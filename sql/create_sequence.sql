@@ -1,5 +1,12 @@
-ALTER TABLE building_outlines.building_canterbury_rural_15_16
-ADD COLUMN imagery_source character varying(250);
+-- Sequence: building_outlines.nz_building_outlines_pilot_id_seq
 
-UPDATE building_outlines.building_canterbury_rural_15_16
-SET imagery_source = 'Canterbury 0.3m Rural Aerial Photos (2015-2016)'
+-- DROP SEQUENCE building_outlines.nz_building_outlines_pilot_id_seq;
+
+CREATE SEQUENCE building_outlines.nz_building_outlines_pilot_id_seq
+  INCREMENT 1
+  MINVALUE 1000000
+  MAXVALUE 9223372036854775807
+  START 2897231
+  CACHE 1;
+ALTER TABLE building_outlines.nz_building_outlines_pilot_id_seq
+  OWNER TO cdawson;
