@@ -126,7 +126,7 @@ def finding_intersecting_buildings(potential_exisitng, potential_incoming):
     idx = []
     provider_intersect = potential_incoming.dataProvider()
     while count <= max_intersect:
-        field_intersect = "e_Bid " + str(count)
+        field_intersect = "e_Bid" + str(count)
         fieldI = QgsField(field_intersect, QVariant.Double)
         provider_intersect.addAttributes([fieldI])
         potential_match_incoming.updateFields()
@@ -190,7 +190,7 @@ def calculate_overlap(potential_existing, potential_incoming):
     path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/"
     name = "sdiff_existing"
     processing.runalg('qgis:saveselectedfeatures', SDiff, path + name)
-    SDiff_existing = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 6-", "ogr")
+    SDiff_existing = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "temp 1-", "ogr")
 
     # Adding Area Field for Existing Potential Matches
     provider = SDiff_existing.dataProvider()
@@ -241,7 +241,7 @@ def calculate_overlap(potential_existing, potential_incoming):
     # caclulating overlap existing
     provider = SDiff_existing.dataProvider()
     potential_existing.startEditing()
-    expression = QgsExpression('100-(("Output 6- sdiff_existing Polygon_areaDiff"/"area")*100)')
+    expression = QgsExpression('100-(("temp 1- sdiff_existing Polygon_areaDiff"/"area")*100)')
     # print expression
     expression.prepare(potential_existing.pendingFields())
 
@@ -256,7 +256,7 @@ def calculate_overlap(potential_existing, potential_incoming):
     path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/"
     name = "sdiff_incoming"
     processing.runalg('qgis:saveselectedfeatures', SDiff, path + name)
-    SDiff_incoming = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 7-", "ogr")
+    SDiff_incoming = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "temp 2-", "ogr")
 
     # Adding Area Field for Incoming Potential Matches
     provider = SDiff_incoming.dataProvider()
@@ -307,7 +307,7 @@ def calculate_overlap(potential_existing, potential_incoming):
     # caclulating overlap incoming
     provider = SDiff_incoming.dataProvider()
     potential_incoming.startEditing()
-    expression = QgsExpression('100-(("Output 7- sdiff_incoming Polygon_areaDiff"/"area")*100)')
+    expression = QgsExpression('100-(("temp 2- sdiff_incoming Polygon_areaDiff"/"area")*100)')
     # print expression
     expression.prepare(potential_incoming.pendingFields())
 
