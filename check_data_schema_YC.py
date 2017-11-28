@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal, Qt
-from PyQt4.QtGui import QDialog, QPixmap
 from qgis.utils import QGis
 
 def check_data_format(lyr_name):
