@@ -5,6 +5,7 @@ from qgis.utils import iface
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 import processing
+import csv
 
 
 #############################################################################
@@ -26,13 +27,15 @@ def read_in_files(existing, incoming):
 def removed_buildings(existing, incoming):
     # Finding removed buildings
     existing.selectAll()
-    processing.runalg("qgis:selectbylocation", existing, incoming, ['intersects'], 0, 2)  # selecting the buildings
+    # selecting the buildings
+    processing.runalg("qgis:selectbylocation", existing, incoming,
+                      ['intersects'], 0, 2)
     # save selection to file
     name = 'Removed Buildings'  # name of shapefile
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp'  # setting up save location
 
     processing.runalg('qgis:saveselectedfeatures', existing, path)
-    removed = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 1-", "ogr")  # reading shapefile back into qgis
+    # reading shapefile back into qgis
+    removed = iface.addVectorLayer(path + name + '.shp', "Output 1-", "ogr")
     return removed
 
 ##############################################################################
@@ -41,13 +44,15 @@ def removed_buildings(existing, incoming):
 def new_buildings(existing, incoming):
     # Finding new buildings
     incoming.selectAll()
-    processing.runalg("qgis:selectbylocation", incoming, existing, ['intersects'], 0, 2)  # selecting the buildings
+    # selecting the buildings
+    processing.runalg("qgis:selectbylocation", incoming, existing,
+                      ['intersects'], 0, 2)
     # save selection to file
     name = 'New Buildings'  # name of shapefile
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp'  # setting up save location
 
     processing.runalg('qgis:saveselectedfeatures', incoming, path)
-    new = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 2-", "ogr")  # reading shapefile back into qgis
+    # reading shapefile back into qgis
+    new = iface.addVectorLayer(path + name + '.shp', "Output 2-", "ogr")
     return new
 
 #############################################################################
@@ -55,24 +60,29 @@ def new_buildings(existing, incoming):
 
 def potential_match(existing, incoming):
     # Finding potential Match in existing buildings
-    processing.runalg("qgis:selectbylocation", existing, incoming, ['intersects'], 0, 0)  # selecting the buildings
+    processing.runalg("qgis:selectbylocation", existing, incoming,
+                      ['intersects'], 0, 0)  # selecting the buildings
     # save selection to file
     name_e = 'Potential Match Existing Layer'  # name of shapefile
-    path1 = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name_e + '.shp'  # setting up save location
 
-    processing.runalg('qgis:saveselectedfeatures', existing, path1)
-    PM_existing = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name_e + '.shp', "Output 3-", "ogr")  # reading shapefile back into qgis
+    processing.runalg('qgis:saveselectedfeatures',
+                      existing, path + name_e + '.shp')
+    # reading shapefile back into qgis
+    PM_existing = iface.addVectorLayer(path + name_e + '.shp',
+                                       "Output 3-", "ogr")
     # existing.removeSelection()
     incoming.removeSelection()
     # Finding potential Match in incominging buildings
-    processing.runalg("qgis:selectbylocation", incoming, existing, ['intersects'], 0, 0)  # selecting the buildings
+    processing.runalg("qgis:selectbylocation", incoming, existing,
+                      ['intersects'], 0, 0)  # selecting the buildings
 
     # save selection to file
     name = 'Potential Match IncomingLayer'  # name of shapefile
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp'  # setting up save location
-
-    processing.runalg('qgis:saveselectedfeatures', incoming, path)
-    PM_incoming = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 4-", "ogr")  # reading shapefile back into qgis
+    processing.runalg('qgis:saveselectedfeatures',
+                      incoming, path + name + '.shp')
+    # reading shapefile back into qgis
+    PM_incoming = iface.addVectorLayer(path + name + '.shp',
+                                       "Output 4-", "ogr")
 
     return[PM_existing, PM_incoming]
 
@@ -113,14 +123,12 @@ def finding_intersecting_buildings(potential_exisitng, potential_incoming):
                 else:
                     temp = [polygon.id()]
                     values[building.id()] = temp
-    # print values # testing
 
     max_intersect = -99999
     for key in values:
         temp = len(values[key])
         if temp > max_intersect:
             max_intersect = temp
-    # print max_intersect  # test, answer: 3
 
     count = 1
     idx = []
@@ -142,7 +150,8 @@ def finding_intersecting_buildings(potential_exisitng, potential_incoming):
             temp_v = values[building_id]
             if len(temp_v) > count:
                 new_values = {idx_value: temp_v[count]}
-                provider_intersect.changeAttributeValues({building_id: new_values})
+                provider_intersect.changeAttributeValues({building_id:
+                                                         new_values})
         count = count + 1
 
 ##############################################################
@@ -151,24 +160,24 @@ def finding_intersecting_buildings(potential_exisitng, potential_incoming):
 def calculate_area(potential_existing, potential_incoming):
     # Adding Area Field for Existing Potential Matches
     provider = potential_existing.dataProvider()
-    areas = [feat.geometry().area() for feat in potential_existing.getFeatures()]
+    areas = [feat.geometry().area() for feat in
+             potential_existing.getFeatures()]
     field = QgsField("area", QVariant.Double)
     provider.addAttributes([field])
     potential_existing.updateFields()
     idx = potential_existing.fieldNameIndex('area')
-    # print idx # debugging
     for area in areas:
         new_values = {idx: float(area)}
         provider.changeAttributeValues({areas.index(area): new_values})
 
     # Adding Area Field for Existing Potential Matches
     provider = potential_incoming.dataProvider()
-    areas = [feat.geometry().area() for feat in potential_incoming.getFeatures()]
+    areas = [feat.geometry().area() for feat in
+             potential_incoming.getFeatures()]
     field = QgsField("area", QVariant.Double)
     provider.addAttributes([field])
     potential_incoming.updateFields()
     idx = potential_incoming.fieldNameIndex('area')
-    # print idx # debugging
     for area in areas:
         new_values = {idx: float(area)}
         provider.changeAttributeValues({areas.index(area): new_values})
@@ -180,17 +189,20 @@ def calculate_area(potential_existing, potential_incoming):
 def calculate_overlap(potential_existing, potential_incoming):
     # Calculate Symmetrical Difference
     name = 'Symmetric Difference'  # name of shapefile
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp'  # setting up save location
 
-    processing.runalg('qgis:symmetricaldifference', potential_existing, potential_incoming, path)
-    SDiff = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "Output 5-", "ogr")  # reading shapefile back into qgis
+    processing.runalg('qgis:symmetricaldifference', potential_existing,
+                      potential_incoming, path)
+    # reading shapefile back into qgis
+    SDiff = iface.addVectorLayer(path + name + '.shp', "Output 5-",
+                                 "ogr")
 
     # Split Symmetric Difference Layer by existing field
-    processing.runalg('qgis:selectbyattribute', SDiff, 'id', 0, "id is not NULL")
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/"
+    processing.runalg('qgis:selectbyattribute', SDiff, 'id',
+                      0, "id is not NULL")
     name = "sdiff_existing"
     processing.runalg('qgis:saveselectedfeatures', SDiff, path + name)
-    SDiff_existing = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "temp 1-", "ogr")
+    SDiff_existing = iface.addVectorLayer(path + name + '.shp',
+                                          "temp 1-", "ogr")
 
     # Adding Area Field for Existing Potential Matches
     provider = SDiff_existing.dataProvider()
@@ -208,16 +220,12 @@ def calculate_overlap(potential_existing, potential_incoming):
     provider.addAttributes([field1])
     SDiff_existing.updateFields()
     idx = SDiff_existing.fieldNameIndex('areaDiff')
-    # print idx
-    # print idx # debugging
     for area in areas:
         new_values = {idx: float(area)}
-        # print new_values
-        # print areas.index(area)
         provider.changeAttributeValues({areas.index(area): new_values})
 
-    # joing the existing symmetric difference area to the existing potential match attributes
-    # table
+    # joing the existing symmetric difference area to the existing
+    # potential match attributes table
     match_layer = potential_existing
     diff_table = SDiff_existing
     MATCH_ID = 'id'
@@ -227,7 +235,8 @@ def calculate_overlap(potential_existing, potential_incoming):
     joinObject.joinFieldName = DIFF_ID
     joinObject.targetFieldName = MATCH_ID
     joinObject.memoryCache = True
-    joinObject.setJoinFieldNamesSubset(['areaDiff'])  # specifying to only copy the areaDiff field
+    # specifying to only copy the areaDiff field
+    joinObject.setJoinFieldNamesSubset(['areaDiff'])
     match_layer.addJoin(joinObject)
 
     # Creating new Field Overlap
@@ -252,11 +261,12 @@ def calculate_overlap(potential_existing, potential_incoming):
     potential_existing.commitChanges()
 
     # Split Symmetric Difference Layer by incoming field
-    processing.runalg('qgis:selectbyattribute', SDiff, 'id_2', 0, "id_2 is not NULL")
-    path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/"
+    processing.runalg('qgis:selectbyattribute', SDiff, 'id_2',
+                      0, "id_2 is not NULL")
     name = "sdiff_incoming"
     processing.runalg('qgis:saveselectedfeatures', SDiff, path + name)
-    SDiff_incoming = iface.addVectorLayer("/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/" + name + '.shp', "temp 2-", "ogr")
+    SDiff_incoming = iface.addVectorLayer(path + name + '.shp',
+                                          "temp 2-", "ogr")
 
     # Adding Area Field for Incoming Potential Matches
     provider = SDiff_incoming.dataProvider()
@@ -274,15 +284,12 @@ def calculate_overlap(potential_existing, potential_incoming):
     provider.addAttributes([field1])
     SDiff_incoming.updateFields()
     idx = SDiff_incoming.fieldNameIndex('areaDiff')
-    # print idx
-    # print idx # debugging
     for area in areas:
         new_values = {idx: float(area)}
-        # print new_values
-        # print areas.index(area)
         provider.changeAttributeValues({areas.index(area): new_values})
 
-    # joing the incoming symmetric difference area to the incoming potential match attributes
+    # joing the incoming symmetric difference area to
+    # the incoming potential match attributes
     # table
     match_layer = potential_incoming
     diff_table = SDiff_incoming
@@ -293,7 +300,8 @@ def calculate_overlap(potential_existing, potential_incoming):
     joinObject.joinFieldName = DIFF_ID
     joinObject.targetFieldName = MATCH_ID
     joinObject.memoryCache = True
-    joinObject.setJoinFieldNamesSubset(['areaDiff'])  # specifying to only copy the areaDiff field
+    # specifying to only copy the areaDiff field
+    joinObject.setJoinFieldNamesSubset(['areaDiff'])
     match_layer.addJoin(joinObject)
 
     # Incoming
@@ -317,26 +325,19 @@ def calculate_overlap(potential_existing, potential_incoming):
 
     potential_incoming.commitChanges()
 
-# main code
 
-# take user input, needs fixing
-# also get user input for file storage location
+#####################################################################
+# Main Code:
+
+# USER EDITS HERE:
+input_existing_text = '/home/linz_user/data/BuildingsProcessing/finalDataQGIS/existing_building_outlines_subset.shp'
+input_incoming_text = '/home/linz_user/data/BuildingsProcessing/finalDataQGIS/incoming_building_outlines_subset.shp'
+path = "/home/linz_user/data/BuildingsProcessing/FinalDataPyQGIS/"
+# csv file name
+# threshold value
+# max existing building intersections
 
 
-# qid = QInputDialog()
-# title = "Enter Following Details"
-# label = "Existing Data file location and name: "
-# mode = QLineEdit.Normal
-# default = "<enter here>"
-# input_existing_text, ok = QInputDialog.getText(qid, title, label, mode, default)
-# title2 = "Enter Following Details"
-# label2 = "Incoming Data file location and name: "
-# mode2 = QLineEdit.Normal
-# default2 = "<enter here>"
-# input_incoming_text, ok = QInputDialog.getText(qid, title2, label2, mode2, default2)
-
-input_existing_text = "/home/linz_user/data/BuildingsProcessing/finalDataQGIS/existing_building_outlines_subset.shp"
-input_incoming_text = "/home/linz_user/data/BuildingsProcessing/finalDataQGIS/incoming_building_outlines_subset.shp"
 # call read in function
 layers = read_in_files(input_existing_text, input_incoming_text)
 existing_layer = layers[0]
@@ -372,10 +373,6 @@ calculate_area(potential_match_existing, potential_match_incoming)
 
 calculate_overlap(potential_match_existing, potential_match_incoming)
 
-# TODO
-# compare overlap
-# generate final shapefile with:
-    # all the new building
-    # without all the removed buildinga
-    # with the merged buildings
-    # with the 'better' of two overlapping buildings
+# generate_csv(potential_match_existing, potential_match_incoming)
+
+# final_output()
