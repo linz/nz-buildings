@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from qgis.utils import QGis
 
-def check_data_format(lyr_name):
+def check_data_schema(lyr_name):
     
     def check_file_type(lyr):  
         """Check if the layer's storage type is ESRI Shapefile"""
@@ -34,22 +34,25 @@ def check_data_format(lyr_name):
     def check_lyr_crs(lyr):
         """Check if the layer has a correct crs"""
         if lyr.crs().authid() != "EPSG:2193":
-            print("Layer crs is not EPSG:2193")
+            print("Layer crs is not EPSG:2193\n")
         else:
-            print("Layer crs is EPSG:2193")
+            print("Layer crs is EPSG:2193\n")
 
     '''lyr = iface.activeLayer()'''
     layers = iface.legendInterface().layers()
     
     for layer in layers:
         if layer.name() == lyr_name:
+            print("check_data_schema: %s \n" %lyr_name)
+
             check_file_type(layer)
             check_lyr_geom(layer)
             check_feat_geom(layer)
             check_lyr_crs(layer)
 
 
-
+check_data_schema('building_outlines_cant')
+check_data_schema('building_outlines_hb')
 
 
 
