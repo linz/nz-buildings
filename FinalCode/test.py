@@ -1,4 +1,4 @@
-# Code to analyse incoming building layers for overlap.
+# final code
 # 20/12/2017
 
 #  relevant inputs
@@ -306,6 +306,8 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
         if 'Overlap' in field.name():
             columns_existing.append(field.name())
 
+
+
     # all existing buildings by building Id to Fid, area and overlap
     fields = {}
     for feature in potential_existing.getFeatures():
@@ -315,12 +317,11 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
         if attrs[4] == NULL:
             temp_list.append(attrs[2])
         else:
-            temp_list.append(attrs[2])
+            temp_list.append(attrs[2] - attrs[4])
         if attrs[3] == NULL:
             temp_list.append(100)
         else:
             temp_list.append(attrs[3])
-
 
         fields[int(attrs[1])] = temp_list  # add row to dictionary
 
@@ -334,7 +335,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
         if 'Overlap' in field.name():
             columns_incoming.append(field.name())
 
-    # find incoming buildings that intersect with single
+    # find incoming buildings that intersect with single 
     # or multiple existing buildings
     single = []
     multiple = []
@@ -355,7 +356,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
             single.append(attrs)
         else:
             multiple.append(attrs)
-
+    
     # iterate through the single incoming buildings and add them
     # to the corresponding existing building id
     for rows in single:
@@ -366,7 +367,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
                 if rows[end - 1] == NULL:
                     fields[key].append(rows[end - 3])
                 else:
-                    fields[key].append(rows[end - 3])
+                    fields[key].append(rows[end - 3] - rows[end - 1])
                 if rows[end - 2] == NULL:
                     fields[key].append(100)
                 else:
@@ -394,17 +395,14 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
                     st = st + c
     st = '(' + st + ')'
 
-    # st = to_string(incoming_id)
-
     # find all the buildings in the potential match
     # incoming layer that have the specified ids
     query = '"id" IN' + st
     selection = potential_incoming.getFeatures(QgsFeatureRequest().setFilterExpression(query))
-    potential_incoming.selectByIds([k.id() for k in selection])
+    potential_incoming.setSelectedFeatures([k.id() for k in selection])
     # save to new shape file
     name = 'Incoming_mulitple_matches'  # name of shapefile
-    processing.runalg('qgis:saveselectedfeatures', potential_incoming,
-                      path + name + '.shp')
+    processing.runalg('qgis:saveselectedfeatures', potential_incoming, path + name + '.shp')
     multi_match_incoming = iface.addVectorLayer(path + name + '.shp',
                                                 "Output-", "ogr")
     legend = iface.legendInterface()
@@ -418,17 +416,16 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
                 if c != 'L':
                     st = st + c
     st = '(' + st + ')'
-    # st = to_string(existing_build_id)
+
     # find all the buildings in potential match
     # existing that have specified ids
     query = '"Build_id" IN' + st
     potential_existing.removeSelection()
     selection = potential_existing.getFeatures(QgsFeatureRequest().setFilterExpression(query))
-    potential_existing.selectByIds([k.id() for k in selection])
+    potential_existing.setSelectedFeatures([k.id() for k in selection])
     # save to new shape file
     name = 'existing_mulitple_matches'  # name of shapefile
-    processing.runalg('qgis:saveselectedfeatures', potential_existing,
-                      path + name + '.shp')
+    processing.runalg('qgis:saveselectedfeatures', potential_existing, path + name + '.shp')
     multi_match_existing = iface.addVectorLayer(path + name + '.shp',
                                                 "Output-", "ogr")
     legend = iface.legendInterface()
@@ -437,8 +434,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
     name = 'SD recalculate'  # name of shapefile
 
     processing.runalg('qgis:symmetricaldifference',
-                      multi_match_existing, multi_match_incoming,
-                      path + name + '.shp')
+                      multi_match_existing, multi_match_incoming, path + name + '.shp')
     SD_rec = iface.addVectorLayer(path + name + '.shp', "temp-", "ogr")
     legend = iface.legendInterface()
     legend.setLayerVisible(SD_rec, False)
@@ -446,8 +442,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
     processing.runalg('qgis:selectbyattribute', SD_rec, 'id', 0,
                       "id is not NULL")
     name = "SD_rec_existing"
-    processing.runalg('qgis:saveselectedfeatures', SD_rec,
-                      path + name + '.shp')
+    processing.runalg('qgis:saveselectedfeatures', SD_rec, path + name + '.shp')
     SD_rec_existing = iface.addVectorLayer(path + name + '.shp',
                                            "temp-", "ogr")
     legend = iface.legendInterface()
@@ -456,8 +451,7 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
     processing.runalg('qgis:selectbyattribute', SD_rec, 'id_2', 0,
                       "id_2 is not NULL")
     name = "SD_rec_incoming"
-    processing.runalg('qgis:saveselectedfeatures', SD_rec,
-                      path + name + '.shp')
+    processing.runalg('qgis:saveselectedfeatures', SD_rec, path + name + '.shp')
     SD_rec_incoming = iface.addVectorLayer(path + name + '.shp',
                                            "temp-", "ogr")
     legend = iface.legendInterface()
@@ -595,11 +589,11 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
     # incoming buildings) the intersectoins with less than X% overlap
     for key in fields:
         temp_list = fields[key]
-        temp_val = range(len(temp_list))
-        temp_val = temp_val[5::3]
+        l = range(len(temp_list))
+        l = l[5::3]
         for value in temp_list:
             to_remove = []
-            if temp_list.index(value) in temp_val:
+            if temp_list.index(value) in l:
                 if value <= 5:  # threshold value: can be changed
                     id_num = temp_list[temp_list.index(value) - 2]
                     overlap_percent = value
@@ -617,7 +611,8 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
             count = count + 1
         fields[key] = temp_list
 
-    # remove from one overlap where the intersection between
+
+        # remove from one overlap where the intersection between
     # existing and incoming buildings is insignificant
         for key in one_overlap:
             temp_list = one_overlap[key]
@@ -673,17 +668,6 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
                              mult_e_intersect_i[key][2]]
             mult_e_intersect_i[key] = []
 
-    for key in one_overlap:
-        if one_overlap[key][0] == ' ':
-            for feature in potential_existing.getFeatures():
-                attrs = [feature[column] for column in columns_existing]
-                if attrs[1] == key:
-                    one_overlap[key][0] = attrs[0]
-
-            one_overlap[key].append(one_overlap[key][1] - one_overlap[key][4])
-            one_overlap[key].append(one_overlap[key][2] - one_overlap[key][5])
-
-
     for key in fields:
         if len(fields[key]) == 6:
             if fields[key][3] not in one_overlap:
@@ -731,24 +715,21 @@ def comparisons(potential_existing, potential_incoming, path, csv_file):
                 'Existing Building ID', 'EB Area', 'EB Overlap', '...']
         writer.writerow(text)
         for key, value in mult_e_intersect_i.items():
-            if len(mult_e_intersect_i[key]) > 3:
+            if len(mult_e_intersect_i[key]) > 0:
                 temp = []
                 for v in value:
                     temp.append(v)
                 writer.writerow(temp)
     csv_file.close()
 
-
 ####################################################################
 # Main Code:
 
 # EDIT HERE TO CHANGE FILE LOCATIONS:
-
-
 input_existing_text = '/home/linz_user/data/BuildingsProcessing/finalDataQGIS/existing_building_outlines_subset.shp'
 input_incoming_text = '/home/linz_user/data/BuildingsProcessing/finalDataQGIS/incoming_building_outlines_subset.shp'
 path = "/home/linz_user/data/BuildingsProcessing/test_data/"
-csv_file = 'output_two.csv'
+csv_file = 'output.csv'
 
 # call read in function
 layers = read_in_files(input_existing_text, input_incoming_text)
@@ -804,7 +785,7 @@ n = path + 'New Buildings.shp'
 processing.runalg("qgis:mergevectorlayers", pm + ';' + n,
                   path + "best_candidates.shp")
 best_candidates = iface.addVectorLayer(path + 'best_candidates.shp',
-                                       "Output-", "ogr")  # output shapefile
+                                       "Output 8-", "ogr")  # output shapefile
 
 # deselecting everything
 for a in iface.attributesToolBar().actions():
