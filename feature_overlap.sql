@@ -50,6 +50,9 @@ FROM
   existing_building_outlines existing 
 WHERE ST_Intersects(incoming.geom, existing.geom) AND (st_area(st_intersection(incoming.geom, existing.geom))/st_area(incoming.geom)) > .06 AND incoming.existing_count = 1;
 
+DELETE FROM incoming_potential_matches WHERE existing_id IN (
+    SELECT existing_id FROM incoming_potential_matches GROUP BY existing_id HAVING ( COUNT(existing_id) > 1 ));
+
 ----------------------------------------------------------------------------------------------------------------------
 -- Merged Buildings
   -- runs through the incoming intersection table and saves the incoming geometries which intersect more than one existing geometry by greater
@@ -85,6 +88,9 @@ FROM
   existing_intersect existing,
   incoming_building_outlines incoming 
 WHERE ST_Intersects(existing.geom, incoming.geom) AND (st_area(st_intersection(existing.geom, incoming.geom))/st_area(existing.geom)) > .06 AND existing.incoming_count = 1;
+
+DELETE FROM existing_potential_matches WHERE incoming_id IN (
+    SELECT incoming_id FROM existing_potential_matches GROUP BY incoming_id HAVING ( COUNT(incoming_id) > 1 ));
 
 --------------------------------------------------------------------------------------------------------------------
 -- 'Exploded' Buildings
