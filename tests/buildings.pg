@@ -52,14 +52,14 @@ SELECT has_index(
     'Should have spatial index on the shape column of the building_outlines table.'
 );
 
-SELECT has_table('buildings', 'lifecycle_stage', 'Should have lifecycle_stage table in the buildings schema.');
+SELECT has_table('buildings', 'lifecycle', 'Should have lifecycle table in the buildings schema.');
 SELECT has_index(
-    'buildings', 'lifecycle_stage', 'idx_lifecycle_parent_building_outline_id', 'parent_building_outline_id',
-    'Should have index on the parent_building_outline_id column of the lifecycle_stage table.'
+    'buildings', 'lifecycle', 'idx_lifecycle_parent_building_outline_id', 'parent_building_outline_id',
+    'Should have index on the parent_building_outline_id column of the lifecycle table.'
 );
 SELECT has_index(
-    'buildings', 'lifecycle_stage', 'idx_lifecycle_building_outline_id', 'building_outline_id',
-    'Should have index on the building_outline_id column of the lifecycle_stage table.'
+    'buildings', 'lifecycle', 'idx_lifecycle_building_outline_id', 'building_outline_id',
+    'Should have index on the building_outline_id column of the lifecycle table.'
 );
 
 -- Finish pgTAP testing
