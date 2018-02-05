@@ -46,10 +46,10 @@ CREATE INDEX idx_capture_source_capture_source_group_id
 CREATE TABLE IF NOT EXISTS buildings.building_outlines (
       building_outline_id serial PRIMARY KEY
     , capture_method_id integer NOT NULL REFERENCES buildings.capture_method (capture_method_id)
-    , capture_source_id character varying(100) NOT NULL REFERENCES buildings.capture_source (capture_source_id)
+    , capture_source_id integer NOT NULL REFERENCES buildings.capture_source (capture_source_id)
     , lifecycle_stage_id integer NOT NULL REFERENCES buildings.lifecycle_stage (lifecycle_stage_id)
-    , begin_lifespan datetime
-    , end_lifespan datetime
+    , begin_lifespan timestamptz
+    , end_lifespan timestamptz
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
@@ -75,8 +75,8 @@ CREATE INDEX shx_building_outlines
 
 CREATE TABLE IF NOT EXISTS buildings.lifecycle (
       lifecycle_id serial PRIMARY KEY
-    , parent_building_outline_id integer NOT NULL REFERENCES building_outlines (building_outline_id)
-    , building_outline_id integer REFERENCES building_outlines (building_outline_id)
+    , parent_building_outline_id integer NOT NULL REFERENCES buildings.building_outlines (building_outline_id)
+    , building_outline_id integer REFERENCES buildings.building_outlines (building_outline_id)
 );
 
 SELECT setval('buildings.lifecycle_lifecycle_id_seq', 1000000);

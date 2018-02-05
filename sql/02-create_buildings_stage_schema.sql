@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS buildings_stage.supplied_datasets (
       supplied_dataset_id serial PRIMARY KEY
     , description character varying(250) NOT NULL
     , supplier_id integer NOT NULL REFERENCES buildings_stage.organisation (organisation_id)
-    , processed_date datetime NOT NULL
-    , transfer_date datetime
+    , processed_date timestamptz NOT NULL
+    , transfer_date timestamptz
 );
 
 DROP INDEX IF EXISTS idx_supplied_datasets_supplier_id;
@@ -49,7 +49,7 @@ CREATE INDEX idx_supplied_outlines_supplied_dataset_id
 
 DROP INDEX IF EXISTS shx_supplied_outlines;
 CREATE INDEX shx_supplied_outlines
-    ON buildings.supplied_outlines USING gist (shape);
+    ON buildings_stage.supplied_outlines USING gist (shape);
 
 -- Existing Subset Extracts
 
@@ -65,12 +65,12 @@ CREATE INDEX idx_existing_subset_extracts_supplied_dataset_id
 
 DROP INDEX IF EXISTS shx_existing_subset_extracts;
 CREATE INDEX shx_existing_subset_extracts
-    ON buildings.existing_subset_extracts USING gist (shape);
+    ON buildings_stage.existing_subset_extracts USING gist (shape);
 
 -- New
 
 CREATE TABLE IF NOT EXISTS buildings_stage.new (
-      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
@@ -82,12 +82,12 @@ CREATE INDEX idx_new_supplied_dataset_id
 
 DROP INDEX IF EXISTS shx_new;
 CREATE INDEX shx_new
-    ON buildings.new USING gist (shape);
+    ON buildings_stage.new USING gist (shape);
 
 -- Removed
 
 CREATE TABLE IF NOT EXISTS buildings_stage.removed (
-      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_extracts (building_outline_id)
+      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
@@ -103,12 +103,12 @@ CREATE INDEX idx_removed_qa_status_id
 
 DROP INDEX IF EXISTS shx_removed;
 CREATE INDEX shx_removed
-    ON buildings.removed USING gist (shape);
+    ON buildings_stage.removed USING gist (shape);
 
 -- Merged
 
 CREATE TABLE IF NOT EXISTS buildings_stage.merged (
-      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , area_covering numeric(10, 2)
@@ -126,13 +126,13 @@ CREATE INDEX idx_merged_qa_status_id
 
 DROP INDEX IF EXISTS shx_merged;
 CREATE INDEX shx_merged
-    ON buildings.merged USING gist (shape);
+    ON buildings_stage.merged USING gist (shape);
 
 -- Merge Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.merge_candidates (
-      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_extracts (building_outline_id)
-    , supplied_outline_id integer NOT NULL REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
+      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
+    , supplied_outline_id integer NOT NULL REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , area_covered numeric(10, 2)
     , percent_covered numeric(5, 2)
@@ -149,7 +149,7 @@ CREATE INDEX idx_merge_candidates_supplied_dataset_id
 -- Split
 
 CREATE TABLE IF NOT EXISTS buildings_stage.split (
-      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , area_covered numeric(10, 2)
@@ -167,13 +167,13 @@ CREATE INDEX idx_split_qa_status_id
 
 DROP INDEX IF EXISTS shx_split;
 CREATE INDEX shx_split
-    ON buildings.split USING gist (shape);
+    ON buildings_stage.split USING gist (shape);
 
 -- Split Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.split_candidates (
-      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_extracts (building_outline_id)
-    , supplied_outline_id integer NOT NULL REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
+      building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
+    , supplied_outline_id integer NOT NULL REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , area_covering numeric(10, 2)
     , percent_covering numeric(5, 2)
@@ -190,8 +190,8 @@ CREATE INDEX idx_split_candidates_supplied_dataset_id
 -- Best Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.best_candidates (
-      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
-    , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_extracts (building_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
+    , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , area_difference numeric(10, 2)
@@ -214,13 +214,13 @@ CREATE INDEX idx_best_candidates_qa_status_id
 
 DROP INDEX IF EXISTS shx_best_candidates;
 CREATE INDEX shx_best_candidates
-    ON buildings.best_candidates USING gist (shape);
+    ON buildings_stage.best_candidates USING gist (shape);
 
 -- Check Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.check_candidates (
-      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.imported_outlines (supplied_outline_id)
-    , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_extracts (building_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
+    , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
     , area_difference numeric(10, 2)
@@ -243,4 +243,4 @@ CREATE INDEX idx_check_candidates_qa_status_id
 
 DROP INDEX IF EXISTS shx_check_candidates;
 CREATE INDEX shx_check_candidates
-    ON buildings.check_candidates USING gist (shape);
+    ON buildings_stage.check_candidates USING gist (shape);
