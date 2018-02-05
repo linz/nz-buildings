@@ -87,4 +87,4 @@ CREATE INDEX idx_lifecycle_parent_building_outline_id
 
 DROP INDEX IF EXISTS idx_lifecycle_building_outline_id;
 CREATE INDEX idx_lifecycle_building_outline_id
-    ON buildings.building_outlines USING btree (building_outline_id);
+    ON buildings.lifecycle USING btree (building_outline_id);
