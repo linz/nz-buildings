@@ -1,0 +1,68 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings schema using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+SELECT plan(14);
+
+-- Tests
+SELECT has_schema('buildings');
+
+-- Lookup Tables
+SELECT has_table('buildings', 'capture_method', 'Should have capture_method table in the buildings schema.');
+SELECT has_table('buildings', 'capture_source_group', 'Should have capture_source_group table in the buildings schema.');
+SELECT has_table('buildings', 'lifecycle_stage', 'Should have lifecycle_stage table in the buildings schema.');
+
+-- Data Tables
+SELECT has_table('buildings', 'capture_source', 'Should have capture_source table in the buildings schema.');
+SELECT has_index(
+    'buildings', 'capture_source', 'idx_capture_source_capture_source_group_id', 'capture_source_group_id',
+    'Should have index on the capture_source_group_id column of the capture_source table.'
+);
+
+SELECT has_table('buildings', 'building_outlines', 'Should have building_outlines table in the buildings schema.');
+SELECT has_index(
+    'buildings', 'building_outlines', 'idx_building_outlines_capture_method_id', 'capture_method_id',
+    'Should have index on the capture_method_id column of the building_outlines table.'
+);
+SELECT has_index(
+    'buildings', 'building_outlines', 'idx_building_outlines_capture_source_id', 'capture_source_id',
+    'Should have index on the capture_source_id column of the building_outlines table.'
+);
+SELECT has_index(
+    'buildings', 'building_outlines', 'idx_building_outlines_lifecycle_stage_id', 'lifecycle_stage_id',
+    'Should have index on the lifecycle_stage_id column of the building_outlines table.'
+);
+SELECT has_index(
+    'buildings', 'building_outlines', 'shx_building_outlines', 'shape',
+    'Should have spatial index on the shape column of the building_outlines table.'
+);
+
+SELECT has_table('buildings', 'lifecycle', 'Should have lifecycle table in the buildings schema.');
+SELECT has_index(
+    'buildings', 'lifecycle', 'idx_lifecycle_parent_building_outline_id', 'parent_building_outline_id',
+    'Should have index on the parent_building_outline_id column of the lifecycle table.'
+);
+SELECT has_index(
+    'buildings', 'lifecycle', 'idx_lifecycle_building_outline_id', 'building_outline_id',
+    'Should have index on the building_outline_id column of the lifecycle table.'
+);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;
