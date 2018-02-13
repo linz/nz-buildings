@@ -1,3 +1,4 @@
+
 -------------------------------------------------------------------------------------------------------------------
 -- NEW BUILDINGS
 -------------------------------------------------------------------------------------------------------------------
@@ -5,11 +6,11 @@
   -- with any geometries in the existing table 
   
 INSERT INTO buildings_stage.new
-SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, 0, supplier.geom
+SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, 1 AS qa_status_id, supplier.shape
 FROM 
   buildings_stage.supplied_outlines AS supplier LEFT JOIN
-  buildings_stage.existing_subset_extract AS existing ON
-  ST_Intersects(supplier.geom, existing.geom)
+  buildings_stage.existing_subset_extracts AS existing ON
+  ST_Intersects(supplier.shape, existing.shape)
 WHERE existing.building_outline_id IS NULL;
 
 -----------------------------------------------------------------------------------------------------------------
@@ -19,12 +20,12 @@ WHERE existing.building_outline_id IS NULL;
   -- with any geometries in the supplied table
   
 INSERT INTO buildings_stage.removed
-SELECT existing.building_outline_id, existing.supplied_dataset_id, 0, existing.geom
+SELECT existing.building_outline_id, existing.supplied_dataset_id, 1 AS qa_status_id, existing.shape
 FROM 
   buildings_stage.existing_subset_extracts existing LEFT JOIN
   buildings_stage.supplied_outlines supplier ON
-  ST_Intersects(existing.geom, supplier.geom)
-WHERE supplier.supplied_otuline_id IS NULL;
+  ST_Intersects(existing.shape, supplier.shape)
+WHERE supplier.supplied_outline_id IS NULL;
 
 -----------------------------------------------------------------------------------------------------------------
 -- MERGED BUILDINGS
@@ -35,65 +36,96 @@ WHERE supplier.supplied_otuline_id IS NULL;
   -- geometries by greater than 10%. it also records a count of how many existing geometries the supplied 
   -- polygons intersect. 
 
-
---TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.supplier_intersect AS
-SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, COUNT(existing.building_outline_id) AS existing_count, supplier.geom
+CREATE TEMP TABLE supplier_intersect AS
+SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, COUNT(existing.building_outline_id) AS existing_count, supplier.shape
 FROM
   buildings_stage.supplied_outlines supplier,
   buildings_stage.existing_subset_extracts existing
-WHERE ST_Intersects(supplier.geom, existing.geom) AND (st_area(st_intersection(supplier, existing.geom))/st_area(existing.geom)) > .1 AND (st_area(st_intersection(supplier, existing.geom))/st_area(supplier.geom)) > .1
+WHERE ST_Intersects(supplier.shape, existing.shape) AND (st_area(st_intersection(supplier.shape, existing.shape))/st_area(existing.shape)) > .1
 GROUP BY supplier.supplied_outline_id
 ORDER BY existing_count DESC;
 
-
--- INSERT INTO new
+----------------------------------------
+--NEW BUILDINGS
 -- add the buildings that overlap by less than 10% to the new table
+----------------------------------------
 
-CREATE TEMP TABLE buildings_stage.new_add AS
-SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, supplier.geom
+--TEMP
+CREATE TEMP TABLE new_add AS
+SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, supplier.shape
 FROM buildings_stage.supplied_outlines supplier
-WHERE supplier.supplied_outline_id not IN (SELECT supplier_intersect.supplied_outline_id FROM buildings_stage.supplier_intersect supplier_intersect);
-
+WHERE supplier.supplied_outline_id not IN (SELECT supplier_intersect.supplied_outline_id FROM supplier_intersect supplier_intersect);
+--TEMP
+DELETE FROM new_add
+WHERE supplied_outline_id not IN (SELECT new.supplied_outline_id FROM buildings_stage.new new);
+--TEMP
+CREATE TEMP TABLE new_add2 AS
+SELECT na.* from new_add na, buildings_stage.existing_subset_extracts existing
+WHERE ST_intersects(na.shape, existing.shape) AND ST_area(ST_Intersection(na.shape, existing.shape))/ST_area(na.shape) < 0.1;
+--DELETE Duplicates
+DELETE FROM new_add2
+WHERE (supplied_outline_id) IN (
+  SELECT supplied_outline_id
+FROM   new_add2
+GROUP BY supplied_outline_id
+HAVING count(*) > 1);
+-- SPLIT CANDIDATES NOT YET POPULATED
+-- delete merge candidates
+DELETE FROM new_add2
+WHERE supplied_outline_id in (SELECT supplied_outline_id from buildings_stage.split_candidates);
+-- INSERT INTO
+-- add the new buildings
 INSERT INTO buildings_stage.new
-SELECT new_add.supplied_outline_id, new_add.supplied_dataset_id, 1, new_add.geom FROM buildings_stage.new_add, buildings_stage.existing_subset_extract existing
-WHERE ST_intersects(new_add.geom, existing.geom) AND ST_area(ST_intersection(new_add.geom, existing.geom))/ST_area(new_add.geom) < 0.1;
+SELECT new_add2.supplied_outline_id, new_add2.supplied_dataset_id, 1, new_add2.shape
+FROM new_add2;
 
-INSERT INTO buildings_stage.new
-SELECT new_add.supplied_outline_id, new_add.supplied_dataset_id, 1, new_add.geom FROM buildings_stage.new_add, buildings_stage.existing_subset_extract existing
-WHERE ST_intersects(new_add.geom, existing.geom) AND ST_area(ST_intersection(new_add.geom, existing.geom))/ST_area(existing.geom) < 0.1;
-
--- TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.to_merge AS
-SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, existing.building_outline_id AS e_id, st_area(st_intersection(supplier.geom, existing.geom)) AS intersection, existing.geom
-FROM buildings_stage.supplied_outlines supplier, buildings_stage.existing_subset_extract existing, supplier_intersect
-WHERE ST_Intersects(supplier.geom, existing.geom) AND (st_area(st_intersection(supplier.geom, existing.geom))/st_area(suplier.geom)) > .1 AND supplier_intersect.supplied_outline_id = supplier.supplied_outline_id AND supplier_intersect.existing_count > 1;
-
-
--- TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.merged_overlap AS 
+-------------------------------------------
+--MERGED
+-------------------------------------------
+-- TEMP
+CREATE TEMP TABLE to_merge AS
+SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, existing.building_outline_id AS e_id, st_area(st_intersection(supplier.shape, existing.shape)) AS intersection, existing.shape
+FROM buildings_stage.supplied_outlines supplier, buildings_stage.existing_subset_extracts existing, supplier_intersect
+WHERE ST_Intersects(supplier.shape, existing.shape) AND (st_area(st_intersection(supplier.shape, existing.shape))/st_area(existing.shape)) > .1 AND supplier_intersect.supplied_outline_id = supplier.supplied_outline_id AND supplier_intersect.existing_count > 1;
+-- TEMP
+CREATE TEMP TABLE merged_overlap AS 
 SELECT supplied_outline_id, SUM(intersection) AS total
-FROM buildings_stage.to_merge
+FROM to_merge
 GROUP BY supplied_outline_id;
-
-
+-- TEMP
+CREATE TEMP TABLE e_dups AS
+SELECT e_id, SUM(intersection), shape
+FROM to_merge
+WHERE (e_id) IN (
+  SELECT e_id
+FROM   to_merge
+GROUP BY e_id
+HAVING count(*) > 1)
+GROUP BY e_id, shape;
+-- DELETE Duplicates
+DELETE FROM to_merge
+WHERE (e_id) IN (
+SELECT e_id
+FROM   to_merge
+GROUP BY e_id
+HAVING count(*) > 1);
 -- INSERT INTO merged
 -- the supplied buildings that intersect more than one existing building
-
 INSERT INTO buildings_stage.merged
-SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, 0 AS qu_status_id, merged_overlap.total AS area_covering, (merged_overlap.total/ST_area(supplier.geom))*100 AS percent_covering, supplier.geom
-FROM buildings_stage.supplied_outlines as supplier, buildings_stage.merged_overlap AS merged_overlap
+SELECT supplier.supplied_outline_id, supplier.supplied_dataset_id, 1 AS qu_status_id, merged_overlap.total AS area_covering, (merged_overlap.total/ST_area(supplier.shape))*100 AS percent_covering, supplier.shape
+FROM buildings_stage.supplied_outlines as supplier, merged_overlap AS merged_overlap
 WHERE supplier.supplied_outline_id = merged_overlap.supplied_outline_id;
+--INSERT summed duplicates
+INSERT INTO buildings_stage.split
+SELECT e_dups.e_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, 1 AS qa_status_id, e_dups.sum AS area_covering, (e_dups.sum/ST_area(supplier.shape))*100 AS percent_covering, supplier.shape
+FROM buildings_stage.supplied_outlines supplier, e_dups
+WHERE supplier.supplied_outline_id = e_dups.e_id;
 
 -- INSERT INTO merged_candidates
 -- the existing buildings that are potential merges
-
 INSERT INTO buildings_stage.merge_candidates
-SELECT build.e_id AS building_outline_id, build.supplied_outline_id, build.supplied_dataset_id, build.intersection AS area_covering, build.intersection/ST_area(supplier.geom)*100 AS percent_covering
-FROM buildings_stage.to_merge build, buildings_stage.supplied_outlines supplier
+SELECT build.e_id AS building_outline_id, build.supplied_outline_id, build.supplied_dataset_id, build.intersection AS area_covering, build.intersection/ST_area(supplier.shape)*100 AS percent_covering
+FROM to_merge build, buildings_stage.supplied_outlines supplier
 WHERE supplier.supplied_outline_id = build.supplied_outline_id;
 
 -------------------------------------------------------------------------------------------------------------------
@@ -104,96 +136,135 @@ WHERE supplier.supplied_outline_id = build.supplied_outline_id;
   -- runs through the geometries in the existing table and finds those which intersect supplied geometries by greater than 10%.
   -- It also records a count of how many supplied geometries the existing polygons intersect.
   
--- TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.existing_intersect AS
-SELECT existing.building_outline_id, existing.supplied_dataset_id, COUNT(supplier.supplied_outline_id) AS supplied_count
+-- TEMP
+CREATE TEMP TABLE existing_intersect AS
+SELECT existing.building_outline_id, existing.supplied_dataset_id, COUNT(supplier.supplied_outline_id) AS supplied_count, existing.shape
 FROM
   buildings_stage.supplied_outlines supplier,
-  buildings_stage.existing_subset_extract existing
-WHERE ST_Intersects(existing.geom, supplier.geom) AND (st_area(st_intersection(existing.geom, supplier.geom))/st_area(existing.geom)) > .1 AND (st_area(st_intersection(supplier.geom, existing.geom))/st_area(supplier.geom)) >.1
+  buildings_stage.existing_subset_extracts existing
+WHERE ST_Intersects(existing.shape, supplier.shape) AND (st_area(st_intersection(existing.shape, supplier.shape))/st_area(supplier.shape)) > .1 --AND (st_area(st_intersection(supplier.shape, existing.shape))/st_area(supplier.shape)) >.1
 GROUP BY existing.building_outline_id
 ORDER BY supplied_count DESC;
 
+------------------------------------
 -- INSERT INTO Removed
 -- add the buildings with less than 10% overlap to the removed table
-CREATE TEMP TABLE buildings_stage.removed_add AS
-SELECT existing.building_outline_id, existing.supplied_dataset_id, existing.geom
-FROM buidlings_stage.existing_subset_extract existing
-WHERE existing.id not IN (SELECT existing_intersect.id FROM buildings_stage.existing_intersect existing_intersect);
-
+------------------------------------
+--TEMP
+CREATE TEMP TABLE removed_add AS
+SELECT existing.building_outline_id, existing.supplied_dataset_id, existing.shape
+FROM buildings_stage.existing_subset_extracts existing
+WHERE existing.building_outline_id not IN (SELECT existing_intersect.building_outline_id FROM existing_intersect existing_intersect);
+--TEMP
+DELETE FROM removed_add
+WHERE building_outline_id not IN (SELECT removed.building_outline_id FROM buildings_stage.removed removed);
+--TEMP
+CREATE TEMP TABLE removed_add2 AS
+SELECT ra.* from removed_add ra, buildings_stage.supplied_outlines supplier
+WHERE ST_intersects(ra.shape, supplier.shape) AND ST_area(ST_Intersection(ra.shape, supplier.shape))/ST_area(ra.shape) <0.1;
+--DELETE Duplicates
+DELETE FROM removed_add2
+WHERE (building_outline_id) IN (
+  SELECT building_outline_id
+FROM   removed_add2
+GROUP BY building_outline_id
+HAVING count(*) > 1);
+-- delete merge candidates
+DELETE FROM removed_add2
+WHERE building_outline_id in (SELECT building_outline_id from buildings_stage.merge_candidates);
+-- INSERT INTO Removed
 INSERT INTO buildings_stage.removed
-SELECT existing.building_outline_id, existing.supplied_dataset_id, 1 AS qa_status_id, existing.geom FROM buidlings_stage.removed_add existing, buildings_stage.supplied_outlines supplier
-WHERE ST_intersects(supplier.geom, existing.geom) AND ST_area(ST_intersection(supplier.geom, existing.geom))/ST_area(existing.geom) < 0.1;
+SELECT removed_add2.building_outline_id, removed_add2.supplied_dataset_id, 1 AS qa_status_id, removed_add2.shape
+FROM removed_add2;
 
-INSERT INTO buildings_stage.removed
-SELECT existing.building_outline_id, existing.supplied_dataset_id, 1, existing.geom FROM buidlings_stage.removed_add existing, buildings_stage.supplied_outlines supplier
-WHERE ST_intersects(supplier.geom, existing.geom) AND ST_area(ST_intersection(supplier.geom, existing.geom))/ST_area(supplier.geom) < 0.1;
+-------------------------------------------------
+--SPLIT
+-------------------------------------------------
 
--- TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.to_split AS
-SELECT existing.building_outline_id, supplier.supplied_outline_id AS s_id, st_area(st_intersection(supplier.geom, existing.geom)) AS intersection, supplier.geom
-FROM buildings_stage.supplied_outlines supplier, buildings_stage.existing_subset_extract existing, existing_intersect
-WHERE ST_Intersects(supplier.geom, existing.geom) AND (st_area(st_intersection(supplier.geom, existing.geom))/st_area(existing.geom)) >.1 AND (st_area(st_intersection(supplier.geom, existing.geom))/st_area(supplier.geom)) > .1 AND existing_intersect.building_outline_id = existing.building_outline_id AND existing_intersect.supplied_count > 1;
-
--- TEMP TABLE
-
-CREATE TEMP TABLE buildings_stage.split_overlap AS 
+-- TEMP
+CREATE TEMP TABLE to_split AS
+SELECT existing.building_outline_id, supplier.supplied_outline_id AS s_id, st_area(st_intersection(supplier.shape, existing.shape)) AS intersection, supplier.shape
+FROM buildings_stage.supplied_outlines supplier, buildings_stage.existing_subset_extracts existing, existing_intersect
+WHERE ST_Intersects(supplier.shape, existing.shape) AND (st_area(st_intersection(supplier.shape, existing.shape))/st_area(supplier.shape)) >.1 AND existing_intersect.building_outline_id = existing.building_outline_id AND existing_intersect.supplied_count > 1;
+-- TEMP
+CREATE TEMP TABLE split_overlap AS 
 SELECT building_outline_id, SUM(intersection) AS total
-FROM buildings_stage.to_split
+FROM to_split
 GROUP BY building_outline_id;
+-- TEMP
+CREATE TEMP TABLE dups AS
+SELECT s_id, SUM(intersection), shape
+FROM to_split
+WHERE (s_id) IN (
+  SELECT s_id
+FROM   to_split
+GROUP BY s_id
+HAVING count(*) > 1)
+GROUP BY s_id, shape;
+-- DELETE Duplicates
+DELETE FROM to_split
+WHERE (s_id) IN (
+  SELECT s_id
+FROM   to_split
+GROUP BY s_id
+HAVING count(*) > 1);
 
 -- INSERT INTO split
 -- the multiple supplied buildings that intersect with the same existing building
-
 INSERT INTO buildings_stage.split
-SELECT supplier.supplied_outline_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, 0 AS qa_status_id, to_split.intersection AS area_covering, (to_split.intersection/ST_area(supplier.geom))*100 AS percent_covering, supplier.geom
-FROM buildings_stage.supplied_outlines supplier, buildings_stage.to_split split
+SELECT to_split.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, 1 AS qa_status_id, to_split.intersection AS area_covering, (to_split.intersection/ST_area(supplier.shape))*100 AS percent_covering, supplier.shape
+FROM buildings_stage.supplied_outlines supplier, to_split
 WHERE supplier.supplied_outline_id = to_split.s_id;
+-- INSERT INTO split
+-- insert summed duplicates
+INSERT INTO buildings_stage.split
+SELECT dups.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, 1 AS qa_status_id, dups.sum AS area_covering, (dups.sum/ST_area(supplier.shape))*100 AS percent_covering, supplier.shape
+FROM buildings_stage.supplied_outlines supplier, dups
+WHERE supplier.supplied_outline_id = dups.s_id;
 
 -- INSERT INTO split_candidates
 -- the existing buildings that intersect with more than one supplied building
-
 INSERT INTO buildings_stage.split_candidates
-SELECT split_overlap.building_outline_id AS building_outline_id, to_split.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, split_overlap.total AS area_covering, split_overlap.total/ST_area(existing.geom)*100 AS percent_covering
-FROM buildings_stage.split_overlap split_overlap, buildings_stage.existing_subset_extract existing, buildings_stage.to_split to_split, buildings_stage.supplied_outlines supplier
-WHERE existing.building_outline_id = build.building_outline_id AND build.building_outline_id = to_split.building_outline_id AND to_split.s_id = supplier.supplied_outline_id;
+SELECT split_overlap.building_outline_id AS building_outline_id, to_split.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, split_overlap.total AS area_covering, split_overlap.total/ST_area(existing.shape)*100 AS percent_covering
+FROM split_overlap split_overlap, buildings_stage.existing_subset_extracts existing, to_split to_split, buildings_stage.supplied_outlines supplier
+WHERE existing.building_outline_id = split_overlap.building_outline_id AND split_overlap.building_outline_id = to_split.building_outline_id AND to_split.s_id = supplier.supplied_outline_id;
 
------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------
+-- BEST/TO CHECK CANDIDATE PROCESSESING 
 
 -- DELETE FROM existing intersect
 -- remove the split buildings from the existing intersect layer
-
-DELETE FROM buildings_stage.existing_intersect
-WHERE buildings_stage.existing_intersect.supplied_count > 1;
+DELETE FROM existing_intersect
+WHERE existing_intersect.supplied_count > 1;
 
 -- DELETE FROM supplied intersect
 -- remove the merged buildings from the supplied intersect layer
-
-DELETE FROM buildings_stage.supplied_intersect
-WHERE buildings_stage.supplied_intersect.existing_count > 1;
+DELETE FROM supplier_intersect
+WHERE supplier_intersect.existing_count > 1;
 
 -- DELETE FROM existing intersect
 -- remove from existing intersect the buildings which have been merged
-
-DELETE FROM buildings_stage.existing_intersect
-WHERE buildings_stage.existing_intersect.building_outline_id IN (SELECT to_merge.e_id FROM buildings_stage.to_merge);
+DELETE FROM existing_intersect
+WHERE existing_intersect.building_outline_id IN (SELECT to_merge.e_id FROM to_merge);
 
 -- DELETE FROM supplied intersect
 -- remove from supplied intersect the buildings which represent splits
+DELETE FROM supplier_intersect
+WHERE supplier_intersect.supplied_outline_id IN (SELECT to_split.s_id FROM to_split);
 
-DELETE FROM buildings_stage.supplied_intersect
-WHERE buildings_stage.supplied_intersect.supplied_outline_id IN (SELECT to_split.s_id FROM buildings.to_split);
+-------------------------------------------------------------------------------------------------------------------------------------------
 
-----------------------------------------------------------------
-DROP TABLE buildings_stage.to_split; -- drop temp table
-DROP TABLE buildings_stage.split_overlap; -- drop temp table
-DROP TABLE buildings_stage.to_merge; -- drop temp table
-DROP TABLE buildings_stage.merged_overlap; -- drop temp table
-DROP TABLE buildings_stage.removed_add;
-DROP TABLE buildings_stage.new_add;
-----------------------------------------------------------------
+-- DROPPING TEMP TABLES
+DROP TABLE to_merge; 
+DROP TABLE merged_overlap; 
+DROP TABLE new_add;
+DROP TABLE new_add2;
+DROP TABLE to_split;
+DROP TABLE split_overlap;
+DROP TABLE removed_add;
+DROP TABLE removed_add2;
+DROP TABLE dups;
+DROP TABLE e_dups;
 
 -----------------------------------------------------------------------------------------------------------------
 -- BEST CANDIDATES & TO CHECK
@@ -201,34 +272,28 @@ DROP TABLE buildings_stage.new_add;
 
 -- TEMP TABLE
 -- of all 1:1 matches and their % overlap, area difference and Hausdorff Distance
-
-CREATE TEMP TABLE buildings_stage.comparisons AS
-SELECT supplier.supplier_outline_id, building.building_outline_id, 1 AS supplied_dataset_id, 0 AS qa_status_id, ST_area(ST_intersection(supplier.geom, building.geom))/ST_area(supplier.geom)*100 AS supplier_overlap, ST_area(ST_intersection(supplier.geom, building.geom))/ST_area(building.geom)*100 AS existing_overlap, ST_area(building.geom) - ST_area(supplier.geom) AS area_difference, ST_hausdorffDistance(supplier.geom, building.geom) AS hausdorff_distance, supplier.geom
-FROM supplied_intersect supplier, existing_intersect building
-WHERE ST_area(ST_intersection(supplier.geom, building.geom))/ST_area(supplier.geom) > 0.1 AND ST_area(ST_intersection(supplier.geom, building.geom))/ST_area(building.geom) > 0.1;
-
+CREATE TEMP TABLE comparisons AS
+SELECT supplier.supplied_outline_id, building.building_outline_id, supplier.supplied_dataset_id, 1 AS qa_status_id, ST_area(ST_intersection(supplier.shape, building.shape))/ST_area(supplier.shape)*100 AS supplier_overlap, ST_area(ST_intersection(supplier.shape, building.shape))/ST_area(building.shape)*100 AS existing_overlap, ST_area(building.shape) - ST_area(supplier.shape) AS area_difference, ST_hausdorffDistance(supplier.shape, building.shape) AS hausdorff_distance, supplier.shape
+FROM supplier_intersect supplier, existing_intersect building
+WHERE ST_area(ST_intersection(supplier.shape, building.shape))/ST_area(supplier.shape) > 0.1 AND ST_area(ST_intersection(supplier.shape, building.shape))/ST_area(building.shape) > 0.1;
 
 -- INSERT INTO To Check
 -- add matches that fail to meet best candidate criteria to this table
-
-INSERT INTO buildings_stage.to_check
-SELECT comparisons.supplier_outline_id, comparisons.building_outline_id, comparisons.supplied_dataset_id, comparisons.qu_status_id, comparisons.supplier_overlap, comparisons.existing_overlap, comparisons.area_difference, comparisons.hausdorff_distance, comparisons.geom
-FROM buildings_stage.comparisons comparisons
-WHERE comparisons.hausdorff_distance >= 4 AND ((comparisons.supplied_overlap + comparisons.existing_overlap)/2) <= 40 OR comparisons.hausdorff_distance >= 4 AND ((comparisons.supplied_overlap + comparisons.existing_overlap)/2) >= 40 OR comparisons.hausdorff_distance <= 4 AND ((comparisons.supplied_overlap + comparisons.existing_overlap)/2) <= 40;
+INSERT INTO buildings_stage.check_candidates
+SELECT comparisons.supplied_outline_id, comparisons.building_outline_id, comparisons.supplied_dataset_id, comparisons.qa_status_id, comparisons.area_difference, ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) AS percent_difference, comparisons.hausdorff_distance, comparisons.shape
+FROM comparisons
+WHERE comparisons.hausdorff_distance >= 4 AND ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) <= 40 OR comparisons.hausdorff_distance >= 4 AND ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) >= 40 OR comparisons.hausdorff_distance <= 4 AND ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) <= 40;
 
 -- INSERT INTO Best Candidates
 -- add matches that have greater than 40% overlap and less than 4 Hausdorff Distance
-
 INSERT INTO buildings_stage.best_candidates
-SELECT comparisons.supplier_outline_id, comparisons.building_outline_id, comparisons.supplied_dataset_id, comparisons.qu_status_id, comparisons.supplier_overlap, comparisons.existing_overlap, comparisons.area_difference, comparisons.hausdorff_distance, comparisons.geom
-FROM buildings_stage.comparisons comparisons
-WHERE comparisons.hausdorff_distance < 4 AND ((comparisons.supplied_overlap + comparisons.existing_overlap)/2) > 40;
+SELECT comparisons.supplied_outline_id, comparisons.building_outline_id, comparisons.supplied_dataset_id, comparisons.qa_status_id, comparisons.area_difference, ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) AS percent_difference, comparisons.hausdorff_distance, comparisons.shape
+FROM comparisons
+WHERE comparisons.hausdorff_distance < 4 AND ((comparisons.supplier_overlap + comparisons.existing_overlap)/2) > 40;
 
 ---------------------------------------------------------------
  -- Remove remaining temp tables
- DROP TABLE buildings_stage.existing_intersect;
- DROP TABLE buildings_stage.supplied_intersect;
- DROP TABLE buildings_stage.comparisons;
- ---------------------------------------------------------------------------------------------------------------
-
+ DROP TABLE existing_intersect;
+ DROP TABLE supplier_intersect;
+ DROP TABLE comparisons;
 
