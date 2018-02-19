@@ -172,7 +172,7 @@ CREATE INDEX shx_split
 -- Split Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.split_candidates (
-    , supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
+    supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , area_covering numeric(10, 2)

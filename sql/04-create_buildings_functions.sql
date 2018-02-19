@@ -57,7 +57,7 @@ FROM buildings_stage.supplied_outlines supplier
 WHERE supplier.supplied_outline_id not IN (SELECT supplier_intersect.supplied_outline_id FROM supplier_intersect supplier_intersect);
 --TEMP
 DELETE FROM new_add
-WHERE supplied_outline_id not IN (SELECT new.supplied_outline_id FROM buildings_stage.new new);
+WHERE supplied_outline_id IN (SELECT new.supplied_outline_id FROM buildings_stage.new new);
 --TEMP
 CREATE TEMP TABLE new_add2 AS
 SELECT na.* from new_add na, buildings_stage.existing_subset_extracts existing
@@ -157,7 +157,7 @@ FROM buildings_stage.existing_subset_extracts existing
 WHERE existing.building_outline_id not IN (SELECT existing_intersect.building_outline_id FROM existing_intersect existing_intersect);
 --TEMP
 DELETE FROM removed_add
-WHERE building_outline_id not IN (SELECT removed.building_outline_id FROM buildings_stage.removed removed);
+WHERE building_outline_id IN (SELECT removed.building_outline_id FROM buildings_stage.removed removed);
 --TEMP
 CREATE TEMP TABLE removed_add2 AS
 SELECT ra.* from removed_add ra, buildings_stage.supplied_outlines supplier
@@ -225,10 +225,9 @@ WHERE supplier.supplied_outline_id = dups.s_id;
 -- INSERT INTO split_candidates
 -- the existing buildings that intersect with more than one supplied building
 INSERT INTO buildings_stage.split_candidates
-SELECT split_overlap.building_outline_id AS building_outline_id, to_split.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, split_overlap.total AS area_covering, split_overlap.total/ST_area(existing.shape)*100 AS percent_covering
+SELECT to_split.s_id AS supplied_outline_id, supplier.supplied_dataset_id AS supplied_dataset_id, split_overlap.building_outline_id AS building_outline_id, split_overlap.total AS area_covering, split_overlap.total/ST_area(existing.shape)*100 AS percent_covering
 FROM split_overlap split_overlap, buildings_stage.existing_subset_extracts existing, to_split to_split, buildings_stage.supplied_outlines supplier
 WHERE existing.building_outline_id = split_overlap.building_outline_id AND split_overlap.building_outline_id = to_split.building_outline_id AND to_split.s_id = supplier.supplied_outline_id;
-
 -----------------------------------------------------------------------------------------------------------------------------------------
 -- BEST/TO CHECK CANDIDATE PROCESSESING 
 
