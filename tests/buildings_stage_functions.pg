@@ -1,0 +1,109 @@
+
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings_stage schema using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+SELECT plan(12);
+
+-- New Buildings contents
+SELECT results_eq(
+    'SELECT * FROM buildings_stage.new ORDER BY supplied_outline_id',
+    'SELECT * FROM buildings_stage.new WHERE suppplied_outline_id = 200010 OR supplied_outline_id = 200003',
+    'new different to what was expected'
+);
+
+-- Removed Buildings contents
+SELECT results_eq(
+    'SELECT * FROM buildings_stage.removed ORDER BY building_outline_id',
+    'SELECT * FROM buildings_stage.removed WHERE building_outline_id = 100006 OR building_outline_id = 100004',
+    'removed different to what was expected'
+);
+
+-- Merged Buildings contents
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.merged ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.merged WHERE supplied_outline_id = 200005 OR supplied_outline_id = 200006 OR supplied_outline_id = 200007 OR supplied_outline_id = 200008 OR supplied_outline_id = 200009 OR supplied_outline_id = 200033',
+	'merged different to what was expected'
+);
+
+-- merge_candidates building_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.merge_cadidates ORDER BY building_outline_id',
+	'SELECT * FROM buildings_stage.merge_cadidates WHERE building_outline_id = 100021 OR building_outline_id = 100022 OR building_outline_id = 100023 OR building_outline_id = 100024 OR building_outline_id = 100025 OR building_outline_id = 100026 OR building_outline_id = 100016 OR building_outline_id = 100017 OR building_outline_id = 100018 OR building_outline_id = 100019 OR building_outline_id = 100020 OR building_outline_id = 100012 OR building_outline_id = 100013 OR building_outline_id = 100014 OR building_outline_id = 100015 OR building_outline_id = 100009 OR building_outline_id = 100010 OR building_outline_id = 100011 OR building_outline_id = 100032 OR building_outline_id 100033 OR building_outline_id = 100007 OR building_outline_id 100008',
+	'merge_candidates building_outline_ids different to what was expected'
+);
+
+-- merge_candidates supplied_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.merge_cadidates ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.merge_cadidates WHERE supplied_outline_id = 200009 OR supplied_outline_id = 200008 OR supplied_outline_id = 200007 OR supplied_outline_id = 200006 OR supplied_outline_id = 200033 OR supplied_outline_id = 200005',
+	'merge_cadidates supplied_outline_ids different to what was expected'
+);
+
+-- Split Buildings contents
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.split ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.split WHERE supplied_outline_id = 200011 OR supplied_outline_id = 200012 OR supplied_outline_id = 200013 OR supplied_outline_id = 200014 OR supplied_outline_id = 200015 OR supplied_outline_id = 200016 OR supplied_outline_id = 200017 OR supplied_outline_id = 200018 OR supplied_outline_id = 200019 OR supplied_outline_id = 200020 OR supplied_outline_id = 200021 OR supplied_outline_id = 200022 OR supplied_outline_id = 200023 OR supplied_outline_id = 200024 OR supplied_outline_id = 200025 OR supplied_outline_id = 200026 OR supplied_outline_id = 200027 OR supplied_outline_id = 200028 OR supplied_outline_id = 200029 OR supplied_outline_id = 200030 OR supplied_outline_id = 200032 OR supplied_outline_id = 200033',
+	'split different to what was expected'
+);
+
+-- split candidates supplied_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.split_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.split_candidates WHERE supplied_outline_id = 200033 OR supplied_outline_id = 200032 OR supplied_outline_id = 200024 OR supplied_outline_id = 200023 OR supplied_outline_id = 200020 OR supplied_outline_id = 200021 OR supplied_outline_id = 200012 OR supplied_outline_id = 200011 OR supplied_outline_id = 200030 OR supplied_outline_id = 200029 OR supplied_outline_id = 200028 OR supplied_outline_id = 200028 OR supplied_outline_id = 200027 OR supplied_outline_id = 200026 OR supplied_outline_id = 200025 OR supplied_outline_id = 200015 OR supplied_outline_id = 200014 OR supplied_outline_id = 200013 OR supplied_outline_id = 200019 OR supplied_outline_id = 200018 OR supplied_outline_id = 200017 OR supplied_outline_id = 200016',
+	'split_candidates supplied_outline_ids different to what was expected'
+);
+
+-- split candidates building_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.split_candidates ORDER BY building_outline_id',
+	'SELECT * FROM buildings_stage.split_candidates WHERE building_outline_id = 100032 OR building_outline_id = 100030 OR building_outline_id = 100027 OR building_outline_id = 100031 OR building_outline_id = 100028 OR building_outline_id 100029',
+	'split_candidates building_outline_ids different to what was expected'
+);
+
+-- check candidates supplied_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.check_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.check_candidates WHERE supplied_outline_id = 200004 OR supplied_outline_id = 200002',
+	'check_candidates supplied_outline_id different to what was expected'
+);
+
+-- check_candidates building_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.check_candidates ORDER BY building_outline_id',
+	'SELECT * FROM buildings_stage.check_candidates WHERE building_outline_id = 100005 OR building_outline_id = 100003',
+	'check_candidates building_outline_id different to what was expected'
+);
+
+-- best_candidates supplied_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.best_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM buildings_stage.best_candidates WHERE supplied_outline_id = 200001 OR supplied_outline_id = 200031',
+	'best_candidates supplied_outline_id different to what was expected'
+);
+
+-- best_candidates building_outline_id
+SELECT results_eq(
+	'SELECT * FROM buildings_stage.best_candidates ORDER BY building_outline_id',
+	'SELECT * FROM buildings_stage.best_candidates WHERE building_outline_id = 100002 OR building_outline_id = 100001'
+);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;
