@@ -207,7 +207,7 @@ insert into test(id) values(1001);
 
 SELECT set_eq(
 	'SELECT building_outline_id FROM buildings_stage.best_candidates ORDER BY building_outline_id',
-	'SELECT * FROM test
+	'SELECT * FROM test'
 );
 
 DROP TABLE test;
