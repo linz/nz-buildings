@@ -1,4 +1,3 @@
-
 ------------------------------------------------------------------------------
 -- Provide unit testing for buildings_stage schema using pgTAP
 ------------------------------------------------------------------------------
@@ -20,88 +19,199 @@ BEGIN;
 
 SELECT plan(12);
 
+-----------------------------------------------------------
 -- New Buildings contents
-SELECT results_eq(
-    'SELECT * FROM buildings_stage.new ORDER BY supplied_outline_id',
-    'SELECT * FROM buildings_stage.new WHERE suppplied_outline_id = 200010 OR supplied_outline_id = 200003',
-    'new different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(2003);
+insert into test(id) values(2010);
+
+SELECT set_eq(
+    'SELECT supplied_outline_id FROM buildings_stage.new ORDER BY supplied_outline_id',
+    'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+-----------------------------------------------------------
 -- Removed Buildings contents
-SELECT results_eq(
-    'SELECT * FROM buildings_stage.removed ORDER BY building_outline_id',
-    'SELECT * FROM buildings_stage.removed WHERE building_outline_id = 100006 OR building_outline_id = 100004',
-    'removed different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(1004);
+insert into test(id) values(1006);
+
+SELECT set_eq(
+    'SELECT building_outline_id FROM buildings_stage.removed ORDER BY building_outline_id',
+    'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+----------------------------------------------------------
 -- Merged Buildings contents
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.merged ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.merged WHERE supplied_outline_id = 200005 OR supplied_outline_id = 200006 OR supplied_outline_id = 200007 OR supplied_outline_id = 200008 OR supplied_outline_id = 200009 OR supplied_outline_id = 200033',
-	'merged different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(2005);
+insert into test(id) values(2006);
+insert into test(id) values(2007);
+insert into test(id) values(2008);
+insert into test(id) values(2009);
+insert into test(id) values(2033);
+
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.merged ORDER BY supplied_outline_id',
+	'SELECT * FROM test'
 );
 
--- merge_candidates building_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.merge_cadidates ORDER BY building_outline_id',
-	'SELECT * FROM buildings_stage.merge_cadidates WHERE building_outline_id = 100021 OR building_outline_id = 100022 OR building_outline_id = 100023 OR building_outline_id = 100024 OR building_outline_id = 100025 OR building_outline_id = 100026 OR building_outline_id = 100016 OR building_outline_id = 100017 OR building_outline_id = 100018 OR building_outline_id = 100019 OR building_outline_id = 100020 OR building_outline_id = 100012 OR building_outline_id = 100013 OR building_outline_id = 100014 OR building_outline_id = 100015 OR building_outline_id = 100009 OR building_outline_id = 100010 OR building_outline_id = 100011 OR building_outline_id = 100032 OR building_outline_id 100033 OR building_outline_id = 100007 OR building_outline_id 100008',
-	'merge_candidates building_outline_ids different to what was expected'
-);
-
+-----------------------------------------------------------
 -- merge_candidates supplied_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.merge_cadidates ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.merge_cadidates WHERE supplied_outline_id = 200009 OR supplied_outline_id = 200008 OR supplied_outline_id = 200007 OR supplied_outline_id = 200006 OR supplied_outline_id = 200033 OR supplied_outline_id = 200005',
-	'merge_cadidates supplied_outline_ids different to what was expected'
+
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.merge_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM  test'
 );
 
+DROP TABLE test;
+
+----------------------------------------------------------
+-- merge_candidates building_outline_id
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(1021);
+insert into test(id) values(1022);
+insert into test(id) values(1023);
+insert into test(id) values(1024);
+insert into test(id) values(1025);
+insert into test(id) values(1026);
+insert into test(id) values(1017);
+insert into test(id) values(1016);
+insert into test(id) values(1018);
+insert into test(id) values(1019);
+insert into test(id) values(1020);
+insert into test(id) values(1012);
+insert into test(id) values(1013);
+insert into test(id) values(1014);
+insert into test(id) values(1015);
+insert into test(id) values(1009);
+insert into test(id) values(1011);
+insert into test(id) values(1032);
+insert into test(id) values(1010);
+insert into test(id) values(1033);
+insert into test(id) values(1007);
+insert into test(id) values(1008);
+
+SELECT set_eq(
+	'SELECT building_outline_id FROM buildings_stage.merge_candidates ORDER BY building_outline_id',
+	'SELECT * FROM test'
+);
+
+DROP TABLE test;
+
+-------------------------------------------------------
 -- Split Buildings contents
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.split ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.split WHERE supplied_outline_id = 200011 OR supplied_outline_id = 200012 OR supplied_outline_id = 200013 OR supplied_outline_id = 200014 OR supplied_outline_id = 200015 OR supplied_outline_id = 200016 OR supplied_outline_id = 200017 OR supplied_outline_id = 200018 OR supplied_outline_id = 200019 OR supplied_outline_id = 200020 OR supplied_outline_id = 200021 OR supplied_outline_id = 200022 OR supplied_outline_id = 200023 OR supplied_outline_id = 200024 OR supplied_outline_id = 200025 OR supplied_outline_id = 200026 OR supplied_outline_id = 200027 OR supplied_outline_id = 200028 OR supplied_outline_id = 200029 OR supplied_outline_id = 200030 OR supplied_outline_id = 200032 OR supplied_outline_id = 200033',
-	'split different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(2011);
+insert into test(id) values(2012);
+insert into test(id) values(2013);
+insert into test(id) values(2014);
+insert into test(id) values(2015);
+insert into test(id) values(2016);
+insert into test(id) values(2017);
+insert into test(id) values(2018);
+insert into test(id) values(2019);
+insert into test(id) values(2020);
+insert into test(id) values(2021);
+insert into test(id) values(2022);
+insert into test(id) values(2023);
+insert into test(id) values(2024);
+insert into test(id) values(2025);
+insert into test(id) values(2026);
+insert into test(id) values(2027);
+insert into test(id) values(2028);
+insert into test(id) values(2029);
+insert into test(id) values(2030);
+insert into test(id) values(2032);
+insert into test(id) values(2033);
+
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.split ORDER BY supplied_outline_id',
+	'SELECT * FROM test'
 );
 
+-------------------------------------------------------
 -- split candidates supplied_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.split_candidates ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.split_candidates WHERE supplied_outline_id = 200033 OR supplied_outline_id = 200032 OR supplied_outline_id = 200024 OR supplied_outline_id = 200023 OR supplied_outline_id = 200020 OR supplied_outline_id = 200021 OR supplied_outline_id = 200012 OR supplied_outline_id = 200011 OR supplied_outline_id = 200030 OR supplied_outline_id = 200029 OR supplied_outline_id = 200028 OR supplied_outline_id = 200028 OR supplied_outline_id = 200027 OR supplied_outline_id = 200026 OR supplied_outline_id = 200025 OR supplied_outline_id = 200015 OR supplied_outline_id = 200014 OR supplied_outline_id = 200013 OR supplied_outline_id = 200019 OR supplied_outline_id = 200018 OR supplied_outline_id = 200017 OR supplied_outline_id = 200016',
-	'split_candidates supplied_outline_ids different to what was expected'
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.split_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+-------------------------------------------------------
 -- split candidates building_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.split_candidates ORDER BY building_outline_id',
-	'SELECT * FROM buildings_stage.split_candidates WHERE building_outline_id = 100032 OR building_outline_id = 100030 OR building_outline_id = 100027 OR building_outline_id = 100031 OR building_outline_id = 100028 OR building_outline_id 100029',
-	'split_candidates building_outline_ids different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(1032);
+insert into test(id) values(1030);
+insert into test(id) values(1027);
+insert into test(id) values(1031);
+insert into test(id) values(1028);
+insert into test(id) values(1029);
+
+SELECT set_eq(
+	'SELECT building_outline_id FROM buildings_stage.split_candidates ORDER BY building_outline_id',
+	'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+-----------------------------------------------------
 -- check candidates supplied_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.check_candidates ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.check_candidates WHERE supplied_outline_id = 200004 OR supplied_outline_id = 200002',
-	'check_candidates supplied_outline_id different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(2004);
+insert into test(id) values(2002);
+
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.check_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+---------------------------------------------------------
 -- check_candidates building_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.check_candidates ORDER BY building_outline_id',
-	'SELECT * FROM buildings_stage.check_candidates WHERE building_outline_id = 100005 OR building_outline_id = 100003',
-	'check_candidates building_outline_id different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(1005);
+insert into test(id) values(1003);
+
+SELECT set_eq(
+	'SELECT building_outline_id FROM buildings_stage.check_candidates ORDER BY building_outline_id',
+	'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+-------------------------------------------------------
 -- best_candidates supplied_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.best_candidates ORDER BY supplied_outline_id',
-	'SELECT * FROM buildings_stage.best_candidates WHERE supplied_outline_id = 200001 OR supplied_outline_id = 200031',
-	'best_candidates supplied_outline_id different to what was expected'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(2001);
+insert into test(id) values(2031);
+
+SELECT set_eq(
+	'SELECT supplied_outline_id FROM buildings_stage.best_candidates ORDER BY supplied_outline_id',
+	'SELECT * FROM test'
 );
 
+DROP TABLE test;
+
+--------------------------------------------------------
 -- best_candidates building_outline_id
-SELECT results_eq(
-	'SELECT * FROM buildings_stage.best_candidates ORDER BY building_outline_id',
-	'SELECT * FROM buildings_stage.best_candidates WHERE building_outline_id = 100002 OR building_outline_id = 100001'
+CREATE TEMP TABLE test (id integer);
+insert into test(id) values(1002);
+insert into test(id) values(1001);
+
+SELECT set_eq(
+	'SELECT building_outline_id FROM buildings_stage.best_candidates ORDER BY building_outline_id',
+	'SELECT * FROM test
 );
+
+DROP TABLE test;
+--------------------------------------------------------
 
 -- Finish pgTAP testing
 SELECT * FROM finish();
