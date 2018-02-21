@@ -109,8 +109,8 @@ CREATE TABLE IF NOT EXISTS buildings.building_name (
 SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_name), 1000000), false);
 
 DROP INDEX IF EXISTS idx_building_name_building_id;
-CREATE INDEX idx_building_names_building_id
-    ON buildings.building_names USING btree (building_id);
+CREATE INDEX idx_building_name_building_id
+    ON buildings.building_name USING btree (building_id);
 
 -- Building Use
 
@@ -125,12 +125,12 @@ CREATE TABLE IF NOT EXISTS buildings.building_use (
 SELECT setval('buildings.building_use_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_use), 1000000), false);
 
 DROP INDEX IF EXISTS idx_building_use_building_id;
-CREATE INDEX idx_building_uses_building_id
-    ON buildings.building_uses USING btree (building_id);
+CREATE INDEX idx_building_use_building_id
+    ON buildings.building_use USING btree (building_id);
 
 DROP INDEX IF EXISTS idx_building_use_use_id;
-CREATE INDEX idx_building_uses_use_id
-    ON buildings.building_uses USING btree (use_id);
+CREATE INDEX idx_building_use_use_id
+    ON buildings.building_use USING btree (use_id);
 
 -- Lifecycle
 
