@@ -17,7 +17,7 @@
 
 BEGIN;
 
-SELECT plan(14);
+SELECT plan(19);
 
 -- Tests
 SELECT has_schema('buildings');
