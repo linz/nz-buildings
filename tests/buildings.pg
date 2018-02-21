@@ -26,6 +26,7 @@ SELECT has_schema('buildings');
 SELECT has_table('buildings', 'capture_method', 'Should have capture_method table in the buildings schema.');
 SELECT has_table('buildings', 'capture_source_group', 'Should have capture_source_group table in the buildings schema.');
 SELECT has_table('buildings', 'lifecycle_stage', 'Should have lifecycle_stage table in the buildings schema.');
+SELECT has_table('buildings', 'use', 'Should have use table in the buildings schema.');
 
 -- Data Tables
 SELECT has_table('buildings', 'capture_source', 'Should have capture_source table in the buildings schema.');
@@ -50,6 +51,18 @@ SELECT has_index(
 SELECT has_index(
     'buildings', 'building_outlines', 'shx_building_outlines', 'shape',
     'Should have spatial index on the shape column of the building_outlines table.'
+);
+
+SELECT has_table('buildings', 'building_name', 'Should have building_name table in the buildings schema.');
+SELECT has_index(
+    'buildings', 'building_name', 'idx_building_name_building_id', 'building_id',
+    'Should have index on the building_id column of the building_name table.'
+);
+
+SELECT has_table('buildings', 'building_use', 'Should have building_use table in the buildings schema.');
+SELECT has_index(
+    'buildings', 'building_use', 'idx_building_use_building_id', 'building_id',
+    'Should have index on the building_id column of the building_use table.'
 );
 
 SELECT has_table('buildings', 'lifecycle', 'Should have lifecycle table in the buildings schema.');

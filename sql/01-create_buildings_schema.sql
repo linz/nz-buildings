@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
     , value character varying(40) NOT NULL
 );
 
+-- Use
+
+CREATE TABLE IF NOT EXISTS buildings.use (
+      use_id serial PRIMARY KEY
+    , value character varying(40) NOT NULL
+);
+
 -- DATA TABLES
 
 -- Capture Source
@@ -85,6 +92,42 @@ CREATE INDEX idx_building_outlines_lifecycle_stage_id
 DROP INDEX IF EXISTS shx_building_outlines;
 CREATE INDEX shx_building_outlines
     ON buildings.building_outlines USING gist (shape);
+
+-- Building Name
+
+CREATE TABLE IF NOT EXISTS buildings.building_name (
+      building_name_id serial PRIMARY KEY
+    , building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
+    , building_name character varying(250) NOT NULL DEFAULT ''
+    , begin_lifespan timestamptz NOT NULL DEFAULT now()
+    , end_lifespan timestamptz
+);
+
+SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_name), 1000000), false);
+
+DROP INDEX IF EXISTS idx_building_name_building_id;
+CREATE INDEX idx_building_names_building_id
+    ON buildings.building_names USING btree (building_id);
+
+-- Building Use
+
+CREATE TABLE IF NOT EXISTS buildings.building_use (
+      building_use_id serial PRIMARY KEY
+    , building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
+    , use_id integer NOT NULL REFERENCES buildings.use (use_id)
+    , begin_lifespan timestamptz NOT NULL DEFAULT now()
+    , end_lifespan timestamptz
+);
+
+SELECT setval('buildings.building_use_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_use), 1000000), false);
+
+DROP INDEX IF EXISTS idx_building_use_building_id;
+CREATE INDEX idx_building_uses_building_id
+    ON buildings.building_uses USING btree (building_id);
+
+DROP INDEX IF EXISTS idx_building_use_use_id;
+CREATE INDEX idx_building_uses_use_id
+    ON buildings.building_uses USING btree (use_id);
 
 -- Lifecycle
 
