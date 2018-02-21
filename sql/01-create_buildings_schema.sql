@@ -52,7 +52,7 @@ CREATE INDEX idx_capture_source_capture_source_group_id
 
 CREATE TABLE IF NOT EXISTS buildings.buildings (
       building_id serial PRIMARY KEY
-    , begin_lifespan timestamptz
+    , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , end_lifespan timestamptz
 );
 
@@ -66,7 +66,10 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , capture_method_id integer NOT NULL REFERENCES buildings.capture_method (capture_method_id)
     , capture_source_id integer NOT NULL REFERENCES buildings.capture_source (capture_source_id)
     , lifecycle_stage_id integer NOT NULL REFERENCES buildings.lifecycle_stage (lifecycle_stage_id)
-    , begin_lifespan timestamptz
+    , suburb_locality character varying(80) NOT NULL DEFAULT ''
+    , town_city character varying(80) NOT NULL DEFAULT ''
+    , territorial_authority character varying(80) NOT NULL DEFAULT ''
+    , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , end_lifespan timestamptz
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
