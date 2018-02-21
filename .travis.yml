@@ -20,8 +20,8 @@ before_script:
   - psql -U postgres -d travis_ci_test -af sql/02-create_buildings_stage_schema.sql
   - psql -U postgres -d travis_ci_test -af sql/03-insert_lookup_table_values.sql
   - psql -U postgres -d travis_ci_test -af sql/lds/01-create_buildings_lds_schema.sql
-  - psql -U postgres -d travis_ci_test -af sql/tests/insert_test_data_buildings_stage.sql
-  - psql -U postgres -d travis_ci_test -af sql/lds/04-create_buildings_functions.sql
+  - psql -U postgres -d travis_ci_test -af tests/insert_test_data_buildings_stage.sql
+  - psql -U postgres -d travis_ci_test -af sql/04-create_buildings_functions.sql
 
 script:
   - pg_prove -U postgres -d travis_ci_test tests/
