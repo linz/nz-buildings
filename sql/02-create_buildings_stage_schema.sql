@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS buildings_stage.supplied_outlines (
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
-SELECT setval('buildings_stage.supplied_outlines_supplied_outline_id_seq', 1000000);
+SELECT setval('buildings_stage.supplied_outlines_supplied_outline_id_seq', coalesce((SELECT max(supplied_outline_id) + 1 FROM buildings.buildings), 1000000), false);
 
 DROP INDEX IF EXISTS idx_supplied_outlines_supplied_dataset_id;
 CREATE INDEX idx_supplied_outlines_supplied_dataset_id

@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS buildings.buildings (
     , end_lifespan timestamptz
 );
 
-SELECT setval('buildings.buildings_building_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.buildings), 1000000), false);
+SELECT setval('buildings.buildings_building_id_seq', coalesce((SELECT max(building_id) + 1 FROM buildings.buildings), 1000000), false);
 
 -- Building Outlines
 
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
-SELECT setval('buildings.building_outlines_building_outline_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_outlines), 1000000), false);
+SELECT setval('buildings.building_outlines_building_outline_id_seq', coalesce((SELECT max(building_outline_id) + 1 FROM buildings.building_outlines), 1000000), false);
 
 DROP INDEX IF EXISTS idx_building_outlines_building_id;
 CREATE INDEX idx_building_outlines_building_id
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS buildings.building_name (
     , end_lifespan timestamptz
 );
 
-SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_name), 1000000), false);
+SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT max(building_name_id) + 1 FROM buildings.building_name), 1000000), false);
 
 DROP INDEX IF EXISTS idx_building_name_building_id;
 CREATE INDEX idx_building_name_building_id
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS buildings.building_use (
     , end_lifespan timestamptz
 );
 
-SELECT setval('buildings.building_use_building_name_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.building_use), 1000000), false);
+SELECT setval('buildings.building_use_building_use_id_seq', coalesce((SELECT max(building_use_id) + 1 FROM buildings.building_use), 1000000), false);
 
 DROP INDEX IF EXISTS idx_building_use_building_id;
 CREATE INDEX idx_building_use_building_id
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS buildings.lifecycle (
     , building_outline_id integer REFERENCES buildings.building_outlines (building_outline_id)
 );
 
-SELECT setval('buildings.lifecycle_lifecycle_id_seq', coalesce((SELECT max(id) + 1 FROM buildings.lifecycle), 1000000), false);
+SELECT setval('buildings.lifecycle_lifecycle_id_seq', coalesce((SELECT max(lifecycle_id) + 1 FROM buildings.lifecycle), 1000000), false);
 
 DROP INDEX IF EXISTS idx_lifecycle_parent_building_outline_id;
 CREATE INDEX idx_lifecycle_parent_building_outline_id
