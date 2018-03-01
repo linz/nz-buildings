@@ -17,7 +17,7 @@
 
 BEGIN;
 
-SELECT plan(19);
+SELECT plan(25);
 
 -- Tests
 SELECT has_schema('buildings');
@@ -34,6 +34,9 @@ SELECT has_index(
     'buildings', 'capture_source', 'idx_capture_source_capture_source_group_id', 'capture_source_group_id',
     'Should have index on the capture_source_group_id column of the capture_source table.'
 );
+
+SELECT has_table('buildings', 'buildings', 'Should have buildings table in the buildings schema.');
+SELECT ok(nextval('buildings.buildings_building_id_seq') > 999999);
 
 SELECT has_table('buildings', 'building_outlines', 'Should have building_outlines table in the buildings schema.');
 SELECT has_index(
@@ -52,18 +55,21 @@ SELECT has_index(
     'buildings', 'building_outlines', 'shx_building_outlines', 'shape',
     'Should have spatial index on the shape column of the building_outlines table.'
 );
+SELECT ok(nextval('buildings.building_outlines_building_outline_id_seq') > 999999);
 
 SELECT has_table('buildings', 'building_name', 'Should have building_name table in the buildings schema.');
 SELECT has_index(
     'buildings', 'building_name', 'idx_building_name_building_id', 'building_id',
     'Should have index on the building_id column of the building_name table.'
 );
+SELECT ok(nextval('buildings.building_name_building_name_id_seq') > 999999);
 
 SELECT has_table('buildings', 'building_use', 'Should have building_use table in the buildings schema.');
 SELECT has_index(
     'buildings', 'building_use', 'idx_building_use_building_id', 'building_id',
     'Should have index on the building_id column of the building_use table.'
 );
+SELECT ok(nextval('buildings.building_use_building_use_id_seq') > 999999);
 
 SELECT has_table('buildings', 'lifecycle', 'Should have lifecycle table in the buildings schema.');
 SELECT has_index(
@@ -74,6 +80,7 @@ SELECT has_index(
     'buildings', 'lifecycle', 'idx_lifecycle_building_outline_id', 'building_outline_id',
     'Should have index on the building_outline_id column of the lifecycle table.'
 );
+SELECT ok(nextval('buildings.lifecycle_lifecycle_id_seq') > 999999);
 
 -- Finish pgTAP testing
 SELECT * FROM finish();

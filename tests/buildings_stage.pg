@@ -17,7 +17,7 @@
 
 BEGIN;
 
-SELECT plan(42);
+SELECT plan(43);
 
 -- Tests
 SELECT has_schema('buildings_stage');
@@ -42,6 +42,7 @@ SELECT has_index(
     'buildings_stage', 'supplied_outlines', 'shx_supplied_outlines', 'shape',
     'Should have spatial index on the shape column of the supplied_outlines table.'
 );
+SELECT ok(nextval('buildings_stage.supplied_outlines_supplied_outline_id_seq') > 999999);
 
 SELECT has_table('buildings_stage', 'existing_subset_extracts', 'Should have existing_subset_extracts table in the buildings_stage schema.');
 SELECT has_index(
