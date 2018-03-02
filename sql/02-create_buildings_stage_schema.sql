@@ -9,14 +9,14 @@ CREATE SCHEMA IF NOT EXISTS buildings_stage;
 
 CREATE TABLE IF NOT EXISTS buildings_stage.organisation (
       organisation_id serial PRIMARY KEY
-    , value character varying(40)
+    , value character varying(40) NOT NULL
 );
 
 -- QA Status
 
 CREATE TABLE IF NOT EXISTS buildings_stage.qa_status (
       qa_status_id serial PRIMARY KEY
-    , value character varying(40)
+    , value character varying(40) NOT NULL
 );
 
 -- Supplied Datasets
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS buildings_stage.supplied_datasets (
       supplied_dataset_id serial PRIMARY KEY
     , description character varying(250) NOT NULL
     , supplier_id integer NOT NULL REFERENCES buildings_stage.organisation (organisation_id)
-    , processed_date timestamptz NOT NULL
+    , processed_date timestamptz NOT NULL DEFAULT now()
     , transfer_date timestamptz
 );
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS buildings_stage.supplied_outlines (
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
-SELECT setval('buildings_stage.supplied_outlines_supplied_outline_id_seq', 1000000);
+SELECT setval('buildings_stage.supplied_outlines_supplied_outline_id_seq', coalesce((SELECT max(supplied_outline_id) + 1 FROM buildings_stage.supplied_outlines), 1000000), false);
 
 DROP INDEX IF EXISTS idx_supplied_outlines_supplied_dataset_id;
 CREATE INDEX idx_supplied_outlines_supplied_dataset_id
@@ -111,8 +111,8 @@ CREATE TABLE IF NOT EXISTS buildings_stage.merged (
       supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
-    , area_covering numeric(10, 2)
-    , percent_covering numeric(5, 2)
+    , area_covering numeric(10, 2) NOT NULL
+    , percent_covering numeric(5, 2) NOT NULL
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS buildings_stage.merge_candidates (
       building_outline_id integer PRIMARY KEY REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_outline_id integer NOT NULL REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
-    , area_covered numeric(10, 2)
-    , percent_covered numeric(5, 2)
+    , area_covered numeric(10, 2) NOT NULL
+    , percent_covered numeric(5, 2) NOT NULL
 );
 
 DROP INDEX IF EXISTS idx_merge_candidates_supplied_outline_id;
@@ -152,8 +152,8 @@ CREATE TABLE IF NOT EXISTS buildings_stage.split (
       supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
-    , area_covered numeric(10, 2)
-    , percent_covered numeric(5, 2)
+    , area_covered numeric(10, 2) NOT NULL
+    , percent_covered numeric(5, 2) NOT NULL
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
@@ -172,11 +172,11 @@ CREATE INDEX shx_split
 -- Split Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_stage.split_candidates (
-    supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
-    , area_covering numeric(10, 2)
-    , percent_covering numeric(5, 2)
+    , area_covering numeric(10, 2) NOT NULL
+    , percent_covering numeric(5, 2) NOT NULL
 );
 
 DROP INDEX IF EXISTS idx_split_candidates_supplied_outline_id;
@@ -194,9 +194,9 @@ CREATE TABLE IF NOT EXISTS buildings_stage.best_candidates (
     , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
-    , area_difference numeric(10, 2)
-    , percent_difference numeric(5, 2)
-    , hausdorff_distance numeric(6, 4)
+    , area_difference numeric(10, 2) NOT NULL
+    , percent_difference numeric(5, 2) NOT NULL
+    , hausdorff_distance numeric(6, 4) NOT NULL
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
@@ -223,9 +223,9 @@ CREATE TABLE IF NOT EXISTS buildings_stage.check_candidates (
     , building_outline_id integer NOT NULL REFERENCES buildings_stage.existing_subset_extracts (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_stage.qa_status (qa_status_id)
-    , area_difference numeric(10, 2)
-    , percent_difference numeric(5, 2)
-    , hausdorff_distance numeric(6, 4)
+    , area_difference numeric(10, 2) NOT NULL
+    , percent_difference numeric(5, 2) NOT NULL
+    , hausdorff_distance numeric(6, 4) NOT NULL
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
