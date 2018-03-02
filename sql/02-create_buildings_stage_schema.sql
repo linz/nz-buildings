@@ -245,3 +245,12 @@ CREATE INDEX idx_check_candidates_qa_status_id
 DROP INDEX IF EXISTS shx_check_candidates;
 CREATE INDEX shx_check_candidates
     ON buildings_stage.check_candidates USING gist (shape);
+
+CREATE TABLE IF NOT EXISTS building_stage.transferred (
+      supplied_outline_id integer PRIMARY KEY REFERENCES buildings_stage.supplied_outlines (supplied_outline_id)
+    , new_building_outline_id integer NOT NULL REFERENCES buildings.building_outlines (building_outline_id)
+);
+
+DROP INDEX IF EXISTS idx_transferred_new_building_outline_id;
+CREATE INDEX idx_transferred_new_building_outline_id
+    ON buildings_stage.transferred USING btree (new_building_outline_id);
