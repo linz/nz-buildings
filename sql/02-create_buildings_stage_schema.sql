@@ -38,6 +38,7 @@ CREATE INDEX idx_supplied_datasets_supplier_id
 CREATE TABLE IF NOT EXISTS buildings_stage.supplied_outlines (
       supplied_outline_id serial PRIMARY KEY
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_stage.supplied_datasets (supplied_dataset_id)
+    , external_outline_id character varying(250)
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
 
