@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS buildings.capture_method (
 
 CREATE TABLE IF NOT EXISTS buildings.capture_source_group (
       capture_source_group_id serial PRIMARY KEY
-    , value character varying(40) NOT NULL
+    , value character varying(80) NOT NULL
+    , description character varying(400) NOT NULL
 );
 
 -- Lifecycle Stage
