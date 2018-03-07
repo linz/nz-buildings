@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>f_new_supplied_outlines</class>
+ <widget class="QFrame" name="f_new_supplied_outlines">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>559</width>
+    <height>254</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>New Supplied Outlines</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="1" column="1">
+    <widget class="QgsMapLayerComboBox" name="ml_supplied_outlines_layer"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QComboBox" name="cmb_organisation"/>
+   </item>
+   <item row="5" column="1">
+    <widget class="QLineEdit" name="le_supplied_data_description"/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QPushButton" name="btn_ok">
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>27</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Ok</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QPushButton" name="btn_cancel">
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>27</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="lb_organisation">
+     <property name="text">
+      <string>Organisation:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lb_supplied_outlines">
+     <property name="text">
+      <string>Supplied Outlines Layer:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="lb_supplied_data_desc">
+     <property name="text">
+      <string>Supplied Data Description:</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>ml_supplied_outlines_layer</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

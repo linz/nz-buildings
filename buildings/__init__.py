@@ -11,5 +11,5 @@ def classFactory(iface):
     :type iface: QgsInterface
     """
 
-    from .core.plugin import Buildings
+    from .plugin import Buildings
     return Buildings(iface)

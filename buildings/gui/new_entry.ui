@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>f_new_entry</class>
+ <widget class="QFrame" name="f_new_entry">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>512</width>
+    <height>137</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>New Entry</string>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
+  </property>
+  <layout class="QFormLayout" name="formLayout">
+   <item row="1" column="1">
+    <widget class="QComboBox" name="cmb_new_type_selection">
+     <item>
+      <property name="text">
+       <string>Organisation</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Lifecycle Stage</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Capture Method</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Capture Source Group</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLineEdit" name="le_new_entry"/>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="l_value">
+     <property name="text">
+      <string>Value:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="l_type_to_add">
+     <property name="text">
+      <string>Type to Add:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QPushButton" name="btn_ok">
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>27</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Ok</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QPushButton" name="btn_cancel">
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>27</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
