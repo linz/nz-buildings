@@ -1,6 +1,6 @@
 
-INSERT INTO buildings_stage.supplied_datasets(supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES(1, 'test data', 1, '2018-02-18 10:00:00 GMT+12', '2018-02-19 10:00:00 GMT+12');
-INSERT INTO buildings_stage.supplied_datasets(supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES(2, 'test data', 1, '2018-02-19 10:00:00 GMT+12', '2018-02-20 10:00:00 GMT+12');
+INSERT INTO buildings_stage.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES(1, 'test data', 1);
+INSERT INTO buildings_stage.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES(2, 'test data', 1);
 
 INSERT INTO buildings.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (1, 1, NULL);
 

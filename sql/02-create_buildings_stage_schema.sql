@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS buildings_stage.supplied_datasets (
       supplied_dataset_id serial PRIMARY KEY
     , description character varying(250) NOT NULL
     , supplier_id integer NOT NULL REFERENCES buildings_stage.organisation (organisation_id)
-    , processed_date timestamptz NOT NULL DEFAULT now()
+    , processed_date timestamptz
     , transfer_date timestamptz
 );
 
