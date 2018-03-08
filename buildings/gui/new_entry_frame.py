@@ -7,8 +7,8 @@ from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
-# from roads.gui.error_dialog import ErrorDialog
-# from buildings.gui.action_frame import ActionFrame
+from buildings.gui.error_dialog import ErrorDialog
+
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_entry.ui"))
@@ -82,9 +82,10 @@ class NewEntry(QFrame, FORM_CLASS):
         ls = cur.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
-            print "organisation exists in table"
-            # self.error_dialog = ErrorDialog()
-            # self.error_dialog.fill_report("organisation exists in table")
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(" ")
+            self.error_dialog.fill_report("organisation already exists in table")
+            self.error_dialog.show()
             # TODO: return dialog box that organisation exists
             return
         # if it isn't in the table add to table
@@ -112,9 +113,10 @@ class NewEntry(QFrame, FORM_CLASS):
         ls = cur.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
-            print "lifecycle_stage exists in table"
-            # TODO
-            # return to tool that lifecycle_stage exists
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(" ")
+            self.error_dialog.fill_report("lifecycle stage already exists in table")
+            self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
@@ -142,9 +144,10 @@ class NewEntry(QFrame, FORM_CLASS):
         ls = cur.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
-            print "capture method value exists in table"
-            # TODO
-            # return to tool that capture method exists
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(" ")
+            self.error_dialog.fill_report("capture method already exists in table")
+            self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
@@ -172,9 +175,10 @@ class NewEntry(QFrame, FORM_CLASS):
         ls = cur.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
-            print "capture source group value exists in table"
-            # TODO
-            # return to tool that capture_source_group exists
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(" ")
+            self.error_dialog.fill_report("capture source group already exists in table")
+            self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:

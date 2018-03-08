@@ -36,17 +36,18 @@ class Buildings:
         # Should add to roads plugin list options here
         try:
             dw = qgis.utils.plugins['roads'].dockwidget
-            dw.insert_into_frames('action_frame', ActionFrame)
             exists = False
-            for row in range(0, (dw.lst_options.count()), 1):
-                if dw.lst_options.item(row).text() == 'Buildings':
-                    exists = True
-            if exists is False:
-                home_dir = os.path.split(os.path.dirname(__file__))[0]
-                item = QListWidgetItem("Buildings")
-                image_path = os.path.join(home_dir, "buildings", "icons", "roads_plugin.png")
-                item.setIcon(QIcon(image_path))
-                dw.lst_options.addItem(item)
+            if dw is not None:
+                dw.insert_into_frames('action_frame', ActionFrame)
+                for row in range(0, (dw.lst_options.count()), 1):
+                    if dw.lst_options.item(row).text() == 'Buildings':
+                        exists = True
+                if exists is False:
+                    # home_dir = os.path.split(os.path.dirname(__file__))[0]
+                    item = QListWidgetItem("Buildings")
+                    # image_path = os.path.join(home_dir, "buildings", "icons", "roads_plugin.png")
+                    # item.setIcon(QIcon(image_path))
+                    dw.lst_options.addItem(item)
 
         except KeyError:
             print 'roads plugin not loaded'
@@ -57,13 +58,15 @@ class Buildings:
         # Should remove from roads plugin list options here
         try:
             dw = qgis.utils.plugins['roads'].dockwidget
-            for row in range(0, (dw.lst_options.count()), 1):
-                if dw.lst_options.item(row).text() == 'Buildings':
-                    dw.lst_options.takeItem(row)
-            dw.frames = {}
-            if dw.stk_options.count() == 5:
-                dw.stk_options.setCurrentIndex(4)
-                # delete stk
+            if dw is not None:
+                for row in range(0, (dw.lst_options.count()), 1):
+                    if dw.lst_options.item(row).text() == 'Buildings':
+                        dw.lst_options.takeItem(row)
+                dw.frames = {}
+                if dw.stk_options.count() == 5:
+                    dw.stk_options.setCurrentIndex(4)
+                    dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+                    dw.stk_options.setCurrentIndex(1)
 
         except KeyError:
             print 'roads plugin not loaded'
@@ -77,4 +80,3 @@ class Buildings:
         dw.stk_options.setCurrentIndex(3)
         dw.stk_options.addWidget(ActionFrame(dw))
         dw.stk_options.setCurrentIndex(4)
-
