@@ -5,8 +5,8 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QFrame
-from buildings.gui.new_entry_frame import NewEntry
-from buildings.gui.new_capture_source_frame import NewCaptureSource
+from buildings.gui.new_entry import NewEntry
+from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.new_supplied_outlines import NewSuppliedOutlines
 from buildings.gui.insert_buildings import InsertBuildings
 import qgis
@@ -14,10 +14,10 @@ import qgis
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "action.ui"))
+    os.path.dirname(__file__), "menu.ui"))
 
 
-class ActionFrame(QFrame, FORM_CLASS):
+class MenuFrame(QFrame, FORM_CLASS):
 
     new_entry = pyqtSignal()
     add_capture_source = pyqtSignal()
@@ -27,7 +27,7 @@ class ActionFrame(QFrame, FORM_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         # self.dw = qgis.utils.plugins['roads'].dockwidget
-        super(ActionFrame, self).__init__(parent)
+        super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
 
         # set up signals and slots

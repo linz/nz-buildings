@@ -7,6 +7,7 @@ from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
+
 from buildings.gui.error_dialog import ErrorDialog
 
 
@@ -37,6 +38,16 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         Get comments from comment box, return default if empty
         """
+        if self.le_new_entry.text() == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n -------------------- EMPTY VALUE FIELD -------------------- \n\n Null values not allowed")
+            self.error_dialog.show()
+            return
+        if len(self.le_new_entry.text()) >= 40:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 40 characters")
+            self.error_dialog.show()
+            return
         return self.le_new_entry.text()
         # TODO if value is nothing fail
 
@@ -53,21 +64,21 @@ class NewEntry(QFrame, FORM_CLASS):
         # get type
         self.new_type = self.get_combobox_value()
         # call insert depending on type
-        if self.new_type == 'Organisation':
-            self.new_organisation(self.value)
-        elif self.new_type == 'Lifecycle Stage':
-            self.new_lifecycle_stage(self.value)
-        elif self.new_type == 'Capture Method':
-            self.new_capture_method(self.value)
-        elif self.new_type == 'Capture Source Group':
-            self.new_capture_source_group(self.value)
-        self.ok_task.emit()  # ?? what does this do
+        if self.value is not None:
+            if self.new_type == 'Organisation':
+                self.new_organisation(self.value)
+            elif self.new_type == 'Lifecycle Stage':
+                self.new_lifecycle_stage(self.value)
+            elif self.new_type == 'Capture Method':
+                self.new_capture_method(self.value)
+            elif self.new_type == 'Capture Source Group':
+                self.new_capture_source_group(self.value)
 
     def cancel_clicked(self):
-        from buildings.gui.action_frame import ActionFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(ActionFrame)
+        dw.new_widget(MenuFrame)
 
     def new_organisation(self, organisation):
         # =========================================================
@@ -100,6 +111,7 @@ class NewEntry(QFrame, FORM_CLASS):
             sql = "INSERT INTO buildings_stage.organisation(organisation_id, value)VALUES(%s, %s);"
             cur.execute(sql, (id, organisation))
             conn.commit()
+            self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
         # New Lifecycle Stage
@@ -130,6 +142,7 @@ class NewEntry(QFrame, FORM_CLASS):
             sql = "INSERT INTO buildings.lifecycle_stage(lifecycle_stage_id, value)VALUES(%s, %s);"
             cur.execute(sql, (id, lifecycle_stage))
             conn.commit()
+            self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
         # New Capture Method
@@ -161,6 +174,7 @@ class NewEntry(QFrame, FORM_CLASS):
             sql = "INSERT INTO buildings.capture_method(capture_method_id, value)VALUES(%s, %s);"
             cur.execute(sql, (id, capture_method))
             conn.commit()
+            self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group):
         # New Capture Source Group
@@ -191,3 +205,5 @@ class NewEntry(QFrame, FORM_CLASS):
             # enter new capture source group
             sql = "INSERT INTO buildings.capture_source_group(capture_source_group_id, value)VALUES(%s, %s);"
             cur.execute(sql, (id, capture_source_group))
+            conn.commit()
+            self.le_new_entry.clear()

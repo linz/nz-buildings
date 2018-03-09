@@ -7,6 +7,7 @@ from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
+from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_supplied_outlines.ui"))
@@ -44,6 +45,16 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
 
     def get_comments(self):
         # Get comments from comment box, fail if empty
+        if self.le_supplied_data_description.text() == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n -------------------- EMPTY VALUE FIELD -------------------- \n\n Null values not allowed")
+            self.error_dialog.show()
+            return
+        if len(self.le_supplied_data_description.text()) >= 40:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 250 characters")
+            self.error_dialog.show()
+            return
         return self.le_supplied_data_description.text()
         # TODO if value is nothing fail
 
@@ -63,16 +74,17 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
         # get layer
         self.layer = self.get_layer()
         # run sql
-        self.insert_supplied_dataset(self.organisation, self.value)
-        self.insert_supplied_outlines(self.dataset_id, self.layer)
+        if self.value is not None:
+            self.insert_supplied_dataset(self.organisation, self.value)
+            self.insert_supplied_outlines(self.dataset_id, self.layer)
 
         self.ok_task.emit()  # ?? what does this do
 
     def cancel_clicked(self):
-        from buildings.gui.action_frame import ActionFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(ActionFrame)
+        dw.new_widget(MenuFrame)
 
     def insert_supplied_dataset(self, organisation, description):
         # find organisation id value from buildings.organisation table
@@ -112,3 +124,4 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
             sql = "INSERT INTO buildings_stage.supplied_outlines(supplied_outline_id, supplied_dataset_id, shape)" + " VALUES(%s, %s, %s);"
             cur.execute(sql, (int(attrs[0]), dataset_id, geom))
         conn.commit()
+        le_supplied_data_description.clear()

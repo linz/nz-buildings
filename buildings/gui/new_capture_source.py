@@ -7,6 +7,7 @@ from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
+from buildings.gui.error_dialog import ErrorDialog
 
 conn = psycopg2.connect(database='building_outlines_test')
 # create cursor
@@ -26,6 +27,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     ok_task = pyqtSignal()
     cancelling_task = pyqtSignal()
+    le_external_source = None
+
     value = ''
     external_source = ''
 
@@ -34,10 +37,12 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
         self.populate_combobox()
+        self.le_external_source_id.setDisabled(1)
 
         # set up signals and slots
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.rad_external_source.toggled.connect(self.enable_external_source)
 
     def populate_combobox(self):
         sql = "SELECT value FROM buildings.capture_source_group"
@@ -48,7 +53,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     def get_comments(self):
         # Get comments from comment box, return default if empty
-        return self.le_external_source_id.text()
+        if not self.rad_external_source.isChecked():
+            return None
+        else:
+            return self.le_external_source_id.text()
         # TODO if value is nothing fail
 
     def get_combobox_value(self):
@@ -56,20 +64,38 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         index = self.cmb_capture_source_group.currentIndex()
         return self.cmb_capture_source_group.itemText(index)
 
+    def enable_external_source(self, boolVal):
+        if self.rad_external_source.isChecked():
+            self.le_external_source_id.setEnabled(1)
+        if not self.rad_external_source.isChecked():
+            self.le_external_source_id.clear()
+            self.le_external_source_id.setDisabled(1)
+
     def ok_clicked(self):
         # get value
         self.external_source = self.get_comments()
+        # if no external source is entered open error dialog
+        if self.rad_external_source.isChecked():
+            if self.external_source == '':
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report("\n -------------------- EMPTY VALUE FIELD -------------------- \n\n If no external source id deselect external source radio button")
+                self.error_dialog.show()
+                return
+            if len(self.external_source) > 250:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report("\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 250 characters")
+                self.error_dialog.show()
+                return
         # get type
         self.value = self.get_combobox_value()
         # call insert
         self.insert_capture_source(self.value, self.external_source)
-        self.ok_task.emit()  # ?? what does this do
 
     def cancel_clicked(self):
-        from buildings.gui.action_frame import ActionFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(ActionFrame)
+        dw.new_widget(MenuFrame)
 
     def insert_capture_source(self, value, external_source):
         # New Capture Source
@@ -92,9 +118,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 # if capture source with same CSG and ES exists
                 if item[1] == capture_source_group_id:
                     if item[2] == external_source:
-                        print "capture source exists in table"
+                        self.error_dialog = ErrorDialog()
+                        self.error_dialog.fill_report(" ")
+                        self.error_dialog.fill_report(" \n capture source exists in table")
+                        self.error_dialog.show()
                         to_add = False
-                        # TODO: send update message to user that external source exists
             # if no entry with external source and capture source group add to table
             if to_add:
                 sql = "SELECT capture_source_id FROM buildings.capture_source;"
@@ -103,6 +131,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 id = length + 1
                 sql = "INSERT INTO buildings.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)"
                 cur.execute(sql, (id, capture_source_group_id, external_source))
+                self.le_external_source_id.clear()
 
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
@@ -112,5 +141,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             id = length + 1
             sql = "INSERT INTO buildings.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)"
             cur.execute(sql, (id, capture_source_group_id, external_source))
+            self.le_external_source_id.clear()
 
         conn.commit()

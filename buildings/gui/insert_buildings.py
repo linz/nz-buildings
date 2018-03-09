@@ -8,6 +8,8 @@ from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
 
+from buildings.gui.error_dialog import ErrorDialog
+
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "insert_buildings.ui"))
 
@@ -69,7 +71,8 @@ class InsertBuildings(QFrame, FORM_CLASS):
         cur.execute(sql)
         ls = cur.fetchall()
         for item in ls:
-            self.cmb_external_source.addItem(item[0])
+            if item[0] is not None:
+                self.cmb_external_source.addItem(item[0])
 
     def populate_lifecycle_stage(self):
         sql = "SELECT value FROM buildings.lifecycle_stage"
@@ -84,7 +87,8 @@ class InsertBuildings(QFrame, FORM_CLASS):
         self.lifecycle_stage = self.get_lifecycle_stage()
         self.layer = self.ml_building_layer.currentLayer()
         self.capture_source = self.get_capture_source()
-        self.insert_buildings()
+        if self.capture_source is not None:
+            self.insert_buildings()
 
     def get_supplied_dataset(self):
         # find supplied dataset id
@@ -122,18 +126,24 @@ class InsertBuildings(QFrame, FORM_CLASS):
     def get_capture_source(self):
         capture_source_group_id = self.get_capture_source_group()
         external_source_id = self.get_external_source()
-        sql = "SELECT capture_source_id FROM buildings.capture_source WHERE %s = buildings.capture_source.capture_source_group_id AND %s = buildings.capture_source.external_source_id"
-        cur.execute(sql, (capture_source_group_id, external_source_id))
+        if external_source_id == 'Null':
+            external_source_id = None
+            sql = "SELECT capture_source_id FROM buildings.capture_source WHERE buildings.capture_source.capture_source_group_id = %s AND buildings.capture_source.external_source_id is %s"
+            cur.execute(sql, (capture_source_group_id, external_source_id))
+        else:
+            sql = "SELECT capture_source_id FROM buildings.capture_source WHERE buildings.capture_source.capture_source_group_id = %s AND buildings.capture_source.external_source_id = %s"
+            cur.execute(sql, (capture_source_group_id, external_source_id))
         ls = cur.fetchall()
         if len(ls) == 0:
-            print 'no capture source with this data'
-            # TODO: popup dialog box with error
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n -------------------- NULL CAPTURE SOURCE -------------------- \n\n No capture source with this capture source group and external source id")
+            self.error_dialog.show()
+            return
         else:
             return ls[0][0]
 
     def insert_buildings(self):
         # generate building_outline_id for building_outlines_table
-
         sql = "SELECT building_outline_id FROM buildings.building_outlines;"
         cur.execute(sql)
         attributes = cur.fetchall()
@@ -165,7 +175,7 @@ class InsertBuildings(QFrame, FORM_CLASS):
         conn.commit()
 
     def cancel_clicked(self):
-        from buildings.gui.action_frame import ActionFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(ActionFrame)
+        dw.new_widget(MenuFrame)

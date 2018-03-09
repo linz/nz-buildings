@@ -5,9 +5,9 @@ import os
 from PyQt4.QtCore import QCoreApplication
 from PyQt4.QtGui import QListWidgetItem, QIcon
 import qgis
-import time
 
-from buildings.gui.action_frame import ActionFrame
+from buildings.gui.menu_frame import MenuFrame
+from buildings.gui.error_dialog import ErrorDialog
 
 # Get the path for the parent directory of this file.
 __location__ = os.path.realpath(
@@ -38,17 +38,21 @@ class Buildings:
             dw = qgis.utils.plugins['roads'].dockwidget
             exists = False
             if dw is not None:
-                dw.insert_into_frames('action_frame', ActionFrame)
+                dw.insert_into_frames('menu_frame', MenuFrame)
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
                 if exists is False:
-                    # home_dir = os.path.split(os.path.dirname(__file__))[0]
+                    home_dir = os.path.split(os.path.dirname(__file__))
                     item = QListWidgetItem("Buildings")
-                    # image_path = os.path.join(home_dir, "buildings", "icons", "roads_plugin.png")
-                    # item.setIcon(QIcon(image_path))
+                    image_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+                    item.setIcon(QIcon(image_path))
                     dw.lst_options.addItem(item)
-
+            else:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report(" ")
+                self.error_dialog.fill_report(" \n FAILED IMPORT \n \n Try opening the roads plugin GUI and then installing the buildings plugin.")
+                self.error_dialog.show()
         except KeyError:
             print 'roads plugin not loaded'
             pass
@@ -78,5 +82,5 @@ class Buildings:
             dw.stk_options.setCurrentIndex(4)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())  # delete fourth
         dw.stk_options.setCurrentIndex(3)
-        dw.stk_options.addWidget(ActionFrame(dw))
+        dw.stk_options.addWidget(MenuFrame(dw))
         dw.stk_options.setCurrentIndex(4)
