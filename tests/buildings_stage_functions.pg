@@ -14,11 +14,23 @@
 \set ON_ERROR_ROLLBACK 1
 \set ON_ERROR_STOP true
 
--- run the function
-SELECT (buildings_stage.compare_building_outlines(2));
 
 BEGIN;
 
+CREATE EXTENSION postgis;
+
+\i sql/01-create_buildings_schema.sql
+\i sql/02-create_buildings_stage_schema.sql
+\i sql/03-insert_lookup_table_values.sql
+\i sql/04-create_buildings_functions.sql
+\i sql/05-buildings_version.sql
+\i sql/lds/01-create_buildings_lds_schema.sql
+\i tests/insert_test_data_buildings_stage.sql
+
+CREATE EXTENSION pgtap;
+
+-- run the function
+SELECT buildings_stage.compare_building_outlines(2);
 
 SELECT plan(13);
 
@@ -63,7 +75,7 @@ SELECT results_eq(
 
 SELECT results_eq(
 	'SELECT supplied_outline_id FROM buildings_stage.merge_candidates ORDER BY supplied_outline_id',
-	$$VALUES (2005),(2005),
+	$$VALUES (2005), (2005),
 			 (2006), (2006), (2006), 
 			 (2007), (2007), (2007), (2007),
 			 (2008), (2008), (2008), (2008), (2008),

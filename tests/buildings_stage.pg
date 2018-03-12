@@ -17,6 +17,17 @@
 
 BEGIN;
 
+CREATE EXTENSION postgis;
+
+\i sql/01-create_buildings_schema.sql
+\i sql/02-create_buildings_stage_schema.sql
+\i sql/03-insert_lookup_table_values.sql
+\i sql/04-create_buildings_functions.sql
+\i sql/05-buildings_version.sql
+\i sql/lds/01-create_buildings_lds_schema.sql
+
+CREATE EXTENSION pgtap;
+
 SELECT plan(43);
 
 -- Tests

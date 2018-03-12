@@ -1,0 +1,46 @@
+#!/bin/sh
+
+DB_NAME=
+export PSQL=psql
+export SCRIPTSDIR=/usr/share/nz-building-outlines/sql/
+
+if test "$1" = "--version"; then
+    echo "@@VERSION@@"
+    exit 0
+fi
+
+if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
+    SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
+fi
+
+if test ! -f "${SCRIPTSDIR}/01-create_buildings_schema.sql"; then
+    cat >&2 <<EOF
+Cannot find 01-create_buildings_schema.sql in ${SCRIPTSDIR}
+Please set BUILDINGSCHEMA_SQLDIR environment variable
+EOF
+    exit 1
+fi
+
+while test -n "$1"; do
+    DB_NAME=$1; shift
+done
+
+if test -z "$DB_NAME"; then
+    echo "Usage: $0 <database>" >&2
+    echo "       $0 --version" >&2
+    exit 1
+fi
+
+export PGDATABASE=$DB_NAME
+
+psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
+psql -c "DROP SCHEMA IF EXISTS buildings_stage CASCADE;"
+psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
+
+psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
+psql -c "SET client_min_messages TO WARNING;"
+
+for file in ${SCRIPTSDIR}/*.sql; do
+    echo ${file}
+    psql -f ${file}
+done
