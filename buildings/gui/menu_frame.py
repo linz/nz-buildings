@@ -8,7 +8,6 @@ from PyQt4.QtGui import QFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.new_supplied_outlines import NewSuppliedOutlines
-from buildings.gui.insert_buildings import InsertBuildings
 import qgis
 # import psycopg2
 
@@ -34,7 +33,6 @@ class MenuFrame(QFrame, FORM_CLASS):
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
         self.btn_add_capture_source.clicked.connect(self.add_capture_source_clicked)
         self.btn_new_supplied_outlines.clicked.connect(self.new_supplied_outlines_clicked)
-        self.btn_insert_builds.clicked.connect(self.insert_buildings_clicked)
 
     def new_entry_clicked(self):
         # open new entry frame
@@ -53,9 +51,3 @@ class MenuFrame(QFrame, FORM_CLASS):
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewSuppliedOutlines)
-
-    def insert_buildings_clicked(self):
-        # open insert buildings frame
-        dw = qgis.utils.plugins['roads'].dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(InsertBuildings)

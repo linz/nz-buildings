@@ -7,17 +7,12 @@ from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
 import psycopg2
 import qgis
+
 from buildings.gui.error_dialog import ErrorDialog
 
 conn = psycopg2.connect(database='building_outlines_test')
 # create cursor
 cur = conn.cursor()
-
-# from buildings.core.lookup import (
-#     CAPTURE_METHODS, CAPTURE_SOURCES, LIFECYCLE_STAGES, USES,
-#     SUBURB_LOCALITIES, TOWN_CITIES, TERRITORIAL_AUTHORITIES
-# )
-
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_capture_source.ui"))
@@ -38,11 +33,15 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.setupUi(self)
         self.populate_combobox()
         self.le_external_source_id.setDisabled(1)
+        self.fcb_external_field.setDisabled(1)
+        self.cmb_external_layer.setDisabled(1)
+        self.fcb_external_field.setLayer(self.cmb_external_layer.currentLayer())
 
         # set up signals and slots
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.rad_external_source.toggled.connect(self.enable_external_source)
+        self.cmb_external_layer.currentIndexChanged.connect(self.populate_external_source)
 
     def populate_combobox(self):
         sql = "SELECT value FROM buildings.capture_source_group"
@@ -64,12 +63,19 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         index = self.cmb_capture_source_group.currentIndex()
         return self.cmb_capture_source_group.itemText(index)
 
+    def populate_external_source(self):
+        self.fcb_external_field.setLayer(self.cmb_external_layer.currentLayer())
+
     def enable_external_source(self, boolVal):
         if self.rad_external_source.isChecked():
             self.le_external_source_id.setEnabled(1)
+            self.fcb_external_field.setEnabled(1)
+            self.cmb_external_layer.setEnabled(1)
         if not self.rad_external_source.isChecked():
             self.le_external_source_id.clear()
             self.le_external_source_id.setDisabled(1)
+            self.fcb_external_field.setDisabled(1)
+            self.cmb_external_layer.setDisabled(1)
 
     def ok_clicked(self):
         # get value
@@ -120,7 +126,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                     if item[2] == external_source:
                         self.error_dialog = ErrorDialog()
                         self.error_dialog.fill_report(" ")
-                        self.error_dialog.fill_report(" \n capture source exists in table")
+                        self.error_dialog.fill_report(" \n capture source value exists in table")
                         self.error_dialog.show()
                         to_add = False
             # if no entry with external source and capture source group add to table

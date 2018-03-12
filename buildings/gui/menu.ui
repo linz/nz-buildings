@@ -42,13 +42,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="btn_insert_builds">
-     <property name="text">
-      <string>Insert Buildings</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

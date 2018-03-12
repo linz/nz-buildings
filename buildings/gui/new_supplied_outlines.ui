@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>559</width>
-    <height>254</height>
+    <width>655</width>
+    <height>248</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,20 @@
    <item row="5" column="1">
     <widget class="QLineEdit" name="le_supplied_data_description"/>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="1">
+    <widget class="QgsMapLayerComboBox" name="mcmb_imagery_layer"/>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1">
+    <widget class="QComboBox" name="cmb_imagery"/>
+   </item>
+   <item row="10" column="0">
     <widget class="QPushButton" name="btn_ok">
      <property name="maximumSize">
       <size>
@@ -42,16 +55,10 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
-    <widget class="QPushButton" name="btn_cancel">
-     <property name="maximumSize">
-      <size>
-       <width>85</width>
-       <height>27</height>
-      </size>
-     </property>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lb_supplied_outlines">
      <property name="text">
-      <string>Cancel</string>
+      <string>Supplied Outlines Layer:</string>
      </property>
     </widget>
    </item>
@@ -62,17 +69,30 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="lb_supplied_outlines">
-     <property name="text">
-      <string>Supplied Outlines Layer:</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0">
     <widget class="QLabel" name="lb_supplied_data_desc">
      <property name="text">
       <string>Supplied Data Description:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="l_imagery">
+     <property name="text">
+      <string>Imagery Layer:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <widget class="QPushButton" name="btn_cancel">
+     <property name="maximumSize">
+      <size>
+       <width>85</width>
+       <height>27</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Cancel</string>
      </property>
     </widget>
    </item>

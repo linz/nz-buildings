@@ -13,6 +13,7 @@ from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_entry.ui"))
+
 conn = psycopg2.connect(database='building_outlines_test')
 # create cursor
 cur = conn.cursor()
@@ -95,7 +96,7 @@ class NewEntry(QFrame, FORM_CLASS):
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("organisation already exists in table")
+            self.error_dialog.fill_report("\n -------------------- ORGANISATION EXISTS -------------------- \n\n Value entered exists in table")
             self.error_dialog.show()
             # TODO: return dialog box that organisation exists
             return
@@ -127,7 +128,7 @@ class NewEntry(QFrame, FORM_CLASS):
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("lifecycle stage already exists in table")
+            self.error_dialog.fill_report("\n -------------------- LIFECYCLE STAGE EXISTS -------------------- \n\n Value entered exists in table")
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
@@ -159,7 +160,7 @@ class NewEntry(QFrame, FORM_CLASS):
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("capture method already exists in table")
+            self.error_dialog.fill_report("\n -------------------- CAPTURE METHOD EXISTS -------------------- \n\n Value entered exists in table")
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
@@ -191,7 +192,7 @@ class NewEntry(QFrame, FORM_CLASS):
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("capture source group already exists in table")
+            self.error_dialog.fill_report("\n ---------------- CAPTURE SOURCE GROUP ---------------- \n\n Value entered exists in table")
             self.error_dialog.show()
             return
         # if it isn't in the table add to table

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>637</width>
-    <height>165</height>
+    <width>629</width>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
    <item row="5" column="1">
     <widget class="QLineEdit" name="le_external_source_id"/>
    </item>
-   <item row="7" column="0">
+   <item row="9" column="0">
     <widget class="QPushButton" name="btn_ok">
      <property name="maximumSize">
       <size>
@@ -56,7 +56,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
+   <item row="9" column="1">
     <widget class="QPushButton" name="btn_cancel">
      <property name="maximumSize">
       <size>
@@ -76,8 +76,47 @@
      </property>
     </widget>
    </item>
+   <item row="8" column="1">
+    <widget class="QgsFieldComboBox" name="fcb_external_field">
+     <property name="contextMenuPolicy">
+      <enum>Qt::PreventContextMenu</enum>
+     </property>
+     <property name="locale">
+      <locale language="English" country="NewZealand"/>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <widget class="QLabel" name="l_external_field">
+     <property name="text">
+      <string>External Source Field:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QgsMapLayerComboBox" name="cmb_external_layer"/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QLabel" name="l_External_layer">
+     <property name="text">
+      <string>External Source Layer:</string>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QgsFieldComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsfieldcombobox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QgsMapLayerComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qgsmaplayercombobox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
