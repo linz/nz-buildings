@@ -49,19 +49,6 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
-installcheck:
-
-	dropdb --if-exists nz-buildings-test-db
-
-	createdb nz-buildings-test-db
-	nz-buildings-load nz-buildings-test-db
-	export PGDATABASE=nz-buildings-test-db; \
-	V=`psql -XtAc 'SELECT buildings.buildings_version()'` && \
-	echo $$V && tests "$$V" = "$(VERSION)" && \
-	V=`nz-buildings-load --version` && \
-	echo $$V && tests `echo "$$V" | awk '{print $$1}'` = "$(VERSION)"
-	dropdb nz-buildings-test-db
-
 uninstall:
 	# Remove the SQL Scripts installed locally
 	rm -rf ${datadir}
