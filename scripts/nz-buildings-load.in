@@ -44,3 +44,8 @@ for file in ${SCRIPTSDIR}/*.sql; do
     echo ${file}
     psql -f ${file}
 done
+
+for file in ${SCRIPTSDIR}/lds/*.sql; do
+    echo ${file}
+    psql -f ${file}
+done

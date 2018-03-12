@@ -46,6 +46,8 @@ scripts/nz-buildings-load: scripts/nz-buildings-load.in
 install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	mkdir -p ${datadir}/sql
 	cp sql/*.sql ${datadir}/sql
+	mkdir -p ${datadir}/sql/lds
+	cp sql/lds/*.sql ${datadir}/sql/lds
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
