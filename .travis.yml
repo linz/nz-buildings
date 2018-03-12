@@ -13,7 +13,10 @@ before_install:
   - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
 
 before_script:
+  - export PGPASSWORD=
+  - sudo -E make install
   - psql -U postgres -c 'CREATE DATABASE travis_ci_test;' -U postgres
+  - nz-buildings-load travis-ci-test
 
 script:
   - pg_prove -U postgres -d travis_ci_test tests/

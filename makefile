@@ -67,10 +67,11 @@ uninstall:
 	rm -rf ${datadir}
 
 check test: $(SQLSCRIPTS)
-    # Build a test database and drop it
+    # Build a test database and run unit tests
 	export PGDATABASE=nz-buildings-pgtap-db; \
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
+	nz-buildings-load nz-buildings-pgtap-db; \
 	pg_prove tests/
 
 clean:
