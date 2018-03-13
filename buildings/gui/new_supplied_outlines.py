@@ -48,11 +48,12 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
 
     def populate_imagery_combobox(self):
         index = self.mcmb_imagery_layer.currentIndex()
-        if self.mcmb_imagery_layer.layer(index).name() == "imagery_surveys":
-            for item in self.mcmb_imagery_layer.currentLayer().getFeatures():
-                self.cmb_imagery.addItem(item[2])
-        else:
-            self.cmb_imagery.clear()
+        if self.mcmb_imagery_layer.layer(index) is not None:
+            if self.mcmb_imagery_layer.layer(index).name() == "imagery_surveys":
+                for item in self.mcmb_imagery_layer.currentLayer().getFeatures():
+                    self.cmb_imagery.addItem(item[2])
+            else:
+                self.cmb_imagery.clear()
 
     def get_comments(self):
         # Get comments from comment box, fail if empty
