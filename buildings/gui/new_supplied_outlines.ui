@@ -20,14 +20,45 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QFormLayout" name="formLayout">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
+   <item row="1" column="0">
+    <widget class="QLabel" name="lb_supplied_outlines">
+     <property name="text">
+      <string>Supplied Outlines Layer:</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="1">
     <widget class="QgsMapLayerComboBox" name="ml_supplied_outlines_layer"/>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="lb_organisation">
+     <property name="text">
+      <string>Organisation:</string>
+     </property>
+    </widget>
    </item>
    <item row="3" column="1">
     <widget class="QComboBox" name="cmb_organisation"/>
    </item>
+   <item row="5" column="0">
+    <widget class="QLabel" name="lb_supplied_data_desc">
+     <property name="text">
+      <string>Supplied Data Description:</string>
+     </property>
+    </widget>
+   </item>
    <item row="5" column="1">
     <widget class="QLineEdit" name="le_supplied_data_description"/>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="l_imagery">
+     <property name="text">
+      <string>Imagery Layer:</string>
+     </property>
+    </widget>
    </item>
    <item row="7" column="1">
     <widget class="QgsMapLayerComboBox" name="mcmb_imagery_layer"/>
@@ -52,34 +83,6 @@
      </property>
      <property name="text">
       <string>Ok</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="lb_supplied_outlines">
-     <property name="text">
-      <string>Supplied Outlines Layer:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="lb_organisation">
-     <property name="text">
-      <string>Organisation:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="lb_supplied_data_desc">
-     <property name="text">
-      <string>Supplied Data Description:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0">
-    <widget class="QLabel" name="l_imagery">
-     <property name="text">
-      <string>Imagery Layer:</string>
      </property>
     </widget>
    </item>

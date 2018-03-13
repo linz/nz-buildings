@@ -33,6 +33,7 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
         super(NewSuppliedOutlines, self).__init__(parent)
         self.setupUi(self)
         self.populate_combobox()
+        self.populate_imagery_combobox()
 
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
@@ -92,23 +93,47 @@ class NewSuppliedOutlines(QFrame, FORM_CLASS):
             self.insert_supplied_dataset(self.organisation, self.value)
             self.insert_supplied_outlines(self.dataset_id, self.layer)
             # TODO: way to check not reading in duplicates?
-            # find existing overlap
+            # find existing outlines
+            # imagery that supplied outlines intersects with
             tile = str(self.get_imagery_combobox_value())
-            print "imagery = '{0}'".format(tile)
-            # find imagery
-            self.mcmb_imagery_layer.currentLayer().selectByExpression('imagery = %s'.format(tile), 0)
-            # TODO:
-            # intersect with building_outlines
-            # if intersection returns no results
-                # don't run feature overlap
-                # all will be new?
-                # check random subset
-                # insert into building_outlines and buildings
-            # else
-                # run feature overlap code
-                # sql = "SELECT (buildings_stage.compare_building_outlines(2));"
-                # cur.execute(sql)
+            # find geometry
+            self.mcmb_imagery_layer.currentLayer().selectByExpression("imagery = '{0}'".format(tile), 0)
+            feature = self.mcmb_imagery_layer.currentLayer().selectedFeatures()
+            # convert to wkt to so can compare with sql shapes
+            wkt = feature[0].geometry().exportToWkt()
+            sql = "SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));"
+            cur.execute(sql, (wkt, ))
+            geom = cur.fetchall()[0][0]
+            # ensure outline SRID is 2193
+            sql = "SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)"
+            cur.execute(sql, (geom, ))
+            geom = cur.fetchall()[0][0]
+            # intersect imagery geom with building_outlines
+            sql = "CREATE TEMP TABLE temp AS SELECT * FROM buildings.building_outlines WHERE ST_intersects(buildings.building_outlines.shape, %s);"
+            cur.execute(sql, (geom, ))
+            # Has to deal with convex hull of supplied data otherwise will mark numerous building outlines as removed
+            sql = "SELECT temp.* FROM temp WHERE ST_Intersects(temp.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_stage.supplied_outlines.shape)) FROM buildings_stage.supplied_outlines WHERE buildings_stage.supplied_outlines.supplied_dataset_id = 2));"
+            cur.execute(sql)
+            results = cur.fetchall()
+            if len(results) == 0:  # no existing outlines in this area
+                print 'nothing \n'
+                # all new outlines
+            else:
+                # remove previous data from existing_subset_extracts
+                sql = "DELETE FROM buildings_stage.existing_subset_extracts;"
+                cur.execute(sql)
+                for ls in results:
+                    # insert relevant data into existing_subset_extract
+                    sql = "INSERT INTO buildings_stage.existing_subset_extracts(building_outline_id, supplied_dataset_id, shape) VALUES(%s, %s, %s);"
+                    cur.execute(sql, (ls[1], 1, ls[10]))  # TODO change supplied dataset id
+                # run comparisons function
+                sql = "SELECT (buildings_stage.compare_building_outlines(%s));"
+                cur.execute(sql, (self.dataset_id, ))
                 # user checked data to buildings and building_outlines
+            sql = "DISCARD TEMP;"
+            cur.execute(sql)  # remove temp files
+            conn.commit()
+            self.mcmb_imagery_layer.currentLayer().removeSelection()
 
     def cancel_clicked(self):
         from buildings.gui.menu_frame import MenuFrame

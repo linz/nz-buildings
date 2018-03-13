@@ -8,8 +8,8 @@ from PyQt4.QtGui import QFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.new_supplied_outlines import NewSuppliedOutlines
+
 import qgis
-# import psycopg2
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -25,7 +25,6 @@ class MenuFrame(QFrame, FORM_CLASS):
 
     def __init__(self, parent=None):
         """Constructor."""
-        # self.dw = qgis.utils.plugins['roads'].dockwidget
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
 
