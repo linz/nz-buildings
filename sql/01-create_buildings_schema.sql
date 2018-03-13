@@ -2,6 +2,9 @@
 -- Create buildings schema and tables
 ------------------------------------------------------------------------------
 
+SET client_min_messages TO WARNING;
+
+
 CREATE SCHEMA IF NOT EXISTS buildings;
 
 -- LOOKUP TABLES

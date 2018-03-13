@@ -13,13 +13,10 @@ before_install:
   - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
 
 before_script:
-  - psql -U postgres -c 'CREATE DATABASE travis_ci_test;' -U postgres
-  - psql -U postgres -d travis_ci_test -c 'CREATE EXTENSION postgis;'
-  - psql -U postgres -d travis_ci_test -c 'CREATE EXTENSION pgtap;' 
-  - psql -U postgres -d travis_ci_test -af sql/01-create_buildings_schema.sql
-  - psql -U postgres -d travis_ci_test -af sql/02-create_buildings_stage_schema.sql
-  - psql -U postgres -d travis_ci_test -af sql/03-insert_lookup_table_values.sql
-  - psql -U postgres -d travis_ci_test -af sql/lds/01-create_buildings_lds_schema.sql
+  - export PGPASSWORD=
+  - sudo -E make install
+  - psql -U postgres -c 'CREATE DATABASE nz_buildings_travis_db;' -U postgres
+  - nz-buildings-load nz_buildings_travis_db
 
 script:
-  - pg_prove -U postgres -d travis_ci_test tests/
+  - pg_prove -U postgres -d nz_buildings_travis_db tests/
