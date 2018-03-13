@@ -1,4 +1,6 @@
-# Minimal script to install the SQL creation scripts ready for postinst script.
+# Installs the SQL creation scripts and load script.
+# TODO: Create a simple rebuild-buildings $DB_NAME alias that can be used to
+# repeatedly reinstall and rebuild the nz-buildings database.
 
 VERSION = dev
 REVISION = $(shell test -d .git && git describe --always || echo $(VERSION))
@@ -8,6 +10,8 @@ SED = sed
 datadir = ${DESTDIR}/usr/share/nz-building-outlines
 bindir = ${DESTDIR}/usr/bin
 
+# List of SQL scripts used for installation
+# Includes SQL scripts that are only built during install
 SQLSCRIPTS = \
 	sql/01-create_buildings_schema.sql \
 	sql/02-create_buildings_stage_schema.sql \
@@ -17,10 +21,12 @@ SQLSCRIPTS = \
 	sql/lds/01-create_buildings_lds_schema.sql \
 	$(END)
 
+# List of scripts built during install
 SCRIPTS_built = \
 	scripts/nz-buildings-load \
 	$(END)
 
+# List of files built from .in files during install
 EXTRA_CLEAN = \
     sql/05-buildings_version.sql \
     $(SCRIPTS_built)
@@ -31,7 +37,7 @@ EXTRA_CLEAN = \
 
 all: $(SQLSCRIPTS) $(SCRIPTS_built)
 
-# Iterate through .sql.in files and create a .sql version
+# Iterate through .sql.in files and build a .sql version
 # with @@VERSION@@ and @@REVISION@@ replaced
 %.sql: %.sql.in makefile
 	$(SED) -e 's/@@VERSION@@/$(VERSION)/;s|@@REVISION@@|$(REVISION)|' $< > $@
@@ -52,7 +58,7 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp $(SCRIPTS_built) ${bindir}
 
 uninstall:
-	# Remove the SQL Scripts installed locally
+	# Remove the SQL scripts installed locally
 	rm -rf ${datadir}
 
 check test: $(SQLSCRIPTS)
@@ -64,5 +70,5 @@ check test: $(SQLSCRIPTS)
 	pg_prove tests/
 
 clean:
-	# Remove the files created from .in files during install
+	# Remove the files built from .in files during install
 	rm -f $(EXTRA_CLEAN)
