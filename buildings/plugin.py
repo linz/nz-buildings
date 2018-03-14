@@ -51,10 +51,9 @@ class Buildings:
             else:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(" ")
-                self.error_dialog.fill_report(" \n FAILED IMPORT \n \n Try opening the roads plugin GUI and then installing the buildings plugin.")
+                self.error_dialog.fill_report(" \n ------------------------------------------FAILED IMPORT------------------------------------------ \n \n Try opening the roads plugin GUI and then installing the buildings plugin.")
                 self.error_dialog.show()
         except KeyError:
-            print 'roads plugin not loaded'
             pass
 
     def unload(self):
@@ -73,7 +72,6 @@ class Buildings:
                     dw.stk_options.setCurrentIndex(1)
 
         except KeyError:
-            print 'roads plugin not loaded'
             pass
 
     def on_click(self):

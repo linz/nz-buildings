@@ -35,9 +35,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="btn_new_supplied_outlines">
+    <widget class="QPushButton" name="btn_load_outlines">
      <property name="text">
-      <string>New Supplied Outlines</string>
+      <string>Bulk Load Outlines</string>
      </property>
     </widget>
    </item>

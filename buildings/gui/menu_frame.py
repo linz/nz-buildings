@@ -7,7 +7,7 @@ from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
-from buildings.gui.new_supplied_outlines import NewSuppliedOutlines
+from buildings.gui.bulk_load_outlines import BulkLoadOutlines
 
 import qgis
 
@@ -31,7 +31,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
         self.btn_add_capture_source.clicked.connect(self.add_capture_source_clicked)
-        self.btn_new_supplied_outlines.clicked.connect(self.new_supplied_outlines_clicked)
+        self.btn_load_outlines.clicked.connect(self.load_outlines_clicked)
 
     def new_entry_clicked(self):
         # open new entry frame
@@ -45,8 +45,8 @@ class MenuFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource)
 
-    def new_supplied_outlines_clicked(self):
+    def load_outlines_clicked(self):
         # open new supplied outlines frame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewSuppliedOutlines)
+        dw.new_widget(BulkLoadOutlines)
