@@ -5,14 +5,12 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
-import psycopg2
 import qgis
 
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.utilities import database as db
 
-conn = psycopg2.connect(database='building_outlines_test')
-# create cursor
-cur = conn.cursor()
+db.connect()
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_capture_source.ui"))
@@ -40,11 +38,12 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.rad_external_source.toggled.connect(self.enable_external_source)
 
     def populate_combobox(self):
-        sql = "SELECT value FROM buildings_common.capture_source_group"
-        cur.execute(sql)
-        ls = cur.fetchall()
+        sql = "SELECT value, description FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        ls = result.fetchall()
         for item in ls:
-            self.cmb_capture_source_group.addItem(item[0])
+            text = str(item[0]) + '- ' + str(item[1])
+            self.cmb_capture_source_group.addItem(text)
 
     def get_comments(self):
         # Get comments from comment box, return default if empty
@@ -99,13 +98,13 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         # find capture source group id based on capture source group value
         sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;"
-        cur.execute(sql, (value,))
-        capture_source_group_id = cur.fetchall()[0][0]
+        result = db._execute(sql, data=(value,))
+        capture_source_group_id = result.fetchall()[0][0]
 
         # check if capture source exists in table
         sql = "SELECT * FROM buildings_common.capture_source WHERE buildings_common.capture_source.external_source_id = %s OR buildings_common.capture_source.capture_source_group_id = %s;"
-        cur.execute(sql, (external_source, capture_source_group_id))
-        ls = cur.fetchall()
+        result = db._execute(sql, data=(external_source, capture_source_group_id))
+        ls = result.fetchall()
         if len(ls) > 0:
             to_add = True
             for item in ls:
@@ -120,21 +119,19 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             # if no entry with external source and capture source group add to table
             if to_add:
                 sql = "SELECT capture_source_id FROM buildings_common.capture_source;"
-                cur.execute(sql)
-                length = len(cur.fetchall())
+                result = db._execute(sql)
+                length = len(result.fetchall())
                 id = length + 1
                 sql = "INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)"
-                cur.execute(sql, (id, capture_source_group_id, external_source))
+                db.execute(sql, data=(id, capture_source_group_id, external_source))
                 self.le_external_source_id.clear()
 
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
             sql = "SELECT capture_source_id FROM buildings_common.capture_source;"
-            cur.execute(sql)
-            length = len(cur.fetchall())
+            result = db._execute(sql)
+            length = len(result.fetchall())
             id = length + 1
             sql = "INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)"
-            cur.execute(sql, (id, capture_source_group_id, external_source))
+            db.execute(sql, data=(id, capture_source_group_id, external_source))
             self.le_external_source_id.clear()
-
-        conn.commit()

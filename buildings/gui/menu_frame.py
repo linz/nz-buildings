@@ -8,9 +8,12 @@ from PyQt4.QtGui import QFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.bulk_load_outlines import BulkLoadOutlines
+from buildings.gui.new_outline import NewOutline
+from buildings.utilities import database as db
 
 import qgis
 
+db.connect()
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "menu.ui"))
@@ -32,9 +35,11 @@ class MenuFrame(QFrame, FORM_CLASS):
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
         self.btn_add_capture_source.clicked.connect(self.add_capture_source_clicked)
         self.btn_load_outlines.clicked.connect(self.load_outlines_clicked)
+        self.btn_new_outline.clicked.connect(self.new_outline_clicked)
 
     def new_entry_clicked(self):
         # open new entry frame
+
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry)
@@ -50,3 +55,9 @@ class MenuFrame(QFrame, FORM_CLASS):
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadOutlines)
+
+    def new_outline_clicked(self):
+        # open new outlines frame
+        dw = qgis.utils.plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(NewOutline)

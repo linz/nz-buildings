@@ -1,11 +1,11 @@
 import os
 from PyQt4 import uic
-from PyQt4.QtGui import QDialog, QPixmap
+from PyQt4.QtGui import QDialog
 from PyQt4.QtCore import pyqtSignal, Qt
-from qgis.utils import QGis
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "error_dialog.ui"))
+
 
 class ErrorDialog(QDialog, FORM_CLASS):
 

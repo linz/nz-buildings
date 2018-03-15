@@ -5,19 +5,15 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
-import psycopg2
 import qgis
 
 from buildings.gui.error_dialog import ErrorDialog
-
+from buildings.utilities import database as db
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_entry.ui"))
 
-conn = psycopg2.connect(database='building_outlines_test')
-# create cursor
-cur = conn.cursor()
-
+db.connect()
 
 class NewEntry(QFrame, FORM_CLASS):
 
@@ -68,14 +64,14 @@ class NewEntry(QFrame, FORM_CLASS):
                 self.error_dialog.show()
                 return
             return self.le_description.text()
-    
+
     def get_combobox_value(self):
         """
         Get the type from the combo box
         """
         index = self.cmb_new_type_selection.currentIndex()
         return self.cmb_new_type_selection.itemText(index)
-    
+
     def set_new_type(self):
         index = self.cmb_new_type_selection.currentIndex()
         self.new_type = self.cmb_new_type_selection.itemText(index)
@@ -102,7 +98,6 @@ class NewEntry(QFrame, FORM_CLASS):
                 if self.description is not None:
                     self.new_capture_source_group(self.value, self.description)
 
-
     def cancel_clicked(self):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
@@ -118,8 +113,8 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if organisation in buildings_bulk_load.organisation table
         sql = "SELECT * FROM buildings_bulk_load.organisation WHERE buildings_bulk_load.organisation.value = %s;"
-        cur.execute(sql, (organisation,))
-        ls = cur.fetchall()
+        result = db._execute(sql, data=(organisation,))
+        ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
@@ -132,8 +127,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # find the last id value in table
             sql = "SELECT organisation_id FROM buildings_bulk_load.organisation;"
-            cur.execute(sql)
-            attributes = cur.fetchall()
+            result = db._execute(sql)
+            attributes = result.fetchall()
             length = len(attributes)
             if length == 0:
                 id = 1
@@ -141,8 +136,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 id = attributes[length - 1][0] + 1  # id for new organisation
             # enter new organisation
             sql = "INSERT INTO buildings_bulk_load.organisation(organisation_id, value)VALUES(%s, %s);"
-            cur.execute(sql, (id, organisation))
-            conn.commit()
+            db.execute(sql, (id, organisation))
             self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
@@ -153,8 +147,8 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
         sql = "SELECT * FROM buildings.lifecycle_stage WHERE buildings.lifecycle_stage.value = %s;"
-        cur.execute(sql, (lifecycle_stage,))
-        ls = cur.fetchall()
+        result = db._execute(sql, data=(lifecycle_stage,))
+        ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
@@ -166,8 +160,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # find the last id value in table
             sql = "SELECT lifecycle_stage_id FROM buildings.lifecycle_stage;"
-            cur.execute(sql)
-            attributes = cur.fetchall()
+            result = db._execute(sql)
+            attributes = result.fetchall()
             length = len(attributes)
             if length == 0:
                 id = 1
@@ -175,8 +169,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 id = attributes[length - 1][0] + 1  # id for new lifecycle stage
             # enter new lifecycle stage
             sql = "INSERT INTO buildings.lifecycle_stage(lifecycle_stage_id, value)VALUES(%s, %s);"
-            cur.execute(sql, (id, lifecycle_stage))
-            conn.commit()
+            db.execute(sql, (id, lifecycle_stage))
             self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
@@ -188,8 +181,8 @@ class NewEntry(QFrame, FORM_CLASS):
 
         # check if capture method in buildings_common.capture_method table
         sql = "SELECT * FROM buildings_common.capture_method WHERE buildings_common.capture_method.value = %s;"
-        cur.execute(sql, (capture_method,))
-        ls = cur.fetchall()
+        result = db._execute(sql, data=(capture_method,))
+        ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
@@ -201,8 +194,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # find the last id value in table
             sql = "SELECT capture_method_id FROM buildings_common.capture_method;"
-            cur.execute(sql)
-            attributes = cur.fetchall()
+            result = db._execute(sql)
+            attributes = result.fetchall()
             length = len(attributes)
             if length == 0:
                 id = 1
@@ -210,8 +203,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 id = attributes[length - 1][0] + 1  # id for new capture method
             # enter new capture method
             sql = "INSERT INTO buildings_common.capture_method(capture_method_id, value)VALUES(%s, %s);"
-            cur.execute(sql, (id, capture_method))
-            conn.commit()
+            db.execute(sql, data=(id, capture_method))
             self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group, description):
@@ -222,8 +214,8 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # Check if capture source group in buildings_common.capture_source_group table
         sql = "SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;"
-        cur.execute(sql, (capture_source_group,))
-        ls = cur.fetchall()
+        result = db._execute(sql, data=(capture_source_group,))
+        ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
@@ -236,8 +228,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # find the last id value in table
             sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group;"
-            cur.execute(sql)
-            attributes = cur.fetchall()
+            result = db._execute(sql)
+            attributes = result.fetchall()
             length = len(attributes)
             if length == 0:
                 id = 1
@@ -245,7 +237,6 @@ class NewEntry(QFrame, FORM_CLASS):
                 id = attributes[length - 1][0] + 1  # id for new capture source group
             # enter new capture source group
             sql = "INSERT INTO buildings_common.capture_source_group(capture_source_group_id, value, description)VALUES(%s, %s, %s);"
-            cur.execute(sql, (id, capture_source_group, description))
-            conn.commit()
+            db.execute(sql, data=(id, capture_source_group, description))
             self.le_new_entry.clear()
             self.le_description.clear()
