@@ -39,25 +39,24 @@ class MenuFrame(QFrame, FORM_CLASS):
 
     def new_entry_clicked(self):
         # open new entry frame
-
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewEntry)
+        dw.new_widget(NewEntry())
 
     def add_capture_source_clicked(self):
         # open add capture source frame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewCaptureSource)
+        dw.new_widget(NewCaptureSource())
 
     def load_outlines_clicked(self):
         # open new supplied outlines frame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadOutlines)
+        dw.new_widget(BulkLoadOutlines())
 
     def new_outline_clicked(self):
         # open new outlines frame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewOutline)
+        dw.new_widget(NewOutline())

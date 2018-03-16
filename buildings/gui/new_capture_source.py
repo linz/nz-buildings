@@ -55,7 +55,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     def get_combobox_value(self):
         # Get the type from the combo box
         index = self.cmb_capture_source_group.currentIndex()
-        return self.cmb_capture_source_group.itemText(index)
+        text = self.cmb_capture_source_group.itemText(index)
+        text_ls = text.split('-')
+        return text_ls[0]
 
     def enable_external_source(self, boolVal):
         if self.rad_external_source.isChecked():
@@ -88,7 +90,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame)
+        dw.new_widget(MenuFrame())
 
     def insert_capture_source(self, value, external_source):
         # New Capture Source

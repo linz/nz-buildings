@@ -151,12 +151,12 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         if self.rad_external_source.isChecked():
             index = self.cmb_external_id.currentIndex()
             ext_id = self.cmb_external_id.itemText(index)
-            print ext_id
             if ext_id == '':
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report("\n -------------------- NO EXTERNAL IDs -------------------- \n\n Please either uncheck the radio button or enter a new capture source")
                 self.error_dialog.show()
-            return
+                return
+            return ext_id
         else:
             return None
 
@@ -194,8 +194,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         # run sql
         if self.description is not None:
             self.insert_supplied_dataset(self.organisation, self.description)
-            self.insert_supplied_outlines(self.dataset_id, self.layer, self.capture_method, self.capture_source_group, self.external_source_id)
-
+            val = self.insert_supplied_outlines(self.dataset_id, self.layer, self.capture_method, self.capture_source_group, self.external_source_id)
+            if val is None:
+                return
             # TODO: way to check not reading in duplicates?
             # imagery that bulk outlines intersects with
             tile = str(self.get_imagery_combobox_value())
@@ -245,7 +246,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame)
+        dw.new_widget(MenuFrame())
 
     def insert_supplied_dataset(self, organisation, description):
         # find organisation id value from buildings.organisation table
@@ -284,7 +285,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report("\n -------------------- NO CAPTURE SOURCE EXISTS -------------------- \n\n No capture source with this capture source group and a Null external id exists")
+                self.error_dialog.fill_report("\n -------------------- NO CAPTURE SOURCE EXISTS -------------------- \n\n No capture source with this capture source group and a Null external id")
                 self.error_dialog.show()
                 return
             else:
@@ -311,3 +312,4 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 sql = "INSERT INTO buildings_bulk_load.bulk_load_outlines(supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, shape)" + " VALUES(%s, %s, %s, %s, %s, %s);"
                 db.execute(sql, (dataset_id, external_id, 1, capture_method, capture_source, geom))
         self.le_data_description.clear()
+        return 1

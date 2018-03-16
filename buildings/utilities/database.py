@@ -1,7 +1,7 @@
 import os
 import psycopg2
 
-from qgis.core import QgsApplication
+from qgis.core import QgsDataSourceURI, QgsApplication
 
 import config
 # from warnings import roads_warning
@@ -106,3 +106,14 @@ def execute(sql, data=None):
         if cursor:
             cursor.close()
         return None
+
+
+def set_uri():
+    """ Creates a QgsDataSourceURI with connection
+
+    @return:    QGIS URI object
+    @rtype:     qgis.core.QgsDataSourceURI
+    """
+    uri = QgsDataSourceURI()
+    uri.setConnection(_host, _port, _dbname, _user, '')
+    return uri

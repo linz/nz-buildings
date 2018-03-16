@@ -8,6 +8,7 @@ import qgis
 
 from buildings.gui.menu_frame import MenuFrame
 from buildings.gui.error_dialog import ErrorDialog
+from utilities.layers import LayerRegistry
 
 # Get the path for the parent directory of this file.
 __location__ = os.path.realpath(
@@ -38,11 +39,13 @@ class Buildings:
             dw = qgis.utils.plugins['roads'].dockwidget
             exists = False
             if dw is not None:
-                dw.insert_into_frames('menu_frame', MenuFrame)
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
                 if exists is False:
+                    self.layer_registry = LayerRegistry()
+                    self.layer_registry.set_up_base_layers()
+                    dw.insert_into_frames('menu_frame', MenuFrame())
                     home_dir = os.path.split(os.path.dirname(__file__))
                     item = QListWidgetItem("Buildings")
                     image_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")

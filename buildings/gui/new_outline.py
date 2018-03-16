@@ -4,9 +4,13 @@ import os.path
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
+
 import qgis
+from qgis.core import QgsVectorLayer
+from qgis.utils import iface
 
 from buildings.utilities import database as db
+from buildings.utilities.layers import LayerRegistry
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_outline.ui"))
@@ -22,8 +26,15 @@ class NewOutline(QFrame, FORM_CLASS):
         self.setupUi(self)
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
-        # add building_outlines layer to canvas
-        # allow editing of building outlines layer
+        # self.cmb_capture_method.setDisabled(1)
+        # self.cmb_capture_source.setDisabled(1)
+        # self.cmb_lifecycle_stage.setDisabled(1)
+        # self.cmb_ta.setDisabled(1)
+        # self.cmb_town.setDisabled(1)
+        # self.cmb_suburb.setDisabled(1)
+        self.btn_save.setDisabled(1)
+
+        self.create_building_layer = QgsVectorLayer()
 
         # set up signals
         self.btn_save.clicked.connect(self.save_clicked)
@@ -77,6 +88,10 @@ class NewOutline(QFrame, FORM_CLASS):
             if item[0] is not None:
                 self.cmb_ta.addItem(item[0])
 
+    def add_geometry(self):
+        print 'blah'
+        # Class layers
+
     def get_capture_method_id(self):
         index = self.cmb_capture_method.currentIndex()
         text = self.cmb_capture_method.itemText(index)
@@ -103,14 +118,16 @@ class NewOutline(QFrame, FORM_CLASS):
         return result.fetchall()[0][0]
 
     def get_suburb(self):
-        print 'something'
+        index = self.cmb_suburb.currentIndex()
+        return self.cmb_suburb.itemText(index)
 
     def get_town(self):
-        print 'something'
+        index = self.cmb_town.currentIndex()
+        return self.cmb_town.itemText(index)
 
     def get_t_a(self):
-        index = self.cmb_capture_method.currentIndex()
-        return self.cmb_capture_method.itemText(index)
+        index = self.cmb_ta.currentIndex()
+        return self.cmb_ta.itemText(index)
 
     def save_clicked(self):
         self.capture_source_id = self.get_capture_source_id()
@@ -136,7 +153,20 @@ class NewOutline(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame)
+        dw.new_widget(MenuFrame())
 
     def reset_clicked(self):
+        self.cmb_capture_method.setCurrentIndex(0)
+        # self.cmb_capture_method.setDisabled(1)
+        self.cmb_capture_source.setCurrentIndex(0)
+        # self.cmb_capture_source.setDisabled(1)
+        self.cmb_lifecycle_stage.setCurrentIndex(0)
+        # self.cmb_lifecycle_stage.setDisabled(1)
+        self.cmb_ta.setCurrentIndex(0)
+        # self.cmb_ta.setDisabled(1)
+        self.cmb_town.setCurrentIndex(0)
+        # self.cmb_town.setDisabled(1)
+        self.cmb_suburb.setCurrentIndex(0)
+        # self.cmb_suburb.setDisabled(1)
+        self.btn_save.setDisabled(1)
         print 'reset'
