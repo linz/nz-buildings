@@ -67,12 +67,12 @@ SELECT ok(nextval('buildings.building_use_building_use_id_seq') > 999999);
 
 SELECT has_table('buildings', 'lifecycle', 'Should have lifecycle table in the buildings schema.');
 SELECT has_index(
-    'buildings', 'lifecycle', 'idx_lifecycle_parent_building_outline_id', 'parent_building_outline_id',
-    'Should have index on the parent_building_outline_id column of the lifecycle table.'
+    'buildings', 'lifecycle', 'idx_lifecycle_parent_building_id', 'parent_building_id',
+    'Should have index on the parent_building_id column of the lifecycle table.'
 );
 SELECT has_index(
-    'buildings', 'lifecycle', 'idx_lifecycle_building_outline_id', 'building_outline_id',
-    'Should have index on the building_outline_id column of the lifecycle table.'
+    'buildings', 'lifecycle', 'idx_lifecycle_building_id', 'building_id',
+    'Should have index on the building_id column of the lifecycle table.'
 );
 SELECT ok(nextval('buildings.lifecycle_lifecycle_id_seq') > 999999);
 

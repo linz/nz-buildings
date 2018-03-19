@@ -1,0 +1,141 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for load_buildings function using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+\i tests/testdata/insert_test_data_buildings_bulk_load.sql
+
+\i tests/testdata/insert_test_data_for_loading.sql
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+-- run the function
+SELECT buildings_bulk_load.load_building_outlines(2);
+
+SELECT plan(13);
+
+--1----------------------------------------------------------
+-- Check function exists
+
+SELECT has_function('buildings_bulk_load', 'load_building_outlines', 'Should have function load_building_outlines in buildings_bulk_load stage schema.');
+
+--2----------------------------------------------------------
+-- result of removed buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1006',
+    'Check removed buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+--3----------------------------------------------------------
+-- result of removed buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1006',
+    'Check removed buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+--4----------------------------------------------------------
+-- result of added buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT * FROM buildings.buildings WHERE building_id = 1000001',
+    'Check added buildings in buildings table after load_buildings function has run'
+);
+
+--5----------------------------------------------------------
+-- result of added buildings in building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000001',
+    $$VALUES (1000001)$$,
+    'Check added buildings in building_outlines table after load_buildings function has run'
+);
+
+--6----------------------------------------------------------
+-- result of matched buildings in building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000006',
+    $$VALUES (1002)$$,
+    'Check matched buildings in building_outlines table after load_buildings function has run'
+);
+
+--7----------------------------------------------------------
+-- result of matched buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1002',
+    'Check matched buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+--8----------------------------------------------------------
+-- result of matched buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1002',
+    'Check matched buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+--9----------------------------------------------------------
+-- result of related buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT * FROM buildings.buildings WHERE building_id = 1000025',
+    'Check related buildings in buildings table after load_buildings function has run'
+);
+
+--10---------------------------------------------------------
+-- result of related buildings in building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000029',
+    $$VALUES (1000025)$$,
+    'Check related buildings in building_outlines table after load_buildings function has run'
+);
+
+--11---------------------------------------------------------
+-- result of related buildings in lifecycle table
+
+SELECT results_eq(
+    'SELECT parent_building_id, building_id FROM buildings.lifecycle WHERE lifecycle_id = 1000030',
+    $$VALUES (1026, 1000025)$$,
+    'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
+);
+
+--12---------------------------------------------------------
+-- result of related buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1026',
+    'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+--13---------------------------------------------------------
+-- result of related buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1026',
+    'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+
+--------------------------------------------------------
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+

@@ -43,9 +43,9 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , capture_method_id integer NOT NULL REFERENCES buildings_common.capture_method (capture_method_id)
     , capture_source_id integer NOT NULL REFERENCES buildings_common.capture_source (capture_source_id)
     , lifecycle_stage_id integer NOT NULL REFERENCES buildings.lifecycle_stage (lifecycle_stage_id)
-    , suburb_locality_id integer NOT NULL
+    , suburb_locality_id integer
     , town_city_id integer
-    , territorial_authority_id integer NOT NULL
+    , territorial_authority_id integer
     , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , end_lifespan timestamptz
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
@@ -113,16 +113,16 @@ CREATE INDEX idx_building_use_use_id
 
 CREATE TABLE IF NOT EXISTS buildings.lifecycle (
       lifecycle_id serial PRIMARY KEY
-    , parent_building_outline_id integer NOT NULL REFERENCES buildings.building_outlines (building_outline_id)
-    , building_outline_id integer REFERENCES buildings.building_outlines (building_outline_id)
+    , parent_building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
+    , building_id integer REFERENCES buildings.buildings (building_id)
 );
 
 SELECT setval('buildings.lifecycle_lifecycle_id_seq', coalesce((SELECT max(lifecycle_id) + 1 FROM buildings.lifecycle), 1000000), false);
 
-DROP INDEX IF EXISTS idx_lifecycle_parent_building_outline_id;
-CREATE INDEX idx_lifecycle_parent_building_outline_id
-    ON buildings.lifecycle USING btree (parent_building_outline_id);
+DROP INDEX IF EXISTS idx_lifecycle_parent_building_id;
+CREATE INDEX idx_lifecycle_parent_building_id
+    ON buildings.lifecycle USING btree (parent_building_id);
 
-DROP INDEX IF EXISTS idx_lifecycle_building_outline_id;
-CREATE INDEX idx_lifecycle_building_outline_id
-    ON buildings.lifecycle USING btree (building_outline_id);
+DROP INDEX IF EXISTS idx_lifecycle_building_id;
+CREATE INDEX idx_lifecycle_building_id
+    ON buildings.lifecycle USING btree (building_id);
