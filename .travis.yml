@@ -16,7 +16,7 @@ before_script:
   - export PGPASSWORD=
   - sudo -E make install
   - psql -U postgres -c 'CREATE DATABASE nz_buildings_travis_db;' -U postgres
-  - nz-buildings-load nz_buildings_travis_db
+  - nz-buildings-load nz_buildings_travis_db --with-test-data
 
 script:
   - pg_prove -U postgres -d nz_buildings_travis_db tests/
