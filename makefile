@@ -13,12 +13,13 @@ bindir = ${DESTDIR}/usr/bin
 # List of SQL scripts used for installation
 # Includes SQL scripts that are only built during install
 SQLSCRIPTS = \
-	sql/01-create_buildings_schema.sql \
-	sql/02-create_buildings_stage_schema.sql \
-	sql/03-insert_lookup_table_values.sql \
-	sql/04-create_buildings_functions.sql \
+	sql/01-buildings_common_schema.sql \
+	sql/02-buildings_schema.sql \
+	sql/03-buildings_bulk_load_schema.sql \
+	sql/04-lookup_table_values.sql \
 	sql/05-buildings_version.sql \
-	sql/lds/01-create_buildings_lds_schema.sql \
+	sql/06-compare_buildings.sql \
+	sql/lds/01-buildings_lds_schema.sql \
 	$(END)
 
 # List of scripts built during install
@@ -28,8 +29,8 @@ SCRIPTS_built = \
 
 # List of files built from .in files during install
 EXTRA_CLEAN = \
-    sql/05-buildings_version.sql \
-    $(SCRIPTS_built)
+	sql/05-buildings_version.sql \
+	$(SCRIPTS_built)
 
 .dummy:
 
@@ -54,6 +55,8 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp sql/*.sql ${datadir}/sql
 	mkdir -p ${datadir}/sql/lds
 	cp sql/lds/*.sql ${datadir}/sql/lds
+	mkdir -p ${datadir}/tests/testdata
+	cp tests/testdata/*.sql ${datadir}/tests/testdata 
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
@@ -62,11 +65,11 @@ uninstall:
 	rm -rf ${datadir}
 
 check test: $(SQLSCRIPTS)
-    # Build a test database and run unit tests
+	# Build a test database and run unit tests
 	export PGDATABASE=nz-buildings-pgtap-db; \
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
-	nz-buildings-load nz-buildings-pgtap-db; \
+	nz-buildings-load nz-buildings-pgtap-db --with-test-data; \
 	pg_prove tests/
 
 clean:

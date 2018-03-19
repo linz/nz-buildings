@@ -2,24 +2,24 @@
 
 -- Capture Method
 
-INSERT INTO buildings.capture_method (value) VALUES ('Unknown');
-INSERT INTO buildings.capture_method (value) VALUES ('Derived');
-INSERT INTO buildings.capture_method (value) VALUES ('Derived From Cadastre');
-INSERT INTO buildings.capture_method (value) VALUES ('Derived From Scanned Map');
-INSERT INTO buildings.capture_method (value) VALUES ('Feature Extraction');
-INSERT INTO buildings.capture_method (value) VALUES ('GPS');
-INSERT INTO buildings.capture_method (value) VALUES ('GPS Differential');
-INSERT INTO buildings.capture_method (value) VALUES ('GPS Mobile');
-INSERT INTO buildings.capture_method (value) VALUES ('Trace');
-INSERT INTO buildings.capture_method (value) VALUES ('Trace Stereophotography');
-INSERT INTO buildings.capture_method (value) VALUES ('Trace Orthophotography');
-INSERT INTO buildings.capture_method (value) VALUES ('Trace Other Image');
-INSERT INTO buildings.capture_method (value) VALUES ('Engineering Survey Data');
-INSERT INTO buildings.capture_method (value) VALUES ('Estimated');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Unknown');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Derived');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Derived From Cadastre');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Derived From Scanned Map');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Feature Extraction');
+INSERT INTO buildings_common.capture_method (value) VALUES ('GPS');
+INSERT INTO buildings_common.capture_method (value) VALUES ('GPS Differential');
+INSERT INTO buildings_common.capture_method (value) VALUES ('GPS Mobile');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Trace');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Stereophotography');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Orthophotography');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Other Image');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Engineering Survey Data');
+INSERT INTO buildings_common.capture_method (value) VALUES ('Estimated');
 
 -- Capture Source Group
 
-INSERT INTO buildings.capture_source_group (value) VALUES ('NZ Aerial Imagery');
+INSERT INTO buildings_common.capture_source_group (value, description) VALUES ('NZ Aerial Imagery', 'Replace with link to LDS table...');
 
 -- Lifecycle Stage
 
@@ -71,11 +71,16 @@ INSERT INTO buildings.use (value) VALUES ('Water Treatment Plant');
 
 -- Organisation
 
-INSERT INTO buildings_stage.organisation (value) VALUES ('Ecopia');
+INSERT INTO buildings_bulk_load.organisation (value) VALUES ('Ecopia');
+
+-- Bulk Load Status
+
+INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Supplied');
+INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Added During QA');
 
 -- QA Status
 
-INSERT INTO buildings_stage.qa_status (value) VALUES ('Not Checked');
-INSERT INTO buildings_stage.qa_status (value) VALUES ('Okay');
-INSERT INTO buildings_stage.qa_status (value) VALUES ('Pending');
-INSERT INTO buildings_stage.qa_status (value) VALUES ('Refer to Supplier');
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Checked');
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Okay');
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Pending');
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Refer to Supplier');

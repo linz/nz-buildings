@@ -9,21 +9,6 @@ CREATE SCHEMA IF NOT EXISTS buildings;
 
 -- LOOKUP TABLES
 
--- Capture Method
-
-CREATE TABLE IF NOT EXISTS buildings.capture_method (
-      capture_method_id serial PRIMARY KEY
-    , value character varying(40) NOT NULL
-);
-
--- Capture Source Group
-
-CREATE TABLE IF NOT EXISTS buildings.capture_source_group (
-      capture_source_group_id serial PRIMARY KEY
-    , value character varying(80) NOT NULL
-    , description character varying(400) NOT NULL
-);
-
 -- Lifecycle Stage
 
 CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
@@ -40,18 +25,6 @@ CREATE TABLE IF NOT EXISTS buildings.use (
 
 -- DATA TABLES
 
--- Capture Source
-
-CREATE TABLE IF NOT EXISTS buildings.capture_source (
-      capture_source_id serial PRIMARY KEY
-    , capture_source_group_id integer NOT NULL REFERENCES buildings.capture_source_group (capture_source_group_id)
-    , external_source_id character varying(250)
-);
-
-DROP INDEX IF EXISTS idx_capture_source_capture_source_group_id;
-CREATE INDEX idx_capture_source_capture_source_group_id
-    ON buildings.capture_source USING btree (capture_source_group_id);
-
 -- Building
 
 CREATE TABLE IF NOT EXISTS buildings.buildings (
@@ -67,8 +40,8 @@ SELECT setval('buildings.buildings_building_id_seq', coalesce((SELECT max(buildi
 CREATE TABLE IF NOT EXISTS buildings.building_outlines (
       building_outline_id serial PRIMARY KEY
     , building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
-    , capture_method_id integer NOT NULL REFERENCES buildings.capture_method (capture_method_id)
-    , capture_source_id integer NOT NULL REFERENCES buildings.capture_source (capture_source_id)
+    , capture_method_id integer NOT NULL REFERENCES buildings_common.capture_method (capture_method_id)
+    , capture_source_id integer NOT NULL REFERENCES buildings_common.capture_source (capture_source_id)
     , lifecycle_stage_id integer NOT NULL REFERENCES buildings.lifecycle_stage (lifecycle_stage_id)
     , suburb_locality_id integer NOT NULL
     , town_city_id integer
