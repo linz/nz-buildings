@@ -2,6 +2,8 @@
 -- Create buildings LDS schema and tables
 ------------------------------------------------------------------------------
 
+SET client_min_messages TO WARNING;
+
 
 CREATE SCHEMA IF NOT EXISTS buildings_lds;
 
