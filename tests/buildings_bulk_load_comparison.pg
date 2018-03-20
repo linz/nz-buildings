@@ -61,7 +61,7 @@ SELECT results_eq(
 			 (2019), (2020), (2021), (2022),
 			 (2023), (2024), (2025), (2026),
 			 (2027), (2028), (2029), (2030), (2032),
-			 (2033), (2033), (2033)$$,
+			 (2033), (2033)$$,
 	'Check bulk load outlines of related table after buildings comparison function has run'
 );
 
@@ -80,7 +80,7 @@ SELECT results_eq(
  			 (1029), (1029), (1029), (1029),
 			 (1030), (1030), (1030), (1030), (1030),
 			 (1031), (1031), (1031), (1031), (1031), (1031),
-			 (1032), (1032), (1032),
+			 (1032), (1032),
 			 (1033)$$,
 	'Check current outlines of related table after buildings comparison function has run'
 );
