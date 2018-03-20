@@ -25,12 +25,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     value = ''
     external_source = ''
 
-    def __init__(self, parent=None):
+    def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
         self.populate_combobox()
         self.le_external_source_id.setDisabled(1)
+
+        self.layer_registry = layer_registry
 
         # set up signals and slots
         self.btn_ok.clicked.connect(self.ok_clicked)
@@ -90,7 +92,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame())
+        dw.new_widget(MenuFrame(self.layer_registry))
 
     def insert_capture_source(self, value, external_source):
         # New Capture Source

@@ -24,7 +24,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     dataset_id = None
     layer = None
 
-    def __init__(self, parent=None):
+    def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(BulkLoadOutlines, self).__init__(parent)
         self.setupUi(self)
@@ -32,6 +32,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.populate_field_combobox()
         self.fcb_external_id.setDisabled(1)
         self.cmb_external_id.setDisabled(1)
+
+        self.layer_registry = layer_registry
 
         self.mcb_imagery_layer.currentIndexChanged.connect(self.populate_field_combobox)
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
@@ -246,7 +248,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame())
+        dw.new_widget(MenuFrame(self.layer_registry))
 
     def insert_supplied_dataset(self, organisation, description):
         # find organisation id value from buildings.organisation table
@@ -262,7 +264,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             id = attributes[length - 1][0] + 1  # id for new dataset
         self.dataset_id = id
         # insert new dataset info into buildings_bulk_load.supplied_datasets
-        sql = "INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES(%s, %s, %s)"
+        sql = "INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES(%s, %s, %s);"
         db.execute(sql, (self.dataset_id, description, organisation))
 
     def insert_supplied_outlines(self, dataset_id, layer, capture_method, capture_source_group, external_source_id):

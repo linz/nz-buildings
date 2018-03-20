@@ -22,10 +22,13 @@ class NewEntry(QFrame, FORM_CLASS):
     value = ''
     new_type = ''
 
-    def __init__(self, parent=None):
+    def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(NewEntry, self).__init__(parent)
         self.setupUi(self)
+
+        self.layer_registry = layer_registry
+
         # set up signals and slots
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
@@ -101,7 +104,7 @@ class NewEntry(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame())
+        dw.new_widget(MenuFrame(self.layer_registry))
 
     def new_organisation(self, organisation):
         # =========================================================

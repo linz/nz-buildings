@@ -4,10 +4,12 @@ import os
 
 from PyQt4.QtCore import QCoreApplication
 from PyQt4.QtGui import QListWidgetItem, QIcon
+
 import qgis
 
 from buildings.gui.menu_frame import MenuFrame
 from buildings.gui.error_dialog import ErrorDialog
+
 from utilities.layers import LayerRegistry
 
 # Get the path for the parent directory of this file.
@@ -24,6 +26,7 @@ class Buildings:
         self.iface = iface
         self.plugin_dir = __location__
         self.image_dir = os.path.join(__location__, "..", "images")
+        self.menu_frame = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -43,18 +46,18 @@ class Buildings:
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
                 if exists is False:
-                    self.layer_registry = LayerRegistry()
-                    self.layer_registry.set_up_base_layers()
-                    dw.insert_into_frames('menu_frame', MenuFrame())
                     home_dir = os.path.split(os.path.dirname(__file__))
+                    icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+                    dw = qgis.utils.plugins['roads'].dockwidget
                     item = QListWidgetItem("Buildings")
-                    image_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
-                    item.setIcon(QIcon(image_path))
+                    item.setIcon(QIcon(icon_path))
                     dw.lst_options.addItem(item)
+                    self.run()
+
             else:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(" ")
-                self.error_dialog.fill_report(" \n ------------------------------------------FAILED IMPORT------------------------------------------ \n \n Try opening the roads plugin GUI and then installing the buildings plugin.")
+                self.error_dialog.fill_report(" \n -------------------------------FAILED IMPORT------------------------------ \n \n Try opening the roads plugin GUI and then installing the buildings plugin.")
                 self.error_dialog.show()
         except KeyError:
             pass
@@ -77,11 +80,28 @@ class Buildings:
         except KeyError:
             pass
 
+    def on_dockwidget_closed(self):
+        """Cleanup necessary items here when plugin dockwidget is closed"""
+
+        # Clear selection on all layers
+        self.layer_registry.clear_layer_selection()
+        self.layer_registry.remove_all_layers()
+
+    def run(self):
+        """Run method that loads and starts the plugin"""
+        if not self.menu_frame:
+            dw = qgis.utils.plugins['roads'].dockwidget
+            self.layer_registry = LayerRegistry()
+            self.layer_registry.set_up_base_layers()
+            self.menu_frame = MenuFrame(self.layer_registry)
+            dw.insert_into_frames('menu_frame', self.menu_frame)
+            dw.closed.connect(self.on_dockwidget_closed)
+
     def on_click(self):
         dw = qgis.utils.plugins['roads'].dockwidget
         if dw.stk_options.count() == 5:  # 4th widget is not empty
             dw.stk_options.setCurrentIndex(4)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())  # delete fourth
         dw.stk_options.setCurrentIndex(3)
-        dw.stk_options.addWidget(MenuFrame(dw))
+        dw.stk_options.addWidget(MenuFrame(self.layer_registry))
         dw.stk_options.setCurrentIndex(4)
