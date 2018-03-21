@@ -1,6 +1,6 @@
 
 from qgis.core import (
-    QgsVectorLayer, QgsMapLayerRegistry, QgsProject, QgsPalLayerSettings,
+    QgsVectorLayer, QgsMapLayerRegistry, QgsProject,
     QgsSymbolLayerV2Registry, QgsSymbolV2, QgsSingleSymbolRendererV2
 )
 from qgis.utils import iface
@@ -190,7 +190,7 @@ class LayerRegistry(object):
         @param layer:     Layer instance
         @type  layer:     qgis.core.QgsVectorLayer
         """
-        
+
         if layer in self.layers.values():
             layer.rollBack()
             QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
@@ -222,18 +222,18 @@ class LayerRegistry(object):
         return layer
 
     def set_up_base_layers(self):
-        localities = self.add_postgres_layer(
-            "nz_localities", "nz_locality",
+        territorial = self.add_postgres_layer(
+            "territorial_authority", "territorial_authority",
             "shape", "admin_bdys", '', ''
         )
-        style_layer(localities, {1: ['204,204,102', '0.3', 'dash', '5;2']})
+        style_layer(territorial, {1: ['204,204,102', '0.3', 'dash', '5;2']})
         temp_bool = False
         for layers in self.group.findLayers():
-           if layers.name() == localities.name():
+            if layers.name() == territorial.name():
                 temp_bool = True
         if not temp_bool:
-            self.group.addLayer(localities)
-            self.base_layers = {"localities": localities}
+            self.group.addLayer(territorial)
+            self.base_layers = {"territorial": territorial}
 
     def update_layers(self):
         """Updates self._layers if layer is removed or added to self.group"""

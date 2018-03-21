@@ -5,6 +5,7 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QFrame
+
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.bulk_load_outlines import BulkLoadOutlines
@@ -41,25 +42,33 @@ class MenuFrame(QFrame, FORM_CLASS):
         self.cmb_add_outline.currentIndexChanged.connect(self.add_outline)
 
     def new_entry_clicked(self):
-        # open new entry frame
+        """
+        Called when new entry button is clicked
+        """
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry(self.layer_registry))
 
     def add_capture_source_clicked(self):
-        # open add capture source frame
+        """
+        Called when add capture source button is clicked
+        """
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(self.layer_registry))
 
     def load_outlines_clicked(self):
-        # open new supplied outlines frame
+        """
+        Called when bulk load outlines is clicked
+        """
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadOutlines(self.layer_registry))
 
     def add_outline(self):
-        # open new outlines frame
+        """
+        Called when index of add outline combobox is changed
+        """
         index = self.cmb_add_outline.currentIndex()
         text = self.cmb_add_outline.itemText(index)
         if text == 'Add New Outline to Supplied Dataset':

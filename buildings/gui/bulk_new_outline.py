@@ -6,10 +6,11 @@ from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 
 import qgis
-from qgis.core import QgsVectorLayer, QgsProject, QgsFeatureRequest
+from qgis.core import QgsVectorLayer, QgsFeatureRequest
 from qgis.utils import iface
 
 from buildings.utilities import database as db
+from buildings.utilities import layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_outline_bulk.ui"))
@@ -25,8 +26,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.setupUi(self)
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
-        # disable comboboxes and save button 
-        # until feature added
+        # disable comboboxes and save button
+        # until feature is added
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
@@ -38,23 +39,23 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.geom = None
         self.added_building_ids = []
         # supplied dataset to add to canvas
-        # find most recent dataset
+        # find data with most recent datasat id 
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets"
         result = db._execute(sql)
         self.dataset = result.fetchall()[len(result.fetchall()) - 1][0]
         self.layer_registry = layer_registry
-        self.layer_registry.add_postgres_layer(
+        # add the bulk_load_outlines to the layer registry
+        self.create_building_layer = self.layer_registry.add_postgres_layer(
             "bulk_load_outlines", "bulk_load_outlines",
             "shape", "buildings_bulk_load", "", "supplied_dataset_id = {0}".format(self.dataset)
         )
-        # find the existing buildings group
-        root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup("Building Tool Layers")
-        layers = group.findLayers()
-        for layer in layers:
-            if layer.name() == "bulk_load_outlines":
-                # save layer
-                self.create_building_layer = layer.layer()
+        self.territorial_auth = self.layer_registry.add_postgres_layer(
+            "territorial_authorities", "territorial_authority",
+            "shape", "admin_bdys", '', ''
+        )
+        # change style of TAs to the same as roads nz_localities but wth different colours
+        layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
         # enable editing
         iface.setActiveLayer(self.create_building_layer)
         iface.actionToggleEditing().trigger()
@@ -234,22 +235,17 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         Called when save clicked
         """
         # get combobox values
-        print self.dataset
         self.capture_source_id = self.get_capture_source_id()
-        print self.capture_source_id
         self.capture_method_id = self.get_capture_method_id()
-        print self.capture_method_id
         self.suburb = self.get_suburb()
-        print self.suburb
         self.town = self.get_town()
-        print self.town
         self.t_a = self.get_t_a()
-        print self.t_a
 
         # insert into bulk_load_outlines table
         sql = "INSERT INTO buildings_bulk_load.bulk_load_outlines(supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES(%s, Null, 2, %s, %s, %s, %s, %s, now(), %s)"
         db.execute(sql, (self.dataset, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
 
+        # reset comboboxes for next outline
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setCurrentIndex(0)
@@ -271,6 +267,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # remove bulk_load_outlines from canvas
         if self.create_building_layer in self.layer_registry.layers.values():
             self.layer_registry.remove_layer(self.create_building_layer)
+        if self.territorial_auth in self.layer_registry.layers.values():
+            self.layer_registry.remove_layer(self.territorial_auth)
         # change frame
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
@@ -285,6 +283,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # restart editing
         iface.actionToggleEditing().trigger()
+        iface.actionAddFeature().trigger()
         # reset combo boxes and disable
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)

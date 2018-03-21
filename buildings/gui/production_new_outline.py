@@ -6,10 +6,11 @@ from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 
 import qgis
-from qgis.core import QgsVectorLayer, QgsProject, QgsFeatureRequest
+from qgis.core import QgsVectorLayer, QgsFeatureRequest
 from qgis.utils import iface
 
 from buildings.utilities import database as db
+from buildings.utilities import layers as layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_outline_production.ui"))
@@ -26,7 +27,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
         # disable comboboxes and save button 
-        # until feature added
+        # until new feature added
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_lifecycle_stage.setDisabled(1)
@@ -41,18 +42,18 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         # building outline dataset to add to canvas
         # find most recent dataset
-        self.layer_registry.add_postgres_layer(
+        self.create_building_layer = self.layer_registry.add_postgres_layer(
             "building_outlines", "building_outlines",
             "shape", "buildings", "", ""
         )
-        # find the existing buildings group
-        root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup("Building Tool Layers")
-        layers = group.findLayers()
-        for layer in layers:
-            if layer.name() == "building_outlines":
-                # save layer
-                self.create_building_layer = layer.layer()
+        # add territorial authority areas
+        self.territorial_auth = self.layer_registry.add_postgres_layer(
+            "territorial_authorities", "territorial_authority",
+            "shape", "admin_bdys", '', ''
+        )
+        # style TAs to the same as roads nz_localities but different colour
+        layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
         # enable editing
         iface.setActiveLayer(self.create_building_layer)
         iface.actionToggleEditing().trigger()
@@ -291,6 +292,8 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         # remove bulk_load_outlines from canvas
         if self.create_building_layer in self.layer_registry.layers.values():
             self.layer_registry.remove_layer(self.create_building_layer)
+        if self.territorial_auth in self.layer_registry.layers.values():
+            self.layer_registry.remove_layer(self.territorial_auth)
         # change frame
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
@@ -305,6 +308,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # restart editing
         iface.actionToggleEditing().trigger()
+        iface.actionAddFeature().trigger()
         # reset combo boxes and disable
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)

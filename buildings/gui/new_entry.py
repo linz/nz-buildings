@@ -52,6 +52,11 @@ class NewEntry(QFrame, FORM_CLASS):
         return self.le_new_entry.text()
 
     def get_description(self):
+        """
+        Returns description input
+        This is only required if the type to add is 
+        capture source group
+        """
         if self.new_type != "Capture Source Group":
             return
         else:
@@ -69,12 +74,15 @@ class NewEntry(QFrame, FORM_CLASS):
 
     def get_combobox_value(self):
         """
-        Get the type from the combo box
+        Get the type to add from the combo box
         """
         index = self.cmb_new_type_selection.currentIndex()
         return self.cmb_new_type_selection.itemText(index)
 
     def set_new_type(self):
+        """
+        Called when type to add combobox index is chaged
+        """
         index = self.cmb_new_type_selection.currentIndex()
         self.new_type = self.cmb_new_type_selection.itemText(index)
         if self.new_type == 'Capture Source Group':
@@ -83,6 +91,9 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_description.setDisabled(1)
 
     def ok_clicked(self):
+        """
+        Called when ok button is clicked
+        """
         # get value
         self.value = self.get_comments()
         # get type
@@ -90,6 +101,7 @@ class NewEntry(QFrame, FORM_CLASS):
         # call insert depending on type
         if self.value is not None:
             if self.new_type == 'Organisation':
+                print 'here'
                 self.new_organisation(self.value)
             elif self.new_type == 'Lifecycle Stage':
                 self.new_lifecycle_stage(self.value)
@@ -101,14 +113,15 @@ class NewEntry(QFrame, FORM_CLASS):
                     self.new_capture_source_group(self.value, self.description)
 
     def cancel_clicked(self):
+        """
+        Called when cancel button is clicked
+        """
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
 
     def new_organisation(self, organisation):
-        # =========================================================
-        # New Organisation
         """
             update the organisation table.
             value output = organisation auto generate id
@@ -123,7 +136,6 @@ class NewEntry(QFrame, FORM_CLASS):
             self.error_dialog.fill_report(" ")
             self.error_dialog.fill_report("\n -------------------- ORGANISATION EXISTS -------------------- \n\n Value entered exists in table")
             self.error_dialog.show()
-            # TODO: return dialog box that organisation exists
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
@@ -142,7 +154,6 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
-        # New Lifecycle Stage
         """
         update the lifecycle stage table
         value = lifecycle stage auto generate id
@@ -175,7 +186,6 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
-        # New Capture Method
         """
         update the capture method table
         value = capture method autogenerate id
@@ -209,7 +219,6 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group, description):
-        # New Capture Source Group
         """
         update the capture source group table
             value = capture source group autogenerate id

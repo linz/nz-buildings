@@ -36,7 +36,7 @@ class Buildings:
         return QCoreApplication.translate("Buildings", message)
 
     def initGui(self):
-        """Create the menu entries and toolbar icons inside the QGIS GUI."""
+        """Inserts buildings plugin into the roads plugin"""
         # Should add to roads plugin list options here
         try:
             dw = qgis.utils.plugins['roads'].dockwidget
@@ -63,8 +63,7 @@ class Buildings:
             pass
 
     def unload(self):
-        """Removes the plugin menu item and icon from QGIS GUI."""
-        # Should remove from roads plugin list options here
+        """Removes the plugin from Roads."""
         try:
             dw = qgis.utils.plugins['roads'].dockwidget
             if dw is not None:
@@ -80,22 +79,15 @@ class Buildings:
         except KeyError:
             pass
 
-    def on_dockwidget_closed(self):
-        """Cleanup necessary items here when plugin dockwidget is closed"""
-
-        # Clear selection on all layers
-        self.layer_registry.clear_layer_selection()
-        self.layer_registry.remove_all_layers()
-
     def run(self):
         """Run method that loads and starts the plugin"""
         if not self.menu_frame:
             dw = qgis.utils.plugins['roads'].dockwidget
             self.layer_registry = LayerRegistry()
-            self.layer_registry.set_up_base_layers()
+            # no base layers 
+            # self.layer_registry.set_up_base_layers()
             self.menu_frame = MenuFrame(self.layer_registry)
             dw.insert_into_frames('menu_frame', self.menu_frame)
-            dw.closed.connect(self.on_dockwidget_closed)
 
     def on_click(self):
         dw = qgis.utils.plugins['roads'].dockwidget
