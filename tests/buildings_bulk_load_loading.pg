@@ -24,7 +24,7 @@ CREATE EXTENSION IF NOT EXISTS pgtap;
 -- run the function
 SELECT buildings_bulk_load.load_building_outlines(2);
 
-SELECT plan(16);
+SELECT plan(15);
 
 --1----------------------------------------------------------
 -- Check function exists
@@ -90,13 +90,6 @@ SELECT isnt_empty(
     'Check matched buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
---8----------------------------------------------------------
--- result of matched buildings in buildings table
-
-SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1002',
-    'Check matched buildings (end_lifespan) in buildings table after load_buildings function has run'
-);
 
 --00---------------------------------------------------------
 -- result of matched buildings in transferred table

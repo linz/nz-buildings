@@ -148,17 +148,6 @@ IF (
             FROM buildings_bulk_load.matched
             WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id);
 
-
-        -- Update end_lifespan in buildings for the replaced buildings
-
-        UPDATE buildings.buildings
-        SET end_lifespan = now()
-        WHERE building_id IN
-            (SELECT outlines.building_id
-            FROM buildings.building_outlines outlines
-            JOIN buildings_bulk_load.matched USING (building_outline_id)
-            WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id);
-
         END LOOP;
 
         -------------
