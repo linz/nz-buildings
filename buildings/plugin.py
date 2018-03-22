@@ -6,6 +6,8 @@ from PyQt4.QtCore import QCoreApplication
 from PyQt4.QtGui import QListWidgetItem, QIcon
 
 import qgis
+from qgis.core import QgsProject
+from qgis.utils import iface
 
 from buildings.gui.menu_frame import MenuFrame
 from buildings.gui.error_dialog import ErrorDialog
@@ -27,6 +29,7 @@ class Buildings:
         self.plugin_dir = __location__
         self.image_dir = os.path.join(__location__, "..", "images")
         self.menu_frame = None
+        self.layer_registry = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -52,6 +55,7 @@ class Buildings:
                     item = QListWidgetItem("Buildings")
                     item.setIcon(QIcon(icon_path))
                     dw.lst_options.addItem(item)
+                    dw.lst_options.itemClicked.connect(self.item_changed)
                     self.run()
 
             else:
@@ -70,6 +74,9 @@ class Buildings:
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         dw.lst_options.takeItem(row)
+                if self.layer_registry is not None:
+                    self.layer_registry.clear_layer_selection()
+                    self.layer_registry.remove_all_layers()
                 dw.frames = {}
                 if dw.stk_options.count() == 5:
                     dw.stk_options.setCurrentIndex(4)
@@ -84,8 +91,7 @@ class Buildings:
         if not self.menu_frame:
             dw = qgis.utils.plugins['roads'].dockwidget
             self.layer_registry = LayerRegistry()
-            # no base layers 
-            # self.layer_registry.set_up_base_layers()
+            # no base layers
             self.menu_frame = MenuFrame(self.layer_registry)
             dw.insert_into_frames('menu_frame', self.menu_frame)
 
@@ -93,7 +99,31 @@ class Buildings:
         dw = qgis.utils.plugins['roads'].dockwidget
         if dw.stk_options.count() == 5:  # 4th widget is not empty
             dw.stk_options.setCurrentIndex(4)  # set to fourth
-            dw.stk_options.removeWidget(dw.stk_options.currentWidget())  # delete fourth
+            dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.stk_options.setCurrentIndex(3)
         dw.stk_options.addWidget(MenuFrame(self.layer_registry))
         dw.stk_options.setCurrentIndex(4)
+
+    def item_changed(self, item):
+        if item.text() != "Buildings":
+            root = QgsProject.instance().layerTreeRoot()
+            group = root.findGroup("Building Tool Layers")
+            layers = group.findLayers()
+            for layer in layers:
+                if layer.layer().name() == "building_outlines":
+                    iface.setActiveLayer(layer.layer())
+                    iface.actionCancelEdits().trigger()
+                if layer.layer().name() == "bulk_load_outlines":
+                    iface.setActiveLayer(layer.layer())
+                    iface.actionCancelEdits().trigger()
+        else:
+            root = QgsProject.instance().layerTreeRoot()
+            group = root.findGroup("Building Tool Layers")
+            layers = group.findLayers()
+            for layer in layers:
+                if layer.layer().name() == "building_outlines":
+                    iface.setActiveLayer(layer.layer())
+                    layer.layer().startEditing()
+                if layer.layer().name() == "bulk_load_outlines":
+                    iface.setActiveLayer(layer.layer())
+                    layer.layer().startEditing()

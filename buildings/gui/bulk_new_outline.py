@@ -11,6 +11,7 @@ from qgis.utils import iface
 
 from buildings.utilities import database as db
 from buildings.utilities import layers
+from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_outline_bulk.ui"))
@@ -38,38 +39,48 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.create_building_layer = QgsVectorLayer()
         self.geom = None
         self.added_building_ids = []
+        self.layer_registry = layer_registry
         # supplied dataset to add to canvas
         # find data with most recent datasat id 
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets"
         result = db._execute(sql)
-        self.dataset = result.fetchall()[len(result.fetchall()) - 1][0]
-        self.layer_registry = layer_registry
-        # add the bulk_load_outlines to the layer registry
-        self.create_building_layer = self.layer_registry.add_postgres_layer(
-            "bulk_load_outlines", "bulk_load_outlines",
-            "shape", "buildings_bulk_load", "", "supplied_dataset_id = {0}".format(self.dataset)
-        )
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            "territorial_authorities", "territorial_authority",
-            "shape", "admin_bdys", '', ''
-        )
-        # change style of TAs to the same as roads nz_localities but wth different colours
-        layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        result = result.fetchall()
+        print result
+        if len(result) == 0:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report("\n ---------------- NO SUPPLIED DATASETS ---------------- \n\n There are no supplied datasets please load some outlines first")
+                self.error_dialog.show()
+                self.btn_reset.setDisabled(1)
+                self.btn_cancel.clicked.connect(self.fail_cancel_clicked)
+        else:
+            self.dataset = result[len(result) - 1][0]
+            print self.dataset
+            # add the bulk_load_outlines to the layer registry
+            self.create_building_layer = self.layer_registry.add_postgres_layer(
+                "bulk_load_outlines", "bulk_load_outlines",
+                "shape", "buildings_bulk_load", "", "supplied_dataset_id = {0}".format(self.dataset)
+            )
+            self.territorial_auth = self.layer_registry.add_postgres_layer(
+                "territorial_authorities", "territorial_authority",
+                "shape", "admin_bdys", '', ''
+            )
+            # change style of TAs to the same as roads nz_localities but wth different colours
+            layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
-        # enable editing
-        iface.setActiveLayer(self.create_building_layer)
-        iface.actionToggleEditing().trigger()
-        # set editing to add polygon
-        iface.actionAddFeature().trigger()
-        # zoom to the active layer
-        iface.actionZoomToLayer().trigger()
+            # enable editing
+            iface.setActiveLayer(self.create_building_layer)
+            iface.actionToggleEditing().trigger()
+            # set editing to add polygon
+            iface.actionAddFeature().trigger()
+            # zoom to the active layer
+            iface.actionZoomToLayer().trigger()
 
-        # set up signals
-        self.btn_save.clicked.connect(self.save_clicked)
-        self.btn_reset.clicked.connect(self.reset_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
-        self.create_building_layer.featureAdded.connect(self.creator_feature_added)
-        self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
+            # set up signals
+            self.btn_save.clicked.connect(self.save_clicked)
+            self.btn_reset.clicked.connect(self.reset_clicked)
+            self.create_building_layer.featureAdded.connect(self.creator_feature_added)
+            self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
+            self.btn_cancel.clicked.connect(self.cancel_clicked)
 
     def populate_lookup_comboboxes(self):
         """
@@ -135,6 +146,11 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         index = self.cmb_capture_source.currentIndex()
         text = self.cmb_capture_source.itemText(index)
+        if text == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries")
+            self.error_dialog.show()
+            return
         text_ls = text.split('- ')
         sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;"
         result = db._execute(sql, data=(text_ls[0], text_ls[1]))
@@ -236,6 +252,9 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         # get combobox values
         self.capture_source_id = self.get_capture_source_id()
+        # TODO if capture source is none
+        if self.capture_source_id is None:
+            return
         self.capture_method_id = self.get_capture_method_id()
         self.suburb = self.get_suburb()
         self.town = self.get_town()
@@ -269,6 +288,16 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.create_building_layer)
         if self.territorial_auth in self.layer_registry.layers.values():
             self.layer_registry.remove_layer(self.territorial_auth)
+        # change frame
+        from buildings.gui.menu_frame import MenuFrame
+        dw = qgis.utils.plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(MenuFrame(self.layer_registry))
+
+    def fail_cancel_clicked(self):
+        """
+        Called when cancel button is clicked if failed to load any data
+        """
         # change frame
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget

@@ -5,7 +5,10 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 from PyQt4.QtCore import pyqtSignal
+
 import qgis
+
+import processing
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
@@ -236,6 +239,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         sql = sql + "WHERE the_outlines.bulk_load_outline_id = the_suburb.id "
         db.execute(sql)
         """
+
     def find_territorial_auth(self):
         print 'ta'
         """
@@ -281,6 +285,39 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         # run sql
         if self.description is not None:
             self.insert_supplied_dataset(self.organisation, self.description)
+            # find convex hull of self.layer
+            result = processing.runalg("qgis:convexhull", self.layer, None, 0, None)
+            convex_hull = processing.getObject(result['OUTPUT'])
+            for feat in convex_hull.getFeatures():
+                geom = feat.geometry()
+                # convert to correct format
+                wkt = geom.exportToWkt()
+                sql = "SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));"
+                result = db._execute(sql, data=(wkt, ))
+                geom = result.fetchall()[0][0]
+                # ensure outline SRID is 2193
+                sql = "SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)"
+                result = db._execute(sql, data=(geom, ))
+                geom = result.fetchall()[0][0]
+            # iterate through supplied datasets and find convex hulls
+            dataset = 1
+            while dataset <= self.dataset_id:
+                sql = "SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;"
+                results = db._execute(sql, (dataset, ))
+                date = results.fetchall()[0][0]
+                if date is None:
+                    sql = "SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));"
+                    result = db._execute(sql, data=(geom, dataset))
+                    results = result.fetchall()
+                    if len(results) > 0:
+                        self.bulk_overlap = True
+                        break
+                dataset = dataset + 1
+            if self.bulk_overlap is True:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report("\n ---------------- BULK LOAD OVERLAP ---------------- \n\n An unprocessed bulk loaded dataset with dataset id of {0} overlaps this input layer please process this first".format(dataset))
+                self.error_dialog.show()
+                return
             val = self.insert_supplied_outlines(self.dataset_id, self.layer, self.capture_method, self.capture_source_group, self.external_source_id)
             if val is None:
                 # if insert_supplied_outlines function failed don't continue
@@ -321,11 +358,16 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 db.execute(sql)
                 for ls in results:
                     # insert relevant data into existing_subset_extract
+                    # if the building was added during production 
                     sql = "SELECT bl.supplied_dataset_id FROM buildings_bulk_load.bulk_load_outlines bl, buildings_bulk_load.transferred t, buildings.building_outlines bo WHERE bo.building_outline_id = %s, bo.building_outline_id = t.new_building_outline_id AND t.bulk_load_outline_id = bl.building_outline_id;"
                     result = db._execute(sql, data=(ls[0], ))
-                    dataset = result.fetchall()[0][0]
-                    sql = "INSERT INTO buildings_bulk_load.existing_subset_extracts(building_outline_id, supplied_dataset_id, shape) VALUES(%s, %s, %s);"
-                    db.execute(sql, data=(ls[0], dataset, ls[10]))
+                    if result is None:
+                        sql = "INSERT INTO buildings_bulk_load.existing_subset_extracts(building_outline_id, supplied_dataset_id, shape) VALUES(%s, NULL, %s);"
+                        db.execute(sql, data=(ls[0], ls[10]))
+                    else:
+                        dataset = result.fetchall()[0][0]
+                        sql = "INSERT INTO buildings_bulk_load.existing_subset_extracts(building_outline_id, supplied_dataset_id, shape) VALUES(%s, %s, %s);"
+                        db.execute(sql, data=(ls[0], dataset, ls[10]))
                 # run comparisons function
                 sql = "SELECT (buildings_bulk_load.compare_building_outlines(%s));"
                 db.execute(sql, data=(self.dataset_id, ))

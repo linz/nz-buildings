@@ -11,6 +11,7 @@ from qgis.utils import iface
 
 from buildings.utilities import database as db
 from buildings.utilities import layers as layers
+from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "new_outline_production.ui"))
@@ -149,6 +150,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         """
         index = self.cmb_capture_source.currentIndex()
         text = self.cmb_capture_source.itemText(index)
+        if text == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries")
+            self.error_dialog.show()
+            return
         text_ls = text.split('- ')
         sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;"
         result = db._execute(sql, data=(text_ls[0], text_ls[1]))
@@ -254,6 +260,8 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.capture_source_id = self.get_capture_source_id()
         self.lifecycle_stage_id = self.get_lifecycle_stage_id()
         self.capture_method_id = self.get_capture_method_id()
+        if self.capture_source_id is None:
+            return
         self.suburb = self.get_suburb()
         self.town = self.get_town()
         self.t_a = self.get_t_a()
