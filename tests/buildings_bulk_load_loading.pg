@@ -17,16 +17,14 @@
 
 BEGIN;
 
-\i tests/testdata/insert_test_data_buildings_bulk_load.sql
 
-\i tests/testdata/insert_test_data_for_loading.sql
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 -- run the function
 SELECT buildings_bulk_load.load_building_outlines(2);
 
-SELECT plan(13);
+SELECT plan(16);
 
 --1----------------------------------------------------------
 -- Check function exists
@@ -66,6 +64,15 @@ SELECT results_eq(
     'Check added buildings in building_outlines table after load_buildings function has run'
 );
 
+--00---------------------------------------------------------
+-- result of added buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000001',
+    $$VALUES (2010)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+);
+
 --6----------------------------------------------------------
 -- result of matched buildings in building_outlines table
 
@@ -89,6 +96,15 @@ SELECT isnt_empty(
 SELECT isnt_empty(
     'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1002',
     'Check matched buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+--00---------------------------------------------------------
+-- result of matched buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000006',
+    $$VALUES (2001)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
 );
 
 --9----------------------------------------------------------
@@ -133,6 +149,14 @@ SELECT isnt_empty(
     'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
+--00---------------------------------------------------------
+-- result of related buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000029',
+    $$VALUES (2009)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+);
 
 --------------------------------------------------------
 

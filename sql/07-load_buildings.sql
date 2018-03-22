@@ -6,6 +6,7 @@ DECLARE
 
     v_new_building_id integer;
     v_bulk_load_outline_id integer;
+    v_new_building_outline_id integer;
 
 BEGIN
 
@@ -44,14 +45,14 @@ IF (
         --  ADDED  --
         -------------
 
-        -- Create a new record in buildings
-
         FOR v_bulk_load_outline_id IN (SELECT bulk_load_outline_id
                                       FROM buildings_bulk_load.added
                                       JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
                                       WHERE supplied.supplied_dataset_id = p_supplied_dataset_id
                                     )
         LOOP
+
+        -- Create a new record in buildings
 
         INSERT INTO buildings.buildings(building_id)
         VALUES (default)
@@ -79,13 +80,28 @@ IF (
                supplied.begin_lifespan,
                supplied.shape
         FROM buildings_bulk_load.bulk_load_outlines supplied
-        WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id;
+        WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
+        RETURNING building_outline_id INTO v_new_building_outline_id;
+
+
+        -- Add new records in transferred table
+
+        INSERT INTO buildings_bulk_load.transferred
+        VALUES(v_bulk_load_outline_id, v_new_building_outline_id);
+
 
         END LOOP;
 
         -------------
         -- MATCHED --
         -------------
+
+        FOR v_bulk_load_outline_id IN (SELECT bulk_load_outline_id
+                                      FROM buildings_bulk_load.matched
+                                      JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
+                                      WHERE supplied.supplied_dataset_id = p_supplied_dataset_id)
+
+        LOOP
 
         -- Create a new record in building_outlines and transfer the buidling_id from replaced record
 
@@ -107,13 +123,20 @@ IF (
              , supplied.territorial_authority_id
              , supplied.begin_lifespan
              , supplied.shape
-        FROM buildings_bulk_load.matched
-        JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        JOIN (SELECT outlines.building_id, outlines.building_outline_id
+        FROM buildings_bulk_load.bulk_load_outlines supplied
+        JOIN (SELECT outlines.building_id as building_id,
+                     matched.bulk_load_outline_id as bulk_load_outline_id
              FROM buildings.building_outlines outlines
-             JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
-             WHERE current.supplied_dataset_id = p_supplied_dataset_id - 1) building USING (building_outline_id)
-        WHERE supplied.supplied_dataset_id = p_supplied_dataset_id;
+             JOIN buildings_bulk_load.matched USING (building_outline_id)
+             WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id) building USING (bulk_load_outline_id)
+        WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
+        RETURNING building_outline_id INTO v_new_building_outline_id;
+
+
+        -- Add new records in transferred table
+
+        INSERT INTO buildings_bulk_load.transferred
+        VALUES (v_bulk_load_outline_id, v_new_building_outline_id);
 
 
         -- Update end_lifespan in building_outlines for the replaced buildings
@@ -123,8 +146,7 @@ IF (
         WHERE building_outline_id IN
             (SELECT matched.building_outline_id
             FROM buildings_bulk_load.matched
-            JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-            WHERE supplied.supplied_dataset_id = p_supplied_dataset_id);
+            WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id);
 
 
         -- Update end_lifespan in buildings for the replaced buildings
@@ -135,8 +157,9 @@ IF (
             (SELECT outlines.building_id
             FROM buildings.building_outlines outlines
             JOIN buildings_bulk_load.matched USING (building_outline_id)
-            JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-            WHERE supplied.supplied_dataset_id = p_supplied_dataset_id);
+            WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id);
+
+        END LOOP;
 
         -------------
         -- RELATED --
@@ -178,7 +201,8 @@ IF (
                supplied.begin_lifespan,
                supplied.shape
         FROM buildings_bulk_load.bulk_load_outlines supplied
-        WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id;
+        WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
+        RETURNING building_outline_id INTO v_new_building_outline_id;
 
 
         -- Create records in lifecycle table
@@ -188,6 +212,12 @@ IF (
         FROM buildings_bulk_load.related
         JOIN buildings.building_outlines outlines USING (building_outline_id)
         WHERE related.bulk_load_outline_id = v_bulk_load_outline_id;
+
+
+        -- Add new records in transferred table
+
+        INSERT INTO buildings_bulk_load.transferred
+        VALUES(v_bulk_load_outline_id, v_new_building_outline_id);
 
 
         -- Update end_lifespan in building_outlines for the replaced buildings
