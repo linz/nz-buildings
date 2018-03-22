@@ -209,6 +209,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     def find_suburb(self):
         print 'suburb'
         """
+        #TODO
         # Wont work as nz_localities is 4167 and building outlines 2193
         sql = "UPDATE buildings_bulk_load.bulk_load_outlines the_outlines "
         sql = sql + "set suburb_locality_id = the_suburb.id "
@@ -226,6 +227,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     def find_town_city(self):
         print 'town/city'
         """
+        #TODO
         # Wont work as nz_localities is 4167 and building outlines 2193
         sql = "UPDATE buildings_bulk_load.bulk_load_outlines the_outlines "
         sql = sql + "set suburb_locality_id = the_suburb.city_id "
@@ -243,6 +245,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     def find_territorial_auth(self):
         print 'ta'
         """
+        #TODO
         # Wont work as territorial authority is 4167 and building outlines 2193
         sql = "UPDATE buildings_bulk_load.bulk_load_outlines the_outlines "
         sql = sql + "set territorial_authority_id = the_ta.ta_id "

@@ -124,6 +124,8 @@ class Buildings:
                 if layer.layer().name() == "building_outlines":
                     iface.setActiveLayer(layer.layer())
                     layer.layer().startEditing()
+                    iface.actionAddFeature().trigger()
                 if layer.layer().name() == "bulk_load_outlines":
                     iface.setActiveLayer(layer.layer())
                     layer.layer().startEditing()
+                    iface.actionAddFeature().trigger()
