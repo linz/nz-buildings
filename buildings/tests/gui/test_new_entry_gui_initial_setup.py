@@ -18,11 +18,10 @@
 
 import unittest
 
-from qgis.core import QgsMapLayerRegistry, QgsVectorLayer
 from qgis.utils import plugins, iface
 
 
-class SetUpMenuGuiTest(unittest.TestCase):
+class SetUpNewEntryGuiTest(unittest.TestCase):
     """Test Edit Road Geometry GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
@@ -40,7 +39,7 @@ class SetUpMenuGuiTest(unittest.TestCase):
                     pass
                 else:
                     cls.building_plugin = plugins.get("buildings")
-        cls.dockwidget.stk_options.setCurrentIndex(4)
+            cls.dockwidget.stk_options.setCurrentIndex(4)
 
     @classmethod
     def tearDownClass(cls):
@@ -54,12 +53,11 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.dockwidget.stk_options.setCurrentIndex(4)
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_new_entry.click()
-        self.frame = self.dockwidget.widget()
-        self.new_entry_frame = None
+        self.new_entry_frame = self.dockwidget.widget()
 
     def tearDown(self):
         """Runs after each test."""
-        self.entry_frame.btn_cancel.click()
+        self.new_entry_frame.btn_cancel.click()
 
     def test_new_entry_gui_set_up(self):
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), "Organisation")
