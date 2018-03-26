@@ -15,12 +15,9 @@
 
  ***************************************************************************/
 """
-
-import unittest
-
-from qgis.core import QgsMapLayerRegistry, QgsVectorLayer
 from qgis.utils import plugins, iface
 
+import unittest
 
 class SetUpMenuGuiTest(unittest.TestCase):
     """Test Edit Road Geometry GUI initial setup confirm default settings"""
@@ -34,7 +31,6 @@ class SetUpMenuGuiTest(unittest.TestCase):
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
-                cls.road_toolbar = iface.road_toolbar
 
                 if not plugins.get("buildings"):
                     pass
@@ -45,7 +41,7 @@ class SetUpMenuGuiTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-    	cls.road_plugin.dockwidget.close()
+        cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
@@ -75,3 +71,5 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertEquals(self.menu_frame.cmb_add_outline.itemText(2), "Add New Outline to Production")
 
 
+if __name__ == "__main__":
+    unittest.main()

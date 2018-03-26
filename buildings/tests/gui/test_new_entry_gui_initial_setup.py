@@ -54,7 +54,7 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.dockwidget.stk_options.setCurrentIndex(4)
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_new_entry.click()
-        # save instance of new entry frame?
+        self.frame = self.dockwidget.widget()
         self.new_entry_frame = None
 
     def tearDown(self):
