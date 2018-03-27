@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AddNewOutline</class>
- <widget class="QFrame" name="AddNewOutline">
+ <class>f_production_new_outline</class>
+ <widget class="QFrame" name="f_production_new_outline">
   <property name="geometry">
    <rect>
     <x>0</x>
