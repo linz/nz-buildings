@@ -18,7 +18,7 @@
 
 import unittest
 
-from qgis.utils import plugins, iface
+from qgis.utils import plugins
 
 from buildings.utilities import database as db
 
@@ -35,13 +35,14 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
-                cls.road_toolbar = iface.road_toolbar
-
-                if not plugins.get("buildings"):
-                    pass
-                else:
-                    cls.building_plugin = plugins.get("buildings")
-            cls.dockwidget.stk_options.setCurrentIndex(4)
+            else:
+                cls.dockwidget = cls.road_plugin.dockwidget
+            if not plugins.get("buildings"):
+                pass
+            else:
+                cls.building_plugin = plugins.get("buildings")
+        cls.dockwidget.stk_options.setCurrentIndex(4)
+        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -55,7 +56,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         self.dockwidget.stk_options.setCurrentIndex(4)
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_add_capture_source.click()
-        self.capture_frame = self.dockwidget.widget()
+        self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
         """Runs after each test."""
@@ -69,7 +70,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
         result = db._execute(sql)
         result = result.fetchall()[0][0]
-        self.assertEquals(self.capture_frame.cmb_capture_source_group.count(), result)
+        self.assertEqual(self.capture_frame.cmb_capture_source_group.count(), result)
         self.capture_frame.rad_external_source.click()
         self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
         self.assertFalse(self.new_entry_frame.le_description.isEnabled())
@@ -79,3 +80,55 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
         self.capture_frame.rad_external_source.click()
         self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+
+    def test_add_new_capture_source(self):
+        # add valid capture source no external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.capture_frame.btn_ok.click()
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertTrue(result2=result + 1)
+        # add duplicate capture source no external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.capture_frame.btn_ok.click()
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertTrue(result2=result)
+        # add capture source external radio button checked and no external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.capture_frame.rad_external_source.click()
+        self.capture_frame.btn_ok.click()
+        self.capture_frame.error_dialog.close()
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertTrue(result2=result)
+        # add capture source with valid external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.capture_frame.rad_external_source.click()
+        self.capture_frame.le_external_source_id.setText("Test Ext Source")
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertTrue(result2=result + 1)
+        # add duplicate capture source and external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.capture_frame.rad_external_source.click()
+        self.capture_frame.le_external_source_id.setText("Test Ext Source")
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertTrue(result2=result)
+

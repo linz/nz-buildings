@@ -15,9 +15,10 @@
 
  ***************************************************************************/
 """
-from qgis.utils import plugins, iface
+from qgis.utils import plugins
 
 import unittest
+
 
 class SetUpMenuGuiTest(unittest.TestCase):
     """Test Edit Road Geometry GUI initial setup confirm default settings"""
@@ -31,12 +32,14 @@ class SetUpMenuGuiTest(unittest.TestCase):
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
-
-                if not plugins.get("buildings"):
-                    pass
-                else:
-                    cls.building_plugin = plugins.get("buildings")
+            else:
+                cls.dockwidget = cls.road_plugin.dockwidget
+            if not plugins.get("buildings"):
+                pass
+            else:
+                cls.building_plugin = plugins.get("buildings")
         cls.dockwidget.stk_options.setCurrentIndex(4)
+        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -63,13 +66,38 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertTrue(self.menu_frame.btn_new_entry.isEnabled())
         self.assertTrue(self.menu_frame.btn_add_capture_source.isEnabled())
         self.assertTrue(self.menu_frame.btn_load_outlines.isEnabled())
-        # combo box index is add outlines
-        self.assertEquals(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), "Add Outlines")
+        # buttons have correct names
+        self.assertEqual(self.menu_frame.btn_new_entry.text(), "New Entry")
+        self.assertEqual(self.menu_frame.btn_add_capture_source.text(), "Add Capture Source")
+        self.assertEqual(self.menu_frame.btn_new_entry.text(), "Bulk Load Outlines")
+        # combo box index is add outlines and enabled
+        self.assertEquals(self.menu_frame.cmb_add_outline.isEnabled())
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), "Add Outlines")
         # combo box has three options
-        self.assertEquals(self.menu_frame.cmb_add_outline.count(), 3)
-        self.assertEquals(self.menu_frame.cmb_add_outline.itemText(1), "Add New Outline to Supplied Dataset")
-        self.assertEquals(self.menu_frame.cmb_add_outline.itemText(2), "Add New Outline to Production")
+        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1), "Add New Outline to Supplied Dataset")
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), "Add New Outline to Production")
 
+    def test_menu_gui_on_click(self):
+        # new entry
+        self.menu_frame.btn_new_entry.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_entry")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # new capture source
+        self.menu_frame.btn_add_capture_source.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_capture_source")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # Bulk load outlines
+        self.menu_frame.btn_load_outlines.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_supplied_outlines")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # Bulk create outline
+        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_bulk_new_outline")
+        # self.dockwidget.current_frame.btn_cancel.click()
+        self.menu_frame.cmb_add_outline.setCurrentIndex(2)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_production_new_outline")
+        self.dockwidget.current_frame.btn_cancel.click()
 
 if __name__ == "__main__":
     unittest.main()
