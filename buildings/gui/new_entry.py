@@ -101,7 +101,6 @@ class NewEntry(QFrame, FORM_CLASS):
         # call insert depending on type
         if self.value is not None:
             if self.new_type == 'Organisation':
-                print 'here'
                 self.new_organisation(self.value)
             elif self.new_type == 'Lifecycle Stage':
                 self.new_lifecycle_stage(self.value)
