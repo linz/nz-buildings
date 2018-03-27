@@ -55,7 +55,7 @@ class Buildings:
                     item = QListWidgetItem("Buildings")
                     item.setIcon(QIcon(icon_path))
                     dw.lst_options.addItem(item)
-                    dw.lst_options.itemClicked.connect(self.item_changed)
+                    dw.lst_options.currentItemChanged.connect(self.item_changed)
                     self.run()
 
             else:

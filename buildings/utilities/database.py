@@ -29,7 +29,6 @@ try:
     )
 except psycopg2.DatabaseError as error:
     _conn = None
-    print 'help'
     raise error
 
 

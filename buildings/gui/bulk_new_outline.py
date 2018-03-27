@@ -45,7 +45,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets"
         result = db._execute(sql)
         result = result.fetchall()
-        print result
         if len(result) == 0:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report("\n ---------------- NO SUPPLIED DATASETS ---------------- \n\n There are no supplied datasets please load some outlines first")
@@ -54,7 +53,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.btn_cancel.clicked.connect(self.fail_cancel_clicked)
         else:
             self.dataset = result[len(result) - 1][0]
-            print self.dataset
             # add the bulk_load_outlines to the layer registry
             self.create_building_layer = self.layer_registry.add_postgres_layer(
                 "bulk_load_outlines", "bulk_load_outlines",
