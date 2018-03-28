@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 -- Release building outlines onto LDS
 ------------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.release_to_lds()
+CREATE OR REPLACE FUNCTION buildings_lds.release_to_lds()
     RETURNS void
 AS $$
 
