@@ -74,7 +74,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def test_ui_on_geom_drawn(self):
         # add geom to canvas
         canvas = iface.mapCanvas()
-        zoom_rectangle = QgsRectangle(1747456, 5427988, 1748402, 5428705)
+        zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         widget = iface.mapCanvas().viewport()
@@ -97,7 +97,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def test_reset_button(self):
         # add geom to canvas
         canvas = iface.mapCanvas()
-        zoom_rectangle = QgsRectangle(1747456, 5427988, 1748402, 5428705)
+        zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         widget = iface.mapCanvas().viewport()
@@ -139,7 +139,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         # add geom
         canvas = iface.mapCanvas()
-        zoom_rectangle = QgsRectangle(1747456, 5427988, 1748402, 5428705)
+        zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         widget = iface.mapCanvas().viewport()
