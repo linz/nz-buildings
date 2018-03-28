@@ -19,9 +19,6 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
--- run the function
-SELECT buildings_bulk_load.load_building_outlines(2);
-
 SELECT plan(13);
 
 --1----------------------------------------------------------
