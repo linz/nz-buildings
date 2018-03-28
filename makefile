@@ -51,31 +51,43 @@ AF = buildings/gui/i18n/af.ts
 
 COMPILED_RESOURCE_FILES = resources.py
 
-# PLUGIN_UPLOAD = $(c)/plugin_upload.py
-
-RESOURCE_SRC=$(shell grep '^ *<file' resources.qrc | sed 's@</file>@@g;s/.*>//g' | tr '\n' ' ')
-
-QGISDIR=.qgis2
-
 default: compile
 
+
 compile: $(COMPILED_RESOURCE_FILES)
+
 
 %.py : %.qrc $(RESOURCES_SRC)
 	pyrcc4 -o $*.py  $<
 
+
 %.qm : %.ts
 	$(LRELEASE) $<
 
+
 test: compile
+	@echo
+	@echo "------------------------------------------"
+	@echo "Running Unit Tests on Buildings Plugin"
+	@echo "------------------------------------------"
 	python -m unittest discover
 
-deploy: # compile doc transcompile
+
+setup_db:
+	@echo
+	@echo "------------------------------------------"
+	@echo "Setting up schema in Linz_db"
+	@echo "------------------------------------------"
+	export PGDATABASE=linz_db; \
+	nz-buildings-load linz_db; \
+
+
+deploy: $(SQLSCRIPTS) $(SCRIPTS_built)
 	@echo
 	@echo "------------------------------------------"
 	@echo "Deploying plugin to your .qgis2 directory."
 	@echo "------------------------------------------"
-	# The deploy  target only works on unix like operating system where
+	# The deploy target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
 	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
@@ -96,8 +108,6 @@ deploy: # compile doc transcompile
 	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vf $(ICONS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/icons
-	# cp -vfr buildings/i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	# cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 
 
 # The dclean target removes compiled python files from plugin directory
@@ -118,6 +128,7 @@ derase:
 	@echo "-------------------------"
 	rm -Rf $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 
+
 zip: deploy dclean
 	@echo
 	@echo "---------------------------"
@@ -127,6 +138,7 @@ zip: deploy dclean
 	# content. You can then upload the zip file on http://plugins.qgis.org
 	rm -f $(PLUGINNAME).zip
 	cd $(HOME)/$(QGISDIR)/python/plugins; zip -9r $(CURDIR)/$(PLUGINNAME).zip $(PLUGINNAME)
+
 
 package: compile
 	# Create a zip package of the plugin named $(PLUGINNAME).zip.
@@ -141,6 +153,7 @@ package: compile
 	rm -f $(PLUGINNAME).zip
 	git archive --prefix=$(PLUGINNAME)/ -o $(PLUGINNAME).zip $(VERSION)
 	echo "Created package: $(PLUGINNAME).zip"
+
 
 clean:
 	@echo
