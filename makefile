@@ -21,6 +21,7 @@ SQLSCRIPTS = \
 	sql/06-compare_buildings.sql \
 	sql/07-load_buildings.sql \
 	sql/lds/01-buildings_lds_schema.sql \
+	sql/lds/02-buildings_lds_releasing.sql \
 	$(END)
 
 # List of scripts built during install
