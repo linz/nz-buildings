@@ -16,12 +16,29 @@ CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
     , value character varying(40) NOT NULL
 );
 
+COMMENT ON TABLE buildings.lifecycle_stage IS
+'Lookup table that holds all of the lifecycle stages for a building.';
+
+COMMENT ON COLUMN buildings.lifecycle_stage.lifecycle_stage_id IS
+'Unique identifier for the lifecycle stage.';
+COMMENT ON COLUMN buildings.lifecycle_stage.value IS
+'The stage of a buildings lifecycle.';
+
 -- Use
 
 CREATE TABLE IF NOT EXISTS buildings.use (
       use_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
 );
+
+COMMENT ON TABLE buildings.use IS
+'Lookup table that holds all of the uses for a building. These uses are '
+'the same as those used in the Topo50 map series.';
+
+COMMENT ON COLUMN buildings.use.use_id IS
+'Unique identifier for the use.';
+COMMENT ON COLUMN buildings.use.value IS
+'The building use, maintained for the Topo50 map series.';
 
 -- DATA TABLES
 
@@ -34,6 +51,19 @@ CREATE TABLE IF NOT EXISTS buildings.buildings (
 );
 
 SELECT setval('buildings.buildings_building_id_seq', coalesce((SELECT max(building_id) + 1 FROM buildings.buildings), 1000000), false);
+
+COMMENT ON TABLE buildings.buildings IS
+'The building table maintains a unique identifier for a building. Over time, '
+'a building can be represented by multiple building outlines aligned to '
+'different imagery sources. These building outlines are linked via the '
+'building_id.';
+
+COMMENT ON COLUMN buildings.buildings.building_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.buildings.begin_lifespan IS
+'The date that the building was first captured in the system.';
+COMMENT ON COLUMN buildings.buildings.end_lifespan IS
+'The date that a building was either replaced or disused.';
 
 -- Building Outlines
 
@@ -72,6 +102,35 @@ CREATE INDEX idx_building_outlines_lifecycle_stage_id
 DROP INDEX IF EXISTS shx_building_outlines;
 CREATE INDEX shx_building_outlines
     ON buildings.building_outlines USING gist (shape);
+
+COMMENT ON TABLE buildings.building_outlines IS
+'The building table maintains a unique identifier for a building. Over time, '
+'a building can be represented by multiple building outlines aligned to '
+'different imagery sources. These building outlines are linked via the '
+'building_id.';
+
+COMMENT ON COLUMN buildings.building_outlines.building_outline_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.building_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.capture_method_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.capture_source_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.lifecycle_stage_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.suburb_locality_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.town_city_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.territorial_authority_id IS
+'Unique identifier for the building.';
+COMMENT ON COLUMN buildings.building_outlines.begin_lifespan IS
+'The date that the building was first captured in the system.';
+COMMENT ON COLUMN buildings.building_outlines.end_lifespan IS
+'The date that a building was either replaced or disused.';
+COMMENT ON COLUMN buildings.building_outlines.shape IS
+'The date that a building was either replaced or disused.';
 
 -- Building Name
 
