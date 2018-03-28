@@ -17,14 +17,12 @@
 
 BEGIN;
 
-
-
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 -- run the function
 SELECT buildings_bulk_load.load_building_outlines(2);
 
-SELECT plan(15);
+SELECT plan(13);
 
 --1----------------------------------------------------------
 -- Check function exists
@@ -35,7 +33,7 @@ SELECT has_function('buildings_bulk_load', 'load_building_outlines', 'Should hav
 -- result of removed buildings in building_outlines table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1006',
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1004,1006)',
     'Check removed buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
@@ -43,33 +41,27 @@ SELECT isnt_empty(
 -- result of removed buildings in buildings table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1006',
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (1004,1006)',
     'Check removed buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
 --4----------------------------------------------------------
--- result of added buildings in buildings table
+-- result of added buildings in buildings and building_outlines table
 
-SELECT isnt_empty(
-    'SELECT * FROM buildings.buildings WHERE building_id = 1000001',
-    'Check added buildings in buildings table after load_buildings function has run'
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines JOIN buildings.buildings USING (building_id) WHERE building_outline_id IN (1000000,1000001)',
+    $$VALUES  (1000000),
+              (1000001)$$,
+    'Check added buildings in buildings and building_outlines table after load_buildings function has run'
 );
 
 --5----------------------------------------------------------
--- result of added buildings in building_outlines table
-
-SELECT results_eq(
-    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000001',
-    $$VALUES (1000001)$$,
-    'Check added buildings in building_outlines table after load_buildings function has run'
-);
-
---00---------------------------------------------------------
 -- result of added buildings in transferred table
 
 SELECT results_eq(
-    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000001',
-    $$VALUES (2010)$$,
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000000,1000001)',
+    $$VALUES  (2010),
+              (2003)$$,
     'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
 );
 
@@ -77,8 +69,11 @@ SELECT results_eq(
 -- result of matched buildings in building_outlines table
 
 SELECT results_eq(
-    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000006',
-    $$VALUES (1002)$$,
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000005,1000002,1000004,1000003)',
+    $$VALUES  (1001),
+              (1005),
+              (1003),
+              (1002)$$,
     'Check matched buildings in building_outlines table after load_buildings function has run'
 );
 
@@ -86,68 +81,69 @@ SELECT results_eq(
 -- result of matched buildings in building_outlines table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1002',
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1002,1001,1003,1005)',
     'Check matched buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
 
---00---------------------------------------------------------
+--8----------------------------------------------------------
 -- result of matched buildings in transferred table
 
 SELECT results_eq(
-    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000006',
-    $$VALUES (2001)$$,
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000005,1000002,1000004,1000003)',
+    $$VALUES  (2031),
+              (2004),
+              (2002),
+              (2001)$$,
     'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
 );
 
---9----------------------------------------------------------
--- result of related buildings in buildings table
 
-SELECT isnt_empty(
-    'SELECT * FROM buildings.buildings WHERE building_id = 1000025',
-    'Check related buildings in buildings table after load_buildings function has run'
+--9----------------------------------------------------------
+-- result of related buildings in buildings and building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000006,1000007,1000008,1000009,1000010,1000011,1000012,1000013,1000014,1000015,1000016,1000017,1000018,1000019,1000020,1000021,1000022,1000023,1000024,1000025,1000026,1000027,1000028,1000029,1000030,1000031,1000032)',
+    $$VALUES  (1000002),(1000003),(1000004),(1000005),(1000006),
+              (1000007),(1000008),(1000009),(1000010),(1000011),
+              (1000012),(1000013),(1000014),(1000015),(1000016),
+              (1000017),(1000018),(1000019),(1000020),(1000021),
+              (1000022),(1000023),(1000024),(1000025),(1000026),
+              (1000027),(1000028)$$,
+    'Check related buildings in buildings and building_outlines table after load_buildings function has run'
 );
 
 --10---------------------------------------------------------
--- result of related buildings in building_outlines table
-
-SELECT results_eq(
-    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id = 1000029',
-    $$VALUES (1000025)$$,
-    'Check related buildings in building_outlines table after load_buildings function has run'
-);
-
---11---------------------------------------------------------
 -- result of related buildings in lifecycle table
 
 SELECT results_eq(
-    'SELECT parent_building_id, building_id FROM buildings.lifecycle WHERE lifecycle_id = 1000030',
-    $$VALUES (1026, 1000025)$$,
+    'SELECT parent_building_id, building_id FROM buildings.lifecycle WHERE lifecycle_id IN (1000000,1000001)',
+    $$VALUES (1032, 1000002),(1032,1000002)$$,
     'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
 );
 
---12---------------------------------------------------------
+--11---------------------------------------------------------
 -- result of related buildings in building_outlines table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1026',
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1033',
     'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
---13---------------------------------------------------------
+--12---------------------------------------------------------
 -- result of related buildings in buildings table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1026',
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 1033',
     'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
---00---------------------------------------------------------
+--13---------------------------------------------------------
 -- result of related buildings in transferred table
 
 SELECT results_eq(
-    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000029',
-    $$VALUES (2009)$$,
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id = 1000006',
+    $$VALUES (2033)$$,
     'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
 );
 

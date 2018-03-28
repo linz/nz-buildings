@@ -101,4 +101,5 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     echo ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
+    psql -c "SELECT buildings_bulk_load.load_building_outlines(2);"
 fi
