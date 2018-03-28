@@ -11,18 +11,16 @@
 #
 ################################################################################
 
-    Tests: New Entry GUI setup confirm default settings
+    Tests: Menu GUI Processes
 
  ***************************************************************************/
 """
 
 import unittest
-
 from qgis.utils import plugins
 
-
-class SetUpNewEntryGuiTest(unittest.TestCase):
-    """Test New Entry GUI initial setup confirm default settings"""
+class SetUpMenuGuiTest(unittest.TestCase):
+    """Test Menu GUI Processes"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -58,25 +56,28 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
         self.road_plugin = plugins.get("roads")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_new_entry.click()
-        self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):
-        """Runs after each test."""
-        self.new_entry_frame.btn_cancel.click()
+        """Runs after each test"""
+        # Do nothing
 
-    def test_new_entry_gui_set_up(self):
-        # initial combobox text is organisation
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), "Organisation")
-        # has four options in combobox
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), "Lifecycle Stage")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), "Capture Method")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), "Capture Source Group")
-        # value is enabled on start up
-        self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
-        # description is disbaled on startup
-        self.assertFalse(self.new_entry_frame.le_description.isEnabled())
-        # change to capture source group option description becomes enabled
-        self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
-        self.assertTrue(self.new_entry_frame.le_description.isEnabled())
+    def test_menu_gui_on_click(self):
+        # new entry
+        self.menu_frame.btn_new_entry.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_entry")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # new capture source
+        self.menu_frame.btn_add_capture_source.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_capture_source")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # Bulk load outlines
+        self.menu_frame.btn_load_outlines.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_supplied_outlines")
+        self.dockwidget.current_frame.btn_cancel.click()
+        # Bulk create outline
+        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_bulk_new_outline")
+        # self.dockwidget.current_frame.btn_cancel.click()
+        self.menu_frame.cmb_add_outline.setCurrentIndex(2)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_production_new_outline")
+        self.dockwidget.current_frame.btn_cancel.click()

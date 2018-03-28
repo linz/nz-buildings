@@ -21,7 +21,7 @@ import unittest
 
 
 class SetUpMenuGuiTest(unittest.TestCase):
-    """Test Edit Road Geometry GUI initial setup confirm default settings"""
+    """Test Menu GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -38,7 +38,13 @@ class SetUpMenuGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        cls.dockwidget.stk_options.setCurrentIndex(4)
+        if cls.dockwidget.stk_options.count() == 4:
+            cls.dockwidget.stk_options.setCurrentIndex(3)
+            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+            cls.dockwidget.current_frame = 'menu_frame'
+            cls.dockwidget.stk_options.setCurrentIndex(4)
+        else:
+            cls.dockwidget.stk_options.setCurrentIndex(4)
         cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
@@ -50,16 +56,11 @@ class SetUpMenuGuiTest(unittest.TestCase):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
         self.dockwidget = self.road_plugin.dockwidget
-        self.dockwidget.stk_options.setCurrentIndex(4)
         self.menu_frame = self.building_plugin.menu_frame
 
     def tearDown(self):
         """Runs after each test"""
         # Do nothing
-
-    def test_plugin_is_active(self):
-        print 'nothing'
-        # TODO: add .is_active field to buildings plugin
 
     def test_menu_gui_set_up(self):
         # buttons are enabled
@@ -77,27 +78,3 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1), "Add New Outline to Supplied Dataset")
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), "Add New Outline to Production")
-
-    def test_menu_gui_on_click(self):
-        # new entry
-        self.menu_frame.btn_new_entry.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_entry")
-        self.dockwidget.current_frame.btn_cancel.click()
-        # new capture source
-        self.menu_frame.btn_add_capture_source.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_capture_source")
-        self.dockwidget.current_frame.btn_cancel.click()
-        # Bulk load outlines
-        self.menu_frame.btn_load_outlines.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_supplied_outlines")
-        self.dockwidget.current_frame.btn_cancel.click()
-        # Bulk create outline
-        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_bulk_new_outline")
-        # self.dockwidget.current_frame.btn_cancel.click()
-        self.menu_frame.cmb_add_outline.setCurrentIndex(2)
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_production_new_outline")
-        self.dockwidget.current_frame.btn_cancel.click()
-
-if __name__ == "__main__":
-    unittest.main()

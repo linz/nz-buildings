@@ -11,21 +11,19 @@
 #
 ################################################################################
 
-    Tests: Bulk Load Outlines GUI setup confirm default settings
+    Tests: Add New Bulk Outline GUI processes
 
  ***************************************************************************/
 """
 
 import unittest
 
-from qgis.core import QgsMapLayerRegistry, QgsVectorLayer
-from qgis.utils import plugins, iface
-
-from buildings.utilities import database as db
+from qgis.core import QgsProject
+from qgis.utils import plugins
 
 
 class SetUpBulkLoadGuiTest(unittest.TestCase):
-    """Test Edit Road Geometry GUI initial setup confirm default settings"""
+    """Test Add New Bulk Outline GUI processes"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -42,7 +40,13 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        cls.dockwidget.stk_options.setCurrentIndex(4)
+        if cls.dockwidget.stk_options.count() == 4:
+            cls.dockwidget.stk_options.setCurrentIndex(3)
+            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+            cls.dockwidget.current_frame = 'menu_frame'
+            cls.dockwidget.stk_options.setCurrentIndex(4)
+        else:
+            cls.dockwidget.stk_options.setCurrentIndex(4)
         cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
@@ -54,8 +58,6 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
         self.dockwidget = self.road_plugin.dockwidget
-        self.dockwidget.stk_options.setCurrentIndex(4)
-        self.dockwidget.lst_options.setCurrentItem(self.dockwidget.lst_options.item(2))
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.cmb_add_outline.setCurrentIndex(1)
         self.new_bulk_frame = self.dockwidget.current_frame
@@ -79,8 +81,6 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
-            # check editing is not on
-        # test for if no_supplied_data is false
         else:
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
             self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
@@ -89,31 +89,21 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
-            # check editing is enabled
-
-    def test_ui_on_geom_drawn(self):
-        if self.no_supplied_data is False:
-            # add geom to canvas
-            self.assertTrue(self.new_bulk_frame.btn_save.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
-            self.assertTrue(self.new_bulk_frame.cmb_capture_method.isEnabled())
-            self.assertTrue(self.new_bulk_frame.cmb_capture_source.isEnabled())
-            self.assertTrue(self.new_bulk_frame.cmb_ta.isEnabled())
-            self.assertTrue(self.new_bulk_frame.cmb_town.isEnabled())
-            self.assertTrue(self.new_bulk_frame.cmb_suburb.isEnabled())
-
-    def test_reset_button(self):
-        if self.no_supplied_data is False:
-            # add geom to canvas
-            # change indexes of comboboxes
-            self.new_bulk_frame.btn_reset.click()
-            # check geom removed from canvas
-            # check comboxbox indexes reset to 0
-            # check comboboxes disabled
-
-    def test_insert(self):
-        # check that data is input into bulk load table 
 
     def test_layer_registry(self):
         # check only the most recent supplied dataset is loaded into the map canvas
-        
+        layer_bool = False
+        edit_bool = True
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup("Building Tool Layers")
+        layers = group.findLayers()
+        for layer in layers:
+            if layer.layer().name() == "bulk_load_outlines":
+                layer_bool = True
+                if layer.layer().isEditable():
+                    edit_bool = True
+        self.assertTrue(layer_bool)
+        if self.no_supplied_data:
+            self.assertTrue(edit_bool)
+        elif self.no_supplied_data is False:
+            self.assertFalse(edit_bool)
