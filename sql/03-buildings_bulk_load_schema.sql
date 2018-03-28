@@ -125,10 +125,15 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
     , bulk_load_outline_id integer NOT NULL REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
-    , area_bulk_load_covering numeric(10, 2)
-    , percent_bulk_load_covering numeric(5, 2)
-    , area_existing_covered numeric(10, 2)
-    , percent_existing_covered numeric(5, 2)
+    , area_bulk_load numeric(10, 2) NOT NULL
+    , area_existing numeric(10, 2) NOT NULL
+    , area_overlap numeric(10, 2) NOT NULL
+    , percent_bulk_load_overlap numeric(5, 2) NOT NULL
+    , percent_existing_overlap numeric(5, 2) NOT NULL
+    , total_area_bulk_load_overlap numeric(10, 2) NOT NULL
+    , total_area_existing_overlap numeric(10, 2) NOT NULL
+    , total_percent_bulk_load_overlap numeric(5, 2) NOT NULL
+    , total_percent_existing_overlap numeric(5, 2) NOT NULL
 );
 
 DROP INDEX IF EXISTS idx_related_bulk_load_outline_id;
@@ -149,8 +154,12 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.matched (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
-    , area_difference numeric(10, 2) NOT NULL
-    , percent_difference numeric(5, 2) NOT NULL
+    , area_bulk_load numeric(10, 2) NOT NULL
+    , area_existing numeric(10, 2) NOT NULL
+    , percent_area_difference numeric(5, 2) NOT NULL
+    , area_overlap numeric(10, 2) NOT NULL
+    , percent_bulk_load_overlap numeric(5, 2) NOT NULL
+    , percent_existing_overlap numeric(5, 2) NOT NULL
     , hausdorff_distance numeric(6, 4) NOT NULL
 );
 
