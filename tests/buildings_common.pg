@@ -1,0 +1,41 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings common schema using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(5);
+
+-- Tests
+SELECT has_schema('buildings_common');
+
+-- Lookup Tables
+SELECT has_table('buildings_common', 'capture_method', 'Should have capture_method table in the buildings_common schema.');
+SELECT has_table('buildings_common', 'capture_source_group', 'Should have capture_source_group table in the buildings_common schema.');
+
+-- Data Tables
+SELECT has_table('buildings_common', 'capture_source', 'Should have capture_source table in the buildings_common schema.');
+SELECT has_index(
+    'buildings_common', 'capture_source', 'idx_capture_source_capture_source_group_id', 'capture_source_group_id',
+    'Should have index on the capture_source_group_id column of the capture_source table.'
+);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;

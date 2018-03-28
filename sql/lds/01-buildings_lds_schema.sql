@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
     , building_id integer NOT NULL
     , name character varying(250) NOT NULL
     , use character varying(40) NOT NULL
+    , suburb_locality character varying(80) NOT NULL
+    , town_city character varying(80) NOT NULL
+    , territorial_authority character varying(80) NOT NULL
     , capture_method character varying(250) NOT NULL
     , capture_source character varying(250) NOT NULL
     , lifecycle_stage character varying(250) NOT NULL

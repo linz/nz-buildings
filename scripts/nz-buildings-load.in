@@ -1,51 +1,104 @@
 #!/bin/sh
 
 DB_NAME=
+WITH_TEST_DATA=false
 export PSQL=psql
-export SCRIPTSDIR=/usr/share/nz-building-outlines/sql/
+export SCRIPTSDIR=/usr/share/nz-building-outlines/
 
+usage() {
+    echo "Usage: $0 <database> [--with-test-data]" >&2
+    echo "Usage: $0 [--version]" >&2
+}
+
+# Check that at least one argument has been supplied, if not print usage
+if [ -z "$1" ]; then
+    usage
+    exit 1
+fi
+
+# Supporting version and help commands
 if test "$1" = "--version"; then
     echo "@@VERSION@@"
     exit 0
 fi
 
+if test "$1" = "-v"; then
+    echo "@@VERSION@@"
+    exit 0
+fi
+
+if test "$1" = "--help"; then
+    usage
+    exit 0
+fi
+
+if test "$1" = "-h"; then
+    usage
+    exit 0
+fi
+
+# Support an environment variable for the script directory
 if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
     SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
 fi
 
-if test ! -f "${SCRIPTSDIR}/01-create_buildings_schema.sql"; then
+if test ! -f "${SCRIPTSDIR}/sql/02-buildings_schema.sql"; then
     cat >&2 <<EOF
-Cannot find 01-create_buildings_schema.sql in ${SCRIPTSDIR}
+Cannot find /sql/02-buildings_schema.sql in ${SCRIPTSDIR}
 Please set BUILDINGSCHEMA_SQLDIR environment variable
 EOF
     exit 1
 fi
 
-while test -n "$1"; do
-    DB_NAME=$1; shift
-done
+DB_NAME=$1; shift
 
-if test -z "$DB_NAME"; then
-    echo "Usage: $0 <database>" >&2
-    echo "       $0 --version" >&2
+# Check that the target database actually exists
+if ! psql -lqt | cut -d \| -f 1 | grep -qw $DB_NAME; then
+    echo "Could not find database: ${DB_NAME}" >&2
     exit 1
 fi
+
+while [ "$1" != "" ]; do
+    PARAM=`echo $1 | awk -F= '{print $1}'`
+    case $PARAM in
+        --with-test-data)
+            WITH_TEST_DATA=true
+            ;;
+        *)
+            # Anything unsupported that follows a valid database name will error out here
+            echo "ERROR: Unrecognised option \"$PARAM\""
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 export PGDATABASE=$DB_NAME
 
 psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings_stage CASCADE;"
+psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
+psql -c "DROP SCHEMA IF EXISTS buildings_common CASCADE"
 
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
 
-for file in ${SCRIPTSDIR}/*.sql; do
-    echo ${file}
+# Execute all files in the main sql dir
+for file in ${SCRIPTSDIR}/sql/*.sql; do
+    echo ${file} >&2
     psql -f ${file}
 done
 
-for file in ${SCRIPTSDIR}/lds/*.sql; do
-    echo ${file}
+# Execute all files in the lds sql dir
+for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
+    echo ${file} >&2
     psql -f ${file}
 done
+
+# Execute files that create test data - test data remains in database
+if [ "${WITH_TEST_DATA}" = true ]; then
+    echo ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql
+    psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
+fi
