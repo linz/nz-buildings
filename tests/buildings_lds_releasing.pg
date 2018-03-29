@@ -1,0 +1,78 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for release_to_lds function using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+-- run the function
+SELECT buildings_lds.release_to_lds();
+
+SELECT plan(2);
+
+--1----------------------------------------------------------
+-- Check function exists
+
+SELECT has_function('buildings_lds', 'release_to_lds', 'Should have function release_to_lds in buildings_lds schema.');
+
+--2----------------------------------------------------------
+-- result of building outlines in the nz_building_outlines
+
+SELECT results_eq(
+    'SELECT building_outline_id, building_id, name, use, suburb_locality, town_city, territorial_authority, capture_method, capture_source, lifecycle_stage FROM buildings_lds.nz_building_outlines',
+    $$VALUES  (1000032,1000028,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000031,1000027,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000030,1000026,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000029,1000025,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000028,1000024,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000027,1000023,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000026,1000022,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000025,1000021,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000024,1000020,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000023,1000019,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000022,1000018,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000021,1000017,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000020,1000016,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000019,1000015,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000018,1000014,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000017,1000013,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000016,1000012,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000015,1000011,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000014,1000010,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000013,1000009,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000012,1000008,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000011,1000007,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000010,1000006,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000009,1000005,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000008,1000004,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000007,1000003,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000006,1000002,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000005,1002,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000004,1003,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000003,1005,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000002,1001,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000001,1000001,,'Feature Extraction','NZ Aerial Imagery','Current'),
+              (1000000,1000000,,'Feature Extraction','NZ Aerial Imagery','Current')$$,
+    'Check building outlines in LDS nz_building_outlines table after release_to_lds function has run'
+);
+
+
+--------------------------------------------------------
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
