@@ -43,9 +43,9 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , capture_method_id integer NOT NULL REFERENCES buildings_common.capture_method (capture_method_id)
     , capture_source_id integer NOT NULL REFERENCES buildings_common.capture_source (capture_source_id)
     , lifecycle_stage_id integer NOT NULL REFERENCES buildings.lifecycle_stage (lifecycle_stage_id)
-    , suburb_locality_id integer
+    , suburb_locality_id integer NOT NULL
     , town_city_id integer
-    , territorial_authority_id integer
+    , territorial_authority_id integer NOT NULL
     , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , end_lifespan timestamptz
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
