@@ -27,7 +27,7 @@ IF (
             (SELECT removed.building_outline_id
             FROM buildings_bulk_load.removed
             JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
-            WHERE current.supplied_dataset_id = p_supplied_dataset_id - 1);
+            WHERE current.supplied_dataset_id = p_supplied_dataset_id);
 
 
         -- Update end_lifespan in buildings
@@ -39,7 +39,7 @@ IF (
             FROM buildings.building_outlines outlines
             JOIN buildings_bulk_load.removed USING (building_outline_id)
             JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
-            WHERE current.supplied_dataset_id = p_supplied_dataset_id - 1);
+            WHERE current.supplied_dataset_id = p_supplied_dataset_id);
 
         -------------
         --  ADDED  --
@@ -55,7 +55,7 @@ IF (
         -- Create a new record in buildings
 
         INSERT INTO buildings.buildings(building_id)
-        VALUES (default)
+        VALUES (DEFAULT)
         RETURNING building_id INTO v_new_building_id;
 
 
@@ -114,7 +114,7 @@ IF (
                                               , territorial_authority_id
                                               , begin_lifespan
                                               , shape)
-        SELECT building.building_id
+        SELECT outlines.building_id
              , supplied.capture_method_id
              , supplied.capture_source_id
              , 1
@@ -124,11 +124,8 @@ IF (
              , supplied.begin_lifespan
              , supplied.shape
         FROM buildings_bulk_load.bulk_load_outlines supplied
-        JOIN (SELECT outlines.building_id as building_id,
-                     matched.bulk_load_outline_id as bulk_load_outline_id
-             FROM buildings.building_outlines outlines
-             JOIN buildings_bulk_load.matched USING (building_outline_id)
-             WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id) building USING (bulk_load_outline_id)
+        JOIN buildings_bulk_load.matched USING (bulk_load_outline_id)
+        JOIN buildings.building_outlines outlines USING (building_outline_id)
         WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
         RETURNING building_outline_id INTO v_new_building_outline_id;
 
@@ -165,7 +162,7 @@ IF (
         LOOP
 
         INSERT INTO buildings.buildings(building_id)
-        VALUES (default)
+        VALUES (DEFAULT)
         RETURNING building_id INTO v_new_building_id;
 
 
@@ -197,7 +194,8 @@ IF (
         -- Create records in lifecycle table
 
         INSERT INTO buildings.lifecycle(parent_building_id, building_id)
-        SELECT outlines.building_id, v_new_building_id
+        SELECT outlines.building_id,
+               v_new_building_id
         FROM buildings_bulk_load.related
         JOIN buildings.building_outlines outlines USING (building_outline_id)
         WHERE related.bulk_load_outline_id = v_bulk_load_outline_id;
