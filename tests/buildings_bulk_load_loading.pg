@@ -115,7 +115,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT parent_building_id, building_id FROM buildings.lifecycle WHERE lifecycle_id IN (1000000,1000001)',
-    $$VALUES (1032, 1000002),(1032,1000002)$$,
+    $$VALUES (1033, 1000002),(1032,1000002)$$,
     'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
 );
 
