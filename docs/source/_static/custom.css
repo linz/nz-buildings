@@ -1,0 +1,20 @@
+table, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #edf6ff;
+    padding: 5px;
+    text-align: center;
+    vertical-align: center;
+}
+
+th {
+    height: 20px;
+    text-align: center;
+    vertical-align: center;
+    padding: 5px;
+    border-bottom: 2px solid black;
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #e0ffdd;
+
+}

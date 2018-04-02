@@ -1,0 +1,45 @@
+{% extends "!page.html" %}
+
+{% block body %}
+{% filter upper %}
+	<b><font size="+2">Schema: {{ schema_gen["schema_name"] }} </font></b><br/>
+{% endfilter %}
+<b><font size="+1">Description: {{ schema_gen["schema_com"] }} </font></b><br/>
+
+<p>
+{% for item in outputschema  %}
+	<b><p>Table Name: {% filter upper %} {{ item["table_nam"] }} {% endfilter %}<br/></b>
+	<b>Description: {{ item["table_comment"] }}<br/></b>
+	{% if item["table_columns"] %}
+		
+		<table>
+		<tbody>
+			<thead>
+				<tr>
+					<th>Column Name</th>
+					<th>Data Type</th>
+					<th>Length</th>
+					<th>Precision</th>
+					<th>Scale</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+		{% for columns in item["table_columns"] %}
+			<tr>
+			{% for column in columns %}
+			
+				 <td>{{ column }}</td>
+				 
+			{% endfor %}
+			</tr>
+		{% endfor%}
+		</tbody>
+		</table>
+		
+	{% endif %}
+	</p>
+{% endfor %}
+</p>
+
+
+{% endblock %}
