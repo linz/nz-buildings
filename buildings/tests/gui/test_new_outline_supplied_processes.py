@@ -23,11 +23,12 @@ from PyQt4.QtTest import QTest
 from qgis.core import QgsRectangle, QgsPoint
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
+from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
     """Test Add New Bulk Outline GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -45,14 +46,15 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = cls.dockwidget.frames['menu_frame']
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -62,8 +64,10 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(1)
         self.new_bulk_frame = self.dockwidget.current_frame
         if self.new_bulk_frame.error_dialog is not None:
@@ -168,7 +172,10 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
             sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines"
             result2 = db._execute(sql)
             result2 = result2.fetchall()[0][0]
-            self.assertTrue(result2=result + 1)
+            self.assertEqual(result2, result + 1)
             # remove row from table
             sql = "DELETE FROM buildings_bulk_load.buildings_bulk_load WHERE bulk_load_outline_id = (SELECT MAX(bulk_load_outline_id) FROM buildings_bulk_load.buildings_bulk_load)"
             db.execute(sql)
+
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

@@ -20,9 +20,10 @@ import unittest
 
 from qgis.core import QgsProject
 from qgis.utils import plugins
+from qgis.utils import reloadPlugin
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class SetUpBulkNewGuiTest(unittest.TestCase):
     """Test Add New Bulk Outline GUI processes"""
     @classmethod
     def setUpClass(cls):
@@ -40,14 +41,15 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = 'menu_frame'
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -57,8 +59,10 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(1)
         self.new_bulk_frame = self.dockwidget.current_frame
         if self.new_bulk_frame.error_dialog is not None:
@@ -76,14 +80,15 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         if self.no_supplied_data:
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
             self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
+            self.assertTrue(self.new_bulk_frame.btn_cancel.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
         else:
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
             self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
+            self.assertTrue(self.new_bulk_frame.btn_cancel.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
@@ -91,9 +96,10 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
 
     def test_layer_registry(self):
+        # TODO: 
         # check only the most recent supplied dataset is loaded into the map canvas
         layer_bool = False
-        edit_bool = True
+        edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
@@ -102,8 +108,12 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 layer_bool = True
                 if layer.layer().isEditable():
                     edit_bool = True
-        self.assertTrue(layer_bool)
         if self.no_supplied_data:
-            self.assertTrue(edit_bool)
-        elif self.no_supplied_data is False:
+            self.assertFalse(layer_bool)
             self.assertFalse(edit_bool)
+        elif self.no_supplied_data is False:
+            self.assertTrue(layer_bool)
+            self.assertTrue(edit_bool)
+
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkNewGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

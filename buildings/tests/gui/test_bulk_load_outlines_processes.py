@@ -19,11 +19,12 @@
 import unittest
 
 from qgis.utils import plugins, iface
+from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class ProcessBulkLoadGuiTest(unittest.TestCase):
     """Test Bulk Load Outlines GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -41,14 +42,15 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = cls.dockwidget.frames['menu_frame']
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -58,6 +60,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
@@ -77,7 +80,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         sql = "SELECT COUNT(external_source_id) FROM buildings_common.capture_source"
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_external_id.count(), result3)
+        self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), result3)
         # check external id combobox populated with fields of current layer
         vectorlayer = self.bulk_load_frame.ml_outlines_layer.currentLayer()
         fields = vectorlayer.pendingFields()
@@ -93,9 +96,11 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         fields = imagery_vector_layer.pendingFields()
         self.assertEqual(self.bulk_load_frame.fcb_imagery_field.count(), len(fields))
         self.bulk_load_frame.fcb_imagery_field.setField(fields[0].name())
-        imagery_field = self.bulk_load_frame.fcb_imagery_field.currentField()
         idx = imagery_vector_layer.fieldNameIndex(fields[0].name())
         values = imagery_vector_layer.uniqueValues(idx)
-        assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
+        self.assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
 
     # add test to check runs correctly
+
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

@@ -19,11 +19,12 @@
 import unittest
 
 from qgis.utils import plugins
+from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
 
-class SetUpCaptureSourceGuiTest(unittest.TestCase):
+class ProcessCaptureSourceGuiTest(unittest.TestCase):
     """Test New Capture Source GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -41,23 +42,29 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = cls.dockwidget.frames['menu_frame']
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+        sql = "INSERT INTO buildings_common.capture_source_group(value, description)VALUES('Tester', 'Tester')"
+        db.execute(sql)
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         cls.road_plugin.dockwidget.close()
+        sql = "DELETE FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = 'Tester'"
+        db.execute(sql)
 
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_add_capture_source.click()
@@ -67,73 +74,112 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_cancel.click()
 
-    def test_radio_button(self):
+    def test_external_radio_button(self):
         self.capture_frame.rad_external_source.click()
         self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
         self.capture_frame.rad_external_source.click()
         self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
 
-    def test_add_new_capture_source(self):
+    def test_add_valid_capture_source_no_EID(self):
         # add valid capture source no external id
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
         result = db._execute(sql)
-        result = result.fetchall()[0][0]
+        self.csg = result.fetchall()[0][0] - 1
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
+        result = db._execute(sql)
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
         self.capture_frame.btn_ok.click()
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
         result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result + 1)
+        if result2 is None:
+            result2 = 0
+        else:
+            result2 = result2.fetchall()[0][0]
+        self.assertEqual(result2, (result + 1))
         sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
         db.execute(sql)
+
+    def test_add_duplicate_capture_source(self):
         # add duplicate capture source no external id
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
         result = db._execute(sql)
-        result = result.fetchall()[0][0]
+        self.csg = result.fetchall()[0][0] - 1
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
         self.capture_frame.btn_ok.click()
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
-        result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result)
-        if result != result2:
-            sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
-            db.execute(sql)
-        # add capture source external radio button checked and no external id
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
         result = db._execute(sql)
-        result = result.fetchall()[0][0]
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.btn_ok.click()
+        self.capture_frame.error_dialog.close()
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
+        result2 = db._execute(sql)
+        if result2 is None:
+            result2 = 0
+        else:
+            result2 = result2.fetchall()[0][0]
+        self.assertEqual(result2, result)
+        sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
+        db.execute(sql)
+
+    def test_add_blank_external_id_lineedit(self):
+        # add capture source external radio button checked and no external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        self.csg = result.fetchall()[0][0] - 1
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
+        result = db._execute(sql)
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
         self.capture_frame.rad_external_source.click()
         self.capture_frame.btn_ok.click()
         self.capture_frame.error_dialog.close()
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
         result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result)
-        if result != result2:
-            sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
-            db.execute(sql)
-        # add capture source with valid external id
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
-        result = db._execute(sql)
-        result = result.fetchall()[0][0]
-        self.capture_frame.rad_external_source.click()
-        self.capture_frame.le_external_source_id.setText("Test Ext Source")
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
-        result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result + 1)
-        sql = "DELETE FROM buildings_common.capture_group WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
-        db.execute(sql)
-        # add duplicate capture source and external id
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
-        result = db._execute(sql)
-        result = result.fetchall()[0][0]
-        self.capture_frame.rad_external_source.click()
-        self.capture_frame.le_external_source_id.setText("Test Ext Source")
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source"
-        result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result)
+        if result2 is None:
+            result2 = 0
+        else:
+            result2 = result2.fetchall()[0][0]
+        self.assertEqual(result2, result)
         if result != result2:
             sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
             db.execute(sql)
 
+    def test_add_valid_capture_source_with_EID(self):
+        # add capture source with valid external id
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        result = db._execute(sql)
+        self.csg = result.fetchall()[0][0] - 1
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
+        result = db._execute(sql)
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.rad_external_source.click()
+        self.capture_frame.le_external_source_id.setText("Test Ext Source")
+        self.capture_frame.btn_ok.click()
+        sql = "SELECT COUNT(capture_source_id) FROM buildings_common.capture_source"
+        result2 = db._execute(sql)
+        if result2 is None:
+            result2 = 0
+        else:
+            result2 = result2.fetchall()[0][0]
+        self.assertEqual(result2, (result + 1))
+        sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
+        db.execute(sql)
+
+
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

@@ -19,6 +19,7 @@
 import unittest
 
 from qgis.utils import plugins
+from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
@@ -41,14 +42,15 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = 'menu_frame'
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -58,6 +60,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_add_capture_source.click()
@@ -67,9 +70,11 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_cancel.click()
 
-    def test_new_capture_source_gui_set_up(self):
+    def test_external_source_default(self):
         self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
         self.assertFalse(self.capture_frame.rad_external_source.isChecked())
+        
+    def test_capture_source_dropdowns(self):
         # check number of options in dropdown is the same as number of
         # entries in capture_source_group table
         sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
@@ -77,5 +82,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(), result)
         self.capture_frame.rad_external_source.click()
-        self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
-        self.assertFalse(self.new_entry_frame.le_description.isEnabled())
+
+
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpCaptureSourceGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

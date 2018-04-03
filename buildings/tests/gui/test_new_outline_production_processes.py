@@ -23,11 +23,12 @@ from PyQt4.QtTest import QTest
 from qgis.core import QgsRectangle, QgsPoint
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
+from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class ProcessProductionNewGuiTest(unittest.TestCase):
     """Test Add Production Outline GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -45,25 +46,32 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = cls.dockwidget.frames['menu_frame']
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+        sql = "INSERT INTO buildings_common.capture_source(capture_source_group_id, external_source_id)VALUES(1, NULL)"
+        db.execute(sql)
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         cls.road_plugin.dockwidget.close()
+        sql = "DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)"
+        db.execute(sql)
 
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
         self.new_production_frame = self.dockwidget.current_frame
 
@@ -126,7 +134,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         self.assertEqual(self.new_production_frame.cmb_suburb.currentIndex(), 0)
         # check comboboxes disabled
         self.assertFalse(self.new_production_frame.btn_save.isEnabled())
-        self.assertFalse(self.new_production_frame.btn_reset.isEnabled())
+        self.assertTrue(self.new_production_frame.btn_reset.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_method.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_ta.isEnabled())
@@ -160,9 +168,12 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         sql = "SELECT COUNT(building_outline_id) FROM buildings.building_outlines"
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
-        self.assertTrue(result2=result + 1)
+        self.assertEqual(result2, result + 1)
         # remove row from table
         sql = "DELETE FROM buildings.building_outlines WHERE building_outline_id = (SELECT MAX(building_outline_id)  FROM buildings.building_outlines)"
         db.execute(sql)
         sql = "DELETE FROM buildings.buildings WHERE building_id = (SELECT MAX(building_id)  FROM buildings.buildings)"
         db.execute(sql)
+
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProductionNewGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

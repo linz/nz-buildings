@@ -20,9 +20,10 @@ import unittest
 
 from qgis.core import QgsProject
 from qgis.utils import plugins
+from qgis.utils import reloadPlugin
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class SetUpProductionNewGuiTest(unittest.TestCase):
     """Test Add Production Outline GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
@@ -40,14 +41,15 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get("buildings")
-        if cls.dockwidget.stk_options.count() == 4:
-            cls.dockwidget.stk_options.setCurrentIndex(3)
-            cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-            cls.dockwidget.current_frame = 'menu_frame'
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        else:
-            cls.dockwidget.stk_options.setCurrentIndex(4)
-        cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                reloadPlugin('buildings')
+                if cls.dockwidget.stk_options.count() == 4:
+                    cls.dockwidget.stk_options.setCurrentIndex(3)
+                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
+                    cls.dockwidget.current_frame = 'menu_frame'
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                else:
+                    cls.dockwidget.stk_options.setCurrentIndex(4)
+                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
 
     @classmethod
     def tearDownClass(cls):
@@ -57,8 +59,10 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.road_plugin = plugins.get("roads")
+        self.building_plugin = plugins.get("buildings")
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
         self.new_production_frame = self.dockwidget.current_frame
 
@@ -67,6 +71,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         self.new_production_frame.btn_cancel.click()
 
     def test_bulk_load_gui_set_up(self):
+        """ tests the initial set up of the frame """
         self.assertFalse(self.new_production_frame.btn_save.isEnabled())
         self.assertTrue(self.new_production_frame.btn_reset.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_method.isEnabled())
@@ -76,16 +81,20 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         self.assertFalse(self.new_production_frame.cmb_suburb.isEnabled())
 
     def test_layer_registry(self):
-        # check only the most recent supplied dataset is loaded into the map canvas
+        """ tests the layer registry has the correct components """
         layer_bool = False
-        edit_bool = True
+        edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
         for layer in layers:
-            if layer.layer().name() == "bulk_load_outlines":
+            if layer.layer().name() == "building_outlines":
                 layer_bool = True
                 if layer.layer().isEditable():
                     edit_bool = True
         self.assertTrue(layer_bool)
         self.assertTrue(edit_bool)
+
+
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpProductionNewGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)
