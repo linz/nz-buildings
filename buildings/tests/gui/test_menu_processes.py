@@ -11,19 +11,17 @@
 #
 ################################################################################
 
-    Tests: New Entry GUI setup confirm default settings
+    Tests: Menu GUI Processes
 
  ***************************************************************************/
 """
 
 import unittest
-
 from qgis.utils import plugins
 from qgis.utils import reloadPlugin
 
-
-class SetUpNewEntryGuiTest(unittest.TestCase):
-    """Test New Entry GUI initial setup confirm default settings"""
+class ProcessMenuGuiTest(unittest.TestCase):
+    """Test Menu GUI Processes"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -56,42 +54,47 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
-        """Runs before each test."""
         self.road_plugin = plugins.get("roads")
         self.building_plugin = plugins.get("buildings")
+        self.road_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_new_entry.click()
-        self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):
-        """Runs after each test."""
-        self.new_entry_frame.btn_cancel.click()
+        """Runs after each test"""
+        # Do nothing
 
-    def test_combobox_default(self):
-        # initial combobox text is organisation
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), "Organisation")
+    def test_new_entry_on_click(self):
+        # new entry
+        self.menu_frame.btn_new_entry.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_entry")
+        self.dockwidget.current_frame.btn_cancel.click()
+    
+    def test_new_capture_source_on_click(self):
+        # new capture source
+        self.menu_frame.btn_add_capture_source.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_capture_source")
+        self.dockwidget.current_frame.btn_cancel.click()
         
-    def test_combobox_options(self):
-        # has four options in combobox
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), "Lifecycle Stage")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), "Capture Method")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), "Capture Source Group")
+    def test_bulk_load_outlines_on_click(self):
+        # Bulk load outlines
+        self.menu_frame.btn_load_outlines.click()
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_supplied_outlines")
+        self.dockwidget.current_frame.btn_cancel.click()
         
-    def test_value_enabled(self):
-        # value is enabled on start up
-        self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
+    def test_cmb_bulk_create_outlines_on_click(self):
+        # Bulk create outline
+        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_bulk_new_outline")
+        self.dockwidget.current_frame.error_dialog.close()
+        self.dockwidget.current_frame.btn_cancel.click()
+    
+    def test_cmb_production_create_outlines_on_click(self):
+        self.menu_frame.cmb_add_outline.setCurrentIndex(2)
+        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_production_new_outline")
+        self.dockwidget.current_frame.btn_cancel.click()
 
-    def test_description_disabled(self):
-        # description is disbaled on startup
-        self.assertFalse(self.new_entry_frame.le_description.isEnabled())
 
-    def test_desc_enabled_on_capture_srcgrp(self):
-        # change to capture source group option description becomes enabled
-        self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
-        self.assertTrue(self.new_entry_frame.le_description.isEnabled())
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessMenuGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
+
