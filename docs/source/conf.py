@@ -302,31 +302,36 @@ texinfo_documents = [
 # ../docs/source
 # The path of the SQL file has been altered from likely final folder path
 
-schema_name_globvar = ''
 sql_file_path = "./sql_not_final_location/02-buildings_schema.sql"
-# sql_file_path = "./sql_not_final_location/02-create_buildings_stage_schema.sql"
+#sql_file_path = "./sql_not_final_location/02-create_buildings_stage_schema.sql"
 
-def get_schema_general():
+def get_schema():
     
-    schema_general = {}  # This only hold the schema name and schema comment
+    schema = {}  # This only hold the schema name and schema comment
+    schema_count = 0
+    with open(sql_file_path) as full_file:
+        file_content = full_file.read()
+    full_file.close()
 
     with open(sql_file_path) as f:
         for line in f:
-            schemaname = re.search(r"(?:CREATE SCHEMA IF NOT EXISTS)\s(.*)(;)", line)
-            schema_com_srch = re.search(r"(?:COMMENT ON SCHEMA)\s(.*)(?:IS)\s(')(.*)(')(;)", line)
+            schema_search = re.search(r"(?:CREATE SCHEMA IF NOT EXISTS)\s(.*)(;)", line)
+            #schema_comment_search = re.search(r"(?:COMMENT ON SCHEMA)\s(.*)(?:IS)\s(')(.*)(')(;)", line)
+            schema_comment_search = re.search(r"(?:COMMENT ON SCHEMA .*?)\s(?:IS)\s(.+?)(?=\;)", file_content, re.DOTALL)
 
-            if schemaname is not None:
-                schema = schemaname.group(1)
-                schema_name_globvar = schema
-                schema_general = {}
-                schema_general = {"schema_name": schema_name_globvar}
-            elif schema_com_srch is not None:
-                schema_comment = schema_com_srch.group(3)
-                schema_general['schema_com'] = schema_comment
+            if schema_count > 1:
+                raise ValueError("More than one schema is defined in this SQL file: {}".format(sql_file_path))
+            if schema_search is not None:
+                schema_name = schema_search.group(1)
+                schema = {"schema_name": schema_name}
+                schema_count += 1
+            if schema_comment_search is not None:
+                schema_comment = schema_comment_search.group(1)
+                schema_comment_clean = schema_comment.replace('\r\n', '').replace("'", "")
+                schema['schema_com'] = schema_comment_clean
 
-    print "Final schema_general is: ", schema_general
     f.close()
-    return schema_general
+    return schema, schema_name
     
 
 
@@ -335,7 +340,7 @@ def get_schema_general():
 # function to build a list of dictionaries (schema_list), with each dictionary (table_dict) containing all
 # of the information for one table in the schema. Each of these dictionaries contains a key
 # to hold a list (this_table_columns) of lists of the columns for each table.
-def get_tables():
+def get_tables(schema_name):
     
     schema_list = []
     table_dict = {}
@@ -349,30 +354,22 @@ def get_tables():
     # reading by line by line is done so that no tables are missed
     with open(sql_file_path) as f:
         for line in f:
-            schemaname = re.search(r"(?:CREATE SCHEMA IF NOT EXISTS)\s(.*)(;)", line)
-            
-            schema_com_srch = re.search(r"(?:COMMENT ON SCHEMA)\s(.*)(?:IS)\s(')(.*)(')(;)", line)
 
             table_name_srch = re.search(r"(?<=CREATE TABLE IF NOT EXISTS )(\w+)(?:\.)([^\(\s]*)", line)
 
-            if schemaname is not None:
-                schema = schemaname.group(1)
-                schema_name_globvar = schema
-
-            elif table_name_srch is not None:
+            if table_name_srch is not None:
                 # Now perform all actions to find table name, table comment, table columns, and table comments
                 # and when done add all these content to table_dict, and then finally to schema_list
 
                 table_dict = {}  # This dict hold all the information for one table
                 table_name = table_name_srch.group(2)
                 table_dict["table_nam"] = table_name
-                table_str = schema_name_globvar + "." + table_name
+                table_str = schema_name + "." + table_name
                 table_com_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
                 table_com_srch = re.search(table_com_str, file_content, re.DOTALL)
                 this_table_columns = [] # this holds several lists, each list is is one column of info
 
                 if table_com_srch is not None:
-                    table_com_result = ''
                     table_com_result = table_com_srch.group(0)
                     # remove line terminators and quote marks from multiline comment
                     table_com_result_clean = table_com_result.replace('\r\n', '').replace("'", "")
@@ -493,9 +490,9 @@ def get_columns(table_str, file_content, this_table_columns):
 
     return this_table_columns
 
-schema_general_out = get_schema_general()
+schema_out, schema_name = get_schema()
 
-schema_list_out = get_tables()
+schema_list_out = get_tables(schema_name)
 
 
 
@@ -519,7 +516,7 @@ def setup(app):
 
 html_context = {
     'outputschema': schema_list_out,
-    'schema_gen': schema_general_out
+    'schema_gen': schema_out
 }
 
 # This is test data in case troubleshooting is required

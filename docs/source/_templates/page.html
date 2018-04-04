@@ -7,7 +7,7 @@
 <b><font size="+1">Description: {{ schema_gen["schema_com"] }} </font></b><br/>
 
 <p>
-{% for item in outputschema  %}
+{% for item in outputschema %}
 	<b><p>Table Name: {% filter upper %} {{ item["table_nam"] }} {% endfilter %}<br/></b>
 	<b>Description: {{ item["table_comment"] }}<br/></b>
 	{% if item["table_columns"] %}
