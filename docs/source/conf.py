@@ -366,21 +366,21 @@ def get_tables(schema_out):
                 table_name = table_name_search.group(1)
                 table_dict["table_nam"] = table_name
                 table_str = schema_out["name"] + "." + table_name
-                table_com_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
-                table_com_srch = re.search(table_com_str, file_content, re.DOTALL)
+                table_comment_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
+                table_comment_search = re.search(table_comment_str, file_content, re.DOTALL)
                 this_table_columns = [] # this holds several lists, each list is is one column of info
 
-                if table_com_srch is not None:
-                    table_com_result = table_com_srch.group(0)
+                if table_comment_search is not None:
+                    table_comment_result = table_comment_search.group(1)
                     # remove line terminators and quote marks from multiline comment
-                    table_com_result_clean = table_com_result.replace("\r\n", "").replace("'", "")
-                    table_dict["table_comment"] = table_com_result_clean
+                    table_comment_result_clean = table_comment_result.replace("\r\n", "").replace("'", "")
+                    table_dict["table_comment"] = table_comment_result_clean
                     # get the columns for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
                     table_dict["table_columns"] = this_table_columns
 
-                elif table_com_srch is None:
-                    table_com_result = ''
+                elif table_comment_search is None:
+                    table_comment_result = ''
                     table_dict["table_comment"] = ""
                     # get the columms for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
@@ -395,36 +395,36 @@ def get_tables(schema_out):
 
 # Get column comments which might contain multilines
 def get_column_comments(column_str, file_content):
-    col_com_str = r"(?:COMMENT ON COLUMN " + column_str + r")(?:\s)(?:IS)([^\;]*)"
-    col_com_srch = re.search(col_com_str, file_content)
+    column_comment_str = r"COMMENT ON COLUMN " + column_str + r"\sIS([^\;]*)"
+    column_comment_search = re.search(column_comment_str, file_content)
 
-    if col_com_srch is not None:
-        col_com = col_com_srch.group(1)
-        col_com_result_clean = col_com.replace("\r\n", "").replace("'", "")
+    if column_comment_search is not None:
+        column_comment = column_comment_search.group(1)
+        column_comment_result_clean = column_comment.replace("\r\n", "").replace("'", "")
 
-    if col_com_srch is None:
-        col_com_result_clean = ""
-    return col_com_result_clean
+    if column_comment_search is None:
+        column_comment_result_clean = ""
+    return column_comment_result_clean
 
 
 # Get the columns for one table, which are listed across multiple lines
 def get_columns(table_str, file_content, this_table_columns):
 
-    srch_str = r"(?<=CREATE TABLE IF NOT EXISTS " + table_str + r"\s\()[^\;]*(?=\)\;)"
-    column_srch = re.search(srch_str, file_content)
-    columns = column_srch.group(0)
+    search_str = r"CREATE TABLE IF NOT EXISTS " + table_str + r"\s\(([^\;]*)\)\;"
+    column_search = re.search(search_str, file_content)
+    columns = column_search.group(0)
     columns_strip = [x.strip() for x in columns.split(',')]
 
     for column_details in columns_strip:
-        pri_key_srch = re.search(r"(.*)(?:serial PRIMARY KEY)", column_details)
-        char_var_srch = re.search(r"(.*)(?:\s)(?:character varying)\((.*?)\)", column_details)
-        timestamp1 = re.search(r"(.*)(?:\s)(?:timestamptz)", column_details)
-        integer = re.search(r"^(.*)(?:\s)(?=integer)", column_details)
-        shape = re.search(r"(shape)(?:.*)(?:geometry)", column_details)
+        pri_key_search = re.search(r"(.*)serial PRIMARY KEY", column_details)
+        character_varying_search = re.search(r"(.*)\scharacter varying\((.*?)\)", column_details)
+        timestamp_search = re.search(r"(.*)\stimestamptz", column_details)
+        integer_search = re.search(r"^(.*)\sinteger", column_details)
+        shape = re.search(r"(shape).*geometry", column_details)
 
-        if pri_key_srch is not None:
+        if pri_key_search is not None:
             this_column = []
-            pri_key = pri_key_srch.group(1)
+            pri_key = pri_key_search.group(1)
             column_str = table_str + "." + pri_key
             this_column.append(pri_key) #column Name
             this_column.append("integer")  #Data Type
@@ -435,10 +435,10 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
 
-        elif char_var_srch is not None:
+        elif character_varying_search is not None:
             this_column = []
-            var_column = char_var_srch.group(1)
-            length = char_var_srch.group(2)
+            var_column = character_varying_search.group(1)
+            length = character_varying_search.group(2)
             column_str = table_str + "." + var_column
             this_column.append(var_column) #column Name
             this_column.append("varchar") #Data Type
@@ -449,9 +449,9 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
 
-        elif timestamp1 is not None:
+        elif timestamp_search is not None:
             this_column = []
-            timecolumn1 = timestamp1.group(1)
+            timecolumn1 = timestamp_search.group(1)
             column_str = table_str + "." + timecolumn1
             this_column.append(timecolumn1) #column Name
             this_column.append("date") #Data Type
@@ -462,11 +462,11 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
 
-        elif integer is not None:
+        elif integer_search is not None:
             this_column = []
-            integercol = integer.group(1)
-            column_str = table_str + "." + integercol
-            this_column.append(integercol) #column Name
+            integer_column_name = integer_search.group(1)
+            column_str = table_str + "." + integer_column_name
+            this_column.append(integer_column_name) #column Name
             this_column.append("integer") #Data Type
             this_column.append("") #Length
             this_column.append("32") #Precision
@@ -477,9 +477,9 @@ def get_columns(table_str, file_content, this_table_columns):
 
         elif shape is not None:
             this_column = []
-            shapecol = shape.group(1)
-            column_str = table_str + "." + shapecol
-            this_column.append(shapecol) #column Name
+            shape_column_name = shape.group(1)
+            column_str = table_str + "." + shape_column_name
+            this_column.append(shape_column_name) #column Name
             this_column.append("geometry") #Data Type
             this_column.append("") #Length
             this_column.append("") #Precision
