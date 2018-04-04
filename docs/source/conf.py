@@ -388,7 +388,6 @@ def get_tables(schema_out):
 
                 schema_list.append(table_dict)
 
-    print "Final schema_list is: ", schema_list
     f.close()
     return schema_list
 
@@ -401,7 +400,7 @@ def get_column_comments(column_str, file_content):
 
     if col_com_srch is not None:
         col_com = col_com_srch.group(1)
-        col_com_result_clean = col_com.replace('\r\n', '').replace("'", "")
+        col_com_result_clean = col_com.replace("\r\n", "").replace("'", "")
 
     if col_com_srch is None:
         col_com_result_clean = ""
