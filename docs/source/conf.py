@@ -315,23 +315,24 @@ def get_schema():
 
     with open(sql_file_path) as f:
         for line in f:
-            schema_search = re.search(r"(?:CREATE SCHEMA IF NOT EXISTS)\s(.*)(;)", line)
-            #schema_comment_search = re.search(r"(?:COMMENT ON SCHEMA)\s(.*)(?:IS)\s(')(.*)(')(;)", line)
-            schema_comment_search = re.search(r"(?:COMMENT ON SCHEMA .*?)\s(?:IS)\s(.+?)(?=\;)", file_content, re.DOTALL)
+            schema_search = re.search(r"CREATE SCHEMA IF NOT EXISTS\s(.*);", line)
+            schema_comment_search = re.search(r"COMMENT ON SCHEMA .*?\sIS\s(.+?)\;", file_content, re.DOTALL)
 
-            if schema_count > 1:
-                raise ValueError("More than one schema is defined in this SQL file: {}".format(sql_file_path))
             if schema_search is not None:
-                schema_name = schema_search.group(1)
-                schema = {"schema_name": schema_name}
                 schema_count += 1
+                if schema_count > 1:
+                    raise ValueError("More than one schema is defined in this SQL file: {}".format(sql_file_path))
+                else:
+                    schema_name = schema_search.group(1)
+                    schema["name"] = schema_name
+                
             if schema_comment_search is not None:
                 schema_comment = schema_comment_search.group(1)
-                schema_comment_clean = schema_comment.replace('\r\n', '').replace("'", "")
-                schema['schema_com'] = schema_comment_clean
+                schema_comment_clean = schema_comment.replace("\r\n", "").replace("'", "")
+                schema['comment'] = schema_comment_clean
 
     f.close()
-    return schema, schema_name
+    return schema
     
 
 
@@ -340,7 +341,7 @@ def get_schema():
 # function to build a list of dictionaries (schema_list), with each dictionary (table_dict) containing all
 # of the information for one table in the schema. Each of these dictionaries contains a key
 # to hold a list (this_table_columns) of lists of the columns for each table.
-def get_tables(schema_name):
+def get_tables(schema_out):
     
     schema_list = []
     table_dict = {}
@@ -355,16 +356,16 @@ def get_tables(schema_name):
     with open(sql_file_path) as f:
         for line in f:
 
-            table_name_srch = re.search(r"(?<=CREATE TABLE IF NOT EXISTS )(\w+)(?:\.)([^\(\s]*)", line)
+            table_name_search = re.search(r"CREATE TABLE IF NOT EXISTS \w+\.([^\(\s]*)", line)
 
-            if table_name_srch is not None:
+            if table_name_search is not None:
                 # Now perform all actions to find table name, table comment, table columns, and table comments
                 # and when done add all these content to table_dict, and then finally to schema_list
 
                 table_dict = {}  # This dict hold all the information for one table
-                table_name = table_name_srch.group(2)
+                table_name = table_name_search.group(1)
                 table_dict["table_nam"] = table_name
-                table_str = schema_name + "." + table_name
+                table_str = schema_out["name"] + "." + table_name
                 table_com_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
                 table_com_srch = re.search(table_com_str, file_content, re.DOTALL)
                 this_table_columns = [] # this holds several lists, each list is is one column of info
@@ -372,7 +373,7 @@ def get_tables(schema_name):
                 if table_com_srch is not None:
                     table_com_result = table_com_srch.group(0)
                     # remove line terminators and quote marks from multiline comment
-                    table_com_result_clean = table_com_result.replace('\r\n', '').replace("'", "")
+                    table_com_result_clean = table_com_result.replace("\r\n", "").replace("'", "")
                     table_dict["table_comment"] = table_com_result_clean
                     # get the columns for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
@@ -490,9 +491,9 @@ def get_columns(table_str, file_content, this_table_columns):
 
     return this_table_columns
 
-schema_out, schema_name = get_schema()
+schema_out = get_schema()
 
-schema_list_out = get_tables(schema_name)
+schema_list_out = get_tables(schema_out)
 
 
 
