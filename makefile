@@ -41,9 +41,14 @@ ICONS =  buildings/icons/roads_plugin.png
 
 UTILITIES = buildings/utilities/config.py buildings/utilities/database.py buildings/utilities/__init__.py buildings/utilities/layers.py
 
-GUITESTS = buildings/tests/gui/__init__.py buildings/tests/gui/test_menu_gui_initial_setup.py buildings/tests/gui/test_new_entry_gui_initial_setup.py buildings/tests/gui/test_new_capture_source_gui_initial_setup.py
+GUITESTS = \
+	buildings/tests/gui/__init__.py \
+	buildings/tests/gui/test_menu_gui_initial_setup.py buildings/tests/gui/test_menu_processes.py buildings/tests/gui/test_new_entry_gui_initial_setup.py\
+	buildings/tests/gui/test_new_entry_processes.py buildings/tests/gui/test_new_capture_source_gui_initial_setup.py buildings/tests/gui/test_new_capture_source_processes.py\
+	buildings/tests/gui/test_bulk_load_outlines_gui_initial_setup.py buildings/tests/gui/test_bulk_load_outlines_processes.py buildings/tests/gui/test_new_outline_supplied_gui_initial_setup.py\
+	buildings/tests/gui/test_new_outline_supplied_processes.py buildings/tests/gui/test_new_outline_production_gui_initial_setup.py buildings/tests/gui/test_new_outline_production_processes.py
 
-TESTS = buildings/tests/__init__.py
+TESTS = buildings/tests/__init__.py buildings/tests/test_runner.py
 
 STYLES = buildings/styles/building_blue.qml buildings/styles/building_green.qml buildings/styles/building_orange.qml buildings/styles/building_purple.qml buildings/styles/building_yellow.qml
 
@@ -70,13 +75,14 @@ test: compile
 	@echo "------------------------------------------"
 	@echo "Running Unit Tests on Buildings Plugin"
 	@echo "------------------------------------------"
-	python -m unittest discover
+	@echo
+	python -c 'from buildings.tests import open_qgis; open_qgis.open_qgis()'
 
 
 setup_db:
 	@echo
 	@echo "------------------------------------------"
-	@echo "Setting up schema in Linz_db"
+	@echo "Setting up schema in linz_db"
 	@echo "------------------------------------------"
 	export PGDATABASE=linz_db; \
 	nz-buildings-load linz_db; \
@@ -90,24 +96,24 @@ deploy: $(SQLSCRIPTS) $(SCRIPTS_built)
 	# The deploy target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/gui
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/gui/i18n
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/icons
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/utilities
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/tests
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/tests/gui
-	mkdir -p $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/styles
-	cp -vf $(PY_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/gui
-	cp -vf $(UI_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/gui
-	cp -vf $(AF) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/gui/i18n
-	cp -vf $(UTILITIES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/utilities
-	cp -vf $(GUITESTS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/tests/gui
-	cp -vf $(TESTS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/tests
-	cp -vf $(STYLES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/styles
-	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(EXTRAS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
-	cp -vf $(ICONS) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/icons
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/gui
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/gui/i18n
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/icons
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/utilities
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/tests
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/tests/gui
+	mkdir -p $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/styles
+	cp -vf $(PY_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/gui
+	cp -vf $(UI_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/gui
+	cp -vf $(AF) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/gui/i18n
+	cp -vf $(UTILITIES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/utilities
+	cp -vf $(GUITESTS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/tests/gui
+	cp -vf $(TESTS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/tests
+	cp -vf $(STYLES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/styles
+	cp -vf $(COMPILED_RESOURCE_FILES) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vf $(EXTRAS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -vf $(ICONS) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)/icons
 
 
 # The dclean target removes compiled python files from plugin directory
@@ -117,8 +123,8 @@ dclean:
 	@echo "-----------------------------------"
 	@echo "Removing any compiled python files."
 	@echo "-----------------------------------"
-	find $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME) -iname "*.pyc" -delete
-	find $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME) -iname ".git" -prune -exec rm -Rf {} \;
+	find $(HOME)/.qgis2/python/plugins/$(PLUGINNAME) -iname "*.pyc" -delete
+	find $(HOME)/.qgis2/python/plugins/$(PLUGINNAME) -iname ".git" -prune -exec rm -Rf {} \;
 
 
 derase:
@@ -126,7 +132,7 @@ derase:
 	@echo "-------------------------"
 	@echo "Removing deployed plugin."
 	@echo "-------------------------"
-	rm -Rf $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
+	rm -Rf $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
 
 
 zip: deploy dclean
@@ -137,7 +143,7 @@ zip: deploy dclean
 	# The zip target deploys the plugin and creates a zip file with the deployed
 	# content. You can then upload the zip file on http://plugins.qgis.org
 	rm -f $(PLUGINNAME).zip
-	cd $(HOME)/$(QGISDIR)/python/plugins; zip -9r $(CURDIR)/$(PLUGINNAME).zip $(PLUGINNAME)
+	cd $(HOME)/.qgis2/python/plugins; zip -9r $(CURDIR)/$(PLUGINNAME).zip $(PLUGINNAME)
 
 
 package: compile
