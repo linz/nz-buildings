@@ -115,5 +115,6 @@ class SetUpBulkNewGuiTest(unittest.TestCase):
             self.assertTrue(layer_bool)
             self.assertTrue(edit_bool)
 
+
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkNewGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

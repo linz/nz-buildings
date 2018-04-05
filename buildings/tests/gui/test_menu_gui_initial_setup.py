@@ -15,8 +15,9 @@
 
  ***************************************************************************/
 """
-from qgis.utils import plugins
+from qgis.utils import plugins, iface
 from qgis.utils import reloadPlugin
+
 
 import unittest
 
@@ -71,7 +72,7 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertTrue(self.menu_frame.btn_new_entry.isEnabled())
         self.assertTrue(self.menu_frame.btn_add_capture_source.isEnabled())
         self.assertTrue(self.menu_frame.btn_load_outlines.isEnabled())
-    
+
     def test_menu_gui_button_names(self):
         # buttons have correct names
         self.assertEqual(self.menu_frame.btn_new_entry.text(), "New Entry")
@@ -92,3 +93,4 @@ class SetUpMenuGuiTest(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
+
