@@ -380,7 +380,6 @@ def get_tables(schema_out):
                     table_dict["table_columns"] = this_table_columns
 
                 elif table_comment_search is None:
-                    table_comment_result = ''
                     table_dict["table_comment"] = ""
                     # get the columms for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
