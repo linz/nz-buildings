@@ -106,5 +106,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         result3 = result3.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(), result3)
 
+
+
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkLoadGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

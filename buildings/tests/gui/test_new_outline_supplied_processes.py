@@ -177,5 +177,6 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             sql = "DELETE FROM buildings_bulk_load.buildings_bulk_load WHERE bulk_load_outline_id = (SELECT MAX(bulk_load_outline_id) FROM buildings_bulk_load.buildings_bulk_load)"
             db.execute(sql)
 
+
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

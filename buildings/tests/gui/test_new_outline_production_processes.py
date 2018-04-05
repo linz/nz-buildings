@@ -175,5 +175,6 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
         sql = "DELETE FROM buildings.buildings WHERE building_id = (SELECT MAX(building_id)  FROM buildings.buildings)"
         db.execute(sql)
 
+
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProductionNewGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

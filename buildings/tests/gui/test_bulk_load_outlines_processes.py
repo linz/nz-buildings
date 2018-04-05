@@ -102,5 +102,6 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
 
     # add test to check runs correctly
 
+
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
