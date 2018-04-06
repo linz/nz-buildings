@@ -20,6 +20,17 @@ IF ( SELECT processed_date
         WHERE supplied.supplied_dataset_id = p_supplied_dataset_id;
 
         -------------------------------------------------------------------------------------------------------------------
+        -- SUBSET existing subset extract table by p_supplied_dataset_id parameter of function
+        -------------------------------------------------------------------------------------------------------------------
+        -- creates temp table of all relevant existing extracts
+        -- this temp table will be used throughout the rest of processing in place of the existing subset extracts table
+
+        CREATE TEMP TABLE extracted_outlines AS
+        SELECT existing.*
+        FROM extracted_outlines AS existing
+        WHERE existing.supplied_dataset_id = p_supplied_dataset_id;
+
+        -------------------------------------------------------------------------------------------------------------------
         -- ADDED BUILDINGS
         -------------------------------------------------------------------------------------------------------------------
          -- runs through the supplied data and finds the geometries which do not intersect
@@ -29,7 +40,7 @@ IF ( SELECT processed_date
         SELECT supplied.bulk_load_outline_id,
                1 AS qa_status_id
         FROM supplied_bulk_load_outlines supplied
-        LEFT JOIN buildings_bulk_load.existing_subset_extracts AS current ON ST_Intersects(supplied.shape, current.shape)
+        LEFT JOIN extracted_outlines AS current ON ST_Intersects(supplied.shape, current.shape)
         WHERE current.building_outline_id IS NULL;
 
         -----------------------------------------------------------------------------------------------------------------
@@ -41,7 +52,7 @@ IF ( SELECT processed_date
         INSERT INTO buildings_bulk_load.removed
         SELECT current.building_outline_id,
                1 AS qa_status_id
-        FROM buildings_bulk_load.existing_subset_extracts current
+        FROM extracted_outlines current
         LEFT JOIN supplied_bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE supplied.bulk_load_outline_id IS NULL;
 
@@ -59,7 +70,7 @@ IF ( SELECT processed_date
                count(current.building_outline_id) AS existing_count,
                supplied.shape
         FROM supplied_bulk_load_outlines supplied,
-             buildings_bulk_load.existing_subset_extracts current
+             extracted_outlines current
         WHERE ST_Intersects(supplied.shape, current.shape)
           AND (ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape)) > 0.1
         GROUP BY supplied.bulk_load_outline_id, supplied.supplied_dataset_id, supplied.shape
@@ -88,7 +99,7 @@ IF ( SELECT processed_date
         CREATE TEMP TABLE add_small_intersection AS
         SELECT oa.*
         FROM other_add_candidates oa,
-             buildings_bulk_load.existing_subset_extracts current
+             extracted_outlines current
         WHERE ST_Intersects(oa.shape, current.shape)
           AND ST_Area(ST_Intersection(oa.shape, current.shape)) / ST_Area(oa.shape) < 0.1;
 
@@ -121,7 +132,7 @@ IF ( SELECT processed_date
                ST_Area(ST_Intersection(supplied.shape, current.shape)) AS intersection,
                current.shape
         FROM supplied_bulk_load_outlines supplied,
-             buildings_bulk_load.existing_subset_extracts current,
+             extracted_outlines current,
              supplied_intersect
         WHERE ST_Intersects(supplied.shape, current.shape)
           AND ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) > 0.1
@@ -151,7 +162,7 @@ IF ( SELECT processed_date
                to_merge.intersection / ST_Area(current.shape) * 100 AS percent_existing_overlap
         FROM to_merge,
              supplied_bulk_load_outlines supplied,
-             buildings_bulk_load.existing_subset_extracts current
+             extracted_outlines current
         WHERE supplied.bulk_load_outline_id = to_merge.bulk_load_outline_id
           AND to_merge.e_id = current.building_outline_id;
 
@@ -169,7 +180,7 @@ IF ( SELECT processed_date
                COUNT(supplied.bulk_load_outline_id) AS supplied_count,
                current.shape
         FROM supplied_bulk_load_outlines supplied,
-             buildings_bulk_load.existing_subset_extracts current
+             extracted_outlines current
         WHERE ST_Intersects(current.shape, supplied.shape)
           AND ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) > 0.1
 
@@ -186,7 +197,7 @@ IF ( SELECT processed_date
         SELECT current.building_outline_id,
                current.supplied_dataset_id,
                current.shape
-        FROM buildings_bulk_load.existing_subset_extracts current
+        FROM extracted_outlines current
         WHERE current.building_outline_id NOT IN
             ( SELECT existing_intersect.building_outline_id
               FROM existing_intersect existing_intersect );
@@ -235,7 +246,7 @@ IF ( SELECT processed_date
                ST_Area(ST_Intersection(supplied.shape, current.shape)) AS intersection,
                supplied.shape
         FROM supplied_bulk_load_outlines supplied,
-             buildings_bulk_load.existing_subset_extracts current,
+             extracted_outlines current,
              existing_intersect
         WHERE ST_Intersects(supplied.shape, current.shape)
           AND ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) > 0.1
@@ -262,7 +273,7 @@ IF ( SELECT processed_date
                to_split.intersection AS area_overlap,
                to_split.intersection / ST_Area(supplied.shape) * 100 AS percent_bulk_load_overlap,
                to_split.intersection / ST_Area(current.shape) * 100 AS percent_existing_overlap
-        FROM buildings_bulk_load.existing_subset_extracts current,
+        FROM extracted_outlines current,
              to_split,
              supplied_bulk_load_outlines supplied
         WHERE current.building_outline_id = to_split.building_outline_id
