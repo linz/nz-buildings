@@ -3,7 +3,6 @@
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.new_entry import NewEntry
@@ -18,15 +17,11 @@ import qgis
 db.connect()
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "menu.ui"))
+    os.path.dirname(__file__), 'menu.ui'))
 
 
 class MenuFrame(QFrame, FORM_CLASS):
 
-    new_entry = pyqtSignal()
-    add_capture_source = pyqtSignal()
-    new_supplied_outlines = pyqtSignal()
-    insert_buildings = pyqtSignal()
 
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
@@ -69,8 +64,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when index of add outline combobox is changed
         """
-        index = self.cmb_add_outline.currentIndex()
-        text = self.cmb_add_outline.itemText(index)
+        text = self.cmb_add_outline.currentText()
         if text == 'Add New Outline to Supplied Dataset':
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
