@@ -29,19 +29,19 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -59,8 +59,8 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_add_capture_source.click()
@@ -77,7 +77,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
     def test_capture_source_dropdowns(self):
         # check number of options in dropdown is the same as number of
         # entries in capture_source_group table
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(), result)

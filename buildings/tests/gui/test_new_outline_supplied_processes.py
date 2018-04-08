@@ -33,19 +33,19 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -63,8 +63,8 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
@@ -146,7 +146,7 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
 
     def test_insert(self):
         if self.no_supplied_data is False:
-            sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines"
+            sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
             result = db._execute(sql)
             result = result.fetchall()[0][0]
             # add geom
@@ -169,12 +169,12 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             self.new_bulk_frame.cmb_town.setCurrentIndex(0)
             self.new_bulk_frame.cmb_suburb.setCurrentIndex(1)
             self.new_bulk_frame.btn_save.click()
-            sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines"
+            sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
             result2 = db._execute(sql)
             result2 = result2.fetchall()[0][0]
             self.assertEqual(result2, result + 1)
             # remove row from table
-            sql = "DELETE FROM buildings_bulk_load.buildings_bulk_load WHERE bulk_load_outline_id = (SELECT MAX(bulk_load_outline_id) FROM buildings_bulk_load.buildings_bulk_load)"
+            sql = 'DELETE FROM buildings_bulk_load.buildings_bulk_load WHERE bulk_load_outline_id = (SELECT MAX(bulk_load_outline_id) FROM buildings_bulk_load.buildings_bulk_load)'
             db.execute(sql)
 
 

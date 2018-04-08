@@ -27,19 +27,19 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -57,8 +57,8 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_new_entry.click()
@@ -70,14 +70,14 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
 
     def test_combobox_default(self):
         # initial combobox text is organisation
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), "Organisation")
+        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), 'Organisation')
         
     def test_combobox_options(self):
         # has four options in combobox
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), "Lifecycle Stage")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), "Capture Method")
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), "Capture Source Group")
+        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
+        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
+        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
         
     def test_value_enabled(self):
         # value is enabled on start up

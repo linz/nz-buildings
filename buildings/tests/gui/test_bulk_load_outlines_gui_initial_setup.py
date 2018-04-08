@@ -29,19 +29,19 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -59,8 +59,8 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
@@ -83,25 +83,25 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
     def test_data_desc_default(self):
         # check data description is enabled and empty
         self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
-        self.assertEqual(self.bulk_load_frame.le_data_description.text(), "")
+        self.assertEqual(self.bulk_load_frame.le_data_description.text(), '')
 
     def test_organisation_combobox(self):
         # check organisation combobox same size as table
-        sql = "SELECT COUNT(value) FROM buildings_bulk_load.organisation"
+        sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_organisation.count(), result)
         
     def test_capture_method_combobox(self):
         # Check capture method combobox same size as table
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_method"
+        sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(), result2)
 
     def test_capture_source_group(self):
         # Check capture source group combobox same size as table
-        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
+        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(), result3)
