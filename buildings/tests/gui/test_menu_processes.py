@@ -25,19 +25,19 @@ class ProcessMenuGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -54,8 +54,8 @@ class ProcessMenuGuiTest(unittest.TestCase):
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.road_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
@@ -67,31 +67,31 @@ class ProcessMenuGuiTest(unittest.TestCase):
     def test_new_entry_on_click(self):
         # new entry
         self.menu_frame.btn_new_entry.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_entry")
+        self.assertEqual(self.dockwidget.current_frame.objectName(), 'f_new_entry')
         self.dockwidget.current_frame.btn_cancel.click()
     
     def test_new_capture_source_on_click(self):
         # new capture source
         self.menu_frame.btn_add_capture_source.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_capture_source")
+        self.assertEqual(self.dockwidget.current_frame.objectName(), 'f_new_capture_source')
         self.dockwidget.current_frame.btn_cancel.click()
         
     def test_bulk_load_outlines_on_click(self):
         # Bulk load outlines
         self.menu_frame.btn_load_outlines.click()
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_new_supplied_outlines")
+        self.assertEqual(self.dockwidget.current_frame.objectName(), 'f_new_supplied_outlines')
         self.dockwidget.current_frame.btn_cancel.click()
         
     def test_cmb_bulk_create_outlines_on_click(self):
         # Bulk create outline
         self.menu_frame.cmb_add_outline.setCurrentIndex(1)
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_bulk_new_outline")
+        self.assertEqual(self.dockwidget.current_frame.objectName(), 'f_bulk_new_outline')
         self.dockwidget.current_frame.error_dialog.close()
         self.dockwidget.current_frame.btn_cancel.click()
     
     def test_cmb_production_create_outlines_on_click(self):
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
-        self.assertEqual(self.dockwidget.current_frame.objectName(), "f_production_new_outline")
+        self.assertEqual(self.dockwidget.current_frame.objectName(), 'f_production_new_outline')
         self.dockwidget.current_frame.btn_cancel.click()
 
 

@@ -29,19 +29,19 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -59,8 +59,8 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
@@ -77,7 +77,7 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
         # check external source id value is correctly populated
-        sql = "SELECT COUNT(external_source_id) FROM buildings_common.capture_source"
+        sql = 'SELECT COUNT(external_source_id) FROM buildings_common.capture_source'
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), result3)

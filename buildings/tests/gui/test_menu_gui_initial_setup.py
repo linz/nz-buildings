@@ -27,19 +27,19 @@ class SetUpMenuGuiTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get("roads"):
+        if not plugins.get('roads'):
             pass
         else:
-            cls.road_plugin = plugins.get("roads")
+            cls.road_plugin = plugins.get('roads')
             if cls.road_plugin.is_active is False:
                 cls.road_plugin.main_toolbar.actions()[0].trigger()
                 cls.dockwidget = cls.road_plugin.dockwidget
             else:
                 cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get("buildings"):
+            if not plugins.get('buildings'):
                 pass
             else:
-                cls.building_plugin = plugins.get("buildings")
+                cls.building_plugin = plugins.get('buildings')
                 reloadPlugin('buildings')
                 if cls.dockwidget.stk_options.count() == 4:
                     cls.dockwidget.stk_options.setCurrentIndex(3)
@@ -57,8 +57,8 @@ class SetUpMenuGuiTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get("roads")
-        self.building_plugin = plugins.get("buildings")
+        self.road_plugin = plugins.get('roads')
+        self.building_plugin = plugins.get('buildings')
         self.road_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
@@ -75,20 +75,20 @@ class SetUpMenuGuiTest(unittest.TestCase):
 
     def test_menu_gui_button_names(self):
         # buttons have correct names
-        self.assertEqual(self.menu_frame.btn_new_entry.text(), "New Entry")
-        self.assertEqual(self.menu_frame.btn_add_capture_source.text(), "Add Capture Source")
-        self.assertEqual(self.menu_frame.btn_load_outlines.text(), "Bulk Load Outlines")
+        self.assertEqual(self.menu_frame.btn_new_entry.text(), 'New Entry')
+        self.assertEqual(self.menu_frame.btn_add_capture_source.text(), 'Add Capture Source')
+        self.assertEqual(self.menu_frame.btn_load_outlines.text(), 'Bulk Load Outlines')
         
     def test_menu_gui_combo_default(self):
         # combo box index is add outlines and enabled
         self.assertTrue(self.menu_frame.cmb_add_outline.isEnabled())
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), "Add Outlines")
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), 'Add Outlines')
         
     def test_menu_gui_combo_options(self):
         # combo box has three options
         self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1), "Add New Outline to Supplied Dataset")
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), "Add New Outline to Production")
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1), 'Add New Outline to Supplied Dataset')
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), 'Add New Outline to Production')
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
