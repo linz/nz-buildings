@@ -76,6 +76,7 @@ done
 
 export PGDATABASE=$DB_NAME
 
+psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
@@ -92,6 +93,12 @@ done
 
 # Execute all files in the lds sql dir
 for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
+    echo ${file} >&2
+    psql -f ${file}
+done
+
+# Execute all files in the admin_bdys sql dir
+for file in ${SCRIPTSDIR}/sql/admin_bdys/*.sql; do
     echo ${file} >&2
     psql -f ${file}
 done

@@ -22,6 +22,8 @@ SQLSCRIPTS = \
 	sql/07-load_buildings.sql \
 	sql/lds/01-buildings_lds_schema.sql \
 	sql/lds/02-buildings_lds_releasing.sql \
+	sql/admin_bdys/01-admin_bdys_schema.sql \
+	sql/admin_bdys/02-lookup_table_values.sql \
 	$(END)
 
 # List of scripts built during install
@@ -57,8 +59,10 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp sql/*.sql ${datadir}/sql
 	mkdir -p ${datadir}/sql/lds
 	cp sql/lds/*.sql ${datadir}/sql/lds
+	mkdir -p ${datadir}/sql/admin_bdys
+	cp sql/admin_bdys/*.sql ${datadir}/sql/admin_bdys
 	mkdir -p ${datadir}/tests/testdata
-	cp tests/testdata/*.sql ${datadir}/tests/testdata 
+	cp tests/testdata/*.sql ${datadir}/tests/testdata
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
