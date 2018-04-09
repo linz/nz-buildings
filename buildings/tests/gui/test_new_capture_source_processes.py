@@ -51,15 +51,11 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
                 else:
                     cls.dockwidget.stk_options.setCurrentIndex(4)
                 cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
-        sql = "INSERT INTO buildings_common.capture_source_group(value, description)VALUES('Tester', 'Tester')"
-        db.execute(sql)
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         cls.road_plugin.dockwidget.close()
-        sql = "DELETE FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = 'Tester'"
-        db.execute(sql)
 
     def setUp(self):
         """Runs before each test."""
@@ -82,16 +78,13 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
 
     def test_add_valid_capture_source_no_EID(self):
         # add valid capture source no external id
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
-        result = db._execute(sql)
-        self.csg = result.fetchall()[0][0] - 1
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
         if result is None:
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.btn_ok.click()
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result2 = db._execute(sql)
@@ -105,10 +98,7 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
 
     def test_add_duplicate_capture_source(self):
         # add duplicate capture source no external id
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
-        result = db._execute(sql)
-        self.csg = result.fetchall()[0][0] - 1
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.btn_ok.click()
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
@@ -116,7 +106,7 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.btn_ok.click()
         self.capture_frame.error_dialog.close()
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
@@ -131,16 +121,13 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
 
     def test_add_blank_external_id_lineedit(self):
         # add capture source external radio button checked and no external id
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
-        result = db._execute(sql)
-        self.csg = result.fetchall()[0][0] - 1
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
         if result is None:
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
         self.capture_frame.btn_ok.click()
         self.capture_frame.error_dialog.close()
@@ -157,16 +144,13 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
 
     def test_add_valid_capture_source_with_EID(self):
         # add capture source with valid external id
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
-        result = db._execute(sql)
-        self.csg = result.fetchall()[0][0] - 1
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
         if result is None:
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.csg)
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
         self.capture_frame.le_external_source_id.setText('Test Ext Source')
         self.capture_frame.btn_ok.click()
