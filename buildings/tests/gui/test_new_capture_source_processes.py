@@ -119,7 +119,7 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
         db.execute(sql)
 
-    def test_add_blank_external_id_lineedit(self):
+    def test_add_blank_external_id_line_edit(self):
         # add capture source external radio button checked and no external id
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
