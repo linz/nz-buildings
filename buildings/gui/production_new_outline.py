@@ -92,7 +92,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
-            text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+            text = '{0}-{1}-{2}'.format(item[0], item[1], item[2])
             self.cmb_capture_source.addItem(text)
 
     def populate_area_comboboxes(self):
@@ -100,7 +100,6 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         method called on opening of trame to populate area 
         comboboxes
         """
-        # TODO is only Wellington??
         # populate suburb combobox
         sql = 'SELECT DISTINCT alias_name FROM admin_bdys.suburb_alias;'
         result = db._execute(sql)
@@ -108,7 +107,6 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         for item in ls:
             if item[0] is not None:
                 self.cmb_suburb.addItem(item[0])
-
         # populate town combobox
         sql = 'SELECT DISTINCT city_name FROM admin_bdys.nz_locality;'
         result = db._execute(sql)
@@ -169,7 +167,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
-        sql = 'SELECT locality_id FROM admin_bdys.suburb_alias WHERE admin_bdys.suburb_alias.alias_name = %s;'
+        sql = 'SELECT id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.suburb_4th = %s;'
         result = db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -198,8 +196,6 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         @param qgsfId:      Id of added feature
         @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-
-        # TODO handle when user tries to add multiple new geoms
 
         if qgsfId not in self.added_building_ids:
             self.added_building_ids.append(qgsfId)

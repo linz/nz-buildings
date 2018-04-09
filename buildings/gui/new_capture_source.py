@@ -81,7 +81,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         # get external source id
         self.external_source = self.get_comments()
-        # if no external source is entered  and radio button selected open error dialog
+        # if no external source is entered and radio button selected open error dialog
         if self.rad_external_source.isChecked():
             if self.external_source == '':
                 self.error_dialog = ErrorDialog()
@@ -96,7 +96,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # get type
         self.value = self.get_combobox_value()
         # call insert function
-        self.insert_capture_source(self.value, self.external_source)
+        return self.insert_capture_source(self.value, self.external_source)
 
     def cancel_clicked(self):
         """
@@ -134,20 +134,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                         to_add = False
             # if no entry with external source and capture source group add to table
             if to_add:
-                sql = 'SELECT capture_source_id FROM buildings_common.capture_source;'
-                result = db._execute(sql)
-                length = len(result.fetchall())
-                id = length + 1
                 sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
-                db.execute(sql, (capture_source_group_id, external_source))
+                result = db._execute(sql, (capture_source_group_id, external_source))
+                return result.fetchall()[0][0]
                 self.le_external_source_id.clear()
 
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
-            sql = 'SELECT capture_source_id FROM buildings_common.capture_source;'
-            result = db._execute(sql)
-            length = len(result.fetchall())
-            id = length + 1
             sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
-            db.execute(sql, (capture_source_group_id, external_source))
+            result = db._execute(sql, (capture_source_group_id, external_source))
+            return result.fetchall()[0][0]
             self.le_external_source_id.clear()

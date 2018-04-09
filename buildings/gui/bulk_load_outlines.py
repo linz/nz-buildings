@@ -332,19 +332,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         """
         generates new supplied outline dataset for the incoming data
         """
-        # generate supplied_outline_id
-        sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets;'
-        result = db._execute(sql)
-        attributes = result.fetchall()
-        length = len(attributes)
-        if length == 0:
-            id = 1  # this is the first dataset
-        else:
-            id = attributes[length - 1][0] + 1  # next dataset  id number
-        self.dataset_id = id
-        # insert new dataset info into buildings_bulk_load.supplied_datasets
-        sql = 'buildings_bulk_load.supplied_datasets_insert(%s, %s, %s);'
-        db.execute(sql, (self.dataset_id, description, organisation))
+        sql = 'SELECT buildings_bulk_load.fn_supplied_datasets_insert(%s, %s);'
+        results = db._execute(sql, (description, organisation))
+        self.dataset_id = results.fetchall()[0][0]
 
     def insert_supplied_outlines(self, dataset_id, layer, capture_method, capture_source_group, external_source_id):
         """
@@ -388,11 +378,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             geom = result.fetchall()[0][0]
             # insert outline into buildings_bulk_load.supplied_outline
             if external_field == '':
-                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
-                db.execute(sql, (dataset_id, 1, capture_method, capture_source, geom))
+                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, %s);'
+                db.execute(sql, (dataset_id, capture_method, capture_source, geom))
             else:
                 external_id = outline.attribute(external_field)
-                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
+                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, %s);'
                 db.execute(sql, (dataset_id, external_id, capture_method, capture_source, geom))
         self.le_data_description.clear()
         # returns 1 if function worked None if failed
