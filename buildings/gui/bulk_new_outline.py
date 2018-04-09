@@ -262,8 +262,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.town = self.get_town()
         self.t_a = self.get_t_a()
 
-        # insert into bulk_load_outlines table
-        sql = 'INSERT INTO buildings_bulk_load.bulk_load_outlines(supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES(%s, Null, 2, %s, %s, %s, %s, %s, now(), %s)'
+        # call function to insert into bulk_load_outlines table
+        sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, now(), %s)'
         db.execute(sql, (self.dataset, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
 
         # reset comboboxes for next outline

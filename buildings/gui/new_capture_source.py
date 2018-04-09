@@ -17,7 +17,6 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class NewCaptureSource(QFrame, FORM_CLASS):
 
-
     le_external_source = None
 
     value = ''
@@ -139,8 +138,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 result = db._execute(sql)
                 length = len(result.fetchall())
                 id = length + 1
-                sql = 'INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)'
-                db.execute(sql, data=(id, capture_source_group_id, external_source))
+                sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
+                db.execute(sql, (capture_source_group_id, external_source))
                 self.le_external_source_id.clear()
 
         # if sql querry returns nothing add to table
@@ -149,6 +148,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             result = db._execute(sql)
             length = len(result.fetchall())
             id = length + 1
-            sql = 'INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id)VALUES(%s, %s, %s)'
-            db.execute(sql, data=(id, capture_source_group_id, external_source))
+            sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
+            db.execute(sql, (capture_source_group_id, external_source))
             self.le_external_source_id.clear()

@@ -147,7 +147,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns capture source id of input combobox
         """
         text = self.cmb_capture_source.currentText()
-        if text == '':
+        if str(text) == '':
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report('\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries')
             self.error_dialog.show()
@@ -213,10 +213,9 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         result = db._execute(sql, data=(wkt, ))
         geom = result.fetchall()[0][0]
         # ensure outline SRID is 2193
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 4167);'
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
         result = db._execute(sql, data=(geom, ))
         self.geom = result.fetchall()[0][0]
-        print self.geom
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
         self.cmb_capture_source.setEnabled(1)
@@ -261,13 +260,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.t_a = self.get_t_a()
 
         # insert into buildings table
-        sql = 'INSERT INTO buildings.buildings(begin_lifespan) VALUES(now());'
-        db.execute(sql)
-        sql = 'SELECT MAX(building_id) FROM buildings.buildings;'
-        result = db._execute(sql)
-        building_id = result.fetchall()[0][0]
+        sql = 'SELECT buildings.fn_buildings_insert();'
+        results = db._execute(sql)
+        building_id = results.fetchall()[0][0]
         # insert into bulk_load_outlines table
-        sql = 'INSERT INTO buildings.building_outlines(building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
+        sql = 'SELECT buildings.fn_building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
         db.execute(sql, (building_id, self.capture_method_id, self.capture_source_id, self.lifecycle_stage_id, self.suburb, self.town, self.t_a, self.geom))
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)

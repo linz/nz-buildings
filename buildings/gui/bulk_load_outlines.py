@@ -309,7 +309,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 print 'something \n'
                 for ls in results:
                     # insert relevant data into existing_subset_extract
-                    sql = 'INSERT INTO buildings_bulk_load.existing_subset_extracts(building_outline_id, supplied_dataset_id, shape) VALUES(%s, %s, %s);'
+                    sql = 'buildings_bulk_load.existing_subset_extract_insert(%s, %s, %s);'
                     db.execute(sql, data=(ls[0], self.dataset_id, ls[10]))
                 # run comparisons function
                 sql = 'SELECT (buildings_bulk_load.compare_building_outlines(%s));'
@@ -343,7 +343,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             id = attributes[length - 1][0] + 1  # next dataset  id number
         self.dataset_id = id
         # insert new dataset info into buildings_bulk_load.supplied_datasets
-        sql = 'INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES(%s, %s, %s);'
+        sql = 'buildings_bulk_load.supplied_datasets_insert(%s, %s, %s);'
         db.execute(sql, (self.dataset_id, description, organisation))
 
     def insert_supplied_outlines(self, dataset_id, layer, capture_method, capture_source_group, external_source_id):
@@ -388,11 +388,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             geom = result.fetchall()[0][0]
             # insert outline into buildings_bulk_load.supplied_outline
             if external_field == '':
-                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
+                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
                 db.execute(sql, (dataset_id, 1, capture_method, capture_source, geom))
             else:
                 external_id = outline.attribute(external_field)
-                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
+                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, NULL, %s)'
                 db.execute(sql, (dataset_id, external_id, capture_method, capture_source, geom))
         self.le_data_description.clear()
         # returns 1 if function worked None if failed

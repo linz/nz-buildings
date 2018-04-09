@@ -134,18 +134,8 @@ class NewEntry(QFrame, FORM_CLASS):
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = 'SELECT organisation_id FROM buildings_bulk_load.organisation;'
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new organisation
-            # enter new organisation
-            sql = 'INSERT INTO buildings_bulk_load.organisation(organisation_id, value)VALUES(%s, %s);'
-            db.execute(sql, (id, organisation))
+            sql = 'SELECT buildings_bulk_load.fn_organisation_insert(%s);'
+            db.execute(sql, (organisation,))
             self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
@@ -166,18 +156,9 @@ class NewEntry(QFrame, FORM_CLASS):
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = 'SELECT lifecycle_stage_id FROM buildings.lifecycle_stage;'
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new lifecycle stage
             # enter new lifecycle stage
-            sql = 'INSERT INTO buildings.lifecycle_stage(lifecycle_stage_id, value)VALUES(%s, %s);'
-            db.execute(sql, (id, lifecycle_stage))
+            sql = 'SELECT buildings.fn_lifecycle_stage_insert(%s);'
+            db.execute(sql, (lifecycle_stage,))
             self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
@@ -199,18 +180,9 @@ class NewEntry(QFrame, FORM_CLASS):
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = 'SELECT capture_method_id FROM buildings_common.capture_method;'
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new capture method
             # enter new capture method
-            sql = 'INSERT INTO buildings_common.capture_method(capture_method_id, value)VALUES(%s, %s);'
-            db.execute(sql, data=(id, capture_method))
+            sql = 'SELECT buildings_common.fn_capture_method_insert(%s);'
+            db.execute(sql, (capture_method,))
             self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group, description):
@@ -218,6 +190,8 @@ class NewEntry(QFrame, FORM_CLASS):
         update the capture source group table
             value = capture source group autogenerate id
         """
+        print capture_source_group
+        print description
         # Check if capture source group in buildings_common.capture_source_group table
         sql = 'SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;'
         result = db._execute(sql, data=(capture_source_group,))
@@ -229,20 +203,9 @@ class NewEntry(QFrame, FORM_CLASS):
             self.error_dialog.fill_report('\n ---------------- CAPTURE SOURCE GROUP ---------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
-
-        # if it isn't in the table add to table
-        elif len(ls) == 0:
-            # find the last id value in table
-            sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group;'
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new capture source group
+        else:
             # enter new capture source group
-            sql = 'INSERT INTO buildings_common.capture_source_group(capture_source_group_id, value, description)VALUES(%s, %s, %s);'
-            db.execute(sql, data=(id, capture_source_group, description))
+            sql = 'SELECT buildings_common.fn_capture_source_group_insert(%s, %s);'
+            db.execute(sql, (capture_source_group, description))
             self.le_new_entry.clear()
             self.le_description.clear()
