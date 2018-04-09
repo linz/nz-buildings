@@ -1,0 +1,29 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for admin_bdys schema using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(3);
+
+-- Schema
+SELECT has_schema('admin_bdys');
+
+-- Tables
+SELECT has_table('admin_bdys', 'nz_locality', 'Should have nz_locality table in the admin_bdys schema.');
+SELECT has_table('admin_bdys', 'territorial_authority', 'Should have territorial_authority table in the admin_bdys schema.');
