@@ -28,8 +28,8 @@ from qgis.utils import reloadPlugin
 from buildings.utilities import database as db
 
 
-class ProcessProductionNewGuiTest(unittest.TestCase):
-    """Test Add Production Outline GUI Processes"""
+class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
+    """Test Add New Bulk Outline GUI Processes"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -60,8 +60,6 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         cls.road_plugin.dockwidget.close()
-        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-        db.execute(sql)
 
     def setUp(self):
         """Runs before each test."""
@@ -69,6 +67,8 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
+        db.execute(sql)
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
         self.new_production_frame = self.dockwidget.current_frame
@@ -76,6 +76,8 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.new_production_frame.btn_cancel.click()
+        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
+        db.execute(sql)
 
     def test_ui_on_geom_drawn(self):
         # add geom to canvas
@@ -140,12 +142,6 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
         self.assertFalse(self.new_production_frame.cmb_suburb.isEnabled())
 
     def test_insert(self):
-        sql = 'SELECT COUNT(*) FROM buildings_common.capture_source'
-        results = db._execute(sql)
-        cs_result = results.fetchall()[0][0]
-        if cs_result == 0:
-            sql = 'INSERT INTO buildings_common.capture_source(capture_source_group_id, external_source_id)VALUES(1, NULL)
-            db._execute(sql)
         sql = 'SELECT COUNT(building_outline_id) FROM buildings.building_outlines'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
@@ -165,9 +161,9 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
         # change indexes of comboboxes
         self.new_production_frame.cmb_capture_method.setCurrentIndex(1)
         self.new_production_frame.cmb_capture_source.setCurrentIndex(0)
-        self.new_production_frame.cmb_ta.setCurrentIndex(1)
+        self.new_production_frame.cmb_ta.setCurrentIndex(0)
         self.new_production_frame.cmb_town.setCurrentIndex(0)
-        self.new_production_frame.cmb_suburb.setCurrentIndex(1)
+        self.new_production_frame.cmb_suburb.setCurrentIndex(0)
         self.new_production_frame.btn_save.click()
         sql = 'SELECT COUNT(building_outline_id) FROM buildings.building_outlines'
         result2 = db._execute(sql)
@@ -178,10 +174,7 @@ class ProcessProductionNewGuiTest(unittest.TestCase):
         db.execute(sql)
         sql = 'DELETE FROM buildings.buildings WHERE building_id = (SELECT MAX(building_id) FROM buildings.buildings)'
         db.execute(sql)
-        if cs_result == 0:
-            sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-            db.execute(sql)
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProductionNewGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
