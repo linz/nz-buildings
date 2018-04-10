@@ -101,7 +101,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         comboboxes
         """
         # populate suburb combobox
-        sql = 'SELECT DISTINCT alias_name FROM admin_bdys.suburb_alias;'
+        sql = 'SELECT DISTINCT suburb_4th FROM admin_bdys.nz_locality;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -150,7 +150,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
             self.error_dialog.fill_report('\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries')
             self.error_dialog.show()
             return
-        text_ls = text.split('- ')
+        text_ls = text.split('-')
         sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;'
         result = db._execute(sql, data=(text_ls[0], text_ls[1]))
         data = result.fetchall()[0][0]
@@ -167,9 +167,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
+        print text
         sql = 'SELECT id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.suburb_4th = %s;'
         result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def get_town(self):
         """
@@ -178,7 +180,8 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         text = self.cmb_town.currentText()
         sql = 'SELECT city_id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.city_name = %s;'
         result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def get_t_a(self):
         """
@@ -187,7 +190,8 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         text = self.cmb_ta.currentText()
         sql = 'SELECT ogc_fid FROM admin_bdys.territorial_authority WHERE admin_bdys.territorial_authority.name = %s;'
         result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def creator_feature_added(self, qgsfId):
         """

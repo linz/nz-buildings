@@ -258,8 +258,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             while dataset <= self.dataset_id:
                 sql = 'SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;'
                 results = db._execute(sql, (dataset, ))
-                date = results.fetchall()[0][0]
-                if date is None:
+                if results is None:
                     sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
                     result = db._execute(sql, data=(geom, dataset))
                     results = result.fetchall()
