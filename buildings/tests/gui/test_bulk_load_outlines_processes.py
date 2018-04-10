@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Bulk Load Outlines GUI Processes
+    Tests: Bulk Load Outlines GUI setup confirm default settings
 
  ***************************************************************************/
 """
@@ -20,12 +20,13 @@ import unittest
 
 from qgis.utils import plugins, iface
 from qgis.utils import reloadPlugin
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint
 
 from buildings.utilities import database as db
 
 
-class ProcessBulkLoadGuiTest(unittest.TestCase):
-    """Test Bulk Load Outlines GUI Processes"""
+class BulkLoadTest(unittest.TestCase):
+    """Test Bulk Load Outlines GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -55,7 +56,7 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        cls.road_plugin.dockwidget.close()
+        # cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
@@ -65,10 +66,14 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
         self.bulk_load_frame = self.dockwidget.current_frame
+        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test')"
+        db.execute(sql)
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_cancel.click()
+        sql = "DELETE FROM buildings_common.capture_source cs WHERE cs.external_source_id = 'test'"
+        db.execute(sql)
 
     def test_external_id_radiobutton(self):
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
@@ -100,8 +105,5 @@ class ProcessBulkLoadGuiTest(unittest.TestCase):
         values = imagery_vector_layer.uniqueValues(idx)
         self.assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
 
-    # add test to check runs correctly
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
