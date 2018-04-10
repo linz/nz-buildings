@@ -96,8 +96,6 @@ class SetUpBulkNewGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
 
     def test_layer_registry(self):
-        # TODO: 
-        # check only the most recent supplied dataset is loaded into the map canvas
         layer_bool = False
         edit_bool = False
         root = QgsProject.instance().layerTreeRoot()

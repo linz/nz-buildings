@@ -56,7 +56,7 @@ class BulkLoadTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        # cls.road_plugin.dockwidget.close()
+        cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
@@ -104,6 +104,7 @@ class BulkLoadTest(unittest.TestCase):
         idx = imagery_vector_layer.fieldNameIndex(fields[0].name())
         values = imagery_vector_layer.uniqueValues(idx)
         self.assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
+
 
 suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
