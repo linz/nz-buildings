@@ -446,25 +446,188 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- CAPTURE SOURCE GROUP insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_group_insert(
-      p_value varchar(80)
+CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_group_insert( 
+      p_value varchar(80) 
     , p_description varchar(400)
 )
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_common.capture_source_group(
-          capture_source_group_id
-        , value
-        , description
+    INSERT INTO buildings_common.capture_source_group( 
+          capture_source_group_id 
+        , value 
+        , description 
+    ) 
+    VALUES ( 
+          DEFAULT -- sequence 
+        , p_value 
+        , p_description 
     )
-    VALUES (
-          DEFAULT -- sequence
-        , p_value
-        , p_description
+    RETURNING capture_source_group_id; 
+ 
+$$ 
+LANGUAGE sql VOLATILE;
 
-    )
+-------------------------------------------------------------------------
+-- ORGANISATION delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_organisation_delete(
+      p_organisation_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.organisation
+    WHERE buildings_bulk_load.organisation.organisation_id = p_organisation_id 
+    RETURNING organisation_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- ORGANISATION delete by value
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_organisation_delete(
+      p_value varchar(40)
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.organisation
+    WHERE buildings_bulk_load.organisation.value = p_value
+    RETURNING organisation_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- LIFECYCLE STAGE delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_lifecycle_stage_delete(
+      p_lifecycle_stage_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings.lifecycle_stage
+    WHERE buildings.lifecycle_stage.lifecycle_stage_id = p_lifecycle_stage_id 
+    RETURNING lifecycle_stage_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- LIFECYCLE STAGE delete by value
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_lifecycle_stage_delete(
+      p_value varchar(40)
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings.lifecycle_stage
+    WHERE buildings.lifecycle_stage.value = p_value
+    RETURNING lifecycle_stage_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- CAPTURE METHOD delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_common.fn_capture_method_delete(
+      p_capture_method_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_common.capture_method
+    WHERE buildings_common.capture_method.capture_method_id = p_capture_method_id 
+    RETURNING capture_method_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- CAPTURE METHOD delete by value
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_capture_method_delete(
+      p_value varchar(40)
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_common.capture_method
+    WHERE buildings_common.capture_method.value = p_value
+    RETURNING capture_method_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- CAPTURE SOURCE delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_delete(
+      p_capture_source_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_common.capture_source
+    WHERE buildings_common.capture_source.capture_source_id = p_capture_source_id 
+    RETURNING capture_source_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- CAPTURE SOURCE GROUP delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_group_delete(
+      p_capture_source_group_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_common.capture_source_group
+    WHERE buildings_common.capture_source_group.capture_source_group_id = p_capture_source_group_id 
     RETURNING capture_source_group_id;
 
 $$
 LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- BULK LOAD OUTLINES delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_buildings_bulk_load_delete(
+      p_bulk_load_outline_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.bulk_load_outlines
+    WHERE buildings_bulk_load.bulk_load_outlines.bulk_load_outline_id = p_bulk_load_outline_id 
+    RETURNING bulk_load_outline_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- PRODUCTION OUTLINES delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_buildings_delete(
+      p_building_outline_id integer
+)
+RETURNS integer AS
+$$
+    DELETE FROM buildings.buildings
+    WHERE buildings.building_id = (SELECT building_id FROM buildings.building_outlines bo WHERE bo.building_outline_id = p_building_outline_id);
+
+    DELETE FROM buildings.building_outlines
+    WHERE buildings.building_outlines.building_outline_id = p_building_outline_id 
+    RETURNING building_outline_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+
