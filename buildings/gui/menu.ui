@@ -152,6 +152,11 @@
         </item>
         <item>
          <property name="text">
+          <string>Alter Building Relationships</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>Add New Outline to Supplied Dataset</string>
          </property>
         </item>

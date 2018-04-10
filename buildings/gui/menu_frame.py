@@ -11,6 +11,7 @@ from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.bulk_load_outlines import BulkLoadOutlines
 from buildings.gui.bulk_new_outline import BulkNewOutline
 from buildings.gui.production_new_outline import ProductionNewOutline
+from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.utilities import database as db
 
 import qgis
@@ -79,3 +80,7 @@ class MenuFrame(QFrame, FORM_CLASS):
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
             dw.new_widget(ProductionNewOutline(self.layer_registry))
+        if text == 'Alter Building Relationships':
+            dw = qgis.utils.plugins['roads'].dockwidget
+            dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+            dw.new_widget(AlterRelationships(self.layer_registry))
