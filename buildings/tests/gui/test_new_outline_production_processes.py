@@ -67,7 +67,7 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
+        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
         db.execute(sql)
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
@@ -76,7 +76,7 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.new_production_frame.btn_cancel.click()
-        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
+        sql = "DELETE FROM buildings_common.capture_source WHERE buildings_common.capture_source.external_source_id = 'test'"
         db.execute(sql)
 
     def test_ui_on_geom_drawn(self):
