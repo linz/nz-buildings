@@ -18,6 +18,7 @@ import json
 import re
 from tabulate import tabulate
 from os import path
+sys.path.append('../sql')
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -153,7 +154,7 @@ html_static_path = ['_static']
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-#html_extra_path = []
+html_extra_path = ['../../sql']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -168,7 +169,10 @@ html_static_path = ['_static']
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+html_additional_pages = {
+    'schema1': 'schema1.html'
+
+}
 
 # If false, no module index is generated.
 #html_domain_indices = True
@@ -302,6 +306,7 @@ texinfo_documents = [
 # ../docs/source
 # The path of the SQL file has been altered from likely final folder path
 
+#sql_file_path = "../../sql/02-buildings_schema.sql"
 sql_file_path = "./sql_not_final_location/02-buildings_schema.sql"
 #sql_file_path = "./sql_not_final_location/02-create_buildings_stage_schema.sql"
 
@@ -338,13 +343,14 @@ def get_schema():
 
 ##############################################################################
 
-# function to build a list of dictionaries (schema_list), with each dictionary (table_dict) containing all
+# function to build a list of dictionaries (schema_tabulate_list), with each dictionary (table_dict_tabulate) containing all
 # of the information for one table in the schema. Each of these dictionaries contains a key
 # to hold a list (this_table_columns) of lists of the columns for each table.
 def get_tables(schema_out):
     
     schema_list = []
-    table_dict = {}
+    schema_tabulate_list = []
+    table_dict_tabulate = {}
     
     # We open and save a copy of the SQL file into a variable, in order to search for components
     # which may have multiple rows (ie table comments or column comments). 
@@ -360,11 +366,11 @@ def get_tables(schema_out):
 
             if table_name_search is not None:
                 # Now perform all actions to find table name, table comment, table columns, and table comments
-                # and when done add all these content to table_dict, and then finally to schema_list
+                # and when done add all these content to table_dict, and then finally to schema_tabulate_list
 
-                table_dict = {}  # This dict hold all the information for one table
+                table_dict_tabulate = {} # This dict hold all the information for one table
                 table_name = table_name_search.group(1)
-                table_dict["table_nam"] = table_name
+                table_dict_tabulate["table_nam"] = table_name
                 table_str = schema_out["name"] + "." + table_name
                 table_comment_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
                 table_comment_search = re.search(table_comment_str, file_content, re.DOTALL)
@@ -374,21 +380,28 @@ def get_tables(schema_out):
                     table_comment_result = table_comment_search.group(1)
                     # remove line terminators and quote marks from multiline comment
                     table_comment_result_clean = table_comment_result.replace("\r\n", "").replace("'", "")
-                    table_dict["table_comment"] = table_comment_result_clean
+                    table_dict_tabulate["table_comment"] = table_comment_result_clean
                     # get the columns for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
-                    table_dict["table_columns"] = this_table_columns
+                    headers = ['Column Name', 'Data Type', 'Length', 'Precision', 'Scale', 'Description']
+                    tabulate_columns = tabulate(this_table_columns, tablefmt='rst', headers = headers)
+                    tabulate_split = [x.split(',')for x in tabulate_columns.split('\n')]
+                    table_dict_tabulate["table_columns"] = tabulate_split
 
                 elif table_comment_search is None:
-                    table_dict["table_comment"] = ""
                     # get the columms for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
-                    table_dict["table_columns"] = this_table_columns
+                    table_dict_tabulate["table_comment"] = ' '
+                    headers = ['Column Name', 'Data Type', 'Length', 'Precision', 'Scale', 'Description']
+                    tabulate_columns = tabulate(this_table_columns, tablefmt='rst', headers = headers)
+                    tabulate_split = [x.split(',')for x in tabulate_columns.split('\n')]
+                    table_dict_tabulate["table_columns"] = tabulate_split
 
-                schema_list.append(table_dict)
+                schema_tabulate_list.append(table_dict_tabulate)
+
 
     f.close()
-    return schema_list
+    return schema_tabulate_list
 
 
 
@@ -399,10 +412,10 @@ def get_column_comments(column_str, file_content):
 
     if column_comment_search is not None:
         column_comment = column_comment_search.group(1)
-        column_comment_result_clean = column_comment.replace("\r\n", "").replace("'", "")
+        column_comment_result_clean = column_comment.replace('\r\n', ' ').replace("'", ' ')
 
     if column_comment_search is None:
-        column_comment_result_clean = ""
+        column_comment_result_clean = ' '
     return column_comment_result_clean
 
 
@@ -426,10 +439,10 @@ def get_columns(table_str, file_content, this_table_columns):
             pri_key = pri_key_search.group(1)
             column_str = table_str + "." + pri_key
             this_column.append(pri_key) #column Name
-            this_column.append("integer")  #Data Type
-            this_column.append("") # Length
-            this_column.append("32") #Precision
-            this_column.append("0") #Scale
+            this_column.append('integer')  #Data Type
+            this_column.append(' ') # Length
+            this_column.append('32') #Precision
+            this_column.append('0') #Scale
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -440,10 +453,10 @@ def get_columns(table_str, file_content, this_table_columns):
             length = character_varying_search.group(2)
             column_str = table_str + "." + var_column
             this_column.append(var_column) #column Name
-            this_column.append("varchar") #Data Type
+            this_column.append('varchar') #Data Type
             this_column.append(length) #Length
-            this_column.append("") #Precision
-            this_column.append("") #scale
+            this_column.append(' ') #Precision
+            this_column.append(' ') #scale
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -453,10 +466,10 @@ def get_columns(table_str, file_content, this_table_columns):
             timecolumn1 = timestamp_search.group(1)
             column_str = table_str + "." + timecolumn1
             this_column.append(timecolumn1) #column Name
-            this_column.append("date") #Data Type
-            this_column.append("") #Length
-            this_column.append("") #Precision
-            this_column.append("") #scale
+            this_column.append('date') #Data Type
+            this_column.append(' ') #Length
+            this_column.append(' ') #Precision
+            this_column.append(' ') #scale
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -466,10 +479,10 @@ def get_columns(table_str, file_content, this_table_columns):
             integer_column_name = integer_search.group(1)
             column_str = table_str + "." + integer_column_name
             this_column.append(integer_column_name) #column Name
-            this_column.append("integer") #Data Type
-            this_column.append("") #Length
-            this_column.append("32") #Precision
-            this_column.append("0") #scale
+            this_column.append('integer') #Data Type
+            this_column.append(' ') #Length
+            this_column.append('32') #Precision
+            this_column.append('0') #scale
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -479,19 +492,23 @@ def get_columns(table_str, file_content, this_table_columns):
             shape_column_name = shape.group(1)
             column_str = table_str + "." + shape_column_name
             this_column.append(shape_column_name) #column Name
-            this_column.append("geometry") #Data Type
-            this_column.append("") #Length
-            this_column.append("") #Precision
-            this_column.append("") #scale
+            this_column.append('geometry') #Data Type
+            this_column.append(' ') #Length
+            this_column.append(' ') #Precision
+            this_column.append(' ') #scale
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
+
 
     return this_table_columns
 
 schema_out = get_schema()
 
-schema_list_out = get_tables(schema_out)
+schema_tabulate_list_out = get_tables(schema_out)
+
+
+
 
 
 
@@ -514,8 +531,8 @@ def setup(app):
     app.add_stylesheet('custom.css')
 
 html_context = {
-    'outputschema': schema_list_out,
-    'schema_gen': schema_out
+    'schema_gen': schema_out,
+    'schema_tab': schema_tabulate_list_out
 }
 
 # This is test data in case troubleshooting is required
