@@ -190,8 +190,6 @@ class NewEntry(QFrame, FORM_CLASS):
         update the capture source group table
             value = capture source group autogenerate id
         """
-        print capture_source_group
-        print description
         # Check if capture source group in buildings_common.capture_source_group table
         sql = 'SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;'
         result = db._execute(sql, data=(capture_source_group,))

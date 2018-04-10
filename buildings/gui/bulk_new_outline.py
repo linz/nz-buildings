@@ -238,7 +238,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
 
         # TODO handle when user tries to add multiple new geoms
-        print 'yes'
         if qgsfId not in self.added_building_ids:
             self.added_building_ids.append(qgsfId)
         # get new feature geom

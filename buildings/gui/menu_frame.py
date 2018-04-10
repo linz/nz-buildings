@@ -22,12 +22,10 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class MenuFrame(QFrame, FORM_CLASS):
 
-
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
-
         self.layer_registry = layer_registry
 
         # set up signals and slots

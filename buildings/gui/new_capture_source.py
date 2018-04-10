@@ -96,7 +96,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # get type
         self.value = self.get_combobox_value()
         # call insert function
-        return self.insert_capture_source(self.value, self.external_source)
+        self.insert_capture_source(self.value, self.external_source)
+        self.le_external_source_id.clear()
 
     def cancel_clicked(self):
         """
@@ -142,6 +143,4 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
             sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
-            result = db._execute(sql, (capture_source_group_id, external_source))
-            return result.fetchall()[0][0]
-            self.le_external_source_id.clear()
+            db.execute(sql, (capture_source_group_id, external_source))

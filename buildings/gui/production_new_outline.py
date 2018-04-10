@@ -167,7 +167,6 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
-        print text
         sql = 'SELECT id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.suburb_4th = %s;'
         result = db._execute(sql, (text, ))
         if result is not None:

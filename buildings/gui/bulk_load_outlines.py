@@ -42,6 +42,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.mcb_imagery_layer.currentIndexChanged.connect(self.populate_field_combobox)
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
         self.rad_external_source.toggled.connect(self.enable_external)
+        self.ml_outlines_layer.currentIndexChanged.connect(self.populate_external_fcb)
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
@@ -116,6 +117,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 count = count + 1
             if not exists:
                 self.cmb_imagery.addItem(str(value))
+
+    def populate_external_fcb(self):
+        self.fcb_external_id.setLayer(self.ml_outlines_layer.currentLayer())
 
     def enable_external(self):
         """
