@@ -4,21 +4,19 @@ import os.path
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
-from PyQt4.QtCore import pyqtSignal
 import qgis
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "new_entry.ui"))
+    os.path.dirname(__file__), 'new_entry.ui'))
 
 db.connect()
 
+
 class NewEntry(QFrame, FORM_CLASS):
 
-    ok_task = pyqtSignal()
-    cancelling_task = pyqtSignal()
     value = ''
     new_type = ''
 
@@ -41,12 +39,12 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         if self.le_new_entry.text() == '':
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report("\n -------------------- EMPTY VALUE FIELD -------------------- \n\n Null values not allowed")
+            self.error_dialog.fill_report('\n -------------------- EMPTY VALUE FIELD -------------------- \n\n Null values not allowed')
             self.error_dialog.show()
             return
         if len(self.le_new_entry.text()) >= 40:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report("\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 40 characters")
+            self.error_dialog.fill_report('\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 40 characters')
             self.error_dialog.show()
             return
         return self.le_new_entry.text()
@@ -57,17 +55,17 @@ class NewEntry(QFrame, FORM_CLASS):
         This is only required if the type to add is 
         capture source group
         """
-        if self.new_type != "Capture Source Group":
+        if self.new_type != 'Capture Source Group':
             return
         else:
             if self.le_description.text() == '':
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report("\n -------------------- EMPTY DESCRIPTION FIELD -------------------- \n\n Null values not allowed")
+                self.error_dialog.fill_report('\n -------------------- EMPTY DESCRIPTION FIELD -------------------- \n\n Null values not allowed')
                 self.error_dialog.show()
                 return
             if len(self.le_description.text()) >= 40:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report("\n -------------------- DESCRIPTION TOO LONG -------------------- \n\n Enter less than 40 characters")
+                self.error_dialog.fill_report('\n -------------------- DESCRIPTION TOO LONG -------------------- \n\n Enter less than 40 characters')
                 self.error_dialog.show()
                 return
             return self.le_description.text()
@@ -76,15 +74,13 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         Get the type to add from the combo box
         """
-        index = self.cmb_new_type_selection.currentIndex()
-        return self.cmb_new_type_selection.itemText(index)
+        return self.cmb_new_type_selection.currentText()
 
     def set_new_type(self):
         """
         Called when type to add combobox index is chaged
         """
-        index = self.cmb_new_type_selection.currentIndex()
-        self.new_type = self.cmb_new_type_selection.itemText(index)
+        self.new_type = self.cmb_new_type_selection.currentText()
         if self.new_type == 'Capture Source Group':
             self.le_description.setEnabled(1)
         else:
@@ -126,30 +122,20 @@ class NewEntry(QFrame, FORM_CLASS):
             value output = organisation auto generate id
         """
         # check if organisation in buildings_bulk_load.organisation table
-        sql = "SELECT * FROM buildings_bulk_load.organisation WHERE buildings_bulk_load.organisation.value = %s;"
+        sql = 'SELECT * FROM buildings_bulk_load.organisation WHERE buildings_bulk_load.organisation.value = %s;'
         result = db._execute(sql, data=(organisation,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("\n -------------------- ORGANISATION EXISTS -------------------- \n\n Value entered exists in table")
+            self.error_dialog.fill_report(' ')
+            self.error_dialog.fill_report('\n -------------------- ORGANISATION EXISTS -------------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = "SELECT organisation_id FROM buildings_bulk_load.organisation;"
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new organisation
-            # enter new organisation
-            sql = "INSERT INTO buildings_bulk_load.organisation(organisation_id, value)VALUES(%s, %s);"
-            db.execute(sql, (id, organisation))
+            sql = 'SELECT buildings_bulk_load.fn_organisation_insert(%s);'
+            db.execute(sql, (organisation,))
             self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
@@ -158,30 +144,21 @@ class NewEntry(QFrame, FORM_CLASS):
         value = lifecycle stage auto generate id
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
-        sql = "SELECT * FROM buildings.lifecycle_stage WHERE buildings.lifecycle_stage.value = %s;"
+        sql = 'SELECT * FROM buildings.lifecycle_stage WHERE buildings.lifecycle_stage.value = %s;'
         result = db._execute(sql, data=(lifecycle_stage,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("\n -------------------- LIFECYCLE STAGE EXISTS -------------------- \n\n Value entered exists in table")
+            self.error_dialog.fill_report(' ')
+            self.error_dialog.fill_report('\n -------------------- LIFECYCLE STAGE EXISTS -------------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = "SELECT lifecycle_stage_id FROM buildings.lifecycle_stage;"
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new lifecycle stage
             # enter new lifecycle stage
-            sql = "INSERT INTO buildings.lifecycle_stage(lifecycle_stage_id, value)VALUES(%s, %s);"
-            db.execute(sql, (id, lifecycle_stage))
+            sql = 'SELECT buildings.fn_lifecycle_stage_insert(%s);'
+            db.execute(sql, (lifecycle_stage,))
             self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
@@ -191,30 +168,21 @@ class NewEntry(QFrame, FORM_CLASS):
         """
 
         # check if capture method in buildings_common.capture_method table
-        sql = "SELECT * FROM buildings_common.capture_method WHERE buildings_common.capture_method.value = %s;"
+        sql = 'SELECT * FROM buildings_common.capture_method WHERE buildings_common.capture_method.value = %s;'
         result = db._execute(sql, data=(capture_method,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("\n -------------------- CAPTURE METHOD EXISTS -------------------- \n\n Value entered exists in table")
+            self.error_dialog.fill_report(' ')
+            self.error_dialog.fill_report('\n -------------------- CAPTURE METHOD EXISTS -------------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
         elif len(ls) == 0:
-            # find the last id value in table
-            sql = "SELECT capture_method_id FROM buildings_common.capture_method;"
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new capture method
             # enter new capture method
-            sql = "INSERT INTO buildings_common.capture_method(capture_method_id, value)VALUES(%s, %s);"
-            db.execute(sql, data=(id, capture_method))
+            sql = 'SELECT buildings_common.fn_capture_method_insert(%s);'
+            db.execute(sql, (capture_method,))
             self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group, description):
@@ -223,30 +191,19 @@ class NewEntry(QFrame, FORM_CLASS):
             value = capture source group autogenerate id
         """
         # Check if capture source group in buildings_common.capture_source_group table
-        sql = "SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;"
+        sql = 'SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;'
         result = db._execute(sql, data=(capture_source_group,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(" ")
-            self.error_dialog.fill_report("\n ---------------- CAPTURE SOURCE GROUP ---------------- \n\n Value entered exists in table")
+            self.error_dialog.fill_report(' ')
+            self.error_dialog.fill_report('\n ---------------- CAPTURE SOURCE GROUP ---------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
-
-        # if it isn't in the table add to table
-        elif len(ls) == 0:
-            # find the last id value in table
-            sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group;"
-            result = db._execute(sql)
-            attributes = result.fetchall()
-            length = len(attributes)
-            if length == 0:
-                id = 1
-            else:
-                id = attributes[length - 1][0] + 1  # id for new capture source group
+        else:
             # enter new capture source group
-            sql = "INSERT INTO buildings_common.capture_source_group(capture_source_group_id, value, description)VALUES(%s, %s, %s);"
-            db.execute(sql, data=(id, capture_source_group, description))
+            sql = 'SELECT buildings_common.fn_capture_source_group_insert(%s, %s);'
+            db.execute(sql, (capture_source_group, description))
             self.le_new_entry.clear()
             self.le_description.clear()

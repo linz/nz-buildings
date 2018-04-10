@@ -14,7 +14,7 @@ from buildings.utilities import layers
 from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "new_outline_bulk.ui"))
+    os.path.dirname(__file__), 'new_outline_bulk.ui'))
 
 db.connect()
 
@@ -34,7 +34,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.cmb_ta.setDisabled(1)
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
-        self.btn_save.setDisabled(1)
         # set up
         self.create_building_layer = QgsVectorLayer()
         self.geom = None
@@ -42,28 +41,79 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         # supplied dataset to add to canvas
         # find data with most recent datasat id 
-        sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets"
+        sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets'
         result = db._execute(sql)
         result = result.fetchall()
         if len(result) == 0:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report("\n ---------------- NO SUPPLIED DATASETS ---------------- \n\n There are no supplied datasets please load some outlines first")
+                self.error_dialog.fill_report('\n ---------------- NO SUPPLIED DATASETS ---------------- \n\n There are no supplied datasets please load some outlines first')
                 self.error_dialog.show()
                 self.btn_reset.setDisabled(1)
+                self.btn_save.setDisabled(1)
+                self.cmb_supplied_dataset.setDisabled(1)
                 self.btn_cancel.clicked.connect(self.fail_cancel_clicked)
         else:
-            self.dataset = result[len(result) - 1][0]
+            self.populate_dataset_combobox()
+            text = self.cmb_supplied_dataset.currentText()
+            text_list = text.split('-')
+            self.dataset_id = text_list[0]
+            self.layer_registry.remove_layer(self.create_building_layer)
+            self.reset_clicked()
             # add the bulk_load_outlines to the layer registry
             self.create_building_layer = self.layer_registry.add_postgres_layer(
-                "bulk_load_outlines", "bulk_load_outlines",
-                "shape", "buildings_bulk_load", "", "supplied_dataset_id = {0}".format(self.dataset)
+                'bulk_load_outlines', 'bulk_load_outlines',
+                'shape', 'buildings_bulk_load', '', 'supplied_dataset_id = {0}'.format(self.dataset_id)
             )
             self.territorial_auth = self.layer_registry.add_postgres_layer(
-                "territorial_authorities", "territorial_authority",
-                "shape", "admin_bdys", '', ''
+                'territorial_authorities', 'territorial_authority',
+                'shape', 'admin_bdys', '', ''
             )
             # change style of TAs to the same as roads nz_localities but wth different colours
             layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+            self.create_building_layer.featureAdded.connect(self.creator_feature_added)
+            self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
+
+            # enable editing
+            iface.setActiveLayer(self.create_building_layer)
+            iface.actionToggleEditing().trigger()
+            # set editing to add polygon
+            iface.actionAddFeature().trigger()
+            # zoom to the active layer
+            iface.actionZoomToLayer().trigger()
+            # set up signals
+            self.btn_save.clicked.connect(self.save_clicked)
+            self.btn_save.setDisabled(1)
+            self.btn_reset.clicked.connect(self.reset_clicked)
+            self.cmb_supplied_dataset.currentIndexChanged.connect(self.add_outlines)
+            self.btn_cancel.clicked.connect(self.cancel_clicked)
+
+    def populate_dataset_combobox(self):
+        sql = 'SELECT supplied_dataset_id, description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.processed_date is NULL;'
+        results = db._execute(sql)
+        datasets = results.fetchall()
+        for dset in datasets:
+            text = '{0}-{1}'.format(dset[0], dset[1])
+            self.cmb_supplied_dataset.addItem(text)
+
+    def add_outlines(self):
+            text = self.cmb_supplied_dataset.currentText()
+            text_list = text.split('-')
+            self.dataset_id = text_list[0]
+            self.layer_registry.remove_layer(self.create_building_layer)
+            self.supplied_reset()
+            # add the bulk_load_outlines to the layer registry
+            self.create_building_layer = self.layer_registry.add_postgres_layer(
+                'bulk_load_outlines', 'bulk_load_outlines',
+                'shape', 'buildings_bulk_load', '', 'supplied_dataset_id = {0}'.format(self.dataset_id)
+            )
+            self.territorial_auth = self.layer_registry.add_postgres_layer(
+                'territorial_authorities', 'territorial_authority',
+                'shape', 'admin_bdys', '', ''
+            )
+            # change style of TAs to the same as roads nz_localities but wth different colours
+            layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+            self.create_building_layer.featureAdded.connect(self.creator_feature_added)
+            self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
 
             # enable editing
             iface.setActiveLayer(self.create_building_layer)
@@ -73,26 +123,19 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             # zoom to the active layer
             iface.actionZoomToLayer().trigger()
 
-            # set up signals
-            self.btn_save.clicked.connect(self.save_clicked)
-            self.btn_reset.clicked.connect(self.reset_clicked)
-            self.create_building_layer.featureAdded.connect(self.creator_feature_added)
-            self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
-            self.btn_cancel.clicked.connect(self.cancel_clicked)
-
     def populate_lookup_comboboxes(self):
         """
         method called on opening of frame to populate the lookup table
         comboboxes
         """
         # populate capture method combobox
-        sql = "SELECT value FROM buildings_common.capture_method;"
+        sql = 'SELECT value FROM buildings_common.capture_method;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.cmb_capture_method.addItem(item[0])
         # populate capture source group
-        sql = "SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;"
+        sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -106,7 +149,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         # TODO is only Wellington??
         # populate suburb combobox
-        sql = "SELECT DISTINCT alias_name FROM admin_bdys.suburb_alias"
+        sql = 'SELECT DISTINCT alias_name FROM admin_bdys.suburb_alias'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -114,14 +157,14 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.cmb_suburb.addItem(item[0])
 
         # populate town combobox
-        sql = "SELECT DISTINCT city_name FROM admin_bdys.nz_locality"
+        sql = 'SELECT DISTINCT city_name FROM admin_bdys.nz_locality'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_town.addItem(item[0])
         # populate territorial authority combobox
-        sql = "SELECT DISTINCT name FROM admin_bdys.territorial_authority"
+        sql = 'SELECT DISTINCT name FROM admin_bdys.territorial_authority'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -132,9 +175,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         returns capture method id of input combobox
         """
-        index = self.cmb_capture_method.currentIndex()
-        text = self.cmb_capture_method.itemText(index)
-        sql = "SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;"
+        text = self.cmb_capture_method.currentText()
+        sql = 'SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;'
         result = db._execute(sql, data=(text, ))
         return result.fetchall()[0][0]
 
@@ -142,22 +184,21 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         returns capture source id of input combobox
         """
-        index = self.cmb_capture_source.currentIndex()
-        text = self.cmb_capture_source.itemText(index)
+        text = self.cmb_capture_source.currentText()
         if text == '':
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report("\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries")
+            self.error_dialog.fill_report('\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries')
             self.error_dialog.show()
             return
         text_ls = text.split('- ')
-        sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;"
+        sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;'
         result = db._execute(sql, data=(text_ls[0], text_ls[1]))
         data = result.fetchall()[0][0]
-        if text_ls[2] == "None":
-            sql = "SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;"
+        if text_ls[2] == 'None':
+            sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;'
             result = db._execute(sql, data=(data,))
         else:
-            sql = "SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;"
+            sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;'
             result = db._execute(sql, data=(data, text_ls[2]))
         return result.fetchall()[0][0]
 
@@ -165,9 +206,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         returns suburb entered
         """
-        index = self.cmb_suburb.currentIndex()
-        text = self.cmb_suburb.itemText(index)
-        sql = "SELECT locality_id FROM admin_bdys.suburb_alias WHERE admin_bdys.suburb_alias.alias_name = %s;"
+        text = self.cmb_suburb.currentText()
+        sql = 'SELECT locality_id FROM admin_bdys.suburb_alias WHERE admin_bdys.suburb_alias.alias_name = %s;'
         result = db._execute(sql, (text, ))
         return result.fetchall()[0][0]  
 
@@ -175,9 +215,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         returns town/city entered
         """
-        index = self.cmb_town.currentIndex()
-        text = self.cmb_town.itemText(index)
-        sql = "SELECT city_id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.city_name = %s;"
+        text = self.cmb_town.currentText()
+        sql = 'SELECT city_id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.city_name = %s;'
         result = db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -185,9 +224,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         returns territorial authority entered
         """
-        index = self.cmb_ta.currentIndex()
-        text = self.cmb_ta.itemText(index)
-        sql = "SELECT ogc_fid FROM admin_bdys.territorial_authority WHERE admin_bdys.territorial_authority.name = %s;"
+        text = self.cmb_ta.currentText()
+        sql = 'SELECT ogc_fid FROM admin_bdys.territorial_authority WHERE admin_bdys.territorial_authority.name = %s;'
         result = db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -200,7 +238,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
 
         # TODO handle when user tries to add multiple new geoms
-
         if qgsfId not in self.added_building_ids:
             self.added_building_ids.append(qgsfId)
         # get new feature geom
@@ -209,14 +246,24 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = "SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));"
+        sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
         result = db._execute(sql, data=(wkt, ))
         geom = result.fetchall()[0][0]
+        """
+        print geom
+        print '---------------------'
         # ensure outline SRID is 2193
-        sql = "SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)"
+
+        sql = 'SELECT ST_GeometryFromText(%s)'
         result = db._execute(sql, data=(geom, ))
         self.geom = result.fetchall()[0][0]
-
+        print self.geom
+        print '---------------------------'
+        """
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        result = db._execute(sql, data=(geom, ))
+        self.geom = result.fetchall()[0][0]
+        # print self.geom
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
         self.cmb_capture_source.setEnabled(1)
@@ -250,7 +297,6 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         # get combobox values
         self.capture_source_id = self.get_capture_source_id()
-        # TODO if capture source is none
         if self.capture_source_id is None:
             return
         self.capture_method_id = self.get_capture_method_id()
@@ -258,9 +304,9 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.town = self.get_town()
         self.t_a = self.get_t_a()
 
-        # insert into bulk_load_outlines table
-        sql = "INSERT INTO buildings_bulk_load.bulk_load_outlines(supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES(%s, Null, 2, %s, %s, %s, %s, %s, now(), %s)"
-        db.execute(sql, (self.dataset, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
+        # call function to insert into bulk_load_outlines table
+        sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, now(), %s)'
+        db.execute(sql, (self.dataset_id, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
 
         # reset comboboxes for next outline
         self.cmb_capture_method.setCurrentIndex(0)
@@ -302,6 +348,22 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
 
+    def supplied_reset(self):
+        """
+        Called when reset button is clicked
+        """
+        # reset combo boxes and disable
+        self.cmb_capture_method.setCurrentIndex(0)
+        self.cmb_capture_method.setDisabled(1)
+        self.cmb_capture_source.setCurrentIndex(0)
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_ta.setCurrentIndex(0)
+        self.cmb_ta.setDisabled(1)
+        self.cmb_town.setCurrentIndex(0)
+        self.cmb_town.setDisabled(1)
+        self.cmb_suburb.setCurrentIndex(0)
+        self.cmb_suburb.setDisabled(1)
+        self.btn_save.setDisabled(1)
     def reset_clicked(self):
         """
         Called when reset button is clicked

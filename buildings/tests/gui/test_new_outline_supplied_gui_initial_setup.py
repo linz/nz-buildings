@@ -78,7 +78,7 @@ class SetUpBulkNewGuiTest(unittest.TestCase):
     def test_bulk_load_gui_set_up(self):
         # tests for if no_supplied_data is true
         if self.no_supplied_data:
-            self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
+            # self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
             self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
             self.assertTrue(self.new_bulk_frame.btn_cancel.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
