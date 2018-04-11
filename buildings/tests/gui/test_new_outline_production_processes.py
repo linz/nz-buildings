@@ -67,9 +67,14 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+        sql = "SELECT COUNT(*) FROM buildings_common.capture_source"
         result = db._execute(sql)
-        self.result_cs = result.fetchall()[0][0]
+        if result.fetchall()[0][0] == 0:
+            sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+            result = db._execute(sql)
+            self.result_cs = result.fetchall()[0][0]
+        else:
+            self.result_cs = 1
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
         self.new_production_frame = self.dockwidget.current_frame
@@ -77,8 +82,6 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.new_production_frame.btn_cancel.click()
-        sql = 'SELECT buildings_common.fn_capture_source_delete(%s);'
-        db.execute(sql, (self.result_cs, ))
 
     def test_ui_on_geom_drawn(self):
         # add geom to canvas
@@ -170,8 +173,6 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        sql = 'SELECT buildings.fn_building_delete(%s);'
-        db.execute(sql, (self.new_production_frame.building_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesGuiTest)
