@@ -20,7 +20,6 @@ import unittest
 
 from qgis.utils import plugins, iface
 from qgis.utils import reloadPlugin
-from qgis.core import QgsFeature, QgsGeometry, QgsPoint
 
 from buildings.utilities import database as db
 
@@ -66,14 +65,15 @@ class BulkLoadTest(unittest.TestCase):
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
         self.bulk_load_frame = self.dockwidget.current_frame
-        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test')"
-        db.execute(sql)
+        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+        result = db._execute(sql)
+        self.result_cs = result.fetchall()[0][0]
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_cancel.click()
-        sql = "DELETE FROM buildings_common.capture_source cs WHERE cs.external_source_id = 'test'"
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_delete(%s);'
+        db.execute(sql, (self.result_cs, ))
 
     def test_external_id_radiobutton(self):
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())

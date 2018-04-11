@@ -15,7 +15,7 @@
 
  ***************************************************************************/
 """
-from qgis.utils import plugins, iface
+from qgis.utils import plugins
 from qgis.utils import reloadPlugin
 
 
@@ -78,12 +78,12 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertEqual(self.menu_frame.btn_new_entry.text(), 'New Entry')
         self.assertEqual(self.menu_frame.btn_add_capture_source.text(), 'Add Capture Source')
         self.assertEqual(self.menu_frame.btn_load_outlines.text(), 'Bulk Load Outlines')
-        
+
     def test_menu_gui_combo_default(self):
         # combo box index is add outlines and enabled
         self.assertTrue(self.menu_frame.cmb_add_outline.isEnabled())
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), 'Add Outlines')
-        
+
     def test_menu_gui_combo_options(self):
         # combo box has three options
         self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
@@ -93,4 +93,3 @@ class SetUpMenuGuiTest(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
-

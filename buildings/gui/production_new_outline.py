@@ -64,6 +64,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         iface.actionZoomToLayer().trigger()
 
         # set up signals
+        self.building_id = None
         self.btn_save.clicked.connect(self.save_clicked)
         self.btn_reset.clicked.connect(self.reset_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
@@ -280,6 +281,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.btn_save.setDisabled(1)
         # empty saved_building_ids
         self.saved_building_ids = []
+        self.building_id = building_id
 
     def cancel_clicked(self):
         """

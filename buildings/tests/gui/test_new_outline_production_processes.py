@@ -68,7 +68,8 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
-        db.execute(sql)
+        result = db._execute(sql)
+        self.result_cs = result.fetchall()[0][0]
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(2)
         self.new_production_frame = self.dockwidget.current_frame
@@ -76,8 +77,8 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.new_production_frame.btn_cancel.click()
-        sql = "DELETE FROM buildings_common.capture_source WHERE buildings_common.capture_source.external_source_id = 'test'"
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_delete(%s);'
+        db.execute(sql, (self.result_cs, ))
 
     def test_ui_on_geom_drawn(self):
         # add geom to canvas
@@ -169,11 +170,8 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        # remove row from table
-        sql = 'DELETE FROM buildings.building_outlines WHERE building_outline_id = (SELECT MAX(building_outline_id) FROM buildings.building_outlines)'
-        db.execute(sql)
-        sql = 'DELETE FROM buildings.buildings WHERE building_id = (SELECT MAX(building_id) FROM buildings.buildings)'
-        db.execute(sql)
+        sql = 'SELECT buildings.fn_building_delete(%s);'
+        db.execute(sql, (self.new_production_frame.building_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesGuiTest)

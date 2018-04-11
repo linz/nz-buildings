@@ -81,8 +81,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        sql = 'DELETE FROM buildings_bulk_load.organisation WHERE organisation_id = (SELECT MAX(organisation_id) FROM buildings_bulk_load.organisation)'
-        db.execute(sql)
+        sql = 'SELECT buildings_bulk_load.fn_organisation_delete(%s);'
+        db.execute(sql, (self.new_entry_frame.organisation_id, ))
 
     def test_duplicate_organisation(self):
         # test existing organisation
@@ -98,8 +98,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_bulk_load.organisation WHERE organisation_id = (SELECT MAX(organisation_id) FROM buildings_bulk_load.organisation)'
-            db.execute(sql)
+            sql = 'SELECT buildings_bulk_load.fn_organisation_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.organisation_id, ))
 
     def test_null_organisation(self):
         # test null organisation
@@ -114,8 +114,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_bulk_load.organisation WHERE organisation_id = (SELECT MAX(organisation_id) FROM buildings_bulk_load.organisation)'
-            db.execute(sql)
+            sql = 'SELECT buildings_bulk_load.fn_organisation_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.organisation_id, ))
 
     def test_new_lifecycle_stage(self):
         # test correct new lifecycle_stage
@@ -129,8 +129,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        sql = 'DELETE FROM buildings.lifecycle_stage WHERE lifecycle_stage_id = (SELECT MAX(lifecycle_stage_id) FROM buildings.lifecycle_stage)'
-        db.execute(sql)
+        sql = 'SELECT buildings.fn_lifecycle_stage_delete(%s);'
+        db.execute(sql, (self.new_entry_frame.lifecycle_stage_id, ))
 
     def test_duplicate_lifecycle_stage(self):
         # test existing lifecycle_stage
@@ -147,8 +147,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings.lifecycle_stage WHERE lifecyle_stage_id = (SELECT MAX(lifecycle_stage_id) FROM buildings.lifecycle_stage)'
-            db.execute(sql)
+            sql = 'SELECT buildings.fn_lifecycle_stage_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.lifecycle_stage_id, ))
 
     def test_null_lifecycle_stage(self):
         # test null lifecycle_stage
@@ -164,8 +164,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings.lifecycle_stage WHERE lifecyle_stage_id = (SELECT MAX(lifecycle_stage_id) FROM buildings.lifecycle_stage)'
-            db.execute(sql)
+            sql = 'SELECT buildings.fn_lifecycle_stage_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.lifecycle_stage_id, ))
 
     def test_new_capture_method(self):
         # test correct new capture_method
@@ -179,8 +179,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        sql = 'DELETE FROM buildings_common.capture_method WHERE capture_method_id = (SELECT MAX(capture_method_id) FROM buildings_common.capture_method)'
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_method_delete(%s);'
+        db.execute(sql, (self.new_entry_frame.capture_method_id, ))
 
     def test_duplicate_capture_method(self):
         # test existing capture_method
@@ -197,8 +197,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_method WHERE capture_method_id = (SELECT MAX(capture_method_id) FROM buildings_common.capture_method)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_method_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_method_id, ))
 
     def test_null_capture_method(self):
         # test null capture_method
@@ -214,8 +214,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_method WHERE capture_method_id = (SELECT MAX(capture_method_id) FROM buildings_common.capture_method)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_method_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_method_id, ))
 
     def test_new_capture_source_group(self):
         # test correct new capture_source_group
@@ -230,8 +230,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        sql = 'DELETE FROM buildings_common.capture_source_group WHERE capture_source_group_id = (SELECT MAX(capture_source_group_id) FROM buildings_common.capture_source_group)'
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_group_delete(%s);'
+        db.execute(sql, (self.new_entry_frame.capture_source_group_id, ))
 
     def test_duplicate_capture_source_group(self):
         # test existing capture_source_group
@@ -249,8 +249,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_source_group WHERE capture_source_group_id = (SELECT MAX(capture_source_group_id) FROM buildings_common.capture_source_group)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_source_group_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_source_group_id, ))
 
     def test_capture_source_group_null_value_complete_desc(self):
         # test capture_source_group null value & complete description
@@ -268,8 +268,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_source_group WHERE capture_source_group_id = (SELECT MAX(capture_source_group_id) FROM buildings_common.capture_source_group)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_source_group_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_source_group_id, ))
 
     def test_capture_source_group_complete_value_null_desc(self):
         # test capture_source_group complete value & null description
@@ -287,8 +287,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_source_group WHERE capture_source_group_id = (SELECT MAX(capture_source_group_id) FROM buildings_common.capture_source_group)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_source_group_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_source_group_id, ))
 
     def test_capture_source_group_null(self):
         # test capture_source_group null value & null description
@@ -306,8 +306,8 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_source_group WHERE capture_source_group_id = (SELECT MAX(capture_source_group_id) FROM buildings_common.capture_source_group)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_source_group_delete(%s);'
+            db.execute(sql, (self.new_entry_frame.capture_source_group_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessNewEntryGuiTest)

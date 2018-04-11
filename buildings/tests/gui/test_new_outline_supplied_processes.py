@@ -137,7 +137,7 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             self.assertEqual(self.new_bulk_frame.cmb_suburb.currentIndex(), 0)
             # check comboboxes disabled
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
-            self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
+            self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
@@ -174,8 +174,8 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
             self.assertEqual(result2, result + 1)
             # remove row from table
-            sql = 'DELETE FROM buildings_bulk_load.buildings_bulk_load WHERE bulk_load_outline_id = (SELECT MAX(bulk_load_outline_id) FROM buildings_bulk_load.buildings_bulk_load)'
-            db.execute(sql)
+            sql = 'SELECT buildings_bulk_load.fn_buildings_bulk_load_delete(%s)'
+            db.execute(sql, (self.new_bulk_frame.supplied_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
