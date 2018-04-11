@@ -93,5 +93,5 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
         self.assertTrue(self.new_entry_frame.le_description.isEnabled())
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryGuiTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
+# suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryGuiTest)
+# unittest.TextTestRunner(verbosity=2).run(suite)

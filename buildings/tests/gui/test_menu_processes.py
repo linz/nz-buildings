@@ -98,5 +98,5 @@ class ProcessMenuGuiTest(unittest.TestCase):
         self.dockwidget.current_frame.btn_cancel.click()
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessMenuGuiTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
+# suite = unittest.TestLoader().loadTestsFromTestCase(ProcessMenuGuiTest)
+# unittest.TextTestRunner(verbosity=2).run(suite)

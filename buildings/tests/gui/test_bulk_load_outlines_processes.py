@@ -65,15 +65,18 @@ class BulkLoadTest(unittest.TestCase):
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_load_outlines.click()
         self.bulk_load_frame = self.dockwidget.current_frame
-        sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+        sql = "SELECT COUNT(*) FROM buildings_common.capture_source"
         result = db._execute(sql)
-        self.result_cs = result.fetchall()[0][0]
+        if result.fetchall()[0][0] == 0:
+            sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+            result = db._execute(sql)
+            self.result_cs = result.fetchall()[0][0]
+        else:
+            self.result_cs = 1
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_cancel.click()
-        sql = 'SELECT buildings_common.fn_capture_source_delete(%s);'
-        db.execute(sql, (self.result_cs, ))
 
     def test_external_id_radiobutton(self):
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
@@ -106,5 +109,5 @@ class BulkLoadTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
+# suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
+# unittest.TextTestRunner(verbosity=2).run(suite)

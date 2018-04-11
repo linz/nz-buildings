@@ -70,6 +70,14 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
         self.menu_frame.cmb_add_outline.setCurrentIndex(1)
         self.new_bulk_frame = self.dockwidget.current_frame
+        sql = "SELECT COUNT(*) FROM buildings_common.capture_source"
+        result = db._execute(sql)
+        if result.fetchall()[0][0] == 0:
+            sql = "SELECT buildings_common.fn_capture_source_insert(1, 'test');"
+            result = db._execute(sql)
+            self.result_cs = result.fetchall()[0][0]
+        else:
+            self.result_cs = 1
         if self.new_bulk_frame.error_dialog is not None:
             self.no_supplied_data = True
             self.new_bulk_frame.error_dialog.close()
@@ -174,9 +182,9 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
             self.assertEqual(result2, result + 1)
             # remove row from table
-            sql = 'SELECT buildings_bulk_load.fn_buildings_bulk_load_delete(%s)'
-            db.execute(sql, (self.new_bulk_frame.supplied_id, ))
+            # sql = 'SELECT buildings_bulk_load.fn_buildings_bulk_load_delete(%s)'
+            # db.execute(sql, (self.new_bulk_frame.supplied_id, ))
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
+# suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
+# unittest.TextTestRunner(verbosity=2).run(suite)
