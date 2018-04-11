@@ -28,6 +28,10 @@ class NewEntry(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
 
         # set up signals and slots
+        self.organisation_id = None
+        self.lifecycle_stage_id = None
+        self.capture_method_id = None
+        self.capture_source_group_id = None
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.le_description.setDisabled(1)
@@ -135,7 +139,8 @@ class NewEntry(QFrame, FORM_CLASS):
         # if it isn't in the table add to table
         elif len(ls) == 0:
             sql = 'SELECT buildings_bulk_load.fn_organisation_insert(%s);'
-            db.execute(sql, (organisation,))
+            result = db._execute(sql, (organisation,))
+            self.organisation_id = result.fetchall()[0][0]
             self.le_new_entry.clear()
 
     def new_lifecycle_stage(self, lifecycle_stage):
@@ -158,7 +163,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # enter new lifecycle stage
             sql = 'SELECT buildings.fn_lifecycle_stage_insert(%s);'
-            db.execute(sql, (lifecycle_stage,))
+            result = db._execute(sql, (lifecycle_stage,))
+            self.lifecycle_stage_id = result.fetchall()[0][0]
             self.le_new_entry.clear()
 
     def new_capture_method(self, capture_method):
@@ -182,7 +188,8 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # enter new capture method
             sql = 'SELECT buildings_common.fn_capture_method_insert(%s);'
-            db.execute(sql, (capture_method,))
+            result = db._execute(sql, (capture_method,))
+            self.capture_method_id = result.fetchall()[0][0]
             self.le_new_entry.clear()
 
     def new_capture_source_group(self, capture_source_group, description):
@@ -204,6 +211,7 @@ class NewEntry(QFrame, FORM_CLASS):
         else:
             # enter new capture source group
             sql = 'SELECT buildings_common.fn_capture_source_group_insert(%s, %s);'
-            db.execute(sql, (capture_source_group, description))
+            result = db._execute(sql, (capture_source_group, description))
+            self.capture_source_group_id = result.fetchall()[0][0]
             self.le_new_entry.clear()
             self.le_description.clear()

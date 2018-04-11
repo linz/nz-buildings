@@ -32,6 +32,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
 
         # set up signals and slots
+        self.capture_source_id = None
         self.btn_ok.clicked.connect(self.ok_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.rad_external_source.toggled.connect(self.enable_external_source)
@@ -137,10 +138,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             if to_add:
                 sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
                 result = db._execute(sql, (capture_source_group_id, external_source))
-                return result.fetchall()[0][0]
+                self.capture_source_id = result.fetchall()[0][0]
                 self.le_external_source_id.clear()
 
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
             sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
-            db.execute(sql, (capture_source_group_id, external_source))
+            result = db._execute(sql, (capture_source_group_id, external_source))
+            self.capture_source_id = result.fetchall()[0][0]

@@ -253,7 +253,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 result = db._execute(sql, data=(wkt, ))
                 geom = result.fetchall()[0][0]
                 # ensure outline SRID is 2193
-                sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+                sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
                 result = db._execute(sql, data=(geom, ))
                 geom = result.fetchall()[0][0]
             # iterate through supplied datasets and find convex hulls

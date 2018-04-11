@@ -81,6 +81,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             # zoom to the active layer
             iface.actionZoomToLayer().trigger()
             # set up signals
+            self.supplied_id = None
             self.btn_save.clicked.connect(self.save_clicked)
             self.btn_save.setDisabled(1)
             self.btn_reset.clicked.connect(self.reset_clicked)
@@ -263,7 +264,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
         result = db._execute(sql, data=(geom, ))
         self.geom = result.fetchall()[0][0]
-        # print self.geom
+        print self.geom
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
         self.cmb_capture_source.setEnabled(1)
@@ -305,9 +306,9 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.t_a = self.get_t_a()
 
         # call function to insert into bulk_load_outlines table
-        sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, now(), %s)'
-        db.execute(sql, (self.dataset_id, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
-
+        sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s)'
+        result = db._execute(sql, (self.dataset_id, self.capture_method_id, self.capture_source_id, self.suburb, self.town, self.t_a, self.geom))
+        self.supplied_id = result.fetchall()[0][0]
         # reset comboboxes for next outline
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)
