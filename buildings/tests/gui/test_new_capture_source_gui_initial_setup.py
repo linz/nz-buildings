@@ -84,5 +84,5 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
         self.capture_frame.rad_external_source.click()
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(SetUpCaptureSourceGuiTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpCaptureSourceGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

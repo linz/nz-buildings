@@ -82,8 +82,6 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.new_production_frame.btn_cancel.click()
-        # sql = 'SELECT buildings_common.fn_capture_source_delete(%s);'
-        # db.execute(sql, (self.result_cs, ))
 
     def test_ui_on_geom_drawn(self):
         # add geom to canvas
@@ -175,9 +173,7 @@ class ProcessProdNewOutlinesGuiTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        # sql = 'SELECT buildings.fn_building_delete(%s);'
-        # db.execute(sql, (self.new_production_frame.building_id, ))
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesGuiTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

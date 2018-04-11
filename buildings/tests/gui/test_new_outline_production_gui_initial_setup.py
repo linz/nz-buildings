@@ -96,5 +96,5 @@ class SetUpProductionNewGuiTest(unittest.TestCase):
         self.assertTrue(edit_bool)
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(SetUpProductionNewGuiTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpProductionNewGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

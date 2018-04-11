@@ -94,34 +94,6 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        # sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
-        # db.execute(sql, (self.capture_frame.capture_source_id, ))
-
-    def test_add_duplicate_capture_source(self):
-        # add duplicate capture source no external id
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
-        self.capture_frame.rad_external_source.click()
-        self.capture_frame.le_external_source_id.setText('Test Duplicate')
-        self.capture_frame.btn_ok.click()
-        sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
-        result = db._execute(sql)
-        if result is None:
-            result = 0
-        else:
-            result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
-        self.capture_frame.rad_external_source.click()
-        self.capture_frame.le_external_source_id.setText('Test Duplicate')
-        self.capture_frame.btn_ok.click()
-        sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
-        result2 = db._execute(sql)
-        if result2 is None:
-            result2 = 0
-        else:
-            result2 = result2.fetchall()[0][0]
-        self.assertEqual(result2, result)
-        # sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
-        # db.execute(sql, (self.capture_frame.capture_source_id, ))
 
     def test_add_blank_external_id_line_edit(self):
         # add capture source external radio button checked and no external id
@@ -144,8 +116,6 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         self.assertEqual(result2, result)
         if result != result2:
             self.capture_frame.error_dialog.close()
-            # sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
-            # db.execute(sql, (self.capture_frame.capture_source_id, ))
 
     def test_add_valid_capture_source_with_EID(self):
         # add capture source with valid external id
@@ -166,8 +136,6 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        # sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
-        # db.execute(sql, (self.capture_frame.capture_source_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceGuiTest)

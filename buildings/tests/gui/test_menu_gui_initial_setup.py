@@ -91,5 +91,5 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), 'Add New Outline to Production')
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

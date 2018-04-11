@@ -109,5 +109,5 @@ class BulkLoadTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_imagery.count(), len(values))
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(BulkLoadTest)
+unittest.TextTestRunner(verbosity=2).run(suite)

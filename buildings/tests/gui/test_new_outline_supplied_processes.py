@@ -181,10 +181,7 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             result2 = db._execute(sql)
             result2 = result2.fetchall()[0][0]
             self.assertEqual(result2, result + 1)
-            # remove row from table
-            # sql = 'SELECT buildings_bulk_load.fn_buildings_bulk_load_delete(%s)'
-            # db.execute(sql, (self.new_bulk_frame.supplied_id, ))
 
 
-# suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
-# unittest.TextTestRunner(verbosity=2).run(suite)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesGuiTest)
+unittest.TextTestRunner(verbosity=2).run(suite)
