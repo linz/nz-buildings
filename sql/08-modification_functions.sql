@@ -469,6 +469,22 @@ $$
 LANGUAGE sql VOLATILE;
 
 -------------------------------------------------------------------------
+-- SUPPLIED DATASET delete by id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_supplied_datasets_delete(
+      p_supplied_dataset_id integer
+)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.supplied_datasets
+    WHERE buildings_bulk_load.supplied_datasets.supplied_dataset_id = p_supplied_dataset_id 
+    RETURNING supplied_dataset_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
 -- ORGANISATION delete by id
 -------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_organisation_delete(
@@ -605,27 +621,49 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_buildings_bulk_load_delete(
 RETURNS integer AS
 $$
 
-    DELETE FROM buildings_bulk_load.bulk_load_outlines
-    WHERE buildings_bulk_load.bulk_load_outlines.bulk_load_outline_id = p_bulk_load_outline_id 
+    DELETE 
+    FROM buildings_bulk_load.bulk_load_outlines
+    WHERE buildings_bulk_load.bulk_load_outlines.bulk_load_outline_id = p_bulk_load_outline_id AND
+    buildings_bulk_load.bulk_load_outlines.bulk_load_status_id = 2
     RETURNING bulk_load_outline_id;
 
 $$
 LANGUAGE sql VOLATILE;
 
 -------------------------------------------------------------------------
--- PRODUCTION OUTLINES delete by id
+-- PRODUCTION delete by building outline id
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_buildings_delete(
+CREATE OR REPLACE FUNCTION buildings.fn_building_outlines_delete(
       p_building_outline_id integer
 )
 RETURNS integer AS
 $$
-    DELETE FROM buildings.buildings
-    WHERE buildings.building_id = (SELECT building_id FROM buildings.building_outlines bo WHERE bo.building_outline_id = p_building_outline_id);
+    DELETE FROM buildings.building_outlines
+    WHERE buildings.building_outlines.building_outline_id = p_building_outline_id;
+
+    DELETE
+    FROM buildings.buildings
+    WHERE buildings.building_id = (SELECT building_id FROM buildings.building_outlines bo WHERE bo.building_outline_id = p_building_outline_id)
+    RETURNING building_id;
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- PRODUCTION OUTLINES delete by building id
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_building_delete(
+      p_building_id integer
+)
+RETURNS integer AS
+$$
 
     DELETE FROM buildings.building_outlines
-    WHERE buildings.building_outlines.building_outline_id = p_building_outline_id 
-    RETURNING building_outline_id;
+    WHERE buildings.building_outlines.building_id = p_building_id;
+    
+    DELETE
+    FROM buildings.buildings
+    WHERE buildings.building_id = p_building_id
+    RETURNING building_id;
 
 $$
 LANGUAGE sql VOLATILE;
