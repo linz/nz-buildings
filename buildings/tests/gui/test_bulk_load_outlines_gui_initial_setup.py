@@ -79,7 +79,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         # check layer combobox contains only the layer in the qgis legend
         layers = iface.legendInterface().layers()
         self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(), len(layers))
-        
+
     def test_data_desc_default(self):
         # check data description is enabled and empty
         self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
@@ -91,7 +91,7 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_organisation.count(), result)
-        
+
     def test_capture_method_combobox(self):
         # Check capture method combobox same size as table
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
@@ -105,7 +105,6 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(), result3)
-
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkLoadGuiTest)

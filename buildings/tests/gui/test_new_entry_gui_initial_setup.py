@@ -71,14 +71,14 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
     def test_combobox_default(self):
         # initial combobox text is organisation
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), 'Organisation')
-        
+
     def test_combobox_options(self):
         # has four options in combobox
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
-        
+
     def test_value_enabled(self):
         # value is enabled on start up
         self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())

@@ -73,7 +73,7 @@ class SetUpCaptureSourceGuiTest(unittest.TestCase):
     def test_external_source_default(self):
         self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
         self.assertFalse(self.capture_frame.rad_external_source.isChecked())
-        
+
     def test_capture_source_dropdowns(self):
         # check number of options in dropdown is the same as number of
         # entries in capture_source_group table

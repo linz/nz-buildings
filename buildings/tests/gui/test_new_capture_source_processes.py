@@ -93,8 +93,8 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
+        db.execute(sql, (self.capture_frame.capture_source_id, ))
 
     def test_add_duplicate_capture_source(self):
         # add duplicate capture source no external id
@@ -116,8 +116,8 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
-        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
+        db.execute(sql, (self.capture_frame.capture_source_id, ))
 
     def test_add_blank_external_id_line_edit(self):
         # add capture source external radio button checked and no external id
@@ -139,8 +139,8 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-            db.execute(sql)
+            sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
+            db.execute(sql, (self.capture_frame.capture_source_id, ))
 
     def test_add_valid_capture_source_with_EID(self):
         # add capture source with valid external id
@@ -161,8 +161,8 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        sql = 'DELETE FROM buildings_common.capture_source WHERE capture_source_id = (SELECT MAX(capture_source_id) FROM buildings_common.capture_source)'
-        db.execute(sql)
+        sql = 'SELECT buildings_common.fn_capture_source_delete(%s)'
+        db.execute(sql, (self.capture_frame.capture_source_id, ))
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceGuiTest)
