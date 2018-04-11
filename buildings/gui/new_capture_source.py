@@ -30,6 +30,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.le_external_source_id.setDisabled(1)
 
         self.layer_registry = layer_registry
+        self.error_dialog = None
 
         # set up signals and slots
         self.capture_source_id = None
@@ -97,7 +98,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # get type
         self.value = self.get_combobox_value()
         # call insert function
-        self.insert_capture_source(self.value, self.external_source)
+        self.capture_source_id = self.insert_capture_source(self.value, self.external_source)
+        print self.capture_source_id
         self.le_external_source_id.clear()
 
     def cancel_clicked(self):
@@ -130,8 +132,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 if item[1] == capture_source_group_id:
                     if item[2] == external_source:
                         self.error_dialog = ErrorDialog()
-                        self.error_dialog.fill_report(' ')
-                        self.error_dialog.fill_report(' \n capture source value exists in table')
+                        self.error_dialog.fill_report('\n -------------------- CS -------------------- \n\n Enter less than 250 characters')
                         self.error_dialog.show()
                         to_add = False
             # if no entry with external source and capture source group add to table
@@ -145,4 +146,5 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s)'
             result = db._execute(sql, (capture_source_group_id, external_source))
-            self.capture_source_id = result.fetchall()[0][0]
+            self.le_external_source_id.clear()
+            return result.fetchall()[0][0]
