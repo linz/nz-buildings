@@ -107,7 +107,7 @@ INSERT INTO buildings.building_outlines (building_outline_id, building_id, captu
 VALUES (1033, 1033, 5, 1, 1, 1, 1, '2017-01-01 09:00:00 GMT+12', NULL, '0106000020910800000100000001030000000100000005000000B9522B1575A93C417396CD1D4131554158D2F189B5A93C41A7AF2D5841315541F012C8AAB7A93C415E5B1CEA313155416EA5569A76A93C41F4285C7531315541B9522B1575A93C417396CD1D41315541');
 
 INSERT INTO buildings_bulk_load.existing_subset_extracts
-SELECT buildings.building_outline_id, 1 AS supplied_dataset_id, buildings.shape
+SELECT buildings.building_outline_id, 2 AS supplied_dataset_id, buildings.shape
 FROM buildings.building_outlines buildings;
 
 INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, bulk_load_status_id, capture_method_id, capture_source_id, shape)

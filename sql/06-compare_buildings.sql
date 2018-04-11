@@ -27,7 +27,7 @@ IF ( SELECT processed_date
 
         CREATE TEMP TABLE extracted_outlines AS
         SELECT existing.*
-        FROM extracted_outlines AS existing
+        FROM buildings_bulk_load.existing_subset_extracts AS existing
         WHERE existing.supplied_dataset_id = p_supplied_dataset_id;
 
         -------------------------------------------------------------------------------------------------------------------
@@ -184,7 +184,7 @@ IF ( SELECT processed_date
         WHERE ST_Intersects(current.shape, supplied.shape)
           AND ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) > 0.1
 
-        GROUP BY current.building_outline_id
+        GROUP BY current.building_outline_id, current.supplied_dataset_id, current.shape
         ORDER BY supplied_count DESC;
 
         ------------------------------------
