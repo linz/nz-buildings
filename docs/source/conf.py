@@ -504,9 +504,8 @@ def get_filenames():
 
     # read the path and file names of all of the SQL schema files in the /SQL folder
     filenames = glob.glob("../../sql/*")
-    str = "schema"
     for name in filenames:
-        if str not in name:
+        if "schema" not in name:
             filenames.remove(name)
     return filenames
 
@@ -518,8 +517,8 @@ def setup_html_context(files_to_read):
     context = {}
     schema_number = 0
 
-    for file in files_to_read:
-        sql_file_path = file
+    for f in files_to_read:
+        sql_file_path = f
         schema_number += 1
         context_key = "schema_gen" + str(schema_number)
         schema_out = get_schema(sql_file_path)
