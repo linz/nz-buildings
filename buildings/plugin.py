@@ -181,6 +181,31 @@ class Buildings:
             dw.lst_options.currentItemChanged.connect(self.item_changed)
             dw.insert_into_frames('menu_frame', self.menu_frame)
             self.on_click()
+        else:
+            dw = qgis.utils.plugins['roads'].dockwidget
+            if not qgis.utils.plugins['roads'].is_active:
+                print 'yup'
+                qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
+
+                canvas = iface.mapCanvas()
+                selectedcrs = "EPSG:2193"
+                target_crs = QgsCoordinateReferenceSystem()
+                target_crs.createFromUserInput(selectedcrs)
+                canvas.setDestinationCrs(target_crs)
+                dw.lst_options.currentItemChanged.connect(self.item_changed)
+                dw.lst_options.setCurrentRow(2)
+                self.on_click()
+
+            else:
+                print 'no'
+                canvas = iface.mapCanvas()
+                selectedcrs = "EPSG:2193"
+                target_crs = QgsCoordinateReferenceSystem()
+                target_crs.createFromUserInput(selectedcrs)
+                canvas.setDestinationCrs(target_crs)
+                dw.lst_options.currentItemChanged.connect(self.item_changed)
+                dw.lst_options.setCurrentRow(2)
+                self.on_click()
 
     def on_click(self):
         dw = qgis.utils.plugins['roads'].dockwidget
