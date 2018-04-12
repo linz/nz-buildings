@@ -20,10 +20,9 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import QgsRectangle, QgsPoint
+from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
-from qgis.utils import reloadPlugin
 
 from buildings.utilities import database as db
 
@@ -46,15 +45,7 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get('buildings')
-                reloadPlugin('buildings')
-                if cls.dockwidget.stk_options.count() == 4:
-                    cls.dockwidget.stk_options.setCurrentIndex(3)
-                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-                    cls.dockwidget.current_frame = cls.dockwidget.frames['menu_frame']
-                    cls.dockwidget.stk_options.setCurrentIndex(4)
-                else:
-                    cls.dockwidget.stk_options.setCurrentIndex(4)
-                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
@@ -83,6 +74,14 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             self.new_bulk_frame.error_dialog.close()
         else:
             self.no_supplied_data = False
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
 
     def tearDown(self):
         """Runs after each test."""
@@ -91,12 +90,17 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
     def test_ui_on_geom_drawn(self):
         if self.no_supplied_data is False:
             # add geom to canvas
+            widget = iface.mapCanvas().viewport()
+            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
             canvas = iface.mapCanvas()
+            selectedcrs = "EPSG:2193"
+            target_crs = QgsCoordinateReferenceSystem()
+            target_crs.createFromUserInput(selectedcrs)
+            canvas.setDestinationCrs(target_crs)
             zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
             canvas.setExtent(zoom_rectangle)
             canvas.refresh()
-            widget = iface.mapCanvas().viewport()
-            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
             QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428152)), delay=300)
             QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428102)), delay=300)
             QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428102)), delay=300)
@@ -115,17 +119,22 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
     def test_reset_button(self):
         if self.no_supplied_data is False:
             # add geom to canvas
+            widget = iface.mapCanvas().viewport()
+            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
             canvas = iface.mapCanvas()
+            selectedcrs = "EPSG:2193"
+            target_crs = QgsCoordinateReferenceSystem()
+            target_crs.createFromUserInput(selectedcrs)
+            canvas.setDestinationCrs(target_crs)
             zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
             canvas.setExtent(zoom_rectangle)
             canvas.refresh()
-            widget = iface.mapCanvas().viewport()
-            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428172)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428222)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428222)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428172)), delay=300)
-            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428172)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428152)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428102)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428102)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
+            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
             QTest.qWait(300)
             # change indexes of comboboxes
             self.new_bulk_frame.cmb_capture_method.setCurrentIndex(1)
@@ -152,23 +161,28 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
 
-    def test_insert(self):
+    def test_zinsert(self):
         if self.no_supplied_data is False:
             sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
             result = db._execute(sql)
             result = result.fetchall()[0][0]
             # add geom
+            widget = iface.mapCanvas().viewport()
+            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
             canvas = iface.mapCanvas()
+            selectedcrs = "EPSG:2193"
+            target_crs = QgsCoordinateReferenceSystem()
+            target_crs.createFromUserInput(selectedcrs)
+            canvas.setDestinationCrs(target_crs)
             zoom_rectangle = QgsRectangle(1747497.2, 5428082.0, 1747710.3, 5428318.7)
             canvas.setExtent(zoom_rectangle)
             canvas.refresh()
-            widget = iface.mapCanvas().viewport()
-            canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428242)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428302)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428302)), delay=300)
-            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428242)), delay=300)
-            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428242)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428152)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747591, 5428102)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428102)), delay=300)
+            QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
+            QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPoint(1747520, 5428152)), delay=300)
             QTest.qWait(300)
             # change indexes of comboboxes
             self.new_bulk_frame.cmb_capture_method.setCurrentIndex(1)

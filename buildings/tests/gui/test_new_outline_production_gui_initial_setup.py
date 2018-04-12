@@ -20,7 +20,6 @@ import unittest
 
 from qgis.core import QgsProject
 from qgis.utils import plugins
-from qgis.utils import reloadPlugin
 
 
 class SetUpProductionNewGuiTest(unittest.TestCase):
@@ -41,15 +40,7 @@ class SetUpProductionNewGuiTest(unittest.TestCase):
                 pass
             else:
                 cls.building_plugin = plugins.get('buildings')
-                reloadPlugin('buildings')
-                if cls.dockwidget.stk_options.count() == 4:
-                    cls.dockwidget.stk_options.setCurrentIndex(3)
-                    cls.dockwidget.stk_options.addWidget(cls.dockwidget.frames['menu_frame'])
-                    cls.dockwidget.current_frame = 'menu_frame'
-                    cls.dockwidget.stk_options.setCurrentIndex(4)
-                else:
-                    cls.dockwidget.stk_options.setCurrentIndex(4)
-                cls.dockwidget.lst_options.setCurrentItem(cls.dockwidget.lst_options.item(2))
+                cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
