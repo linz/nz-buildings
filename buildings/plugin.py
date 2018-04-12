@@ -106,26 +106,28 @@ class Buildings:
 
     def item_changed(self, item):
         if item.text() != "Buildings":
-            root = QgsProject.instance().layerTreeRoot()
-            group = root.findGroup("Building Tool Layers")
-            layers = group.findLayers()
-            for layer in layers:
-                if layer.layer().name() == "building_outlines":
-                    iface.setActiveLayer(layer.layer())
-                    iface.actionCancelEdits().trigger()
-                if layer.layer().name() == "bulk_load_outlines":
-                    iface.setActiveLayer(layer.layer())
-                    iface.actionCancelEdits().trigger()
+            if QgsProject is not None:
+                root = QgsProject.instance().layerTreeRoot()
+                group = root.findGroup("Building Tool Layers")
+                layers = group.findLayers()
+                for layer in layers:
+                    if layer.layer().name() == "building_outlines":
+                        iface.setActiveLayer(layer.layer())
+                        iface.actionCancelEdits().trigger()
+                    if layer.layer().name() == "bulk_load_outlines":
+                        iface.setActiveLayer(layer.layer())
+                        iface.actionCancelEdits().trigger()
         else:
-            root = QgsProject.instance().layerTreeRoot()
-            group = root.findGroup("Building Tool Layers")
-            layers = group.findLayers()
-            for layer in layers:
-                if layer.layer().name() == "building_outlines":
-                    iface.setActiveLayer(layer.layer())
-                    layer.layer().startEditing()
-                    iface.actionAddFeature().trigger()
-                if layer.layer().name() == "bulk_load_outlines":
-                    iface.setActiveLayer(layer.layer())
-                    layer.layer().startEditing()
-                    iface.actionAddFeature().trigger()
+            if QgsProject is not None:
+                root = QgsProject.instance().layerTreeRoot()
+                group = root.findGroup("Building Tool Layers")
+                layers = group.findLayers()
+                for layer in layers:
+                    if layer.layer().name() == "building_outlines":
+                        iface.setActiveLayer(layer.layer())
+                        layer.layer().startEditing()
+                        iface.actionAddFeature().trigger()
+                    if layer.layer().name() == "bulk_load_outlines":
+                        iface.setActiveLayer(layer.layer())
+                        layer.layer().startEditing()
+                        iface.actionAddFeature().trigger()
