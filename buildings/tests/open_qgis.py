@@ -37,21 +37,8 @@ def open_qgis():
         len(re.findall(r'Ran \d+ tests in\s',
                        out, re.MULTILINE)) > 0
     print('='*60)
-    values = out.split(" ")
 
-    final = []
-    for index, val in enumerate(values):
-        if "test_" in val:
-            final.append(val)
-            final.append('...')
-            if 'roads' in values[index + 2]:
-                final.append(values[index + 2])
-        if "setup_main_toolbar\r\n\r\n----------------------------------------------------------------------\r\nRan" in val:
-            final.append('\n')
-            final.append(val)
-            final.append(' ' + values[index + 1] + ' ' + values[index + 2] + ' ' + values[index + 3] + ' ' + values[index + 4])
-    str2 = ''.join(final)
-    print str2
+    print out
 
     if len(out) == 0:
         print("QGIS Test Runner - [WARNING] subprocess returned no output")
