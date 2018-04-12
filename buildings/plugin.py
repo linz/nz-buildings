@@ -3,7 +3,7 @@
 import os
 
 from PyQt4.QtCore import QCoreApplication
-from PyQt4.QtGui import QListWidgetItem, QIcon, QAction
+from PyQt4.QtGui import QListWidgetItem, QIcon, QAction, QMenu
 
 import qgis
 from qgis.core import QgsProject, QgsCoordinateReferenceSystem
@@ -181,10 +181,16 @@ class Buildings:
             dw.lst_options.currentItemChanged.connect(self.item_changed)
             dw.insert_into_frames('menu_frame', self.menu_frame)
             self.on_click()
+
+            panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
+            for act in panel.actions():
+                if act.text() == u"Road Maintenance":
+                    print 'yup'
+                    act.setText(u"Building Maintenance")
+                # panel.removeAction(act)
         else:
             dw = qgis.utils.plugins['roads'].dockwidget
             if not qgis.utils.plugins['roads'].is_active:
-                print 'yup'
                 qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
 
                 canvas = iface.mapCanvas()
@@ -196,8 +202,13 @@ class Buildings:
                 dw.lst_options.setCurrentRow(2)
                 self.on_click()
 
+                panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
+                for act in panel.actions():
+                    if act.text() == u"Road Maintenance":
+                        print 'yup'
+                        act.setText(u"Building Maintenance")
+
             else:
-                print 'no'
                 canvas = iface.mapCanvas()
                 selectedcrs = "EPSG:2193"
                 target_crs = QgsCoordinateReferenceSystem()
@@ -206,6 +217,12 @@ class Buildings:
                 dw.lst_options.currentItemChanged.connect(self.item_changed)
                 dw.lst_options.setCurrentRow(2)
                 self.on_click()
+
+                panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
+                for act in panel.actions():
+                    if act.text() == u"Road Maintenance":
+                        print 'yup'
+                        act.setText(u"Building Maintenance")
 
     def on_click(self):
         dw = qgis.utils.plugins['roads'].dockwidget
