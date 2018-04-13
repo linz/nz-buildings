@@ -9,7 +9,6 @@ import qgis
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 
-db.connect()
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_capture_source.ui'))

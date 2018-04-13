@@ -15,8 +15,6 @@ from buildings.utilities import database as db
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load_outlines.ui'))
 
-db.connect()
-
 
 class BulkLoadOutlines(QFrame, FORM_CLASS):
 
@@ -37,7 +35,6 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.cmb_external_id.setDisabled(1)
 
         self.layer_registry = layer_registry
-
         # signals and slots
         self.mcb_imagery_layer.currentIndexChanged.connect(self.populate_field_combobox)
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)

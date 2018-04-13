@@ -16,7 +16,6 @@ from buildings.gui.error_dialog import ErrorDialog
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_outline_bulk.ui'))
 
-db.connect()
 
 
 class BulkNewOutline(QFrame, FORM_CLASS):

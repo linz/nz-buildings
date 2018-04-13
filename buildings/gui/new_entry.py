@@ -12,7 +12,6 @@ from buildings.utilities import database as db
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_entry.ui'))
 
-db.connect()
 
 
 class NewEntry(QFrame, FORM_CLASS):
