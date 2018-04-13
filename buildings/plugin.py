@@ -2,8 +2,8 @@
 
 import os
 
-from PyQt4.QtCore import QCoreApplication
-from PyQt4.QtGui import QListWidgetItem, QIcon, QAction, QMenu
+from PyQt4.QtCore import QCoreApplication, Qt
+from PyQt4.QtGui import QListWidgetItem, QIcon, QAction, QMenu, QDockWidget, QToolBar
 
 import qgis
 from qgis.core import QgsProject, QgsCoordinateReferenceSystem
@@ -127,7 +127,6 @@ class Buildings:
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
                 if exists is False:
-                    dw = qgis.utils.plugins['roads'].dockwidget
                     self.run()
         except KeyError:
             pass
@@ -149,17 +148,65 @@ class Buildings:
                     dw.stk_options.removeWidget(dw.stk_options.currentWidget())
                     dw.stk_options.setCurrentIndex(1)
 
-                # Delete road toolbar
-                if iface.building_toolbar:
-                    iface.mainWindow().removeToolBar(iface.building_toolbar)
-                    iface.building_toolbar = None
-                    del iface.building_toolbar
+                    # Remove main toolbar
+                    for action in self.actions:
+                        iface.removePluginMenu(self.tr(u'&Building Maintenance'), action)
+                        iface.removeToolBarIcon(action)
+                    del self.main_toolbar
+
+                    for toolbar in iface.mainWindow().findChildren(QToolBar, "Building Tools"):
+                        iface.mainWindow().removeToolBar(toolbar)
+                        # Setting parent to None, deletes the widget completely
+                        toolbar.setParent(None)
+
+                        # Remove action triggering toolbar from ToolBar menu
+                        toolbar_menu = iface.mainWindow().findChildren(QMenu, "mToolbarMenu")[0]
+                        for act in toolbar_menu.actions():
+                            if act.text() == u'Building Tools':
+                                toolbar_menu.removeAction(act)
 
         except KeyError:
             pass
 
     def run(self):
         """Run method that loads and starts the plugin"""
+        if not iface.building_toolbar:
+            # Set up toolbar
+            iface.building_toolbar = QToolBar(u'Building Tools')
+            iface.addToolBar(iface.building_toolbar, Qt.RightToolBarArea)
+
+        self.setup_main_toolbar()
+        if self.menu_frame:
+            if not qgis.utils.plugins['roads'].is_active:
+                qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
+                dw = qgis.utils.plugins['roads'].dockwidget
+                home_dir = os.path.split(os.path.dirname(__file__))
+                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+                item = QListWidgetItem("Buildings")
+                item.setIcon(QIcon(icon_path))
+                if dw.lst_options.item(2) is None:
+                    dw.lst_options.addItem(item)
+                    dw.lst_options.setCurrentItem(item)
+                canvas = iface.mapCanvas()
+                selectedcrs = "EPSG:2193"
+                target_crs = QgsCoordinateReferenceSystem()
+                target_crs.createFromUserInput(selectedcrs)
+                canvas.setDestinationCrs(target_crs)
+                dw.lst_options.currentItemChanged.connect(self.item_changed)
+                dw.lst_options.setCurrentRow(2)
+                self.on_click()
+
+            else:
+                dw = qgis.utils.plugins['roads'].dockwidget
+                canvas = iface.mapCanvas()
+                selectedcrs = "EPSG:2193"
+                target_crs = QgsCoordinateReferenceSystem()
+                target_crs.createFromUserInput(selectedcrs)
+                canvas.setDestinationCrs(target_crs)
+                dw.lst_options.currentItemChanged.connect(self.item_changed)
+                dw.lst_options.setCurrentRow(2)
+                self.on_click()
+
         if not self.menu_frame:
             if not qgis.utils.plugins['roads'].dockwidget:
                 qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
@@ -182,48 +229,6 @@ class Buildings:
             dw.insert_into_frames('menu_frame', self.menu_frame)
             self.on_click()
 
-            panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
-            for act in panel.actions():
-                if act.text() == u"Road Maintenance":
-                    print 'yup'
-                    act.setText(u"Building Maintenance")
-                # panel.removeAction(act)
-        else:
-            dw = qgis.utils.plugins['roads'].dockwidget
-            if not qgis.utils.plugins['roads'].is_active:
-                qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
-
-                canvas = iface.mapCanvas()
-                selectedcrs = "EPSG:2193"
-                target_crs = QgsCoordinateReferenceSystem()
-                target_crs.createFromUserInput(selectedcrs)
-                canvas.setDestinationCrs(target_crs)
-                dw.lst_options.currentItemChanged.connect(self.item_changed)
-                dw.lst_options.setCurrentRow(2)
-                self.on_click()
-
-                panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
-                for act in panel.actions():
-                    if act.text() == u"Road Maintenance":
-                        print 'yup'
-                        act.setText(u"Building Maintenance")
-
-            else:
-                canvas = iface.mapCanvas()
-                selectedcrs = "EPSG:2193"
-                target_crs = QgsCoordinateReferenceSystem()
-                target_crs.createFromUserInput(selectedcrs)
-                canvas.setDestinationCrs(target_crs)
-                dw.lst_options.currentItemChanged.connect(self.item_changed)
-                dw.lst_options.setCurrentRow(2)
-                self.on_click()
-
-                panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
-                for act in panel.actions():
-                    if act.text() == u"Road Maintenance":
-                        print 'yup'
-                        act.setText(u"Building Maintenance")
-
     def on_click(self):
         dw = qgis.utils.plugins['roads'].dockwidget
         if dw.stk_options.count() == 5:  # 4th widget is not empty
@@ -237,7 +242,7 @@ class Buildings:
         """ Set up the custom tool bar in its most basic state """
         try:
             iface.building_toolbar.clear()
-            iface.building_toolbar.setObjectName(u'Road Tools')
+            iface.building_toolbar.setObjectName(u'Building Tools')
             iface.building_toolbar.hide()
 
             # Choose necessary basic tools

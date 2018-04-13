@@ -27,7 +27,7 @@ SOURCES = \
 	buildings/__init__.py \
 	buildings/gui/menu_frame.py buildings/gui/new_entry.py buildings/gui/new_capture_source.py buildings/gui/bulk_load_outlines.py buildings/gui/bulk_new_outline.py buildings/gui/production_new_outline.py buildings/gui/error_dialog.py
 
-PLUGINNAME = local_buildings
+PLUGINNAME = buildings
 
 PY_FILES = \
 	buildings/__init__.py \

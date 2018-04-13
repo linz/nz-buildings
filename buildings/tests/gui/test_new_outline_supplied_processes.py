@@ -161,7 +161,7 @@ class ProcessBulkNewOutlinesGuiTest(unittest.TestCase):
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
 
-    def test_zinsert(self):
+    def test_insert(self):
         if self.no_supplied_data is False:
             sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
             result = db._execute(sql)

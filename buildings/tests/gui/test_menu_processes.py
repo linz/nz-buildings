@@ -48,7 +48,6 @@ class ProcessMenuGuiTest(unittest.TestCase):
     def setUp(self):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
-        self.road_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
 
