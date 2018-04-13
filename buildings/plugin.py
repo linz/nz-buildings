@@ -194,7 +194,7 @@ class Buildings:
                 canvas.setDestinationCrs(target_crs)
                 dw.lst_options.currentItemChanged.connect(self.item_changed)
                 dw.lst_options.setCurrentRow(2)
-                self.on_click()
+                dw.stk_options.setCurrentIndex(4)
 
             else:
                 dw = qgis.utils.plugins['roads'].dockwidget
@@ -205,7 +205,7 @@ class Buildings:
                 canvas.setDestinationCrs(target_crs)
                 dw.lst_options.currentItemChanged.connect(self.item_changed)
                 dw.lst_options.setCurrentRow(2)
-                self.on_click()
+                dw.stk_options.setCurrentIndex(4)
 
         if not self.menu_frame:
             if not qgis.utils.plugins['roads'].dockwidget:
@@ -226,7 +226,6 @@ class Buildings:
             target_crs.createFromUserInput(selectedcrs)
             canvas.setDestinationCrs(target_crs)
             dw.lst_options.currentItemChanged.connect(self.item_changed)
-            dw.insert_into_frames('menu_frame', self.menu_frame)
             self.on_click()
 
     def on_click(self):
