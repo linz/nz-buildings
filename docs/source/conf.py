@@ -83,7 +83,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['schema4tables.rst']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -155,7 +155,7 @@ html_static_path = ['_static']
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-html_extra_path = ['../../sql']
+# html_extra_path = ['../../sql']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -302,16 +302,12 @@ texinfo_documents = [
 # Script to parse database sql files into one dictionary and one list 
 # The path of this conf.py script is:
 # ../docs/source
-# The path of the SQL file has been altered from likely final folder path
-
-#sql_file_path = "../../sql/02-buildings_schema.sql"
-
-#sql_file_path = "./sql_not_final_location/02-create_buildings_stage_schema.sql"
+# The path of the SQL file is in the root repo folder
 
 
-# This is currently needed to read directly from the root /sql folder
-sql_file_path = "../../sql/02-buildings_schema.sql"
-def get_schema():
+
+
+def get_schema(sql_file_path):
     
     schema = {}  # This only hold the schema name and schema comment
     schema_count = 0
@@ -339,7 +335,7 @@ def get_schema():
 
     f.close()
     return schema
-    
+
 
 
 ##############################################################################
@@ -347,7 +343,7 @@ def get_schema():
 # function to build a list of dictionaries (schema_tabulate_list), with each dictionary (table_dict_tabulate) containing all
 # of the information for one table in the schema. Each of these dictionaries contains a key
 # to hold a list (this_table_columns) of lists of the columns for each table.
-def get_tables(schema_out):
+def get_tables(schema_out, sql_file_path):
 
     schema_list = []
     schema_tabulate_list = []
@@ -504,10 +500,41 @@ def get_columns(table_str, file_content, this_table_columns):
 
     return this_table_columns
 
+def get_filenames():
 
-schema_out = get_schema()
+    # read the path and file names of all of the SQL schema files in the /SQL folder
+    filenames = glob.glob("../../sql/*")
+    for name in filenames:
+        if "schema" not in name:
+            filenames.remove(name)
+    return filenames
 
-schema_tabulate_list_out = get_tables(schema_out)
+
+def setup_html_context(files_to_read):
+
+    # Generate a dict containing HTML_context items needed by Sphinx build process.
+    # One schema_gen and one schema_tab for each schema.
+    context = {}
+    schema_number = 0
+
+    for f in files_to_read:
+        sql_file_path = f
+        schema_number += 1
+        context_key = "schema_gen" + str(schema_number)
+        schema_out = get_schema(sql_file_path)
+        context[context_key] = schema_out
+        context_table_key = "schema_tab" + str(schema_number)
+        schema_tabulate_list_out = get_tables(schema_out, sql_file_path)
+        context[context_table_key] = schema_tabulate_list_out
+
+    return context
+
+
+files_to_read = get_filenames()
+
+context_out = setup_html_context(files_to_read)
+
+
 
 
 # This is required to allow Sphinx to read data dynamically
@@ -528,22 +555,4 @@ def setup(app):
     app.connect("source-read", rstjinja)
     app.add_stylesheet('custom.css')
 
-html_context = {
-    "schema_gen": schema_out,
-    "schema_tab": schema_tabulate_list_out
-    }
-
-# This is test data in case troubleshooting is required
-        # schema_general = {"schema_name": "buildings", "schema_com": "holds schema comment"}
-        # schema_list = [
-        # {"table_nam": "lifecycle stage", "table_comment": "Lifecycle stage comments", "table_columns": [
-        #             ["lifecycle_stage_id", "integer", "", "32", "0", "", "Lookup table that holds all of the lifecycle stages for a building."],
-        #             ["value", "varchar", "40", "", "", "", "The stage of a buildings lifecycle."]
-        #                     ]
-        #      },
-        # {"table_nam": "use", "table_comment": "Lookup table that holds all of the uses for a building. These uses are the same as those used in the Topo50 map series.", "table_columns": [
-        #             ["use_id", "integer", "", "32", "0", "", "Unique identifier for the use."],
-        #             ["value", "varchar", "40", "", "", "", "The building use, maintained for the Topo50 map series."]
-        #                     ]
-        # }
-        #             ]
+html_context = context_out
