@@ -1,20 +1,20 @@
 
-.. _schema4tables:
+.. _buildings_schema:
 {% filter upper %}
-**Schema: {{ schema_gen4["name"] }}**
+**Schema: {{ schema_gen_buildings["name"] }}**
 =======================================
 {% endfilter %}
-**Description: {{ schema_gen4["comment"] }}**
+**Description: {{ schema_gen_buildings["comment"] }}**
 
-Additional Notes about this Schema #1
+Additional Notes about this Schema
 ------------------------------------
 * This schema is designed for specific purposes
 
-{% filter upper %}{{ schema_gen4["name"] }}{% endfilter %} Schema Details
+{% filter upper %}{{ schema_gen_buildings["name"] }}{% endfilter %} Schema Details
 -----------------------------------------
 
 
-{% for item in schema_tab4  %}
+{% for item in schema_tab_buildings  %}
 
 	**Table Name:** {% filter upper %} **{{ item.table_nam }}** {% endfilter %}
 	
