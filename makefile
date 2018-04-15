@@ -19,6 +19,10 @@ SQLSCRIPTS = \
 	sql/04-lookup_table_values.sql \
 	sql/05-buildings_version.sql \
 	sql/06-compare_buildings.sql \
+	sql/08-admin_boundary_functions.sql \
+	sql/09-buildings_functions.sql \
+	sql/10-buildings_bulk_load_functions.sql \
+	sql/11-buildings_common_functions.sql \
 	sql/lds/01-buildings_lds_schema.sql \
 	$(END)
 
