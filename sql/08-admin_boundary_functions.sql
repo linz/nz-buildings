@@ -168,23 +168,3 @@ END;
 
 $$
 LANGUAGE plpgsql VOLATILE;
-
--------------------------------------------------------------------
---BUILDINGS insert into
--------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_buildings_insert()
-RETURNS integer AS
-$$
-
-    INSERT INTO buildings.buildings(
-          building_id
-        , begin_lifespan
-    )
-    VALUES (
-          DEFAULT -- sequence
-        , DEFAULT -- now()
-    )
-    RETURNING building_id;
-
-$$
-LANGUAGE sql VOLATILE;
