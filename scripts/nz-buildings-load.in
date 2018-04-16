@@ -76,11 +76,11 @@ done
 
 export PGDATABASE=$DB_NAME
 
-psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_common CASCADE"
+psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
 
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
@@ -97,16 +97,13 @@ for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
     psql -f ${file}
 done
 
-# Execute all files in the admin_bdys sql dir
-for file in ${SCRIPTSDIR}/sql/admin_bdys/*.sql; do
-    echo ${file} >&2
-    psql -f ${file}
-done
-
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
-    echo ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/insert_test_data_buildings_bulk_load.sql
+    # Execute all files in the admin_bdys sql dir
+    for file in ${SCRIPTSDIR}/tests/testdata/*.sql; do
+        echo ${file} >&2
+        psql -f ${file}
+    done
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.release_to_lds();"

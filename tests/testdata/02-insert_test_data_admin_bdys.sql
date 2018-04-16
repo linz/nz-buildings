@@ -1,6 +1,3 @@
--- table values inserts
-
-
 -- nz_locality
 
 INSERT INTO admin_bdys.nz_locality
