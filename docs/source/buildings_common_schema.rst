@@ -1,20 +1,20 @@
 
-.. _schema3tables:
+.. _buildings_common_schema:
 {% filter upper %}
-**Schema: {{ schema_gen3["name"] }}**
+**Schema: {{ schema_gen_buildings_common["name"] }}**
 =======================================
 {% endfilter %}
-**Description: {{ schema_gen3["comment"] }}**
+**Description: {{ schema_gen_buildings_common["comment"] }}**
 
-Additional Notes about this Schema #1
+Additional Notes about this Schema
 ------------------------------------
 * This schema is designed for specific purposes
 
-{% filter upper %}{{ schema_gen3["name"] }}{% endfilter %} Schema Details
+{% filter upper %}{{ schema_gen_buildings_common["name"] }}{% endfilter %} Schema Details
 -----------------------------------------
 
 
-{% for item in schema_tab3  %}
+{% for item in schema_tab_buildings_common  %}
 
 	**Table Name:** {% filter upper %} **{{ item.table_nam }}** {% endfilter %}
 	

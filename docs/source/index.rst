@@ -7,10 +7,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   schema1tables
-   schema2tables
-   schema3tables
-   schema4tables
+   buildings_schema
+   buildings_common_schema
+   buildings_bulk_load_schema
 
 
 
@@ -19,13 +18,11 @@ Index page Subsection
 ----------------------------
 
 
-:doc:`schema1tables`
+:doc:`buildings_schema`
 
-:doc:`schema2tables`
+:doc:`buildings_common_schema`
 
-:doc:`schema3tables`
-
-:doc:`schema4tables`
+:doc:`buildings_bulk_load_schema`
 
 
 
