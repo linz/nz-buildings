@@ -1,5 +1,5 @@
 
-INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (1, 'test data', 1);
+INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (1, 'Test Data', 1);
 
 INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (1, 1, NULL);
 
