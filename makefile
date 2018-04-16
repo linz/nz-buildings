@@ -19,6 +19,7 @@ SQLSCRIPTS = \
 	sql/04-lookup_table_values.sql \
 	sql/05-buildings_version.sql \
 	sql/06-compare_buildings.sql \
+	sql/07-load_buildings.sql \
 	sql/lds/01-buildings_lds_schema.sql \
 	$(END)
 
@@ -56,7 +57,7 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	mkdir -p ${datadir}/sql/lds
 	cp sql/lds/*.sql ${datadir}/sql/lds
 	mkdir -p ${datadir}/tests/testdata
-	cp tests/testdata/*.sql ${datadir}/tests/testdata 
+	cp tests/testdata/*.sql ${datadir}/tests/testdata
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
