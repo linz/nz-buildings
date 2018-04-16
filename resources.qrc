@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/qgis-buildings-plugin/" >
+        <file>buildings/icons/roads_plugin.png</file>
+    </qresource>
+</RCC>
