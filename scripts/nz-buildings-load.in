@@ -91,6 +91,12 @@ for file in ${SCRIPTSDIR}/sql/*.sql; do
     psql -f ${file}
 done
 
+# Execute all files in the admin_bdys sql dir
+for file in ${SCRIPTSDIR}/tests/testdata/*.sql; do
+    echo ${file} >&2
+    psql -f ${file}
+done
+
 # Execute all files in the lds sql dir
 for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
     echo ${file} >&2
@@ -99,12 +105,7 @@ done
 
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
-    # Execute all files in the admin_bdys sql dir
-    for file in ${SCRIPTSDIR}/tests/testdata/*.sql; do
-        echo ${file} >&2
-        psql -f ${file}
-    done
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
-    psql -c "SELECT buildings_lds.release_to_lds();"
+    psql -c "SELECT buildings_lds.populate_buildings_lds();"
 fi
