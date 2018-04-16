@@ -1,0 +1,168 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for load_buildings function using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(13);
+
+--1----------------------------------------------------------
+-- Check function exists
+
+SELECT has_function('buildings_bulk_load', 'load_building_outlines', 'Should have function load_building_outlines in buildings_bulk_load stage schema.');
+
+--2----------------------------------------------------------
+-- result of removed buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1004, 1006)',
+    'Check removed buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+--3----------------------------------------------------------
+-- result of removed buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (1004, 1006)',
+    'Check removed buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+--4----------------------------------------------------------
+-- result of added buildings in buildings and building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines JOIN buildings.buildings USING (building_id) WHERE building_outline_id IN (1000000, 1000001)',
+    $$VALUES (1000000),
+             (1000001)$$,
+    'Check added buildings in buildings and building_outlines table after load_buildings function has run'
+);
+
+--5----------------------------------------------------------
+-- result of added buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000000, 1000001)',
+    $$VALUES (2010),
+             (2003)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+);
+
+--6----------------------------------------------------------
+-- result of matched buildings in building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000005, 1000002, 1000004, 1000003)',
+    $$VALUES (1001),
+             (1005),
+             (1003),
+             (1002)$$,
+    'Check matched buildings in building_outlines table after load_buildings function has run'
+);
+
+--7----------------------------------------------------------
+-- result of matched buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1002, 1001, 1003, 1005)',
+    'Check matched buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+
+--8----------------------------------------------------------
+-- result of matched buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000005, 1000002, 1000004, 1000003)',
+    $$VALUES (2031),
+             (2004),
+             (2002),
+             (2001)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+);
+
+
+--9----------------------------------------------------------
+-- result of related buildings in buildings and building_outlines table
+
+SELECT results_eq(
+    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032)',
+    $$VALUES (1000002), (1000003), (1000004), (1000005), (1000006),
+             (1000007), (1000008), (1000009), (1000010), (1000011),
+             (1000012), (1000013), (1000014), (1000015), (1000016),
+             (1000017), (1000018), (1000019), (1000020), (1000021),
+             (1000022), (1000023), (1000024), (1000025), (1000026),
+             (1000027), (1000028)$$,
+    'Check related buildings in buildings and building_outlines table after load_buildings function has run'
+);
+
+--10---------------------------------------------------------
+-- result of related buildings in lifecycle table
+
+SELECT results_eq(
+    'SELECT parent_building_id, building_id FROM buildings.lifecycle',
+    $$VALUES (1033, 1000002),
+             (1032, 1000002), (1032, 1000003),
+             (1031, 1000004), (1031, 1000005), (1031, 1000006), (1031, 1000007), (1031, 1000008), (1031, 1000009),
+             (1030, 1000010), (1030, 1000011), (1030, 1000012), (1030, 1000013), (1030, 1000014),
+             (1029, 1000015), (1029, 1000016), (1029, 1000017), (1029, 1000018),
+             (1028, 1000019), (1028, 1000020), (1028, 1000021),
+             (1027, 1000022), (1027, 1000023),
+             (1026, 1000024), (1025, 1000024), (1024, 1000024), (1023, 1000024), (1022, 1000024), (1021, 1000024),
+             (1020, 1000025), (1019, 1000025), (1018, 1000025), (1017, 1000025), (1016, 1000025),
+             (1015, 1000026), (1014, 1000026), (1013, 1000026), (1012, 1000026),
+             (1011, 1000027), (1010, 1000027), (1009, 1000027),
+             (1008, 1000028), (1007, 1000028)$$,
+    'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
+);
+
+--11---------------------------------------------------------
+-- result of related buildings in building_outlines table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1033, 1032, 1031, 1030, 1029, 1028, 1027, 1026, 1025, 1024, 1023, 1022, 1021, 1020, 1019, 1018, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009, 1008, 1007)',
+    'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+);
+
+--12---------------------------------------------------------
+-- result of related buildings in buildings table
+
+SELECT isnt_empty(
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (1033, 1032, 1031, 1030, 1029, 1028, 1027, 1026, 1025, 1024, 1023, 1022, 1021, 1020, 1019, 1018, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009, 1008, 1007)',
+    'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
+);
+
+--13---------------------------------------------------------
+-- result of related buildings in transferred table
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000000, 1000001, 1000002, 1000003, 1000004, 1000005, 1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032)',
+    $$VALUES (2010), (2003), (2031), (2004), (2002),
+             (2001), (2033), (2032), (2030), (2029),
+             (2028), (2027), (2026), (2025), (2024),
+             (2023), (2022), (2021), (2020), (2019),
+             (2018), (2017), (2016), (2015), (2014),
+             (2013), (2012), (2011), (2009), (2008),
+             (2007), (2006), (2005)$$,
+    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+);
+
+--------------------------------------------------------
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
