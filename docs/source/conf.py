@@ -14,11 +14,10 @@
 
 import sys
 import os
-import json
 import re
 from tabulate import tabulate
 from os import path
-import glob
+import glob2
 sys.path.insert(0, os.path.abspath('../../sql'))
 
 
@@ -380,7 +379,7 @@ def get_tables(schema_out, sql_file_path):
                     table_dict_tabulate["table_comment"] = table_comment_result_clean
                     # get the columns for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
-                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Description"]
+                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Allows Nulls", "Description"]
                     tabulate_columns = tabulate(this_table_columns, tablefmt="rst", headers = headers)
                     tabulate_split = [x.split(",")for x in tabulate_columns.split('\n')]
                     table_dict_tabulate["table_columns"] = tabulate_split
@@ -389,7 +388,7 @@ def get_tables(schema_out, sql_file_path):
                     # get the columms for this table
                     this_table_columns = get_columns(table_str, file_content, this_table_columns)
                     table_dict_tabulate["table_comment"] = " "
-                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Description"]
+                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Allows Nulls", "Description"]
                     tabulate_columns = tabulate(this_table_columns, tablefmt="rst", headers = headers)
                     tabulate_split = [x.split(",")for x in tabulate_columns.split("\n")]
                     table_dict_tabulate["table_columns"] = tabulate_split
@@ -425,23 +424,44 @@ def get_columns(table_str, file_content, this_table_columns):
     columns_strip = [x.strip() for x in columns.split(",")]
 
     for column_details in columns_strip:
-        pri_key_search = re.search(r"(.*)serial PRIMARY KEY", column_details)
-        character_varying_search = re.search(r"(.*)\scharacter varying\((.*?)\)", column_details)
-        timestamp_search = re.search(r"(.*)\stimestamptz", column_details)
-        integer_search = re.search(r"^(.*)\sinteger", column_details)
+        pri_key_serial_search = re.search(r"(.*)\sserial PRIMARY KEY", column_details)
+        pri_key_search = re.search(r"(.*)\sinteger PRIMARY KEY", column_details)
+        character_varying_search = re.search(r"(.*)\scharacter varying\((.*?)\)\s(?!NOT NULL)", column_details)  #does not contain "NOT NULL"
+        character_varying_not_null_search = re.search(r"(.*)\scharacter varying\((.*?)\)\sNOT NULL", column_details)  #does contain "NOT NULL"
+        timestamp_search = re.search(r"(.*)\stimestamptz\s(?!NOT NULL)", column_details)  #does not contain "NOT NULL"
+        timestamp_not_null_search = re.search(r"^(.*)\stimestamptz\sNOT NULL.*", column_details)  #does contain "NOT NULL"
+        integer_search = re.search(r"^(.*)\sinteger\s(?!NOT NULL)", column_details)  #does not contain "NOT NULL"
+        integer_not_null_search = re.search(r"^(.*)\sinteger\sNOT NULL.*", column_details)  #does contain "NOT NULL"
+        numeric_search = re.search(r"(.*)\snumeric\((\d{1,2})\,\s(\d{1,2})\)\s(?!NOT NULL)", column_details)
+        numeric_not_null_search = re.search(r"(.*)\snumeric\((\d{1,2})\,\s(\d{1,2}).*NOT NULL", column_details)
         shape = re.search(r"(shape).*geometry", column_details)
 
-        if pri_key_search is not None:
+        if pri_key_serial_search is not None:
+            this_column = []
+            pri_key = pri_key_serial_search.group(1)
+            column_str = table_str + "." + pri_key
+            this_column.append(pri_key)  #column Name
+            this_column.append("integer")  #Data Type
+            this_column.append(" ")  # Length
+            this_column.append("32")  #Precision
+            this_column.append("0")  # Scale
+            this_column.append("No") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out)  # Description
+            this_table_columns.append(this_column)
+
+        elif pri_key_search is not None:
             this_column = []
             pri_key = pri_key_search.group(1)
             column_str = table_str + "." + pri_key
-            this_column.append(pri_key) #column Name
+            this_column.append(pri_key)  #column Name
             this_column.append("integer")  #Data Type
-            this_column.append(" ") # Length
-            this_column.append("32") #Precision
-            this_column.append("0") #Scale
+            this_column.append(" ")  # Length
+            this_column.append("32")  #Precision
+            this_column.append("0")  # Scale
+            this_column.append("No") # Allows Nulls
             column_comment_out = get_column_comments(column_str, file_content)
-            this_column.append(column_comment_out) #Description
+            this_column.append(column_comment_out)  # Description
             this_table_columns.append(this_column)
 
         elif character_varying_search is not None:
@@ -454,6 +474,22 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(length) #Length
             this_column.append(" ") #Precision
             this_column.append(" ") #scale
+            this_column.append("Yes") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out) #Description
+            this_table_columns.append(this_column)
+
+        elif character_varying_not_null_search is not None:
+            this_column = []
+            var_column = character_varying_not_null_search.group(1)
+            length = character_varying_not_null_search.group(2)
+            column_str = table_str + "." + var_column
+            this_column.append(var_column) #column Name
+            this_column.append("varchar") #Data Type
+            this_column.append(length) #Length
+            this_column.append(" ") #Precision
+            this_column.append(" ") #scale
+            this_column.append("No") # Allows Nulls
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -467,6 +503,21 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(" ") #Length
             this_column.append(" ") #Precision
             this_column.append(" ") #scale
+            this_column.append("Yes") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out) #Description
+            this_table_columns.append(this_column)
+
+        elif timestamp_not_null_search is not None:
+            this_column = []
+            timecolumn2 = timestamp_not_null_search.group(1)
+            column_str = table_str + "." + timecolumn2
+            this_column.append(timecolumn2) #column Name
+            this_column.append("date") #Data Type
+            this_column.append(" ") #Length
+            this_column.append(" ") #Precision
+            this_column.append(" ") #scale
+            this_column.append("No") # Allows Nulls
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -480,6 +531,53 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(" ") #Length
             this_column.append("32") #Precision
             this_column.append("0") #scale
+            this_column.append("Yes") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out) #Description
+            this_table_columns.append(this_column)
+
+        elif integer_not_null_search is not None:
+            this_column = []
+            integer_column_name = integer_not_null_search.group(1)
+            column_str = table_str + "." + integer_column_name
+            this_column.append(integer_column_name) #column Name
+            this_column.append("integer") #Data Type
+            this_column.append(" ") #Length
+            this_column.append("32") #Precision
+            this_column.append("0") #scale
+            this_column.append("No") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out) #Description
+            this_table_columns.append(this_column)
+
+        elif numeric_search is not None:
+            this_column = []
+            numeric_column_name = numeric_search.group(1)
+            numeric_precision = numeric_search.group(2)
+            numeric_scale = numeric_search.group(3)
+            column_str = table_str + "." + numeric_column_name
+            this_column.append(numeric_column_name) #column Name
+            this_column.append("integer") #Data Type
+            this_column.append(" ") #Length
+            this_column.append(str(numeric_precision)) #Precision
+            this_column.append(str(numeric_scale)) #scale
+            this_column.append("Yes") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out) #Description
+            this_table_columns.append(this_column)
+
+        elif numeric_not_null_search is not None:
+            this_column = []
+            numeric_column_name = numeric_not_null_search.group(1)
+            numeric_precision = numeric_not_null_search.group(2)
+            numeric_scale = numeric_not_null_search.group(3)
+            column_str = table_str + "." + numeric_column_name
+            this_column.append(numeric_column_name) #column Name
+            this_column.append("integer") #Data Type
+            this_column.append(" ") #Length
+            this_column.append(str(numeric_precision)) #Precision
+            this_column.append(str(numeric_scale)) #scale
+            this_column.append("No") # Allows Nulls
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -493,6 +591,7 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column.append(" ") #Length
             this_column.append(" ") #Precision
             this_column.append(" ") #scale
+            this_column.append("No") # Allows Nulls
             column_comment_out = get_column_comments(column_str, file_content)
             this_column.append(column_comment_out) #Description
             this_table_columns.append(this_column)
@@ -503,7 +602,8 @@ def get_columns(table_str, file_content, this_table_columns):
 def get_filenames():
 
     # read the path and file names of all of the SQL schema files in the /SQL folder
-    filenames = glob.glob("../../sql/*")
+    # including subfolders
+    filenames = glob2.glob("../../sql/**/*")
     for name in filenames:
         if "schema" not in name:
             filenames.remove(name)
