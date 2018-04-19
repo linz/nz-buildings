@@ -208,6 +208,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btn_clear_slt2">
+            <property name="text">
+             <string>Clear Selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btn_relink_slt">
             <property name="text">
              <string>Re-link Selected</string>
@@ -286,19 +293,19 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="QTableWidget" name="tableWidget"/>
+         <widget class="QTableWidget" name="tbl_result"/>
         </item>
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
-           <widget class="QPushButton" name="pushButton_4">
+           <widget class="QPushButton" name="btn_reunlink_slt">
             <property name="text">
              <string>Re-unlink Selected</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton_3">
+           <widget class="QPushButton" name="btn_reunlink_all">
             <property name="text">
              <string>Re-unlink All</string>
             </property>
