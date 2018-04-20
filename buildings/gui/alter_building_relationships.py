@@ -61,6 +61,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_unlink_selected.setEnabled(False)
         self.btn_unlink_all.setEnabled(False)
 
+        self.btn_link.setEnabled(False)
 
         self.btn_save.setEnabled(False)
         
@@ -85,7 +86,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
         self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
-        
+
+        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
+        self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
+
+        self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)            
+        self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
             
     def find_building_lyrs(self):
         """Finds building layers."""
@@ -120,6 +126,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.verticalHeader().setVisible(False)
 
+        #tbl.setEditTriggers(QAbstractItemView.DoubleClicked)
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
         tbl.setSelectionMode(QAbstractItemView.MultiSelection)
 
         tbl.setShowGrid(True)
@@ -196,12 +204,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     else:
                         tbl.setRowCount(row + 1)
                         tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
-
+        '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
             for col in range(2):
                 if tbl.item(row, col):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        '''
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
         self.enable_btn_unlink_all()
@@ -272,12 +281,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     else:
                         tbl.setRowCount(row + 1)
                         tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
-
+        '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
             for col in range(2):
                 if tbl.item(row, col):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        '''
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
         self.enable_btn_unlink_all()
@@ -308,9 +318,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         return have_duplicate_row, the_row
 
     def select_from_tbl_original_existing(self):
-        
-        for building_lyr in self.existing_lyr:
-            
+        self.lst_existing.clearSelection()
+        self.tbl_result.clearSelection()
+
+        for building_lyr in self.existing_lyr:    
             building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
             building_lyr.removeSelection()
 
@@ -326,14 +337,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.enable_btn_unlink_selected()
 
-
     def select_from_tbl_original_bulk(self):
     
+        self.lst_bulk.clearSelection()
+        self.tbl_result.clearSelection()
+
         for building_lyr in self.bulk_load_lyr:
-            
             building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
             building_lyr.removeSelection()
-
+        
         feat_ids_bulk = []
         for index in self.tbl_original.selectionModel().selectedRows():
             item_bulk = self.tbl_original.item(index.row(), 1)
@@ -352,6 +364,27 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_original.clearSelection()
         self.btn_unlink_selected.setEnabled(False) 
 
+    def remove_selected_clicked(self):
+        tbl = self.tbl_original
+
+        rows = []
+        for index in tbl.selectionModel().selectedRows()[::-1]:
+            item_existing = tbl.item(index.row(), 0)
+            item_bulk = tbl.item(index.row(), 1)
+
+            for row in range(tbl.rowCount())[::-1]:
+                id_existing = int(tbl.item(row, 0).text())
+                id_bulk = int(tbl.item(row, 1).text())
+                if id_existing == int(item_existing.text()) or id_bulk == int(item_bulk.text()):
+                    rows.append(row)
+
+        for row in sorted(set(rows), reverse=True):
+            tbl.removeRow(row)
+
+        tbl.clearSelection()    
+        self.enable_btn_unlink_selected()
+        self.enable_btn_unlink_all()
+
     def remove_all_clicked(self):
 
         for building_lyr in self.existing_lyr + self.bulk_load_lyr:
@@ -360,20 +393,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.tbl_original.removeRow(row)
         self.btn_unlink_selected.setEnabled(False)  
         self.btn_unlink_all.setEnabled(False)
-
-    def remove_selected_clicked(self):
-
-        for index in self.tbl_original.selectionModel().selectedRows()[::-1]:
-            '''
-            item_existing = self.tbl_original.item(index.row(), 0)
-            item_bulk = self.tbl_original.item(index.row(), 1)
-            for row in self.tbl_original.rowCount():
-            '''
-            self.tbl_original.removeRow(index.row())
-        self.tbl_original.clearSelection()    
-        self.enable_btn_unlink_selected()
-        self.enable_btn_unlink_all()
-        
 
 
     def enable_btn_unlink_selected(self):
@@ -390,44 +409,93 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def unlink_selected_clicked(self):
         tbl = self.tbl_original
         for index in tbl.selectionModel().selectedRows()[::-1]:
-            item_existing = tbl.item(index.row(), 0)
-            if item_existing:
-                id_existing = int(item_existing.text())
-                self.lst_existing.addItem(QListWidgetItem('%s' %id_existing))
-            item_bulk = tbl.item(index.row(), 1)
-            if item_bulk:
-                id_bulk = int(item_bulk.text())
-                self.lst_bulk.addItem(QListWidgetItem('%s' %id_bulk))
-            tbl.removeRow(index.row())
+            row = index.row()
+            self.remove_from_tbl_to_lst(row)
 
     def unlink_all_clicked(self):
+
+        for row in range(self.tbl_original.rowCount())[::-1]:
+            self.remove_from_tbl_to_lst(row)
+         
+    def remove_from_tbl_to_lst(self, row):
+        
         tbl = self.tbl_original
-        for row in range(tbl.rowCount())[::-1]:
-            item_existing = tbl.item(row, 0)
-            if item_existing:
-                id_existing = int(item_existing.text())
-                have_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_existing, id_existing)
-                if not have_duplicate_id:
-                    self.lst_existing.addItem(QListWidgetItem('%s' %id_existing))
-            item_bulk = tbl.item(row, 1)
-            if item_bulk:
-                id_bulk = int(item_bulk.text())
-                have_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_bulk, id_bulk)
-                if not have_duplicate_id:
-                    self.lst_bulk.addItem(QListWidgetItem('%s' %id_bulk))
-            tbl.removeRow(row)            
+        self.lst_existing.clearSelection()
+        self.lst_bulk.clearSelection()
+        item_existing = tbl.item(row, 0)
+        if item_existing:
+            id_existing = int(item_existing.text())
+            have_duplicate_id, the_row = self.check_duplicate_listwidgetitems(self.lst_existing, id_existing)
+            if not have_duplicate_id:
+                self.lst_existing.addItem(QListWidgetItem('%s' %id_existing))
+                #else:
+                #    self.lst_existing.item(the_row).setSelected(True)
+        item_bulk = tbl.item(row, 1)
+        if item_bulk:
+            id_bulk = int(item_bulk.text())
+            have_duplicate_id, the_row = self.check_duplicate_listwidgetitems(self.lst_bulk, id_bulk)
+            if not have_duplicate_id:
+                self.lst_bulk.addItem(QListWidgetItem('%s' %id_bulk))
+                #else:
+                #    self.lst_bulk.item(the_row).setSelected(True)
+        tbl.removeRow(row)  
 
     def check_duplicate_listwidgetitems(self, lst, id_item):
+        
         have_duplicate_id = False
+        the_row = 0
         for row in range(lst.count()):
             item = lst.item(row)
             if int(item.text()) == id_item:
                 have_duplicate_id = True
+                the_row = row
                 break
-        return have_duplicate_id
+        return have_duplicate_id, the_row
 
 
     #######################################################################################
+
+    def select_from_lst_existing(self):
+
+        self.tbl_original.clearSelection()
+        self.tbl_result.clearSelection()
+
+        for building_lyr in self.existing_lyr:
+            building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+            building_lyr.removeSelection()
+
+        feat_ids_existing = []
+        for index in self.lst_existing.selectionModel().selectedRows():
+            item_existing = self.lst_existing.item(index.row())
+            feat_ids_existing.append(int(item_existing.text()))
+
+        for building_lyr in self.existing_lyr:
+            building_lyr.selectByIds(feat_ids_existing)
+            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
+
+        self.enable_btn_link()
+
+
+    def select_from_lst_bulk(self):
+
+        self.tbl_original.clearSelection()
+        self.tbl_result.clearSelection()
+
+        for building_lyr in self.bulk_load_lyr:
+            building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+            building_lyr.removeSelection()
+
+
+        feat_ids_bulk = []
+        for index in self.lst_bulk.selectionModel().selectedRows():
+            item_bulk = self.lst_bulk.item(index.row())
+            feat_ids_bulk.append(int(item_bulk.text()))
+
+        for building_lyr in self.bulk_load_lyr:
+            building_lyr.selectByIds(feat_ids_bulk)
+            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+
+        self.enable_btn_link()
 
     def relink_selected_clicked(self):
 
@@ -465,6 +533,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         
         self.lst_bulk.clearSelection()
 
+        self.btn_link.setEnabled(False)
+
 
     def relink_all_clicked(self):
         self.rows_lst_existing = []
@@ -480,6 +550,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             item = self.lst_bulk.takeItem(row)
             self.lst_bulk.removeItemWidget(item)
 
+        self.btn_link.setEnabled(False)
 
     def remove_from_lst_existing_to_table(self, row_lst):
         tbl = self.tbl_original
@@ -616,9 +687,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         #return self.rows_lst_existing, self.rows_lst_bulk
 
+    def enable_btn_link(self):
+        self.btn_link.setEnabled(False)
+        for index in self.lst_existing.selectionModel().selectedRows():
+            for index in self.lst_bulk.selectionModel().selectedRows():
+                self.btn_link.setEnabled(True)
+
     def clear_selection2_clicked(self):
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
+        self.btn_link.setEnabled(False)
 
 ##############################################################################
 
@@ -643,6 +721,43 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_relink_all.setEnabled(False)
         self.btn_relink_slt.setEnabled(False)
+
+
+    def select_from_tbl_result_existing(self):
+        self.tbl_original.clearSelection()
+        self.lst_existing.clearSelection()
+
+        for building_lyr in self.existing_lyr:    
+            building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+            building_lyr.removeSelection()
+
+        feat_ids_existing = []
+        for index in self.tbl_result.selectionModel().selectedRows():
+            item_existing = self.tbl_result.item(index.row(), 0)
+            if item_existing:
+                feat_ids_existing.append(int(item_existing.text()))
+        
+        for building_lyr in self.existing_lyr:
+            building_lyr.selectByIds(feat_ids_existing)
+            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
+
+    def select_from_tbl_result_bulk(self):
+        self.tbl_original.clearSelection()
+        self.lst_bulk.clearSelection()
+
+        for building_lyr in self.bulk_load_lyr:    
+            building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+            building_lyr.removeSelection()
+
+        feat_ids_bulk = []
+        for index in self.tbl_result.selectionModel().selectedRows():
+            item_bulk = self.tbl_result.item(index.row(), 1)
+            if item_bulk:
+                feat_ids_bulk.append(int(item_bulk.text()))
+        
+        for building_lyr in self.bulk_load_lyr:
+            building_lyr.selectByIds(feat_ids_bulk)
+            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
 
 
     def reunlink_selected_clicked(self):
@@ -678,6 +793,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
             tbl.removeRow(index.row())
 
+        self.enable_btn_relink()
 
     def reunlink_all_clicked(self):
         tbl = self.tbl_result
