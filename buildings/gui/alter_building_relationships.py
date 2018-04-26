@@ -63,7 +63,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_link.setEnabled(False)
 
-        self.btn_save.setEnabled(False)
+        #self.btn_save.setEnabled(False)
         
         
     
@@ -369,13 +369,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         rows = []
         for index in tbl.selectionModel().selectedRows()[::-1]:
-            item_existing = tbl.item(index.row(), 0)
-            item_bulk = tbl.item(index.row(), 1)
+            item_existing_0 = tbl.item(index.row(), 0)
+            item_bulk_0 = tbl.item(index.row(), 1)
+            if not item_existing_0 or not item_bulk_0:
+                rows.append(index.row())
+                continue
 
             for row in range(tbl.rowCount())[::-1]:
-                id_existing = int(tbl.item(row, 0).text())
-                id_bulk = int(tbl.item(row, 1).text())
-                if id_existing == int(item_existing.text()) or id_bulk == int(item_bulk.text()):
+                item_existing = tbl.item(row, 0)
+                item_bulk = tbl.item(row, 1)
+                if not item_existing or not item_bulk:
+                    continue
+                if int(item_existing.text()) == int(item_existing_0.text()) or int(item_bulk.text()) == int(item_bulk_0.text()):
                     rows.append(row)
 
         for row in sorted(set(rows), reverse=True):
@@ -849,29 +854,108 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched_bulk = '''DELETE FROM buildings_bulk_load.matched
                               WHERE bulk_load_outline_id = %s;
                               '''
-        sql_removed = '''DELETE FROM buildling_bulk_load.removed
+        sql_removed = '''DELETE FROM buildings_bulk_load.removed
                          WHERE building_outline_id = %s;
                          '''
-        sql_added = '''DELETE FROM buildling_bulk_load.added
+        sql_added = '''DELETE FROM buildings_bulk_load.added
                        WHERE bulk_load_outline_id = %s;
                        '''
+        sql_new_removed = '''INSERT INTO buildings_bulk_load.removed
+                            VALUES (%s, 1);
+                            '''
+        sql_new_added = '''INSERT INTO buildings_bulk_load.added
+                            VALUES (%s, 1);
+                            '''
+        sql_new_matched = '''INSERT INTO buildings_bulk_load.matched(bulk_load_outline_id
+                                                                   , building_outline_id
+                                                                   , qa_status_id
+                                                                   , area_bulk_load
+                                                                   , area_existing
+                                                                   , percent_area_difference
+                                                                   , area_overlap
+                                                                   , percent_bulk_load_overlap
+                                                                   , percent_existing_overlap
+                                                                   , hausdorff_distance)
+                             SELECT supplied.bulk_load_outline_id,
+                                    current.building_outline_id,
+                                    1,
+                                    ST_Area(supplied.shape),
+                                    ST_Area(current.shape),
+                                    @(ST_Area(current.shape) - ST_Area(supplied.shape)) / ST_Area(current.shape) * 100,
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)),
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100 ,
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100,
+                                    ST_HausdorffDistance(supplied.shape, current.shape)
+                             FROM buildings_bulk_load.bulk_load_outlines supplied,
+                                  buildings_bulk_load.existing_subset_extracts current
+                             WHERE supplied.bulk_load_outline_id = %s and current.building_outline_id = %s;
 
-        for row in range(tbl.rowCount())[::-1]:
-            id_existing = int(tbl.item(index.row(), 0).text())
-            id_bulk = int(tbl.item(index.row(), 1).text())
+                            '''
+        sql_new_related = '''INSERT INTO buildings_bulk_load.related(bulk_load_outline_id
+                                                                   , building_outline_id
+                                                                   , qa_status_id
+                                                                   , area_bulk_load
+                                                                   , area_existing
+                                                                   , area_overlap
+                                                                   , percent_bulk_load_overlap
+                                                                   , percent_existing_overlap
+                                                                   , total_area_bulk_load_overlap
+                                                                   , total_area_existing_overlap
+                                                                   , total_percent_bulk_load_overlap
+                                                                   , total_percent_existing_overlap)
+                             SELECT supplied.bulk_load_outline_id,
+                                    current.building_outline_id,
+                                    1,
+                                    ST_Area(supplied.shape),
+                                    ST_Area(current.shape),
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)),
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100,
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100,
+
+                            '''
+
+
+        for row in range(self.lst_existing.count())[::-1]:
+            item = self.lst_existing.item(row)
+            id_existing = int(item.text())
 
             db._execute(sql_related_existing, (id_existing, ))
-            db._execute(sql_related_bulk, (id_bulk, ))
             db._execute(sql_matched_existing, (id_existing, ))
-            db._execute(sql_matched_bulk, (id_bulk, ))
             db._execute(sql_removed, (id_existing, ))
+
+            if not item.background().color().getRgb() == QColor('yellow'):
+                db._execute(sql_new_removed, (id_existing, ))
+
+
+        for row in range(self.lst_bulk.count())[::-1]:
+            item = self.lst_bulk.item(row)
+            id_bulk = int(item.text())
+
+            db._execute(sql_related_bulk, (id_bulk, ))
+            db._execute(sql_matched_bulk, (id_bulk, ))
             db._execute(sql_added, (id_bulk, ))
 
-            sql_new_matched = '''INSERT INTO buildling_bulk_load.matched(bulk_load_outline_id, building_outline_id)
-                                 VALUES (id_bulk, id_existing)
-                                 '''
-            tbl.removeRow()
+            if not item.background().color().getRgb() == QColor('yellow'):
+                db._execute(sql_new_added, (id_bulk, ))
+
+        ids_existing = []
+        ids_bulk = []
+        for row in range(tbl.rowCount())[::-1]:
+            ids_existing.append(int(tbl.item(row, 0).text()))
+            ids_bulk.append(int(tbl.item(row, 1).text()))
+
+        for row in range(tbl.rowCount())[::-1]:
+            id_existing = int(tbl.item(row, 0).text())
+            id_bulk = int(tbl.item(row, 1).text())
+
+            if ids_existing.count(id_existing) > 1 or ids_bulk.count(id_bulk) > 1:
+                db._execute(sql_new_related, (id_bulk, id_existing))
+            else:
+                db._execute(sql_new_matched, (id_bulk, id_existing))
             
+            tbl.removeRow(row)
+        self.lst_existing.clear()
+        self.lst_bulk.clear()    
 
     def cancel_clicked(self):
         """
