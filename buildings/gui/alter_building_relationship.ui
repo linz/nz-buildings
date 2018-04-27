@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>568</width>
-    <height>859</height>
+    <height>863</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -251,6 +251,38 @@
          <widget class="QPushButton" name="btn_link">
           <property name="text">
            <string>Link</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QPushButton" name="btn_added">
+          <property name="text">
+           <string>Added</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_removed">
+          <property name="text">
+           <string>Removed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_matched">
+          <property name="text">
+           <string>Matched</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_related">
+          <property name="text">
+           <string>Related</string>
           </property>
          </widget>
         </item>

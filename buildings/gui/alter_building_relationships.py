@@ -52,6 +52,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         
         self.btn_link.clicked.connect(self.link_clicked)
 
+        self.btn_added.clicked.connect(self.added_clicked)
+        self.btn_removed.clicked.connect(self.removed_clicked)
+        self.btn_matched.clicked.connect(self.matched_clicked)
+        self.btn_related.clicked.connect(self.related_clicked)
+
         self.btn_reunlink_slt.clicked.connect(self.reunlink_selected_clicked)
         self.btn_reunlink_all.clicked.connect(self.reunlink_all_clicked)
 
@@ -74,6 +79,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_table(self.tbl_original)
         self.init_table(self.tbl_result)
         
+        self.init_list(self.lst_existing)
+        self.init_list(self.lst_bulk)
+
         self.find_building_lyrs()
         
         for building_lyr in self.existing_lyr:
@@ -92,12 +100,29 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)            
         self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
+
+
+        self.lyr_added_bulk_load.setSubsetString('null')
+        self.lyr_removed_existing.setSubsetString('null')
+        self.lyr_matched_existing.setSubsetString('null')
+        self.lyr_matched_bulk_load.setSubsetString('null')
+        self.lyr_related_existing.setSubsetString('null')
+        self.lyr_related_bulk_load.setSubsetString('null')
+
             
     def find_building_lyrs(self):
         """Finds building layers."""
 
         self.bulk_load_lyr = []
         self.existing_lyr = []
+
+        self.lyr_added_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
+        self.lyr_removed_existing = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
+        self.lyr_matched_existing = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_in_edit")[0]
+        self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_in_edit")[0]
+        self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_in_edit")[0]
+        self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_in_edit")[0]
+
 
         bulk_load_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')
         existing_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('existing_subset_extracts')
@@ -133,11 +158,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.setShowGrid(True)
 
 
-        '''
-        self.lst_bulk.clearSelection()
-        self.lst_bulk.setSelectionMode(QAbstractItemView.MultiSelection)
-        self.lst_bulk.setSortingEnabled(True)
-        '''
+    def init_list(self, lst):
+        lst.clearSelection()
+        lst.setSelectionMode(QAbstractItemView.MultiSelection)
+        #lst.setSortingEnabled(True)
+    
 
     def select_from_layer_existing(self):
 
@@ -557,6 +582,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_link.setEnabled(False)
 
+        ##
+        self.lyr_added_bulk_load.setSubsetString('null')
+        self.lyr_removed_existing.setSubsetString('null')
+        self.lyr_matched_existing.setSubsetString('null')
+        self.lyr_matched_bulk_load.setSubsetString('null')        
+        self.lyr_related_existing.setSubsetString('null')
+        self.lyr_related_bulk_load.setSubsetString('null')
+
     def remove_from_lst_existing_to_table(self, row_lst):
         tbl = self.tbl_original
         
@@ -705,6 +738,69 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
 ##############################################################################
 
+
+    def added_clicked(self):
+        
+        for index in self.lst_bulk.selectionModel().selectedRows():
+            item_bulk = self.lst_bulk.item(index.row())
+            item_bulk.setBackground(QColor('yellow'))
+            id_bulk = int(item_bulk.text())
+
+            self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+
+
+    def removed_clicked(self):
+        
+        for index in self.lst_existing.selectionModel().selectedRows():
+            item_existing = self.lst_existing.item(index.row())
+            item_existing.setBackground(QColor('yellow'))
+            id_existing = int(item_existing.text())
+
+            self.lyr_removed_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+
+    def matched_clicked(self):
+
+        for index in self.lst_existing.selectionModel().selectedRows():
+            item_existing = self.lst_existing.item(index.row())
+            item_existing.setBackground(QColor('yellow'))
+            id_existing = int(item_existing.text())
+
+            self.lyr_matched_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+
+        for index in self.lst_bulk.selectionModel().selectedRows():
+            item_bulk = self.lst_bulk.item(index.row())
+            item_bulk.setBackground(QColor('yellow'))
+            id_bulk = int(item_bulk.text())
+
+            self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+
+    def related_clicked(self):
+
+        ids_existing = []
+        ids_bulk = []
+        for index in self.lst_existing.selectionModel().selectedRows():
+            item_existing = self.lst_existing.item(index.row())
+            item_existing.setBackground(QColor('yellow'))
+            id_existing = int(item_existing.text())
+            ids_existing.append(id_existing)
+
+        for index in self.lst_bulk.selectionModel().selectedRows():
+            item_bulk = self.lst_bulk.item(index.row())
+            item_bulk.setBackground(QColor('yellow'))
+            id_bulk = int(item_bulk.text())
+            ids_bulk.append(ids_bulk)
+
+        if len(ids_existings) > 1:
+            self.lyr_related_existing.setSubsetString('"building_outline_id" in {}'.format(tuple(ids_existings)))
+        elif len(ids_existings) == 1:
+            self.lyr_related_existing.setSubsetString('"building_outline_id" = {}'.format(ids_existings[0]))
+
+        if len(ids_bulk) > 1:
+            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" in {}'.format(tuple(ids_bulk)))
+        elif len(ids_bulk) == 1:
+            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" = {}'.format(ids_bulk[0]))
+
+
     def link_clicked(self):
 
         tbl = self.tbl_result
@@ -800,6 +896,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.enable_btn_relink()
 
+        ##
+
+
     def reunlink_all_clicked(self):
         tbl = self.tbl_result
 
@@ -816,6 +915,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_relink_all.setEnabled(True)
         self.btn_relink_slt.setEnabled(True)
+
 
     def enable_btn_relink(self):
         have_highlight_existing = False
@@ -835,8 +935,150 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_relink_slt.setEnabled(True)            
 
 
-
     def save_clicked(self):
+
+        sql_related_existing = '''DELETE FROM buildings_bulk_load.related
+                                  WHERE building_outline_id = %s;
+                                  '''
+        sql_related_bulk = '''DELETE FROM buildings_bulk_load.related
+                              WHERE bulk_load_outline_id = %s;
+                              '''
+        sql_matched_existing = '''DELETE FROM buildings_bulk_load.matched
+                                  WHERE building_outline_id = %s;
+                                  '''
+        sql_matched_bulk = '''DELETE FROM buildings_bulk_load.matched
+                              WHERE bulk_load_outline_id = %s;
+                              '''
+        sql_removed = '''DELETE FROM buildings_bulk_load.removed
+                         WHERE building_outline_id = %s;
+                         '''
+        sql_added = '''DELETE FROM buildings_bulk_load.added
+                       WHERE bulk_load_outline_id = %s;
+                       '''
+
+        sql_new_added = '''INSERT INTO buildings_bulk_load.added
+                            VALUES (%s, 1);
+                            '''
+
+        sql_new_removed = '''INSERT INTO buildings_bulk_load.removed
+                            VALUES (%s, 1);
+                            '''
+
+        sql_new_matched = '''INSERT INTO buildings_bulk_load.matched(bulk_load_outline_id
+                                                                   , building_outline_id
+                                                                   , qa_status_id
+                                                                   , area_bulk_load
+                                                                   , area_existing
+                                                                   , percent_area_difference
+                                                                   , area_overlap
+                                                                   , percent_bulk_load_overlap
+                                                                   , percent_existing_overlap
+                                                                   , hausdorff_distance)
+                             SELECT supplied.bulk_load_outline_id,
+                                    current.building_outline_id,
+                                    1,
+                                    ST_Area(supplied.shape),
+                                    ST_Area(current.shape),
+                                    @(ST_Area(current.shape) - ST_Area(supplied.shape)) / ST_Area(current.shape) * 100,
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)),
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100 ,
+                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100,
+                                    ST_HausdorffDistance(supplied.shape, current.shape)
+                             FROM buildings_bulk_load.bulk_load_outlines supplied,
+                                  buildings_bulk_load.existing_subset_extracts current
+                             WHERE supplied.bulk_load_outline_id = %s and current.building_outline_id = %s;
+
+                            '''
+
+        sql_refresh = '''CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
+                            SELECT a.bulk_load_outline_id, b.shape
+                            FROM buildings_bulk_load.added a
+                            JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
+
+                        CREATE OR REPLACE VIEW buildings_bulk_load.removed_outlines AS
+                            SELECT r.building_outline_id, e.shape
+                            FROM buildings_bulk_load.removed r
+                            JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
+
+                        CREATE OR REPLACE VIEW buildings_bulk_load.matched_bulk_load_outlines AS
+                            SELECT m.bulk_load_outline_id, b.shape
+                            FROM buildings_bulk_load.matched m
+                            JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
+
+                        CREATE OR REPLACE VIEW buildings_bulk_load.related_bulk_load_outlines AS
+                            SELECT DISTINCT r.bulk_load_outline_id, b.shape
+                            FROM buildings_bulk_load.related r
+                            JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
+
+                        CREATE OR REPLACE VIEW buildings_bulk_load.matched_existing_outlines AS
+                            SELECT m.building_outline_id, e.shape
+                            FROM buildings_bulk_load.matched m
+                            JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
+
+                        CREATE OR REPLACE VIEW buildings_bulk_load.related_existing_outlines AS
+                            SELECT DISTINCT r.building_outline_id, e.shape
+                            FROM buildings_bulk_load.related r
+                            JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
+                        '''
+
+
+        for row in range(self.lst_existing.count())[::-1]:
+            item = self.lst_existing.item(row)
+            id_existing = int(item.text())
+
+            db._execute(sql_removed, (id_existing, ))
+            db._execute(sql_matched_existing, (id_existing, ))
+            db._execute(sql_related_existing, (id_existing, ))
+            
+            if not item.background().color().getRgb() == QColor('yellow'):
+                db._execute(sql_new_removed, (id_existing, ))
+            
+
+        for row in range(self.lst_bulk.count())[::-1]:
+            item = self.lst_bulk.item(row)
+            id_bulk = int(item.text())
+
+            db._execute(sql_added, (id_bulk, ))
+            db._execute(sql_matched_bulk, (id_bulk, ))
+            db._execute(sql_related_bulk, (id_bulk, ))
+            
+            if not item.background().color().getRgb() == QColor('yellow'):
+                db._execute(sql_new_added, (id_bulk, ))
+            
+
+
+        #added
+        for feat in self.lyr_added_bulk_load.getFeatures():
+            id_bulk = feat['bulk_load_outline_id']
+            db._execute(sql_new_added, (id_bulk,))
+
+        #removed
+        for feat in self.lyr_removed_existing.getFeatures():
+            id_existing = feat['building_outline_id']
+            db._execute(sql_new_removed, (id_existing, ))
+
+        #matched
+        for feat1 in self.lyr_matched_bulk_load.getFeatures():
+            id_bulk = feat1['bulk_load_outline_id']
+            for feat2 in self.lyr_matched_existing.getFeatures():
+                id_existing = feat2['building_outline_id']
+                db._execute(sql_new_matched, (id_bulk, id_existing))
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()  
+
+        self.lyr_added_bulk_load.setSubsetString('null')
+        self.lyr_removed_existing.setSubsetString('null')
+        self.lyr_matched_existing.setSubsetString('null')
+        self.lyr_matched_bulk_load.setSubsetString('null')
+        self.lyr_related_existing.setSubsetString('null')
+        self.lyr_related_bulk_load.setSubsetString('null')
+
+
+        db._execute(sql_refresh)
+
+
+    def save_clicked2(self):
         """
         Called when save button is clicked
         """
@@ -891,6 +1133,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                              WHERE supplied.bulk_load_outline_id = %s and current.building_outline_id = %s;
 
                             '''
+        ##                     
         sql_new_related = '''INSERT INTO buildings_bulk_load.related(bulk_load_outline_id
                                                                    , building_outline_id
                                                                    , qa_status_id
@@ -912,6 +1155,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                     ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100,
                                     ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100,
 
+                            '''
+
+        sql_new_related = '''INSERT INTO buildings_bulk_load.related(bulk_load_outline_id, building_outline_id)
+                             VALUES (%s, %s)
                             '''
 
 
