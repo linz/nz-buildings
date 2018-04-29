@@ -114,7 +114,7 @@ SELECT results_eq(
 -- result of related buildings in lifecycle table
 
 SELECT results_eq(
-    'SELECT parent_building_id, building_id FROM buildings.lifecycle',
+    'SELECT parent_building_id, building_id FROM buildings.lifecycle ORDER BY parent_building_id DESC',
     $$VALUES (1033, 1000002),
              (1032, 1000002), (1032, 1000003),
              (1031, 1000004), (1031, 1000005), (1031, 1000006), (1031, 1000007), (1031, 1000008), (1031, 1000009),

@@ -49,8 +49,8 @@ BEGIN
     JOIN buildings_common.capture_method USING (capture_method_id)
     JOIN buildings_common.capture_source USING (capture_source_id)
     JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-    JOIN admin_bdys.nz_locality ON nz_locality.id = building_outlines.suburb_locality_id
-    JOIN admin_bdys.territorial_authority ON territorial_authority.ogc_fid = building_outlines.territorial_authority_id
+    JOIN buildings_admin_bdys.nz_locality ON nz_locality.id = building_outlines.suburb_locality_id
+    JOIN buildings_admin_bdys.territorial_authority ON territorial_authority.ogc_fid = building_outlines.territorial_authority_id
     WHERE building_outlines.end_lifespan IS NULL
     AND buildings.end_lifespan IS NULL
     AND building_name.end_lifespan IS NULL
