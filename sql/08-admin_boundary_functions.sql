@@ -9,7 +9,7 @@ RETURNS integer AS
 $$
     
     SELECT   nzl.id
-    FROM     admin_bdys.nz_locality nzl
+    FROM     buildings_admin_bdys.nz_locality nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
                  , nzl.shape
@@ -66,7 +66,7 @@ RETURNS numeric(10,0) AS
 $$
     
     SELECT   nzl.city_id
-    FROM     admin_bdys.nz_locality nzl
+    FROM     buildings_admin_bdys.nz_locality nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
                  , nzl.shape
@@ -123,7 +123,7 @@ RETURNS integer AS
 $$
     
     SELECT   nzl.ogc_fid
-    FROM     admin_bdys.territorial_authority nzl
+    FROM     buildings_admin_bdys.territorial_authority nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
                  , nzl.shape

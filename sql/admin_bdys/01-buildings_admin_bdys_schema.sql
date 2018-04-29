@@ -5,11 +5,11 @@
 SET client_min_messages TO WARNING;
 
 
-CREATE SCHEMA IF NOT EXISTS admin_bdys;
+CREATE SCHEMA IF NOT EXISTS buildings_admin_bdys;
 
 -- NZ Locality
 
-CREATE TABLE IF NOT EXISTS admin_bdys.nz_locality (
+CREATE TABLE IF NOT EXISTS buildings_admin_bdys.nz_locality (
       id integer NOT NULL PRIMARY KEY
     , parent_id numeric(10,0)
     , suburb_4th character varying(60)
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS admin_bdys.nz_locality (
 
 -- Territorial Authority
 
-CREATE TABLE IF NOT EXISTS admin_bdys.territorial_authority (
+CREATE TABLE IF NOT EXISTS buildings_admin_bdys.territorial_authority (
       ogc_fid integer NOT NULL PRIMARY KEY
     , shape public.geometry(MultiPolygon,4167)
     , name character varying(100)

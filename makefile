@@ -13,6 +13,7 @@ bindir = ${DESTDIR}/usr/bin
 # List of SQL scripts used for installation
 # Includes SQL scripts that are only built during install
 SQLSCRIPTS = \
+	sql/admin_bdys/01-buildings_admin_bdys_schema.sql \
 	sql/01-buildings_common_schema.sql \
 	sql/02-buildings_schema.sql \
 	sql/03-buildings_bulk_load_schema.sql \
@@ -59,6 +60,8 @@ scripts/nz-buildings-load: scripts/nz-buildings-load.in
 install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	mkdir -p ${datadir}/sql
 	cp sql/*.sql ${datadir}/sql
+	mkdir -p ${datadir}/sql/admin_bdys
+	cp sql/admin_bdys/*.sql ${datadir}/sql/admin_bdys
 	mkdir -p ${datadir}/sql/lds
 	cp sql/lds/*.sql ${datadir}/sql/lds
 	mkdir -p ${datadir}/tests/testdata
