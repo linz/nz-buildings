@@ -1,4 +1,4 @@
-﻿------------------------------------------------------------------------------
+------------------------------------------------------------------------------
 -- Create buildings schema and tables
 ------------------------------------------------------------------------------
 
@@ -104,33 +104,34 @@ CREATE INDEX shx_building_outlines
     ON buildings.building_outlines USING gist (shape);
 
 COMMENT ON TABLE buildings.building_outlines IS
-'The building table maintains a unique identifier for a building. Over time, '
-'a building can be represented by multiple building outlines aligned to '
-'different imagery sources. These building outlines are linked via the '
-'building_id.';
+'The building_outline table holds a geometry, typically captured from an '
+'aerial photograph. A new record is created for each new outline that '
+'represents a building.';
 
 COMMENT ON COLUMN buildings.building_outlines.building_outline_id IS
-'Unique identifier for the building.';
+'Unique identifier for the building outline.';
 COMMENT ON COLUMN buildings.building_outlines.building_id IS
-'Unique identifier for the building.';
+'Foreign key to the building table. The building id is persistant for the '
+'same building across all of the building outlines that represent it.';
 COMMENT ON COLUMN buildings.building_outlines.capture_method_id IS
-'Unique identifier for the building.';
+'Foreign key to the capture_method table. Holds the method by which the '
+'geometry was captured.';
 COMMENT ON COLUMN buildings.building_outlines.capture_source_id IS
-'Unique identifier for the building.';
+'Foreign key to the buildings_common.capture_source table.';
 COMMENT ON COLUMN buildings.building_outlines.lifecycle_stage_id IS
-'Unique identifier for the building.';
+'Foreign key to the buildings.lifecycle_stage table.';
 COMMENT ON COLUMN buildings.building_outlines.suburb_locality_id IS
-'Unique identifier for the building.';
+'Foreign key to the buildings_common.suburb_locality table.';
 COMMENT ON COLUMN buildings.building_outlines.town_city_id IS
-'Unique identifier for the building.';
+'Foreign key to the buildings_common.town_city table.';
 COMMENT ON COLUMN buildings.building_outlines.territorial_authority_id IS
-'Unique identifier for the building.';
+'Foreign key to the buildings_common.territorial_authority table.';
 COMMENT ON COLUMN buildings.building_outlines.begin_lifespan IS
-'The date that the building was first captured in the system.';
+'The date that the building outline was added to the system.';
 COMMENT ON COLUMN buildings.building_outlines.end_lifespan IS
-'The date that a building was either replaced or disused.';
+'The date that the building outline was superceded, replaced or disused.';
 COMMENT ON COLUMN buildings.building_outlines.shape IS
-'The date that a building was either replaced or disused.';
+'The geometry of the building outline.';
 
 -- Building Name
 
@@ -147,6 +148,24 @@ SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT m
 DROP INDEX IF EXISTS idx_building_name_building_id;
 CREATE INDEX idx_building_name_building_id
     ON buildings.building_name USING btree (building_id);
+
+COMMENT ON TABLE buildings.building_name IS
+'The building_name table stores a name that is related to a building at a '
+'point in time. Names have an lifespan independent from the building - the '
+'name can change independent to any other changes to the building.';
+
+COMMENT ON COLUMN buildings.building_name.building_name_id IS
+'Unique identifier for a building name.';
+COMMENT ON COLUMN buildings.building_name.building_id IS
+'Foreign key to the buildings.building table.';
+COMMENT ON COLUMN buildings.building_name.building_name IS
+'';
+COMMENT ON COLUMN buildings.building_name.begin_lifespan IS
+'The date that the building name was first captured in the system.';
+COMMENT ON COLUMN buildings.building_name.end_lifespan IS
+'The date that the building name was no longer attributed to a building in '
+'the system, either because the name was no longer in use or because the '
+'building was replaced or disused.';
 
 -- Building Use
 
@@ -168,6 +187,24 @@ DROP INDEX IF EXISTS idx_building_use_use_id;
 CREATE INDEX idx_building_use_use_id
     ON buildings.building_use USING btree (use_id);
 
+COMMENT ON TABLE buildings.building_use IS
+'The building_use table stores a use that is related to a building at a '
+'point in time. Uses have an lifespan independent from the building - the '
+'use can change independent to any other changes to the building.';
+
+COMMENT ON COLUMN buildings.building_use.building_use_id IS
+'Unique identifier for a building_use.';
+COMMENT ON COLUMN buildings.building_use.building_id IS
+'Foreign key to the buildings.building table.';
+COMMENT ON COLUMN buildings.building_use.use_id IS
+'Foreign key to the buildings.use table.';
+COMMENT ON COLUMN buildings.building_use.begin_lifespan IS
+'The date that the building use was first captured in the system.';
+COMMENT ON COLUMN buildings.building_use.end_lifespan IS
+'The date that the building use was no longer attributed to a building in '
+'the system, either because the use was no longer in use or because the '
+'building was replaced or disused.';
+
 -- Lifecycle
 
 CREATE TABLE IF NOT EXISTS buildings.lifecycle (
@@ -185,3 +222,18 @@ CREATE INDEX idx_lifecycle_parent_building_id
 DROP INDEX IF EXISTS idx_lifecycle_building_id;
 CREATE INDEX idx_lifecycle_building_id
     ON buildings.lifecycle USING btree (building_id);
+
+COMMENT ON TABLE buildings.building_use IS
+'The lifecycle table stores the relationship between buildings when one '
+'building is split into two buildings or two buildings are merged into one '
+'building. This will generally occur when a building outline was erroneously '
+'captured encompassing two buildings, which later becomes clear with '
+'additional aerial imagery.';
+
+COMMENT ON COLUMN buildings.lifecycle.lifecycle_id IS
+'Unique identifier for a building_use.';
+COMMENT ON COLUMN buildings.lifecycle.parent_buiilding_id IS
+'Foreign key to the buildings.building table. All records stored as parent '
+'buildings will be end dated in the system.';
+COMMENT ON COLUMN buildings.lifecycle.building_id IS
+'Foreign key to the buildings.building table.';

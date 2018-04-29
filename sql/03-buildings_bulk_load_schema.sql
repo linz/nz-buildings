@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.organisation (
     , value character varying(40) NOT NULL
 );
 
+CREATE COMMENT ON TABLE buildings_bulk_load.organisation IS 
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.organisation.organisation_id IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.organisation.value IS
+'';
+
 -- Bulk Load Status
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_status (
@@ -21,12 +29,28 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_status (
     , value character varying(40) NOT NULL
 );
 
+CREATE COMMENT ON TABLE buildings_bulk_load.bulk_load_status IS 
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_status.bulk_load_status_id IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_status.value IS
+'';
+
 -- QA Status
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.qa_status (
       qa_status_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
 );
+
+CREATE COMMENT ON TABLE buildings_bulk_load.qa_status IS 
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.qa_status.qa_status_id IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.qa_status.value IS
+'';
 
 -- Supplied Datasets
 
@@ -42,6 +66,20 @@ DROP INDEX IF EXISTS idx_supplied_datasets_supplier_id;
 CREATE INDEX idx_supplied_datasets_supplier_id
     ON buildings_bulk_load.supplied_datasets USING btree (supplier_id);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.supplied_datasets IS 
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.supplied_dataset_id IS
+'Unique identifier for the supplied_datasets table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.description IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.supplier_id IS
+'Foreign key to the buildings.organisation table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.processed_date IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.transfer_date IS
+'';
+
 -- Supplied Outlines
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
@@ -51,9 +89,9 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
     , bulk_load_status_id integer NOT NULL REFERENCES buildings_bulk_load.bulk_load_status (bulk_load_status_id)
     , capture_method_id integer NOT NULL REFERENCES buildings_common.capture_method (capture_method_id)
     , capture_source_id integer NOT NULL REFERENCES buildings_common.capture_source (capture_source_id)
-    , suburb_locality_id integer
-    , town_city_id integer
-    , territorial_authority_id integer
+    , suburb_locality_id integer NOT NULL REFERENCES buildings_common.suburb_locality (suburb_locality_id)
+    , town_city_id integer REFERENCES buildings_common.town_city (town_city_id)
+    , territorial_authority_id integer NOT NULL REFERENCES buildings_common.territorial_authority (territorial_authority_id)
     , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , shape public.geometry(MultiPolygon, 2193) NOT NULL
 );
@@ -80,6 +118,32 @@ DROP INDEX IF EXISTS shx_bulk_load_outlines;
 CREATE INDEX shx_bulk_load_outlines
     ON buildings_bulk_load.bulk_load_outlines USING gist (shape);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.bulk_load_outlines IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.bulk_load_outline_id IS
+'Unique identifier for the bulk_load_outlines table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.supplied_dataset_id IS
+'Foreign key to the buildings_bulk_load.supplied_datasets table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.external_outline_id IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.bulk_load_status_id IS
+'Foreign key to the buildings_bulk_load.bulk_load_status table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.capture_method_id IS
+'Foreign key to the buildings_common.capture_method table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.capture_source_id IS
+'Foreign key to the buildings_common.capture_source table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.suburb_locality_id IS
+'Foreign key to the buildings_common.suburb_locality table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.town_city_id IS
+'Foreign key to the buildings_common.town_city table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.territorial_authority_id IS
+'Foreign key to the buildings_common.territorial_authority table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.begin_lifespan IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.shape IS
+'';
+
 -- Existing Subset Extracts
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.existing_subset_extracts (
@@ -96,6 +160,17 @@ DROP INDEX IF EXISTS shx_existing_subset_extracts;
 CREATE INDEX shx_existing_subset_extracts
     ON buildings_bulk_load.existing_subset_extracts USING gist (shape);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.existing_subset_extracts IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.existing_subset_extracts.building_outline_id IS
+'Unique identifier for the existing_subset_extracts table and foreign key to the '
+'buildings.building_outlines table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.existing_subset_extracts.supplied_dataset_id IS
+'Foreign key to the buildings_bulk_load.supplied_datasets table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.existing_subset_extracts.shape IS
+'';
+
 -- Added
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.added (
@@ -106,6 +181,15 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.added (
 DROP INDEX IF EXISTS idx_added_qa_status_id;
 CREATE INDEX idx_added_qa_status_id
     ON buildings_bulk_load.added USING btree (qa_status_id);
+
+CREATE COMMENT ON TABLE buildings_bulk_load.added IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.added.bulk_load_outline_id IS
+'Unique identifier for the added table and foreign key to the '
+'buildings_bulk_load.bulk_load_outlines table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.added.qa_status_id IS
+'Foreign key to the buildings_bulk_load.qa_status table.';
 
 -- Removed
 
@@ -118,10 +202,19 @@ DROP INDEX IF EXISTS idx_removed_qa_status_id;
 CREATE INDEX idx_removed_qa_status_id
     ON buildings_bulk_load.removed USING btree (qa_status_id);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.removed IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.removed.building_outline_id IS
+'Unique identifier for the removed table and foreign key to the '
+'buildings_bulk_load.existing_subset_extracts table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.removed.qa_status_id IS
+'Foreign key to the buildings_bulk_load.qa_status table.';
+
 -- Related Candidates
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
-      related_candidate_id serial PRIMARY KEY
+      related_id serial PRIMARY KEY
     , bulk_load_outline_id integer NOT NULL REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
@@ -148,6 +241,36 @@ DROP INDEX IF EXISTS idx_related_qa_status_id;
 CREATE INDEX idx_related_qa_status_id
     ON buildings_bulk_load.related USING btree (qa_status_id);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.related IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.related_id IS
+'Unique identifier for the related table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.bulk_load_outline_id IS
+'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.building_outline_id IS
+'Foreign key to the buildings_bulk_load.building_outlines table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.qa_status_id IS
+'Foreign key to the buildings_bulk_load.qa_status table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.area_bulk_load IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.area_existing IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.area_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.percent_bulk_load_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.percent_existing_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.total_area_bulk_load_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.total_area_existing_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.total_percent_bulk_load_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.related.total_percent_existing_overlap IS
+'';
+
 -- Matched
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.matched (
@@ -171,6 +294,30 @@ DROP INDEX IF EXISTS idx_matched_qa_status_id;
 CREATE INDEX idx_matched_qa_status_id
     ON buildings_bulk_load.matched USING btree (qa_status_id);
 
+CREATE COMMENT ON TABLE buildings_bulk_load.matched IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.bulk_load_outline_id IS
+'Unique identifier for the matched table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.building_outline_id IS
+'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.qa_status_id IS
+'Foreign key to the buildings_bulk_load.qa_status table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.area_bulk_load IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.area_existing IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.percent_area_difference IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.area_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.percent_bulk_load_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.percent_existing_overlap IS
+'';
+CREATE COMMENT ON COLUMN buildings_bulk_load.matched.hausdorff_distance IS
+'';
+
 -- Transferred
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.transferred (
@@ -181,3 +328,12 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.transferred (
 DROP INDEX IF EXISTS idx_transferred_new_building_outline_id;
 CREATE INDEX idx_transferred_new_building_outline_id
     ON buildings_bulk_load.transferred USING btree (new_building_outline_id);
+
+CREATE COMMENT ON TABLE buildings_bulk_load.transferred IS
+'';
+
+CREATE COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
+'Unique identifier for the transferred table and foreign key to the '
+'buildings_bulk_load.bulk_load_outlines table.';
+CREATE COMMENT ON COLUMN buildings_bulk_load.transferred.new_building_outline_id IS
+'Foreign key to the buildings.building_outlines table.';
