@@ -16,8 +16,8 @@ from buildings.utilities import database as db
 from PyQt4.QtGui import QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QTableWidgetSelectionRange, QColor
 from qgis.utils import iface
 from qgis.core import QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar
-from functools import partial
+from qgis.gui import QgsMessageBar, QgsHighlight
+#from functools import partial
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "alter_building_relationship.ui"))
@@ -64,7 +64,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
         self.btn_unlink_selected.setEnabled(False)
-        self.btn_unlink_all.setEnabled(False)
+        #self.btn_unlink_all.setEnabled(False)
 
         self.btn_link.setEnabled(False)
 
@@ -83,38 +83,30 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_list(self.lst_bulk)
 
         self.find_building_lyrs()
-        
-        for building_lyr in self.existing_lyr:
-            building_lyr.removeSelection()
-            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
-        
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.removeSelection()
-            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
 
-        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
-        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
+        self.hl_list = []
+
+        self.existing_lyr.removeSelection()
+        self.existing_lyr.selectionChanged.connect(self.select_from_layer_existing)
+        self.existing_lyr.selectionChanged.connect(self.highlight_features)
+
+        self.bulk_load_lyr.removeSelection()
+        self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.selectionChanged.connect(self.highlight_features)
+
+        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
+        #self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
+        #self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
 
         self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
 
-        self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)            
-        self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
-
-
-        self.lyr_added_bulk_load.setSubsetString('null')
-        self.lyr_removed_existing.setSubsetString('null')
-        self.lyr_matched_existing.setSubsetString('null')
-        self.lyr_matched_bulk_load.setSubsetString('null')
-        self.lyr_related_existing.setSubsetString('null')
-        self.lyr_related_bulk_load.setSubsetString('null')
+        #self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)            
+        #self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
 
             
     def find_building_lyrs(self):
         """Finds building layers."""
-
-        self.bulk_load_lyr = []
-        self.existing_lyr = []
 
         self.lyr_added_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
         self.lyr_removed_existing = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
@@ -122,8 +114,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_in_edit")[0]
         self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_in_edit")[0]
         self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_in_edit")[0]
+        
+        self.clear_layer_filter()
 
-
+        ##
         bulk_load_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')
         existing_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('existing_subset_extracts')
 
@@ -134,10 +128,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif len(existing_lyrs) < 1:
             iface.messageBar().pushMessage("Error:", "Missing layer bulk_load_outlines", level=QgsMessageBar.WARNING)       
         else:
-            self.bulk_load_lyr = bulk_load_lyrs
-            self.existing_lyr = existing_lyrs
+            self.bulk_load_lyr = bulk_load_lyrs[0]
+            self.existing_lyr = existing_lyrs[0]
 
-    
+    def clear_layer_filter(self):
+
+        self.lyr_added_bulk_load.setSubsetString('null')
+        self.lyr_removed_existing.setSubsetString('null')
+        self.lyr_matched_existing.setSubsetString('null')
+        self.lyr_matched_bulk_load.setSubsetString('null')
+        self.lyr_related_existing.setSubsetString('null')
+        self.lyr_related_bulk_load.setSubsetString('null')
+
     def init_table(self, tbl):
 
         #tbl = self.tbl_original
@@ -151,7 +153,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.verticalHeader().setVisible(False)
 
-        #tbl.setEditTriggers(QAbstractItemView.DoubleClicked)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
         tbl.setSelectionMode(QAbstractItemView.MultiSelection)
 
@@ -164,71 +165,96 @@ class AlterRelationships(QFrame, FORM_CLASS):
         #lst.setSortingEnabled(True)
     
 
+    def highlight_features(self):
+        ''' function that does the work of highlighting selected features'''
+        
+        # remove all highlight objects
+        for i in range(len(self.hl_list))[::-1]:
+            self.hl_list.pop(i)
+        
+        for feat in self.existing_lyr.selectedFeatures():
+            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.existing_lyr)
+
+            # set highlight symbol properties
+            h.setColor(QColor(255,0,0,255))
+            h.setWidth(4)
+            h.setFillColor(QColor(255,255,255,0))
+            self.hl_list.append(h)
+
+        for feat in self.bulk_load_lyr.selectedFeatures():
+            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.bulk_load_lyr)
+
+            # set highlight symbol properties
+            h.setColor(QColor(255,0,0,255))
+            h.setWidth(4)
+            h.setFillColor(QColor(255,255,255,0))
+            self.hl_list.append(h)
+
+
     def select_from_layer_existing(self):
 
         tbl = self.tbl_original
         tbl.clearSelection()
-        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_existing)
-
+        #tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_existing)
+        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
         sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
         sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
         
-        for building_lyr in self.existing_lyr:
-            for feat_id in building_lyr.selectedFeaturesIds():
-                row = tbl.rowCount()
+        for feat_id in self.existing_lyr.selectedFeaturesIds():
+            row = tbl.rowCount()
 
-                result1 = db._execute(sql_related_existing, (feat_id,))
-                feat_ids_related = result1.fetchall()
-                if feat_ids_related:
-                    for feat_id_related in feat_ids_related:
-                        have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_related[0])
+            result1 = db._execute(sql_related_existing, (feat_id,))
+            feat_ids_related = result1.fetchall()
+            if feat_ids_related:
+                for feat_id_related in feat_ids_related:
+                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_related[0])
+                    if have_duplicate_row:
+                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                    else:
+                        tbl.setRowCount(row + 1)
+                        tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
+                        tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id_related[0]))
+                        row += 1
+                if len(feat_ids_related) == 1:
+                    id_bulk = feat_ids_related[0][0]
+                    result = db._execute(sql_related_bulk, (id_bulk,))
+                    ids = result.fetchall()
+                    for (id_existing, ) in ids:
+                        if id_existing == feat_id:
+                            continue
+                        have_duplicate_row, the_row = self.check_duplicate_rows(id_existing, id_bulk)
                         if have_duplicate_row:
                             tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
                         else:
-                            tbl.setRowCount(row + 1)
-                            tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
-                            tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id_related[0]))
-                            row += 1
-                    if len(feat_ids_related) == 1:
-                        id_bulk = feat_ids_related[0][0]
-                        result = db._execute(sql_related_bulk, (id_bulk,))
-                        ids = result.fetchall()
-                        for (id_existing, ) in ids:
-                            if id_existing == feat_id:
-                                continue
-                            have_duplicate_row, the_row = self.check_duplicate_rows(id_existing, id_bulk)
-                            if have_duplicate_row:
-                                tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                            else:
-                                row_tbl = tbl.rowCount()
-                                tbl.setRowCount(row_tbl + 1)
-                                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" %id_existing))
-                                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" %id_bulk))
+                            row_tbl = tbl.rowCount()
+                            tbl.setRowCount(row_tbl + 1)
+                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" %id_existing))
+                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" %id_bulk))
 
-                    continue
+                continue
 
-                result2 = db._execute(sql_matched, (feat_id,))
-                feat_id_matched = result2.fetchone()
-                if feat_id_matched:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_matched[0])
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
-                        tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id_matched[0]))
-                    continue
+            result2 = db._execute(sql_matched, (feat_id,))
+            feat_id_matched = result2.fetchone()
+            if feat_id_matched:
+                have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_matched[0])
+                if have_duplicate_row:
+                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                else:
+                    tbl.setRowCount(row + 1)
+                    tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
+                    tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id_matched[0]))
+                continue
 
-                result3 = db._execute(sql_removed, (feat_id,))
-                if result3.fetchone:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, None)
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
+            result3 = db._execute(sql_removed, (feat_id,))
+            if result3.fetchone:
+                have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, None)
+                if have_duplicate_row:
+                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                else:
+                    tbl.setRowCount(row + 1)
+                    tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id))
         '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
@@ -237,75 +263,76 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         '''
 
-        tbl.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
-        self.enable_btn_unlink_all()
+        #tbl.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
+        tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
+        #self.enable_btn_unlink_all()
 
 
     def select_from_layer_bulk(self):
 
         tbl = self.tbl_original
         tbl.clearSelection()
-        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_bulk)
+        #tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_bulk)
+        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
 
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
         sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s"
         sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
         
-        for building_lyr in self.bulk_load_lyr:
-            for feat_id in building_lyr.selectedFeaturesIds():
-                row = tbl.rowCount()
+        for feat_id in self.bulk_load_lyr.selectedFeaturesIds():
+            row = tbl.rowCount()
 
-                result1 = db._execute(sql_related_bulk, (feat_id,))
-                feat_ids_related = result1.fetchall()
-                if feat_ids_related:
-                    for feat_id_related in feat_ids_related:
-                        have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_related[0], feat_id)
+            result1 = db._execute(sql_related_bulk, (feat_id,))
+            feat_ids_related = result1.fetchall()
+            if feat_ids_related:
+                for feat_id_related in feat_ids_related:
+                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_related[0], feat_id)
+                    if have_duplicate_row:
+                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                    else:
+                        tbl.setRowCount(row + 1)
+                        tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id_related[0]))
+                        tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
+                        row += 1
+
+                if len(feat_ids_related) == 1:
+                    id_existing = feat_ids_related[0][0]
+                    result = db._execute(sql_related_existing, (id_existing,))
+                    ids = result.fetchall()
+                    for (id_bulk, ) in ids:
+                        if id_bulk == feat_id:
+                            continue
+                        have_duplicate_row, the_row = self.check_duplicate_rows(id_bulk, id_existing)
                         if have_duplicate_row:
                             tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
                         else:
-                            tbl.setRowCount(row + 1)
-                            tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id_related[0]))
-                            tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
-                            row += 1
+                            row_tbl = tbl.rowCount()
+                            tbl.setRowCount(row_tbl + 1)
+                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" %id_existing))
+                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" %id_bulk))
+                continue
 
-                    if len(feat_ids_related) == 1:
-                        id_existing = feat_ids_related[0][0]
-                        result = db._execute(sql_related_existing, (id_existing,))
-                        ids = result.fetchall()
-                        for (id_bulk, ) in ids:
-                            if id_bulk == feat_id:
-                                continue
-                            have_duplicate_row, the_row = self.check_duplicate_rows(id_bulk, id_existing)
-                            if have_duplicate_row:
-                                tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                            else:
-                                row_tbl = tbl.rowCount()
-                                tbl.setRowCount(row_tbl + 1)
-                                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" %id_existing))
-                                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" %id_bulk))
-                    continue
+            result2 = db._execute(sql_matched, (feat_id,))
+            feat_id_matched = result2.fetchone()
+            if feat_id_matched:
+                have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_matched[0], feat_id)
+                if have_duplicate_row:
+                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                else:
+                    tbl.setRowCount(row + 1)
+                    tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id_matched[0]))
+                    tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
+                continue
 
-                result2 = db._execute(sql_matched, (feat_id,))
-                feat_id_matched = result2.fetchone()
-                if feat_id_matched:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_matched[0], feat_id)
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 0, QTableWidgetItem("%s" %feat_id_matched[0]))
-                        tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
-                    continue
-
-                result3 = db._execute(sql_added, (feat_id,))
-                if result3.fetchone:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(None, feat_id)
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
+            result3 = db._execute(sql_added, (feat_id,))
+            if result3.fetchone:
+                have_duplicate_row, the_row = self.check_duplicate_rows(None, feat_id)
+                if have_duplicate_row:
+                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
+                else:
+                    tbl.setRowCount(row + 1)
+                    tbl.setItem(row, 1, QTableWidgetItem("%s" %feat_id))
         '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
@@ -314,8 +341,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         '''
 
-        tbl.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
-        self.enable_btn_unlink_all()
+        #tbl.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
+        tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
+        #self.enable_btn_unlink_all()
 
     def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
 
@@ -342,44 +370,34 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         return have_duplicate_row, the_row
 
-    def select_from_tbl_original_existing(self):
+    def select_from_tbl_original(self):
         self.lst_existing.clearSelection()
         self.tbl_result.clearSelection()
+        self.lst_bulk.clearSelection()
+        self.tbl_result.clearSelection()
 
-        for building_lyr in self.existing_lyr:    
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
-            building_lyr.removeSelection()
+        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.existing_lyr.removeSelection()
+
+        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.removeSelection()       
 
         feat_ids_existing = []
+        feat_ids_bulk = []
         for index in self.tbl_original.selectionModel().selectedRows():
             item_existing = self.tbl_original.item(index.row(), 0)
             if item_existing:
                 feat_ids_existing.append(int(item_existing.text()))
-        
-        for building_lyr in self.existing_lyr:
-            building_lyr.selectByIds(feat_ids_existing)
-            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
 
-        self.enable_btn_unlink_selected()
-
-    def select_from_tbl_original_bulk(self):
-    
-        self.lst_bulk.clearSelection()
-        self.tbl_result.clearSelection()
-
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
-            building_lyr.removeSelection()
-        
-        feat_ids_bulk = []
-        for index in self.tbl_original.selectionModel().selectedRows():
             item_bulk = self.tbl_original.item(index.row(), 1)
             if item_bulk:
                 feat_ids_bulk.append(int(item_bulk.text()))
 
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.selectByIds(feat_ids_bulk)
-            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+        self.existing_lyr.selectByIds(feat_ids_existing)
+        self.bulk_load_lyr.selectByIds(feat_ids_bulk)
+
+        self.existing_lyr.selectionChanged.connect(self.select_from_layer_existing)
+        self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
 
         self.enable_btn_unlink_selected()
 
@@ -413,16 +431,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.clearSelection()    
         self.enable_btn_unlink_selected()
-        self.enable_btn_unlink_all()
+        #self.enable_btn_unlink_all()
 
     def remove_all_clicked(self):
 
-        for building_lyr in self.existing_lyr + self.bulk_load_lyr:
-            building_lyr.removeSelection()
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
+
         for row in range(self.tbl_original.rowCount())[::-1]:
             self.tbl_original.removeRow(row)
         self.btn_unlink_selected.setEnabled(False)  
-        self.btn_unlink_all.setEnabled(False)
+        #self.btn_unlink_all.setEnabled(False)
 
 
     def enable_btn_unlink_selected(self):
@@ -446,6 +465,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         for row in range(self.tbl_original.rowCount())[::-1]:
             self.remove_from_tbl_to_lst(row)
+
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
          
     def remove_from_tbl_to_lst(self, row):
         
@@ -490,18 +512,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_original.clearSelection()
         self.tbl_result.clearSelection()
 
-        for building_lyr in self.existing_lyr:
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
-            building_lyr.removeSelection()
+        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.existing_lyr.removeSelection()
 
         feat_ids_existing = []
         for index in self.lst_existing.selectionModel().selectedRows():
             item_existing = self.lst_existing.item(index.row())
             feat_ids_existing.append(int(item_existing.text()))
 
-        for building_lyr in self.existing_lyr:
-            building_lyr.selectByIds(feat_ids_existing)
-            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
+        self.existing_lyr.selectByIds(feat_ids_existing)
+
+        self.existing_lyr.selectionChanged.connect(self.select_from_layer_existing)
 
         self.enable_btn_link()
 
@@ -511,9 +532,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_original.clearSelection()
         self.tbl_result.clearSelection()
 
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
-            building_lyr.removeSelection()
+        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.removeSelection()
 
 
         feat_ids_bulk = []
@@ -521,9 +541,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             item_bulk = self.lst_bulk.item(index.row())
             feat_ids_bulk.append(int(item_bulk.text()))
 
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.selectByIds(feat_ids_bulk)
-            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.selectByIds(feat_ids_bulk)
+
+        self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
 
         self.enable_btn_link()
 
@@ -583,12 +603,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_link.setEnabled(False)
 
         ##
-        self.lyr_added_bulk_load.setSubsetString('null')
-        self.lyr_removed_existing.setSubsetString('null')
-        self.lyr_matched_existing.setSubsetString('null')
-        self.lyr_matched_bulk_load.setSubsetString('null')        
-        self.lyr_related_existing.setSubsetString('null')
-        self.lyr_related_bulk_load.setSubsetString('null')
+        self.clear_layer_filter()
+
+        self.btn_matched.setEnabled(True)
+        self.btn_related.setEnabled(True)
 
     def remove_from_lst_existing_to_table(self, row_lst):
         tbl = self.tbl_original
@@ -743,36 +761,70 @@ class AlterRelationships(QFrame, FORM_CLASS):
         
         for index in self.lst_bulk.selectionModel().selectedRows():
             item_bulk = self.lst_bulk.item(index.row())
-            item_bulk.setBackground(QColor('yellow'))
+            item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
 
-            self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+            if not self.lyr_added_bulk_load.subsetString():
+                self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+            else:
+                self.lyr_added_bulk_load.setSubsetString(self.lyr_added_bulk_load.subsetString()+' or "bulk_load_outline_id" = %s' %id_bulk)
 
+            item_bulk.setFlags(Qt.NoItemFlags)
+        
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
 
     def removed_clicked(self):
         
         for index in self.lst_existing.selectionModel().selectedRows():
             item_existing = self.lst_existing.item(index.row())
-            item_existing.setBackground(QColor('yellow'))
+            item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
 
-            self.lyr_removed_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+            if not self.lyr_removed_existing.subsetString():
+                self.lyr_removed_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+            else:
+                self.lyr_removed_existing.setSubsetString(self.lyr_removed_existing.subsetString()+' or "building_outline_id" = %s' %id_existing)
+
+            item_existing.setFlags(Qt.NoItemFlags)
+
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
 
     def matched_clicked(self):
 
         for index in self.lst_existing.selectionModel().selectedRows():
             item_existing = self.lst_existing.item(index.row())
-            item_existing.setBackground(QColor('yellow'))
+            item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
 
             self.lyr_matched_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+            '''
+            if not self.lyr_matched_existing.subsetString():
+                self.lyr_matched_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
+            else:
+                self.lyr_matched_existing.setSubsetString(self.lyr_matched_existing.subsetString()+' or "building_outline_id" = %s' %id_existing)
+            '''
+            item_existing.setFlags(Qt.NoItemFlags)
 
         for index in self.lst_bulk.selectionModel().selectedRows():
             item_bulk = self.lst_bulk.item(index.row())
-            item_bulk.setBackground(QColor('yellow'))
+            item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
-
+            
             self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+            '''
+            if not self.lyr_matched_bulk_load.subsetString():
+                self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
+            else:
+                self.lyr_matched_bulk_load.setSubsetString(self.lyr_matched_bulk_load.subsetString()+' or "bulk_load_outline_id" = %s' %id_bulk)
+            '''
+            item_bulk.setFlags(Qt.NoItemFlags)
+
+        self.btn_matched.setEnabled(False)
+
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
 
     def related_clicked(self):
 
@@ -780,26 +832,34 @@ class AlterRelationships(QFrame, FORM_CLASS):
         ids_bulk = []
         for index in self.lst_existing.selectionModel().selectedRows():
             item_existing = self.lst_existing.item(index.row())
-            item_existing.setBackground(QColor('yellow'))
+            item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
             ids_existing.append(id_existing)
 
+            item_existing.setFlags(Qt.NoItemFlags)
+
         for index in self.lst_bulk.selectionModel().selectedRows():
             item_bulk = self.lst_bulk.item(index.row())
-            item_bulk.setBackground(QColor('yellow'))
+            item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
-            ids_bulk.append(ids_bulk)
+            ids_bulk.append(id_bulk)
 
-        if len(ids_existings) > 1:
-            self.lyr_related_existing.setSubsetString('"building_outline_id" in {}'.format(tuple(ids_existings)))
-        elif len(ids_existings) == 1:
-            self.lyr_related_existing.setSubsetString('"building_outline_id" = {}'.format(ids_existings[0]))
+            item_bulk.setFlags(Qt.NoItemFlags)
+
+        if len(ids_existing) > 1:
+            self.lyr_related_existing.setSubsetString('"building_outline_id" in {}'.format(tuple(ids_existing)))
+        elif len(ids_existing) == 1:
+            self.lyr_related_existing.setSubsetString('"building_outline_id" = {}'.format(ids_existing[0]))
 
         if len(ids_bulk) > 1:
             self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" in {}'.format(tuple(ids_bulk)))
         elif len(ids_bulk) == 1:
             self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" = {}'.format(ids_bulk[0]))
 
+        self.btn_related.setEnabled(False)
+
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
 
     def link_clicked(self):
 
@@ -807,12 +867,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         index = self.lst_existing.selectionModel().selectedRows()[0]#singleselection mode
         item_existing = self.lst_existing.item(index.row())
-        item_existing.setBackground(QColor('yellow'))
+        item_existing.setBackground(QColor('#E3ECEF'))
         id_existing = int(item_existing.text())
 
         index = self.lst_bulk.selectionModel().selectedRows()[0]
         item_bulk = self.lst_bulk.item(index.row())
-        item_bulk.setBackground(QColor('yellow'))
+        item_bulk.setBackground(QColor('#E3ECEF'))
         id_bulk = int(item_bulk.text())
 
         row_tbl = tbl.rowCount()
@@ -828,9 +888,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_original.clearSelection()
         self.lst_existing.clearSelection()
 
-        for building_lyr in self.existing_lyr:    
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
-            building_lyr.removeSelection()
+        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.existing_lyr.removeSelection()
 
         feat_ids_existing = []
         for index in self.tbl_result.selectionModel().selectedRows():
@@ -838,17 +897,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if item_existing:
                 feat_ids_existing.append(int(item_existing.text()))
         
-        for building_lyr in self.existing_lyr:
-            building_lyr.selectByIds(feat_ids_existing)
-            building_lyr.selectionChanged.connect(self.select_from_layer_existing)
+        self.existing_lyr.selectByIds(feat_ids_existing)
+
+        self.existing_lyr.selectionChanged.connect(self.select_from_layer_existing)
 
     def select_from_tbl_result_bulk(self):
         self.tbl_original.clearSelection()
         self.lst_bulk.clearSelection()
-
-        for building_lyr in self.bulk_load_lyr:    
-            building_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
-            building_lyr.removeSelection()
+  
+        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.removeSelection()
 
         feat_ids_bulk = []
         for index in self.tbl_result.selectionModel().selectedRows():
@@ -856,9 +914,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if item_bulk:
                 feat_ids_bulk.append(int(item_bulk.text()))
         
-        for building_lyr in self.bulk_load_lyr:
-            building_lyr.selectByIds(feat_ids_bulk)
-            building_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.selectByIds(feat_ids_bulk)
+
+        self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
 
 
     def reunlink_selected_clicked(self):
@@ -884,13 +942,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 for row in range(self.lst_existing.count()):
                     item = self.lst_existing.item(row)
                     if int(item.text()) == id_existing:
-                        item.setBackground(QColor('white'))
+                        item.setBackground(QColor(Qt.white))
 
             if not keep_highlight_bulk:
                 for row in range(self.lst_bulk.count()):
                     item = self.lst_bulk.item(row)
                     if int(item.text()) == id_bulk:
-                        item.setBackground(QColor('white'))
+                        item.setBackground(QColor(Qt.white))
 
             tbl.removeRow(index.row())
 
@@ -907,11 +965,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         for row in range(self.lst_existing.count()):
             item = self.lst_existing.item(row)
-            item.setBackground(QColor('white'))
+            item.setBackground(QColor(Qt.white))
 
         for row in range(self.lst_bulk.count()):
             item = self.lst_bulk.item(row)
-            item.setBackground(QColor('white'))
+            item.setBackground(QColor(Qt.white))
 
         self.btn_relink_all.setEnabled(True)
         self.btn_relink_slt.setEnabled(True)
@@ -923,11 +981,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         for row in range(self.lst_existing.count()):
             item = self.lst_existing.item(row)
-            if item.background().color().getRgb() == QColor('yellow'):
+            if item.background().color() == QColor('#E3ECEF'):
                 have_highlight_existing = True
         for row in range(self.lst_bulk.count()):
             item = self.lst_bulk.item(row)
-            if item.background().color().getRgb() == QColor('yellow'):
+            if item.background().color() == QColor('#E3ECEF'):
                 have_highlight_bulk = True
 
         if not (have_highlight_existing or have_highlight_bulk):
@@ -1030,7 +1088,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             db._execute(sql_matched_existing, (id_existing, ))
             db._execute(sql_related_existing, (id_existing, ))
             
-            if not item.background().color().getRgb() == QColor('yellow'):
+            if not item.background().color() == QColor('#E3ECEF'):
                 db._execute(sql_new_removed, (id_existing, ))
             
 
@@ -1042,11 +1100,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             db._execute(sql_matched_bulk, (id_bulk, ))
             db._execute(sql_related_bulk, (id_bulk, ))
             
-            if not item.background().color().getRgb() == QColor('yellow'):
+            if not item.background().color() == QColor('#E3ECEF'):
                 db._execute(sql_new_added, (id_bulk, ))
             
-
-
         #added
         for feat in self.lyr_added_bulk_load.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
@@ -1067,17 +1123,42 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()  
 
-        self.lyr_added_bulk_load.setSubsetString('null')
-        self.lyr_removed_existing.setSubsetString('null')
-        self.lyr_matched_existing.setSubsetString('null')
-        self.lyr_matched_bulk_load.setSubsetString('null')
-        self.lyr_related_existing.setSubsetString('null')
-        self.lyr_related_bulk_load.setSubsetString('null')
+        self.clear_layer_filter()
 
+        self.btn_matched.setEnabled(True)
+        self.btn_related.setEnabled(True)
 
+        #refresh relationship view
         db._execute(sql_refresh)
 
+        iface.mapCanvas().refreshAllLayers()
 
+    def cancel_clicked(self):
+        """
+        Called when cancel button is clicked
+        """
+        from buildings.gui.menu_frame import MenuFrame
+        dw = qgis.utils.plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(MenuFrame(self.layer_registry))
+
+        self.existing_lyr.removeSelection()
+        self.bulk_load_lyr.removeSelection()
+
+        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.existing_lyr.selectionChanged.disconnect(self.highlight_features)
+        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.selectionChanged.disconnect(self.highlight_features)
+        self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+        self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
+        self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
+        #self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_existing)            
+        #self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_bulk)
+
+        self.clear_layer_filter()
+
+
+    #####################
     def save_clicked2(self):
         """
         Called when save button is clicked
@@ -1170,7 +1251,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             db._execute(sql_matched_existing, (id_existing, ))
             db._execute(sql_removed, (id_existing, ))
 
-            if not item.background().color().getRgb() == QColor('yellow'):
+            if not item.background().color() == QColor('#E3ECEF'):
                 db._execute(sql_new_removed, (id_existing, ))
 
 
@@ -1182,7 +1263,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             db._execute(sql_matched_bulk, (id_bulk, ))
             db._execute(sql_added, (id_bulk, ))
 
-            if not item.background().color().getRgb() == QColor('yellow'):
+            if not item.background().color() == QColor('#E3ECEF'):
                 db._execute(sql_new_added, (id_bulk, ))
 
         ids_existing = []
@@ -1204,68 +1285,46 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()    
 
-    def cancel_clicked(self):
-        """
-        Called when cancel button is clicked
-        """
-        from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['roads'].dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
 
 
 
     '''
-    def select_from_layer_bulk(self):
+    def select_from_tbl_original_existing(self):
+        self.lst_existing.clearSelection()
+        self.tbl_result.clearSelection()
+ 
+        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.existing_lyr.removeSelection()
 
-        #self.lst_bulk.clearSelection()
-
-        self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_list_bulk)
-
-        for building_lyr in self.bulk_load_lyr:   
-            for feat_id in building_lyr.selectedFeaturesIds():
-                item = QListWidgetItem('%s' %feat_id)
-                if self.lst_bulk.count() > 0:
-                    have_duplicate_id = False
-                    for row in range(self.lst_bulk.count()):
-                        witem = self.lst_bulk.item(row)
-                        #witem.setSelected(False)
-                        if int(witem.text()) == feat_id:
-                            witem.setSelected(True)
-                            have_duplicate_id = True
-                    if not have_duplicate_id:
-                        self.lst_bulk.addItem(item)    
-                else:
-                    self.lst_bulk.addItem(item)
-
-        self.lst_bulk.itemSelectionChanged.connect(self.select_from_list_bulk)
-
-        self.enable_btn_unlink_all()
-
-    def select_from_layer_existing(self):
-
-        #self.lst_existing.clearSelection()
-
-        self.lst_existing.itemSelectionChanged.disconnect(self.select_from_list_existing)
-
-        for building_lyr in self.existing_lyr:   
-            for feat_id in building_lyr.selectedFeaturesIds():
-                item = QListWidgetItem('%s' %feat_id)
-                if self.lst_existing.count() > 0:
-                    have_duplicate_id = False
-                    for row in range(self.lst_existing.count()):
-                        witem = self.lst_existing.item(row)
-                        #witem.setSelected(False)
-                        if int(witem.text()) == feat_id:
-                            witem.setSelected(True)
-                            have_duplicate_id = True
-                    if not have_duplicate_id:
-                        self.lst_existing.addItem(item)    
-                else:
-                    self.lst_existing.addItem(item)
-
-        self.lst_existing.itemSelectionChanged.connect(self.select_from_list_existing)
+        feat_ids_existing = []
+        for index in self.tbl_original.selectionModel().selectedRows():
+            item_existing = self.tbl_original.item(index.row(), 0)
+            if item_existing:
+                feat_ids_existing.append(int(item_existing.text()))
         
-        self.enable_btn_unlink_all()
-    '''
+        self.existing_lyr.selectByIds(feat_ids_existing)
 
+        self.existing_lyr.selectionChanged.connect(self.select_from_layer_existing)
+
+        self.enable_btn_unlink_selected()
+
+    def select_from_tbl_original_bulk(self):
+    
+        self.lst_bulk.clearSelection()
+        self.tbl_result.clearSelection()
+
+        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.bulk_load_lyr.removeSelection()
+        
+        feat_ids_bulk = []
+        for index in self.tbl_original.selectionModel().selectedRows():
+            item_bulk = self.tbl_original.item(index.row(), 1)
+            if item_bulk:
+                feat_ids_bulk.append(int(item_bulk.text()))
+
+        self.bulk_load_lyr.selectByIds(feat_ids_bulk)
+
+        self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
+
+        self.enable_btn_unlink_selected()
+    '''
