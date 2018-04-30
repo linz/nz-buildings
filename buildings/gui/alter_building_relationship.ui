@@ -216,16 +216,16 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_9">
         <item>
-         <widget class="QPushButton" name="btn_added">
+         <widget class="QPushButton" name="btn_removed">
           <property name="text">
-           <string>Added</string>
+           <string>Removed</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_removed">
+         <widget class="QPushButton" name="btn_added">
           <property name="text">
-           <string>Removed</string>
+           <string>Added</string>
           </property>
          </widget>
         </item>
