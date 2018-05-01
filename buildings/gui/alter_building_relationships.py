@@ -15,9 +15,11 @@ from buildings.utilities import database as db
 
 from PyQt4.QtGui import QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QTableWidgetSelectionRange, QColor
 from qgis.utils import iface
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsMapLayerRegistry, QgsFillSymbolV2
 from qgis.gui import QgsMessageBar, QgsHighlight
 # from functools import partial
+
+from buildings.utilities import layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "alter_building_relationship.ui"))
@@ -116,6 +118,69 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def find_building_lyrs(self):
         """Finds building layers."""
 
+        mySymbol = QgsFillSymbolV2.createSimple({'color': '0, 0, 0, 0', 'color_border': '0, 0, 0, 0'})
+
+        self.existing_lyr = layers.LayerRegistry().add_postgres_layer(
+            "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.existing_lyr.rendererV2().setSymbol(mySymbol)
+
+        self.bulk_load_lyr = layers.LayerRegistry().add_postgres_layer(
+            "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.bulk_load_lyr.rendererV2().setSymbol(mySymbol)
+
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
+
+        self.lyr_related_bulk_load = layers.LayerRegistry().add_postgres_layer(
+            "related_bulk_load_outlines", "related_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_related_bulk_load.loadNamedStyle(path + 'building_purple.qml')
+
+        self.lyr_related_existing = layers.LayerRegistry().add_postgres_layer(
+            "related_existing_outlines", "related_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_related_existing.loadNamedStyle(path + 'building_purple.qml')
+
+        self.lyr_matched_bulk_load = layers.LayerRegistry().add_postgres_layer(
+            "matched_bulk_load_outlines", "matched_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_matched_bulk_load.loadNamedStyle(path + 'building_blue.qml')
+
+        self.lyr_matched_existing = layers.LayerRegistry().add_postgres_layer(
+            "matched_existing_outlines", "matched_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_matched_existing.loadNamedStyle(path + 'building_blue.qml')
+
+        self.lyr_removed_existing = layers.LayerRegistry().add_postgres_layer(
+            "removed_outlines", "removed_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_removed_existing.loadNamedStyle(path + 'building_orange.qml')
+
+        self.lyr_added_bulk_load = layers.LayerRegistry().add_postgres_layer(
+            "added_outlines", "added_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_added_bulk_load.loadNamedStyle(path + 'building_green.qml')
+
+        self.lyr_related_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "related_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_related_bulk_load_in_edit.loadNamedStyle(path + 'building_purple.qml')
+
+        self.lyr_related_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "related_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_related_existing_in_edit.loadNamedStyle(path + 'building_purple.qml')
+
+        self.lyr_matched_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "matched_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_matched_bulk_load_in_edit.loadNamedStyle(path + 'building_blue.qml')
+
+        self.lyr_matched_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "matched_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_matched_existing_in_edit.loadNamedStyle(path + 'building_blue.qml')
+
+        self.lyr_removed_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "removed_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+        self.lyr_removed_existing_in_edit.loadNamedStyle(path + 'building_orange.qml')
+
+        self.lyr_added_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+            "added_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+        self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
+
+        iface.mapCanvas().setExtent(self.existing_lyr.extent())
+
+        '''
         self.lyr_added_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
         self.lyr_removed_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
         self.lyr_matched_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_in_edit")[0]
@@ -129,9 +194,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_outlines")[0]
         self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_outlines")[0]
         self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_outlines")[0]
+        '''
 
         self.clear_layer_filter()
-
+        '''
         ##
         bulk_load_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')
         existing_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('existing_subset_extracts')
@@ -145,6 +211,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.bulk_load_lyr = bulk_load_lyrs[0]
             self.existing_lyr = existing_lyrs[0]
+        '''
 
     def clear_layer_filter(self):
 
