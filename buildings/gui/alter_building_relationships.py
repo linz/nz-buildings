@@ -74,6 +74,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Select features on layers"""
         # self.show()
 
+        # set selected item color as transparent
+        iface.mapCanvas().setSelectionColor(QColor("Transparent"))
+
         self.init_table(self.tbl_original)
         self.init_table(self.tbl_result)
 
@@ -92,6 +95,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.bulk_load_lyr.selectionChanged.connect(self.select_from_layer_bulk)
         self.bulk_load_lyr.selectionChanged.connect(self.highlight_features)
 
+        '''
+        building_lyrs = [self.existing_lyr, self.bulk_load_lyr]
+        for lyr in building_lyrs:
+            lyr.removeSelection()
+            lyr.selectionChanged.connect(self.select_from_layer_bulk)
+            lyr.selectionChanged.connect(self.select_from_layer_existing)
+            lyr.selectionChanged.connect(self.highlight_features)
+        '''
         self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
         # self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
         # self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
@@ -105,12 +116,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def find_building_lyrs(self):
         """Finds building layers."""
 
-        self.lyr_added_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
-        self.lyr_removed_existing = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
-        self.lyr_matched_existing = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_in_edit")[0]
-        self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_in_edit")[0]
-        self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_in_edit")[0]
-        self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_in_edit")[0]
+        self.lyr_added_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
+        self.lyr_removed_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
+        self.lyr_matched_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_in_edit")[0]
+        self.lyr_matched_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_in_edit")[0]
+        self.lyr_related_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_in_edit")[0]
+        self.lyr_related_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_in_edit")[0]
+
+        self.lyr_added_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("added_outlines")[0]
+        self.lyr_removed_existing = QgsMapLayerRegistry.instance().mapLayersByName("removed_outlines")[0]
+        self.lyr_matched_existing = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_outlines")[0]
+        self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_outlines")[0]
+        self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_outlines")[0]
+        self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_outlines")[0]
 
         self.clear_layer_filter()
 
@@ -130,12 +148,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def clear_layer_filter(self):
 
-        self.lyr_added_bulk_load.setSubsetString('null')
-        self.lyr_removed_existing.setSubsetString('null')
-        self.lyr_matched_existing.setSubsetString('null')
-        self.lyr_matched_bulk_load.setSubsetString('null')
-        self.lyr_related_existing.setSubsetString('null')
-        self.lyr_related_bulk_load.setSubsetString('null')
+        self.lyr_added_bulk_load_in_edit.setSubsetString('null')
+        self.lyr_removed_existing_in_edit.setSubsetString('null')
+        self.lyr_matched_existing_in_edit.setSubsetString('null')
+        self.lyr_matched_bulk_load_in_edit.setSubsetString('null')
+        self.lyr_related_existing_in_edit.setSubsetString('null')
+        self.lyr_related_bulk_load_in_edit.setSubsetString('null')
+
+        self.lyr_added_bulk_load.setSubsetString('')
+        self.lyr_removed_existing.setSubsetString('')
+        self.lyr_matched_existing.setSubsetString('')
+        self.lyr_matched_bulk_load.setSubsetString('')
+        self.lyr_related_existing.setSubsetString('')
+        self.lyr_related_bulk_load.setSubsetString('')
 
     def init_table(self, tbl):
 
@@ -154,6 +179,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.setSelectionMode(QAbstractItemView.MultiSelection)
 
         tbl.setShowGrid(True)
+        # tbl.setSortingEnabled(True)
 
     def init_list(self, lst):
         lst.clearSelection()
@@ -190,26 +216,27 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.clearSelection()
         # tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_existing)
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
         sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
         sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
 
         for feat_id in self.existing_lyr.selectedFeaturesIds():
-            row = tbl.rowCount()
 
             result1 = db._execute(sql_related_existing, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
+                # remove the current items inside table
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    if not ((tbl.item(row_tbl, 1), ) in feat_ids_related or tbl.item(row_tbl, 0) == feat_id):
+                        tbl.removeRow(row_tbl)
                 for feat_id_related in feat_ids_related:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_related[0])
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 0, QTableWidgetItem("%s" % feat_id))
-                        tbl.setItem(row, 1, QTableWidgetItem("%s" % feat_id_related[0]))
-                        row += 1
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_related[0]))
+
                 if len(feat_ids_related) == 1:
                     id_bulk = feat_ids_related[0][0]
                     result = db._execute(sql_related_bulk, (id_bulk,))
@@ -217,37 +244,40 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     for (id_existing, ) in ids:
                         if id_existing == feat_id:
                             continue
-                        have_duplicate_row, the_row = self.check_duplicate_rows(id_existing, id_bulk)
-                        if have_duplicate_row:
-                            tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                        else:
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                        row_tbl = tbl.rowCount()
+                        tbl.setRowCount(row_tbl + 1)
+                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                        tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
 
                 continue
 
             result2 = db._execute(sql_matched, (feat_id,))
             feat_id_matched = result2.fetchone()
             if feat_id_matched:
-                have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, feat_id_matched[0])
-                if have_duplicate_row:
-                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                else:
-                    tbl.setRowCount(row + 1)
-                    tbl.setItem(row, 0, QTableWidgetItem("%s" % feat_id))
-                    tbl.setItem(row, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
+                # remove the current items inside table
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    tbl.removeRow(row_tbl)
+
+                row_tbl = tbl.rowCount()
+                tbl.setRowCount(row_tbl + 1)
+                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
+
                 continue
 
             result3 = db._execute(sql_removed, (feat_id,))
             if result3.fetchone:
+                # if the current items are not from added or removed table, remove them
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    item_existing = tbl.item(row_tbl, 0)
+                    item_bulk = tbl.item(row_tbl, 1)
+                    if item_existing and item_bulk:
+                        tbl.removeRow(row_tbl)
                 have_duplicate_row, the_row = self.check_duplicate_rows(feat_id, None)
-                if have_duplicate_row:
-                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                else:
-                    tbl.setRowCount(row + 1)
-                    tbl.setItem(row, 0, QTableWidgetItem("%s" % feat_id))
+                if not have_duplicate_row:
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
         '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
@@ -273,20 +303,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
 
         for feat_id in self.bulk_load_lyr.selectedFeaturesIds():
-            row = tbl.rowCount()
-
             result1 = db._execute(sql_related_bulk, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
+                # remove the current items inside table
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    if not ((tbl.item(row_tbl, 0), ) in feat_ids_related or tbl.item(row_tbl, 1) == feat_id):
+                        tbl.removeRow(row_tbl)
                 for feat_id_related in feat_ids_related:
-                    have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_related[0], feat_id)
-                    if have_duplicate_row:
-                        tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                    else:
-                        tbl.setRowCount(row + 1)
-                        tbl.setItem(row, 0, QTableWidgetItem("%s" % feat_id_related[0]))
-                        tbl.setItem(row, 1, QTableWidgetItem("%s" % feat_id))
-                        row += 1
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_related[0]))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
 
                 if len(feat_ids_related) == 1:
                     id_existing = feat_ids_related[0][0]
@@ -295,36 +323,37 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     for (id_bulk, ) in ids:
                         if id_bulk == feat_id:
                             continue
-                        have_duplicate_row, the_row = self.check_duplicate_rows(id_bulk, id_existing)
-                        if have_duplicate_row:
-                            tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                        else:
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                        row_tbl = tbl.rowCount()
+                        tbl.setRowCount(row_tbl + 1)
+                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                        tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                 continue
 
             result2 = db._execute(sql_matched, (feat_id,))
             feat_id_matched = result2.fetchone()
             if feat_id_matched:
-                have_duplicate_row, the_row = self.check_duplicate_rows(feat_id_matched[0], feat_id)
-                if have_duplicate_row:
-                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                else:
-                    tbl.setRowCount(row + 1)
-                    tbl.setItem(row, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
-                    tbl.setItem(row, 1, QTableWidgetItem("%s" % feat_id))
+                # remove the current items inside table
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    tbl.removeRow(row_tbl)
+                row_tbl = tbl.rowCount()
+                tbl.setRowCount(row_tbl + 1)
+                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
+                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
                 continue
 
             result3 = db._execute(sql_added, (feat_id,))
             if result3.fetchone:
+                # if the current items are not from added or removed table, remove them
+                for row_tbl in range(tbl.rowCount())[::-1]:
+                    item_existing = tbl.item(row_tbl, 0)
+                    item_bulk = tbl.item(row_tbl, 1)
+                    if item_existing and item_bulk:
+                        tbl.removeRow(row_tbl)
                 have_duplicate_row, the_row = self.check_duplicate_rows(None, feat_id)
-                if have_duplicate_row:
-                    tbl.setRangeSelected(QTableWidgetSelectionRange(the_row, 0, the_row, 1), True)
-                else:
-                    tbl.setRowCount(row + 1)
-                    tbl.setItem(row, 1, QTableWidgetItem("%s" % feat_id))
+                if not have_duplicate_row:
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
         '''
         for row in range(tbl.rowCount()):
             tbl.showRow(row)
@@ -366,12 +395,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clearSelection()
         self.tbl_result.clearSelection()
         self.lst_bulk.clearSelection()
-        self.tbl_result.clearSelection()
 
         self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
-        self.existing_lyr.removeSelection()
-
         self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+
+        self.existing_lyr.removeSelection()
         self.bulk_load_lyr.removeSelection()
 
         feat_ids_existing = []
@@ -425,7 +453,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # self.enable_btn_unlink_all()
 
     def remove_all_clicked(self):
-
         self.existing_lyr.removeSelection()
         self.bulk_load_lyr.removeSelection()
 
@@ -746,11 +773,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
             item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
 
-            if not self.lyr_added_bulk_load.subsetString():
-                self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
+            if not self.lyr_added_bulk_load_in_edit.subsetString():
+                self.lyr_added_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
             else:
-                self.lyr_added_bulk_load.setSubsetString(
-                    self.lyr_added_bulk_load.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+                self.lyr_added_bulk_load_in_edit.setSubsetString(
+                    self.lyr_added_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+
+            self.remove_features_from_layer_bulk(id_bulk)
 
             item_bulk.setFlags(Qt.NoItemFlags)
 
@@ -764,11 +793,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
             item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
 
-            if not self.lyr_removed_existing.subsetString():
-                self.lyr_removed_existing.setSubsetString('"building_outline_id" = %s' % id_existing)
+            if not self.lyr_removed_existing_in_edit.subsetString():
+                self.lyr_removed_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
             else:
-                self.lyr_removed_existing.setSubsetString(
-                    self.lyr_removed_existing.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+                self.lyr_removed_existing_in_edit.setSubsetString(
+                    self.lyr_removed_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+
+            self.remove_features_from_layer_existing(id_existing)
 
             item_existing.setFlags(Qt.NoItemFlags)
 
@@ -777,73 +808,140 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def matched_clicked(self):
 
-        for index in self.lst_existing.selectionModel().selectedRows():
-            item_existing = self.lst_existing.item(index.row())
+        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
+        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
+
+        if len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
+            item_existing = self.lst_existing.item(rows_lst_existing[0])
             item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
 
-            self.lyr_matched_existing.setSubsetString('"building_outline_id" = %s' % id_existing)
-            '''
-            if not self.lyr_matched_existing.subsetString():
-                self.lyr_matched_existing.setSubsetString('"building_outline_id" = %s' %id_existing)
-            else:
-                self.lyr_matched_existing.setSubsetString(self.lyr_matched_existing.subsetString()+' or "building_outline_id" = %s' %id_existing)
-            '''
+            self.lyr_matched_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
             item_existing.setFlags(Qt.NoItemFlags)
 
-        for index in self.lst_bulk.selectionModel().selectedRows():
-            item_bulk = self.lst_bulk.item(index.row())
+            item_bulk = self.lst_bulk.item(rows_lst_bulk[0])
             item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
 
-            self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
-            '''
-            if not self.lyr_matched_bulk_load.subsetString():
-                self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" = %s' %id_bulk)
-            else:
-                self.lyr_matched_bulk_load.setSubsetString(self.lyr_matched_bulk_load.subsetString()+' or "bulk_load_outline_id" = %s' %id_bulk)
-            '''
+            self.lyr_matched_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
             item_bulk.setFlags(Qt.NoItemFlags)
 
-        self.btn_matched.setEnabled(False)
+            self.remove_features_from_layer_existing(id_existing)
+            self.remove_features_from_layer_bulk(id_bulk)
 
-        self.existing_lyr.removeSelection()
-        self.bulk_load_lyr.removeSelection()
+            self.btn_matched.setEnabled(False)
+
+        else:
+            iface.messageBar().pushMessage("Error:", "Do not match other than one building in each layer", level=QgsMessageBar.WARNING)
+
+        self.lst_bulk.clearSelection()
+        self.lst_existing.clearSelection()
 
     def related_clicked(self):
 
-        ids_existing = []
-        ids_bulk = []
-        for index in self.lst_existing.selectionModel().selectedRows():
-            item_existing = self.lst_existing.item(index.row())
-            item_existing.setBackground(QColor('#E3ECEF'))
-            id_existing = int(item_existing.text())
-            ids_existing.append(id_existing)
+        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
+        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
 
-            item_existing.setFlags(Qt.NoItemFlags)
+        if len(rows_lst_bulk) < 1 or len(rows_lst_existing) < 1:
+            iface.messageBar().pushMessage("Error:", "Do not relate less than one building in each layer", level=QgsMessageBar.WARNING)
+            self.btn_related.setEnabled(True)
+        elif len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
+            iface.messageBar().pushMessage("Error:", "Do not relate only one building in each layer", level=QgsMessageBar.WARNING)
+            self.btn_related.setEnabled(True)
+        else:
+            # ids_existing = []
+            # ids_bulk = []
+            for index in self.lst_existing.selectionModel().selectedRows():
+                item_existing = self.lst_existing.item(index.row())
+                item_existing.setBackground(QColor('#E3ECEF'))
+                id_existing = int(item_existing.text())
+                # ids_existing.append(id_existing)
 
-        for index in self.lst_bulk.selectionModel().selectedRows():
-            item_bulk = self.lst_bulk.item(index.row())
-            item_bulk.setBackground(QColor('#E3ECEF'))
-            id_bulk = int(item_bulk.text())
-            ids_bulk.append(id_bulk)
+                if not self.lyr_related_existing_in_edit.subsetString():
+                    self.lyr_related_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
+                else:
+                    self.lyr_related_existing_in_edit.setSubsetString(
+                        self.lyr_related_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
 
-            item_bulk.setFlags(Qt.NoItemFlags)
+                self.remove_features_from_layer_existing(id_existing)
 
-        if len(ids_existing) > 1:
-            self.lyr_related_existing.setSubsetString('"building_outline_id" in {}'.format(tuple(ids_existing)))
-        elif len(ids_existing) == 1:
-            self.lyr_related_existing.setSubsetString('"building_outline_id" = {}'.format(ids_existing[0]))
+                item_existing.setFlags(Qt.NoItemFlags)
 
-        if len(ids_bulk) > 1:
-            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" in {}'.format(tuple(ids_bulk)))
-        elif len(ids_bulk) == 1:
-            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" = {}'.format(ids_bulk[0]))
+            for index in self.lst_bulk.selectionModel().selectedRows():
+                item_bulk = self.lst_bulk.item(index.row())
+                item_bulk.setBackground(QColor('#E3ECEF'))
+                id_bulk = int(item_bulk.text())
+                # ids_bulk.append(id_bulk)
 
-        self.btn_related.setEnabled(False)
+                if not self.lyr_related_bulk_load_in_edit.subsetString():
+                    self.lyr_related_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
+                else:
+                    self.lyr_related_bulk_load_in_edit.setSubsetString(
+                        self.lyr_related_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
 
-        self.existing_lyr.removeSelection()
-        self.bulk_load_lyr.removeSelection()
+                self.remove_features_from_layer_bulk(id_bulk)
+
+                item_bulk.setFlags(Qt.NoItemFlags)
+
+            '''
+            if len(ids_existing) > 1:
+                self.lyr_related_existing_in_edit.setSubsetString('"building_outline_id" in {}'.format(tuple(ids_existing)))
+            elif len(ids_existing) == 1:
+                self.lyr_related_existing_in_edit.setSubsetString('"building_outline_id" = {}'.format(ids_existing[0]))
+
+            if len(ids_bulk) > 1:
+                self.lyr_related_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" in {}'.format(tuple(ids_bulk)))
+            elif len(ids_bulk) == 1:
+                self.lyr_related_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = {}'.format(ids_bulk[0]))
+            '''
+            self.btn_related.setEnabled(False)
+
+        self.lst_bulk.clearSelection()
+        self.lst_existing.clearSelection()
+
+    def remove_features_from_layer_bulk(self, id_bulk):
+        #
+        if not self.lyr_added_bulk_load.subsetString():
+            self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_added_bulk_load.setSubsetString(
+                self.lyr_added_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+        #
+        if not self.lyr_matched_bulk_load.subsetString():
+            self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_matched_bulk_load.setSubsetString(
+                self.lyr_matched_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+        #
+        if not self.lyr_related_bulk_load.subsetString():
+            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_related_bulk_load.setSubsetString(
+                self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+    def remove_features_from_layer_existing(self, id_existing):
+        #
+        if not self.lyr_removed_existing.subsetString():
+            self.lyr_removed_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_removed_existing.setSubsetString(
+                self.lyr_removed_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+
+        #
+        if not self.lyr_matched_existing.subsetString():
+            self.lyr_matched_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_matched_existing.setSubsetString(
+                self.lyr_matched_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+
+        #
+        if not self.lyr_related_existing.subsetString():
+            self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_related_existing.setSubsetString(
+                self.lyr_related_bulk_load.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
     def link_clicked(self):
 
@@ -1081,19 +1179,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 db._execute(sql_new_added, (id_bulk, ))
 
         # added
-        for feat in self.lyr_added_bulk_load.getFeatures():
+        for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
             db._execute(sql_new_added, (id_bulk,))
 
         # removed
-        for feat in self.lyr_removed_existing.getFeatures():
+        for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
             db._execute(sql_new_removed, (id_existing, ))
 
         # matched
-        for feat1 in self.lyr_matched_bulk_load.getFeatures():
+        for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
-            for feat2 in self.lyr_matched_existing.getFeatures():
+            for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 db._execute(sql_new_matched, (id_bulk, id_existing))
 
@@ -1122,16 +1220,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.existing_lyr.removeSelection()
         self.bulk_load_lyr.removeSelection()
 
-        self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
-        self.existing_lyr.selectionChanged.disconnect(self.highlight_features)
-        self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
-        self.bulk_load_lyr.selectionChanged.disconnect(self.highlight_features)
-        self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-        self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
-        self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
-        # self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_existing)
-        # self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_bulk)
-
+        try:
+            self.existing_lyr.selectionChanged.disconnect(self.select_from_layer_existing)
+            self.existing_lyr.selectionChanged.disconnect(self.highlight_features)
+            self.bulk_load_lyr.selectionChanged.disconnect(self.select_from_layer_bulk)
+            self.bulk_load_lyr.selectionChanged.disconnect(self.highlight_features)
+            self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+            self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
+            self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
+            # self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_existing)
+            # self.tbl_result.itemSelectionChanged.disconnect(self.select_from_tbl_result_bulk)
+        except TypeError:
+            pass
         self.clear_layer_filter()
 
     #####################
@@ -1218,7 +1318,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                              VALUES (%s, %s)
                             '''
 
-
         for row in range(self.lst_existing.count())[::-1]:
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
@@ -1229,7 +1328,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
             if not item.background().color() == QColor('#E3ECEF'):
                 db._execute(sql_new_removed, (id_existing, ))
-
 
         for row in range(self.lst_bulk.count())[::-1]:
             item = self.lst_bulk.item(row)
@@ -1260,9 +1358,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             tbl.removeRow(row)
         self.lst_existing.clear()
         self.lst_bulk.clear()
-
-
-
 
     '''
     def select_from_tbl_original_existing(self):
