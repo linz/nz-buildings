@@ -20,6 +20,7 @@ from qgis.gui import QgsMessageBar, QgsHighlight
 # from functools import partial
 
 from buildings.utilities import layers
+import re
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "alter_building_relationship.ui"))
@@ -246,9 +247,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def select_from_layer_existing(self):
         tbl = self.tbl_original
-        tbl.clearSelection()
-        # tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_existing)
+
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+        tbl.clearSelection()
 
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
@@ -311,24 +312,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
                     tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-        '''
-        for row in range(tbl.rowCount()):
-            tbl.showRow(row)
-            for col in range(2):
-                if tbl.item(row, col):
-                    tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-        '''
 
-        # tbl.itemSelectionChanged.connect(self.select_from_tbl_original_existing)
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
         # self.enable_btn_unlink_all()
+        tbl.selectAll()
 
     def select_from_layer_bulk(self):
 
         tbl = self.tbl_original
-        tbl.clearSelection()
-        # tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original_bulk)
+
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+        tbl.clearSelection()
 
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
@@ -395,9 +389,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
         '''
 
-        # tbl.itemSelectionChanged.connect(self.select_from_tbl_original_bulk)
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
         # self.enable_btn_unlink_all()
+        tbl.selectAll()
 
     def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
 
@@ -512,7 +506,32 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def unlink_all_clicked(self):
 
-        for row in range(self.tbl_original.rowCount())[::-1]:
+        tbl = self.tbl_original
+        for row in range(tbl.rowCount())[::-1]:
+            item_existing = tbl.item(row, 0)
+            if item_existing:
+                id_existing = int(item_existing.text())
+
+                if not self.lyr_removed_existing_in_edit.subsetString():
+                    self.lyr_removed_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
+                else:
+                    self.lyr_removed_existing_in_edit.setSubsetString(
+                        self.lyr_removed_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+
+                self.remove_features_from_layer_existing(id_existing)
+
+            item_bulk = tbl.item(row, 1)
+            if item_bulk:
+                id_bulk = int(item_bulk.text())
+
+                if not self.lyr_added_bulk_load_in_edit.subsetString():
+                    self.lyr_added_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
+                else:
+                    self.lyr_added_bulk_load_in_edit.setSubsetString(
+                        self.lyr_added_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+
+                self.remove_features_from_layer_bulk(id_bulk)
+
             self.remove_from_tbl_to_lst(row)
 
         self.existing_lyr.removeSelection()
@@ -845,6 +864,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
 
         if len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
+
             item_existing = self.lst_existing.item(rows_lst_existing[0])
             item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
@@ -858,6 +878,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
             self.lyr_matched_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
             item_bulk.setFlags(Qt.NoItemFlags)
+
+            ##
+            ids_added = re.findall('\d+', self.lyr_added_bulk_load_in_edit.subsetString())
+            for id_added in ids_added:
+                if int(id_added) == id_bulk:
+                    self.lyr_added_bulk_load_in_edit.setSubsetString(
+                        '(' + self.lyr_added_bulk_load_in_edit.subsetString() + ') and "bulk_load_outline_id" != %s' % id_bulk)
+
+            ids_removed = re.findall('\d+', self.lyr_removed_existing_in_edit.subsetString())
+            for id_removed in ids_removed:
+                if int(id_removed) == id_existing:
+                    self.lyr_removed_existing_in_edit.setSubsetString(
+                        '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
 
             self.remove_features_from_layer_existing(id_existing)
             self.remove_features_from_layer_bulk(id_bulk)
@@ -890,11 +923,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_existing = int(item_existing.text())
                 # ids_existing.append(id_existing)
 
-                if not self.lyr_related_existing_in_edit.subsetString():
-                    self.lyr_related_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
-                else:
-                    self.lyr_related_existing_in_edit.setSubsetString(
-                        self.lyr_related_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+                self.lyr_related_existing_in_edit.setSubsetString(
+                    self.lyr_related_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+
+                ids_removed = re.findall('\d+', self.lyr_removed_existing_in_edit.subsetString())
+                for id_removed in ids_removed:
+                    if int(id_removed) == id_existing:
+                        self.lyr_removed_existing_in_edit.setSubsetString(
+                            '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
 
                 self.remove_features_from_layer_existing(id_existing)
 
@@ -906,11 +942,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_bulk = int(item_bulk.text())
                 # ids_bulk.append(id_bulk)
 
-                if not self.lyr_related_bulk_load_in_edit.subsetString():
-                    self.lyr_related_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
-                else:
-                    self.lyr_related_bulk_load_in_edit.setSubsetString(
-                        self.lyr_related_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+                self.lyr_related_bulk_load_in_edit.setSubsetString(
+                    self.lyr_related_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+
+                ids_added = re.findall('\d+', self.lyr_added_bulk_load_in_edit.subsetString())
+                for id_added in ids_added:
+                    if int(id_added) == id_bulk:
+                        self.lyr_added_bulk_load_in_edit.setSubsetString(
+                            '(' + self.lyr_added_bulk_load_in_edit.subsetString() + ') and "bulk_load_outline_id" != %s' % id_bulk)
 
                 self.remove_features_from_layer_bulk(id_bulk)
 
@@ -974,7 +1013,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
         else:
             self.lyr_related_existing.setSubsetString(
-                self.lyr_related_bulk_load.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+                self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
     def link_clicked(self):
 
