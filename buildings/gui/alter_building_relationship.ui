@@ -48,13 +48,6 @@
           <item>
            <widget class="QTableWidget" name="tbl_original"/>
           </item>
-          <item>
-           <widget class="QPushButton" name="btn_unlink_all">
-            <property name="text">
-             <string>Unlink All</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </item>
         <item>
@@ -92,6 +85,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_unlink_all">
+            <property name="text">
+             <string>Unlink All</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -143,8 +143,14 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
-             <string>existing_id</string>
+             <string>Existing Outline ID</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -160,8 +166,14 @@
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
            <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
             <property name="text">
-             <string>bulk_load_id</string>
+             <string>Bulk Load Outline ID</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -209,39 +221,21 @@
             </property>
            </spacer>
           </item>
+          <item>
+           <widget class="QPushButton" name="btn_matched">
+            <property name="text">
+             <string>Matched</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_related">
+            <property name="text">
+             <string>Related</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QPushButton" name="btn_removed">
-          <property name="text">
-           <string>Removed</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_added">
-          <property name="text">
-           <string>Added</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_matched">
-          <property name="text">
-           <string>Matched</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_related">
-          <property name="text">
-           <string>Related</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </item>
@@ -362,6 +356,20 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_removed">
+            <property name="text">
+             <string>Removed</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_added">
+            <property name="text">
+             <string>Added</string>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_6">

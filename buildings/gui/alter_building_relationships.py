@@ -15,11 +15,10 @@ from buildings.utilities import database as db
 
 from PyQt4.QtGui import QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QTableWidgetSelectionRange, QColor
 from qgis.utils import iface
-from qgis.core import QgsMapLayerRegistry, QgsFillSymbolV2
+from qgis.core import QgsMapLayerRegistry, QgsProject
 from qgis.gui import QgsMessageBar, QgsHighlight
 # from functools import partial
 
-from buildings.utilities import layers
 import re
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -86,7 +85,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_list(self.lst_existing)
         self.init_list(self.lst_bulk)
 
-        self.open_building_lyrs()
+        self.add_building_lyrs()
+
+        iface.setActiveLayer(self.existing_lyr)
+        iface.actionSelectRectangle().trigger()
 
         self.hl_list = []
 
@@ -116,69 +118,80 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)
         # self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
 
-    def open_building_lyrs(self):
-        """Finds building layers."""
+    def add_building_lyrs(self):
+        self.remove_building_lyrs()
+
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
-        self.existing_lyr = layers.LayerRegistry().add_postgres_layer(
+        self.existing_lyr = self.layer_registry.add_postgres_layer(
             "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.existing_lyr.loadNamedStyle(path + 'building_transparent.qml')
 
-        self.bulk_load_lyr = layers.LayerRegistry().add_postgres_layer(
+        self.bulk_load_lyr = self.layer_registry.add_postgres_layer(
             "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.bulk_load_lyr.loadNamedStyle(path + 'building_transparent.qml')
 
-        self.lyr_related_bulk_load = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
             "related_bulk_load_outlines", "related_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_related_bulk_load.loadNamedStyle(path + 'building_purple.qml')
 
-        self.lyr_related_existing = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_related_existing = self.layer_registry.add_postgres_layer(
             "related_existing_outlines", "related_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_related_existing.loadNamedStyle(path + 'building_purple.qml')
 
-        self.lyr_matched_bulk_load = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_matched_bulk_load = self.layer_registry.add_postgres_layer(
             "matched_bulk_load_outlines", "matched_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_matched_bulk_load.loadNamedStyle(path + 'building_blue.qml')
 
-        self.lyr_matched_existing = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_matched_existing = self.layer_registry.add_postgres_layer(
             "matched_existing_outlines", "matched_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_matched_existing.loadNamedStyle(path + 'building_blue.qml')
 
-        self.lyr_removed_existing = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_removed_existing = self.layer_registry.add_postgres_layer(
             "removed_outlines", "removed_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_removed_existing.loadNamedStyle(path + 'building_orange.qml')
 
-        self.lyr_added_bulk_load = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_added_bulk_load = self.layer_registry.add_postgres_layer(
             "added_outlines", "added_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_added_bulk_load.loadNamedStyle(path + 'building_green.qml')
 
-        self.lyr_related_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_related_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "related_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_related_bulk_load_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
-        self.lyr_related_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_related_existing_in_edit = self.layer_registry.add_postgres_layer(
             "related_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_related_existing_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
-        self.lyr_matched_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_matched_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "matched_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_matched_bulk_load_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
-        self.lyr_matched_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_matched_existing_in_edit = self.layer_registry.add_postgres_layer(
             "matched_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_matched_existing_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
-        self.lyr_removed_existing_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_removed_existing_in_edit = self.layer_registry.add_postgres_layer(
             "removed_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
         self.lyr_removed_existing_in_edit.loadNamedStyle(path + 'building_orange.qml')
 
-        self.lyr_added_bulk_load_in_edit = layers.LayerRegistry().add_postgres_layer(
+        self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "added_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
 
-        iface.mapCanvas().setExtent(self.existing_lyr.extent())
+        iface.mapCanvas().setExtent(self.bulk_load_lyr.extent())
 
         self.clear_layer_filter()
+
+    def remove_building_lyrs(self):
+
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup('Building Tool Layers')
+        if group:
+            for child in group.children():
+                dump = child.dump()
+                id = dump.split("=")[-1].strip()
+                QgsMapLayerRegistry.instance().removeMapLayer(id)
 
     def clear_layer_filter(self):
 
@@ -1305,6 +1318,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         except TypeError:
             pass
         self.clear_layer_filter()
+
+        self.remove_building_lyrs()
 
     #####################
     def save_clicked2(self):
