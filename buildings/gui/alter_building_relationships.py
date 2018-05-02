@@ -85,7 +85,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_list(self.lst_existing)
         self.init_list(self.lst_bulk)
 
-        self.find_building_lyrs()
+        self.open_building_lyrs()
 
         self.hl_list = []
 
@@ -115,20 +115,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_existing)
         # self.tbl_result.itemSelectionChanged.connect(self.select_from_tbl_result_bulk)
 
-    def find_building_lyrs(self):
+    def open_building_lyrs(self):
         """Finds building layers."""
-
-        mySymbol = QgsFillSymbolV2.createSimple({'color': '0, 0, 0, 0', 'color_border': '0, 0, 0, 0'})
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
         self.existing_lyr = layers.LayerRegistry().add_postgres_layer(
             "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
-        self.existing_lyr.rendererV2().setSymbol(mySymbol)
+        self.existing_lyr.loadNamedStyle(path + 'building_transparent.qml')
 
         self.bulk_load_lyr = layers.LayerRegistry().add_postgres_layer(
             "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
-        self.bulk_load_lyr.rendererV2().setSymbol(mySymbol)
-
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
+        self.bulk_load_lyr.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_related_bulk_load = layers.LayerRegistry().add_postgres_layer(
             "related_bulk_load_outlines", "related_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
@@ -180,38 +177,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         iface.mapCanvas().setExtent(self.existing_lyr.extent())
 
-        '''
-        self.lyr_added_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("added_bulk_load_in_edit")[0]
-        self.lyr_removed_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("removed_existing_in_edit")[0]
-        self.lyr_matched_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_in_edit")[0]
-        self.lyr_matched_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_in_edit")[0]
-        self.lyr_related_existing_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_in_edit")[0]
-        self.lyr_related_bulk_load_in_edit = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_in_edit")[0]
-
-        self.lyr_added_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("added_outlines")[0]
-        self.lyr_removed_existing = QgsMapLayerRegistry.instance().mapLayersByName("removed_outlines")[0]
-        self.lyr_matched_existing = QgsMapLayerRegistry.instance().mapLayersByName("matched_existing_outlines")[0]
-        self.lyr_matched_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("matched_bulk_load_outlines")[0]
-        self.lyr_related_existing = QgsMapLayerRegistry.instance().mapLayersByName("related_existing_outlines")[0]
-        self.lyr_related_bulk_load = QgsMapLayerRegistry.instance().mapLayersByName("related_bulk_load_outlines")[0]
-        '''
-
         self.clear_layer_filter()
-        '''
-        ##
-        bulk_load_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')
-        existing_lyrs = QgsMapLayerRegistry.instance().mapLayersByName('existing_subset_extracts')
-
-        if len(bulk_load_lyrs) > 1 or len(existing_lyrs) > 1:
-            iface.messageBar().pushMessage("Error:", "Duplicated building outlines layers", level=QgsMessageBar.WARNING)
-        elif len(bulk_load_lyrs) < 1:
-            iface.messageBar().pushMessage("Error:", "Missing layer bulk_load_outlines", level=QgsMessageBar.WARNING)
-        elif len(existing_lyrs) < 1:
-            iface.messageBar().pushMessage("Error:", "Missing layer bulk_load_outlines", level=QgsMessageBar.WARNING)
-        else:
-            self.bulk_load_lyr = bulk_load_lyrs[0]
-            self.existing_lyr = existing_lyrs[0]
-        '''
 
     def clear_layer_filter(self):
 
