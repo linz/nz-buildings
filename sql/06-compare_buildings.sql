@@ -354,10 +354,17 @@ IF ( SELECT processed_date
         -- TEMP TABLE
         -- of all 1:1 matches and their % overlap, area difference and Hausdorff Distance
 
-        INSERT INTO buildings_bulk_load.matched (bulk_load_outline_id, building_outline_id, qa_status_id)
+        INSERT INTO buildings_bulk_load.matched (bulk_load_outline_id, building_outline_id, qa_status_id, area_bulk_load, area_existing, percent_area_difference, area_overlap, percent_bulk_load_overlap, percent_existing_overlap, hausdorff_distance)
         SELECT supplied.bulk_load_outline_id,
                current.building_outline_id,
-               1 AS qa_status_id
+               1 AS qa_status_id,
+               ST_Area(supplied.shape) AS area_bulk_load,
+               ST_Area(current.shape) As area_existing,
+               @(ST_Area(current.shape) - ST_Area(supplied.shape)) / ST_Area(current.shape) * 100 AS percent_area_difference,
+               ST_Area(ST_Intersection(supplied.shape, current.shape)) AS area_overlap,
+               ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100 AS percent_bulk_load_overlap,
+               ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100 AS percent_existing_overlap,
+               ST_HausdorffDistance(supplied.shape, current.shape) AS hausdorff_distance
         FROM supplied_intersect supplied,
              existing_intersect current
         WHERE ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) > 0.1

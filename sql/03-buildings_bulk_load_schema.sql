@@ -273,32 +273,20 @@ COMMENT ON COLUMN buildings_bulk_load.related.building_outline_id IS
 'Foreign key to the buildings_bulk_load.building_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.related.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.related.area_bulk_load IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.area_existing IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.area_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.percent_bulk_load_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.percent_existing_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.total_area_bulk_load_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.total_area_existing_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.total_percent_bulk_load_overlap IS
-'';
-COMMENT ON COLUMN buildings_bulk_load.related.total_percent_existing_overlap IS
-'';
 
 -- Matched
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.matched (
-      matched_id serial PRIMARY KEY
-    , bulk_load_outline_id integer NOT NULL REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
+      bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
+    , area_bulk_load numeric(10, 2) NOT NULL
+    , area_existing numeric(10, 2) NOT NULL
+    , percent_area_difference numeric(5, 2) NOT NULL
+    , area_overlap numeric(10, 2) NOT NULL
+    , percent_bulk_load_overlap numeric(5, 2) NOT NULL
+    , percent_existing_overlap numeric(5, 2) NOT NULL
+    , hausdorff_distance numeric(6, 4) NOT NULL
 );
 
 DROP INDEX IF EXISTS idx_matched_building_outline_id;
@@ -313,8 +301,6 @@ COMMENT ON TABLE buildings_bulk_load.matched IS
 'This table holds potential 1:1 matches between outlines that have been '
 'loaded into the system in bulk and those that already exist.';
 
-COMMENT ON COLUMN buildings_bulk_load.matched.matched_id IS
-'Unique identifier for the matched table.';
 COMMENT ON COLUMN buildings_bulk_load.matched.bulk_load_outline_id IS
 'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
 COMMENT ON COLUMN buildings_bulk_load.matched.building_outline_id IS
@@ -342,238 +328,3 @@ COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
 'buildings_bulk_load.bulk_load_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.transferred.new_building_outline_id IS
 'Foreign key to the buildings.building_outlines table.';
-
--- VIEWS
-
--- Added Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
-    SELECT
-          added.bulk_load_outline_id
-        , added.qa_status_id
-        , supplied.supplied_dataset_id
-        , supplied.shape
-    FROM buildings_bulk_load.added
-    JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.added_outlines IS
-'This table holds the building outlines that have been identified as new '
-'buildings within the building outlines dataset.';
-
-COMMENT ON COLUMN buildings_bulk_load.added_outlines.bulk_load_outline_id IS
-'Unique identifier for the added table and foreign key to the '
-'buildings_bulk_load.bulk_load_outlines table.';
-COMMENT ON COLUMN buildings_bulk_load.added_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.added_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.added_outlines.shape IS
-'The geometry of existing building outlines that are part of a 1:1 '
-'relationship with bulk loaded outlines.';
-
--- Removed Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.removed_outlines AS
-    SELECT
-          removed.building_outline_id
-        , removed.qa_status_id
-        , current.supplied_dataset_id
-        , current.shape
-    FROM buildings_bulk_load.removed
-    JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.removed_outlines IS
-'This table holds the building outlines that have been identified as removed '
-'buildings within the building outlines dataset.';
-
-COMMENT ON COLUMN buildings_bulk_load.removed_outlines.building_outline_id IS
-'Unique identifier for the removed table and foreign key to the '
-'buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.removed_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.removed_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.removed_outlines.shape IS
-'The geometry of existing building outlines that are part of a 1:1 '
-'relationship with bulk loaded outlines.';
-
--- Matched Existing Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.matched_existing_outlines AS
-    SELECT
-          matched.matched_id
-        , matched.bulk_load_outline_id
-        , matched.building_outline_id
-        , matched.qa_status_id
-        , current.supplied_dataset_id
-        , current.shape
-    FROM buildings_bulk_load.matched
-    JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.matched_existing_outlines IS
-'The matched_existing_outlines view is used to visualise building '
-'outlines that are current in the system and identified as part of an '
-'1:1 relationship with bulk loaded outlines.';
-
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.matched_id IS
-'Unique identifier for the matched table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outlines table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.building_outline_id IS
-'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.shape IS
-'The geometry of existing building outlines that are part of a 1:1 '
-'relationship with bulk loaded outlines.';
-
--- Matched Bulk Load Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.matched_bulk_load_outlines AS
-    SELECT
-          matched.matched_id
-        , matched.bulk_load_outline_id
-        , matched.building_outline_id
-        , matched.qa_status_id
-        , supplied.supplied_dataset_id
-        , supplied.shape
-    FROM buildings_bulk_load.matched
-    JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.matched_bulk_load_outlines IS
-'The matched_bulk_load_outlines view is used to visualise building '
-'outlines that are current in the system and identified as part of an '
-'1:1 relationship with existing outlines.';
-
-COMMENT ON COLUMN buildings_bulk_load.matched_bulk_load_outlines.matched_id IS
-'Unique identifier for the matched table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_bulk_load_outlines.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outlines table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_existing_outlines.building_outline_id IS
-'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_bulk_load_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_bulk_load_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_bulk_load_outlines.shape IS
-'The geometry of bulk loaded building outlines that are part of an 1:1 '
-'relationship with existing building outlines.';
-
--- Matched Details
-
-CREATE OR REPLACE VIEW buildings_bulk_load.matched_details AS
-    SELECT 
-          matched.matched_id
-        , matched.bulk_load_outline_id
-        , matched.building_outline_id
-        , matched.qa_status_id
-        , supplied.supplied_dataset_id
-        , round(ST_Area(supplied.shape)::numeric, 2) AS area_bulk_load
-        , round(ST_Area(current.shape)::numeric, 2) As area_existing
-        , round((@(ST_Area(current.shape) - ST_Area(supplied.shape)) / ST_Area(current.shape) * 100)::numeric, 2) AS percent_area_difference
-        , round(ST_Area(ST_Intersection(supplied.shape, current.shape))::numeric, 2) AS area_overlap
-        , round((ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100)::numeric, 2) AS percent_bulk_load_overlap
-        , round((ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100)::numeric, 2) AS percent_existing_overlap
-        , round(ST_HausdorffDistance(supplied.shape, current.shape)::numeric, 2) AS hausdorff_distance
-    FROM buildings_bulk_load.matched
-    JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-    JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.matched_details IS
-'The matched_details view includes area calculations that help determine '
-'whether the match is likely to be valid or not.';
-
-COMMENT ON COLUMN buildings_bulk_load.matched_details.matched_id IS
-'Unique identifier for the matched table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.building_outline_id IS
-'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.area_bulk_load IS
-'The area of the building outline that is part of a bulk load.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.area_existing IS
-'The area of the existing building outline that has been identified as a '
-'match for the bulk load building outline.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.percent_area_difference IS
-'The percentage of area difference between bulk load and existing.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.area_overlap IS
-'The area of intersection between the two building outlines.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.percent_bulk_load_overlap IS
-'The percentage of the bulk load building outline that is overlapped by the '
-'existing building outline.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.percent_existing_overlap IS
-'The percentage of the existing building outline that is overlapped by the '
-'bulk load building outline.';
-COMMENT ON COLUMN buildings_bulk_load.matched_details.hausdorff_distance IS
-'Hausdorff Distance is an algorithm for determining if the shape of two '
-'polygons is similar.';
-
--- Related Existing Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.related_existing_outlines AS
-    SELECT DISTINCT
-          related.related_id
-        , related.bulk_load_outline_id
-        , related.building_outline_id
-        , related.qa_status_id
-        , current.supplied_dataset_id
-        , current.shape
-    FROM buildings_bulk_load.related
-    JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.related_existing_outlines IS
-'The related_existing_outlines view is used to visualise building '
-'outlines that are current in the system and identified as part of an '
-'m:n relationship with bulk loaded outlines.';
-
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.related_id IS
-'Unique identifier for the related table.';
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.building_outline_id IS
-'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.related_existing_outlines.shape IS
-'The geometry of existing building outlines that are part of an m:n '
-'relationship with bulk loaded outlines.';
-
--- Related Bulk Load Outlines
-
-CREATE OR REPLACE VIEW buildings_bulk_load.related_bulk_load_outlines AS
-    SELECT DISTINCT
-          related.related_id
-        , related.bulk_load_outline_id
-        , related.building_outline_id
-        , related.qa_status_id
-        , supplied.supplied_dataset_id
-        , supplied.shape
-    FROM buildings_bulk_load.related
-    JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id);
-
-COMMENT ON VIEW buildings_bulk_load.related_bulk_load_outlines IS
-'The related_bulk_load_outlines view is used to visualise building '
-'outlines that have been bulk loaded and identified as part of an '
-'m:n relationship.';
-
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.related_id IS
-'Unique identifier for the related table.';
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.building_outline_id IS
-'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.qa_status_id IS
-'Foreign key to the buildings_bulk_load.qa_status table.';
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.supplied_dataset_id IS
-'Foreign key to the buildings_bulk_load.supplied_datasets table.';
-COMMENT ON COLUMN buildings_bulk_load.related_bulk_load_outlines.shape IS
-'The geometry of existing building outlines that are part of an m:n '
-'relationship with bulk loaded outlines.';
