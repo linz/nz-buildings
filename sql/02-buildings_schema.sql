@@ -111,7 +111,7 @@ COMMENT ON TABLE buildings.building_outlines IS
 COMMENT ON COLUMN buildings.building_outlines.building_outline_id IS
 'Unique identifier for the building outline.';
 COMMENT ON COLUMN buildings.building_outlines.building_id IS
-'Foreign key to the building table. The building id is persistant for the '
+'Foreign key to the buildings.building table. The building id is persistant for the '
 'same building across all of the building outlines that represent it.';
 COMMENT ON COLUMN buildings.building_outlines.capture_method_id IS
 'Foreign key to the capture_method table. Holds the method by which the '
@@ -159,7 +159,7 @@ COMMENT ON COLUMN buildings.building_name.building_name_id IS
 COMMENT ON COLUMN buildings.building_name.building_id IS
 'Foreign key to the buildings.building table.';
 COMMENT ON COLUMN buildings.building_name.building_name IS
-'';
+'The name of the building, where known.';
 COMMENT ON COLUMN buildings.building_name.begin_lifespan IS
 'The date that the building name was first captured in the system.';
 COMMENT ON COLUMN buildings.building_name.end_lifespan IS
