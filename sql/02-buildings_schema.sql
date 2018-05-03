@@ -232,7 +232,7 @@ COMMENT ON TABLE buildings.building_use IS
 
 COMMENT ON COLUMN buildings.lifecycle.lifecycle_id IS
 'Unique identifier for a building_use.';
-COMMENT ON COLUMN buildings.lifecycle.parent_buiilding_id IS
+COMMENT ON COLUMN buildings.lifecycle.parent_building_id IS
 'Foreign key to the buildings.building table. All records stored as parent '
 'buildings will be end dated in the system.';
 COMMENT ON COLUMN buildings.lifecycle.building_id IS

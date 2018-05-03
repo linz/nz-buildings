@@ -80,6 +80,7 @@ INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Added During Q
 
 -- QA Status
 
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Manually Altered Relationship');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Checked');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Okay');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Pending');
