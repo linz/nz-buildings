@@ -61,7 +61,7 @@ class SetUpCaptureSourceTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.capture_frame.btn_cancel.click()
+        self.capture_frame.btn_exit.click()
 
     def test_external_source_default(self):
         """External source line edit is disabled and radiobutton is not checked"""

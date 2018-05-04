@@ -57,7 +57,7 @@ class SetUpNewEntryTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_entry_frame.btn_cancel.click()
+        self.new_entry_frame.btn_exit.click()
 
     def test_combobox_default(self):
         """Initial combobox text is organisation"""

@@ -61,7 +61,7 @@ class SetUpBulkLoadTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.bulk_load_frame.btn_cancel.click()
+        self.bulk_load_frame.btn_exit.click()
 
     def test_external_defaults(self):
         """External source comboboxes disabled on setup"""

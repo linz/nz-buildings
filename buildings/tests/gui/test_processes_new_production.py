@@ -66,7 +66,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_production_frame.btn_cancel.click()
+        self.new_production_frame.btn_exit.click()
 
     def test_ui_on_geometry_drawn(self):
         """UI comboboxes enable when geometry is drawn"""
@@ -165,7 +165,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         self.assertEqual(self.new_production_frame.cmb_suburb.currentIndex(), 0)
         # check comboboxes disabled
         self.assertFalse(self.new_production_frame.btn_save.isEnabled())
-        self.assertTrue(self.new_production_frame.btn_reset.isEnabled())
+        self.assertFalse(self.new_production_frame.btn_reset.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_method.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_ta.isEnabled())

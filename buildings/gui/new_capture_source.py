@@ -41,7 +41,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # set up signals and slots
         self.capture_source_id = None
         self.btn_ok.clicked.connect(self.ok_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.rad_external_source.toggled.connect(self.enable_external_source)
 
     def populate_combobox(self):
@@ -109,9 +109,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                                                             commit_status)
         self.le_external_source_id.clear()
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
         db.close_connection()
         from buildings.gui.menu_frame import MenuFrame

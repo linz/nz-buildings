@@ -61,7 +61,7 @@ class ProcessNewEntryTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_entry_frame.btn_cancel.click()
+        self.new_entry_frame.btn_exit.click()
 
     def test_valid_new_organisation(self):
         """New organisation added"""

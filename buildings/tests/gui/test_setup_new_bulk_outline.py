@@ -65,22 +65,22 @@ class SetUpBulkNewTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_bulk_frame.btn_cancel.click()
+        self.new_bulk_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
         """Buttons and comboboxes correctly enabled/disables on startup"""
         if self.no_supplied_data:
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
             self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_cancel.isEnabled())
+            self.assertTrue(self.new_bulk_frame.btn_exit.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
         else:
             self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_cancel.isEnabled())
+            self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
+            self.assertTrue(self.new_bulk_frame.btn_exit.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
             self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())

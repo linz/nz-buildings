@@ -51,7 +51,6 @@ reset_db:
 	@echo "re-connecting plugin to linz_db"
 	@echo "------------------------------------------"
 	sed -i '4s/.*/dbname=linz_db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
-	# command line refresh plugins??
 
 setup_db:
 	@echo

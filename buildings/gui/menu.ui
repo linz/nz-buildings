@@ -152,7 +152,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Add New Outline to Supplied Dataset</string>
+          <string>Add New Outline to Bulk Load Dataset</string>
          </property>
         </item>
         <item>

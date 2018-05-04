@@ -62,7 +62,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.capture_frame.btn_cancel.click()
+        self.capture_frame.btn_exit.click()
 
     def test_external_radio_button(self):
         """External source line edit enabled when external source radiobutton selected"""

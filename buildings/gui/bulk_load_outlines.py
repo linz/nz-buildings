@@ -50,7 +50,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.rad_external_source.toggled.connect(self.enable_external)
         self.ml_outlines_layer.currentIndexChanged.connect(self.populate_external_fcb)
         self.btn_ok.clicked.connect(self.ok_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
 
     def populate_comboboxes(self):
         """
@@ -318,7 +318,6 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 sql = "SELECT bulk_load_outline_id FROM buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = %s;"
                 results = db.execute_no_commit(sql, (self.dataset_id, ))
                 bulk_loaded_ids = results.fetchall()
-                print len(bulk_loaded_ids)
                 for id in bulk_loaded_ids:
                     sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 1);'
                     db.execute_no_commit(sql, (id[0], ))
@@ -342,9 +341,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             db.execute(sql)  # remove temp files
             self.mcb_imagery_layer.currentLayer().removeSelection()
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
         db.close_connection()
         from buildings.gui.menu_frame import MenuFrame

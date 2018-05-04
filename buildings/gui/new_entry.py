@@ -34,7 +34,7 @@ class NewEntry(QFrame, FORM_CLASS):
         self.capture_method_id = None
         self.capture_source_group_id = None
         self.btn_ok.clicked.connect(self.ok_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.le_description.setDisabled(1)
         self.cmb_new_type_selection.currentIndexChanged.connect(self.set_new_type)
 
@@ -117,9 +117,9 @@ class NewEntry(QFrame, FORM_CLASS):
                     self.new_capture_source_group(self.value, self.description,
                                                   commit_status)
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
         db.close_connection()
         from buildings.gui.menu_frame import MenuFrame

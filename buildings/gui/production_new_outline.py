@@ -37,6 +37,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
         # set up
         self.create_building_layer = QgsVectorLayer()
         self.geom = None
@@ -65,7 +66,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.building_id = None
         self.btn_save.clicked.connect(self.save_clicked)
         self.btn_reset.clicked.connect(self.reset_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.create_building_layer.featureAdded.connect(self.creator_feature_added)
         self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
 
@@ -223,6 +224,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setEnabled(1)
         # enable save
         self.btn_save.setEnabled(1)
+        self.btn_reset.setEnabled(1)
 
     def creator_feature_deleted(self, qgsfId):
         """
@@ -284,13 +286,14 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
         # empty saved_building_ids
         self.saved_building_ids = []
         self.building_id = building_id
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
         db.close_connection()
         # remove unsaved edits and stop editing layer
@@ -329,3 +332,4 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)

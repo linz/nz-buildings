@@ -63,12 +63,12 @@ class SetUpProductionNewTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_production_frame.btn_cancel.click()
+        self.new_production_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
         self.assertFalse(self.new_production_frame.btn_save.isEnabled())
-        self.assertTrue(self.new_production_frame.btn_reset.isEnabled())
+        self.assertFalse(self.new_production_frame.btn_reset.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_method.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_ta.isEnabled())

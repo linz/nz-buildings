@@ -52,7 +52,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.btn_reset.setDisabled(1)
                 self.btn_save.setDisabled(1)
                 self.cmb_supplied_dataset.setDisabled(1)
-                self.btn_cancel.clicked.connect(self.fail_cancel_clicked)
+                self.btn_exit.clicked.connect(self.fail_exit_clicked)
         else:
             self.populate_dataset_combobox()
             text = self.cmb_supplied_dataset.currentText()
@@ -60,32 +60,15 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             self.dataset_id = text_list[0]
             self.layer_registry.remove_layer(self.building_layer)
             # add the bulk_load_outlines to the layer registry
-            self.building_layer = self.layer_registry.add_postgres_layer(
-                'bulk_load_outlines', 'bulk_load_outlines',
-                'shape', 'buildings_bulk_load', '',
-                'supplied_dataset_id = {0}'.format(self.dataset_id)
-            )
-            self.territorial_auth = self.layer_registry.add_postgres_layer(
-                'territorial_authorities', 'territorial_authority',
-                'shape', 'buildings_admin_bdys', '', ''
-            )
-            # change style of TAs
-            layers.style_layer(self.territorial_auth,
-                               {1: ['204,121,95', '0.3', 'dash', '5;2']})
-            self.building_layer.featureAdded.connect(self.creator_feature_added)
-            self.building_layer.featureDeleted.connect(self.creator_feature_deleted)
-            # enable editing
-            iface.setActiveLayer(self.building_layer)
-            iface.actionToggleEditing().trigger()
-            # set editing to add polygon
-            iface.actionAddFeature().trigger()
+            self.add_outlines()
             # set up signals
             self.outline_id = None
             self.btn_save.clicked.connect(self.save_clicked)
             self.btn_save.setDisabled(1)
+            self.btn_reset.setDisabled(1)
             self.btn_reset.clicked.connect(self.reset_clicked)
             self.cmb_supplied_dataset.currentIndexChanged.connect(self.add_outlines)
-            self.btn_cancel.clicked.connect(self.cancel_clicked)
+            self.btn_exit.clicked.connect(self.exit_clicked)
 
     def reload_setup(self):
         self.populate_dataset_combobox()
@@ -94,6 +77,32 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.dataset_id = text_list[0]
         self.layer_registry.remove_layer(self.building_layer)
         self.reset_clicked()
+        # add the bulk_load_outlines to the layer registry
+        self.add_outlines()
+        # set up signals
+        self.outline_id = None
+        self.btn_save.clicked.connect(self.save_clicked)
+        self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
+        self.btn_reset.clicked.connect(self.reset_clicked)
+        self.cmb_supplied_dataset.currentIndexChanged.connect(self.add_outlines)
+        self.btn_exit.clicked.connect(self.exit_clicked)
+
+    def populate_dataset_combobox(self):
+        sql = 'SELECT supplied_dataset_id, description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.processed_date is NULL;'
+        results = db._execute(sql)
+        datasets = results.fetchall()
+        for dset in datasets:
+            text = '{0}-{1}'.format(dset[0], dset[1])
+            self.cmb_supplied_dataset.addItem(text)
+
+    def add_outlines(self):
+        """Called when supplied dataset index is changed"""
+        text = self.cmb_supplied_dataset.currentText()
+        text_list = text.split('-')
+        self.dataset_id = text_list[0]
+        self.layer_registry.remove_layer(self.building_layer)
+        self.supplied_reset()
         # add the bulk_load_outlines to the layer registry
         self.building_layer = self.layer_registry.add_postgres_layer(
             'bulk_load_outlines', 'bulk_load_outlines',
@@ -109,54 +118,12 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
         self.building_layer.featureAdded.connect(self.creator_feature_added)
         self.building_layer.featureDeleted.connect(self.creator_feature_deleted)
+
         # enable editing
         iface.setActiveLayer(self.building_layer)
         iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
-        # set up signals
-        self.outline_id = None
-        self.btn_save.clicked.connect(self.save_clicked)
-        self.btn_save.setDisabled(1)
-        self.btn_reset.clicked.connect(self.reset_clicked)
-        self.cmb_supplied_dataset.currentIndexChanged.connect(self.add_outlines)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
-
-    def populate_dataset_combobox(self):
-        sql = 'SELECT supplied_dataset_id, description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.processed_date is NULL;'
-        results = db._execute(sql)
-        datasets = results.fetchall()
-        for dset in datasets:
-            text = '{0}-{1}'.format(dset[0], dset[1])
-            self.cmb_supplied_dataset.addItem(text)
-
-    def add_outlines(self):
-            text = self.cmb_supplied_dataset.currentText()
-            text_list = text.split('-')
-            self.dataset_id = text_list[0]
-            self.layer_registry.remove_layer(self.building_layer)
-            self.supplied_reset()
-            # add the bulk_load_outlines to the layer registry
-            self.building_layer = self.layer_registry.add_postgres_layer(
-                'bulk_load_outlines', 'bulk_load_outlines',
-                'shape', 'buildings_bulk_load', '',
-                'supplied_dataset_id = {0}'.format(self.dataset_id)
-            )
-            self.territorial_auth = self.layer_registry.add_postgres_layer(
-                'territorial_authorities', 'territorial_authority',
-                'shape', 'buildings_admin_bdys', '', ''
-            )
-            # change style of TAs
-            layers.style_layer(self.territorial_auth,
-                               {1: ['204,121,95', '0.3', 'dash', '5;2']})
-            self.building_layer.featureAdded.connect(self.creator_feature_added)
-            self.building_layer.featureDeleted.connect(self.creator_feature_deleted)
-
-            # enable editing
-            iface.setActiveLayer(self.building_layer)
-            iface.actionToggleEditing().trigger()
-            # set editing to add polygon
-            iface.actionAddFeature().trigger()
 
     def populate_lookup_comboboxes(self):
         """
@@ -294,6 +261,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setEnabled(1)
         # enable save
         self.btn_save.setEnabled(1)
+        self.btn_reset.setEnabled(1)
 
     def creator_feature_deleted(self, qgsfId):
         """
@@ -312,6 +280,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.cmb_suburb.setDisabled(1)
                 # disable save
                 self.btn_save.setDisabled(1)
+                self.btn_reset.setDisabled(1)
 
     def save_clicked(self, built_in=False, commit_status=True):
         """
@@ -354,10 +323,11 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
         db.close_connection()
         # remove unsaved edits and stop editing layer
@@ -373,9 +343,9 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
 
-    def fail_cancel_clicked(self):
+    def fail_exit_clicked(self):
         """
-        Called when cancel button is clicked if failed to load any data
+        Called when exit button is clicked if failed to load any data
         """
         # change frame
         db.close_connection()
@@ -386,7 +356,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
 
     def supplied_reset(self):
         """
-        Called when reset button is clicked
+        Called when supplied dataset combobox index changed
         """
         # reset combo boxes and disable
         self.cmb_capture_method.setCurrentIndex(0)
@@ -400,6 +370,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
 
     def reset_clicked(self):
         """
@@ -422,3 +393,4 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)

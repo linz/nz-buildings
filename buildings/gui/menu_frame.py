@@ -67,7 +67,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         db.close_connection()
         text = self.cmb_add_outline.currentText()
-        if text == 'Add New Outline to Supplied Dataset':
+        if text == 'Add New Outline to Bulk Load Dataset':
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
             dw.new_widget(BulkNewOutline(self.layer_registry))
