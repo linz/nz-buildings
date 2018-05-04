@@ -23,7 +23,7 @@ from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
 
-class SetUpBulkLoadGuiTest(unittest.TestCase):
+class SetUpBulkLoadTest(unittest.TestCase):
     """Test Bulk Load Outlines GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
@@ -40,12 +40,14 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
+                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
+        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -62,41 +64,45 @@ class SetUpBulkLoadGuiTest(unittest.TestCase):
         self.bulk_load_frame.btn_cancel.click()
 
     def test_external_defaults(self):
+        """External source comboboxes disabled on setup"""
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 0)
 
     def test_supplied_layer_combobox(self):
-        # check layer combobox contains only the layer in the qgis legend
+        """Bulk load layer combobox contains only the layers in the qgis legend"""
         layers = iface.legendInterface().layers()
-        self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(), len(layers))
+        self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(),
+                         len(layers))
 
-    def test_data_desc_default(self):
-        # check data description is enabled and empty
+    def test_data_description_default(self):
+        """Data description is enabled and empty"""
         self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
         self.assertEqual(self.bulk_load_frame.le_data_description.text(), '')
 
     def test_organisation_combobox(self):
-        # check organisation combobox same size as table
+        """Organisation combobox same size as table"""
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_organisation.count(), result)
 
     def test_capture_method_combobox(self):
-        # Check capture method combobox same size as table
+        """Capture method combobox same size as table"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(), result2)
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(),
+                         result2)
 
     def test_capture_source_group(self):
-        # Check capture source group combobox same size as table
+        """Capture source group combobox same size as table"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(), result3)
+        self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(),
+                         result3)
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkLoadGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkLoadTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

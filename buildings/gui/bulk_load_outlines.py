@@ -9,6 +9,8 @@ import qgis
 
 import processing
 
+# from functools import partial
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 
@@ -23,13 +25,20 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     organisation = ''
     dataset_id = None
     layer = None
+    inserted_values = 0
 
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(BulkLoadOutlines, self).__init__(parent)
         self.setupUi(self)
+
+        db.connect()
+        self.cursor = None
+        self.database = db
+
         self.populate_comboboxes()
         self.populate_field_combobox()
+
         # only enabled if radio button selected
         self.fcb_external_id.setDisabled(1)
         self.cmb_external_id.setDisabled(1)
@@ -155,7 +164,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         """
         text = self.cmb_organisation.currentText()
         sql = 'SELECT organisation_id FROM buildings_bulk_load.organisation o WHERE o.value = %s;'
-        result= db._execute(sql, data=(text, ))
+        result = db._execute(sql, data=(text, ))
         return result.fetchall()[0][0]
 
     def get_capture_method(self):
@@ -197,12 +206,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         sql = 'SELECT (buildings.fn_bulk_load_outlines_update_town_city(%s))'
         db.execute(sql, (self.dataset_id, ))
 
-
     def find_territorial_auth(self):
         sql = 'SELECT (buildings.fn_bulk_load_outlines_update_territorial_authority(%s))'
         db.execute(sql, (self.dataset_id, ))
 
-    def ok_clicked(self):
+    def ok_clicked(self, built_in, commit_status=True):
         # get value
         self.description = self.get_description()
         # get combobox values
@@ -215,7 +223,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         else:
             # sets id to None
             self.external_source_id = None
-        # if user checks radio button then does not enter a field give error dialog
+        # if user checks radio button then does not enter a field error
         if self.external_source_id is None and self.rad_external_source.isChecked():
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report('\n -------------------- NO EXTERNAL IDs -------------------- \n\n Please either uncheck the radio button or enter a new capture source')
@@ -238,9 +246,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
 
         # run sql
         if self.description is not None:
-            self.insert_supplied_dataset(self.organisation, self.description)
+            self.insert_supplied_dataset(self.organisation, self.description,
+                                         commit_status)
             # find convex hull of self.layer
-            result = processing.runalg('qgis:convexhull', self.layer, None, 0, None)
+            result = processing.runalg('qgis:convexhull', self.layer,
+                                       None, 0, None)
             convex_hull = processing.getObject(result['OUTPUT'])
             for feat in convex_hull.getFeatures():
                 geom = feat.geometry()
@@ -272,79 +282,100 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 self.error_dialog.fill_report('\n ---------------- BULK LOAD OVERLAP ---------------- \n\n An unprocessed bulk loaded dataset with dataset id of {0} overlaps this input layer please process this first'.format(dataset))
                 self.error_dialog.show()
                 return
-            val = self.insert_supplied_outlines(self.dataset_id, self.layer, self.capture_method, self.capture_source_group, self.external_source_id)
+            val = self.insert_supplied_outlines(self.dataset_id, self.layer,
+                                                self.capture_method,
+                                                self.capture_source_group,
+                                                self.external_source_id,
+                                                commit_status)
             if val is None:
                 # if insert_supplied_outlines function failed don't continue
                 return
-            # update the locality information fields of the bulk_load_outlines table
-            self.find_suburb()
-            self.find_town_city()
-            self.find_territorial_auth()
             # TODO: way to check not reading in duplicates?
             # imagery that bulk outlines intersects with
             tile = str(self.get_imagery_combobox_value())
+            field = str(self.fcb_imagery_field.currentText())
             # find geometry
-            self.mcb_imagery_layer.currentLayer().selectByExpression("imagery = '{0}'".format(tile), 0)
+            self.mcb_imagery_layer.currentLayer().selectByExpression("{0} = '{1}'".format(field, tile), 0)
             feature = self.mcb_imagery_layer.currentLayer().selectedFeatures()
             # convert to wkt to so can compare with sql shapes
             wkt = feature[0].geometry().exportToWkt()
             sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-            result = db._execute(sql, data=(wkt, ))
+            result = db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             # ensure outline SRID is 2193
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
-            result = db._execute(sql, data=(geom, ))
+            result = db.execute_no_commit(sql, data=(geom, ))
             geom = result.fetchall()[0][0]
             # intersect imagery geom with building_outlines
             sql = 'CREATE TEMP TABLE temp AS SELECT * FROM buildings.building_outlines WHERE ST_intersects(buildings.building_outlines.shape, %s);'
-            db.execute(sql, data=(geom, ))
-            # Has to deal with convex hull of bulk data otherwise will mark numerous building outlines as removed
+            db.execute_no_commit(sql, data=(geom, ))
+            # convex hull else will mark numerous building outlines as removed
             sql = 'SELECT temp.* FROM temp WHERE ST_Intersects(temp.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-            result = db._execute(sql, data=(self.dataset_id, ))
+            result = db.execute_no_commit(sql, data=(self.dataset_id, ))
             results = result.fetchall()
             if len(results) == 0:  # no existing outlines in this area
-                print 'nothing \n'
                 # all new outlines
+                sql = "SELECT bulk_load_outline_id FROM buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = %s;"
+                results = db.execute_no_commit(sql, (self.dataset_id, ))
+                bulk_loaded_ids = results.fetchall()
+                print len(bulk_loaded_ids)
+                for id in bulk_loaded_ids:
+                    sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 1);'
+                    db.execute_no_commit(sql, (id[0], ))
             else:
-                print 'something \n'
                 for ls in results:
                     # insert relevant data into existing_subset_extract
                     sql = 'buildings_bulk_load.existing_subset_extract_insert(%s, %s, %s);'
-                    db.execute(sql, data=(ls[0], self.dataset_id, ls[10]))
+                    db.execute_no_commit(sql, data=(ls[0],
+                                                    self.dataset_id, ls[10]))
                 # run comparisons function
                 sql = 'SELECT (buildings_bulk_load.compare_building_outlines(%s));'
-                db.execute(sql, data=(self.dataset_id, ))
+                db.execute_no_commit(sql, data=(self.dataset_id, ))
                 # user checked data to buildings and building_outlines
+            if commit_status:
+                db.commit_open_cursor()
+            # update the locality fields
+            self.find_suburb()
+            self.find_town_city()
+            self.find_territorial_auth()
             sql = 'DISCARD TEMP;'
             db.execute(sql)  # remove temp files
-            self.mcb_imagery_layer.currentLayer().removeSelection()  # remove selection
+            self.mcb_imagery_layer.currentLayer().removeSelection()
 
     def cancel_clicked(self):
         """
         Called when cancel button is clicked
         """
+        db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
 
-    def insert_supplied_dataset(self, organisation, description):
+    def insert_supplied_dataset(self, organisation, description,
+                                commit_status):
         """
         generates new supplied outline dataset for the incoming data
         """
+        if self.cursor is None:
+            self.cursor = db.open_cursor()
         sql = 'SELECT buildings_bulk_load.fn_supplied_datasets_insert(%s, %s);'
-        results = db._execute(sql, (description, organisation))
+        results = db.execute_no_commit(sql, (description, organisation))
         self.dataset_id = results.fetchall()[0][0]
 
-    def insert_supplied_outlines(self, dataset_id, layer, capture_method, capture_source_group, external_source_id):
+    def insert_supplied_outlines(self, dataset_id, layer, capture_method,
+                                 capture_source_group, external_source_id,
+                                 commit_status):
         """
         inserts the new outlines into the bulk_load_outlines table
         """
         # find capture source id from capture source and external id
         capture_source = None
+        self.inserted_values = 0
         if self.external_source_id is not None:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
-            result = db._execute(sql, data=(self.capture_source_group, self.external_source_id))
+            result = db._execute(sql, data=(self.capture_source_group,
+                                            self.external_source_id))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -376,14 +407,18 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
             result = db._execute(sql, data=(geom, ))
             geom = result.fetchall()[0][0]
+            self.inserted_values = self.inserted_values + 1
             # insert outline into buildings_bulk_load.supplied_outline
             if external_field == '':
                 sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, %s);'
-                db.execute(sql, (dataset_id, capture_method, capture_source, geom))
+                db.execute_no_commit(sql, (dataset_id, capture_method,
+                                           capture_source, geom))
             else:
                 external_id = outline.attribute(external_field)
                 sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, %s);'
-                db.execute(sql, (dataset_id, external_id, capture_method, capture_source, geom))
+                db.execute_no_commit(sql, (dataset_id, external_id,
+                                           capture_method, capture_source,
+                                           geom))
         self.le_data_description.clear()
         # returns 1 if function worked None if failed
         return 1

@@ -23,7 +23,7 @@ from qgis.utils import plugins
 from buildings.utilities import database as db
 
 
-class ProcessNewEntryGuiTest(unittest.TestCase):
+class ProcessNewEntryTest(unittest.TestCase):
     """Test New Entry GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -40,12 +40,14 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
+                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
+        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -61,207 +63,221 @@ class ProcessNewEntryGuiTest(unittest.TestCase):
         """Runs after each test."""
         self.new_entry_frame.btn_cancel.click()
 
-    def test_new_organisation(self):
-        # test correct new organisation
+    def test_valid_new_organisation(self):
+        """New organisation added"""
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.le_new_entry.setText('Test Organisation')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_duplicate_organisation(self):
-        # test existing organisation
+        """Gives error when adding duplicate organisation"""
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.le_new_entry.setText('Ecopia')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_null_organisation(self):
-        # test null organisation
+        """Gives error when adding null organisation"""
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
-    def test_new_lifecycle_stage(self):
-        # test correct new lifecycle_stage
+    def test_valid_new_lifecycle_stage(self):
+        """New lifecycle stage added"""
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(1)
         self.new_entry_frame.le_new_entry.setText('Test lifecycle Stage')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_duplicate_lifecycle_stage(self):
-        # test existing lifecycle_stage
+        """Gives error when duplicate lifecycle stage added"""
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(1)
         self.new_entry_frame.le_new_entry.setText('Current')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_null_lifecycle_stage(self):
-        # test null lifecycle_stage
+        """Gives error when null lifecycle stage added"""
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(1)
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings.lifecycle_stage'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
-    def test_new_capture_method(self):
-        # test correct new capture_method
+    def test_valid_new_capture_method(self):
+        """New capture method added"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(2)
         self.new_entry_frame.le_new_entry.setText('Test Capture Method')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_duplicate_capture_method(self):
-        # test existing capture_method
+        """Gives error when duplicate capture method added"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(2)
         self.new_entry_frame.le_new_entry.setText('Derived')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_null_capture_method(self):
-        # test null capture_method
+        """gives error when null capture method added"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(2)
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
-    def test_new_capture_source_group(self):
-        # test correct new capture_source_group
+    def test_valid_new_capture_source_group(self):
+        """New capture source group added"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.new_entry_frame.le_new_entry.setText('Test Capture Source Group')
         self.new_entry_frame.le_description.setText('Test Description')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_duplicate_capture_source_group(self):
-        # test existing capture_source_group
+        """gives error when duplicate capture source group added"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.new_entry_frame.le_new_entry.setText('NZ Aerial Imagery')
         self.new_entry_frame.le_description.setText('Replace with link to LDS table...')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_capture_source_group_null_value_complete_desc(self):
-        # test capture_source_group null value & complete description
+        """gives error when null value & complete description"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.new_entry_frame.le_new_entry.setText('')
         self.new_entry_frame.le_description.setText('Test description two')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_capture_source_group_complete_value_null_desc(self):
-        # test capture_source_group complete value & null description
+        """gives error when complete value & null description"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
-        self.new_entry_frame.le_new_entry.setText('Test capture source group two')
+        self.new_entry_frame.le_new_entry.setText('Test CSG 2')
         self.new_entry_frame.le_description.setText('')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
     def test_capture_source_group_null(self):
-        # test capture_source_group null value & null description
+        """Gives error when null value & null description"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.new_entry_frame.le_new_entry.setText('')
         self.new_entry_frame.le_description.setText('')
-        self.new_entry_frame.btn_ok.click()
+        self.new_entry_frame.ok_clicked(built_in=False, commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
+        self.new_entry_frame.database.rollback_open_cursor()
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessNewEntryGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessNewEntryTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

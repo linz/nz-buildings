@@ -21,7 +21,7 @@ import unittest
 from qgis.utils import plugins
 
 
-class SetUpNewEntryGuiTest(unittest.TestCase):
+class SetUpNewEntryTest(unittest.TestCase):
     """Test New Entry GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
@@ -60,29 +60,31 @@ class SetUpNewEntryGuiTest(unittest.TestCase):
         self.new_entry_frame.btn_cancel.click()
 
     def test_combobox_default(self):
-        # initial combobox text is organisation
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(self.new_entry_frame.cmb_new_type_selection.currentIndex()), 'Organisation')
+        """Initial combobox text is organisation"""
+        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(
+                          self.new_entry_frame.cmb_new_type_selection.currentIndex()),
+                          'Organisation')
 
     def test_combobox_options(self):
-        # has four options in combobox
+        """Four options in combobox"""
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
 
     def test_value_enabled(self):
-        # value is enabled on start up
+        """Line edit: value is enabled on start up"""
         self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
 
     def test_description_disabled(self):
-        # description is disbaled on startup
+        """Line edit: description is disbaled on startup"""
         self.assertFalse(self.new_entry_frame.le_description.isEnabled())
 
-    def test_desc_enabled_on_capture_srcgrp(self):
-        # change to capture source group option description becomes enabled
+    def test_description_enabled_on_capture_source_group(self):
+        """Description enabled when change to capture source group option"""
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.assertTrue(self.new_entry_frame.le_description.isEnabled())
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

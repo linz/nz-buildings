@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
+    <width>714</width>
     <height>354</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="l_capture_method">
         <property name="text">
-         <string>Capture Method::</string>
+         <string>Capture Method:</string>
         </property>
        </widget>
       </item>

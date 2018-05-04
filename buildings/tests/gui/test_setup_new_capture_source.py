@@ -11,18 +11,20 @@
 #
 ################################################################################
 
-    Tests: Menu GUI setup confirm default settings
+    Tests: New Capture Source GUI setup confirm default settings
 
  ***************************************************************************/
 """
-from qgis.utils import plugins
-
 
 import unittest
 
+from qgis.utils import plugins
 
-class SetUpMenuGuiTest(unittest.TestCase):
-    """Test Menu GUI initial setup confirm default settings"""
+from buildings.utilities import database as db
+
+
+class SetUpCaptureSourceTest(unittest.TestCase):
+    """Test New Capture Source GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -38,12 +40,14 @@ class SetUpMenuGuiTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
+                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
+        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -52,34 +56,27 @@ class SetUpMenuGuiTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_add_capture_source.click()
+        self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
-        """Runs after each test"""
-        # Do nothing
+        """Runs after each test."""
+        self.capture_frame.btn_cancel.click()
 
-    def test_menu_gui_buttons_enabled(self):
-        # buttons are enabled
-        self.assertTrue(self.menu_frame.btn_new_entry.isEnabled())
-        self.assertTrue(self.menu_frame.btn_add_capture_source.isEnabled())
-        self.assertTrue(self.menu_frame.btn_load_outlines.isEnabled())
+    def test_external_source_default(self):
+        """External source line edit is disabled and radiobutton is not checked"""
+        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
 
-    def test_menu_gui_button_names(self):
-        # buttons have correct names
-        self.assertEqual(self.menu_frame.btn_new_entry.text(), 'New Entry')
-        self.assertEqual(self.menu_frame.btn_add_capture_source.text(), 'Add Capture Source')
-        self.assertEqual(self.menu_frame.btn_load_outlines.text(), 'Bulk Load Outlines')
-
-    def test_menu_gui_combo_default(self):
-        # combo box index is add outlines and enabled
-        self.assertTrue(self.menu_frame.cmb_add_outline.isEnabled())
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(self.menu_frame.cmb_add_outline.currentIndex()), 'Add Outlines')
-
-    def test_menu_gui_combo_options(self):
-        # combo box has three options
-        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1), 'Add New Outline to Supplied Dataset')
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2), 'Add New Outline to Production')
+    def test_capture_source_dropdowns(self):
+        """Number of options in dropdown = number of entries in table"""
+        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
+                         result)
+        self.capture_frame.rad_external_source.click()
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(SetUpCaptureSourceTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

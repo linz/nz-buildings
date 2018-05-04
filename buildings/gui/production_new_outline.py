@@ -17,16 +17,18 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_outline_production.ui'))
 
 
-
 class ProductionNewOutline(QFrame, FORM_CLASS):
 
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(ProductionNewOutline, self).__init__(parent)
         self.setupUi(self)
+        db.connect()
+        self.cursor = None
+        self.database = db
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
-        # disable comboboxes and save button 
+        # disable comboboxes and save button
         # until new feature added
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
@@ -49,19 +51,16 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         # add territorial authority areas
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
-            'shape', 'admin_bdys', '', ''
+            'shape', 'buildings_admin_bdys', '', ''
         )
         # style TAs to the same as roads nz_localities but different colour
-        layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
-
+        layers.style_layer(self.territorial_auth,
+                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
         # enable editing
         iface.setActiveLayer(self.create_building_layer)
         iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
-        # zoom to the active layer
-        iface.actionZoomToLayer().trigger()
-
         # set up signals
         self.building_id = None
         self.btn_save.clicked.connect(self.save_clicked)
@@ -97,25 +96,25 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
 
     def populate_area_comboboxes(self):
         """
-        method called on opening of trame to populate area 
+        method called on opening of trame to populate area
         comboboxes
         """
         # populate suburb combobox
-        sql = 'SELECT DISTINCT suburb_4th FROM admin_bdys.nz_locality;'
+        sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.nz_locality;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_suburb.addItem(item[0])
         # populate town combobox
-        sql = 'SELECT DISTINCT city_name FROM admin_bdys.nz_locality;'
+        sql = 'SELECT DISTINCT city_name FROM buildings_admin_bdys.nz_locality;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_town.addItem(item[0])
         # populate territorial authority combobox
-        sql = 'SELECT DISTINCT name FROM admin_bdys.territorial_authority;'
+        sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.territorial_authority;'
         result = db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -167,7 +166,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
-        sql = 'SELECT id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.suburb_4th = %s;'
+        sql = 'SELECT id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.suburb_4th = %s;'
         result = db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
@@ -177,7 +176,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns town/city entered
         """
         text = self.cmb_town.currentText()
-        sql = 'SELECT city_id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.city_name = %s;'
+        sql = 'SELECT city_id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.city_name = %s;'
         result = db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
@@ -187,7 +186,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns territorial authority entered
         """
         text = self.cmb_ta.currentText()
-        sql = 'SELECT ogc_fid FROM admin_bdys.territorial_authority WHERE admin_bdys.territorial_authority.name = %s;'
+        sql = 'SELECT ogc_fid FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
         result = db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
@@ -244,7 +243,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
                 # disable save
                 self.btn_save.setDisabled(1)
 
-    def save_clicked(self):
+    def save_clicked(self, built_in, commit_status=True):
         """
         Called when save clicked
         """
@@ -259,12 +258,19 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.t_a = self.get_t_a()
 
         # insert into buildings table
+        if self.cursor is None:
+            db.open_cursor()
         sql = 'SELECT buildings.fn_buildings_insert();'
-        results = db._execute(sql)
+        results = db.execute_no_commit(sql)
         building_id = results.fetchall()[0][0]
         # insert into bulk_load_outlines table
         sql = 'SELECT buildings.fn_building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
-        db.execute(sql, (building_id, self.capture_method_id, self.capture_source_id, self.lifecycle_stage_id, self.suburb, self.town, self.t_a, self.geom))
+        db.execute_no_commit(sql, (building_id, self.capture_method_id,
+                                   self.capture_source_id,
+                                   self.lifecycle_stage_id, self.suburb,
+                                   self.town, self.t_a, self.geom))
+        if commit_status:
+            db.commit_open_cursor()
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setCurrentIndex(0)
@@ -286,6 +292,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         """
         Called when cancel button is clicked
         """
+        db.close_connection()
         # remove unsaved edits and stop editing layer
         iface.actionCancelEdits().trigger()
         # remove bulk_load_outlines from canvas
