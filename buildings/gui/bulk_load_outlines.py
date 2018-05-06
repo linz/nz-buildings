@@ -269,18 +269,21 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             while dataset <= self.dataset_id:
                 sql = 'SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;'
                 results = db._execute(sql, (dataset, ))
-                if results is None:
-                    sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-                    result = db._execute(sql, data=(geom, dataset))
-                    results = result.fetchall()
-                    if len(results) > 0:
-                        self.bulk_overlap = True
-                        break
+                t_date = results.fetchall()
+                if t_date:
+                    if t_date[0][0] is None:
+                        sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
+                        result = db._execute(sql, data=(geom, dataset))
+                        results = result.fetchall()
+                        if len(results) > 0:
+                            self.bulk_overlap = True
+                            break
                 dataset = dataset + 1
             if self.bulk_overlap is True:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report('\n ---------------- BULK LOAD OVERLAP ---------------- \n\n An unprocessed bulk loaded dataset with dataset id of {0} overlaps this input layer please process this first'.format(dataset))
                 self.error_dialog.show()
+                db.rollback_open_cursor()
                 return
             val = self.insert_supplied_outlines(self.dataset_id, self.layer,
                                                 self.capture_method,
