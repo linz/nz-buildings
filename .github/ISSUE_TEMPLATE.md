@@ -1,6 +1,7 @@
 ### User Story
 
-As a [user] I want to [do a thing] so that [reason].
+In order to [accomplish goal] as a [role] I want [capability] 
+(optional: instead of [existing behaviour]).
 
 #### Acceptance Criteria
 - [ ] ...
