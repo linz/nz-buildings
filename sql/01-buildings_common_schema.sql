@@ -24,7 +24,7 @@ COMMENT ON TABLE buildings_common.capture_method IS
 
 COMMENT ON COLUMN buildings_common.capture_method.capture_method_id IS
 'Unique identifier for the capture method.';
-COMMENT ON COLUMN buildings_common.capture_methodvalue IS
+COMMENT ON COLUMN buildings_common.capture_method.value IS
 'The method by which the geometry was captured.';
 
 -- Capture Source Group

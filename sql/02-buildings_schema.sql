@@ -7,6 +7,9 @@ SET client_min_messages TO WARNING;
 
 CREATE SCHEMA IF NOT EXISTS buildings;
 
+COMMENT ON SCHEMA buildings IS
+'Schema that holds production buildings data.';
+
 -- LOOKUP TABLES
 
 -- Lifecycle Stage
@@ -114,18 +117,19 @@ COMMENT ON COLUMN buildings.building_outlines.building_id IS
 'Foreign key to the buildings.building table. The building id is persistant for the '
 'same building across all of the building outlines that represent it.';
 COMMENT ON COLUMN buildings.building_outlines.capture_method_id IS
-'Foreign key to the capture_method table. Holds the method by which the '
+'Foreign key to the buildings_common.capture_method table. Holds the method by which the '
 'geometry was captured.';
 COMMENT ON COLUMN buildings.building_outlines.capture_source_id IS
 'Foreign key to the buildings_common.capture_source table.';
 COMMENT ON COLUMN buildings.building_outlines.lifecycle_stage_id IS
 'Foreign key to the buildings.lifecycle_stage table.';
 COMMENT ON COLUMN buildings.building_outlines.suburb_locality_id IS
-'Foreign key to the buildings_common.suburb_locality table.';
+'Holds an external id for suburbs / localities from the nz_locality dataset.';
 COMMENT ON COLUMN buildings.building_outlines.town_city_id IS
-'Foreign key to the buildings_common.town_city table.';
+'Holds an external id for the town / city from the nz_locality dataset.';
 COMMENT ON COLUMN buildings.building_outlines.territorial_authority_id IS
-'Foreign key to the buildings_common.territorial_authority table.';
+'Holds an external id for the territorial authority from the '
+'territorial_authority dataset.'
 COMMENT ON COLUMN buildings.building_outlines.begin_lifespan IS
 'The date that the building outline was added to the system.';
 COMMENT ON COLUMN buildings.building_outlines.end_lifespan IS
@@ -223,7 +227,7 @@ DROP INDEX IF EXISTS idx_lifecycle_building_id;
 CREATE INDEX idx_lifecycle_building_id
     ON buildings.lifecycle USING btree (building_id);
 
-COMMENT ON TABLE buildings.building_use IS
+COMMENT ON TABLE buildings.lifecycle IS
 'The lifecycle table stores the relationship between buildings when one '
 'building is split into two buildings or two buildings are merged into one '
 'building. This will generally occur when a building outline was erroneously '

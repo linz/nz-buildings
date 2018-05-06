@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.qa_status (
 
 COMMENT ON TABLE buildings_bulk_load.qa_status IS
 'This is a lookup table that holds the status of building outlines during '
-'.feet';
+'QA of the bulk load process.';
 
 COMMENT ON COLUMN buildings_bulk_load.qa_status.qa_status_id IS
 'Unique identifier for the qa_status table.';
@@ -83,7 +83,7 @@ COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.supplied_dataset_id IS
 COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.description IS
 'A general description of the supplied dataset.';
 COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.supplier_id IS
-'Foreign key to the buildings.organisation table.';
+'Foreign key to the buildings_bulk_load.organisation table.';
 COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.processed_date IS
 'The date that the supplied dataset was imported into the buildings_bulk_load '
 'schema.';
@@ -149,11 +149,12 @@ COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.capture_method_id IS
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.capture_source_id IS
 'Foreign key to the buildings_common.capture_source table.';
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.suburb_locality_id IS
-'Foreign key to the buildings_common.suburb_locality table.';
+'Holds an external id for suburbs / localities from the nz_locality dataset.';
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.town_city_id IS
-'Foreign key to the buildings_common.town_city table.';
+'Holds an external id for the town / city from the nz_locality dataset.';
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.territorial_authority_id IS
-'Foreign key to the buildings_common.territorial_authority table.';
+'Holds an external id for the territorial authority from the '
+'territorial_authority dataset.';
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.begin_lifespan IS
 'The date that the building was uploaded via bulk load tools.';
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.shape IS
@@ -232,7 +233,7 @@ COMMENT ON COLUMN buildings_bulk_load.removed.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.removed.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
--- Related Candidates
+-- Related
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
       related_id serial PRIMARY KEY
@@ -263,14 +264,15 @@ CREATE INDEX idx_related_qa_status_id
     ON buildings_bulk_load.related USING btree (qa_status_id);
 
 COMMENT ON TABLE buildings_bulk_load.related IS
-'';
+'This table holds potential m:n matches between outlines that have been '
+'loaded into the system in bulk and those that already exist.';
 
 COMMENT ON COLUMN buildings_bulk_load.related.related_id IS
 'Unique identifier for the related table.';
 COMMENT ON COLUMN buildings_bulk_load.related.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
+'Foreign key to the buildings_bulk_load.bulk_load_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.related.building_outline_id IS
-'Foreign key to the buildings_bulk_load.building_outlines table.';
+'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
 COMMENT ON COLUMN buildings_bulk_load.related.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
@@ -302,7 +304,7 @@ COMMENT ON TABLE buildings_bulk_load.matched IS
 'loaded into the system in bulk and those that already exist.';
 
 COMMENT ON COLUMN buildings_bulk_load.matched.bulk_load_outline_id IS
-'Foreign key to the buildings_bulk_load.bulk_load_outline_id table.';
+'Foreign key to the buildings_bulk_load.bulk_load_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.matched.building_outline_id IS
 'Foreign key to the buildings_bulk_load.existing_subset_extracts table.';
 COMMENT ON COLUMN buildings_bulk_load.matched.qa_status_id IS
