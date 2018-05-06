@@ -323,7 +323,8 @@ CREATE INDEX idx_transferred_new_building_outline_id
     ON buildings_bulk_load.transferred USING btree (new_building_outline_id);
 
 COMMENT ON TABLE buildings_bulk_load.transferred IS
-'This table holds the building_outline_id ';
+'This table holds the building_outline_id that was created for each '
+'bulk loaded building outline tranferred to production.';
 
 COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
 'Unique identifier for the transferred table and foreign key to the '
