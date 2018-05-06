@@ -19,6 +19,7 @@ from tabulate import tabulate
 from os import path
 import glob2
 sys.path.insert(0, os.path.abspath('../../sql'))
+site_url = "http://building-outlines-test.readthedocs.io/en/latest/"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -37,10 +38,12 @@ sys.path.insert(0, os.path.abspath('../../sql'))
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosectionlabel'
 ]
 
+# 'sphinx.ext.autosectionlabel'
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
@@ -54,8 +57,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Building Outlines Test'
-copyright = u'2018, LINZ'
+project = u'Building Outlines Data Dictionary'
 author = u'Land Information NZ'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -116,14 +118,14 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'page_width': 'auto',
-    'sidebar_width': '200px',
+    'sticky_navigation': True
 
 }
 
@@ -132,14 +134,14 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+html_title = 'Building Outlines Data Dictionary'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+html_short_title = 'Building Outlines Data Dictionary'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = 'logo.png'
 
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -158,14 +160,14 @@ html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
+html_last_updated_fmt = '%B %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+# html_sidebars = {'**': ['about.html'] }
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
@@ -187,7 +189,7 @@ html_static_path = ['_static']
 #html_show_sphinx = True
 
 # If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
-#html_show_copyright = True
+html_show_copyright = False
 
 # If true, an OpenSearch description file will be output, and all pages will
 # contain a <link> tag referring to it.  The value of this option must be the
@@ -212,16 +214,16 @@ html_static_path = ['_static']
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'BuildingOutlinesTestdoc'
+htmlhelp_basename = 'BuildingOutlines'
 
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
 # The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+'papersize': 'a4paper',
 
 # The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
 #'preamble': '',
@@ -234,8 +236,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'BuildingOutlinesTest.tex', u'Building Outlines Test Documentation',
-     u'Jan Ducnuigeen', 'manual'),
+    (master_doc, 'BuildingOutlines.tex', u'Building Outlines Data Documentation',
+     u'LINZ', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -244,7 +246,7 @@ latex_documents = [
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-#latex_use_parts = False
+latex_use_parts = True
 
 # If true, show page references after internal links.
 #latex_show_pagerefs = False
@@ -278,8 +280,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'BuildingOutlinesTest', u'Building Outlines Test Documentation',
-     author, 'BuildingOutlinesTest', 'One line description of project.',
+    (master_doc, 'BuildingOutlines', u'Building Outlines Documentation',
+     author, 'BuildingOutlines', 'One line description of project.',
      'Miscellaneous'),
 ]
 
@@ -402,26 +404,46 @@ def get_tables(schema_out, sql_file_path):
 
 
 # Get column comments which might contain multilines
+# If a column is a foreign key to another table, create hyperlinks to that RTD table
 def get_column_comments(column_str, file_content):
     column_comment_str = r"COMMENT ON COLUMN " + column_str + r"\sIS([^\;]*)"
     column_comment_search = re.search(column_comment_str, file_content)
 
     if column_comment_search is not None:
         column_comment = column_comment_search.group(1)
-        column_comment_result_clean = column_comment.replace("\r\n", " ").replace("'", " ")
+        column_comment_result_clean = column_comment.replace("\r\n", "").replace("'", "").replace("\n", "")
+        column_comment_result_strip = column_comment_result_clean.strip()
+        column_comment_result_clean_lower = column_comment_result_clean.lower().strip()
+        if "foreign key to the" in column_comment_result_clean_lower:
+            foreign_search = re.search(r"(.*)(foreign key to the\s)(.*\..*)\stable(.*)", column_comment_result_strip, re.IGNORECASE)
+            if foreign_search is not None:
+                schema_and_table = foreign_search.group(3)
+                schema_and_table_strip = schema_and_table.strip()
+                front_comment = foreign_search.group(1)
+                end_comment = foreign_search.group(4)
+                foreign_key_comment = foreign_search.group(2)
+                schema_named, table_named = schema_and_table.split(".")
+                hyphens = table_named.replace("_", "-")
+                template_url = "`{schema_table} <https://building-outlines-test.readthedocs.io/en/latest/{schema_name}_schema.html#table-name-{table_name_hyphens}>`_"
+                foreign_link = template_url.format(schema_table=schema_and_table_strip, schema_name=schema_named, table_name_hyphens=hyphens)
+                column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
+            else:
+                print"The parser search was expecting something in this column comment: ", column_comment_result_strip
+                column_comment_result_strip = " "
 
     if column_comment_search is None:
-        column_comment_result_clean = " "
-    return column_comment_result_clean
+        column_comment_result_strip = " "
+    return column_comment_result_strip
 
 
-# Get the columns for one table, which are listed across multiple lines
+# Get the columns for one table, which are listed across multiple lines 
 def get_columns(table_str, file_content, this_table_columns):
 
     search_str = r"CREATE TABLE IF NOT EXISTS " + table_str + r"\s\(([^\;]*)\)\;"
     column_search = re.search(search_str, file_content)
     columns = column_search.group(0)
     columns_strip = [x.strip() for x in columns.split(",")]
+
 
     for column_details in columns_strip:
         pri_key_serial_search = re.search(r"(.*)\sserial PRIMARY KEY", column_details)
@@ -439,8 +461,10 @@ def get_columns(table_str, file_content, this_table_columns):
         if pri_key_serial_search is not None:
             this_column = []
             pri_key = pri_key_serial_search.group(1)
-            column_str = table_str + "." + pri_key
-            this_column.append(pri_key)  #column Name
+            pri_key2 = pri_key.strip()
+            pri_key_str = " **"+pri_key2+"** "
+            column_str = table_str + "." + pri_key2
+            this_column.append(pri_key_str)  #column Name
             this_column.append("integer")  #Data Type
             this_column.append(" ")  # Length
             this_column.append("32")  #Precision
@@ -453,8 +477,10 @@ def get_columns(table_str, file_content, this_table_columns):
         elif pri_key_search is not None:
             this_column = []
             pri_key = pri_key_search.group(1)
-            column_str = table_str + "." + pri_key
-            this_column.append(pri_key)  #column Name
+            pri_key2 = pri_key.strip()
+            pri_key_str = " **"+pri_key2+"** "
+            column_str = table_str + "." + pri_key2
+            this_column.append(pri_key_str)  #column Name
             this_column.append("integer")  #Data Type
             this_column.append(" ")  # Length
             this_column.append("32")  #Precision
