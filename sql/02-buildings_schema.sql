@@ -114,7 +114,7 @@ COMMENT ON TABLE buildings.building_outlines IS
 COMMENT ON COLUMN buildings.building_outlines.building_outline_id IS
 'Unique identifier for the building outline.';
 COMMENT ON COLUMN buildings.building_outlines.building_id IS
-'Foreign key to the buildings.building table. The building id is persistant for the '
+'Foreign key to the buildings.buildings table. The building id is persistant for the '
 'same building across all of the building outlines that represent it.';
 COMMENT ON COLUMN buildings.building_outlines.capture_method_id IS
 'Foreign key to the buildings_common.capture_method table. Holds the method by which the '
@@ -161,7 +161,7 @@ COMMENT ON TABLE buildings.building_name IS
 COMMENT ON COLUMN buildings.building_name.building_name_id IS
 'Unique identifier for a building name.';
 COMMENT ON COLUMN buildings.building_name.building_id IS
-'Foreign key to the buildings.building table.';
+'Foreign key to the buildings.buildings table.';
 COMMENT ON COLUMN buildings.building_name.building_name IS
 'The name of the building, where known.';
 COMMENT ON COLUMN buildings.building_name.begin_lifespan IS
@@ -199,7 +199,7 @@ COMMENT ON TABLE buildings.building_use IS
 COMMENT ON COLUMN buildings.building_use.building_use_id IS
 'Unique identifier for a building_use.';
 COMMENT ON COLUMN buildings.building_use.building_id IS
-'Foreign key to the buildings.building table.';
+'Foreign key to the buildings.buildings table.';
 COMMENT ON COLUMN buildings.building_use.use_id IS
 'Foreign key to the buildings.use table.';
 COMMENT ON COLUMN buildings.building_use.begin_lifespan IS
@@ -237,7 +237,7 @@ COMMENT ON TABLE buildings.lifecycle IS
 COMMENT ON COLUMN buildings.lifecycle.lifecycle_id IS
 'Unique identifier for a building_use.';
 COMMENT ON COLUMN buildings.lifecycle.parent_building_id IS
-'Foreign key to the buildings.building table. All records stored as parent '
+'Foreign key to the buildings.buildings table. All records stored as parent '
 'buildings will be end dated in the system.';
 COMMENT ON COLUMN buildings.lifecycle.building_id IS
-'Foreign key to the buildings.building table.';
+'Foreign key to the buildings.buildings table.';
