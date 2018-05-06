@@ -16,6 +16,6 @@ def update_unique_test_modules(test_folder):
     unittest.TestLoader().discover(test_folder, pattern="test_*.py")
 
 login = getpass.getuser()
-path = os.path.join('/home', login, '.qgis2/python/plugins/local_buildings/tests')
+path = os.path.join('/home', login, '.qgis2/python/plugins/buildings/tests')
 
 update_unique_test_modules(path)

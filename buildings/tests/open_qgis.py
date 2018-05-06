@@ -26,7 +26,7 @@ def open_qgis():
         '--nologo',
         '--noversioncheck',
         '--code',
-        '~/.qgis2/python/plugins/local_buildings/tests/test_runner.py',
+        '~/.qgis2/python/plugins/buildings/tests/test_runner.py',
     ]
 
     command_line = ' '.join(args)
