@@ -1,4 +1,100 @@
 -------------------------------------------------------------------
+--BUILDING OUTLINES update end_lifespan
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_end_lifespan(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_building_outlines AS (
+        UPDATE buildings.building_outlines
+        SET end_lifespan = now()
+        WHERE building_outline_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_building_outlines;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_end_lifespan(integer[]) IS
+'Update end_lifespan in BUILDING OUTLINES schema';
+
+-------------------------------------------------------------------
+--BUILDINGS update end_lifespan
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.buildings_update_end_lifespan(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_buildings AS (
+        UPDATE buildings.buildings
+        SET end_lifespan = now()
+        WHERE building_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_buildings;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.buildings_update_end_lifespan(integer[]) IS
+'Update end_lifespan in BUILDINGS schema';
+
+-------------------------------------------------------------------
+--BUILDING OUTLINES select from removed table
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.building_outlines_removed_select_by_dataset(integer)
+    RETURNS integer[] AS
+$$
+
+    SELECT ARRAY(
+        SELECT removed.building_outline_id
+        FROM buildings_bulk_load.removed
+        JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
+        WHERE current.supplied_dataset_id = $1
+    )
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.building_outlines_removed_select_by_dataset(integer) IS
+'Select building_outline_id in removed table';
+-------------------------------------------------------------------
+--BUILDINGS select from removed table
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(integer)
+    RETURNS integer[] AS
+$$
+
+    SELECT ARRAY(
+        SELECT outlines.building_id
+        FROM buildings.building_outlines outlines
+        JOIN buildings_bulk_load.removed USING (building_outline_id)
+        JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
+        WHERE current.supplied_dataset_id = $1
+    )
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(integer) IS
+'Select building_id in removed table';
+
+
+
+-------------------------------------------------------------------
+--BUILDINGS create new records
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.fn_buildings_add_record()
+    RETURNS integer AS
+$$
+            INSERT INTO buildings.buildings(building_id)
+            VALUES ( DEFAULT )
+            RETURNING building_id;
+
+$$ LANGUAGE sql;
+
+
+-------------------
+
+
+-------------------------------------------------------------------
 --BUILDINGS insert into
 -------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings.fn_buildings_insert()

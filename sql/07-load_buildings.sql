@@ -21,25 +21,12 @@ IF (
 
         -- Update end_lifespan in building_outlines
 
-        UPDATE buildings.building_outlines
-        SET end_lifespan = now()
-        WHERE building_outline_id IN (
-            SELECT removed.building_outline_id
-            FROM buildings_bulk_load.removed
-            JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
-            WHERE current.supplied_dataset_id = p_supplied_dataset_id );
-
+        select buildings.building_outlines_update_end_lifespan(
+            buildings_bulk_load.building_outlines_removed_select_by_dataset(p_supplied_dataset_id))
 
         -- Update end_lifespan in buildings
-
-        UPDATE buildings.buildings
-        SET end_lifespan = now()
-        WHERE building_id IN (
-            SELECT outlines.building_id
-            FROM buildings.building_outlines outlines
-            JOIN buildings_bulk_load.removed USING (building_outline_id)
-            JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
-            WHERE current.supplied_dataset_id = p_supplied_dataset_id );
+        select buildings.buildings_update_end_lifespan(
+            buildings_bulk_load.buildings_removed_select_by_dataset(p_supplied_dataset_id))
 
         -------------
         --  ADDED  --
@@ -119,7 +106,7 @@ IF (
                 , begin_lifespan
                 , shape
             )
-            SELECT 
+            SELECT
                   outlines.building_id
                 , supplied.capture_method_id
                 , supplied.capture_source_id
@@ -189,7 +176,7 @@ IF (
                 , begin_lifespan
                 , shape
             )
-            SELECT 
+            SELECT
                   v_new_building_id
                 , supplied.capture_method_id
                 , supplied.capture_source_id
