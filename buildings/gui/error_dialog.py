@@ -9,7 +9,6 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ErrorDialog(QDialog, FORM_CLASS):
 
-
     def __init__(self, parent=None):
         super(ErrorDialog, self).__init__(parent)
         self.setupUi(self)

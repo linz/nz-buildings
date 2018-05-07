@@ -19,6 +19,8 @@ def open_qgis():
     print "             Opening QGIS   "
     print "---------------------------------------"
 
+    file_path = '~/.qgis2/python/plugins/buildings/tests/test_runner.py'
+
     os.environ['QGIS_DEBUG'] = '1'
     args = [
         'qgis',
@@ -26,7 +28,7 @@ def open_qgis():
         '--nologo',
         '--noversioncheck',
         '--code',
-        '~/.qgis2/python/plugins/buildings/tests/test_runner.py',
+        file_path,
     ]
 
     command_line = ' '.join(args)

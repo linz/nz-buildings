@@ -24,7 +24,7 @@ from qgis.utils import plugins
 from buildings.utilities import database as db
 
 
-class ProcessCaptureSourceGuiTest(unittest.TestCase):
+class ProcessCaptureSourceTest(unittest.TestCase):
     """Test New Capture Source GUI Processes"""
     @classmethod
     def setUpClass(cls):
@@ -41,12 +41,14 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
+                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
+        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -60,15 +62,17 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.capture_frame.btn_cancel.click()
+        self.capture_frame.btn_exit.click()
 
     def test_external_radio_button(self):
+        """External source line edit enabled when external source radiobutton selected"""
         self.capture_frame.rad_external_source.click()
         self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
         self.capture_frame.rad_external_source.click()
         self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
 
-    def test_add_valid_capture_source_no_EID(self):
+    def test_add_valid_capture_source_no_external_id(self):
+        """Valid capture source added when ok clicked"""
         # add valid capture source no external id
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
@@ -77,7 +81,7 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
-        self.capture_frame.btn_ok.click()
+        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result2 = db._execute(sql)
         if result2 is None:
@@ -85,9 +89,10 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
+        self.capture_frame.db.rollback_open_cursor()
 
     def test_add_blank_external_id_line_edit(self):
-        # add capture source external radio button checked and no external id
+        """Error dialog when external radio button checked and no external id"""
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result = db._execute(sql)
         if result is None:
@@ -96,8 +101,9 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
-        self.capture_frame.btn_ok.click()
-        self.capture_frame.error_dialog.close()
+        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
+        if self.capture_frame.error_dialog is not None:
+            self.capture_frame.error_dialog.close()
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result2 = db._execute(sql)
         if result2 is None:
@@ -106,10 +112,12 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         if result != result2:
-            self.capture_frame.error_dialog.close()
+            if self.capture_frame.error_dialog is not None:
+                self.capture_frame.error_dialog.close()
+        self.capture_frame.db.rollback_open_cursor()
 
-    def test_add_valid_capture_source_with_EID(self):
-        # add capture source with valid external id
+    def test_add_valid_capture_source_with_external_id(self):
+        """Valid capture source with valid external id"""
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
         result = db._execute(sql)
         if result is None:
@@ -119,7 +127,7 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
         self.capture_frame.le_external_source_id.setText('Test Ext Source')
-        self.capture_frame.btn_ok.click()
+        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
         result2 = db._execute(sql)
         if result2 is None:
@@ -127,7 +135,8 @@ class ProcessCaptureSourceGuiTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
+        self.capture_frame.db.rollback_open_cursor()
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceGuiTest)
+suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

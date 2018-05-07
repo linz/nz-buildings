@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>699</width>
+    <width>714</width>
     <height>354</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="l_capture_method">
         <property name="text">
-         <string>Capture Method::</string>
+         <string>Capture Method:</string>
         </property>
        </widget>
       </item>
@@ -148,7 +148,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btn_cancel">
+       <widget class="QPushButton" name="btn_exit">
         <property name="maximumSize">
          <size>
           <width>85</width>
@@ -156,14 +156,14 @@
          </size>
         </property>
         <property name="text">
-         <string>Cancel</string>
+         <string>Exit</string>
         </property>
        </widget>
       </item>
      </layout>
      <zorder>btn_reset</zorder>
      <zorder>btn_save</zorder>
-     <zorder>btn_cancel</zorder>
+     <zorder>btn_exit</zorder>
      <zorder>horizontalSpacer</zorder>
     </widget>
    </item>
@@ -186,7 +186,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="l_supplied_dataset">
      <property name="text">
-      <string>Supplied Dataset:</string>
+      <string>Dataset:</string>
      </property>
     </widget>
    </item>

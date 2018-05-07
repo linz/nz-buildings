@@ -14,8 +14,6 @@ from buildings.utilities import database as db
 
 import qgis
 
-db.connect()
-
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'menu.ui'))
 
@@ -27,6 +25,8 @@ class MenuFrame(QFrame, FORM_CLASS):
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
         self.layer_registry = layer_registry
+        db.connect()
+        self.cmb_add_outline.setCurrentIndex(0)
 
         # set up signals and slots
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
@@ -38,6 +38,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when new entry button is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry(self.layer_registry))
@@ -46,6 +47,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when add capture source button is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(self.layer_registry))
@@ -54,6 +56,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when bulk load outlines is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadOutlines(self.layer_registry))
@@ -62,8 +65,9 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when index of add outline combobox is changed
         """
+        db.close_connection()
         text = self.cmb_add_outline.currentText()
-        if text == 'Add New Outline to Supplied Dataset':
+        if text == 'Add New Outline to Bulk Load Dataset':
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
             dw.new_widget(BulkNewOutline(self.layer_registry))
