@@ -462,7 +462,7 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column = []
             pri_key = pri_key_serial_search.group(1)
             pri_key2 = pri_key.strip()
-            pri_key_str = " **"+pri_key2+"** "
+            pri_key_str = " **" + pri_key2 + "** "
             column_str = table_str + "." + pri_key2
             this_column.append(pri_key_str)  #column Name
             this_column.append("integer")  #Data Type
@@ -478,7 +478,7 @@ def get_columns(table_str, file_content, this_table_columns):
             this_column = []
             pri_key = pri_key_search.group(1)
             pri_key2 = pri_key.strip()
-            pri_key_str = " **"+pri_key2+"** "
+            pri_key_str = " **" + pri_key2 + "** "
             column_str = table_str + "." + pri_key2
             this_column.append(pri_key_str)  #column Name
             this_column.append("integer")  #Data Type
