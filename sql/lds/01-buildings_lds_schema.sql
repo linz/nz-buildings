@@ -7,6 +7,9 @@ SET client_min_messages TO WARNING;
 
 CREATE SCHEMA IF NOT EXISTS buildings_lds;
 
+COMMENT ON SCHEMA buildings_lds IS
+'Schema that holds tables that will be published via the LINZ Data Service.';
+
 -- NZ Building Outlines
 
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
