@@ -23,9 +23,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """Constructor."""
         super(BulkNewOutline, self).__init__(parent)
         self.setupUi(self)
-        db.connect()
-        self.cursor = None
-        self.database = db
+        self.db = db
+        self.db.connect()
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
         # disable comboboxes and save button
@@ -43,11 +42,17 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # supplied dataset to add to canvas
         # find data with most recent datasat id
         sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         result = result.fetchall()
         if len(result) == 0:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n ---------------- NO SUPPLIED DATASETS ---------------- \n\n There are no supplied datasets please load some outlines first')
+                self.error_dialog.fill_report('\n ---------------- NO '
+                                              'SUPPLIED DATASETS -----'
+                                              '----------- \n\n There '
+                                              'are no supplied datasets '
+                                              'please load some outlines '
+                                              'first'
+                                              )
                 self.error_dialog.show()
                 self.btn_reset.setDisabled(1)
                 self.btn_save.setDisabled(1)
@@ -90,7 +95,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
 
     def populate_dataset_combobox(self):
         sql = 'SELECT supplied_dataset_id, description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.processed_date is NULL;'
-        results = db._execute(sql)
+        results = self.db._execute(sql)
         datasets = results.fetchall()
         for dset in datasets:
             text = '{0}-{1}'.format(dset[0], dset[1])
@@ -132,13 +137,13 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         # populate capture method combobox
         sql = 'SELECT value FROM buildings_common.capture_method;'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.cmb_capture_method.addItem(item[0])
         # populate capture source group
         sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
@@ -151,7 +156,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         # populate suburb combobox
         sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.nz_locality'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
@@ -159,14 +164,14 @@ class BulkNewOutline(QFrame, FORM_CLASS):
 
         # populate town combobox
         sql = 'SELECT DISTINCT city_name FROM buildings_admin_bdys.nz_locality'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_town.addItem(item[0])
         # populate territorial authority combobox
         sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.territorial_authority'
-        result = db._execute(sql)
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
@@ -178,7 +183,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_capture_method.currentText()
         sql = 'SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;'
-        result = db._execute(sql, data=(text, ))
+        result = self.db._execute(sql, data=(text, ))
         return result.fetchall()[0][0]
 
     def get_capture_source_id(self):
@@ -188,19 +193,24 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         text = self.cmb_capture_source.currentText()
         if text == '':
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report('\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries')
+            self.error_dialog.fill_report('\n ---------------- '
+                                          'NO CAPTURE SOURCE --'
+                                          '-------------- \n\n '
+                                          'There are no capture '
+                                          'source entries'
+                                          )
             self.error_dialog.show()
             return
         text_ls = text.split('- ')
         sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;'
-        result = db._execute(sql, data=(text_ls[0], text_ls[1]))
+        result = self.db._execute(sql, data=(text_ls[0], text_ls[1]))
         data = result.fetchall()[0][0]
         if text_ls[2] == 'None':
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;'
-            result = db._execute(sql, data=(data,))
+            result = self.db._execute(sql, data=(data,))
         else:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;'
-            result = db._execute(sql, data=(data, text_ls[2]))
+            result = self.db._execute(sql, data=(data, text_ls[2]))
         return result.fetchall()[0][0]
 
     def get_suburb(self):
@@ -209,7 +219,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_suburb.currentText()
         sql = 'SELECT id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.suburb_4th = %s;'
-        result = db._execute(sql, (text, ))
+        result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
     def get_town(self):
@@ -218,7 +228,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_town.currentText()
         sql = 'SELECT city_id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.city_name = %s;'
-        result = db._execute(sql, (text, ))
+        result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
     def get_t_a(self):
@@ -227,7 +237,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_ta.currentText()
         sql = 'SELECT ogc_fid FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
-        result = db._execute(sql, (text, ))
+        result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
     def creator_feature_added(self, qgsfId):
@@ -248,10 +258,10 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # convert to correct format
         wkt = new_geometry.exportToWkt()
         sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-        result = db._execute(sql, data=(wkt, ))
+        result = self.db._execute(sql, data=(wkt, ))
         geom = result.fetchall()[0][0]
         sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
-        result = db._execute(sql, data=(geom, ))
+        result = self.db._execute(sql, data=(geom, ))
         self.geom = result.fetchall()[0][0]
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
@@ -294,14 +304,14 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.suburb = self.get_suburb()
         self.town = self.get_town()
         self.t_a = self.get_t_a()
-        db.open_cursor()
+        self.db.open_cursor()
         # call function to insert into bulk_load_outlines table
         sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s)'
-        result = db.execute_no_commit(sql, (self.dataset_id,
-                                            self.capture_method_id,
-                                            self.capture_source_id,
-                                            self.suburb,
-                                            self.town, self.t_a, self.geom))
+        result = self.db.execute_no_commit(sql, (self.dataset_id,
+                                           self.capture_method_id,
+                                           self.capture_source_id,
+                                           self.suburb,
+                                           self.town, self.t_a, self.geom))
         self.outline_id = result.fetchall()[0][0]
         # TODO:
         # insert the new outline to its comparison table (i.e- added/removed/etc)
@@ -309,7 +319,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # comparing single outlines
 
         if commit_status:
-            db.commit_open_cursor()
+            self.db.commit_open_cursor()
 
         # reset comboboxes for next outline
         self.cmb_capture_method.setCurrentIndex(0)
@@ -329,7 +339,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         Called when exit button is clicked
         """
-        db.close_connection()
+        self.db.close_connection()
         # remove unsaved edits and stop editing layer
         iface.actionCancelEdits().trigger()
         # remove bulk_load_outlines from canvas
@@ -348,7 +358,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         Called when exit button is clicked if failed to load any data
         """
         # change frame
-        db.close_connection()
+        self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())

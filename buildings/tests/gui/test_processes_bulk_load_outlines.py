@@ -157,15 +157,14 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # set imagery field
         self.bulk_load_frame.fcb_imagery_field.setCurrentIndex(0)
         # open cursor as have to add capture source entry from test
-        if self.bulk_load_frame.cursor is None:
-            self.bulk_load_frame.database.open_cursor()
+        self.bulk_load_frame.db.open_cursor()
         # using opened cursor insert capture source value required
         sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-        self.bulk_load_frame.database.execute_no_commit(sql)
+        self.bulk_load_frame.db.execute_no_commit(sql)
         # add outlines
         self.bulk_load_frame.ok_clicked(built_in=False, commit_status=False)
         # rollback changes
-        self.bulk_load_frame.database.rollback_open_cursor()
+        self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.dataset_id)
         # check 2 outlines were added to bulk load outlines

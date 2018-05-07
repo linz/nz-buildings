@@ -26,17 +26,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
 
-        db.connect()
-        self.cursor = None
-        self.database = db
+        self.db = db
+        self.db.connect()
 
         self.populate_combobox()
         self.le_external_source_id.setDisabled(1)
 
         self.layer_registry = layer_registry
         self.error_dialog = None
-        self.cursor = None
-        self.connection = db._conn
 
         # set up signals and slots
         self.capture_source_id = None
@@ -48,8 +45,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         Called on opening of frame populate combobox with capture source group
         """
-        sql = 'SELECT value, description FROM buildings_common.capture_source_group'
-        result = db._execute(sql)
+        sql = 'SELECT value, description FROM buildings_common.capture_source_group;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             text = str(item[0]) + '- ' + str(item[1])
@@ -93,12 +90,21 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         if self.rad_external_source.isChecked():
             if self.external_source == '':
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n -------------------- EMPTY VALUE FIELD -------------------- \n\n If no external source id deselect external source radio button')
+                self.error_dialog.fill_report('\n -------------------- '
+                                              'EMPTY VALUE FIELD ------'
+                                              '-------------- \n\n If no '
+                                              'external source id deselect '
+                                              'external source radio button'
+                                              )
                 self.error_dialog.show()
                 return
             if len(self.external_source) > 250:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n -------------------- VALUE TOO LONG -------------------- \n\n Enter less than 250 characters')
+                self.error_dialog.fill_report('\n -------------------- '
+                                              'VALUE TOO LONG ---------'
+                                              '----------- \n\n Enter '
+                                              'less than 250 characters'
+                                              )
                 self.error_dialog.show()
                 return
         # get type
@@ -113,7 +119,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         Called when exit button is clicked
         """
-        db.close_connection()
+        self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
@@ -126,13 +132,13 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         # find capture source group id based on capture source group value
         sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;'
-        result = db._execute(sql, data=(value,))
+        result = self.db._execute(sql, data=(value,))
         capture_source_group_id = result.fetchall()[0][0]
 
         # check if capture source exists in table
         sql = 'SELECT * FROM buildings_common.capture_source WHERE buildings_common.capture_source.external_source_id = %s OR buildings_common.capture_source.capture_source_group_id = %s;'
-        result = db._execute(sql, data=(external_source,
-                                        capture_source_group_id))
+        result = self.db._execute(sql, data=(external_source,
+                                             capture_source_group_id))
         ls = result.fetchall()
         if len(ls) > 0:
             to_add = True
@@ -141,27 +147,34 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 if item[1] == capture_source_group_id:
                     if item[2] == external_source:
                         self.error_dialog = ErrorDialog()
-                        self.error_dialog.fill_report('\n ------------------ CAPTURE SOURCE GROUP EXISTS ------------------ \n\n Group already exists in table')
+                        self.error_dialog.fill_report('\n ------------------ '
+                                                      'CAPTURE SOURCE GROUP '
+                                                      'EXISTS -------'
+                                                      '----------- '
+                                                      '\n\n Group already'
+                                                      ' exists in table'
+                                                      )
                         self.error_dialog.show()
                         to_add = False
             if to_add:
-                    # enter but don't commit
-                self.cursor = db.open_cursor()
+                # enter but don't commit
+                self.db.open_cursor()
                 sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s);'
-                result = db.execute_no_commit(sql, (capture_source_group_id,
+                result = self.db.execute_no_commit(sql,
+                                                   (capture_source_group_id,
                                                     external_source))
                 self.capture_source_id = result.fetchall()[0][0]
                 if commit_status:
-                    db.commit_open_cursor()
+                    self.db.commit_open_cursor()
                 self.le_external_source_id.clear()
         # if sql querry returns nothing add to table
         elif len(ls) == 0:
             # enter but don't commit
-            self.cursor = db.open_cursor()
+            self.db.open_cursor()
             sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s);'
-            result = db.execute_no_commit(sql, (capture_source_group_id,
-                                                external_source))
+            result = self.db.execute_no_commit(sql, (capture_source_group_id,
+                                               external_source))
             self.capture_source_id = result.fetchall()[0][0]
             if commit_status:
-                db.commit_open_cursor()
+                self.db.commit_open_cursor()
             self.le_external_source_id.clear()

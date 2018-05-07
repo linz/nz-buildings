@@ -89,7 +89,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        self.capture_frame.database.rollback_open_cursor()
+        self.capture_frame.db.rollback_open_cursor()
 
     def test_add_blank_external_id_line_edit(self):
         """Error dialog when external radio button checked and no external id"""
@@ -114,7 +114,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         if result != result2:
             if self.capture_frame.error_dialog is not None:
                 self.capture_frame.error_dialog.close()
-        self.capture_frame.database.rollback_open_cursor()
+        self.capture_frame.db.rollback_open_cursor()
 
     def test_add_valid_capture_source_with_external_id(self):
         """Valid capture source with valid external id"""
@@ -135,7 +135,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         else:
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
-        self.capture_frame.database.rollback_open_cursor()
+        self.capture_frame.db.rollback_open_cursor()
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceTest)

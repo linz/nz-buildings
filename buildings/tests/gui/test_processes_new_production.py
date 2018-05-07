@@ -111,9 +111,9 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
 
     def test_reset_button(self):
         """UI comboboxes enable when geometry is drawn"""
-        self.new_production_frame.database.open_cursor()
+        self.new_production_frame.db.open_cursor()
         sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-        result = self.new_production_frame.database.execute_no_commit(sql)
+        result = self.new_production_frame.db.execute_no_commit(sql)
         self.capture_source = result.fetchall()[0][0]
         self.new_production_frame.populate_lookup_comboboxes()
         # add geom to canvas
@@ -171,14 +171,14 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         self.assertFalse(self.new_production_frame.cmb_ta.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_town.isEnabled())
         self.assertFalse(self.new_production_frame.cmb_suburb.isEnabled())
-        self.new_production_frame.database.rollback_open_cursor()
+        self.new_production_frame.db.rollback_open_cursor()
 
     def test_new_outline_insert(self):
         """Data added to correct tables when save clicked"""
         # set up
-        self.new_production_frame.database.open_cursor()
+        self.new_production_frame.db.open_cursor()
         sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-        result = self.new_production_frame.database.execute_no_commit(sql)
+        result = self.new_production_frame.db.execute_no_commit(sql)
         self.capture_source = result.fetchall()[0][0]
         self.new_production_frame.populate_lookup_comboboxes()
         # inserting geom
@@ -226,7 +226,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        self.new_production_frame.database.rollback_open_cursor()
+        self.new_production_frame.db.rollback_open_cursor()
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessProdNewOutlinesTest)

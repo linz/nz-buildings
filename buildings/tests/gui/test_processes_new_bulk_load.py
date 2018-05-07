@@ -84,19 +84,19 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
 
     def test_ui_on_geometry_drawn(self):
         """UI comboboxes enable when geometry is drawn"""
-        self.new_bulk_frame.database.open_cursor()
+        self.new_bulk_frame.db.open_cursor()
         if self.no_supplied_data is True:
             # insert capture source
             sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.capture_source = result.fetchall()[0][0]
             # insert supplied data
             sql = "SELECT buildings_bulk_load.fn_supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
             sql = "SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, 1, %s, NULL, NULL, NULL, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.database.execute_no_commit(sql, (self.dataset, self.capture_source))
+            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
             self.new_bulk_frame.reload_setup()
@@ -140,23 +140,23 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         self.assertTrue(self.new_bulk_frame.cmb_ta.isEnabled())
         self.assertTrue(self.new_bulk_frame.cmb_town.isEnabled())
         self.assertTrue(self.new_bulk_frame.cmb_suburb.isEnabled())
-        self.new_bulk_frame.database.rollback_open_cursor()
+        self.new_bulk_frame.db.rollback_open_cursor()
 
     def test_reset_button(self):
         """Indexes are reset and comboxes disabled when reset is called"""
-        self.new_bulk_frame.database.open_cursor()
+        self.new_bulk_frame.db.open_cursor()
         if self.no_supplied_data is True:
             # insert capture source
             sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.capture_source = result.fetchall()[0][0]
             # insert supplied data
             sql = "SELECT buildings_bulk_load.fn_supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
             sql = "SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, 1, %s, NULL, NULL, NULL, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.database.execute_no_commit(sql, (self.dataset, self.capture_source))
+            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
             self.new_bulk_frame.reload_setup()
@@ -216,23 +216,23 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
         self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
         self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
-        self.new_bulk_frame.database.rollback_open_cursor()
+        self.new_bulk_frame.db.rollback_open_cursor()
 
     def test_new_outline_insert(self):
         """Data added to correct tables when save clicked"""
-        self.new_bulk_frame.database.open_cursor()
+        self.new_bulk_frame.db.open_cursor()
         if self.no_supplied_data is True:
             # insert capture source
             sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.capture_source = result.fetchall()[0][0]
             # insert supplied data
             sql = "SELECT buildings_bulk_load.fn_supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.database.execute_no_commit(sql)
+            result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
             sql = "SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, 1, %s, NULL, NULL, NULL, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.database.execute_no_commit(sql, (self.dataset, self.capture_source))
+            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
             self.new_bulk_frame.reload_setup()
@@ -281,7 +281,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
-        self.new_bulk_frame.database.rollback_open_cursor()
+        self.new_bulk_frame.db.rollback_open_cursor()
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesTest)
