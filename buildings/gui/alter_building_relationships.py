@@ -1010,3 +1010,53 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.layer_registry.remove_all_layers()
 
+
+from qgis.core import QgsRectangle, QgsMapLayerRegistry
+from PyQt4.Qt import QCursor, QPixmap
+from qgis.gui import QgsMapTool
+
+
+class MultiLayerSelection(QgsMapTool):
+
+    def __init__(self, canvas):
+        self.canvas = canvas
+        QgsMapTool.__init__(self, self.canvas)
+        self.cursor = QCursor(QPixmap(["16 16 3 1",
+                                       "# c None",
+                                       "a c #000000",
+                                       ". c #ffffff",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "aaaaaaaaaaaaaaaaa",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########",
+                                       "########a########"]))
+
+    def canvasPressEvent(self, e):
+
+        layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName("bulk_load_outlines")
+        layer_existing = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
+        layers = [layer for layer in layer_bulk] + [layer for layer in layer_existing]
+        p = self.toMapCoordinates(e.pos())
+        w = self.canvas.mapUnitsPerPixel() * 3
+        rect = QgsRectangle(p.x() - w, p.y() - w, p.x() + w, p.y() + w)
+        for layer in layers:
+            lRect = self.canvas.mapSettings().mapToLayerCoordinates(layer, rect)
+            layer.select(lRect, False)
+
+    def activate(self):
+        self.canvas.setCursor(self.cursor)
+
+    def setCursor(self, cursor):
+        self.cursor = QCursor(cursor)
