@@ -35,9 +35,9 @@ $$
         , p_bulk_load_status_id
         , p_capture_method_id
         , p_capture_source_id
-        , NULL --p_suburb_locality_id
-        , NULL --p_town_city_id
-        , NULL --p_territorial_authority_id
+        , p_suburb_locality_id --p_suburb_locality_id
+        , p_town_city_id --p_town_city_id
+        , p_territorial_authority_id --p_territorial_authority_id
         , now() --p_begin_lifespan
         , p_shape
     )
@@ -57,30 +57,23 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_existing_subset_extract_insert
 )
 RETURNS integer AS
 $$
-
-DECLARE
-    v_rows_updated integer;
-
-BEGIN
-
-    INSERT INTO buildings_bulk_load.existing_subset_extract(
-          building_outline_id
-        , supplied_dataset_id
-        , shape
+    WITH insert_subset_extract AS(
+        INSERT INTO buildings_bulk_load.existing_subset_extract(
+              building_outline_id
+            , supplied_dataset_id
+            , shape
+        )
+        VALUES (
+              p_building_outline_id
+            , p_supplied_dataset_id
+            , p_shape
+        )
+        RETURNING *
     )
-    VALUES (
-          p_building_outline_id
-        , p_supplied_dataset_id
-        , p_shape
-    );
-
-    GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
-
-    RETURN v_rows_updated;
-END;
+    SELECT count(*)::integer FROM insert_subset_extract
 
 $$
-LANGUAGE plpgsql VOLATILE;
+LANGUAGE sql VOLATILE;
 
 -------------------------------------------------------------------------
 -- SUPPLIED DATASET insert into

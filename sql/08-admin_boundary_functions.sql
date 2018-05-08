@@ -29,31 +29,24 @@ LANGUAGE sql VOLATILE;
 -- SUBURB INTERSECTION- Replace the suburb values with the intersection result
 -- returns number of building outlines updated
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_suburb(p_supplied_dataset_id integer)
+CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_suburb(integer)
 RETURNS integer AS
 $$
 
-DECLARE
-    v_rows_updated integer;
-
-BEGIN
-
-    UPDATE buildings_bulk_load.bulk_load_outlines outlines
-    SET suburb_locality_id = nzl_intersect.fn_suburb_locality_intersect_poly
-    FROM (
-        SELECT buildings.fn_suburb_locality_intersect_poly(outlines.shape), outlines.id
-        FROM buildings_bulk_load.bulk_load_outlines outlines
-    ) nzl_intersect
-    WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = p_supplied_dataset_id;
-
-    GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
-
-    RETURN v_rows_updated;
-
-END;
+    WITH update_suburb AS(
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET suburb_locality_id = nzl_intersect.fn_suburb_locality_intersect_poly
+        FROM (
+            SELECT buildings.fn_suburb_locality_intersect_poly(outlines.shape), outlines.id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) nzl_intersect
+        WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_suburb;
 
 $$
-LANGUAGE plpgsql VOLATILE;
+LANGUAGE sql VOLATILE;
 
 --------------------------------------------------------------------------
 -- TOWN/CITY INTERSECTION- find the id of the town/city that has the most overlap with
@@ -86,31 +79,24 @@ LANGUAGE sql VOLATILE;
 -- TOWN/CITY INTERSECTION- Replace the town/city values with the intersection result
 -- returns number of building outlines updated
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_town_city(p_supplied_dataset_id integer)
+CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_town_city(integer)
 RETURNS integer AS
 $$
-
-DECLARE
-    v_rows_updated integer;
-
-BEGIN
-
-    UPDATE buildings_bulk_load.bulk_load_outlines outlines
-    SET town_city_id = nzl_intersect.fn_town_city_locality_intersect_poly
-    FROM (
-        SELECT buildings.fn_town_city_locality_intersect_poly(outlines.shape), outlines.id
-        FROM buildings_bulk_load.bulk_load_outlines outlines
-    ) nzl_intersect
-    WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = p_supplied_dataset_id;
-
-    GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
-
-    RETURN v_rows_updated;
-
-END;
+    
+    WITH update_town_city AS(
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET town_city_id = nzl_intersect.fn_town_city_locality_intersect_poly
+        FROM (
+            SELECT buildings.fn_town_city_locality_intersect_poly(outlines.shape), outlines.id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) nzl_intersect
+        WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_town_city;
 
 $$
-LANGUAGE plpgsql VOLATILE;
+LANGUAGE sql VOLATILE;
 
 --------------------------------------------------------------------------
 -- TERRITORIAL AUTHORITY INTERSECTION- find the id of the TA that has the most overlap with
@@ -143,28 +129,21 @@ LANGUAGE sql VOLATILE;
 -- TERRITORIAL AUTHORITY INTERSECTION- Replace the TA values with the intersection result
 -- returns number of building outlines updated
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_territorial_authority(p_supplied_dataset_id integer)
+CREATE OR REPLACE FUNCTION buildings.fn_bulk_load_outlines_update_territorial_authority(integer)
 RETURNS integer AS
 $$
 
-DECLARE
-    v_rows_updated integer;
-
-BEGIN
-
-    UPDATE buildings_bulk_load.bulk_load_outlines outlines
-    SET town_city_id = nzl_intersect.fn_territorial_authority_locality_intersect_poly
-    FROM (
-        SELECT buildings.fn_territorial_authority_locality_intersect_poly(outlines.shape), outlines.id
-        FROM buildings_bulk_load.bulk_load_outlines outlines
-    ) nzl_intersect
-    WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = p_supplied_dataset_id;
-
-    GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
-
-    RETURN v_rows_updated;
-
-END;
+    WITH update_territorial_auth AS(
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET town_city_id = nzl_intersect.fn_territorial_authority_locality_intersect_poly
+        FROM (
+            SELECT buildings.fn_territorial_authority_locality_intersect_poly(outlines.shape), outlines.id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) nzl_intersect
+        WHERE outlines.id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        RETURNING $1
+    )
+    SELECT count(*)::integer FROM update_territorial_auth;
 
 $$
-LANGUAGE plpgsql VOLATILE;
+LANGUAGE sql VOLATILE;
