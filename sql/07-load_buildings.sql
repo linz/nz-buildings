@@ -19,65 +19,28 @@ IF (
         -- REMOVED --
         -------------
 
-        -- Update end_lifespan in building_outlines
+        SELECT buildings.building_outlines_update_end_lifespan(
+            buildings_bulk_load.building_outlines_removed_select_by_dataset(p_supplied_dataset_id));
 
-        select buildings.building_outlines_update_end_lifespan(
-            buildings_bulk_load.building_outlines_removed_select_by_dataset(p_supplied_dataset_id))
-
-        -- Update end_lifespan in buildings
-        select buildings.buildings_update_end_lifespan(
-            buildings_bulk_load.buildings_removed_select_by_dataset(p_supplied_dataset_id))
+        SELECT buildings.buildings_update_end_lifespan(
+            buildings_bulk_load.buildings_removed_select_by_dataset(p_supplied_dataset_id));
 
         -------------
         --  ADDED  --
         -------------
 
         FOR v_bulk_load_outline_id IN (
-            SELECT bulk_load_outline_id
-            FROM buildings_bulk_load.added
-            JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-            WHERE supplied.supplied_dataset_id = p_supplied_dataset_id
+            SELECT buildings_bulk_load.added_select_by_dataset(p_supplied_dataset_id)
         )
         LOOP
 
-            -- Create a new record in buildings
+            SELECT buildings.buildings_add_added_record()
+            INTO v_new_building_id;
 
-            INSERT INTO buildings.buildings(building_id)
-            VALUES ( DEFAULT )
-            RETURNING building_id INTO v_new_building_id;
+            SELECT buildings.building_outlines_add_added_record(v_new_building_id, v_bulk_load_outline_id)
+            INTO v_new_building_outline_id;
 
-            -- Create a new record in building_outlines
-
-            INSERT INTO buildings.building_outlines (
-                  building_id
-                , capture_method_id
-                , capture_source_id
-                , lifecycle_stage_id
-                , suburb_locality_id
-                , town_city_id
-                , territorial_authority_id
-                , begin_lifespan
-                , shape
-            )
-            SELECT
-                  v_new_building_id
-                , supplied.capture_method_id
-                , supplied.capture_source_id
-                , 1
-                , supplied.suburb_locality_id
-                , supplied.town_city_id
-                , supplied.territorial_authority_id
-                , supplied.begin_lifespan
-                , supplied.shape
-            FROM buildings_bulk_load.bulk_load_outlines supplied
-            WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
-            RETURNING building_outline_id INTO v_new_building_outline_id;
-
-
-            -- Add new records in transferred table
-
-            INSERT INTO buildings_bulk_load.transferred
-            VALUES(v_bulk_load_outline_id, v_new_building_outline_id);
+            SELECT buildings_bulk_load.transferred_update(v_bulk_load_outline_id, v_new_building_outline_id);
 
         END LOOP;
 
@@ -86,58 +49,17 @@ IF (
         -------------
 
         FOR v_bulk_load_outline_id IN (
-            SELECT bulk_load_outline_id
-            FROM buildings_bulk_load.matched
-            JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-            WHERE supplied.supplied_dataset_id = p_supplied_dataset_id
+            SELECT buildings_bulk_load.matched_select_by_dataset(p_supplied_dataset_id)
         )
         LOOP
 
-            -- Create a new record in building_outlines and transfer the buidling_id from replaced record
+            SELECT buildings.building_outlines_add_matched_record(v_bulk_load_outline_id)
+            INTO v_new_building_outline_id;
 
-            INSERT INTO buildings.building_outlines(
-                  building_id
-                , capture_method_id
-                , capture_source_id
-                , lifecycle_stage_id
-                , suburb_locality_id
-                , town_city_id
-                , territorial_authority_id
-                , begin_lifespan
-                , shape
-            )
-            SELECT
-                  outlines.building_id
-                , supplied.capture_method_id
-                , supplied.capture_source_id
-                , 1
-                , supplied.suburb_locality_id
-                , supplied.town_city_id
-                , supplied.territorial_authority_id
-                , supplied.begin_lifespan
-                , supplied.shape
-            FROM buildings_bulk_load.bulk_load_outlines supplied
-            JOIN buildings_bulk_load.matched USING (bulk_load_outline_id)
-            JOIN buildings.building_outlines outlines USING (building_outline_id)
-            WHERE supplied.bulk_load_outline_id = v_bulk_load_outline_id
-            RETURNING building_outline_id INTO v_new_building_outline_id;
+            SELECT buildings_bulk_load.transferred_update(v_bulk_load_outline_id, v_new_building_outline_id);
 
-
-            -- Add new records in transferred table
-
-            INSERT INTO buildings_bulk_load.transferred
-            VALUES ( v_bulk_load_outline_id, v_new_building_outline_id );
-
-
-            -- Update end_lifespan in building_outlines for the replaced buildings
-
-            UPDATE buildings.building_outlines
-            SET end_lifespan = now()
-            WHERE building_outline_id IN (
-                SELECT matched.building_outline_id
-                FROM buildings_bulk_load.matched
-                WHERE matched.bulk_load_outline_id = v_bulk_load_outline_id
-            );
+            SELECT buildings.building_outlines_update_end_lifespan(
+                buildings_bulk_load.building_outlines_matched_select_by_dataset(v_bulk_load_outline_id));
 
         END LOOP;
 
