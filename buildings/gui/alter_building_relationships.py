@@ -228,8 +228,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
         sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
 
+        selection_not_empty = False
         for feat_id in self.lyr_existing.selectedFeaturesIds():
-
+            selection_not_empty = True
             result1 = db._execute(sql_related_existing, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
@@ -293,8 +294,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
-
-        tbl.selectAll()
+        if selection_not_empty:
+            tbl.selectAll()
+        else:
+            tbl.clearSelection()
 
     def select_from_layer_bulk(self):
         """
@@ -310,7 +313,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s"
         sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
 
+        selection_not_empty = False
         for feat_id in self.lyr_bulk_load.selectedFeaturesIds():
+            selection_not_empty = True
             result1 = db._execute(sql_related_bulk, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
@@ -375,7 +380,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-        tbl.selectAll()
+        if selection_not_empty:
+            tbl.selectAll()
+        else:
+            tbl.clearSelection()
 
     def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
         """
