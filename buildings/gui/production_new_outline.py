@@ -14,9 +14,7 @@ from buildings.utilities import layers as layers
 from buildings.gui.error_dialog import ErrorDialog
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "new_outline_production.ui"))
-
-db.connect()
+    os.path.dirname(__file__), 'new_outline_production.ui'))
 
 
 class ProductionNewOutline(QFrame, FORM_CLASS):
@@ -25,9 +23,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         """Constructor."""
         super(ProductionNewOutline, self).__init__(parent)
         self.setupUi(self)
+        self.db = db
+        self.db.connect()
         self.populate_lookup_comboboxes()
         self.populate_area_comboboxes()
-        # disable comboboxes and save button 
+        # disable comboboxes and save button
         # until new feature added
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
@@ -36,6 +36,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
         # set up
         self.create_building_layer = QgsVectorLayer()
         self.geom = None
@@ -44,29 +45,27 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         # building outline dataset to add to canvas
         # find most recent dataset
         self.create_building_layer = self.layer_registry.add_postgres_layer(
-            "building_outlines", "building_outlines",
-            "shape", "buildings", "", ""
+            'building_outlines', 'building_outlines',
+            'shape', 'buildings', '', ''
         )
         # add territorial authority areas
         self.territorial_auth = self.layer_registry.add_postgres_layer(
-            "territorial_authorities", "territorial_authority",
-            "shape", "admin_bdys", '', ''
+            'territorial_authorities', 'territorial_authority',
+            'shape', 'buildings_admin_bdys', '', ''
         )
         # style TAs to the same as roads nz_localities but different colour
-        layers.style_layer(self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
-
+        layers.style_layer(self.territorial_auth,
+                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
         # enable editing
         iface.setActiveLayer(self.create_building_layer)
         iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
-        # zoom to the active layer
-        iface.actionZoomToLayer().trigger()
-
         # set up signals
+        self.building_id = None
         self.btn_save.clicked.connect(self.save_clicked)
         self.btn_reset.clicked.connect(self.reset_clicked)
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.create_building_layer.featureAdded.connect(self.creator_feature_added)
         self.create_building_layer.featureDeleted.connect(self.creator_feature_deleted)
 
@@ -76,49 +75,47 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         comboboxes
         """
         # populate capture method combobox
-        sql = "SELECT value FROM buildings_common.capture_method;"
-        result = db._execute(sql)
+        sql = 'SELECT value FROM buildings_common.capture_method;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.cmb_capture_method.addItem(item[0])
         # populate lifecycle stage combobox
-        sql = "SELECT value FROM buildings.lifecycle_stage;"
-        result = db._execute(sql)
+        sql = 'SELECT value FROM buildings.lifecycle_stage;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.cmb_lifecycle_stage.addItem(item[0])
         # populate capture source group
-        sql = "SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;"
-        result = db._execute(sql)
+        sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
-            text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+            text = '{0}-{1}-{2}'.format(item[0], item[1], item[2])
             self.cmb_capture_source.addItem(text)
 
     def populate_area_comboboxes(self):
         """
-        method called on opening of trame to populate area 
+        method called on opening of trame to populate area
         comboboxes
         """
-        # TODO is only Wellington??
         # populate suburb combobox
-        sql = "SELECT DISTINCT alias_name FROM admin_bdys.suburb_alias;"
-        result = db._execute(sql)
+        sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.nz_locality;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_suburb.addItem(item[0])
-
         # populate town combobox
-        sql = "SELECT DISTINCT city_name FROM admin_bdys.nz_locality;"
-        result = db._execute(sql)
+        sql = 'SELECT DISTINCT city_name FROM buildings_admin_bdys.nz_locality;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_town.addItem(item[0])
         # populate territorial authority combobox
-        sql = "SELECT DISTINCT name FROM admin_bdys.territorial_authority;"
-        result = db._execute(sql)
+        sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.territorial_authority;'
+        result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
@@ -128,74 +125,75 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         """
         returns capture method id of input combobox
         """
-        index = self.cmb_capture_method.currentIndex()
-        text = self.cmb_capture_method.itemText(index)
-        sql = "SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;"
-        result = db._execute(sql, data=(text, ))
+        text = self.cmb_capture_method.currentText()
+        sql = 'SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;'
+        result = self.db._execute(sql, data=(text, ))
         return result.fetchall()[0][0]
 
     def get_lifecycle_stage_id(self):
         """
         returns lifecycle stage id of input
         """
-        index = self.cmb_lifecycle_stage.currentIndex()
-        text = self.cmb_lifecycle_stage.itemText(index)
-        sql = "SELECT lifecycle_stage_id FROM buildings.lifecycle_stage ls WHERE ls.value = %s;"
-        result = db._execute(sql, data=(text, ))
+        text = self.cmb_lifecycle_stage.currentText()
+        sql = 'SELECT lifecycle_stage_id FROM buildings.lifecycle_stage ls WHERE ls.value = %s;'
+        result = self.db._execute(sql, data=(text, ))
         return result.fetchall()[0][0]
 
     def get_capture_source_id(self):
         """
         returns capture source id of input combobox
         """
-        index = self.cmb_capture_source.currentIndex()
-        text = self.cmb_capture_source.itemText(index)
-        if text == '':
+        text = self.cmb_capture_source.currentText()
+        if str(text) == '':
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report("\n ---------------- NO CAPTURE SOURCE ---------------- \n\n There are no capture source entries")
+            self.error_dialog.fill_report('\n ---------------- '
+                                          'NO CAPTURE SOURCE ---'
+                                          '------------- \n\n '
+                                          'There are no capture '
+                                          'source entries')
             self.error_dialog.show()
             return
-        text_ls = text.split('- ')
-        sql = "SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;"
-        result = db._execute(sql, data=(text_ls[0], text_ls[1]))
+        text_ls = text.split('-')
+        sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;'
+        result = self.db._execute(sql, data=(text_ls[0], text_ls[1]))
         data = result.fetchall()[0][0]
-        if text_ls[2] == "None":
-            sql = "SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;"
-            result = db._execute(sql, data=(data,))
+        if text_ls[2] == 'None':
+            sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;'
+            result = self.db._execute(sql, data=(data,))
         else:
-            sql = "SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;"
-            result = db._execute(sql, data=(data, text_ls[2]))
+            sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;'
+            result = self.db._execute(sql, data=(data, text_ls[2]))
         return result.fetchall()[0][0]
 
     def get_suburb(self):
         """
         returns suburb entered
         """
-        index = self.cmb_suburb.currentIndex()
-        text = self.cmb_suburb.itemText(index)
-        sql = "SELECT locality_id FROM admin_bdys.suburb_alias WHERE admin_bdys.suburb_alias.alias_name = %s;"
-        result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        text = self.cmb_suburb.currentText()
+        sql = 'SELECT id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.suburb_4th = %s;'
+        result = self.db._execute(sql, (text, ))
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def get_town(self):
         """
         returns town/city entered
         """
-        index = self.cmb_town.currentIndex()
-        text = self.cmb_town.itemText(index)
-        sql = "SELECT city_id FROM admin_bdys.nz_locality WHERE admin_bdys.nz_locality.city_name = %s;"
-        result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        text = self.cmb_town.currentText()
+        sql = 'SELECT city_id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.city_name = %s;'
+        result = self.db._execute(sql, (text, ))
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def get_t_a(self):
         """
         returns territorial authority entered
         """
-        index = self.cmb_ta.currentIndex()
-        text = self.cmb_ta.itemText(index)
-        sql = "SELECT ogc_fid FROM admin_bdys.territorial_authority WHERE admin_bdys.territorial_authority.name = %s;"
-        result = db._execute(sql, (text, ))
-        return result.fetchall()[0][0]
+        text = self.cmb_ta.currentText()
+        sql = 'SELECT ogc_fid FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
+        result = self.db._execute(sql, (text, ))
+        if result is not None:
+            return result.fetchall()[0][0]
 
     def creator_feature_added(self, qgsfId):
         """
@@ -205,8 +203,6 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
 
-        # TODO handle when user tries to add multiple new geoms
-
         if qgsfId not in self.added_building_ids:
             self.added_building_ids.append(qgsfId)
         # get new feature geom
@@ -215,14 +211,13 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = "SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));"
-        result = db._execute(sql, data=(wkt, ))
+        sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
+        result = self.db._execute(sql, data=(wkt, ))
         geom = result.fetchall()[0][0]
         # ensure outline SRID is 2193
-        sql = "SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);"
-        result = db._execute(sql, data=(geom, ))
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        result = self.db._execute(sql, data=(geom, ))
         self.geom = result.fetchall()[0][0]
-
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
         self.cmb_capture_source.setEnabled(1)
@@ -232,6 +227,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setEnabled(1)
         # enable save
         self.btn_save.setEnabled(1)
+        self.btn_reset.setEnabled(1)
 
     def creator_feature_deleted(self, qgsfId):
         """
@@ -252,7 +248,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
                 # disable save
                 self.btn_save.setDisabled(1)
 
-    def save_clicked(self):
+    def save_clicked(self, built_in, commit_status=True):
         """
         Called when save clicked
         """
@@ -267,14 +263,19 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.t_a = self.get_t_a()
 
         # insert into buildings table
-        sql = "INSERT INTO buildings.buildings(begin_lifespan) VALUES(now());"
-        db.execute(sql)
-        sql = "SELECT MAX(building_id) FROM buildings.buildings;"
-        result = db._execute(sql)
-        building_id = result.fetchall()[0][0]
+        # if self.cursor is None:
+        self.db.open_cursor()
+        sql = 'SELECT buildings.fn_buildings_insert();'
+        results = self.db.execute_no_commit(sql)
+        building_id = results.fetchall()[0][0]
         # insert into bulk_load_outlines table
-        sql = "INSERT INTO buildings.building_outlines(building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES(%s, %s, %s, %s, %s, %s, %s, now(), %s);"
-        db.execute(sql, (building_id, self.capture_method_id, self.capture_source_id, self.lifecycle_stage_id, self.suburb, self.town, self.t_a, self.geom))
+        sql = 'SELECT buildings.fn_building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
+        self.db.execute_no_commit(sql, (building_id, self.capture_method_id,
+                                  self.capture_source_id,
+                                  self.lifecycle_stage_id, self.suburb,
+                                  self.town, self.t_a, self.geom))
+        if commit_status:
+            self.db.commit_open_cursor()
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_capture_source.setCurrentIndex(0)
@@ -288,13 +289,16 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
         # empty saved_building_ids
         self.saved_building_ids = []
+        self.building_id = building_id
 
-    def cancel_clicked(self):
+    def exit_clicked(self):
         """
-        Called when cancel button is clicked
+        Called when exit button is clicked
         """
+        self.db.close_connection()
         # remove unsaved edits and stop editing layer
         iface.actionCancelEdits().trigger()
         # remove bulk_load_outlines from canvas
@@ -331,3 +335,4 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         self.cmb_suburb.setCurrentIndex(0)
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)

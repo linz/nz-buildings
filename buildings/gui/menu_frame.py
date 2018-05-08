@@ -3,7 +3,6 @@
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.new_entry import NewEntry
@@ -16,25 +15,19 @@ from buildings.utilities import database as db
 
 import qgis
 
-db.connect()
-
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "menu.ui"))
+    os.path.dirname(__file__), 'menu.ui'))
 
 
 class MenuFrame(QFrame, FORM_CLASS):
-
-    new_entry = pyqtSignal()
-    add_capture_source = pyqtSignal()
-    new_supplied_outlines = pyqtSignal()
-    insert_buildings = pyqtSignal()
 
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
-
         self.layer_registry = layer_registry
+        db.connect()
+        self.cmb_add_outline.setCurrentIndex(0)
 
         # set up signals and slots
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
@@ -46,6 +39,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when new entry button is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry(self.layer_registry))
@@ -54,6 +48,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when add capture source button is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(self.layer_registry))
@@ -62,6 +57,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when bulk load outlines is clicked
         """
+        db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadOutlines(self.layer_registry))
@@ -70,9 +66,9 @@ class MenuFrame(QFrame, FORM_CLASS):
         """
         Called when index of add outline combobox is changed
         """
-        index = self.cmb_add_outline.currentIndex()
-        text = self.cmb_add_outline.itemText(index)
-        if text == 'Add New Outline to Supplied Dataset':
+        db.close_connection()
+        text = self.cmb_add_outline.currentText()
+        if text == 'Add New Outline to Bulk Load Dataset':
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
             dw.new_widget(BulkNewOutline(self.layer_registry))
