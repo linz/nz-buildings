@@ -135,6 +135,21 @@ $$
 LANGUAGE sql VOLATILE;
 
 -------------------------------------------------------------------
+--SUPPLIED DATASET select transfer_date
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.supplied_datasets_select_transfer_date(integer)
+    RETURNS timestamp with time zone AS
+$$
+    SELECT transfer_date
+    FROM buildings_bulk_load.supplied_datasets
+    WHERE buildings_bulk_load.supplied_datasets.supplied_dataset_id = $1
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_select_transfer_date(integer) IS
+'Return transfer_date in supplied_datasets table';
+
+-------------------------------------------------------------------
 --TRANSFERRED update
 -------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.transferred_add_record(integer, integer)
@@ -261,6 +276,7 @@ $$
         FROM buildings_bulk_load.related
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
         WHERE supplied.supplied_dataset_id = $1
+        ORDER BY bulk_load_outline_id DESC
     );
 
 $$ LANGUAGE sql;
