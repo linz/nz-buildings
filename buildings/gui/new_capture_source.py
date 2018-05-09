@@ -159,7 +159,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             if to_add:
                 # enter but don't commit
                 self.db.open_cursor()
-                sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s);'
+                sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
                 result = self.db.execute_no_commit(sql,
                                                    (capture_source_group_id,
                                                     external_source))
@@ -171,7 +171,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # enter but don't commit
             self.db.open_cursor()
-            sql = 'SELECT buildings_common.fn_capture_source_insert(%s, %s);'
+            sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
             result = self.db.execute_no_commit(sql, (capture_source_group_id,
                                                external_source))
             self.capture_source_id = result.fetchall()[0][0]
