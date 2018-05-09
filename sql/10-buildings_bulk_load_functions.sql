@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------
 -- BULK LOAD OUTLINES insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_bulk_load_outlines_insert(
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_insert(
       p_supplied_dataset_id integer
     , p_external_outline_id integer
     , p_bulk_load_status_id integer
@@ -50,15 +50,15 @@ LANGUAGE sql VOLATILE;
 -- EXISTING SUBSET EXTRACT insert into
   -- returns number of rows inserted into table
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_existing_subset_extract_insert(
+CREATE OR REPLACE FUNCTION buildings_bulk_load.existing_subset_extracts_insert(
       p_building_outline_id integer
     , p_supplied_dataset_id integer
     , p_shape geometry
 )
 RETURNS integer AS
 $$
-    WITH insert_subset_extract AS(
-        INSERT INTO buildings_bulk_load.existing_subset_extract(
+    WITH insert_subset_extracts AS(
+        INSERT INTO buildings_bulk_load.existing_subset_extracts(
               building_outline_id
             , supplied_dataset_id
             , shape
@@ -70,7 +70,7 @@ $$
         )
         RETURNING *
     )
-    SELECT count(*)::integer FROM insert_subset_extract
+    SELECT count(*)::integer FROM insert_subset_extracts
 
 $$
 LANGUAGE sql VOLATILE;
@@ -78,7 +78,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- SUPPLIED DATASET insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_supplied_datasets_insert(
+CREATE OR REPLACE FUNCTION buildings_bulk_load.supplied_datasets_insert(
       p_description varchar(250)
     , p_supplier_id integer
 )
@@ -107,7 +107,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- ORGANISATION insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.fn_organisation_insert(
+CREATE OR REPLACE FUNCTION buildings_bulk_load.organisation_insert(
       p_value varchar(250)
 )
 RETURNS integer AS
