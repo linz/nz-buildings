@@ -17,8 +17,6 @@ import re
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "alter_building_relationship.ui"))
 
-db.connect()
-
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
@@ -26,6 +24,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
+
+        self.db = db
+        self.db.connect()
 
         self.layer_registry = layer_registry
 
@@ -44,6 +45,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.clicked.connect(self.matched_clicked)
         self.btn_related.clicked.connect(self.related_clicked)
 
+        # self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_save.clicked.connect(self.save_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
@@ -228,10 +230,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
         sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
 
+        # self.db.open_cursor()
+
         selection_not_empty = False
         for feat_id in self.lyr_existing.selectedFeaturesIds():
             selection_not_empty = True
-            result1 = db._execute(sql_related_existing, (feat_id,))
+            result1 = self.db._execute(sql_related_existing, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
                 # remove the current items inside table
@@ -247,7 +251,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 # add other related outlines
                 if len(feat_ids_related) == 1:
                     id_bulk = feat_ids_related[0][0]
-                    result = db._execute(sql_related_bulk, (id_bulk,))
+                    result = self.db._execute(sql_related_bulk, (id_bulk,))
                     ids = result.fetchall()
                     for (id_existing, ) in ids:
                         if id_existing == feat_id:
@@ -258,7 +262,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                 continue
 
-            result2 = db._execute(sql_matched, (feat_id,))
+            result2 = self.db._execute(sql_matched, (feat_id,))
             feat_id_matched = result2.fetchone()
             if feat_id_matched:
                 # remove the current items inside table
@@ -271,7 +275,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
                 continue
 
-            result3 = db._execute(sql_removed, (feat_id,))
+            result3 = self.db._execute(sql_removed, (feat_id,))
             if result3.fetchone:
                 # remove the currrent items if they are not from added or removed table
                 for row_tbl in range(tbl.rowCount())[::-1]:
@@ -294,6 +298,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
+
         if selection_not_empty:
             tbl.selectAll()
         else:
@@ -313,10 +318,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s"
         sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
 
+        # self.db.open_cursor()
         selection_not_empty = False
         for feat_id in self.lyr_bulk_load.selectedFeaturesIds():
             selection_not_empty = True
-            result1 = db._execute(sql_related_bulk, (feat_id,))
+            result1 = self.db._execute(sql_related_bulk, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
                 # remove the current items inside table
@@ -332,7 +338,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 # add other related outlines
                 if len(feat_ids_related) == 1:
                     id_existing = feat_ids_related[0][0]
-                    result = db._execute(sql_related_existing, (id_existing,))
+                    result = self.db._execute(sql_related_existing, (id_existing,))
                     ids = result.fetchall()
                     for (id_bulk, ) in ids:
                         if id_bulk == feat_id:
@@ -343,7 +349,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                 continue
 
-            result2 = db._execute(sql_matched, (feat_id,))
+            result2 = self.db._execute(sql_matched, (feat_id,))
             feat_id_matched = result2.fetchone()
             if feat_id_matched:
                 # remove the current items inside table
@@ -356,7 +362,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
                 continue
 
-            result3 = db._execute(sql_added, (feat_id,))
+            result3 = self.db._execute(sql_added, (feat_id,))
             if result3.fetchone:
                 # if the current items are not from added or removed table, remove them
                 for row_tbl in range(tbl.rowCount())[::-1]:
@@ -379,6 +385,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
+
 
         if selection_not_empty:
             tbl.selectAll()
@@ -612,6 +619,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         rows_lst_existing = []
         rows_lst_bulk = []
 
+        # self.db.open_cursor()
+
         for row_lst in range(self.lst_existing.count())[::-1]:
             if row_lst not in rows_lst_existing:
 
@@ -619,7 +628,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
                 id_existing = int(self.lst_existing.item(row_lst).text())
 
-                result = db._execute(sql_related_existing, (id_existing,))
+                result = self.db._execute(sql_related_existing, (id_existing,))
                 ids_related = result.fetchall()
                 if ids_related:
                     id_bulk_count = 0
@@ -641,7 +650,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.lst_existing.removeItemWidget(item)
 
                     if id_bulk_count == 1:
-                        result = db._execute(sql_related_bulk, (id_bulk_0,))
+                        result = self.db._execute(sql_related_bulk, (id_bulk_0,))
                         ids = result.fetchall()
                         for row in range(self.lst_existing.count())[::-1]:
                             id_item_existing = int(self.lst_existing.item(row).text())
@@ -658,7 +667,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                 self.lst_existing.removeItemWidget(item)
                     continue
 
-                result = db._execute(sql_matched_existing, (id_existing,))
+                result = self.db._execute(sql_matched_existing, (id_existing,))
                 id_matched = result.fetchone()
                 if id_matched:
                     for row in range(self.lst_bulk.count())[::-1]:
@@ -679,7 +688,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.lst_existing.removeItemWidget(item)
                     continue
 
-                result = db._execute(sql_removed, (id_existing,))
+                result = self.db._execute(sql_removed, (id_existing,))
                 if result.fetchone():
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
@@ -694,13 +703,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
                 id_bulk = int(self.lst_bulk.item(row_lst).text())
 
-                result = db._execute(sql_added, (id_bulk,))
+                result = self.db._execute(sql_added, (id_bulk,))
                 if result.fetchone():
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
                     tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                     item = self.lst_bulk.takeItem(row_lst)
                     self.lst_bulk.removeItemWidget(item)
+
 
     def matched_clicked(self):
         """
@@ -849,7 +859,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_related_existing.setSubsetString(
                 self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
-    def save_clicked(self):
+    def save_clicked(self, built_in, commit_status=True):
         """
         Save result and change database
         Called when save botton is clicked
@@ -938,44 +948,46 @@ class AlterRelationships(QFrame, FORM_CLASS):
                             JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
                         '''
 
+        # self.db.open_cursor()
+
         for row in range(self.lst_existing.count())[::-1]:
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
 
-            db._execute(sql_removed, (id_existing, ))
-            db._execute(sql_matched_existing, (id_existing, ))
-            db._execute(sql_related_existing, (id_existing, ))
+            self.db._execute(sql_removed, (id_existing, ))
+            self.db._execute(sql_matched_existing, (id_existing, ))
+            self.db._execute(sql_related_existing, (id_existing, ))
 
             if not item.background().color() == QColor('#E3ECEF'):
-                db._execute(sql_new_removed, (id_existing, ))
+                self.db._execute(sql_new_removed, (id_existing, ))
 
         for row in range(self.lst_bulk.count())[::-1]:
             item = self.lst_bulk.item(row)
             id_bulk = int(item.text())
 
-            db._execute(sql_added, (id_bulk, ))
-            db._execute(sql_matched_bulk, (id_bulk, ))
-            db._execute(sql_related_bulk, (id_bulk, ))
+            self.db._execute(sql_added, (id_bulk, ))
+            self.db._execute(sql_matched_bulk, (id_bulk, ))
+            self.db._execute(sql_related_bulk, (id_bulk, ))
 
             if not item.background().color() == QColor('#E3ECEF'):
-                db._execute(sql_new_added, (id_bulk, ))
+                self.db._execute(sql_new_added, (id_bulk, ))
 
         # added
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
-            db._execute(sql_new_added, (id_bulk,))
+            self.db._execute(sql_new_added, (id_bulk,))
 
         # removed
         for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
-            db._execute(sql_new_removed, (id_existing, ))
+            self.db._execute(sql_new_removed, (id_existing, ))
 
         # matched
         for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
-                db._execute(sql_new_matched, (id_bulk, id_existing))
+                self.db._execute(sql_new_matched, (id_bulk, id_existing))
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -986,9 +998,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_related.setEnabled(True)
 
         # refresh view layer
-        db._execute(sql_refresh)
+        self.db._execute(sql_refresh)
 
         iface.mapCanvas().refreshAllLayers()
+
+        # if commit_status:
+        #     self.db.commit_open_cursor()
 
     def cancel_clicked(self):
         """
@@ -999,6 +1014,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         dw = plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
+
+        self.db.close_connection()
 
         self.tbl_original.clearSelection()
         self.lst_existing.clearSelection()

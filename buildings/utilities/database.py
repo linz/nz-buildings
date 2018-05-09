@@ -96,7 +96,10 @@ def _execute(sql, data=None):
     @rtype:     psycopg2.extensions.cursor
     """
     # Set cursor
-    cursor = _conn.cursor()
+    if _open_cursor:
+        cursor = _open_cursor
+    else:
+        cursor = _conn.cursor()
     # execute sql
     try:
         cursor.execute(sql, data)
