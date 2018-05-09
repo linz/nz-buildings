@@ -11,10 +11,23 @@ th {
 .wy-nav-content {
 	padding: 1.618em 3.236em;
     height: 100%;
-    max-width: 100%; 
+    max-width: 100%;
     margin: auto;
 
+}
 
+/* override table width restrictions */
+@media screen and (min-width: 800px) {
+
+   .wy-table-responsive table td {
+      /* !important prevents the common CSS stylesheets from overriding
+         this as on RTD they are loaded after this stylesheet */
+      white-space: normal !important;
+   }
+
+   .wy-table-responsive {
+      overflow: visible !important;
+   }
 }
 
 div.section p {
