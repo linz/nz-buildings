@@ -113,4 +113,8 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
+    for file in ${SCRIPTSDIR}/tests/functiontestdata/*.sql; do
+        echo ${file} >&2
+        psql -f ${file}
+    done
 fi

@@ -66,6 +66,8 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp sql/lds/*.sql ${datadir}/sql/lds
 	mkdir -p ${datadir}/tests/testdata
 	cp tests/testdata/*.sql ${datadir}/tests/testdata
+	mkdir -p ${datadir}/tests/functiontestdata
+	cp tests/functiontestdata/*.sql ${datadir}/tests/functiontestdata
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
