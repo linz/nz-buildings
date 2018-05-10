@@ -6,7 +6,7 @@ Introduction
 Purpose
 -----------------------------
 
-This document provides detailed metadata (data dictionary) for the NZ Building Outlines data published on the LINZ Data Service.
+This document provides detailed metadata (data dictionary) for the NZ Buildings data published on the LINZ Data Service.
 
 Background
 ----------------------------
@@ -57,7 +57,7 @@ The Building Outlines contain spatial detail reflective of the visible character
 File format
 ---------------------------
 
-Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZGD2000 (New Zealand Geodetic Datum 2000).
+Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZGD2000 (New Zealand Geodetic Datum 2000)..
 
 
 
@@ -65,18 +65,26 @@ Definitions
 ---------------------------
 
 .. table::
-   :widths: auto
-+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Term              | Description                                                                                                                                                                                                                                                                         |
-+===================+=====================================================================================================================================================================================================================================================================================+
-| Aspatial          | Data that is not related to a spatial geometry                                                                                                                                                                                                                                      |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| LDS               | LINZ Data Service                                                                                                                                                                                                                                                                   |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Building          | A structure generally permanent in nature which has been constructed to meet a specific objective (e.g. housing, storage, and workplace) and less permanent structures such as   caravans and other portable housing may also be represented.                                       |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Building Outlines | Building Outlines are a digital representation of the roof outlines of a buildings which have been classified from remotely sensed information that identifies every building structure that is greater than 10 square meters and falls within an area of the capture of buildings. |
-+-------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+   :class: manual
+
++-------------------+----------------------------------------------------------------------+
+| Term              | Description                                                          |
++===================+======================================================================+
+| Aspatial          | Data that is not related to a spatial geometry                       |
++-------------------+----------------------------------------------------------------------+
+| LDS               | LINZ Data Service                                                    |
++-------------------+----------------------------------------------------------------------+
+| Building          | A structure generally permanent in nature which has been constructed |
+|                   | to meet a specific objective (e.g. housing, storage, and workplace)  |
+|                   | and less permanent structures such as caravans and other portable    |
+|                   | housing may also be represented.                                     |
++-------------------+----------------------------------------------------------------------+
+| Building Outlines | Building Outlines are a digital representation of the roof outlines  |
+|                   | of a buildings which have been classified from remotely              |
+|                   | sensed information that identifies every building structure that is  |
+|                   | greater than 10 square meters and falls within an area of the        |
+|                   | capture of buildings.                                                |
++-------------------+----------------------------------------------------------------------+
 
 
 
