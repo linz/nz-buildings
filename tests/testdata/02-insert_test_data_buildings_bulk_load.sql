@@ -1,7 +1,7 @@
 
-INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (1, 'Test Data', 1);
+INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (DEFAULT, 'Test Data', 1);
 
-INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (1, 1, NULL);
+INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (DEFAULT, 1, NULL);
 
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1001, '2017-01-01 09:00:00 GMT+12', NULL);
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1002, '2017-01-01 09:00:00 GMT+12', NULL);

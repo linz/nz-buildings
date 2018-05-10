@@ -1,0 +1,59 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings functions using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+SELECT buildings.buildings_insert();
+SELECT buildings.building_outlines_insert(1000030, 5, 1, 1, 1, NULL, 1, now(), '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');
+SELECT buildings_bulk_load.existing_subset_extracts_insert(1000000, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(6);
+
+-- Tests
+--1-------------------------
+SELECT has_function('buildings', 'buildings_insert', 'Should have function buildings_insert in buildings schema');
+SELECT set_has(
+    'SELECT building_id FROM buildings.buildings',
+    $$VALUES(1000030),
+    		(1001)$$,
+    'Check contents of buildings table after buildings_insert function has run'
+);
+--2-------------------------
+SELECT has_function('buildings', 'building_outlines_insert', 'Should have function buildings_outlines_insert in buildings_schema');
+SELECT set_has(
+    'SELECT building_outline_id FROM buildings.building_outlines',
+    $$VALUES(1000034),
+    		(1001)$$,
+    'Check contents of building outlines table after building_outlines_insert function has run'
+);
+
+--3-------------------------
+SELECT has_function('buildings_bulk_load', 'existing_subset_extracts_insert', 'Should have function existing_subset_extracts_insert in bulk_load stage schema.');
+SELECT set_has(
+    'SELECT building_id FROM buildings.buildings',
+    $$VALUES(1000000),
+    		(1001)$$,
+    'Check contents of existing subset extracts table after existing_subset_extracts_insert function has run'
+);
+
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;
+
