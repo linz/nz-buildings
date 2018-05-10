@@ -24,11 +24,19 @@ SELECT plan(10);
 -- Tests
 
 --Organisation--------------------------
-SELECT has_function('buildings_bulk_load', 'organisation_insert', 'Should have function organisation_insert in bulk_load stage schema.');
+SELECT has_function('buildings_bulk_load', 'organisation_insert', 'Should have function organisation_insert in bulk_load schema.');
 SELECT set_has(
     'SELECT value FROM buildings_bulk_load.organisation',
     $$VALUES('Test Organisation')$$,
     'Check contents of organisation table after organisation_insert function has run'
+);
+
+--Capture Source Group-------------------
+SELECT has_function('buildings_common', 'capture_source_group_insert', 'Should have function capture_source_group_insert in buildings_common schema.');
+SELECT set_has(
+    'SELECT value FROM buildings_common.capture_source_group',
+    $$VALUES('Test CS Value')$$,
+    'Check contents of capture_source table after capture_source_insert function has run'
 );
 
 --Capture Source-------------------------
@@ -54,15 +62,6 @@ SELECT set_has(
     $$VALUES('Test Capture Method')$$,
     'Check contents of capture_method table after capture_method_insert function has run'
 );
-
---Capture Source Group-------------------
-SELECT has_function('buildings_common', 'capture_source_group_insert', 'Should have function capture_source_group_insert in buildings_common schema.');
-SELECT set_has(
-    'SELECT value FROM buildings_common.capture_source_group',
-    $$VALUES('Test CS Value')$$,
-    'Check contents of capture_source table after capture_source_insert function has run'
-);
-
 
 -- Finish pgTAP testing
 SELECT * FROM finish();
