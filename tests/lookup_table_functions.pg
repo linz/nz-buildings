@@ -35,7 +35,7 @@ SELECT set_has(
 SELECT has_function('buildings_common', 'capture_source_insert', 'Should have function capture_source_insert in buildings_common schema.');
 SELECT set_has(
     'SELECT external_source_id FROM buildings_common.capture_source',
-    $$VALUES('test external source')$$,
+    $$VALUES('Test External Source')$$,
     'Check contents of capture source table after capture_source_insert function has run'
 );
 
