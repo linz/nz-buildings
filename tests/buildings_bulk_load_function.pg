@@ -25,8 +25,7 @@ SELECT plan(4);
 SELECT has_function('buildings_bulk_load', 'bulk_load_outlines_insert', 'Should have function bulk_load_outlines_insert in bulk_load schema.');
 SELECT set_has(
     'SELECT bulk_load_outline_id FROM buildings_bulk_load.bulk_load_outlines',
-    $$VALUES(1000000),
-    		(2001)$$,
+    $$VALUES (1000000.0)$$,
     'Check contents of bulk load outlines table after bulk_load_outlines_insert function has run'
 );
 
