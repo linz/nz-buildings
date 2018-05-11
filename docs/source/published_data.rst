@@ -4,7 +4,7 @@
 Published Data
 ================================
 
-The data decribed below represents openly availabe building outlines data available on the LINZ Data Service:
+The data described below represents building outlines data openly available on the LINZ Data Service:
 https://data.linz.govt.nz/layer/53413-nz-building-outlines-pilot/
 
 Data Model

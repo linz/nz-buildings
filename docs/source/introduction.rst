@@ -57,7 +57,7 @@ The Building Outlines contain spatial detail reflective of the visible character
 File format
 ---------------------------
 
-Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZGD2000 (New Zealand Geodetic Datum 2000)..
+Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZGD2000 (New Zealand Geodetic Datum 2000).
 
 
 
