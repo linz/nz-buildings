@@ -35,10 +35,10 @@ $$
         , p_bulk_load_status_id
         , p_capture_method_id
         , p_capture_source_id
-        , p_suburb_locality_id --p_suburb_locality_id
-        , p_town_city_id --p_town_city_id
-        , p_territorial_authority_id --p_territorial_authority_id
-        , now() --p_begin_lifespan
+        , p_suburb_locality_id
+        , p_town_city_id
+        , p_territorial_authority_id
+        , now()
         , p_shape
     )
     RETURNING bulk_load_outline_id;

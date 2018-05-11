@@ -129,7 +129,7 @@ COMMENT ON COLUMN buildings.building_outlines.town_city_id IS
 'Holds an external id for the town / city from the nz_locality dataset.';
 COMMENT ON COLUMN buildings.building_outlines.territorial_authority_id IS
 'Holds an external id for the territorial authority from the '
-'territorial_authority dataset.'
+'territorial_authority dataset.';
 COMMENT ON COLUMN buildings.building_outlines.begin_lifespan IS
 'The date that the building outline was added to the system.';
 COMMENT ON COLUMN buildings.building_outlines.end_lifespan IS
