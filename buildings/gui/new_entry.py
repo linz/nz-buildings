@@ -164,7 +164,7 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
                 # enter but don't commit
             self.db.open_cursor()
-            sql = 'SELECT buildings_bulk_load.fn_organisation_insert(%s);'
+            sql = 'SELECT buildings_bulk_load.organisation_insert(%s);'
             result = self.db.execute_no_commit(sql, (organisation,))
             self.organisation_id = result.fetchall()[0][0]
             if commit_status:
@@ -194,7 +194,7 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # enter but don't commit
             self.db.open_cursor()
-            sql = 'SELECT buildings.fn_lifecycle_stage_insert(%s);'
+            sql = 'SELECT buildings.lifecycle_stage_insert(%s);'
             result = self.db.execute_no_commit(sql, (lifecycle_stage,))
             self.lifecycle_stage_id = result.fetchall()[0][0]
             if commit_status:
@@ -226,7 +226,7 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
                 # enter but don't commit
             self.db.open_cursor()
-            sql = 'SELECT buildings_common.fn_capture_method_insert(%s);'
+            sql = 'SELECT buildings_common.capture_method_insert(%s);'
             result = self.db.execute_no_commit(sql, (capture_method,))
             self.capture_method_id = result.fetchall()[0][0]
             if commit_status:
@@ -258,7 +258,7 @@ class NewEntry(QFrame, FORM_CLASS):
         elif len(ls) == 0:
             # enter but don't commit
             self.db.open_cursor()
-            sql = 'SELECT buildings_common.fn_capture_source_group_insert(%s, %s);'
+            sql = 'SELECT buildings_common.capture_source_group_insert(%s, %s);'
             result = self.db.execute_no_commit(sql, (capture_source_group,
                                                      description))
             self.capture_method_id = result.fetchall()[0][0]

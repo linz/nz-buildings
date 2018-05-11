@@ -265,11 +265,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         # insert into buildings table
         # if self.cursor is None:
         self.db.open_cursor()
-        sql = 'SELECT buildings.fn_buildings_insert();'
+        sql = 'SELECT buildings.buildings_insert();'
         results = self.db.execute_no_commit(sql)
         building_id = results.fetchall()[0][0]
         # insert into bulk_load_outlines table
-        sql = 'SELECT buildings.fn_building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
+        sql = 'SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now(), %s);'
         self.db.execute_no_commit(sql, (building_id, self.capture_method_id,
                                   self.capture_source_id,
                                   self.lifecycle_stage_id, self.suburb,

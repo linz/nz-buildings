@@ -306,7 +306,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.t_a = self.get_t_a()
         self.db.open_cursor()
         # call function to insert into bulk_load_outlines table
-        sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s)'
+        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s)'
         result = self.db.execute_no_commit(sql, (self.dataset_id,
                                            self.capture_method_id,
                                            self.capture_source_id,

@@ -112,7 +112,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
     def test_reset_button(self):
         """UI comboboxes enable when geometry is drawn"""
         self.new_production_frame.db.open_cursor()
-        sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
+        sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
         result = self.new_production_frame.db.execute_no_commit(sql)
         self.capture_source = result.fetchall()[0][0]
         self.new_production_frame.populate_lookup_comboboxes()
@@ -177,7 +177,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         """Data added to correct tables when save clicked"""
         # set up
         self.new_production_frame.db.open_cursor()
-        sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
+        sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
         result = self.new_production_frame.db.execute_no_commit(sql)
         self.capture_source = result.fetchall()[0][0]
         self.new_production_frame.populate_lookup_comboboxes()

@@ -203,17 +203,20 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
     def get_imagery_combobox_value(self):
         return self.cmb_imagery.currentText()
 
-    def find_suburb(self):
-        sql = 'SELECT buildings.fn_bulk_load_outlines_update_suburb(%s);'
-        self.db.execute(sql, (self.dataset_id, ))
+    def find_suburb(self, geom):
+        sql = 'SELECT buildings.nz_locality_suburb_intersect_polygon(%s);'
+        result = self.db.execute_no_commit(sql, (geom, ))
+        return result.fetchall()[0][0]
 
-    def find_town_city(self):
-        sql = 'SELECT buildings.fn_bulk_load_outlines_update_town_city(%s);'
-        self.db.execute(sql, (self.dataset_id, ))
+    def find_town_city(self, geom):
+        sql = 'SELECT buildings.nz_locality_town_city_intersect_polygon(%s);'
+        result = self.db.execute_no_commit(sql, (geom, ))
+        return result.fetchall()[0][0]
 
-    def find_territorial_auth(self):
-        sql = 'SELECT buildings.fn_bulk_load_outlines_update_territorial_authority(%s);'
-        self.db.execute(sql, (self.dataset_id, ))
+    def find_territorial_auth(self, geom):
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.db.execute_no_commit(sql, (geom, ))
+        return result.fetchall()[0][0]
 
     def ok_clicked(self, built_in, commit_status=True):
         # get value
@@ -369,15 +372,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 # run comparisons function
                 sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
                 self.db.execute_no_commit(sql, data=(self.dataset_id, ))
-                # user checked data to buildings and building_outlines
+            sql = 'DISCARD TEMP;'
+            self.db.execute_no_commit(sql)  # remove temp files
             if commit_status:
                 self.db.commit_open_cursor()
             # update the locality fields
-            self.find_suburb()
-            self.find_town_city()
-            self.find_territorial_auth()
-            sql = 'DISCARD TEMP;'
-            self.db.execute(sql)  # remove temp files
             self.mcb_imagery_layer.currentLayer().removeSelection()
 
     def exit_clicked(self):
@@ -397,8 +396,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         """
         # if self.cursor is None:
         # if self.db._open_cursor is None:
-        self.db.open_cursor()
-        sql = 'SELECT buildings_bulk_load.fn_supplied_datasets_insert(%s, %s);'
+        if self.db._open_cursor is None:
+            self.db.open_cursor()
+        sql = 'SELECT buildings_bulk_load.supplied_datasets_insert(%s, %s);'
         results = self.db.execute_no_commit(sql, (description, organisation))
         self.dataset_id = results.fetchall()[0][0]
 
@@ -413,8 +413,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.inserted_values = 0
         if self.external_source_id is not None:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
-            result = self.db._execute(sql, data=(self.capture_source_group,
-                                                 self.external_source_id))
+            result = self.db.execute_no_commit(sql, data=(self.capture_source_group,
+                                                          self.external_source_id))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -426,12 +426,13 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                                               'external id'
                                               )
                 self.error_dialog.show()
+                self.db.rollback_open_cursor()
                 return
             else:
                 capture_source = value[0][0]
         else:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s AND cs.external_source_id is Null;'
-            result = self.db._execute(sql, data=(self.capture_source_group, ))
+            result = self.db.execute_no_commit(sql, data=(capture_source_group,))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -442,6 +443,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                                               ' group and a Null external id'
                                               )
                 self.error_dialog.show()
+                self.db.rollback_open_cursor()
                 return
             else:
                 capture_source = value[0][0]
@@ -457,18 +459,44 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
             result = self.db._execute(sql, data=(geom, ))
             geom = result.fetchall()[0][0]
+            suburb = self.find_suburb(geom)
+            town_city = self.find_town_city(geom)
+            TA = self.find_territorial_auth(geom)
+            if suburb is None:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report('\n -------------------- No '
+                                              'Suburb Admin Boundary ------'
+                                              '-------------- \n\n Data will'
+                                              ' not be added to table as has '
+                                              'null suburb Id, See canvas for '
+                                              'feature')
+                self.error_dialog.show()
+                self.db.rollback_open_cursor()
+                return
+            if TA is None:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report('\n -------------------- No '
+                                              'TA Admin Boundary ------'
+                                              '-------------- \n\n Data will'
+                                              ' not be added to table as has '
+                                              'null TA Id'
+                                              )
+                self.error_dialog.show()
+                self.db.rollback_open_cursor()
+                return
             self.inserted_values = self.inserted_values + 1
             # insert outline into buildings_bulk_load.supplied_outline
             if external_field == '':
-                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, NULL, 1, %s, %s, NULL, NULL, NULL, %s);'
+                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, capture_method,
-                                          capture_source, geom))
+                                          capture_source, suburb, town_city,
+                                          TA, geom))
             else:
                 external_id = outline.attribute(external_field)
-                sql = 'SELECT buildings_bulk_load.fn_bulk_load_outlines_insert(%s, %s, 1, %s, %s, NULL, NULL, NULL, %s);'
+                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, external_id,
                                           capture_method, capture_source,
-                                          geom))
+                                          suburb, town_city, TA, geom))
         self.le_data_description.clear()
         # returns 1 if function worked None if failed
         return 1
