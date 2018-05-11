@@ -57,7 +57,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Building Outlines Data Dictionary'
+project = u'NZ Buildings Data Dictionary'
 author = u'Land Information NZ'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -134,10 +134,10 @@ html_theme_options = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'Building Outlines Data Dictionary'
+html_title = 'NZ Buildings Data Dictionary'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = 'Building Outlines Data Dictionary'
+html_short_title = 'NZ Buildings Data Dictionary'
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
@@ -214,7 +214,7 @@ html_show_copyright = False
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'BuildingOutlines'
+htmlhelp_basename = 'NZ_Buildings'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -235,10 +235,10 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'BuildingOutlines.tex', u'Building Outlines Data Documentation',
-     u'LINZ', 'manual'),
-]
+#latex_documents = [
+#    (master_doc, 'BuildingOutlines.tex', u'Building Outlines Data Documentation',
+#     u'LINZ', 'manual'),
+#]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -266,7 +266,7 @@ latex_use_parts = True
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'buildingoutlinestest', u'Building Outlines Test Documentation',
+    (master_doc, 'buildings_data_dictionary', u'buildings_data_dictionary',
      [author], 1)
 ]
 
@@ -280,8 +280,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'BuildingOutlines', u'Building Outlines Documentation',
-     author, 'BuildingOutlines', 'One line description of project.',
+    (master_doc, 'buildings_data_dictionary', u'NZ Buildings Data Dictionary',
+     author, 'LINZ', 'Documentation for the NZ Buildings Dataset',
      'Miscellaneous'),
 ]
 
@@ -408,6 +408,7 @@ def get_tables(schema_out, sql_file_path):
 def get_column_comments(column_str, file_content):
     column_comment_str = r"COMMENT ON COLUMN " + column_str + r"\sIS([^\;]*)"
     column_comment_search = re.search(column_comment_str, file_content)
+    schema_check = column_str.split('.')[0]
 
     if column_comment_search is not None:
         column_comment = column_comment_search.group(1)
@@ -424,11 +425,15 @@ def get_column_comments(column_str, file_content):
                 foreign_key_comment = foreign_search.group(2)
                 schema_named, table_named = schema_and_table.split(".")
                 hyphens = table_named.replace("_", "-")
-                template_url = "`{schema_table} <https://building-outlines-test.readthedocs.io/en/latest/{schema_name}_schema.html#table-name-{table_name_hyphens}>`_"
-                foreign_link = template_url.format(schema_table=schema_and_table_strip, schema_name=schema_named, table_name_hyphens=hyphens)
-                column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
+                if schema_check == "buildings" or schema_check == "buildings_common" or schema_check == "buildings_bulk_load":
+                    template_url = "`{schema_table} <https://building-outlines-test.readthedocs.io/en/latest/internal_data.html#table-{table_name_hyphens}>`_"
+                    foreign_link = template_url.format(schema_table=schema_and_table_strip, table_name_hyphens=hyphens)
+                    column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
+                if schema_check == "buildings_lds":
+                    template_url = "`{schema_table} <https://building-outlines-test.readthedocs.io/en/latest/published_data.html#table-{table_name_hyphens}>`_"
+                    foreign_link = template_url.format(schema_table=schema_and_table_strip, table_name_hyphens=hyphens)
+                    column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
             else:
-                print"The parser search was expecting something in this column comment: ", column_comment_result_strip
                 column_comment_result_strip = " "
 
     if column_comment_search is None:
