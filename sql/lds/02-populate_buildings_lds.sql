@@ -6,10 +6,6 @@ CREATE OR REPLACE FUNCTION buildings_lds.populate_buildings_lds()
 RETURNS integer AS
 $$
 
--- DECLARE
---     v_rows_updated integer;
-
--- BEGIN
     WITH pop_buildings_lds AS(
         INSERT INTO buildings_lds.nz_building_outlines (
               building_outline_id
@@ -59,12 +55,6 @@ $$
         RETURNING *
     )
     SELECT count(*)::integer FROM pop_buildings_lds;
-
---     GET DIAGNOSTICS v_rows_updated = ROW_COUNT;
-
---     RETURN v_rows_updated;
-
--- END;
 
 $$
 LANGUAGE sql VOLATILE;
