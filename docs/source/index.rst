@@ -1,4 +1,4 @@
-Building Outlines Data Dictionary
+NZ Buildings Data Dictionary
 =========================
 
 Table of Contents:
@@ -8,10 +8,7 @@ Table of Contents:
    :numbered:
 
    introduction
-   data_model
-   buildings_schema
-   buildings_common_schema
-   buildings_bulk_load_schema
-   buildings_lds_schema
+   published_data
+   internal_data
 
 
