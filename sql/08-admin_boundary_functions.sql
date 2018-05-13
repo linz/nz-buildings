@@ -135,7 +135,7 @@ $$
 
     WITH update_territorial_auth AS(
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
-        SET town_city_id = nzl_intersect.territorial_authority_intersect_polygon
+        SET territorial_authority_id = nzl_intersect.territorial_authority_intersect_polygon
         FROM (
             SELECT buildings.territorial_authority_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
