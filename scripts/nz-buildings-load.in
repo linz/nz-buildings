@@ -106,15 +106,13 @@ done
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
     # Execute all files in the test data sql dir
-    for file in ${SCRIPTSDIR}/tests/testdata/*.sql; do
-        echo ${file} >&2
-        psql -f ${file}
-    done
+    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql
+    echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
-    for file in ${SCRIPTSDIR}/tests/functiontestdata/*.sql; do
-        echo ${file} >&2
-        psql -f ${file}
-    done
+    echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_functions.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_functions.sql
 fi
