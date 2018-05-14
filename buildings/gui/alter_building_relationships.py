@@ -236,22 +236,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if feat_ids_related:
                 # remove the current items inside table
                 for row_tbl in range(tbl.rowCount())[::-1]:
-                    if not ((tbl.item(row_tbl, 1), ) in feat_ids_related or tbl.item(row_tbl, 0) == feat_id):
-                        tbl.removeRow(row_tbl)
-                # add the related building ids into table
-                for feat_id_related in feat_ids_related:
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_related[0]))
-                # add other related outlines
-                if len(feat_ids_related) == 1:
-                    id_bulk = feat_ids_related[0][0]
-                    result = self.db._execute(sql_related_bulk, (id_bulk,))
+                    tbl.removeRow(row_tbl)
+
+                ids_bulk = []
+                ids_existing = [feat_id]
+                for (feat_id_related,) in feat_ids_related:
+                    ids_bulk.append(feat_id_related)
+                    result = self.db._execute(sql_related_bulk, (feat_id_related,))
                     ids = result.fetchall()
                     for (id_existing, ) in ids:
-                        if id_existing == feat_id:
-                            continue
+                        ids_existing.append(id_existing)
+
+                for id_existing in list(set(ids_existing)):
+                    for id_bulk in list(set(ids_bulk)):
                         row_tbl = tbl.rowCount()
                         tbl.setRowCount(row_tbl + 1)
                         tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
@@ -264,7 +261,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 # remove the current items inside table
                 for row_tbl in range(tbl.rowCount())[::-1]:
                     tbl.removeRow(row_tbl)
-                # add the matched building ids into table
+
                 row_tbl = tbl.rowCount()
                 tbl.setRowCount(row_tbl + 1)
                 tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
@@ -317,22 +314,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if feat_ids_related:
                 # remove the current items inside table
                 for row_tbl in range(tbl.rowCount())[::-1]:
-                    if not ((tbl.item(row_tbl, 0), ) in feat_ids_related or tbl.item(row_tbl, 1) == feat_id):
-                        tbl.removeRow(row_tbl)
-                # add the related building ids into table
-                for feat_id_related in feat_ids_related:
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_related[0]))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
-                # add other related outlines
-                if len(feat_ids_related) == 1:
-                    id_existing = feat_ids_related[0][0]
-                    result = self.db._execute(sql_related_existing, (id_existing,))
+                    tbl.removeRow(row_tbl)
+
+                ids_bulk = [feat_id]
+                ids_existing = []
+                for (feat_id_related,) in feat_ids_related:
+                    ids_existing.append(feat_id_related)
+                    result = self.db._execute(sql_related_existing, (feat_id_related,))
                     ids = result.fetchall()
                     for (id_bulk, ) in ids:
-                        if id_bulk == feat_id:
-                            continue
+                        ids_bulk.append(id_bulk)
+
+                for id_existing in list(set(ids_existing)):
+                    for id_bulk in list(set(ids_bulk)):
                         row_tbl = tbl.rowCount()
                         tbl.setRowCount(row_tbl + 1)
                         tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
