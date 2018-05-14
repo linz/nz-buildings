@@ -45,8 +45,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.clicked.connect(self.matched_clicked)
         self.btn_related.clicked.connect(self.related_clicked)
 
-        # self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
-        self.btn_save.clicked.connect(self.save_clicked)
+        self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
+        # self.btn_save.clicked.connect(self.save_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
     def open_alter_relationship_frame(self):
@@ -859,7 +859,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_related_existing.setSubsetString(
                 self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
-    def save_clicked(self, built_in, commit_status=True):
+    def save_clicked(self, commit_status=True):
         """
         Save result and change database
         Called when save botton is clicked
@@ -948,46 +948,40 @@ class AlterRelationships(QFrame, FORM_CLASS):
                             JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
                         '''
 
-        # self.db.open_cursor()
+        self.db.open_cursor()
 
         for row in range(self.lst_existing.count())[::-1]:
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
 
-            self.db._execute(sql_removed, (id_existing, ))
-            self.db._execute(sql_matched_existing, (id_existing, ))
-            self.db._execute(sql_related_existing, (id_existing, ))
-
-            if not item.background().color() == QColor('#E3ECEF'):
-                self.db._execute(sql_new_removed, (id_existing, ))
+            self.db.execute_no_commit(sql_removed, (id_existing, ))
+            self.db.execute_no_commit(sql_matched_existing, (id_existing, ))
+            self.db.execute_no_commit(sql_related_existing, (id_existing, ))
 
         for row in range(self.lst_bulk.count())[::-1]:
             item = self.lst_bulk.item(row)
             id_bulk = int(item.text())
 
-            self.db._execute(sql_added, (id_bulk, ))
-            self.db._execute(sql_matched_bulk, (id_bulk, ))
-            self.db._execute(sql_related_bulk, (id_bulk, ))
-
-            if not item.background().color() == QColor('#E3ECEF'):
-                self.db._execute(sql_new_added, (id_bulk, ))
+            self.db.execute_no_commit(sql_added, (id_bulk, ))
+            self.db.execute_no_commit(sql_matched_bulk, (id_bulk, ))
+            self.db.execute_no_commit(sql_related_bulk, (id_bulk, ))
 
         # added
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
-            self.db._execute(sql_new_added, (id_bulk,))
+            self.db.execute_no_commit(sql_new_added, (id_bulk,))
 
         # removed
         for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
-            self.db._execute(sql_new_removed, (id_existing, ))
+            self.db.execute_no_commit(sql_new_removed, (id_existing, ))
 
         # matched
         for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
-                self.db._execute(sql_new_matched, (id_bulk, id_existing))
+                self.db.execute_no_commit(sql_new_matched, (id_bulk, id_existing))
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -998,12 +992,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_related.setEnabled(True)
 
         # refresh view layer
-        self.db._execute(sql_refresh)
+        self.db.execute_no_commit(sql_refresh)
 
         iface.mapCanvas().refreshAllLayers()
 
-        # if commit_status:
-        #     self.db.commit_open_cursor()
+        if commit_status:
+            self.db.commit_open_cursor()
 
     def cancel_clicked(self):
         """
