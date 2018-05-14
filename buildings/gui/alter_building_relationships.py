@@ -968,6 +968,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                  existing_totals
                             WHERE rp.bulk_load_outline_id = bulk_load_totals.bulk_load_outline_id
                               AND rp.building_outline_id = existing_totals.building_outline_id;
+
+                            DISCARD TEMP;
                             '''
 
         sql_refresh = '''CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
@@ -1045,6 +1047,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.db.execute_no_commit(sql_new_related_prep, (id_bulk, id_existing))
         self.db.execute_no_commit(sql_new_related)
 
+        # refresh view layer
+        self.db.execute_no_commit(sql_refresh)
+
+        if commit_status:
+            self.db.commit_open_cursor()
+
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
@@ -1053,13 +1061,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.setEnabled(True)
         self.btn_related.setEnabled(True)
 
-        # refresh view layer
-        self.db.execute_no_commit(sql_refresh)
-
         iface.mapCanvas().refreshAllLayers()
-
-        if commit_status:
-            self.db.commit_open_cursor()
 
     def cancel_clicked(self):
         """
