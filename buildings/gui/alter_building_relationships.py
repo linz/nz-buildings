@@ -230,11 +230,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
         sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
 
-        # self.db.open_cursor()
-
-        selection_not_empty = False
         for feat_id in self.lyr_existing.selectedFeaturesIds():
-            selection_not_empty = True
             result1 = self.db._execute(sql_related_existing, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
@@ -299,10 +295,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-        if selection_not_empty:
-            tbl.selectAll()
-        else:
-            tbl.clearSelection()
+        tbl.selectAll()
 
     def select_from_layer_bulk(self):
         """
@@ -318,10 +311,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s"
         sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
 
-        # self.db.open_cursor()
-        selection_not_empty = False
         for feat_id in self.lyr_bulk_load.selectedFeaturesIds():
-            selection_not_empty = True
             result1 = self.db._execute(sql_related_bulk, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
@@ -386,11 +376,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-
-        if selection_not_empty:
-            tbl.selectAll()
-        else:
-            tbl.clearSelection()
+        tbl.selectAll()
 
     def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
         """
@@ -914,7 +900,80 @@ class AlterRelationships(QFrame, FORM_CLASS):
                              FROM buildings_bulk_load.bulk_load_outlines supplied,
                                   buildings_bulk_load.existing_subset_extracts current
                              WHERE supplied.bulk_load_outline_id = %s and current.building_outline_id = %s;
+                            '''
 
+        sql_new_related_prep_table = '''
+                                CREATE TEMP TABLE related_prep (bulk_load_outline_id integer
+                                                              , building_outline_id integer
+                                                              , qa_status_id integer
+                                                              , area_bulk_load numeric(10,2)
+                                                              , area_existing numeric(10,2)
+                                                              , area_overlap numeric(10,2)
+                                                              , percent_bulk_load_overlap numeric(5,2)
+                                                              , percent_existing_overlap numeric(5,2))
+                                '''
+
+        sql_new_related_prep = '''
+                                INSERT INTO related_prep
+                                SELECT supplied.bulk_load_outline_id,
+                                       current.building_outline_id,
+                                       1 AS qa_status_id,
+                                       ST_Area(supplied.shape) AS area_bulk_load,
+                                       ST_Area(current.shape) AS area_existing,
+                                       ST_Area(ST_Intersection(supplied.shape, current.shape)) AS area_overlap,
+                                       ST_Area(ST_Intersection(supplied.shape, current.shape))/ ST_Area(supplied.shape) * 100
+                                       AS percent_bulk_load_overlap,
+                                       ST_Area(ST_Intersection(supplied.shape, current.shape))/ ST_Area(current.shape) * 100
+                                       AS percent_existing_overlap
+                                FROM buildings_bulk_load.bulk_load_outlines supplied,
+                                     buildings_bulk_load.existing_subset_extracts current
+                                WHERE supplied.bulk_load_outline_id = %s
+                                  AND current.building_outline_id = %s;
+                                '''
+
+        sql_new_related = '''
+                            WITH bulk_load_totals AS (
+                                SELECT bulk_load_outline_id,
+                                    sum(area_overlap) AS total_area_bulk_load_overlap,
+                                    sum(percent_bulk_load_overlap) AS total_percent_bulk_load_overlap
+                                FROM related_prep
+                                GROUP BY bulk_load_outline_id ),
+                                existing_totals AS (
+                                SELECT building_outline_id,
+                                    sum(area_overlap) AS total_area_existing_overlap,
+                                    sum(percent_existing_overlap) AS total_percent_existing_overlap
+                                FROM related_prep
+                                GROUP BY building_outline_id )
+
+                            INSERT INTO buildings_bulk_load.related(bulk_load_outline_id
+                                                                  , building_outline_id
+                                                                  , qa_status_id
+                                                                  , area_bulk_load
+                                                                  , area_existing
+                                                                  , area_overlap
+                                                                  , percent_bulk_load_overlap
+                                                                  , percent_existing_overlap
+                                                                  , total_area_bulk_load_overlap
+                                                                  , total_area_existing_overlap
+                                                                  , total_percent_bulk_load_overlap
+                                                                  , total_percent_existing_overlap)
+                            SELECT rp.bulk_load_outline_id,
+                                   rp.building_outline_id,
+                                   rp.qa_status_id,
+                                   rp.area_bulk_load,
+                                   rp.area_existing,
+                                   rp.area_overlap,
+                                   rp.percent_bulk_load_overlap,
+                                   rp.percent_existing_overlap,
+                                   bulk_load_totals.total_area_bulk_load_overlap,
+                                   existing_totals.total_area_existing_overlap,
+                                   bulk_load_totals.total_percent_bulk_load_overlap,
+                                   existing_totals.total_percent_existing_overlap
+                            FROM related_prep rp,
+                                 bulk_load_totals,
+                                 existing_totals
+                            WHERE rp.bulk_load_outline_id = bulk_load_totals.bulk_load_outline_id
+                              AND rp.building_outline_id = existing_totals.building_outline_id;
                             '''
 
         sql_refresh = '''CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
@@ -982,6 +1041,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 self.db.execute_no_commit(sql_new_matched, (id_bulk, id_existing))
+
+        # related
+        self.db.execute_no_commit(sql_new_related_prep_table)
+        for feat1 in self.lyr_related_bulk_load_in_edit.getFeatures():
+            id_bulk = feat1['bulk_load_outline_id']
+            for feat2 in self.lyr_related_existing_in_edit.getFeatures():
+                id_existing = feat2['building_outline_id']
+                self.db.execute_no_commit(sql_new_related_prep, (id_bulk, id_existing))
+        self.db.execute_no_commit(sql_new_related)
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
