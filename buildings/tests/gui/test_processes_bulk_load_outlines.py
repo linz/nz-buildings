@@ -97,6 +97,12 @@ class ProcessBulkLoadTest(unittest.TestCase):
     def test_bulk_load_ok_clicked(self):
         """When save is clicked data is added to the correct tables"""
         # create temporary outlines layer
+        sql = 'SELECT count * FROM buildings_bulk_load.bulk_load_outlines;'
+        result = db._execute(sql)
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
         layer = QgsVectorLayer("Polygon?crs=epsg:2193",
                                "temporary_outlines", "memory")
         layer.dataProvider().addAttributes([QgsField('id', QVariant.Int)])
@@ -105,19 +111,12 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # feature one
         feature_one = QgsFeature()
         feature_one.setAttributes([1])
-        points = [QgsPoint(1749919, 5426930), QgsPoint(1749919, 5426874),
-                  QgsPoint(1749976, 5426874), QgsPoint(1749976, 5426930)]
+        points = [QgsPoint(1878056, 5555355), QgsPoint(1878056, 5555300),
+                  QgsPoint(1878156, 5555300), QgsPoint(1878156, 5555355)]
         feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
-        # feature two
-        feature_two = QgsFeature()
-        feature_two.setAttributes([2])
-        points = [QgsPoint(1749919, 5426950), QgsPoint(1749919, 5427005),
-                  QgsPoint(1749976, 5427005), QgsPoint(1749976, 5426950)]
-        feature_two.setGeometry(QgsGeometry.fromPolygon([points]))
         # add outlines to temporary layer
         layer.startEditing()
         layer.addFeature(feature_one, True)
-        layer.addFeature(feature_two, True)
         layer.commitChanges()
         # create temporary imagery layer
         imagery_layer = QgsVectorLayer("Polygon?crs=epsg:2193",
@@ -128,10 +127,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         QgsMapLayerRegistry.instance().addMapLayer(imagery_layer)
         outline = QgsFeature()
         outline.setAttributes(['1'])
-        points = points = [QgsPoint(1749900, 5426874),
-                           QgsPoint(1749900, 5427005),
-                           QgsPoint(1749999, 5427005),
-                           QgsPoint(1749999, 5426874)]
+        points = points = [QgsPoint(1878000, 5555400),
+                           QgsPoint(1878000, 5554999),
+                           QgsPoint(1878300, 5554999),
+                           QgsPoint(1878300, 5555400)]
         outline.setGeometry(QgsGeometry.fromPolygon([points]))
         imagery_layer.startEditing()
         imagery_layer.addFeature(outline, True)
@@ -159,16 +158,23 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # open cursor as have to add capture source entry from test
         self.bulk_load_frame.db.open_cursor()
         # using opened cursor insert capture source value required
-        sql = 'SELECT buildings_common.fn_capture_source_insert(1, NULL);'
+        sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
         self.bulk_load_frame.db.execute_no_commit(sql)
         # add outlines
         self.bulk_load_frame.ok_clicked(built_in=False, commit_status=False)
+        # check 1 outlines were added to bulk load outlines
+        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
+        result2 = db._execute(sql)
+        # print result2
+        if result2 is None:
+            result2 = 0
+        else:
+            resultT = result2.fetchall()[0][0]
+        self.assertEqual(result + 1, resultT)
         # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.dataset_id)
-        # check 2 outlines were added to bulk load outlines
-        self.assertEqual(self.bulk_load_frame.inserted_values, 2)
 
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadTest)
