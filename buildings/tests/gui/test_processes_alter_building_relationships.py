@@ -18,7 +18,7 @@
 
 import unittest
 
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsFeature, QgsPoint, QgsGeometry, QgsField
+from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsFeature, QgsPoint, QgsGeometry, QgsField, QgsCoordinateReferenceSystem, QgsRectangle
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
@@ -60,18 +60,30 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Alter Building Relationships'))
         self.alter_relationships_frame = self.dockwidget.current_frame
 
     def tearDown(self):
         """Runs after each test."""
         self.alter_relationships_frame.btn_cancel.click()
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
 
     def test_select_added_and_removed_outlines(self):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas = iface.mapCanvas()
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14,
+                                      1878449.89, 5555644.95)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+
         QTest.mouseClick(widget,
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878228, 5555333)),
