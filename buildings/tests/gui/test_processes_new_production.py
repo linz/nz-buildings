@@ -61,7 +61,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.cmb_add_outline.setCurrentIndex(0)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(2)
+        self.menu_frame.cmb_add_outline.setCurrentIndex(3)
         self.new_production_frame = self.dockwidget.current_frame
 
     def tearDown(self):

@@ -82,10 +82,12 @@ class SetUpMenuTest(unittest.TestCase):
 
     def test_menu_gui_combo_options(self):
         """Combo box has three options"""
-        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
+        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 4)
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1),
-                         'Add New Outline to Bulk Load Dataset')
+                         'Alter Building Relationships')
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2),
+                         'Add New Outline to Bulk Load Dataset')
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(3),
                          'Add New Outline to Production')
 
 
