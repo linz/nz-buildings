@@ -145,15 +145,19 @@ COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_select_transfer_date(i
 -------------------------------------------------------------------
 --TRANSFERRED update
 -------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.transferred_add_record(integer, integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.transferred_insert(integer, integer)
     RETURNS integer AS
 $$
-    INSERT INTO buildings_bulk_load.transferred(bulk_load_outline_id, new_building_outline_id)
-    VALUES($1, $2)
-    RETURNING bulk_load_outline_id;
+
+    WITH transferred_insert AS (
+        INSERT INTO buildings_bulk_load.transferred(bulk_load_outline_id, new_building_outline_id)
+        VALUES($1, $2)
+        RETURNING 1
+    )
+    SELECT count(*)::integer FROM transferred_insert;
 
 $$ LANGUAGE sql;
-COMMENT ON FUNCTION buildings_bulk_load.transferred_add_record(integer, integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.transferred_insert(integer, integer) IS
 'Create new records in transferred table';
 
 -------------------------------------------------------------------
@@ -313,3 +317,43 @@ $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.buildings_related_select_by_dataset(integer) IS
 'Select building_id in related table';
 
+-------------------------------------------------------------------
+--BUILDING OUTLINES create new records
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer)
+    RETURNS integer AS
+$$
+
+    SELECT buildings.building_outlines_insert (
+            $1
+          , supplied.capture_method_id
+          , supplied.capture_source_id
+          , 1
+          , supplied.suburb_locality_id
+          , supplied.town_city_id
+          , supplied.territorial_authority_id
+          , supplied.begin_lifespan
+          , supplied.shape
+          )
+        FROM buildings_bulk_load.bulk_load_outlines supplied
+        WHERE supplied.bulk_load_outline_id = $2
+
+$$ LANGUAGE sql;
+COMMENT ON FUNCTION buildings.building_outlines_insert_bulk(integer, integer) IS
+'Create new added records in building outlines table';
+
+-------------------------------------------------------------------
+--MATCHED return building_id
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_find_building_id(integer)
+    RETURNS integer AS
+$$
+
+    SELECT outlines.building_outline_id
+    FROM buildings.building_outlines outlines
+    JOIN buildings_bulk_load.matched USING (building_outline_id)
+    WHERE matched.bulk_load_outline_id = $1
+
+$$ LANGUAGE sql;
+COMMENT ON FUNCTION buildings.matched_find_building_id(integer) IS
+'Return the building_id of the matched building outlines';
