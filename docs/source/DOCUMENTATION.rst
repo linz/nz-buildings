@@ -64,14 +64,15 @@ Structure requirements of SQL schema build files:
 
  CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
 
-3. Each table's columns must be listed in the lines immediately following the CREATE TABLE IF NOT EXISTS line, and within "()" brackets and ending with a semi-colon:
+3. Each table's columns must be listed in the lines immediately following the CREATE TABLE IF NOT EXISTS line, and within "()" brackets and ending with a semi-colon. It's important that each column be preceeded by four spaces, and then a comma "    ,". This is to ensure parsing is not confused by the comma used in the numeric or decimal precision/scope values.
 
 .. code-block:: sql
 
-   CREATE TABLE IF NOT EXISTS buildings.use (
-      use_id serial PRIMARY KEY,
-      value character varying(40) NOT NULL
-      );
+  CREATE TABLE IF NOT EXISTS buildings.buildings (
+      building_id serial PRIMARY KEY
+    , begin_lifespan timestamptz NOT NULL DEFAULT now()
+    , end_lifespan timestamptz
+);
 
 4. Every schema, table, and column must have a comment describing it.
 
