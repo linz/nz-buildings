@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 --BUILDINGS insert into
 -------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_buildings_insert()
+CREATE OR REPLACE FUNCTION buildings.buildings_insert()
 RETURNS integer AS
 $$
 
@@ -21,7 +21,7 @@ LANGUAGE sql VOLATILE;
 ----------------------------------------------------------------
 -- BUILDING OUTLINES insert into
 ----------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_building_outlines_insert(
+CREATE OR REPLACE FUNCTION buildings.building_outlines_insert(
       p_building_id integer
     , p_capture_method_id integer
     , p_capture_source_id integer
@@ -67,7 +67,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- LIFECYCLE STAGE insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_lifecycle_stage_insert(
+CREATE OR REPLACE FUNCTION buildings.lifecycle_stage_insert(
       p_value varchar(40)
 )
 RETURNS integer AS

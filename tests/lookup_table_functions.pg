@@ -1,0 +1,69 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for lookup table functions using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+
+SELECT plan(10);
+
+-- Tests
+
+--Organisation--------------------------
+SELECT has_function('buildings_bulk_load', 'organisation_insert', 'Should have function organisation_insert in bulk_load schema.');
+SELECT set_has(
+    'SELECT value FROM buildings_bulk_load.organisation',
+    $$VALUES('Test Organisation')$$,
+    'Check contents of organisation table after organisation_insert function has run'
+);
+
+--Capture Source Group-------------------
+SELECT has_function('buildings_common', 'capture_source_group_insert', 'Should have function capture_source_group_insert in buildings_common schema.');
+SELECT set_has(
+    'SELECT value FROM buildings_common.capture_source_group',
+    $$VALUES('Test CS Value')$$,
+    'Check contents of capture_source table after capture_source_insert function has run'
+);
+
+--Capture Source-------------------------
+SELECT has_function('buildings_common', 'capture_source_insert', 'Should have function capture_source_insert in buildings_common schema.');
+SELECT set_has(
+    'SELECT external_source_id FROM buildings_common.capture_source',
+    $$VALUES('Test External Source')$$,
+    'Check contents of capture source table after capture_source_insert function has run'
+);
+
+--Lifecycle Stage-------------------------
+SELECT has_function('buildings', 'lifecycle_stage_insert', 'Should have function lifecycle_stage_insert in buildings schema.');
+SELECT set_has(
+    'SELECT value FROM buildings.lifecycle_stage',
+    $$VALUES('Test Lifecycle Stage')$$,
+    'Check contents of lifecycle_stage table after lifecycle_stage_insert function has run'
+);
+
+--Capture Method-------------------------
+SELECT has_function('buildings_common', 'capture_method_insert', 'Should have function capture_method_insert in buildings_common schema.');
+SELECT set_has(
+    'SELECT value FROM buildings_common.capture_method',
+    $$VALUES('Test Capture Method')$$,
+    'Check contents of capture_method table after capture_method_insert function has run'
+);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;

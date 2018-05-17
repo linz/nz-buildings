@@ -80,7 +80,7 @@ Structure requirements of SQL schema build files:
 
 .. code-block:: sql
 
-   COMMENT ON SCHEMA buildings IS 'The schema holds builing information. ';
+   COMMENT ON SCHEMA buildings IS 'The schema holds building information. ';
 
    COMMENT ON TABLE buildings.lifecycle_stage IS
    'Lookup table that holds all of the lifecycle stages for a building.';

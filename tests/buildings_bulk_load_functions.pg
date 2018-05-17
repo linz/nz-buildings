@@ -1,0 +1,44 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings_bulk_load functions using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(4);
+
+-- Tests
+--Bulk Load Outlines-------------------------
+SELECT has_function('buildings_bulk_load', 'bulk_load_outlines_insert', 'Should have function bulk_load_outlines_insert in bulk_load schema.');
+SELECT set_has(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.bulk_load_outlines',
+    $$VALUES (1000000.0)$$,
+    'Check contents of bulk load outlines table after bulk_load_outlines_insert function has run'
+);
+
+--Supplied Datasets-------------------------
+SELECT has_function('buildings_bulk_load', 'supplied_datasets_insert', 'Should have function supplied_datasets_insert in bulk_load schema.');
+SELECT set_has(
+    'SELECT description, supplier_id FROM buildings_bulk_load.supplied_datasets',
+    $$VALUES('Test Dataset', 1)$$,
+    'Check contents of supplied datasets table after supplied_datasets_insert function has run'
+);
+
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;

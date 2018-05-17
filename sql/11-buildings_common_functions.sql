@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------
 -- CAPTURE SOURCE insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_insert(
+CREATE OR REPLACE FUNCTION buildings_common.capture_source_insert(
       p_capture_source_group_id integer
     , p_external_source_id varchar(250)
 )
@@ -27,7 +27,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- CAPTURE METHOD insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_common.fn_capture_method_insert(
+CREATE OR REPLACE FUNCTION buildings_common.capture_method_insert(
       p_value varchar(250)
 )
 RETURNS integer AS
@@ -50,7 +50,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- CAPTURE SOURCE GROUP insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_common.fn_capture_source_group_insert( 
+CREATE OR REPLACE FUNCTION buildings_common.capture_source_group_insert( 
       p_value varchar(80) 
     , p_description varchar(400)
 )
