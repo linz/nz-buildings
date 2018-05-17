@@ -126,3 +126,122 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- ALTER_BUILDING_RELATIONSHIPS
+-------------------------------------------------------------------------
+
+-- Remove building outlines
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_delete_existing_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.related
+    WHERE building_outline_id = $1
+    RETURNING building_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_delete_bulk_load_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.related
+    WHERE bulk_load_outline_id = $1
+    RETURNING bulk_load_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_delete_existing_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.matched
+    WHERE building_outline_id = $1
+    RETURNING building_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_delete_bulk_load_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.matched
+    WHERE bulk_load_outline_id = $1
+    RETURNING bulk_load_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.removed
+    WHERE building_outline_id = $1
+    RETURNING building_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.added_delete_bulk_load_outlines(integer)
+RETURNS integer AS
+$$
+
+    DELETE FROM buildings_bulk_load.added
+    WHERE bulk_load_outline_id = $1
+    RETURNING bulk_load_outline_id;
+
+$$
+LANGUAGE sql;
+
+-- Insert building outlines
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer)
+RETURNS integer AS
+$$
+    INSERT INTO buildings_bulk_load.added
+    VALUES ($1, 1)
+    RETURNING added.bulk_load_outline_id;
+
+$$
+LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_insert_bulk_load_outlines(integer)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.removed
+    VALUES ($1, 1)
+    RETURNING removed.building_outline_id;
+
+$$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_insert_buildling_outlines(integer, integer)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.matched
+    VALUES ($1, $2, 1)
+    RETURNING matched.building_outline_id;
+
+$$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_insert_buildling_outlines(integer, integer)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.related (bulk_load_outline_id, building_outline_id, qa_status_id)
+    VALUES ($1, $2, 1)
+    RETURNING related.related_id;
+
+$$
+LANGUAGE sql;
