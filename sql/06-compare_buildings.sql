@@ -32,13 +32,15 @@ $$
         GROUP BY bulk_load_outline_id
         HAVING count(bulk_load_outline_id) = 1
     )
-        SELECT bulk_load_outline_id
-        FROM buildings_bulk_load.bulk_load_outlines supplied
-        LEFT JOIN buildings_bulk_load.existing_subset_extracts current ON ST_Intersects(supplied.shape, current.shape)
-        LEFT JOIN intersects USING (bulk_load_outline_id)
-        WHERE current.building_outline_id IS NULL
-        OR (     intersects.supplied_intersect < 5
-             AND supplied.bulk_load_outline_id NOT IN ( SELECT bulk_load_outline_id FROM supplied_count ))
+    -- Find supplied bulk_load_outline_id that do not intersect or intersect
+    -- with <5% overlap, and are therefore marked as new to the dataset.
+    SELECT bulk_load_outline_id
+    FROM buildings_bulk_load.bulk_load_outlines supplied
+    LEFT JOIN buildings_bulk_load.existing_subset_extracts current ON ST_Intersects(supplied.shape, current.shape)
+    LEFT JOIN intersects USING (bulk_load_outline_id)
+    WHERE current.building_outline_id IS NULL
+    OR (     intersects.supplied_intersect < 5
+         AND supplied.bulk_load_outline_id NOT IN ( SELECT bulk_load_outline_id FROM supplied_count ))
     ;
 
 $$
@@ -78,13 +80,15 @@ $$
         GROUP BY building_outline_id
         HAVING count(building_outline_id) = 1
     )
-        SELECT building_outline_id
-        FROM buildings_bulk_load.existing_subset_extracts current
-        LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
-        LEFT JOIN intersects USING (building_outline_id)
-        WHERE supplied.bulk_load_outline_id IS NULL
-        OR (     intersects.current_intersect < 5
-             AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ))
+    -- Find current building_outline_id that do not intersect or intersect with
+    -- <5% overlap, and are therefore marked for removal from the dataset.
+    SELECT building_outline_id
+    FROM buildings_bulk_load.existing_subset_extracts current
+    LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
+    LEFT JOIN intersects USING (building_outline_id)
+    WHERE supplied.bulk_load_outline_id IS NULL
+    OR (     intersects.current_intersect < 5
+         AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ))
     ;
 
 $$
@@ -136,27 +140,24 @@ $$
         GROUP BY bulk_load_outline_id
         HAVING count(bulk_load_outline_id) = 1
     )
-        -- Find and return the combination of id's that are involved in 1:1
-        -- intersects
-        SELECT
-              intersects.building_outline_id
-            , intersects.bulk_load_outline_id
-        FROM intersects
-        WHERE building_outline_id IN (
-            SELECT building_outline_id
-            FROM current_count )
-        AND bulk_load_outline_id IN (
-            SELECT bulk_load_outline_id
-            FROM supplied_count )
-
-        -- Do I need > 5 again?
+    -- Find and return the combination of id's that are involved in 1:1
+    -- intersects
+    SELECT
+          intersects.building_outline_id
+        , intersects.bulk_load_outline_id
+    FROM intersects
+    WHERE building_outline_id IN (
+        SELECT building_outline_id
+        FROM current_count )
+    AND bulk_load_outline_id IN (
+        SELECT bulk_load_outline_id
+        FROM supplied_count )
     ;
 
 $$
 LANGUAGE sql VOLATILE;
 
 -- RELATED
-
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.find_related(
       p_supplied_dataset_id integer
@@ -202,29 +203,28 @@ $$
         GROUP BY bulk_load_outline_id
         HAVING count(bulk_load_outline_id) > 1
     )
-        -- Find and return the combination of id's that are involved in m:n
-        -- intersects
-        SELECT
-              intersects.building_outline_id
-            , intersects.bulk_load_outline_id
-        FROM intersects
-        WHERE building_outline_id IN (
-            SELECT building_outline_id
-            FROM current_count )
-        OR bulk_load_outline_id IN (
-            SELECT bulk_load_outline_id
-            FROM supplied_count )
-
-        -- Do I need > 5 again?
+    -- Find and return the combination of id's that are involved in m:n
+    -- intersects
+    SELECT
+          intersects.building_outline_id
+        , intersects.bulk_load_outline_id
+    FROM intersects
+    WHERE building_outline_id IN (
+        SELECT building_outline_id
+        FROM current_count )
+    OR bulk_load_outline_id IN (
+        SELECT bulk_load_outline_id
+        FROM supplied_count )
     ;
 
 $$
 LANGUAGE sql VOLATILE;
 
+-- OVERALL PROCESS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.compare_building_outlines(p_supplied_dataset_id integer)
-    RETURNS void
-AS $$
+    RETURNS void AS 
+$$
 
 BEGIN
 
