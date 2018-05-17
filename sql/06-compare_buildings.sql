@@ -237,7 +237,7 @@ IF ( SELECT processed_date
         INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
         SELECT
               bulk_load_outline_id
-            , 1 AS qa_status_id
+            , 2 AS qa_status_id
         FROM buildings_bulk_load.find_added(p_supplied_dataset_id);
 
         -- REMOVED
@@ -245,7 +245,7 @@ IF ( SELECT processed_date
         INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id)
         SELECT
               building_outline_id
-            , 1 AS qa_status_id
+            , 2 AS qa_status_id
         FROM buildings_bulk_load.find_removed(p_supplied_dataset_id);
 
         -- MATCHED
@@ -254,7 +254,7 @@ IF ( SELECT processed_date
         SELECT
               bulk_load_outline_id
             , building_outline_id
-            , 1 AS qa_status_id
+            , 2 AS qa_status_id
         FROM buildings_bulk_load.find_matched(p_supplied_dataset_id);
 
         -- RELATED
@@ -263,7 +263,7 @@ IF ( SELECT processed_date
         SELECT
               bulk_load_outline_id
             , building_outline_id
-            , 1 AS qa_status_id
+            , 2 AS qa_status_id
         FROM buildings_bulk_load.find_related(p_supplied_dataset_id);
 
         -- UPDATE processed_date IN supplied_datasets
