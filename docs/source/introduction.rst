@@ -47,6 +47,21 @@ Source Imagery
 
 Resolution of imagery used for capture of building outlines ranges from 50cm pixel resolution (0.5m GSD) to 10cm pixel resolution (0.1m GSD).
 
+Coverage Maps
+---------------------------
+
+The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the LDS. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
+
++-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
+| .. figure:: _static/current_building_outlines_coverage.jpg  | .. figure:: _static/upcoming_building_outlines_coverage.jpg | .. figure:: _static/future_building_outlines_coverage.jpg |
+|    :scale: 70%                                              |    :scale: 70%                                              |    :scale: 70%                                            |
+|    :alt: current building outlines coverage                 |    :alt: upcoming bulding outlines coverage                 |    :alt: future building outlines coverage                |
+|                                                             |                                                             |                                                           |
+|    Image 2: Map of current coverage                         |    Image 3: Map of coverage by the end of 2018.             |    Image 4: Map of coverage after next round of aerial    |
+|                                                             |                                                             |    imagery received.                                      |
++-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
+
+
 
 Accuracy Specification
 ---------------------------
