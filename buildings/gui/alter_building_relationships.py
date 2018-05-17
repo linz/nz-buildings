@@ -46,7 +46,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_related.clicked.connect(self.related_clicked)
 
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
-        # self.btn_save.clicked.connect(self.save_clicked)
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
     def open_alter_relationship_frame(self):
@@ -59,14 +58,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_list(self.lst_existing)
         self.init_list(self.lst_bulk)
 
-        self.update_view()
         self.add_building_lyrs()
         self.clear_layer_filter()
 
         iface.mapCanvas().setExtent(self.lyr_bulk_load.extent())
-
         iface.setActiveLayer(self.lyr_bulk_load)
-
         iface.actionSelectRectangle().trigger()
 
         self.lst_highlight = []
@@ -83,41 +79,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
-
-    def update_view(self):
-        """Update view for buildings in different relationships"""
-
-        sql_refresh = '''CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
-                    SELECT a.bulk_load_outline_id, b.shape
-                    FROM buildings_bulk_load.added a
-                    JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
-
-                CREATE OR REPLACE VIEW buildings_bulk_load.removed_outlines AS
-                    SELECT r.building_outline_id, e.shape
-                    FROM buildings_bulk_load.removed r
-                    JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
-
-                CREATE OR REPLACE VIEW buildings_bulk_load.matched_bulk_load_outlines AS
-                    SELECT m.bulk_load_outline_id, b.shape
-                    FROM buildings_bulk_load.matched m
-                    JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
-
-                CREATE OR REPLACE VIEW buildings_bulk_load.related_bulk_load_outlines AS
-                    SELECT DISTINCT r.bulk_load_outline_id, b.shape
-                    FROM buildings_bulk_load.related r
-                    JOIN buildings_bulk_load.bulk_load_outlines b USING (bulk_load_outline_id);
-
-                CREATE OR REPLACE VIEW buildings_bulk_load.matched_existing_outlines AS
-                    SELECT m.building_outline_id, e.shape
-                    FROM buildings_bulk_load.matched m
-                    JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
-
-                CREATE OR REPLACE VIEW buildings_bulk_load.related_existing_outlines AS
-                    SELECT DISTINCT r.building_outline_id, e.shape
-                    FROM buildings_bulk_load.related r
-                    JOIN buildings_bulk_load.existing_subset_extracts e USING (building_outline_id);
-                '''
-        self.db._execute(sql_refresh)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -181,6 +142,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "added_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
+
+    def repaint_view(self):
+        """Repaint views to update changes in result"""
+        self.lyr_added_bulk_load.triggerRepaint()
+        self.lyr_removed_existing.triggerRepaint()
+        self.lyr_matched_bulk_load.triggerRepaint()
+        self.lyr_matched_existing.triggerRepaint()
+        self.lyr_related_bulk_load.triggerRepaint()
+        self.lyr_related_existing.triggerRepaint()
 
     def clear_layer_filter(self):
         """ Returns 'null' filter for layers """
@@ -880,133 +850,26 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Save result and change database
         Called when save botton is clicked
         """
-        sql_related_existing = '''DELETE FROM buildings_bulk_load.related
-                                  WHERE building_outline_id = %s;
-                                  '''
-        sql_related_bulk = '''DELETE FROM buildings_bulk_load.related
-                              WHERE bulk_load_outline_id = %s;
-                              '''
-        sql_matched_existing = '''DELETE FROM buildings_bulk_load.matched
-                                  WHERE building_outline_id = %s;
-                                  '''
-        sql_matched_bulk = '''DELETE FROM buildings_bulk_load.matched
-                              WHERE bulk_load_outline_id = %s;
-                              '''
-        sql_removed = '''DELETE FROM buildings_bulk_load.removed
-                         WHERE building_outline_id = %s;
-                         '''
-        sql_added = '''DELETE FROM buildings_bulk_load.added
-                       WHERE bulk_load_outline_id = %s;
-                       '''
 
-        sql_new_added = '''INSERT INTO buildings_bulk_load.added
-                            VALUES (%s, 1);
-                            '''
+        sql_delete_related_existing = 'SELECT buildings_bulk_load.related_delete_existing_outlines(%s);'
 
-        sql_new_removed = '''INSERT INTO buildings_bulk_load.removed
-                            VALUES (%s, 1);
-                            '''
+        sql_delete_related_bulk = 'SELECT buildings_bulk_load.related_delete_bulk_load_outlines(%s);'
 
-        sql_new_matched = '''INSERT INTO buildings_bulk_load.matched(bulk_load_outline_id
-                                                                   , building_outline_id
-                                                                   , qa_status_id
-                                                                   , area_bulk_load
-                                                                   , area_existing
-                                                                   , percent_area_difference
-                                                                   , area_overlap
-                                                                   , percent_bulk_load_overlap
-                                                                   , percent_existing_overlap
-                                                                   , hausdorff_distance)
-                             SELECT supplied.bulk_load_outline_id,
-                                    current.building_outline_id,
-                                    1,
-                                    ST_Area(supplied.shape),
-                                    ST_Area(current.shape),
-                                    @(ST_Area(current.shape) - ST_Area(supplied.shape)) / ST_Area(current.shape) * 100,
-                                    ST_Area(ST_Intersection(supplied.shape, current.shape)),
-                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(supplied.shape) * 100 ,
-                                    ST_Area(ST_Intersection(supplied.shape, current.shape)) / ST_Area(current.shape) * 100,
-                                    ST_HausdorffDistance(supplied.shape, current.shape)
-                             FROM buildings_bulk_load.bulk_load_outlines supplied,
-                                  buildings_bulk_load.existing_subset_extracts current
-                             WHERE supplied.bulk_load_outline_id = %s and current.building_outline_id = %s;
-                            '''
+        sql_delete_matched_existing = 'SELECT buildings_bulk_load.matched_delete_existing_outlines(%s);'
 
-        sql_new_related_prep_table = '''
-                                CREATE TEMP TABLE related_prep (bulk_load_outline_id integer
-                                                              , building_outline_id integer
-                                                              , qa_status_id integer
-                                                              , area_bulk_load numeric(10,2)
-                                                              , area_existing numeric(10,2)
-                                                              , area_overlap numeric(10,2)
-                                                              , percent_bulk_load_overlap numeric(5,2)
-                                                              , percent_existing_overlap numeric(5,2))
-                                '''
+        sql_delete_matched_bulk = 'SELECT buildings_bulk_load.matched_delete_bulk_load_outlines(%s);'
 
-        sql_new_related_prep = '''
-                                INSERT INTO related_prep
-                                SELECT supplied.bulk_load_outline_id,
-                                       current.building_outline_id,
-                                       1 AS qa_status_id,
-                                       ST_Area(supplied.shape) AS area_bulk_load,
-                                       ST_Area(current.shape) AS area_existing,
-                                       ST_Area(ST_Intersection(supplied.shape, current.shape)) AS area_overlap,
-                                       ST_Area(ST_Intersection(supplied.shape, current.shape))/ ST_Area(supplied.shape) * 100
-                                       AS percent_bulk_load_overlap,
-                                       ST_Area(ST_Intersection(supplied.shape, current.shape))/ ST_Area(current.shape) * 100
-                                       AS percent_existing_overlap
-                                FROM buildings_bulk_load.bulk_load_outlines supplied,
-                                     buildings_bulk_load.existing_subset_extracts current
-                                WHERE supplied.bulk_load_outline_id = %s
-                                  AND current.building_outline_id = %s;
-                                '''
+        sql_delete_removed = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
 
-        sql_new_related = '''
-                            WITH bulk_load_totals AS (
-                                SELECT bulk_load_outline_id,
-                                    sum(area_overlap) AS total_area_bulk_load_overlap,
-                                    sum(percent_bulk_load_overlap) AS total_percent_bulk_load_overlap
-                                FROM related_prep
-                                GROUP BY bulk_load_outline_id ),
-                                existing_totals AS (
-                                SELECT building_outline_id,
-                                    sum(area_overlap) AS total_area_existing_overlap,
-                                    sum(percent_existing_overlap) AS total_percent_existing_overlap
-                                FROM related_prep
-                                GROUP BY building_outline_id )
+        sql_delete_added = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
 
-                            INSERT INTO buildings_bulk_load.related(bulk_load_outline_id
-                                                                  , building_outline_id
-                                                                  , qa_status_id
-                                                                  , area_bulk_load
-                                                                  , area_existing
-                                                                  , area_overlap
-                                                                  , percent_bulk_load_overlap
-                                                                  , percent_existing_overlap
-                                                                  , total_area_bulk_load_overlap
-                                                                  , total_area_existing_overlap
-                                                                  , total_percent_bulk_load_overlap
-                                                                  , total_percent_existing_overlap)
-                            SELECT rp.bulk_load_outline_id,
-                                   rp.building_outline_id,
-                                   rp.qa_status_id,
-                                   rp.area_bulk_load,
-                                   rp.area_existing,
-                                   rp.area_overlap,
-                                   rp.percent_bulk_load_overlap,
-                                   rp.percent_existing_overlap,
-                                   bulk_load_totals.total_area_bulk_load_overlap,
-                                   existing_totals.total_area_existing_overlap,
-                                   bulk_load_totals.total_percent_bulk_load_overlap,
-                                   existing_totals.total_percent_existing_overlap
-                            FROM related_prep rp,
-                                 bulk_load_totals,
-                                 existing_totals
-                            WHERE rp.bulk_load_outline_id = bulk_load_totals.bulk_load_outline_id
-                              AND rp.building_outline_id = existing_totals.building_outline_id;
+        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
 
-                            DISCARD TEMP;
-                            '''
+        sql_insert_removed = 'SELECT buildings_bulk_load.removed_insert_bulk_load_outlines(%s);'
+
+        sql_insert_matched = 'SELECT buildings_bulk_load.matched_insert_buildling_outlines(%s, %s);'
+
+        sql_insert_related = 'SELECT buildings_bulk_load.related_insert_buildling_outlines(%s, %s);'
 
         self.db.open_cursor()
 
@@ -1014,53 +877,49 @@ class AlterRelationships(QFrame, FORM_CLASS):
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
 
-            self.db.execute_no_commit(sql_removed, (id_existing, ))
-            self.db.execute_no_commit(sql_matched_existing, (id_existing, ))
-            self.db.execute_no_commit(sql_related_existing, (id_existing, ))
+            self.db.execute_no_commit(sql_delete_removed, (id_existing, ))
+            self.db.execute_no_commit(sql_delete_matched_existing, (id_existing, ))
+            self.db.execute_no_commit(sql_delete_related_existing, (id_existing, ))
 
         for row in range(self.lst_bulk.count())[::-1]:
             item = self.lst_bulk.item(row)
             id_bulk = int(item.text())
 
-            self.db.execute_no_commit(sql_added, (id_bulk, ))
-            self.db.execute_no_commit(sql_matched_bulk, (id_bulk, ))
-            self.db.execute_no_commit(sql_related_bulk, (id_bulk, ))
+            self.db.execute_no_commit(sql_delete_added, (id_bulk, ))
+            self.db.execute_no_commit(sql_delete_matched_bulk, (id_bulk, ))
+            self.db.execute_no_commit(sql_delete_related_bulk, (id_bulk, ))
 
         # added
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
-            self.db.execute_no_commit(sql_new_added, (id_bulk,))
+            self.db.execute_no_commit(sql_insert_added, (id_bulk,))
 
         # removed
         for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
-            self.db.execute_no_commit(sql_new_removed, (id_existing, ))
+            self.db.execute_no_commit(sql_insert_removed, (id_existing, ))
 
         # matched
         for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
-                self.db.execute_no_commit(sql_new_matched, (id_bulk, id_existing))
+                self.db.execute_no_commit(sql_insert_matched, (id_bulk, id_existing))
 
         # related
-        self.db.execute_no_commit(sql_new_related_prep_table)
         for feat1 in self.lyr_related_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
-                self.db.execute_no_commit(sql_new_related_prep, (id_bulk, id_existing))
-        self.db.execute_no_commit(sql_new_related)
+                self.db.execute_no_commit(sql_insert_related, (id_bulk, id_existing))
 
         if commit_status:
             self.db.commit_open_cursor()
 
-        # refresh view layer
-        self.update_view()
-
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
+        self.repaint_view()
         self.clear_layer_filter()
 
         self.btn_matched.setEnabled(True)
