@@ -61,8 +61,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.update_view()
         self.add_building_lyrs()
+        self.clear_layer_filter()
 
-        iface.setActiveLayer(self.lyr_existing)
+        iface.mapCanvas().setExtent(self.lyr_bulk_load.extent())
+
+        iface.setActiveLayer(self.lyr_bulk_load)
+
         iface.actionSelectRectangle().trigger()
 
         self.lst_highlight = []
@@ -177,10 +181,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "added_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
         self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
-
-        iface.mapCanvas().setExtent(self.lyr_bulk_load.extent())
-
-        self.clear_layer_filter()
 
     def clear_layer_filter(self):
         """ Returns 'null' filter for layers """
@@ -334,6 +334,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         When user selects features in bulk load outline layers, the ids will be added to the table
         """
+
         tbl = self.tbl_original
 
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
@@ -726,7 +727,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                     item = self.lst_bulk.takeItem(row_lst)
                     self.lst_bulk.removeItemWidget(item)
-
 
     def matched_clicked(self):
         """
