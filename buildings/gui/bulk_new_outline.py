@@ -9,6 +9,8 @@ import qgis
 from qgis.core import QgsVectorLayer, QgsFeatureRequest
 from qgis.utils import iface
 
+from functools import partial
+
 from buildings.utilities import database as db
 from buildings.utilities import layers
 from buildings.gui.error_dialog import ErrorDialog
@@ -68,7 +70,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             self.add_outlines()
             # set up signals
             self.outline_id = None
-            self.btn_save.clicked.connect(self.save_clicked)
+            self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
             self.btn_save.setDisabled(1)
             self.btn_reset.setDisabled(1)
             self.btn_reset.clicked.connect(self.reset_clicked)
@@ -81,7 +83,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         text_list = text.split('-')
         self.dataset_id = text_list[0]
         self.layer_registry.remove_layer(self.building_layer)
-        self.reset_clicked()
+        # self.reset_clicked()
         # add the bulk_load_outlines to the layer registry
         self.add_outlines()
         # set up signals
@@ -155,7 +157,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         comboboxes
         """
         # populate suburb combobox
-        sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.nz_locality'
+        sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.suburb_locality'
         result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -163,7 +165,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.cmb_suburb.addItem(item[0])
 
         # populate town combobox
-        sql = 'SELECT DISTINCT city_name FROM buildings_admin_bdys.nz_locality'
+        sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.town_city'
         result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -218,7 +220,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
-        sql = 'SELECT id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.suburb_4th = %s;'
+        sql = 'SELECT suburb_locality_id FROM buildings_admin_bdys.suburb_locality WHERE buildings_admin_bdys.suburb_locality.suburb_4th = %s;'
         result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -227,7 +229,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         returns town/city entered
         """
         text = self.cmb_town.currentText()
-        sql = 'SELECT city_id FROM buildings_admin_bdys.nz_locality WHERE buildings_admin_bdys.nz_locality.city_name = %s;'
+        sql = 'SELECT town_city_id FROM buildings_admin_bdys.town_city WHERE buildings_admin_bdys.town_city.name = %s;'
         result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -236,7 +238,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         returns territorial authority entered
         """
         text = self.cmb_ta.currentText()
-        sql = 'SELECT ogc_fid FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
+        sql = 'SELECT territorial_authority_id FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
         result = self.db._execute(sql, (text, ))
         return result.fetchall()[0][0]
 
@@ -292,7 +294,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                 self.btn_save.setDisabled(1)
                 self.btn_reset.setDisabled(1)
 
-    def save_clicked(self, built_in=False, commit_status=True):
+    def save_clicked(self, commit_status):
         """
         Called when save clicked
         """

@@ -5,6 +5,7 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 import qgis
+from functools import partial
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
@@ -32,7 +33,7 @@ class NewEntry(QFrame, FORM_CLASS):
         self.lifecycle_stage_id = None
         self.capture_method_id = None
         self.capture_source_group_id = None
-        self.btn_ok.clicked.connect(self.ok_clicked)
+        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.le_description.setDisabled(1)
         self.cmb_new_type_selection.currentIndexChanged.connect(self.set_new_type)
@@ -112,7 +113,7 @@ class NewEntry(QFrame, FORM_CLASS):
         else:
             self.le_description.setDisabled(1)
 
-    def ok_clicked(self, built_in, commit_status=True):
+    def ok_clicked(self, commit_status):
         # get value
         self.value = self.get_comments()
         # get type

@@ -5,6 +5,7 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 import qgis
+from functools import partial
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
@@ -37,7 +38,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
         # set up signals and slots
         self.capture_source_id = None
-        self.btn_ok.clicked.connect(self.ok_clicked)
+        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.rad_external_source.toggled.connect(self.enable_external_source)
 
@@ -80,7 +81,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.le_external_source_id.clear()
             self.le_external_source_id.setDisabled(1)
 
-    def ok_clicked(self, built_in, commit_status=True):
+    def ok_clicked(self, commit_status):
         """
         Called when ok button clicked
         """

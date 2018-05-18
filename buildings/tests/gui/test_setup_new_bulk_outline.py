@@ -53,9 +53,8 @@ class SetUpBulkNewTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Bulk Load Dataset'))
         self.new_bulk_frame = self.dockwidget.current_frame
         if self.new_bulk_frame.error_dialog is not None:
             self.no_supplied_data = True

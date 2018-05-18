@@ -9,6 +9,8 @@ import qgis
 
 import processing
 
+from functools import partial
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 
@@ -46,7 +48,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
         self.rad_external_source.toggled.connect(self.enable_external)
         self.ml_outlines_layer.currentIndexChanged.connect(self.populate_external_fcb)
-        self.btn_ok.clicked.connect(self.ok_clicked)
+        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
     def populate_comboboxes(self):
@@ -204,12 +206,12 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         return self.cmb_imagery.currentText()
 
     def find_suburb(self, geom):
-        sql = 'SELECT buildings.nz_locality_suburb_intersect_polygon(%s);'
+        sql = 'SELECT buildings.suburb_locality_suburb_intersect_polygon(%s);'
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
     def find_town_city(self, geom):
-        sql = 'SELECT buildings.nz_locality_town_city_intersect_polygon(%s);'
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
@@ -218,7 +220,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
-    def ok_clicked(self, built_in, commit_status=True):
+    def ok_clicked(self, commit_status):
         # get value
         self.description = self.get_description()
         # get combobox values
