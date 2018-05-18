@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS buildings_admin_bdys.suburb_locality (
 -- Town / City
 
 CREATE TABLE IF NOT EXISTS buildings_admin_bdys.town_city (
-    , town_city_id serial PRIMARY KEY
+      town_city_id serial PRIMARY KEY
     , external_city_id integer
     , name character varying(60)
     , shape public.geometry(MultiPolygon, 2193)

@@ -24,11 +24,11 @@ SELECT plan(9);
 -- Tests
 
 --Suburb--------------------------
-SELECT has_function('buildings', 'nz_locality_suburb_intersect_polygon', 'Should have function nz_locality_suburb_intersect_polygon in buildings schema.');
+SELECT has_function('buildings', 'suburb_locality_suburb_intersect_polygon', 'Should have function suburb_locality_suburb_intersect_polygon in buildings schema.');
 SELECT results_eq(
-	$$SELECT buildings.nz_locality_suburb_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+	$$SELECT buildings.suburb_locality_suburb_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (2)$$,
-    'nz_locality_suburb_intersect_polygon not returning correct suburb_id value'
+    'suburb_locality_suburb_intersect_polygon not returning correct suburb_locality_id value'
 );
 SELECT results_eq(
 	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
@@ -37,15 +37,15 @@ SELECT results_eq(
 );
 
 --Town City-------------------
-SELECT has_function('buildings', 'nz_locality_town_city_intersect_polygon', 'Should have function nz_locality_town_city_intersect_polygon in buildings schema.');
+SELECT has_function('buildings', 'town_city_intersect_polygon', 'Should have function nz_locality_town_city_intersect_polygon in buildings schema.');
 SELECT results_eq(
-	$$SELECT buildings.nz_locality_town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
-    $$VALUES (100132.0)$$,
-    'nz_locality_town_city_intersect_polygon not returning correct town_city_id value'
+	$$SELECT buildings.town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+    $$VALUES (200)$$,
+    'town_city_intersect_polygon not returning correct town_city_id value'
 );
 SELECT results_eq(
 	$$SELECT town_city_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
-    $$VALUES (100132)$$,
+    $$VALUES (200)$$,
     'Check town_city_id of bulk load outlines table after bulk_load_outlines_update_town_city function has run'
 );
 

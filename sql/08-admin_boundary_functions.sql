@@ -2,14 +2,14 @@
 -- SUBURB INTERSECTION- find the id of the suburb that has the most overlap with
 -- the provided building outline
 --------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.nz_locality_suburb_intersect_polygon(
+CREATE OR REPLACE FUNCTION buildings.suburb_locality_suburb_intersect_polygon(
     p_polygon_geometry geometry
 )
 RETURNS integer AS
 $$
     
-    SELECT   nzl.id
-    FROM     buildings_admin_bdys.nz_locality nzl
+    SELECT   nzl.suburb_locality_id
+    FROM     buildings_admin_bdys.suburb_locality nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
                  , ST_Transform(ST_SETSRID(nzl.shape, 2193),2193)
@@ -35,9 +35,9 @@ $$
 
     WITH update_suburb AS(
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
-        SET suburb_locality_id = nzl_intersect.nz_locality_suburb_intersect_polygon
+        SET suburb_locality_id = nzl_intersect.suburb_locality_suburb_intersect_polygon
         FROM (
-            SELECT buildings.nz_locality_suburb_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
+            SELECT buildings.suburb_locality_suburb_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) nzl_intersect
         WHERE outlines.bulk_load_outline_id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
@@ -52,14 +52,14 @@ LANGUAGE sql VOLATILE;
 -- TOWN/CITY INTERSECTION- find the id of the town/city that has the most overlap with
 -- the provided building outline
 --------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.nz_locality_town_city_intersect_polygon(
+CREATE OR REPLACE FUNCTION buildings.town_city_intersect_polygon(
     p_polygon_geometry geometry
 )
-RETURNS numeric(10,0) AS
+RETURNS integer AS
 $$
     
-    SELECT   nzl.city_id
-    FROM     buildings_admin_bdys.nz_locality nzl
+    SELECT   nzl.town_city_id
+    FROM     buildings_admin_bdys.town_city nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
                  , ST_Transform(ST_SETSRID(nzl.shape,2193),2193)
@@ -85,9 +85,9 @@ $$
     
     WITH update_town_city AS(
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
-        SET town_city_id = nzl_intersect.nz_locality_town_city_intersect_polygon
+        SET town_city_id = nzl_intersect.town_city_intersect_polygon
         FROM (
-            SELECT buildings.nz_locality_town_city_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
+            SELECT buildings.town_city_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) nzl_intersect
         WHERE outlines.bulk_load_outline_id = nzl_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
@@ -108,7 +108,7 @@ CREATE OR REPLACE FUNCTION buildings.territorial_authority_intersect_polygon(
 RETURNS integer AS
 $$
     
-    SELECT   nzl.ogc_fid
+    SELECT   nzl.territorial_authority_id
     FROM     buildings_admin_bdys.territorial_authority nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
