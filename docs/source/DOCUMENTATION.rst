@@ -80,7 +80,7 @@ Structure requirements of SQL schema build files:
 
 .. code-block:: sql
 
-   COMMENT ON SCHEMA buildings IS 'The schema holds building information. ';
+   COMMENT ON SCHEMA buildings IS 'The schema holds builing information. ';
 
    COMMENT ON TABLE buildings.lifecycle_stage IS
    'Lookup table that holds all of the lifecycle stages for a building.';
@@ -117,4 +117,7 @@ For example, an URL anchor link to the building_outlines table in the buildings 
 The above hyperlink is only shown to help understand the structure of the hyperlinks. The parsing script automatically determines the schema and table names.
 
 
+Creating a database diagram
+-----------------------------------
 
+The database diagram was created using licensed pgModeler version 0.9.1 on Ubuntu 16.04. The buildings database was created on a local installation of postgresql. pgModeler was used to "import" the database through this local connection, and the diagram created from that import. 

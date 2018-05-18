@@ -451,14 +451,15 @@ def get_columns(table_str, file_content, this_table_columns):
     for column_details in columns_strip:
         pri_key_serial_search = re.search(r"(.*)\sserial PRIMARY KEY", column_details)
         pri_key_search = re.search(r"(.*)\sinteger PRIMARY KEY", column_details)
+        pri_key_integer_not_null_search = re.search(r"(.*)\sinteger(?=.*?(NOT NULL))(?=.*?(PRIMARY KEY))", column_details)
         character_varying_search = re.search(r"(.*)\scharacter varying\((.*?)\)(?! NOT NULL)", column_details)  #does not contain "NOT NULL"
         character_varying_not_null_search = re.search(r"(.*)\scharacter varying\((.*?)\)\sNOT NULL", column_details)  #does contain "NOT NULL"
         timestamp_search = re.search(r"(.*)\stimestamptz(?! NOT NULL)", column_details)  #does not contain "NOT NULL"
         timestamp_not_null_search = re.search(r"^(.*)\stimestamptz\sNOT NULL.*", column_details)  #does contain "NOT NULL"
         integer_search = re.search(r"^(.*)\sinteger(?!.*NOT NULL)", column_details)  #does not contain "NOT NULL"
         integer_not_null_search = re.search(r"^(.*)\sinteger\sNOT NULL.*", column_details)  #does contain "NOT NULL"
-        numeric_search = re.search(r"(.*)\snumeric\((\d{1,2})\,\s(\d{1,2})\)\s(?!NOT NULL)", column_details)
-        numeric_not_null_search = re.search(r"(.*)\snumeric\((\d{1,2})\,\s(\d{1,2}).*NOT NULL", column_details)
+        numeric_search = re.search(r"(.*)\snumeric\((.*)\,(.*)\)(?! NOT NULL)", column_details)
+        numeric_not_null_search = re.search(r"(.*)\snumeric\((.*)\,(.*)\).*NOT NULL", column_details)
         shape = re.search(r"(shape).*geometry", column_details)
         text_not_null_search = re.search(r"(.*)\stext NOT NULL", column_details)
         text_search = re.search(r"(.*)\stext", column_details)
@@ -486,6 +487,22 @@ def get_columns(table_str, file_content, this_table_columns):
         elif pri_key_search is not None:
             this_column = []
             pri_key = pri_key_search.group(1)
+            pri_key2 = pri_key.strip()
+            pri_key_str = " **" + pri_key2 + "** "
+            column_str = table_str + "." + pri_key2
+            this_column.append(pri_key_str)  #column Name
+            this_column.append("integer")  #Data Type
+            this_column.append("32")  # Length
+            this_column.append(" ")  #Precision
+            this_column.append(" ")  # Scale
+            this_column.append("No") # Allows Nulls
+            column_comment_out = get_column_comments(column_str, file_content)
+            this_column.append(column_comment_out)  # Description
+            this_table_columns.append(this_column)
+
+        elif pri_key_integer_not_null_search is not None:
+            this_column = []
+            pri_key = pri_key_integer_not_null_search.group(1)
             pri_key2 = pri_key.strip()
             pri_key_str = " **" + pri_key2 + "** "
             column_str = table_str + "." + pri_key2
