@@ -290,23 +290,23 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 # convert to correct format
                 wkt = geom.exportToWkt()
                 sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-                result = self.db._execute(sql, data=(wkt, ))
+                result = self.db.execute_no_commit(sql, data=(wkt, ))
                 geom = result.fetchall()[0][0]
                 # ensure outline SRID is 2193
                 sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-                result = self.db._execute(sql, data=(geom, ))
+                result = self.db.execute_no_commit(sql, data=(geom, ))
                 geom = result.fetchall()[0][0]
             # iterate through supplied datasets and find convex hulls
             dataset = 1
             self.bulk_overlap = False
             while dataset <= self.dataset_id:
                 sql = 'SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;'
-                results = self.db._execute(sql, (dataset, ))
+                results = self.db.execute_no_commit(sql, (dataset, ))
                 t_date = results.fetchall()
                 if t_date:
                     if t_date[0][0] is None:
                         sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-                        result = self.db._execute(sql, data=(geom, dataset))
+                        result = self.db.execute_no_commit(sql, data=(geom, dataset))
                         results = result.fetchall()
                         if len(results) > 0:
                             self.bulk_overlap = True
@@ -455,11 +455,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             wkt = outline.geometry().exportToWkt()
             # convert to postgis shape and ensure outline is a multipolygon
             sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-            result = self.db._execute(sql, data=(wkt, ))
+            result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             # ensure outline SRID is 2193
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-            result = self.db._execute(sql, data=(geom, ))
+            result = self.db.execute_no_commit(sql, data=(geom, ))
             geom = result.fetchall()[0][0]
             suburb = self.find_suburb(geom)
             town_city = self.find_town_city(geom)
@@ -470,8 +470,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                                               'Suburb Admin Boundary ------'
                                               '-------------- \n\n Data will'
                                               ' not be added to table as has '
-                                              'null suburb Id, See canvas for '
-                                              'feature')
+                                              'null suburb Id')
                 self.error_dialog.show()
                 self.db.rollback_open_cursor()
                 return
@@ -488,7 +487,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 return
             self.inserted_values = self.inserted_values + 1
             # insert outline into buildings_bulk_load.supplied_outline
-            if external_field == '':
+            if external_source_id is None:
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, capture_method,
                                           capture_source, suburb, town_city,
