@@ -12,12 +12,12 @@ $$
     FROM     buildings_admin_bdys.suburb_locality nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
-                 , ST_Transform(ST_SETSRID(nzl.shape, 2193),2193)
+                 , nzl.shape
              )
     ORDER BY ST_Area( 
                  ST_Intersection( 
                        p_polygon_geometry
-                     , ST_Transform(ST_SETSRID(nzl.shape,2193), 2193)
+                     , nzl.shape
                  ) 
              ) / ST_Area(nzl.shape) DESC
     LIMIT    1;
@@ -62,12 +62,12 @@ $$
     FROM     buildings_admin_bdys.town_city nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
-                 , ST_Transform(ST_SETSRID(nzl.shape,2193),2193)
+                 , nzl.shape
              )
     ORDER BY ST_Area( 
                  ST_Intersection( 
                        p_polygon_geometry
-                     , ST_Transform(ST_SETSRID(nzl.shape,2193),2193)
+                     , nzl.shape
                  ) 
              ) / ST_Area(nzl.shape) DESC
     LIMIT    1;
@@ -112,12 +112,12 @@ $$
     FROM     buildings_admin_bdys.territorial_authority nzl
     WHERE    ST_Intersects(
                    p_polygon_geometry
-                 , ST_Transform(ST_SETSRID(nzl.shape,2193),2193)
+                 , nzl.shape
              )
     ORDER BY ST_Area( 
                  ST_Intersection( 
                        p_polygon_geometry
-                     , ST_Transform(ST_SETSRID(nzl.shape,2193),2193)
+                     , nzl.shape
                  ) 
              ) / ST_Area(nzl.shape) DESC
     LIMIT    1;
