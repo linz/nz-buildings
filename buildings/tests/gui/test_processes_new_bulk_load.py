@@ -232,6 +232,9 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
+        sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added'
+        added_result = db._execute(sql)
+        added_result = added_result.fetchall()[0][0]
         # add geom
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -273,6 +276,10 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added'
+        added_result2 = db._execute(sql)
+        added_result2 = added_result2.fetchall()[0][0]
+        self.assertEqual(added_result2, added_result + 1)
         self.new_bulk_frame.db.rollback_open_cursor()
 
 
