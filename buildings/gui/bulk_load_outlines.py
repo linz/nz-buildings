@@ -48,7 +48,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
         self.rad_external_source.toggled.connect(self.enable_external)
         self.ml_outlines_layer.currentIndexChanged.connect(self.populate_external_fcb)
-        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
+        self.btn_ok.clicked.connect(partial(self.ok_clicked,
+                                            commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
     def populate_comboboxes(self):
@@ -306,7 +307,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 if t_date:
                     if t_date[0][0] is None:
                         sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-                        result = self.db.execute_no_commit(sql, data=(geom, dataset))
+                        result = self.db.execute_no_commit(sql, data=(geom,
+                                                           dataset))
                         results = result.fetchall()
                         if len(results) > 0:
                             self.bulk_overlap = True
@@ -415,8 +417,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.inserted_values = 0
         if self.external_source_id is not None:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
-            result = self.db.execute_no_commit(sql, data=(self.capture_source_group,
-                                                          self.external_source_id))
+            result = self.db.execute_no_commit(sql,
+                                               data=(self.capture_source_group,
+                                                     self.external_source_id))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -434,7 +437,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 capture_source = value[0][0]
         else:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s AND cs.external_source_id is Null;'
-            result = self.db.execute_no_commit(sql, data=(capture_source_group,))
+            result = self.db.execute_no_commit(sql,
+                                               data=(capture_source_group,))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()

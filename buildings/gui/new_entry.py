@@ -33,7 +33,8 @@ class NewEntry(QFrame, FORM_CLASS):
         self.lifecycle_stage_id = None
         self.capture_method_id = None
         self.capture_source_group_id = None
-        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
+        self.btn_ok.clicked.connect(partial(self.ok_clicked,
+                                            commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.le_description.setDisabled(1)
         self.cmb_new_type_selection.currentIndexChanged.connect(self.set_new_type)

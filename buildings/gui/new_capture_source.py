@@ -38,7 +38,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
         # set up signals and slots
         self.capture_source_id = None
-        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
+        self.btn_ok.clicked.connect(partial(self.ok_clicked,
+                                            commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.rad_external_source.toggled.connect(self.enable_external_source)
 

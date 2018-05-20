@@ -64,7 +64,8 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         iface.actionAddFeature().trigger()
         # set up signals
         self.building_id = None
-        self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
+        self.btn_save.clicked.connect(partial(self.save_clicked,
+                                              commit_status=True))
         self.btn_reset.clicked.connect(self.reset_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.create_building_layer.featureAdded.connect(self.creator_feature_added)

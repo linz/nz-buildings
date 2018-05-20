@@ -70,7 +70,8 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             self.add_outlines()
             # set up signals
             self.outline_id = None
-            self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
+            self.btn_save.clicked.connect(partial(self.save_clicked,
+                                                  commit_status=True))
             self.btn_save.setDisabled(1)
             self.btn_reset.setDisabled(1)
             self.btn_reset.clicked.connect(self.reset_clicked)
@@ -185,7 +186,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_capture_method.currentText()
         sql = 'SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;'
-        result = self.db._execute(sql, data=(text, ))
+        result = self.db.execute_no_commit(sql, data=(text, ))
         return result.fetchall()[0][0]
 
     def get_capture_source_id(self):
@@ -205,14 +206,14 @@ class BulkNewOutline(QFrame, FORM_CLASS):
             return
         text_ls = text.split('- ')
         sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s AND csg.description = %s;'
-        result = self.db._execute(sql, data=(text_ls[0], text_ls[1]))
+        result = self.db.execute_no_commit(sql, data=(text_ls[0], text_ls[1]))
         data = result.fetchall()[0][0]
         if text_ls[2] == 'None':
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id is NULL;'
-            result = self.db._execute(sql, data=(data,))
+            result = self.db.execute_no_commit(sql, data=(data,))
         else:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s and cs.external_source_id = %s;'
-            result = self.db._execute(sql, data=(data, text_ls[2]))
+            result = self.db.execute_no_commit(sql, data=(data, text_ls[2]))
         return result.fetchall()[0][0]
 
     def get_suburb(self):
@@ -221,7 +222,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_suburb.currentText()
         sql = 'SELECT suburb_locality_id FROM buildings_admin_bdys.suburb_locality WHERE buildings_admin_bdys.suburb_locality.suburb_4th = %s;'
-        result = self.db._execute(sql, (text, ))
+        result = self.db.execute_no_commit(sql, (text, ))
         return result.fetchall()[0][0]
 
     def get_town(self):
@@ -230,7 +231,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_town.currentText()
         sql = 'SELECT town_city_id FROM buildings_admin_bdys.town_city WHERE buildings_admin_bdys.town_city.name = %s;'
-        result = self.db._execute(sql, (text, ))
+        result = self.db.execute_no_commit(sql, (text, ))
         return result.fetchall()[0][0]
 
     def get_t_a(self):
@@ -239,7 +240,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         """
         text = self.cmb_ta.currentText()
         sql = 'SELECT territorial_authority_id FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
-        result = self.db._execute(sql, (text, ))
+        result = self.db.execute_no_commit(sql, (text, ))
         return result.fetchall()[0][0]
 
     def creator_feature_added(self, qgsfId):
@@ -299,6 +300,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         Called when save clicked
         """
         # get combobox values
+        self.db.open_cursor()
         self.capture_source_id = self.get_capture_source_id()
         if self.capture_source_id is None:
             return
@@ -306,19 +308,16 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         self.suburb = self.get_suburb()
         self.town = self.get_town()
         self.t_a = self.get_t_a()
-        self.db.open_cursor()
         # call function to insert into bulk_load_outlines table
-        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s)'
+        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
         result = self.db.execute_no_commit(sql, (self.dataset_id,
                                            self.capture_method_id,
                                            self.capture_source_id,
                                            self.suburb,
                                            self.town, self.t_a, self.geom))
         self.outline_id = result.fetchall()[0][0]
-        # TODO:
-        # insert the new outline to its comparison table (i.e- added/removed/etc)
-        # not yet done as nz-building-outlines comparison script does not allow for
-        # comparing single outlines
+        sql = 'SELECT buildings_bulk_load.added_insert(%s, 2);'
+        self.db.execute_no_commit(sql, (self.outline_id, ))
 
         if commit_status:
             self.db.commit_open_cursor()
