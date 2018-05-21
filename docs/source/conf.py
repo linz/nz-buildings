@@ -19,7 +19,7 @@ from tabulate import tabulate
 from os import path
 import glob2
 sys.path.insert(0, os.path.abspath('../../sql'))
-site_url = "http://building-outlines-test.readthedocs.io/en/latest/"
+site_url = "http://nz-building-outlines.readthedocs.io/en/latest/"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
