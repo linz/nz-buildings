@@ -88,7 +88,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
 
     def test_alter_relationship_to_added_or_removed(self):
-
+        """When save is clicked buildings in matched are moved to added/removed"""
         sql = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
         result = db._execute(sql)
         result_original = result.fetchone()[0]
@@ -126,7 +126,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_alter_relationship_to_matched(self):
-
+        """When save is clicked buildings in added/removed are moved to matched"""
         sql = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
         result = db._execute(sql)
         result_original = result.fetchone()[0]
@@ -181,7 +181,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_alter_relationship_to_related(self):
-
+        """When save is clicked buildings in added/removed are moved to related"""
         sql = 'SELECT count(*)::integer FROM buildings_bulk_load.related'
         result = db._execute(sql)
         result_original = result.fetchone()[0]
@@ -224,7 +224,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_remove_button(self):
-
+        """When remove button is clicked the building ids in tablewidget are removed"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
@@ -260,7 +260,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(row_count, 0)
 
     def test_relink_botton(self):
-
+        """When relink button is clicked the building ids in listwidget are moved back to tablewidget"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
@@ -283,7 +283,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(row_count, 0)
 
     def test_clear_selection_button(self):
-
+        """When clear_selection button is clicked the selections get cleared"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
