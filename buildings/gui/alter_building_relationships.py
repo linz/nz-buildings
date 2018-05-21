@@ -853,11 +853,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         sql_delete_related_existing = 'SELECT buildings_bulk_load.related_delete_existing_outlines(%s);'
 
-        sql_delete_related_bulk = 'SELECT buildings_bulk_load.related_delete_bulk_load_outlines(%s);'
-
         sql_delete_matched_existing = 'SELECT buildings_bulk_load.matched_delete_existing_outlines(%s);'
-
-        sql_delete_matched_bulk = 'SELECT buildings_bulk_load.matched_delete_bulk_load_outlines(%s);'
 
         sql_delete_removed = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
 
@@ -886,8 +882,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             id_bulk = int(item.text())
 
             self.db.execute_no_commit(sql_delete_added, (id_bulk, ))
-            self.db.execute_no_commit(sql_delete_matched_bulk, (id_bulk, ))
-            self.db.execute_no_commit(sql_delete_related_bulk, (id_bulk, ))
 
         # added
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
