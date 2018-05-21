@@ -375,17 +375,6 @@ $$
 $$
 LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION buildings_bulk_load.related_delete_bulk_load_outlines(integer)
-RETURNS integer AS
-$$
-
-    DELETE FROM buildings_bulk_load.related
-    WHERE bulk_load_outline_id = $1
-    RETURNING bulk_load_outline_id;
-
-$$
-LANGUAGE sql;
-
 CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_delete_existing_outlines(integer)
 RETURNS integer AS
 $$
@@ -393,17 +382,6 @@ $$
     DELETE FROM buildings_bulk_load.matched
     WHERE building_outline_id = $1
     RETURNING building_outline_id;
-
-$$
-LANGUAGE sql;
-
-CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_delete_bulk_load_outlines(integer)
-RETURNS integer AS
-$$
-
-    DELETE FROM buildings_bulk_load.matched
-    WHERE bulk_load_outline_id = $1
-    RETURNING bulk_load_outline_id;
 
 $$
 LANGUAGE sql;
