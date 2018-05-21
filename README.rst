@@ -4,7 +4,16 @@ NZ Building Outlines
 
 .. image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg 
     :target: https://github.com/linz/nz-building-outlines/blob/master/LICENSE
+    :alt: License
 
+.. image:: https://api.travis-ci.com/linz/nz-building-outlines.svg?branch=master
+    :target: https://travis-ci.com/linz/nz-building-outlines
+    :alt: CI Status
+    
+.. image:: https://readthedocs.org/projects/nz-building-outlines/badge/?version=latest
+    :target: https://nz-building-outlines.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+    
 Provides schemas and functions for the NZ Building Outlines system.
 
 Installation
