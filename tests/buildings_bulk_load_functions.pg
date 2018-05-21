@@ -18,7 +18,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(4);
+SELECT plan(5);
 
 -- Tests
 --Bulk Load Outlines-------------------------
@@ -36,6 +36,9 @@ SELECT set_has(
     $$VALUES('Test Dataset', 1)$$,
     'Check contents of supplied datasets table after supplied_datasets_insert function has run'
 );
+--Supplied Datasets-------------------------
+SELECT has_function('buildings_bulk_load', 'added_insert', 'Should have function added_insert in bulk_load schema.');
+
 
 
 -- Finish pgTAP testing

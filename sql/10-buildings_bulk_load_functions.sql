@@ -126,3 +126,27 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+-----------------------------------------------------------------------
+-- ADDED insert into
+-----------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert(
+      p_bulk_load_outline_id integer
+    , p_qa_status_id integer
+)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.added(
+          bulk_load_outline_id
+        , qa_status_id
+    )
+    VALUES (
+          p_bulk_load_outline_id
+        , p_qa_status_id
+
+    )
+    RETURNING bulk_load_outline_id;
+
+$$
+LANGUAGE sql VOLATILE;
