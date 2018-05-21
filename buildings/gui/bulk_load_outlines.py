@@ -207,7 +207,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         return self.cmb_imagery.currentText()
 
     def find_suburb(self, geom):
-        sql = 'SELECT buildings.suburb_locality_suburb_intersect_polygon(%s);'
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
