@@ -24,11 +24,11 @@ SELECT plan(9);
 -- Tests
 
 --Suburb--------------------------
-SELECT has_function('buildings', 'suburb_locality_suburb_intersect_polygon', 'Should have function suburb_locality_suburb_intersect_polygon in buildings schema.');
+SELECT has_function('buildings', 'suburb_locality_intersect_polygon', 'Should have function suburb_locality_intersect_polygon in buildings schema.');
 SELECT results_eq(
-	$$SELECT buildings.suburb_locality_suburb_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+	$$SELECT buildings.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (2)$$,
-    'suburb_locality_suburb_intersect_polygon not returning correct suburb_locality_id value'
+    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value'
 );
 SELECT results_eq(
 	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
