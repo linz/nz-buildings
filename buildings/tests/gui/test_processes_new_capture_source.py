@@ -81,7 +81,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         else:
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
-        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
+        self.capture_frame.ok_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result2 = db._execute(sql)
         if result2 is None:
@@ -101,7 +101,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
-        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
+        self.capture_frame.ok_clicked(commit_status=False)
         if self.capture_frame.error_dialog is not None:
             self.capture_frame.error_dialog.close()
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
@@ -127,7 +127,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.rad_external_source.click()
         self.capture_frame.le_external_source_id.setText('Test Ext Source')
-        self.capture_frame.ok_clicked(built_in=False, commit_status=False)
+        self.capture_frame.ok_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
         result2 = db._execute(sql)
         if result2 is None:

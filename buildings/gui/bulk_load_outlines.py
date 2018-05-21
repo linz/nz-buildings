@@ -9,6 +9,8 @@ import qgis
 
 import processing
 
+from functools import partial
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 
@@ -46,7 +48,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
         self.rad_external_source.toggled.connect(self.enable_external)
         self.ml_outlines_layer.currentIndexChanged.connect(self.populate_external_fcb)
-        self.btn_ok.clicked.connect(self.ok_clicked)
+        self.btn_ok.clicked.connect(partial(self.ok_clicked,
+                                            commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
     def populate_comboboxes(self):
@@ -204,12 +207,12 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         return self.cmb_imagery.currentText()
 
     def find_suburb(self, geom):
-        sql = 'SELECT buildings.nz_locality_suburb_intersect_polygon(%s);'
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
     def find_town_city(self, geom):
-        sql = 'SELECT buildings.nz_locality_town_city_intersect_polygon(%s);'
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
@@ -218,7 +221,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         result = self.db.execute_no_commit(sql, (geom, ))
         return result.fetchall()[0][0]
 
-    def ok_clicked(self, built_in, commit_status=True):
+    def ok_clicked(self, commit_status):
         # get value
         self.description = self.get_description()
         # get combobox values
@@ -288,23 +291,24 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 # convert to correct format
                 wkt = geom.exportToWkt()
                 sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-                result = self.db._execute(sql, data=(wkt, ))
+                result = self.db.execute_no_commit(sql, data=(wkt, ))
                 geom = result.fetchall()[0][0]
                 # ensure outline SRID is 2193
                 sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-                result = self.db._execute(sql, data=(geom, ))
+                result = self.db.execute_no_commit(sql, data=(geom, ))
                 geom = result.fetchall()[0][0]
             # iterate through supplied datasets and find convex hulls
             dataset = 1
             self.bulk_overlap = False
             while dataset <= self.dataset_id:
                 sql = 'SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;'
-                results = self.db._execute(sql, (dataset, ))
+                results = self.db.execute_no_commit(sql, (dataset, ))
                 t_date = results.fetchall()
                 if t_date:
                     if t_date[0][0] is None:
                         sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-                        result = self.db._execute(sql, data=(geom, dataset))
+                        result = self.db.execute_no_commit(sql, data=(geom,
+                                                           dataset))
                         results = result.fetchall()
                         if len(results) > 0:
                             self.bulk_overlap = True
@@ -413,8 +417,9 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         self.inserted_values = 0
         if self.external_source_id is not None:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
-            result = self.db.execute_no_commit(sql, data=(self.capture_source_group,
-                                                          self.external_source_id))
+            result = self.db.execute_no_commit(sql,
+                                               data=(self.capture_source_group,
+                                                     self.external_source_id))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -432,7 +437,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 capture_source = value[0][0]
         else:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s AND cs.external_source_id is Null;'
-            result = self.db.execute_no_commit(sql, data=(capture_source_group,))
+            result = self.db.execute_no_commit(sql,
+                                               data=(capture_source_group,))
             value = result.fetchall()
             if len(value) == 0:
                 self.error_dialog = ErrorDialog()
@@ -453,11 +459,11 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             wkt = outline.geometry().exportToWkt()
             # convert to postgis shape and ensure outline is a multipolygon
             sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-            result = self.db._execute(sql, data=(wkt, ))
+            result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             # ensure outline SRID is 2193
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-            result = self.db._execute(sql, data=(geom, ))
+            result = self.db.execute_no_commit(sql, data=(geom, ))
             geom = result.fetchall()[0][0]
             suburb = self.find_suburb(geom)
             town_city = self.find_town_city(geom)
@@ -468,8 +474,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                                               'Suburb Admin Boundary ------'
                                               '-------------- \n\n Data will'
                                               ' not be added to table as has '
-                                              'null suburb Id, See canvas for '
-                                              'feature')
+                                              'null suburb Id')
                 self.error_dialog.show()
                 self.db.rollback_open_cursor()
                 return
@@ -486,7 +491,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 return
             self.inserted_values = self.inserted_values + 1
             # insert outline into buildings_bulk_load.supplied_outline
-            if external_field == '':
+            if external_source_id is None:
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, capture_method,
                                           capture_source, suburb, town_city,

@@ -60,23 +60,14 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(1)
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Bulk Load Dataset'))
         self.new_bulk_frame = self.dockwidget.current_frame
         if self.new_bulk_frame.error_dialog is not None:
             self.no_supplied_data = True
             self.new_bulk_frame.error_dialog.close()
         else:
             self.no_supplied_data = False
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1747497.2, 5428082.0,
-                                      1747710.3, 5428318.7)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
 
     def tearDown(self):
         """Runs after each test."""
@@ -241,6 +232,9 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
         result = db._execute(sql)
         result = result.fetchall()[0][0]
+        sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added'
+        added_result = db._execute(sql)
+        added_result = added_result.fetchall()[0][0]
         # add geom
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -282,6 +276,10 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
+        sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added'
+        added_result2 = db._execute(sql)
+        added_result2 = added_result2.fetchall()[0][0]
+        self.assertEqual(added_result2, added_result + 1)
         self.new_bulk_frame.db.rollback_open_cursor()
 
 
