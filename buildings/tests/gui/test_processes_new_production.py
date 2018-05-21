@@ -60,8 +60,8 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(0)
-        self.menu_frame.cmb_add_outline.setCurrentIndex(3)
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
+        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Production'))
         self.new_production_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -220,8 +220,7 @@ class ProcessProdNewOutlinesTest(unittest.TestCase):
         self.new_production_frame.cmb_ta.setCurrentIndex(0)
         self.new_production_frame.cmb_town.setCurrentIndex(0)
         self.new_production_frame.cmb_suburb.setCurrentIndex(0)
-        self.new_production_frame.save_clicked(built_in=False,
-                                               commit_status=False)
+        self.new_production_frame.save_clicked(commit_status=False)
         sql = 'SELECT COUNT(building_outline_id) FROM buildings.building_outlines'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]

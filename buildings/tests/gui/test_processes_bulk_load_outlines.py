@@ -118,13 +118,13 @@ class ProcessBulkLoadTest(unittest.TestCase):
         layer.startEditing()
         layer.addFeature(feature_one, True)
         layer.commitChanges()
+        QgsMapLayerRegistry.instance().addMapLayer(layer)
         # create temporary imagery layer
         imagery_layer = QgsVectorLayer("Polygon?crs=epsg:2193",
                                        "temporary_imagery", "memory")
         imagery_layer.dataProvider().addAttributes([QgsField('id',
                                                    QVariant.String)])
         imagery_layer.updateFields()
-        QgsMapLayerRegistry.instance().addMapLayer(imagery_layer)
         outline = QgsFeature()
         outline.setAttributes(['1'])
         points = points = [QgsPoint(1878000, 5555400),
@@ -135,6 +135,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         imagery_layer.startEditing()
         imagery_layer.addFeature(outline, True)
         imagery_layer.commitChanges()
+        QgsMapLayerRegistry.instance().addMapLayer(imagery_layer)
         # set combobox values
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
@@ -161,11 +162,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
         self.bulk_load_frame.db.execute_no_commit(sql)
         # add outlines
-        self.bulk_load_frame.ok_clicked(built_in=False, commit_status=False)
+        self.bulk_load_frame.ok_clicked(commit_status=False)
         # check 1 outlines were added to bulk load outlines
         sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
         result2 = db._execute(sql)
-        # print result2
         if result2 is None:
             result2 = 0
         else:
