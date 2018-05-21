@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 --BUILDINGS insert into
 -------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_buildings_insert()
+CREATE OR REPLACE FUNCTION buildings.buildings_insert()
 RETURNS integer AS
 $$
 
@@ -21,7 +21,7 @@ LANGUAGE sql VOLATILE;
 ----------------------------------------------------------------
 -- BUILDING OUTLINES insert into
 ----------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_building_outlines_insert(
+CREATE OR REPLACE FUNCTION buildings.building_outlines_insert(
       p_building_id integer
     , p_capture_method_id integer
     , p_capture_source_id integer
@@ -67,7 +67,7 @@ LANGUAGE sql VOLATILE;
 -------------------------------------------------------------------------
 -- LIFECYCLE STAGE insert into
 -------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings.fn_lifecycle_stage_insert(
+CREATE OR REPLACE FUNCTION buildings.lifecycle_stage_insert(
       p_value varchar(40)
 )
 RETURNS integer AS
@@ -86,3 +86,65 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------
+--BUILDING OUTLINES update end_lifespan
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_end_lifespan(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_building_outlines AS (
+        UPDATE buildings.building_outlines
+        SET end_lifespan = now()
+        WHERE building_outline_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_building_outlines;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_end_lifespan(integer[]) IS
+'Update end_lifespan in building outlines table';
+
+-------------------------------------------------------------------
+--BUILDINGS update end_lifespan
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.buildings_update_end_lifespan(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_buildings AS (
+        UPDATE buildings.buildings
+        SET end_lifespan = now()
+        WHERE building_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_buildings;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.buildings_update_end_lifespan(integer[]) IS
+'Update end_lifespan in buildings table';
+
+-------------------------------------------------------------------
+--LIFECYCLE create new records
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.lifecycle_add_record(integer, integer)
+    RETURNS integer AS
+$$
+    INSERT INTO buildings.lifecycle(
+          parent_building_id
+        , building_id
+    )
+    SELECT
+          outlines.building_id
+        , $1
+    FROM buildings_bulk_load.related
+    JOIN buildings.building_outlines outlines USING (building_outline_id)
+    WHERE related.bulk_load_outline_id = $2
+    RETURNING building_id;
+
+$$ LANGUAGE sql;
+COMMENT ON FUNCTION buildings.lifecycle_add_record(integer, integer) IS
+'Create new records in lifecycle table';
