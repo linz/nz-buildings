@@ -316,7 +316,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
                                            self.suburb,
                                            self.town, self.t_a, self.geom))
         self.outline_id = result.fetchall()[0][0]
-        sql = 'SELECT buildings_bulk_load.added_insert(%s, 2);'
+        sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 2);'
         self.db.execute_no_commit(sql, (self.outline_id, ))
 
         if commit_status:
