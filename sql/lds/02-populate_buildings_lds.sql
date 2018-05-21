@@ -27,8 +27,8 @@ $$
             , building_outlines.building_id
             , building_name.building_name
             , use.value
-            , nz_locality.suburb_4th
-            , nz_locality.city_name
+            , suburb_locality.suburb_4th
+            , town_city.name
             , territorial_authority.name
             , capture_method.value
             , capture_source_group.value
@@ -45,8 +45,9 @@ $$
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-        JOIN buildings_admin_bdys.nz_locality ON nz_locality.id = building_outlines.suburb_locality_id
-        JOIN buildings_admin_bdys.territorial_authority ON territorial_authority.ogc_fid = building_outlines.territorial_authority_id
+        JOIN buildings_admin_bdys.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
+        JOIN buildings_admin_bdys.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        JOIN buildings_admin_bdys.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
         AND building_name.end_lifespan IS NULL

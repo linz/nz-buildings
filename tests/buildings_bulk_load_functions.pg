@@ -38,6 +38,7 @@ SELECT set_has(
 );
 
 
+
 -- Finish pgTAP testing
 SELECT * FROM finish();
 
