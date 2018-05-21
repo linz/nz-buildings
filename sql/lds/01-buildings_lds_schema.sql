@@ -13,7 +13,7 @@ COMMENT ON SCHEMA buildings_lds IS
 -- NZ Building Outlines
 
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
-      building_outline_id integer NOT NULL PRIMARY KEY
+      building_outline_id integer NOT NULL
     , building_id integer NOT NULL
     , name character varying(250)
     , use character varying(40)
