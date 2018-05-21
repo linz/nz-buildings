@@ -89,6 +89,10 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_alter_relationship_to_added_or_removed(self):
 
+        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
+        result = db._execute(sql)
+        result_original = result.fetchone()[0]
+
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
@@ -116,13 +120,16 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
         result = db._execute(sql)
-        self.assertEqual(result.fetchone()[0], 3)
+        self.assertEqual(result.fetchone()[0], result_original + 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_alter_relationship_to_matched(self):
+
+        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
+        result = db._execute(sql)
+        result_original = result.fetchone()[0]
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -168,13 +175,16 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
         result = db._execute(sql)
-        self.assertEqual(result.fetchone()[0], 1)
+        self.assertEqual(result.fetchone()[0], result_original + 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_alter_relationship_to_related(self):
+
+        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.related'
+        result = db._execute(sql)
+        result_original = result.fetchone()[0]
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -208,14 +218,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        result = db._execute('SELECT count(*)::integer FROM buildings_bulk_load.added')
-        self.assertEqual(result.fetchone()[0], 0)
-
-        result = db._execute('SELECT count(*)::integer FROM buildings_bulk_load.removed')
-        self.assertEqual(result.fetchone()[0], 1)
-
-        result = db._execute('SELECT count(*)::integer FROM buildings_bulk_load.related')
-        self.assertEqual(result.fetchone()[0], 45)
+        result = db._execute(sql)
+        self.assertEqual(result.fetchone()[0], result_original + 2)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
 
