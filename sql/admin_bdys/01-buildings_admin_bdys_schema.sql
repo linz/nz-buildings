@@ -7,31 +7,32 @@ SET client_min_messages TO WARNING;
 
 CREATE SCHEMA IF NOT EXISTS buildings_admin_bdys;
 
--- NZ Locality
+-- Suburb / Locality
 
-CREATE TABLE IF NOT EXISTS buildings_admin_bdys.nz_locality (
-      id integer NOT NULL PRIMARY KEY
-    , parent_id numeric(10,0)
+CREATE TABLE IF NOT EXISTS buildings_admin_bdys.suburb_locality (
+      suburb_locality_id serial PRIMARY KEY
+    , external_suburb_locality_id integer
     , suburb_4th character varying(60)
     , suburb_3rd character varying(60)
     , suburb_2nd character varying(60)
     , suburb_1st character varying(60)
-    , type_order numeric(10,0)
-    , type character varying(12)
-    , city_id numeric(10,0)
-    , city_name character varying(60)
-    , has_addres character varying(1)
-    , start_date date
-    , end_date date
-    , major_id numeric(10,0)
-    , major_name character varying(80)
-    , shape public.geometry(MultiPolygon,4167)
+    , shape public.geometry(MultiPolygon, 2193)
+);
+
+-- Town / City
+
+CREATE TABLE IF NOT EXISTS buildings_admin_bdys.town_city (
+      town_city_id serial PRIMARY KEY
+    , external_city_id integer
+    , name character varying(60)
+    , shape public.geometry(MultiPolygon, 2193)
 );
 
 -- Territorial Authority
 
 CREATE TABLE IF NOT EXISTS buildings_admin_bdys.territorial_authority (
-      ogc_fid integer NOT NULL PRIMARY KEY
-    , shape public.geometry(MultiPolygon,4167)
+      territorial_authority_id serial PRIMARY KEY
+    , external_territorial_authority_id integer
     , name character varying(100)
+    , shape public.geometry(MultiPolygon, 2193)
 );
