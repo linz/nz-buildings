@@ -78,7 +78,7 @@
       <gmd:referenceSystemIdentifier>
         <gmd:RS_Identifier>
           <gmd:code>
-            <gco:CharacterString>NZGD2000 / New Zealand Transverse Mercator 2000</gco:CharacterString>
+            <gco:CharacterString>NZTM2000 / New Zealand Transverse Mercator 2000</gco:CharacterString>
           </gmd:code>
         </gmd:RS_Identifier>
       </gmd:referenceSystemIdentifier>
@@ -104,9 +104,9 @@
         </gmd:CI_Citation>
       </gmd:citation>
       <gmd:abstract>
-        <gco:CharacterString>This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Tasman, West Coast, Marlborough, Canterbury and Otago.
+        <gco:CharacterString>This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available.
 
-Building outlines are 2D shapes of the edge of a building as visible from aerial imagery, most commonly the roofline edge. It includes spaces such as decks, garages and porches. Each polygon represents a building outline. The outlines were extracted from orthoimagery using an automated process.
+This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from remotely sensed information using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset. Each building polygon represents a building outline and this may include spaces such as decks, garages and porches.
 
 **Source imagery**
 Resolution of the imagery used for capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  Please refer to the NZ Building Outlines Data Dictionary for further information.
@@ -139,11 +139,12 @@ Buildings must be;
 • Squared off (90 degrees) if the corner angles are between 80-100 degrees.      
 
 **Valid Geometry:**    
-A building polygon is considered to have valid geometry if;
-• It does not overlap with other building polygons;
+A building outline polygon is considered to have valid geometry if;
+• It does not overlap with other building outline polygons;
 • It does not contain any spikes;
 • It does not contain lines that are intersected with each other;
-• It does not contain multiple-part polygons;
+• It can contain polygons with interior rings (holes);
+• It does not contain polygons with multiple exterior rings;
 • Building polygons captured will be greater than 10m².</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
