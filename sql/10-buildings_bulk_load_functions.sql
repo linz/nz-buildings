@@ -339,7 +339,7 @@ $$
         WHERE supplied.bulk_load_outline_id = $2
 
 $$ LANGUAGE sql;
-COMMENT ON FUNCTION buildings.building_outlines_insert_bulk(integer, integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer) IS
 'Create new added records in building outlines table';
 
 -------------------------------------------------------------------
@@ -355,5 +355,5 @@ $$
     WHERE matched.bulk_load_outline_id = $1
 
 $$ LANGUAGE sql;
-COMMENT ON FUNCTION buildings.matched_find_building_id(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.matched_find_building_id(integer) IS
 'Return the building_id of the matched building outlines';
