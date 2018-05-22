@@ -457,17 +457,20 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         external_field = str(self.fcb_external_id.currentField())
         for outline in layer.getFeatures():
             wkt = outline.geometry().exportToWkt()
-            # convert to postgis shape and ensure outline is a multipolygon
             sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
             result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             # ensure outline SRID is 2193
-            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
             result = self.db.execute_no_commit(sql, data=(geom, ))
+            multi_geom = result.fetchall()[0][0]
+            # ensure outline SRID is 2193
+            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
-            suburb = self.find_suburb(geom)
-            town_city = self.find_town_city(geom)
-            TA = self.find_territorial_auth(geom)
+            suburb = self.find_suburb(multi_geom)
+            town_city = self.find_town_city(multi_geom)
+            TA = self.find_territorial_auth(multi_geom)
             if suburb is None:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report('\n -------------------- No '
@@ -493,7 +496,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             # insert outline into buildings_bulk_load.supplied_outline
             if external_source_id is None:
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
-                self.db.execute_no_commit(sql, (dataset_id, capture_method,
+                result = self.db.execute_no_commit(sql, (dataset_id, capture_method,
                                           capture_source, suburb, town_city,
                                           TA, geom))
             else:

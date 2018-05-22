@@ -213,13 +213,11 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-        result = self.db._execute(sql, data=(wkt, ))
-        geom = result.fetchall()[0][0]
         # ensure outline SRID is 2193
         sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-        result = self.db._execute(sql, data=(geom, ))
+        result = self.db._execute(sql, data=(wkt, ))
         self.geom = result.fetchall()[0][0]
+        print self.geom
         # enable comboboxes
         self.cmb_capture_method.setEnabled(1)
         self.cmb_capture_source.setEnabled(1)
