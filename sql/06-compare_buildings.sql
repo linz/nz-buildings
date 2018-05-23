@@ -38,7 +38,7 @@ $$
     FROM buildings_bulk_load.bulk_load_outlines supplied
     LEFT JOIN buildings_bulk_load.existing_subset_extracts current ON ST_Intersects(supplied.shape, current.shape)
     LEFT JOIN intersects USING (bulk_load_outline_id)
-    WHERE current.building_outline_id IS NULL
+    WHERE current.building_outline_id IS NULL AND supplied.supplied_dataset_id = $1
     OR (     intersects.supplied_intersect < 5
          AND supplied.bulk_load_outline_id NOT IN ( SELECT bulk_load_outline_id FROM supplied_count ))
     ;
@@ -86,7 +86,7 @@ $$
     FROM buildings_bulk_load.existing_subset_extracts current
     LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
     LEFT JOIN intersects USING (building_outline_id)
-    WHERE supplied.bulk_load_outline_id IS NULL
+    WHERE supplied.bulk_load_outline_id IS NULL AND current.supplied_dataset_id = $1
     OR (     intersects.current_intersect < 5
          AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ))
     ;
