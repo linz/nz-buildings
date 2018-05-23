@@ -97,7 +97,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
     def test_bulk_load_ok_clicked(self):
         """When save is clicked data is added to the correct tables"""
         # create temporary outlines layer
-        sql = 'SELECT count * FROM buildings_bulk_load.bulk_load_outlines;'
+        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
         result = db._execute(sql)
         if result is None:
             result = 0
@@ -123,7 +123,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         imagery_layer = QgsVectorLayer("Polygon?crs=epsg:2193",
                                        "temporary_imagery", "memory")
         imagery_layer.dataProvider().addAttributes([QgsField('id',
-                                                   QVariant.String)])
+                                                             QVariant.String)])
         imagery_layer.updateFields()
         outline = QgsFeature()
         outline.setAttributes(['1'])
@@ -156,11 +156,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
             idx = idx + 1
         # set imagery field
         self.bulk_load_frame.fcb_imagery_field.setCurrentIndex(0)
-        # open cursor as have to add capture source entry from test
-        self.bulk_load_frame.db.open_cursor()
-        # using opened cursor insert capture source value required
-        sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
-        self.bulk_load_frame.db.execute_no_commit(sql)
         # add outlines
         self.bulk_load_frame.ok_clicked(commit_status=False)
         # check 1 outlines were added to bulk load outlines

@@ -63,11 +63,8 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
         self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Bulk Load Dataset'))
         self.new_bulk_frame = self.dockwidget.current_frame
-        if self.new_bulk_frame.error_dialog is not None:
-            self.no_supplied_data = True
-            self.new_bulk_frame.error_dialog.close()
-        else:
-            self.no_supplied_data = False
+
+        self.new_bulk_frame.error_dialog.close()
 
     def tearDown(self):
         """Runs after each test."""
@@ -76,23 +73,20 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
     def test_ui_on_geometry_drawn(self):
         """UI comboboxes enable when geometry is drawn"""
         self.new_bulk_frame.db.open_cursor()
-        if self.no_supplied_data is True:
-            # insert capture source
-            sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.capture_source = result.fetchall()[0][0]
-            self.new_bulk_frame.populate_lookup_comboboxes()
-            # insert supplied data
-            sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.dataset = result.fetchall()[0][0]
-            # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
-            # reload setup
-            self.new_bulk_frame.btn_reset.setEnabled(1)
-            self.new_bulk_frame.reload_setup()
-            self.new_bulk_frame.populate_lookup_comboboxes()
+        self.new_bulk_frame.populate_lookup_comboboxes()
+        # insert supplied data
+        sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
+        result = self.new_bulk_frame.db.execute_no_commit(sql)
+        self.dataset = result.fetchall()[0][0]
+        # add geoms to bl
+        sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, 1, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+        self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset,))
+        # reload setup
+        self.new_bulk_frame.btn_reset.setEnabled(1)
+        self.new_bulk_frame.reload_setup()
+        self.new_bulk_frame.populate_lookup_comboboxes()
+        self.new_bulk_frame.cmb_supplied_dataset.setEnabled(1)
+
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -137,22 +131,18 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
     def test_reset_button(self):
         """Indexes are reset and comboxes disabled when reset is called"""
         self.new_bulk_frame.db.open_cursor()
-        if self.no_supplied_data is True:
-            # insert capture source
-            sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.capture_source = result.fetchall()[0][0]
-            # insert supplied data
-            sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.dataset = result.fetchall()[0][0]
-            # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
-            # reload setup
-            self.new_bulk_frame.btn_reset.setEnabled(1)
-            self.new_bulk_frame.reload_setup()
-            self.new_bulk_frame.populate_lookup_comboboxes()
+        # insert supplied data
+        sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
+        result = self.new_bulk_frame.db.execute_no_commit(sql)
+        self.dataset = result.fetchall()[0][0]
+        # add geoms to bl
+        sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, 1, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+        self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset,))
+        # reload setup
+        self.new_bulk_frame.btn_reset.setEnabled(1)
+        self.new_bulk_frame.reload_setup()
+        self.new_bulk_frame.populate_lookup_comboboxes()
+        self.new_bulk_frame.cmb_supplied_dataset.setEnabled(1)
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -213,22 +203,18 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
     def test_new_outline_insert(self):
         """Data added to correct tables when save clicked"""
         self.new_bulk_frame.db.open_cursor()
-        if self.no_supplied_data is True:
-            # insert capture source
-            sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.capture_source = result.fetchall()[0][0]
-            # insert supplied data
-            sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
-            result = self.new_bulk_frame.db.execute_no_commit(sql)
-            self.dataset = result.fetchall()[0][0]
-            # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
-            self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
-            # reload setup
-            self.new_bulk_frame.btn_reset.setEnabled(1)
-            self.new_bulk_frame.reload_setup()
-            self.new_bulk_frame.populate_lookup_comboboxes()
+        # insert supplied data
+        sql = "SELECT buildings_bulk_load.supplied_datasets_insert('Test Data Insert', 1)"
+        result = self.new_bulk_frame.db.execute_no_commit(sql)
+        self.dataset = result.fetchall()[0][0]
+        # add geoms to bl
+        sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, 1, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+        self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, ))
+        # reload setup
+        self.new_bulk_frame.btn_reset.setEnabled(1)
+        self.new_bulk_frame.reload_setup()
+        self.new_bulk_frame.populate_lookup_comboboxes()
+        self.new_bulk_frame.cmb_supplied_dataset.setEnabled(1)
         sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines'
         result = db._execute(sql)
         result = result.fetchall()[0][0]

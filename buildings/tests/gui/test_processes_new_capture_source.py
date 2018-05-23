@@ -80,7 +80,16 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
+
+        # Add a capture source group for testing
+        self.capture_frame.db.open_cursor()
+        sql = "INSERT INTO buildings_common.capture_source_group (value, description) VALUES ('Test Source', 'Test Source');"
+        self.capture_frame.db.execute_no_commit(sql)
+        # populate the combobox including the test data
+        self.capture_frame.cmb_capture_source_group.clear()
+        self.capture_frame.populate_combobox()
+
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(self.capture_frame.cmb_capture_source_group.findText('Test Source- Test Source'))
         self.capture_frame.ok_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source'
         result2 = db._execute(sql)

@@ -308,7 +308,7 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                     if t_date[0][0] is None:
                         sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
                         result = self.db.execute_no_commit(sql, data=(geom,
-                                                           dataset))
+                                                                      dataset))
                         results = result.fetchall()
                         if len(results) > 0:
                             self.bulk_overlap = True
@@ -368,14 +368,21 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                     self.db.execute_no_commit(sql, (id[0], ))
             else:
                 for ls in results:
-                    # insert relevant data into existing_subset_extract
-                    sql = 'buildings_bulk_load.existing_subset_extract_insert(%s, %s, %s);'
-                    self.db.execute_no_commit(sql, data=(ls[0],
-                                                         self.dataset_id,
-                                                         ls[10]))
+                    sql = 'SELECT building_outline_id FROM buildings_bulk_load.existing_subset_extracts WHERE building_outline_id = %s;'
+                    result = self.db.execute_no_commit(sql, (ls[0], ))
+                    result = result.fetchall()
+                    if len(result) == 0:
+                        # insert relevant data into existing_subset_extract
+                        sql = 'SELECT buildings_bulk_load.existing_subset_extracts_insert(%s, %s, %s);'
+                        result = self.db.execute_no_commit(sql, data=(ls[0],
+                                                                      self.dataset_id,
+                                                                      ls[10]))
+                    else:
+                        sql = 'UPDATE buildings_bulk_load.existing_subset_extracts SET supplied_dataset_id = %s WHERE building_outline_id = %s;'
+                        self.db.execute_no_commit(sql, (self.dataset_id, ls[0]))
                 # run comparisons function
-                sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
-                self.db.execute_no_commit(sql, data=(self.dataset_id, ))
+                # sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
+                # self.db.execute_no_commit(sql, data=(self.dataset_id, ))
             sql = 'DISCARD TEMP;'
             self.db.execute_no_commit(sql)  # remove temp files
             if commit_status:
@@ -494,14 +501,14 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             if external_source_id is None:
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, capture_method,
-                                          capture_source, suburb, town_city,
-                                          TA, geom))
+                                                capture_source, suburb, town_city,
+                                                TA, geom))
             else:
                 external_id = outline.attribute(external_field)
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, 1, %s, %s, %s, %s, %s, %s);'
                 self.db.execute_no_commit(sql, (dataset_id, external_id,
-                                          capture_method, capture_source,
-                                          suburb, town_city, TA, geom))
+                                                capture_method, capture_source,
+                                                suburb, town_city, TA, geom))
         self.le_data_description.clear()
         # returns 1 if function worked None if failed
         return 1
