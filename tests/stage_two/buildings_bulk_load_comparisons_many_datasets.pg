@@ -1,0 +1,88 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings_bulk_load comparisons functions
+-- with two supplied datasets using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(7);
+
+--1----------------------------------------------------------
+-- Check function exists
+
+SELECT has_function('buildings_bulk_load', 'compare_building_outlines', 'Should have function compare_building_outlines in buildings stage schema.');
+
+--2----------------------------------------------------------
+-- New Buildings contents
+
+SELECT set_has(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id',
+    $$VALUES (2034)$$,
+    'Check contents of new buildings table after building comparison function has run'
+);
+
+--3----------------------------------------------------------
+-- Removed Buildings contents
+
+SELECT set_has(
+    'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id',
+    $$VALUES (1035)$$,
+    'Check contents of removed buildings table after building comparison function has run'
+);
+
+--4----------------------------------------------------------
+-- related bulk_load_outline_id
+
+SELECT set_has(
+	'SELECT bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY bulk_load_outline_id',
+	$$VALUES (2036), (2036)$$,
+	'Check bulk load outlines of related table after buildings comparison function has run'
+);
+
+--5---------------------------------------------------------
+-- related building_outline_id
+
+SELECT set_has(
+	'SELECT building_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id',
+	$$VALUES (1001), (1002)$$,
+	'Check current outlines of related table after buildings comparison function has run'
+);
+
+--6------------------------------------------------------
+-- Matched bulk_load_outline_id
+
+SELECT set_has(
+	'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY bulk_load_outline_id',
+	$$VALUES (2035)$$,
+	'Check supplied outlines of matched table after buildings comparison function has run'
+);
+
+--7-------------------------------------------------------
+-- Matched building_outline_id
+
+SELECT set_has(
+	'SELECT building_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id',
+	$$VALUES (1000000)$$,
+	'Check current outlines of matched table after buildings comparison function has run'
+);
+
+--------------------------------------------------------
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+

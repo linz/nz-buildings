@@ -1,0 +1,68 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for admin boundary functions using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+
+SELECT plan(3);
+
+-- Tests
+
+--Suburb--------------------------
+SELECT has_function('buildings', 'suburb_locality_intersect_polygon', 'Should have function suburb_locality_intersect_polygon in buildings schema.');
+--SELECT results_eq(
+--	$$SELECT buildings.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C41000000001931554100000000--8CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+--    $$VALUES (2)$$,
+--    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value'
+--);
+--SELECT results_eq(
+--	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
+--    $$VALUES (2)$$,
+--    'Check suburb_locality_id of bulk load outlines table after bulk_load_outlines_update_suburb function has run'
+--);
+
+--Town City-------------------
+SELECT has_function('buildings', 'town_city_intersect_polygon', 'Should have function nz_locality_town_city_intersect_polygon in buildings schema.');
+--SELECT results_eq(
+--	$$SELECT buildings.town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C--410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+--    $$VALUES (200)$$,
+--    'town_city_intersect_polygon not returning correct town_city_id value'
+--);
+--SELECT results_eq(
+--	$$SELECT town_city_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
+--    $$VALUES (200)$$,
+--    'Check town_city_id of bulk load outlines table after bulk_load_outlines_update_town_city function has run'
+--);
+
+--Territorial Authority-------------------------
+SELECT has_function('buildings', 'territorial_authority_intersect_polygon', 'Should have function territorial_authority_intersect_polygon in buildings schema.');
+--SELECT results_eq(
+--	$$SELECT buildings.territorial_authority_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C41000000001931554100--0000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
+--    $$VALUES (1)$$,
+--    'nz_territorial_authority_intersect_polygon not returning correct territorial_authority value'
+--);
+--SELECT results_eq(
+--	$$SELECT territorial_authority_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
+--    $$VALUES (1)$$,
+--    'Check territorial_authority_id of bulk load outlines table after bulk_load_outlines_update_territorial_authority function has run'
+--);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+ 
+ROLLBACK;

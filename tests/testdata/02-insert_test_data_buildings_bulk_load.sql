@@ -1,5 +1,6 @@
 
 INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (DEFAULT, 'Test Data', 1);
+INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id) VALUES (DEFAULT, 'Test Data Two', 1);
 
 INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (DEFAULT, 1, NULL);
 
@@ -36,7 +37,6 @@ INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUE
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1031, '2017-01-01 09:00:00 GMT+12', NULL);
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1032, '2017-01-01 09:00:00 GMT+12', NULL);
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1033, '2017-01-01 09:00:00 GMT+12', NULL);
-INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan) VALUES (1034, '2017-01-01 09:00:00 GMT+12', NULL);
 
 INSERT INTO buildings.building_outlines (building_outline_id, building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, end_lifespan, shape)
 VALUES (1001, 1001, 5, 1, 1, 2, 100, 1, '2017-01-01 09:00:00 GMT+12', NULL, '01060000209108000001000000010300000001000000050000002F9EEE1D40A83C4111B98E242131554135FAC7385AA83C416C3970282131554135FAC7385AA83C413B8099EB1B315541309EEE1D40A83C41877FD6E31B3155412F9EEE1D40A83C4111B98E2421315541');
@@ -175,3 +175,12 @@ INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, suppli
 VALUES (2032, 1, 1, 5, 1, 1, 100, 1, '0106000020910800000100000001030000000100000005000000137AA177FBA83C4179BBEA34533155418CA82234FEA83C4121DEAE14443155418B106F574CA93C41ECC44EDA43315541E5466E844AA93C41E3EDAAA953315541137AA177FBA83C4179BBEA3453315541');
 INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, shape)
 VALUES (2033, 1, 1, 5, 1, 1, 100, 1, '01060000209108000001000000010300000001000000050000006CBF296F71A93C41DB6FCA85523155419D2603DC7AA93C411B2C2893343155410C3FF0E3B1A93C415FCEB27F3431554192106F27AFA93C411F125572523155416CBF296F71A93C41DB6FCA8552315541');
+
+-- add outlines of supplied dataset 2 to check buildings_bulk_load.compare_building_outlines(1) does not include these outlines
+INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, shape)
+VALUES (2034, 2, 1, 5, 1, 1, 100, 1, ST_MULTI('010300002091080000010000000500000021318A090EA83C413B6659B51931554121318A090EA83C419A83A4A51431554143E87BC41DA83C41412D529C14315541A941C5E91DA83C4194BCABBE1931554121318A090EA83C413B6659B519315541'));
+INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, shape)
+VALUES (2035, 2, 1, 5, 1, 1, 100, 1, ST_MULTI('0103000020910800000100000007000000527EF7BE0DA83C41862630C429315541B8D740E40DA83C4172E73A7324315541089384E223A83C4165E4435724315541089384E223A83C414A1BA24E26315541AFCB71A116A83C41A371F457263155411525BBC616A83C412DD0DDBA29315541527EF7BE0DA83C41862630C429315541'));
+INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, shape)
+VALUES (2036, 2, 1, 5, 1, 1, 100, 1, ST_MULTI('0103000020910800000100000005000000EAA71E3343A83C413F1CF048233155411EF58BE842A83C41C6C442181D3155417480A00885A83C41ACBE54E01C315541DB1A7B7384A83C41F3C8945B23315541EAA71E3343A83C413F1CF04823315541'));
+
