@@ -30,7 +30,7 @@ $$
         WHERE current_intersect > 5
         AND supplied_intersect > 5
         GROUP BY bulk_load_outline_id
-        HAVING count(bulk_load_outline_id) = 1
+        HAVING count(bulk_load_outline_id) >= 1
     )
     -- Find supplied bulk_load_outline_id that do not intersect or intersect
     -- with <5% overlap, and are therefore marked as new to the dataset.
@@ -78,7 +78,7 @@ $$
         WHERE current_intersect > 5
         AND supplied_intersect > 5
         GROUP BY building_outline_id
-        HAVING count(building_outline_id) = 1
+        HAVING count(building_outline_id) >= 1
     )
     -- Find current building_outline_id that do not intersect or intersect with
     -- <5% overlap, and are therefore marked for removal from the dataset.
@@ -152,6 +152,7 @@ $$
     AND bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
+    AND ((current_intersect > 5 AND supplied_intersect > 5) OR (current_intersect > 90) or (supplied_intersect > 90))
     ;
 
 $$
@@ -215,6 +216,7 @@ $$
     OR bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
+    AND ((current_intersect > 5 AND supplied_intersect > 5) OR (current_intersect > 90) or (supplied_intersect > 90))
     ;
 
 $$
