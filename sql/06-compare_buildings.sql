@@ -21,7 +21,7 @@ $$
         WHERE current.supplied_dataset_id = $1
         AND supplied.supplied_dataset_id = $1
     ), supplied_count AS (
-        -- Find all supplied building outlines that have more exactly one >5%
+        -- Find all supplied building outlines that have more than or exactly one >5%
         -- overlap with the current building outlines.
         SELECT
               bulk_load_outline_id
