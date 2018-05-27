@@ -45,7 +45,8 @@ Building polygons in the building outlines data are defined by the following cri
 Source Imagery
 ---------------------------
 
-Resolution of imagery used for capture of building outlines ranges from 50cm pixel resolution (0.5m GSD) to 10cm pixel resolution (0.1m GSD).
+Resolution of imagery used for capture of building outlines ranges from 50cm pixel resolution (0.5m GSD) to 10cm pixel resolution (0.1m GSD). An index of the imagery used for these data sets can be seen in the Imagery Surveys index described here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
+
 
 Coverage Maps
 ---------------------------
