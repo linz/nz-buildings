@@ -79,7 +79,7 @@ check test: $(SQLSCRIPTS)
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
 	nz-buildings-load nz-buildings-pgtap-db --with-test-data; \
-	pg_prove tests/stage_two
+	pg_prove tests/
 
 clean:
 	# Remove the files built from .in files during install
