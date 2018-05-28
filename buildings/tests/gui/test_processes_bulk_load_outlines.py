@@ -97,7 +97,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
     def test_bulk_load_ok_clicked(self):
         """When save is clicked data is added to the correct tables"""
         # create temporary outlines layer
-        sql = 'SELECT count * FROM buildings_bulk_load.bulk_load_outlines;'
+        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
         result = db._execute(sql)
         if result is None:
             result = 0
@@ -111,8 +111,8 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # feature one
         feature_one = QgsFeature()
         feature_one.setAttributes([1])
-        points = [QgsPoint(1878056, 5555355), QgsPoint(1878056, 5555300),
-                  QgsPoint(1878156, 5555300), QgsPoint(1878156, 5555355)]
+        points = [QgsPoint(1878056, 5555250), QgsPoint(1878056, 5555300),
+                  QgsPoint(1878100, 5555300), QgsPoint(1878100, 5555250)]
         feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
         # add outlines to temporary layer
         layer.startEditing()

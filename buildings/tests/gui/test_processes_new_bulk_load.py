@@ -87,7 +87,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
             result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0103000020910800000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');"
             self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
@@ -147,7 +147,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
             result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0103000020910800000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');"
             self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
@@ -223,7 +223,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
             result = self.new_bulk_frame.db.execute_no_commit(sql)
             self.dataset = result.fetchall()[0][0]
             # add geoms to bl
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0106000020910800000100000001030000000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441')"
+            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, 1, %s, 1, NULL, 1, '0103000020910800000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');"
             self.new_bulk_frame.db.execute_no_commit(sql, (self.dataset, self.capture_source))
             # reload setup
             self.new_bulk_frame.btn_reset.setEnabled(1)
