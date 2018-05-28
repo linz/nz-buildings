@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
     , building_begin_lifespan timestamp NOT NULL
     , name_begin_lifespan timestamp
     , use_begin_lifespan timestamp
-    , shape public.geometry(MultiPolygon, 2193) NOT NULL
+    , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
 COMMENT ON TABLE buildings_lds.nz_building_outlines IS
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines_full_history (
     , building_lifecycle character varying(40) NOT NULL
     , record_begin_lifespan timestamp NOT NULL
     , record_end_lifespan timestamp
-    , shape public.geometry(MultiPolygon, 2193) NOT NULL
+    , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
 COMMENT ON TABLE buildings_lds.nz_building_outlines_full_history IS
