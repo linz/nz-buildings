@@ -118,8 +118,8 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
-    echo ${SCRIPTSDIR}/tests/testdata/03-test_second_dataset_comparisons.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/03-test_second_dataset_comparisons.sql
+    echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
     echo ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql
