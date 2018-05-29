@@ -2,38 +2,65 @@
 matrix:
   include:
 
-    - addons:
+    - env: PGSQL=9.4 PGIS=2.3 PGPORT=5432
+      addons:
         postgresql: 9.4
         apt:
           packages:
             - postgresql-9.4
             - postgresql-9.4-pgtap
-            - postgresql-9.4-postgis-2.3
 
-    - addons:
+    - env: PGSQL=9.5 PGIS=2.3 PGPORT=5432
+      addons:
         postgresql: 9.5
         apt:
           packages:
             - postgresql-9.5
             - postgresql-9.5-pgtap
-            - postgresql-9.5-postgis-2.3
 
-    - addons:
+    - env: PGSQL=9.5 PGIS=2.4 PGPORT=5432
+      addons:
+        postgresql: 9.5
+        apt:
+          packages:
+            - postgresql-9.5
+            - postgresql-9.5-pgtap
+
+    - env: PGSQL=9.6 PGIS=2.3 PGPORT=5432
+      addons:
         postgresql: 9.6
         apt:
           packages:
             - postgresql-9.6
             - postgresql-9.6-pgtap
-            - postgresql-9.6-postgis-2.3
+
+    - env: PGSQL=9.6 PGIS=2.4 PGPORT=5432
+      addons:
+        postgresql: 9.6
+        apt:
+          packages:
+            - postgresql-9.6
+            - postgresql-9.6-pgtap
+
+    - env: PGSQL=10 PGIS=2.4 PGPORT=5433
+      addons:
+        postgresql: 10
+        apt:
+          packages:
+            - postgresql-10
+            - postgresql-10-pgtap
 
 before_install:
+  - sudo apt-get -qq update
   - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+  - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
 before_script:
-  - export PGPASSWORD=
-  - psql -U postgres -c 'CREATE DATABASE nz_buildings_travis_db;'
+  - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+  - export PGPASSWORD=travis
+  - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
   - sudo make install
   - nz-buildings-load nz_buildings_travis_db --with-test-data
 
 script:
-  - pg_prove -U postgres -d nz_buildings_travis_db tests/
+  - pg_prove -U travis -d nz_buildings_travis_db tests/
