@@ -112,17 +112,18 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         """
         layer_index = self.mcb_imagery_layer.currentIndex()
         self.cmb_imagery.clear()
-        for feature in self.mcb_imagery_layer.layer(layer_index).getFeatures():
-            idx = self.mcb_imagery_layer.layer(layer_index).fieldNameIndex(self.fcb_imagery_field.currentField())
-            value = feature.attributes()[idx]
-            count = 0
-            exists = False
-            while count < self.cmb_imagery.count():
-                if self.cmb_imagery.itemText(count) == str(value):
-                    exists = True
-                count = count + 1
-            if not exists:
-                self.cmb_imagery.addItem(str(value))
+        if self.mcb_imagery_layer.layer(layer_index) is not None:
+            for feature in self.mcb_imagery_layer.layer(layer_index).getFeatures():
+                idx = self.mcb_imagery_layer.layer(layer_index).fieldNameIndex(self.fcb_imagery_field.currentField())
+                value = feature.attributes()[idx]
+                count = 0
+                exists = False
+                while count < self.cmb_imagery.count():
+                    if self.cmb_imagery.itemText(count) == str(value):
+                        exists = True
+                    count = count + 1
+                if not exists:
+                    self.cmb_imagery.addItem(str(value))
 
     def populate_external_fcb(self):
         self.fcb_external_id.setLayer(self.ml_outlines_layer.currentLayer())
@@ -290,12 +291,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                 geom = feat.geometry()
                 # convert to correct format
                 wkt = geom.exportToWkt()
-                sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-                result = self.db.execute_no_commit(sql, data=(wkt, ))
-                geom = result.fetchall()[0][0]
-                # ensure outline SRID is 2193
                 sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-                result = self.db.execute_no_commit(sql, data=(geom, ))
+                result = self.db.execute_no_commit(sql, data=(wkt, ))
                 geom = result.fetchall()[0][0]
             # iterate through supplied datasets and find convex hulls
             dataset = 1
@@ -344,12 +341,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
             feature = self.mcb_imagery_layer.currentLayer().selectedFeatures()
             # convert to wkt to so can compare with sql shapes
             wkt = feature[0].geometry().exportToWkt()
-            sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-            result = self.db.execute_no_commit(sql, data=(wkt, ))
-            geom = result.fetchall()[0][0]
-            # ensure outline SRID is 2193
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
-            result = self.db.execute_no_commit(sql, data=(geom, ))
+            result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             # intersect imagery geom with building_outlines
             sql = 'CREATE TEMP TABLE temp AS SELECT * FROM buildings.building_outlines WHERE ST_intersects(buildings.building_outlines.shape, %s);'
@@ -464,13 +457,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
         external_field = str(self.fcb_external_id.currentField())
         for outline in layer.getFeatures():
             wkt = outline.geometry().exportToWkt()
-            # convert to postgis shape and ensure outline is a multipolygon
-            sql = 'SELECT ST_AsText(ST_Multi(ST_GeometryFromText(%s)));'
-            result = self.db.execute_no_commit(sql, data=(wkt, ))
-            geom = result.fetchall()[0][0]
-            # ensure outline SRID is 2193
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-            result = self.db.execute_no_commit(sql, data=(geom, ))
+            result = self.db.execute_no_commit(sql, data=(wkt, ))
             geom = result.fetchall()[0][0]
             suburb = self.find_suburb(geom)
             town_city = self.find_town_city(geom)
