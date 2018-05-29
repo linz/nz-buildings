@@ -111,8 +111,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # feature one
         feature_one = QgsFeature()
         feature_one.setAttributes([1])
-        points = [QgsPoint(1878056, 5555250), QgsPoint(1878056, 5555300),
-                  QgsPoint(1878100, 5555300), QgsPoint(1878100, 5555250)]
+        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
+                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
+        # points = [QgsPoint(1878056, 5555355), QgsPoint(1878056, 5555300),
+        #           QgsPoint(1878156, 5555300), QgsPoint(1878156, 5555355)]
         feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
         # add outlines to temporary layer
         layer.startEditing()
@@ -127,10 +129,12 @@ class ProcessBulkLoadTest(unittest.TestCase):
         imagery_layer.updateFields()
         outline = QgsFeature()
         outline.setAttributes(['1'])
-        points = points = [QgsPoint(1878000, 5555400),
-                           QgsPoint(1878000, 5554999),
-                           QgsPoint(1878300, 5554999),
-                           QgsPoint(1878300, 5555400)]
+        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
+                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
+        # points = points = [QgsPoint(1878000, 5555400),
+        #                    QgsPoint(1878000, 5554999),
+        #                    QgsPoint(1878300, 5554999),
+        #                    QgsPoint(1878300, 5555400)]
         outline.setGeometry(QgsGeometry.fromPolygon([points]))
         imagery_layer.startEditing()
         imagery_layer.addFeature(outline, True)

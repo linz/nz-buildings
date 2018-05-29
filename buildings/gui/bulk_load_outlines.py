@@ -374,8 +374,8 @@ class BulkLoadOutlines(QFrame, FORM_CLASS):
                         sql = 'UPDATE buildings_bulk_load.existing_subset_extracts SET supplied_dataset_id = %s WHERE building_outline_id = %s;'
                         self.db.execute_no_commit(sql, (self.dataset_id, ls[0]))
                 # run comparisons function
-                # sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
-                # self.db.execute_no_commit(sql, data=(self.dataset_id, ))
+                sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
+                self.db.execute_no_commit(sql, data=(self.dataset_id, ))
             sql = 'DISCARD TEMP;'
             self.db.execute_no_commit(sql)  # remove temp files
             if commit_status:

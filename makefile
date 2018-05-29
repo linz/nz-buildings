@@ -33,7 +33,7 @@ setup_test_db:
 	export PGDATABASE=nz-buildings-plugin-db; \
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
-	nz-buildings-load nz-buildings-plugin-db --with-test-data; \
+	nz-buildings-load nz-buildings-plugin-db --with-plugin-setup; \
 	sed -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
 
 test:

@@ -64,7 +64,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Bulk Load Dataset'))
         self.new_bulk_frame = self.dockwidget.current_frame
 
-        self.new_bulk_frame.error_dialog.close()
+        # self.new_bulk_frame.error_dialog.close()
 
     def tearDown(self):
         """Runs after each test."""
