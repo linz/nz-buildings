@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , territorial_authority_id integer NOT NULL
     , begin_lifespan timestamptz NOT NULL DEFAULT now()
     , end_lifespan timestamptz
-    , shape public.geometry(MultiPolygon, 2193) NOT NULL
+    , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
 SELECT setval('buildings.building_outlines_building_outline_id_seq', coalesce((SELECT max(building_outline_id) + 1 FROM buildings.building_outlines), 1000000), false);

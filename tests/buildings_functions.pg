@@ -40,7 +40,7 @@ SELECT set_has(
 --Existing Subset Extracts-------------------------
 SELECT has_function('buildings_bulk_load', 'existing_subset_extracts_insert', 'Should have function existing_subset_extracts_insert in bulk_load stage schema.');
 SELECT set_has(
-    'SELECT building_id FROM buildings.buildings',
+    'SELECT building_outline_id FROM buildings_bulk_load.existing_subset_extracts',
     $$VALUES (1000000.0)$$,
     'Check contents of existing subset extracts table after existing_subset_extracts_insert function has run'
 );

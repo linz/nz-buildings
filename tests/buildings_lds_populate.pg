@@ -19,51 +19,54 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(2);
+SELECT plan(5);
 
 --1----------------------------------------------------------
--- Check function exists
+-- Check functions exist
 
+SELECT has_function('buildings_lds', 'nz_building_outlines_insert', 'Should have function nz_building_outlines_insert in buildings_lds schema.');
+SELECT has_function('buildings_lds', 'nz_building_outlines_full_history_insert', 'Should have function nz_building_outlines_full_history_insert in buildings_lds schema.');
+SELECT has_function('buildings_lds', 'nz_building_outlines_lifecycle_insert', 'Should have function nz_building_outlines_lifecycle_insert in buildings_lds schema.');
 SELECT has_function('buildings_lds', 'populate_buildings_lds', 'Should have function populate_buildings_lds in buildings_lds schema.');
 
 --2----------------------------------------------------------
 -- result of building outlines in the nz_building_outlines
 
 SELECT results_eq(
-    'SELECT building_outline_id, building_id, name, use, suburb_locality, town_city, territorial_authority, capture_method, capture_source, lifecycle_stage FROM buildings_lds.nz_building_outlines',
-    $$VALUES (1000000, 1000000, NULL::varchar, NULL::varchar, 'Kelburn'::varchar, 'Wellington'::varchar, 'Wellington'::varchar, 'Feature Extraction'::varchar, 'NZ Aerial Imagery'::varchar, 'Current'::varchar),
-             (1000001, 1000001, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000002, 1001, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000003, 1005, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000004, 1003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000005, 1002, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000006, 1000002, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000007, 1000003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000008, 1000004, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000009, 1000005, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000010, 1000006, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000011, 1000007, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000012, 1000008, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000013, 1000009, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000014, 1000010, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000015, 1000011, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000016, 1000012, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000017, 1000013, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000018, 1000014, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000019, 1000015, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000020, 1000016, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000021, 1000017, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000022, 1000018, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000023, 1000019, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000024, 1000020, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000025, 1000021, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000026, 1000022, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000027, 1000023, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000028, 1000024, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000029, 1000025, NULL, NULL, 'Newtown', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000030, 1000026, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000031, 1000027, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current'),
-             (1000032, 1000028, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery', 'Current')
+    'SELECT building_outline_id, building_id, name, use, suburb_locality, town_city, territorial_authority, capture_method, capture_source FROM buildings_lds.nz_building_outlines',
+    $$VALUES (1000000, 1000000, NULL::varchar, NULL::varchar, 'Kelburn'::varchar, 'Wellington'::varchar, 'Wellington'::varchar, 'Feature Extraction'::varchar, 'NZ Aerial Imagery'::varchar),
+             (1000001, 1000001, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000002, 1001, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000003, 1005, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000004, 1003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000005, 1002, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000006, 1000002, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000007, 1000003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000008, 1000004, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000009, 1000005, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000010, 1000006, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000011, 1000007, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000012, 1000008, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000013, 1000009, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000014, 1000010, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000015, 1000011, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000016, 1000012, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000017, 1000013, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000018, 1000014, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000019, 1000015, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000020, 1000016, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000021, 1000017, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000022, 1000018, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000023, 1000019, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000024, 1000020, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000025, 1000021, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000026, 1000022, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000027, 1000023, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000028, 1000024, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000029, 1000025, NULL, NULL, 'Newtown', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000030, 1000026, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000031, 1000027, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000032, 1000028, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery')
     $$,
     'Check building outlines in buildings_lds.nz_building_outlines table after populate_buildings_lds function has run'
 );

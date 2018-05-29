@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
     , town_city_id integer
     , territorial_authority_id integer NOT NULL
     , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , shape public.geometry(MultiPolygon, 2193) NOT NULL
+    , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
 SELECT setval('buildings_bulk_load.bulk_load_outlines_bulk_load_outline_id_seq', coalesce((SELECT max(bulk_load_outline_id) + 1 FROM buildings_bulk_load.bulk_load_outlines), 1000000), false);
@@ -165,7 +165,7 @@ COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.shape IS
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.existing_subset_extracts (
       building_outline_id integer PRIMARY KEY REFERENCES buildings.building_outlines (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
-    , shape public.geometry(MultiPolygon, 2193) NOT NULL
+    , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
 DROP INDEX IF EXISTS idx_existing_subset_extracts_supplied_dataset_id;
