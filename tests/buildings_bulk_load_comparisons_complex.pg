@@ -1,7 +1,7 @@
 
 ------------------------------------------------------------------------------ 
 -- Provide testing for buildings_bulk_load comparisons functions 
--- with complex real world examples using pgTAP 
+-- with complex real world and Hausdorff Distance examples using pgTAP 
 ------------------------------------------------------------------------------ 
  
 -- Turn off echo. 
@@ -28,7 +28,9 @@ SELECT plan(10);
 
 SELECT results_eq(
     'SELECT buildings_bulk_load.find_added(4)',
-    $$VALUES (2038), (2051), (2052)$$,
+    $$VALUES (2061), (2038), (2051), (2052), (2058),
+             (2059), (2060), (2062), (2065), (2066),
+             (2068), (2070), (2076), (2077), (2079)$$,
     'Check return of buildings bulk load find_added function'
 );
 
@@ -37,7 +39,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT buildings_bulk_load.find_removed(4)',
-    $$VALUES (1042), (1058)$$,
+    $$VALUES (1042), (1058), (1064)$$,
     'Check return of buildings bulk load find_removed function'
 );
 
@@ -46,9 +48,12 @@ SELECT results_eq(
 
 SELECT results_eq(
   'SELECT buildings_bulk_load.find_matched(4)',
-  $$VALUES ((1061,2053)), ((1060,2050)),
-           ((1041,2047)), ((1048,2045)),
-           ((1056,2042))$$,
+  $$VALUES ((1078,2082)), ((1077,2081)), ((1076,2080)),
+           ((1073,2078)), ((1065,2075)), ((1072,2074)),
+           ((1066,2073)), ((1071,2072)), ((1075,2071)),
+           ((1074,2069)), ((1063,2064)), ((1069,2063)),
+           ((1070,2057)), ((1061,2053)), ((1060,2050)),
+           ((1041,2047)), ((1048,2045)), ((1056,2042))$$,
   'Check return of buildings_bulk_load find_matched function'
 );
 
@@ -57,7 +62,8 @@ SELECT results_eq(
 
 SELECT results_eq(
   'SELECT buildings_bulk_load.find_related(4)',
-  $$VALUES ((1059,2056)), ((1057,2055)),
+  $$VALUES ((1067,2067)), ((1068,2067)),
+           ((1059,2056)), ((1057,2055)),
            ((1059,2055)), ((1059,2054)),
            ((1059,2049)), ((1038,2048)),
            ((1040,2048)), ((1039,2046)),
