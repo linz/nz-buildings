@@ -18,7 +18,7 @@
 
 import unittest
 
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsFeature, QgsPoint, QgsGeometry, QgsField, QgsCoordinateReferenceSystem, QgsRectangle
+from qgis.core import QgsPoint, QgsCoordinateReferenceSystem, QgsRectangle
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
@@ -85,7 +85,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.alter_relationships_frame.btn_cancel.click()
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
 
     def test_alter_relationship_to_added_or_removed(self):
         """When save is clicked buildings in matched are moved to added/removed"""
@@ -245,6 +244,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(index22.data(), '2005')
 
         self.alter_relationships_frame.btn_remove_all.click()
+        QTest.qWait(300)
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
 
@@ -256,6 +256,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.tbl_original.item(0, 0).setSelected(True)
         self.alter_relationships_frame.btn_remove_slt.click()
+        QTest.qWait(300)
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
 
