@@ -78,7 +78,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -90,20 +90,20 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
-        QTest.qWait(300)
+                         delay=-1)
+        QTest.qWait(1)
         # tests
         self.assertTrue(self.new_bulk_frame.btn_save.isEnabled())
         self.assertTrue(self.new_bulk_frame.btn_reset.isEnabled())
@@ -122,7 +122,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -134,20 +134,20 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
-        QTest.qWait(300)
+                         delay=-1)
+        QTest.qWait(1)
         # change indexes of comboboxes
         self.new_bulk_frame.cmb_capture_method.setCurrentIndex(1)
         self.new_bulk_frame.cmb_capture_source.setCurrentIndex(0)
@@ -188,7 +188,7 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -199,20 +199,20 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747591, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428102)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
+                         delay=-1)
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=300)
-        QTest.qWait(300)
+                         delay=-1)
+        QTest.qWait(1)
         # change indexes of comboboxes
         self.new_bulk_frame.cmb_capture_method.setCurrentIndex(1)
         self.new_bulk_frame.cmb_capture_source.setCurrentIndex(0)

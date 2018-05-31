@@ -70,7 +70,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         QTest.mouseClick(widget,
                          Qt.RightButton,
                          pos=canvas_point(QgsPoint(1878334, 5555224)),
-                         delay=300)
+                         delay=-1)
+        QTest.qWait(1)
 
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -98,7 +99,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 1)
@@ -108,7 +109,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(index2.data(), '2002')
 
         self.alter_relationships_frame.btn_unlink_all.click()
-        QTest.qWait(300)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
@@ -136,7 +136,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878229.15, 5555335.28)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 1)
@@ -149,7 +149,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 2)
@@ -157,7 +157,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(index.data(), '1004')
 
         self.alter_relationships_frame.btn_unlink_all.click()
-        QTest.qWait(300)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
@@ -191,22 +190,21 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878229.15, 5555335.28)),
                          delay=-1)
-        QTest.qWait(300)
+        QTest.qWait(1)
 
         QTest.mouseClick(widget,
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
                          delay=-1)
-        QTest.qWait(300)
+        QTest.qWait(1)
 
         QTest.mouseClick(widget,
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878033.55, 5555355.73)),
                          delay=-1)
-        QTest.qWait(300)
+        QTest.qWait(1)
 
         self.alter_relationships_frame.btn_unlink_all.click()
-        QTest.qWait(1000)
 
         self.alter_relationships_frame.lst_existing.item(0).setSelected(True)
         self.alter_relationships_frame.lst_bulk.item(0).setSelected(True)
@@ -230,7 +228,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878185.10, 5555290.52)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 2)
@@ -244,7 +242,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(index22.data(), '2005')
 
         self.alter_relationships_frame.btn_remove_all.click()
-        QTest.qWait(300)
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
 
@@ -252,11 +249,10 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878185.10, 5555290.52)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         self.alter_relationships_frame.tbl_original.item(0, 0).setSelected(True)
         self.alter_relationships_frame.btn_remove_slt.click()
-        QTest.qWait(300)
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
 
@@ -268,13 +264,11 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         self.alter_relationships_frame.btn_unlink_all.click()
-        QTest.qWait(300)
 
         self.alter_relationships_frame.btn_relink_all.click()
-        QTest.qWait(300)
 
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 1)
@@ -291,12 +285,11 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
                          Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
                          delay=-1)
-        QTest.qWait(1000)
+        QTest.qWait(1)
 
         self.assertTrue(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
 
         self.alter_relationships_frame.btn_clear_slt.click()
-        QTest.qWait(300)
 
         self.assertFalse(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
 
