@@ -27,10 +27,11 @@ SELECT plan(10);
 -- Test find_added function on complex data
 
 SELECT results_eq(
-    'SELECT buildings_bulk_load.find_added(4)',
-    $$VALUES (2061), (2038), (2051), (2052), (2058),
-             (2059), (2060), (2062), (2065), (2066),
-             (2068), (2070), (2076), (2077), (2079)$$,
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(4) ORDER BY bulk_load_outline_id',
+    $$VALUES (2038), (2051), (2052), (2058),
+             (2059), (2060), (2061), (2062),
+             (2065), (2066), (2068), (2070),
+             (2076), (2077), (2079)$$,
     'Check return of buildings bulk load find_added function'
 );
 
@@ -38,7 +39,7 @@ SELECT results_eq(
 -- Test find_removed function on complex data
 
 SELECT results_eq(
-    'SELECT buildings_bulk_load.find_removed(4)',
+    'SELECT building_outline_id FROM buildings_bulk_load.find_removed(4) ORDER BY building_outline_id',
     $$VALUES (1042), (1058), (1064)$$,
     'Check return of buildings bulk load find_removed function'
 );
@@ -47,13 +48,16 @@ SELECT results_eq(
 -- Test find_matched function on complex data
 
 SELECT results_eq(
-  'SELECT buildings_bulk_load.find_matched(4)',
-  $$VALUES ((1078,2082)), ((1077,2081)), ((1076,2080)),
-           ((1073,2078)), ((1065,2075)), ((1072,2074)),
-           ((1066,2073)), ((1071,2072)), ((1075,2071)),
-           ((1074,2069)), ((1063,2064)), ((1069,2063)),
-           ((1070,2057)), ((1061,2053)), ((1060,2050)),
-           ((1041,2047)), ((1048,2045)), ((1056,2042))$$,
+  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_matched(4) ORDER BY building_outline_id, bulk_load_outline_id',
+  $$VALUES (1041, 2047), (1048, 2045),
+           (1056, 2042), (1060, 2050),
+           (1061, 2053), (1063, 2064),
+           (1065, 2075), (1066, 2073),
+           (1069, 2063), (1070, 2057),
+           (1071, 2072), (1072, 2074),
+           (1073, 2078), (1074, 2069),
+           (1075, 2071), (1076, 2080),
+           (1077, 2081), (1078, 2082)$$,
   'Check return of buildings_bulk_load find_matched function'
 );
 
@@ -61,21 +65,21 @@ SELECT results_eq(
 -- Test find_related in complex data
 
 SELECT results_eq(
-  'SELECT buildings_bulk_load.find_related(4)',
-  $$VALUES ((1079,2083)), ((1080,2083)),
-           ((1067,2067)), ((1068,2067)),
-           ((1059,2056)), ((1057,2055)),
-           ((1059,2055)), ((1059,2054)),
-           ((1059,2049)), ((1038,2048)),
-           ((1040,2048)), ((1039,2046)),
-           ((1043,2046)), ((1045,2046)),
-           ((1053,2044)), ((1054,2044)),
-           ((1055,2044)), ((1044,2043)),
-           ((1046,2043)), ((1047,2043)),
-           ((1049,2043)), ((1050,2043)),
-           ((1051,2043)), ((1052,2043)),
-           ((1062,2041)), ((1062,2040)),
-           ((1062,2039)), ((1062,2037))$$,
+  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_related(4) ORDER BY building_outline_id, bulk_load_outline_id',
+  $$VALUES (1038, 2048), (1039, 2046),
+           (1040, 2048), (1043, 2046),
+           (1044, 2043), (1045, 2046),
+           (1046, 2043), (1047, 2043),
+           (1049, 2043), (1050, 2043),
+           (1051, 2043), (1052, 2043),
+           (1053, 2044), (1054, 2044),
+           (1055, 2044), (1057, 2055),
+           (1059, 2049), (1059, 2054),
+           (1059, 2055), (1059, 2056),
+           (1062, 2037), (1062, 2039),
+           (1062, 2040), (1062, 2041),
+           (1067, 2067), (1068, 2067),
+           (1079, 2083), (1080, 2083)$$,
   'Check return of buildings_bulk_load find related function'
 );
 
@@ -84,7 +88,7 @@ SELECT results_eq(
 
 SELECT set_has(
     'SELECT bulk_load_outline_id FROM buildings_bulk_load.added',
-    $$VALUES (2038), (2051), (2052)$$,
+    $$VALUES (2038), (2051), (2052), (2084)$$,
     'Check added outlines after comparisons function has run'
 );
 
@@ -93,7 +97,7 @@ SELECT set_has(
 
 SELECT set_has(
     'SELECT building_outline_id FROM buildings_bulk_load.removed',
-    $$VALUES (1042), (1058)$$,
+    $$VALUES (1042), (1058), (1081)$$,
     'Check removed outlines after comparisons function has run'
 );
 
