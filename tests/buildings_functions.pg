@@ -25,7 +25,7 @@ SELECT plan(6);
 SELECT has_function('buildings', 'buildings_insert', 'Should have function buildings_insert in buildings schema');
 SELECT set_has(
     'SELECT building_id FROM buildings.buildings',
-    $$VALUES (1000029.0)$$,
+    $$VALUES (1000029)$$,
     'Check contents of buildings table after buildings_insert function has run'
 );
 
@@ -33,7 +33,7 @@ SELECT set_has(
 SELECT has_function('buildings', 'building_outlines_insert', 'Should have function buildings_outlines_insert in buildings_schema');
 SELECT set_has(
     'SELECT building_outline_id FROM buildings.building_outlines',
-    $$VALUES (1000033.0)$$,
+    $$VALUES (1000033)$$,
     'Check contents of building outlines table after building_outlines_insert function has run'
 );
 
@@ -41,7 +41,7 @@ SELECT set_has(
 SELECT has_function('buildings_bulk_load', 'existing_subset_extracts_insert', 'Should have function existing_subset_extracts_insert in bulk_load stage schema.');
 SELECT set_has(
     'SELECT building_outline_id FROM buildings_bulk_load.existing_subset_extracts',
-    $$VALUES (1000000.0)$$,
+    $$VALUES (1000000)$$,
     'Check contents of existing subset extracts table after existing_subset_extracts_insert function has run'
 );
 

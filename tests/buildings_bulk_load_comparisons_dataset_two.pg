@@ -45,18 +45,18 @@ SELECT results_eq(
 -- related
 
 SELECT results_eq(
-	'SELECT buildings_bulk_load.find_related(2)',
-	$$VALUES ((1036,2035)), ((1037,2035))$$,
-	'Check return of buildings bulk load finc_related function'
+    'SELECT buildings_bulk_load.find_related(2)',
+    $$VALUES ((1036,2035)), ((1037,2035))$$,
+    'Check return of buildings bulk load finc_related function'
 );
 
 --4------------------------------------------------------
 -- matched 
 
 SELECT results_eq(
-	'SELECT buildings_bulk_load.find_matched(2)',
-	$$VALUES ((1035,2036))$$,
-	'Check return of buildings bulk load find_matched function'
+    'SELECT buildings_bulk_load.find_matched(2)',
+    $$VALUES ((1035,2036))$$,
+    'Check return of buildings bulk load find_matched function'
 );
 
 --5----------------------------------------------------------
@@ -81,36 +81,36 @@ SELECT set_has(
 -- related bulk_load_outline_id
 
 SELECT set_has(
-	'SELECT bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY bulk_load_outline_id',
-	$$VALUES (2035)$$,
-	'Check bulk load outlines of related table after buildings comparison function has run'
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY bulk_load_outline_id',
+    $$VALUES (2035)$$,
+    'Check bulk load outlines of related table after buildings comparison function has run'
 );
 
 --8---------------------------------------------------------
 -- related building_outline_id
 
 SELECT set_has(
-	'SELECT building_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id',
-	$$VALUES (1036), (1037)$$,
-	'Check building_outline_id of related table after buildings comparison function has run'
+    'SELECT building_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id',
+    $$VALUES (1036), (1037)$$,
+    'Check building_outline_id of related table after buildings comparison function has run'
 );
 
 --9------------------------------------------------------
 -- Matched bulk_load_outline_id
 
 SELECT set_has(
-	'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY bulk_load_outline_id',
-	$$VALUES (2036)$$,
-	'Check bulk_load_outline_id of matched table after buildings comparison function has run'
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY bulk_load_outline_id',
+    $$VALUES (2036)$$,
+    'Check bulk_load_outline_id of matched table after buildings comparison function has run'
 );
 
 --10-------------------------------------------------------
 -- Matched building_outline_id
 
 SELECT set_has(
-	'SELECT building_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id',
-	$$VALUES (1035)$$,
-	'Check building_outline_id outlines of matched table after buildings comparison function has run'
+    'SELECT building_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id',
+    $$VALUES (1035)$$,
+    'Check building_outline_id outlines of matched table after buildings comparison function has run'
 );
 
 --------------------------------------------------------
