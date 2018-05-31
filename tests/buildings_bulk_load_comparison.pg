@@ -92,8 +92,7 @@ SELECT results_eq(
              (1031, 2027), (1031, 2028),
              (1031, 2029), (1031, 2030), 
              (1032, 2032), (1032, 2033),
-             (1033, 2033)
-             $$,
+             (1033, 2033)$$,
     'Check bulk load outlines of related table after buildings comparison function has run'
 );
 
@@ -103,8 +102,7 @@ SELECT results_eq(
 SELECT results_eq(
     'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_matched(1) ORDER BY building_outline_id',
     $$VALUES (1001, 2031), (1002, 2001),
-             (1003, 2002), (1005, 2004)
-             $$,
+             (1003, 2002), (1005, 2004)$$,
     'Check outlines pairs of matched table after buildings comparison .find_matched function has run'
 );
 
