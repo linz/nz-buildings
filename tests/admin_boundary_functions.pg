@@ -31,8 +31,8 @@ SELECT results_eq(
     'suburb_locality_intersect_polygon not returning correct suburb_locality_id value'
 );
 SELECT results_eq(
-	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
-    $$VALUES (2)$$,
+	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
+    $$VALUES (1)$$,
     'Check suburb_locality_id of bulk load outlines table after bulk_load_outlines_update_suburb function has run'
 );
 
@@ -44,8 +44,8 @@ SELECT results_eq(
     'town_city_intersect_polygon not returning correct town_city_id value'
 );
 SELECT results_eq(
-	$$SELECT town_city_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
-    $$VALUES (200)$$,
+	$$SELECT town_city_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
+    $$VALUES (100)$$,
     'Check town_city_id of bulk load outlines table after bulk_load_outlines_update_town_city function has run'
 );
 
@@ -57,7 +57,7 @@ SELECT results_eq(
     'nz_territorial_authority_intersect_polygon not returning correct territorial_authority value'
 );
 SELECT results_eq(
-	$$SELECT territorial_authority_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2;$$,
+	$$SELECT territorial_authority_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
     $$VALUES (1)$$,
     'Check territorial_authority_id of bulk load outlines table after bulk_load_outlines_update_territorial_authority function has run'
 );

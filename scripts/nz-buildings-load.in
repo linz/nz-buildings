@@ -2,11 +2,13 @@
 
 DB_NAME=
 WITH_TEST_DATA=false
+WITH_PLUGIN_SETUP=false
 export PSQL=psql
 export SCRIPTSDIR=/usr/share/nz-building-outlines/
 
 usage() {
     echo "Usage: $0 <database> [--with-test-data]" >&2
+    echo "Usage: $0 <database> [--with-plugin-setup]" >&2
     echo "Usage: $0 [--version]" >&2
 }
 
@@ -64,6 +66,9 @@ while [ "$1" != "" ]; do
         --with-test-data)
             WITH_TEST_DATA=true
             ;;
+        --with-plugin-setup)
+            WITH_PLUGIN_SETUP=true
+            ;;
         *)
             # Anything unsupported that follows a valid database name will error out here
             echo "ERROR: Unrecognised option \"$PARAM\""
@@ -113,6 +118,21 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
-    echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_functions.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_functions.sql
+    echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql
+    psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
+    echo ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql
+
+fi
+# Execute files that are needed to test the plugin - test data remains in database
+if [ "${WITH_PLUGIN_SETUP}" = true ]; then
+    # Execute all files in the test data sql dir
+    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql
+    echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql
+    psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
+    psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
+    psql -c "SELECT buildings_lds.populate_buildings_lds();"
 fi

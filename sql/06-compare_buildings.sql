@@ -21,7 +21,7 @@ $$
         WHERE current.supplied_dataset_id = $1
         AND supplied.supplied_dataset_id = $1
     ), supplied_count AS (
-        -- Find all supplied building outlines that have more exactly one >5%
+        -- Find all supplied building outlines that have more than or exactly one >5%
         -- overlap with the current building outlines.
         SELECT
               bulk_load_outline_id
@@ -30,7 +30,7 @@ $$
         WHERE current_intersect > 5
         AND supplied_intersect > 5
         GROUP BY bulk_load_outline_id
-        HAVING count(bulk_load_outline_id) = 1
+        HAVING count(bulk_load_outline_id) >= 1
     )
     -- Find supplied bulk_load_outline_id that do not intersect or intersect
     -- with <5% overlap, and are therefore marked as new to the dataset.
@@ -39,6 +39,7 @@ $$
     LEFT JOIN buildings_bulk_load.existing_subset_extracts current ON ST_Intersects(supplied.shape, current.shape)
     LEFT JOIN intersects USING (bulk_load_outline_id)
     WHERE current.building_outline_id IS NULL
+    AND supplied.supplied_dataset_id = $1
     OR (     intersects.supplied_intersect < 5
          AND supplied.bulk_load_outline_id NOT IN ( SELECT bulk_load_outline_id FROM supplied_count ))
     ;
@@ -78,7 +79,7 @@ $$
         WHERE current_intersect > 5
         AND supplied_intersect > 5
         GROUP BY building_outline_id
-        HAVING count(building_outline_id) = 1
+        HAVING count(building_outline_id) >= 1
     )
     -- Find current building_outline_id that do not intersect or intersect with
     -- <5% overlap, and are therefore marked for removal from the dataset.
@@ -87,6 +88,7 @@ $$
     LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
     LEFT JOIN intersects USING (building_outline_id)
     WHERE supplied.bulk_load_outline_id IS NULL
+    AND current.supplied_dataset_id = $1
     OR (     intersects.current_intersect < 5
          AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ))
     ;
@@ -152,6 +154,9 @@ $$
     AND bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
+    AND (   (current_intersect > 5 AND supplied_intersect > 5) 
+          OR (current_intersect > 90) 
+          OR (supplied_intersect > 90)  )
     ;
 
 $$
@@ -215,6 +220,9 @@ $$
     OR bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
+    AND (   (current_intersect > 5 AND supplied_intersect > 5)
+          OR (current_intersect > 90)
+          OR (supplied_intersect > 90)  )
     ;
 
 $$
@@ -265,6 +273,32 @@ IF ( SELECT processed_date
             , building_outline_id
             , 2 AS qa_status_id
         FROM buildings_bulk_load.find_related(p_supplied_dataset_id);
+
+        -- insert Bulk Load Outlines that don't get sorted into ADDED
+
+        INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id)
+        SELECT blo.bulk_load_outline_id, 2 AS qa_status_id
+        FROM buildings_bulk_load.bulk_load_outlines blo
+        LEFT JOIN buildings_bulk_load.added added ON added.bulk_load_outline_id = blo.bulk_load_outline_id
+        LEFT JOIN buildings_bulk_load.matched matched ON matched.bulk_load_outline_id = blo.bulk_load_outline_id
+        LEFT JOIN buildings_bulk_load.related related ON related.bulk_load_outline_id = blo.bulk_load_outline_id
+        WHERE blo.supplied_dataset_id = p_supplied_dataset_id
+        AND added.bulk_load_outline_id IS NULL
+        AND matched.bulk_load_outline_id IS NULL
+        AND related.bulk_load_outline_id IS NULL; 
+
+        -- insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
+        
+        INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id)
+        SELECT ex.building_outline_id, 2 AS qa_status_id
+        FROM buildings_bulk_load.existing_subset_extracts ex
+        LEFT JOIN buildings_bulk_load.removed removed ON removed.building_outline_id = ex.building_outline_id
+        LEFT JOIN buildings_bulk_load.matched matched ON matched.building_outline_id = ex.building_outline_id
+        LEFT JOIN buildings_bulk_load.related related ON related.building_outline_id = ex.building_outline_id
+        WHERE ex.supplied_dataset_id = p_supplied_dataset_id
+        AND removed.building_outline_id IS NULL
+        AND matched.building_outline_id IS NULL
+        AND related.building_outline_id IS NULL; 
 
         -- UPDATE processed_date IN supplied_datasets
 
