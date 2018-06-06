@@ -49,9 +49,9 @@ $$
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-        JOIN buildings_admin_bdys.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        JOIN buildings_admin_bdys.town_city ON town_city.town_city_id = building_outlines.town_city_id
-        JOIN buildings_admin_bdys.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
+        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
+        JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
         AND building_name.end_lifespan IS NULL
@@ -134,9 +134,9 @@ $$
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-        JOIN buildings_admin_bdys.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        JOIN buildings_admin_bdys.town_city ON town_city.town_city_id = building_outlines.town_city_id
-        JOIN buildings_admin_bdys.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
+        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
+        JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         ORDER BY full_history.building_outline_id
         RETURNING *
     )
@@ -178,7 +178,7 @@ $$
     TRUNCATE buildings_lds.nz_building_outlines_full_history;
     TRUNCATE buildings_lds.nz_building_outlines_lifecycle;
 
-    VALUES 
+    VALUES
           ('nz_building_outlines' , buildings_lds.nz_building_outlines_insert())
         , ('nz_building_outlines_full_history' , buildings_lds.nz_building_outlines_full_history_insert())
         , ('nz_building_outlines_lifecycle' , buildings_lds.nz_building_outlines_lifecycle_insert())
