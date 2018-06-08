@@ -277,7 +277,3 @@ class ProcessNewEntryTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result)
         self.new_entry_frame.db.rollback_open_cursor()
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessNewEntryTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

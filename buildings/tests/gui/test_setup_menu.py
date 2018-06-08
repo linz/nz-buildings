@@ -89,7 +89,3 @@ class SetUpMenuTest(unittest.TestCase):
                          'Add New Outline to Bulk Load Dataset')
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(3),
                          'Add New Outline to Production')
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

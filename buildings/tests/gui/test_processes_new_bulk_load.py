@@ -229,7 +229,3 @@ class ProcessBulkNewOutlinesTest(unittest.TestCase):
         added_result2 = added_result2.fetchall()[0][0]
         self.assertEqual(added_result2, added_result + 1)
         self.new_bulk_frame.db.rollback_open_cursor()
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkNewOutlinesTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

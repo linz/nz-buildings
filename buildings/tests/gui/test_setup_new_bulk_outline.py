@@ -104,7 +104,3 @@ class SetUpBulkNewTest(unittest.TestCase):
         elif self.no_supplied_data is False:
             self.assertTrue(layer_bool)
             self.assertTrue(edit_bool)
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpBulkNewTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

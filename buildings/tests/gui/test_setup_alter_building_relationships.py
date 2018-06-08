@@ -107,7 +107,3 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
 
         self.assertEqual(len([layer for layer in layers]), len(layer_name))
         self.assertTrue(layer_bool)
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpAlterRelationshipsTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

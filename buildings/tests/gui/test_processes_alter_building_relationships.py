@@ -292,7 +292,3 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_clear_slt.click()
 
         self.assertFalse(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessAlterRelationshipsTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

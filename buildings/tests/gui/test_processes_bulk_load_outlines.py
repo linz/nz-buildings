@@ -174,7 +174,3 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.dataset_id)
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

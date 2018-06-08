@@ -145,7 +145,3 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
         self.capture_frame.db.rollback_open_cursor()
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessCaptureSourceTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
