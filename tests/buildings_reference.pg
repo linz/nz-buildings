@@ -1,0 +1,91 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for buildings_reference schema using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(22);
+
+-- Schema
+SELECT has_schema('buildings_reference');
+
+-- Table and index
+SELECT has_table('buildings_reference', 'suburb_locality', 'Should have suburb_locality table in the buildings_reference schema.');
+
+SELECT has_table('buildings_reference', 'town_city', 'Should have town_city table in the buildings_reference schema.');
+
+SELECT has_table('buildings_reference', 'territorial_authority', 'Should have territorial_authority table in the buildings_reference schema.');
+
+SELECT has_table('buildings_reference', 'coastlines', 'Should have coastlines table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'coastlines', 'shx_coastlines', 'shape',
+    'Should have spatial index on the shape column of the coastlines table.'
+);
+
+SELECT has_table('buildings_reference', 'river_centrelines', 'Should have river_centrelines table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'river_centrelines', 'shx_river_centrelines', 'shape',
+    'Should have spatial index on the shape column of the river_centrelines table.'
+);
+
+SELECT has_table('buildings_reference', 'river_polygons', 'Should have river_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'river_polygons', 'shx_river_polygons', 'shape',
+    'Should have spatial index on the shape column of the river_polygons table.'
+);
+
+SELECT has_table('buildings_reference', 'lake_polygons', 'Should have lake_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'lake_polygons', 'shx_lake_polygons', 'shape',
+    'Should have spatial index on the shape column of the lake_polygons table.'
+);
+
+SELECT has_table('buildings_reference', 'pond_polygons', 'Should have pond_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'pond_polygons', 'shx_pond_polygons', 'shape',
+    'Should have spatial index on the shape column of the pond_polygons table.'
+);
+
+SELECT has_table('buildings_reference', 'swamp_polygons', 'Should have swamp_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'swamp_polygons', 'shx_swamp_polygons', 'shape',
+    'Should have spatial index on the shape column of the swamp_polygons table.'
+);
+
+SELECT has_table('buildings_reference', 'lagoon_polygons', 'Should have lagoon_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'lagoon_polygons', 'shx_lagoon_polygons', 'shape',
+    'Should have spatial index on the shape column of the lagoon_polygons table.'
+);
+
+SELECT has_table('buildings_reference', 'canal_centrelines', 'Should have canal_centrelines table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'canal_centrelines', 'shx_canal_centrelines', 'shape',
+    'Should have spatial index on the shape column of the canal_centrelines table.'
+);
+
+SELECT has_table('buildings_reference', 'canal_polygons', 'Should have canal_polygons table in the buildings_reference schema.');
+SELECT has_index(
+    'buildings_reference', 'canal_polygons', 'shx_canal_polygons', 'shape',
+    'Should have spatial index on the shape column of the canal_polygons table.'
+);
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;
