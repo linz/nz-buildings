@@ -34,7 +34,7 @@ setup_test_db:
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
 	nz-buildings-load nz-buildings-plugin-db; \
-	psql -f ~/dev/nz-building-outlines/tests/testdata/01-insert_test_data_admin_bdys.sql
+	psql -f ~/dev/nz-building-outlines/tests/testdata/01-insert_test_data_reference.sql
 	sed -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
 
 test:
