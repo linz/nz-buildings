@@ -52,7 +52,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         # add territorial authority areas
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_admin_bdys', '', ''
+            'shape', 'buildings_reference', '', ''
         )
         # style TAs to the same as roads nz_localities but different colour
         layers.style_layer(self.territorial_auth,
@@ -102,21 +102,21 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         comboboxes
         """
         # populate suburb combobox
-        sql = 'SELECT DISTINCT suburb_4th FROM buildings_admin_bdys.suburb_locality;'
+        sql = 'SELECT DISTINCT suburb_4th FROM buildings_reference.suburb_locality;'
         result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_suburb.addItem(item[0])
         # populate town combobox
-        sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.town_city;'
+        sql = 'SELECT DISTINCT name FROM buildings_reference.town_city;'
         result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             if item[0] is not None:
                 self.cmb_town.addItem(item[0])
         # populate territorial authority combobox
-        sql = 'SELECT DISTINCT name FROM buildings_admin_bdys.territorial_authority;'
+        sql = 'SELECT DISTINCT name FROM buildings_reference.territorial_authority;'
         result = self.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
@@ -172,7 +172,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns suburb entered
         """
         text = self.cmb_suburb.currentText()
-        sql = 'SELECT suburb_locality_id FROM buildings_admin_bdys.suburb_locality WHERE buildings_admin_bdys.suburb_locality.suburb_4th = %s;'
+        sql = 'SELECT suburb_locality_id FROM buildings_reference.suburb_locality WHERE buildings_reference.suburb_locality.suburb_4th = %s;'
         result = self.db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
@@ -182,7 +182,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns town/city entered
         """
         text = self.cmb_town.currentText()
-        sql = 'SELECT town_city_id FROM buildings_admin_bdys.town_city WHERE buildings_admin_bdys.town_city.name = %s;'
+        sql = 'SELECT town_city_id FROM buildings_reference.town_city WHERE buildings_reference.town_city.name = %s;'
         result = self.db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
@@ -192,7 +192,7 @@ class ProductionNewOutline(QFrame, FORM_CLASS):
         returns territorial authority entered
         """
         text = self.cmb_ta.currentText()
-        sql = 'SELECT territorial_authority_id FROM buildings_admin_bdys.territorial_authority WHERE buildings_admin_bdys.territorial_authority.name = %s;'
+        sql = 'SELECT territorial_authority_id FROM buildings_reference.territorial_authority WHERE buildings_reference.territorial_authority.name = %s;'
         result = self.db._execute(sql, (text, ))
         if result is not None:
             return result.fetchall()[0][0]
