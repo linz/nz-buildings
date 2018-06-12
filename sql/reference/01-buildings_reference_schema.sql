@@ -40,7 +40,9 @@ CREATE TABLE IF NOT EXISTS buildings_reference.territorial_authority (
 -- Coastline
 
 CREATE TABLE IF NOT EXISTS buildings_reference.coastlines_and_islands (
+
       coastline_and_island_id serial PRIMARY KEY
+    , external_coastline_and_island_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_coastlines_and_islands;
@@ -51,6 +53,7 @@ CREATE INDEX shx_coastlines_and_islands
 
 CREATE TABLE IF NOT EXISTS buildings_reference.river_centrelines (
       river_centreline_id serial PRIMARY KEY
+    , external_river_centreline_id integer
     , shape public.geometry(Linestring, 2193)
 );
 DROP INDEX IF EXISTS shx_river_centrelines;
@@ -61,6 +64,7 @@ CREATE INDEX shx_river_centrelines
 
 CREATE TABLE IF NOT EXISTS buildings_reference.river_polygons (
       river_polygon_id serial PRIMARY KEY
+    , external_river_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_river_polygons;
@@ -71,6 +75,7 @@ CREATE INDEX shx_river_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.lake_polygons (
       lake_polygon_id serial PRIMARY KEY
+    , external_lake_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_lake_polygons;
@@ -81,6 +86,7 @@ CREATE INDEX shx_lake_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.pond_polygons (
       pond_polygon_id serial PRIMARY KEY
+    , external_pond_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_pond_polygons;
@@ -91,6 +97,7 @@ CREATE INDEX shx_pond_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.swamp_polygons (
       swamp_polygon_id serial PRIMARY KEY
+    , external_swamp_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_swamp_polygons;
@@ -101,6 +108,7 @@ CREATE INDEX shx_swamp_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.lagoon_polygons (
       lagoon_polygon_id serial PRIMARY KEY
+    , external_lagoon_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_lagoon_polygons;
@@ -111,6 +119,7 @@ CREATE INDEX shx_lagoon_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.canal_centrelines (
       canal_centreline_id serial PRIMARY KEY
+    , external_canal_centreline_id integer
     , shape public.geometry(Linestring, 2193)
 );
 DROP INDEX IF EXISTS shx_canal_centrelines;
@@ -121,6 +130,7 @@ CREATE INDEX shx_canal_centrelines
 
 CREATE TABLE IF NOT EXISTS buildings_reference.canal_polygons (
       canal_polygon_id serial PRIMARY KEY
+    , external_canal_polygon_id integer
     , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_canal_polygons;
