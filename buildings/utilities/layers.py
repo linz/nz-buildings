@@ -224,7 +224,7 @@ class LayerRegistry(object):
     def set_up_base_layers(self):
         territorial = self.add_postgres_layer(
             "territorial_authority", "territorial_authority",
-            "shape", "buildings_admin_bdys", '', ''
+            "shape", "buildings_reference", '', ''
         )
         style_layer(territorial, {1: ['204,204,102', '0.3', 'dash', '5;2']})
         temp_bool = False
