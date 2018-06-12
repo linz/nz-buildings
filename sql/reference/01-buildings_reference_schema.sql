@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.coastlines_and_islands (
 
       coastline_and_island_id serial PRIMARY KEY
     , external_coastline_and_island_id integer
-    , shape public.geometry(Polygon, 2193)
+    , shape public.geometry(MultiPolygon, 2193)
 );
 DROP INDEX IF EXISTS shx_coastlines_and_islands;
 CREATE INDEX shx_coastlines_and_islands
