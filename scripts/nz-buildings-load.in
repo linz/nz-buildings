@@ -85,13 +85,13 @@ psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
 psql -c "DROP SCHEMA IF EXISTS buildings_common CASCADE"
-psql -c "DROP SCHEMA IF EXISTS buildings_admin_bdys CASCADE;"
+psql -c "DROP SCHEMA IF EXISTS buildings_reference CASCADE;"
 
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
 
-# Execute all files in the admin_bdys sql dir
-for file in ${SCRIPTSDIR}/sql/admin_bdys/*.sql; do
+# Execute all files in the reference sql dir
+for file in ${SCRIPTSDIR}/sql/reference/*.sql; do
     echo ${file} >&2
     psql -f ${file}
 done
@@ -111,8 +111,8 @@ done
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
     # Execute all files in the test data sql dir
-    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql
+    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql
     echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
@@ -132,8 +132,8 @@ fi
 # Execute files that are needed to test the plugin - test data remains in database
 if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     # Execute all files in the test data sql dir
-    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_admin_bdys.sql
+    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql
     echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
