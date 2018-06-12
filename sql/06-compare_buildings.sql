@@ -245,7 +245,7 @@ IF ( SELECT processed_date
         INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
         SELECT
               bulk_load_outline_id
-            , 2 AS qa_status_id
+            , 1 AS qa_status_id
         FROM buildings_bulk_load.find_added(p_supplied_dataset_id);
 
         -- REMOVED
@@ -253,7 +253,7 @@ IF ( SELECT processed_date
         INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id)
         SELECT
               building_outline_id
-            , 2 AS qa_status_id
+            , 1 AS qa_status_id
         FROM buildings_bulk_load.find_removed(p_supplied_dataset_id);
 
         -- MATCHED
@@ -262,7 +262,7 @@ IF ( SELECT processed_date
         SELECT
               bulk_load_outline_id
             , building_outline_id
-            , 2 AS qa_status_id
+            , 1 AS qa_status_id
         FROM buildings_bulk_load.find_matched(p_supplied_dataset_id);
 
         -- RELATED
@@ -271,13 +271,13 @@ IF ( SELECT processed_date
         SELECT
               bulk_load_outline_id
             , building_outline_id
-            , 2 AS qa_status_id
+            , 1 AS qa_status_id
         FROM buildings_bulk_load.find_related(p_supplied_dataset_id);
 
         -- insert Bulk Load Outlines that don't get sorted into ADDED
 
         INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id)
-        SELECT blo.bulk_load_outline_id, 2 AS qa_status_id
+        SELECT blo.bulk_load_outline_id, 1 AS qa_status_id
         FROM buildings_bulk_load.bulk_load_outlines blo
         LEFT JOIN buildings_bulk_load.added added ON added.bulk_load_outline_id = blo.bulk_load_outline_id
         LEFT JOIN buildings_bulk_load.matched matched ON matched.bulk_load_outline_id = blo.bulk_load_outline_id
@@ -285,12 +285,12 @@ IF ( SELECT processed_date
         WHERE blo.supplied_dataset_id = p_supplied_dataset_id
         AND added.bulk_load_outline_id IS NULL
         AND matched.bulk_load_outline_id IS NULL
-        AND related.bulk_load_outline_id IS NULL; 
+        AND related.bulk_load_outline_id IS NULL;
 
         -- insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
-        
+
         INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id)
-        SELECT ex.building_outline_id, 2 AS qa_status_id
+        SELECT ex.building_outline_id, 1 AS qa_status_id
         FROM buildings_bulk_load.existing_subset_extracts ex
         LEFT JOIN buildings_bulk_load.removed removed ON removed.building_outline_id = ex.building_outline_id
         LEFT JOIN buildings_bulk_load.matched matched ON matched.building_outline_id = ex.building_outline_id

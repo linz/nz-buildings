@@ -413,8 +413,8 @@ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer)
 RETURNS integer AS
 $$
-    INSERT INTO buildings_bulk_load.added
-    VALUES ($1, 1)
+    INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
+    VALUES ($1, 2)
     RETURNING added.bulk_load_outline_id;
 
 $$
@@ -424,8 +424,8 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_insert_bulk_load_outlines
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_bulk_load.removed
-    VALUES ($1, 1)
+    INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id)
+    VALUES ($1, 2)
     RETURNING removed.building_outline_id;
 
 $$
@@ -436,8 +436,8 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_insert_buildling_outlines
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_bulk_load.matched
-    VALUES ($1, $2, 1)
+    INSERT INTO buildings_bulk_load.matched (bulk_load_outline_id, building_outline_id, qa_status_id)
+    VALUES ($1, $2, 2)
     RETURNING matched.building_outline_id;
 
 $$
@@ -449,7 +449,7 @@ RETURNS integer AS
 $$
 
     INSERT INTO buildings_bulk_load.related (bulk_load_outline_id, building_outline_id, qa_status_id)
-    VALUES ($1, $2, 1)
+    VALUES ($1, $2, 2)
     RETURNING related.related_id;
 
 $$
