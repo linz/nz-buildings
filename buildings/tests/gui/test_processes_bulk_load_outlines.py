@@ -111,8 +111,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # feature one
         feature_one = QgsFeature()
         feature_one.setAttributes([1])
-        points = [QgsPoint(1878056, 5555250), QgsPoint(1878056, 5555300),
-                  QgsPoint(1878100, 5555300), QgsPoint(1878100, 5555250)]
+        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
+                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
+        # points = [QgsPoint(1878056, 5555355), QgsPoint(1878056, 5555300),
+        #           QgsPoint(1878156, 5555300), QgsPoint(1878156, 5555355)]
         feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
         # add outlines to temporary layer
         layer.startEditing()
@@ -123,14 +125,16 @@ class ProcessBulkLoadTest(unittest.TestCase):
         imagery_layer = QgsVectorLayer("Polygon?crs=epsg:2193",
                                        "temporary_imagery", "memory")
         imagery_layer.dataProvider().addAttributes([QgsField('id',
-                                                   QVariant.String)])
+                                                             QVariant.String)])
         imagery_layer.updateFields()
         outline = QgsFeature()
         outline.setAttributes(['1'])
-        points = points = [QgsPoint(1878000, 5555400),
-                           QgsPoint(1878000, 5554999),
-                           QgsPoint(1878300, 5554999),
-                           QgsPoint(1878300, 5555400)]
+        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
+                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
+        # points = points = [QgsPoint(1878000, 5555400),
+        #                    QgsPoint(1878000, 5554999),
+        #                    QgsPoint(1878300, 5554999),
+        #                    QgsPoint(1878300, 5555400)]
         outline.setGeometry(QgsGeometry.fromPolygon([points]))
         imagery_layer.startEditing()
         imagery_layer.addFeature(outline, True)
@@ -156,11 +160,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
             idx = idx + 1
         # set imagery field
         self.bulk_load_frame.fcb_imagery_field.setCurrentIndex(0)
-        # open cursor as have to add capture source entry from test
-        self.bulk_load_frame.db.open_cursor()
-        # using opened cursor insert capture source value required
-        sql = 'SELECT buildings_common.capture_source_insert(1, NULL);'
-        self.bulk_load_frame.db.execute_no_commit(sql)
         # add outlines
         self.bulk_load_frame.ok_clicked(commit_status=False)
         # check 1 outlines were added to bulk load outlines
@@ -175,7 +174,3 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.dataset_id)
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(ProcessBulkLoadTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

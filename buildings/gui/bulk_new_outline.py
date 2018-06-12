@@ -39,6 +39,7 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # set up
         self.building_layer = QgsVectorLayer()
         self.geom = None
+        self.error_dialog = None
         self.added_building_ids = []
         self.layer_registry = layer_registry
         # supplied dataset to add to canvas
@@ -47,19 +48,19 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         result = self.db._execute(sql)
         result = result.fetchall()
         if len(result) == 0:
-                self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n ---------------- NO '
-                                              'SUPPLIED DATASETS -----'
-                                              '----------- \n\n There '
-                                              'are no supplied datasets '
-                                              'please load some outlines '
-                                              'first'
-                                              )
-                self.error_dialog.show()
-                self.btn_reset.setDisabled(1)
-                self.btn_save.setDisabled(1)
-                self.cmb_supplied_dataset.setDisabled(1)
-                self.btn_exit.clicked.connect(self.fail_exit_clicked)
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report('\n ---------------- NO '
+                                          'SUPPLIED DATASETS -----'
+                                          '----------- \n\n There '
+                                          'are no supplied datasets '
+                                          'please load some outlines '
+                                          'first'
+                                          )
+            self.error_dialog.show()
+            self.btn_reset.setDisabled(1)
+            self.btn_save.setDisabled(1)
+            self.cmb_supplied_dataset.setDisabled(1)
+            self.btn_exit.clicked.connect(self.fail_exit_clicked)
         else:
             self.populate_dataset_combobox()
             text = self.cmb_supplied_dataset.currentText()
@@ -103,6 +104,17 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         for dset in datasets:
             text = '{0}-{1}'.format(dset[0], dset[1])
             self.cmb_supplied_dataset.addItem(text)
+        if len(datasets) == 0:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report('\n ---------------- NO '
+                                          'UNPROCESSED DATASETS -----'
+                                          '----------- \n\n There '
+                                          'are no unprocessed datasets '
+                                          'please load some outlines '
+                                          'first'
+                                          )
+            self.error_dialog.show()
+            self.cmb_supplied_dataset.setDisabled(1)
 
     def add_outlines(self):
         """Called when supplied dataset index is changed"""
@@ -308,10 +320,10 @@ class BulkNewOutline(QFrame, FORM_CLASS):
         # call function to insert into bulk_load_outlines table
         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
         result = self.db.execute_no_commit(sql, (self.dataset_id,
-                                           self.capture_method_id,
-                                           self.capture_source_id,
-                                           self.suburb,
-                                           self.town, self.t_a, self.geom))
+                                                 self.capture_method_id,
+                                                 self.capture_source_id,
+                                                 self.suburb,
+                                                 self.town, self.t_a, self.geom))
         self.outline_id = result.fetchall()[0][0]
         sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 2);'
         self.db.execute_no_commit(sql, (self.outline_id, ))
