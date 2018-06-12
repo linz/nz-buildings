@@ -7,7 +7,7 @@ from qgis.gui import QgsMessageBar, QgsHighlight
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame, QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QColor
-from PyQt4.QtCore import pyqtSignal, Qt
+from PyQt4.QtCore import Qt
 
 from buildings.utilities import database as db
 
@@ -199,10 +199,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # remove all highlight objects
         self.lst_highlight = []
-        '''
-        for i in range(len(self.lst_highlight))[::-1]:
-            self.lst_highlight.pop(i)
-        '''
 
         for feat in self.lyr_existing.selectedFeatures():
             h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_existing)
@@ -231,17 +227,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
         tbl.clearSelection()
 
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
-        sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
-        sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
+        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
+        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
+        sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
+        sql_removed = "SELECT building_outline_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s;"
 
         for feat_id in self.lyr_existing.selectedFeaturesIds():
             result1 = self.db._execute(sql_related_existing, (feat_id,))
             feat_ids_related = result1.fetchall()
             if feat_ids_related:
                 # remove the current items inside table
-                for row_tbl in range(tbl.rowCount())[::-1]:
+                for row_tbl in range(tbl.rowCount())[::-1]:  # reverse list so item could be removed from the bottom
                     tbl.removeRow(row_tbl)
 
                 ids_bulk = []
@@ -310,10 +306,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
         tbl.clearSelection()
 
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
-        sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s"
-        sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
+        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
+        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
+        sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
+        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
 
         for feat_id in self.lyr_bulk_load.selectedFeaturesIds():
             result1 = self.db._execute(sql_related_bulk, (feat_id,))
@@ -605,8 +601,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         rows_lst_existing = []
         rows_lst_bulk = []
-
-        # self.db.open_cursor()
 
         for row_lst in range(self.lst_existing.count())[::-1]:
             if row_lst not in rows_lst_existing:
