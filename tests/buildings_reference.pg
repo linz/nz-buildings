@@ -31,10 +31,10 @@ SELECT has_table('buildings_reference', 'town_city', 'Should have town_city tabl
 
 SELECT has_table('buildings_reference', 'territorial_authority', 'Should have territorial_authority table in the buildings_reference schema.');
 
-SELECT has_table('buildings_reference', 'coastlines', 'Should have coastlines table in the buildings_reference schema.');
+SELECT has_table('buildings_reference', 'coastlines_and_islands', 'Should have coastlines_and_islands table in the buildings_reference schema.');
 SELECT has_index(
-    'buildings_reference', 'coastlines', 'shx_coastlines', 'shape',
-    'Should have spatial index on the shape column of the coastlines table.'
+    'buildings_reference', 'coastlines_and_islands', 'shx_coastlines_and_islands', 'shape',
+    'Should have spatial index on the shape column of the coastlines_and_islands table.'
 );
 
 SELECT has_table('buildings_reference', 'river_centrelines', 'Should have river_centrelines table in the buildings_reference schema.');

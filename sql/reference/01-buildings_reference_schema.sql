@@ -39,19 +39,19 @@ CREATE TABLE IF NOT EXISTS buildings_reference.territorial_authority (
 
 -- Coastline
 
-CREATE TABLE IF NOT EXISTS buildings_reference.coastlines (
-      coastline_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+CREATE TABLE IF NOT EXISTS buildings_reference.coastlines_and_islands (
+      coastline_and_island_id serial PRIMARY KEY
+    , shape public.geometry(Polygon, 2193)
 );
-DROP INDEX IF EXISTS shx_coastlines;
-CREATE INDEX shx_coastlines
-    ON buildings_reference.coastlines USING gist (shape);
+DROP INDEX IF EXISTS shx_coastlines_and_islands;
+CREATE INDEX shx_coastlines_and_islands
+    ON buildings_reference.coastlines_and_islands USING gist (shape);
 
 -- River Centrelines
 
 CREATE TABLE IF NOT EXISTS buildings_reference.river_centrelines (
       river_centreline_id serial PRIMARY KEY
-    , shape public.geometry(MultiLinestring, 2193)
+    , shape public.geometry(Linestring, 2193)
 );
 DROP INDEX IF EXISTS shx_river_centrelines;
 CREATE INDEX shx_river_centrelines
@@ -61,7 +61,7 @@ CREATE INDEX shx_river_centrelines
 
 CREATE TABLE IF NOT EXISTS buildings_reference.river_polygons (
       river_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_river_polygons;
 CREATE INDEX shx_river_polygons
@@ -71,7 +71,7 @@ CREATE INDEX shx_river_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.lake_polygons (
       lake_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_lake_polygons;
 CREATE INDEX shx_lake_polygons
@@ -81,7 +81,7 @@ CREATE INDEX shx_lake_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.pond_polygons (
       pond_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_pond_polygons;
 CREATE INDEX shx_pond_polygons
@@ -91,7 +91,7 @@ CREATE INDEX shx_pond_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.swamp_polygons (
       swamp_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_swamp_polygons;
 CREATE INDEX shx_swamp_polygons
@@ -101,7 +101,7 @@ CREATE INDEX shx_swamp_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.lagoon_polygons (
       lagoon_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_lagoon_polygons;
 CREATE INDEX shx_lagoon_polygons
@@ -111,7 +111,7 @@ CREATE INDEX shx_lagoon_polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.canal_centrelines (
       canal_centreline_id serial PRIMARY KEY
-    , shape public.geometry(MultiLinestring, 2193)
+    , shape public.geometry(Linestring, 2193)
 );
 DROP INDEX IF EXISTS shx_canal_centrelines;
 CREATE INDEX shx_canal_centrelines
@@ -121,7 +121,7 @@ CREATE INDEX shx_canal_centrelines
 
 CREATE TABLE IF NOT EXISTS buildings_reference.canal_polygons (
       canal_polygon_id serial PRIMARY KEY
-    , shape public.geometry(MultiPolygon, 2193)
+    , shape public.geometry(Polygon, 2193)
 );
 DROP INDEX IF EXISTS shx_canal_polygons;
 CREATE INDEX shx_canal_polygons
