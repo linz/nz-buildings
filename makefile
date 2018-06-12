@@ -25,6 +25,7 @@ SQLSCRIPTS = \
 	sql/09-buildings_functions.sql \
 	sql/10-buildings_bulk_load_functions.sql \
 	sql/11-buildings_common_functions.sql \
+	sql/12-alter_relationships_create_view.sql \
 	sql/lds/01-buildings_lds_schema.sql \
 	sql/lds/02-populate_buildings_lds.sql \
 	$(END)
