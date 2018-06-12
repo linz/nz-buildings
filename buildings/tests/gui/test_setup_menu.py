@@ -73,21 +73,18 @@ class SetUpMenuTest(unittest.TestCase):
         self.assertEqual(self.menu_frame.btn_load_outlines.text(),
                          'Bulk Load Outlines')
 
-    def test_menu_gui_combo_default(self):
+    def test_menu_gui_combo_enabled(self):
         """Combo box index is 'add outlines' and enabled"""
         self.assertTrue(self.menu_frame.cmb_add_outline.isEnabled())
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(0),
-                         'Add Outlines')
-        self.assertEqual(self.menu_frame.cmb_add_outline.currentIndex(), 0)
 
     def test_menu_gui_combo_options(self):
-        """Combo box has three options"""
-        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 3)
+        """Combo box has four options"""
+        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 4)
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(0),
+                         'Add Outlines')
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1),
-                         'Add New Outline to Bulk Load Dataset')
+                         'Alter Building Relationships')
         self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2),
+                         'Add New Outline to Bulk Load Dataset')
+        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(3),
                          'Add New Outline to Production')
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpMenuTest)
-unittest.TextTestRunner(verbosity=2).run(suite)

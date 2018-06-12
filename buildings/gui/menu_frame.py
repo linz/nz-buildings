@@ -10,9 +10,12 @@ from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.bulk_load_outlines import BulkLoadOutlines
 from buildings.gui.bulk_new_outline import BulkNewOutline
 from buildings.gui.production_new_outline import ProductionNewOutline
+from buildings.gui.alter_building_relationships import AlterRelationships
+from buildings.gui.alter_building_relationships import MultiLayerSelection
 from buildings.utilities import database as db
 
 import qgis
+from qgis.utils import iface
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'menu.ui'))
@@ -75,3 +78,10 @@ class MenuFrame(QFrame, FORM_CLASS):
             dw = qgis.utils.plugins['roads'].dockwidget
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
             dw.new_widget(ProductionNewOutline(self.layer_registry))
+        if text == 'Alter Building Relationships':
+            dw = qgis.utils.plugins['roads'].dockwidget
+            dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+            dw.new_widget(AlterRelationships(self.layer_registry))
+            canvas = iface.mapCanvas()
+            self.tool = MultiLayerSelection(canvas)
+            canvas.setMapTool(self.tool)

@@ -84,7 +84,3 @@ class SetUpNewEntryTest(unittest.TestCase):
         """Description enabled when change to capture source group option"""
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.assertTrue(self.new_entry_frame.le_description.isEnabled())
-
-
-suite = unittest.TestLoader().loadTestsFromTestCase(SetUpNewEntryTest)
-unittest.TextTestRunner(verbosity=2).run(suite)
