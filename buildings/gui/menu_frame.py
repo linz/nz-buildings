@@ -8,6 +8,7 @@ from PyQt4.QtGui import QFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
 from buildings.gui.bulk_load_outlines import BulkLoadOutlines
+from buildings.gui.compare_outlines import CompareOutlines
 from buildings.gui.bulk_new_outline import BulkNewOutline
 from buildings.gui.production_new_outline import ProductionNewOutline
 from buildings.gui.alter_building_relationships import AlterRelationships
@@ -35,6 +36,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         self.btn_new_entry.clicked.connect(self.new_entry_clicked)
         self.btn_add_capture_source.clicked.connect(self.add_capture_source_clicked)
         self.btn_load_outlines.clicked.connect(self.load_outlines_clicked)
+        self.btn_compare.clicked.connect(self.compare_outlines_clicked)
         self.cmb_add_outline.currentIndexChanged.connect(self.add_outline)
 
     def new_entry_clicked(self):
@@ -63,6 +65,15 @@ class MenuFrame(QFrame, FORM_CLASS):
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadOutlines(self.layer_registry))
+
+    def compare_outlines_clicked(self):
+        """
+        Called when compare outlines is clicked
+        """
+        db.close_connection()
+        dw = qgis.utils.plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(CompareOutlines(self.layer_registry))
 
     def add_outline(self):
         """
