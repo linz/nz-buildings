@@ -36,47 +36,15 @@ class CompareOutlines(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.populate_dataset_combobox()
-        # self.populate_field_combobox()
 
         self.layer_registry = layer_registry
         self.building_layer = QgsVectorLayer()
         self.find_dataset()
         # signals and slots
-        # self.mcb_imagery_layer.currentIndexChanged.connect(self.populate_field_combobox)
-        # self.fcb_imagery_field.currentIndexChanged.connect(self.populate_value_combobox)
         self.cmb_supplied_dataset.currentIndexChanged.connect(self.find_dataset)
         self.btn_ok.clicked.connect(partial(self.ok_clicked,
                                             commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
-
-    # def populate_field_combobox(self):
-    #     """
-    #     populates combobox with fields of imagery layer
-    #     Called when imagery layer is changed
-    #     """
-    #     if self.mcb_imagery_layer.currentLayer() is not None:
-    #         self.fcb_imagery_field.setLayer(self.mcb_imagery_layer.currentLayer())
-    #         self.cmb_imagery.clear()
-
-    # def populate_value_combobox(self):
-    #     """
-    #     populate combobox with imagery layer field values
-    #     Called when imagery layer is changed
-    #     """
-    #     layer_index = self.mcb_imagery_layer.currentIndex()
-    #     self.cmb_imagery.clear()
-    #     if self.mcb_imagery_layer.layer(layer_index) is not None:
-    #         for feature in self.mcb_imagery_layer.layer(layer_index).getFeatures():
-    #             idx = self.mcb_imagery_layer.layer(layer_index).fieldNameIndex(self.fcb_imagery_field.currentField())
-    #             value = feature.attributes()[idx]
-    #             count = 0
-    #             exists = False
-    #             while count < self.cmb_imagery.count():
-    #                 if self.cmb_imagery.itemText(count) == str(value):
-    #                     exists = True
-    #                 count = count + 1
-    #             if not exists:
-    #                 self.cmb_imagery.addItem(str(value))
 
     def populate_dataset_combobox(self):
         sql = 'SELECT supplied_dataset_id, description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.processed_date is NULL;'
@@ -97,9 +65,6 @@ class CompareOutlines(QFrame, FORM_CLASS):
             self.error_dialog.show()
             self.cmb_supplied_dataset.setDisabled(1)
 
-    # def get_imagery_combobox_value(self):
-    #     return self.cmb_imagery.currentText()
-
     def find_dataset(self):
         """Called when supplied dataset index is changed"""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
@@ -107,6 +72,10 @@ class CompareOutlines(QFrame, FORM_CLASS):
         text = self.cmb_supplied_dataset.currentText()
         text_list = text.split('-')
         self.dataset_id = text_list[0]
+        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines WHERE supplied_dataset_id = %s;'
+        result = self.db._execute(sql, (self.dataset_id))
+        result = result.fetchall()[0][0]
+        self.lb_outlines.setText(str(result))
         self.layer_registry.remove_layer(self.building_layer)
         # add the bulk_load_outlines to the layer registry
         self.building_layer = self.layer_registry.add_postgres_layer(
@@ -155,34 +124,35 @@ class CompareOutlines(QFrame, FORM_CLASS):
         self.bulk_overlap = False
         while dataset <= max_dataset_id:
             """
-            # transfered_date = sql
+            TODO
+            # transfered date
             sql = 'SELECT transfer_date FROM buildings_bulk_load.supplied_datasets WHERE supplied_dataset_id = %s;'
             results = self.db.execute_no_commit(sql, (dataset, ))
             t_date = results.fetchall()[0][0]
-            # imagery_date = sql
-            if transferred_date
-                if transfered_date is None:
-                    if imagery_date is earlier than current dataset imagery_date:
-                        if dataset has intersecting outlines:
-                            sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
-                            result = self.db.execute_no_commit(sql, data=(geom,
-                                                                  dataset))
-                            results = result.fetchall()
-                            if len(results) > 0:
-                                self.bulk_overlap = True
-                                break
-                    if imagery_date is later than current dataset imagery_date:
-                        IGNORE
+            # imagery_date = sql (TODO)
+            if t_date:
+                if t_date is None:
+                    if imagery_date is earlier than current dataset imagery_date: (TODO)
+                        sql = 'SELECT * FROM buildings_bulk_load.bulk_load_outlines outlines WHERE ST_Intersects(%s, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
+                        result = self.db.execute_no_commit(sql, data=(geom,
+                                                              dataset))
+                        results = result.fetchall()
+                        # if there are intersecting buildings
+                        if len(results) > 0:
+                            self.bulk_overlap = True
+                            break
+                    else:
+                        pass
                 else:
-                    IGNORE
+                    pass
             """
             dataset = dataset + 1
             if self.bulk_overlap is True:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report('\n ---------------- BULK '
                                               'LOAD OVERLAP ------------'
-                                              '---- \n\n An earlier unprocessed '
-                                              'bulk loaded dataset with '
+                                              '-- \n\n An earlier unprocessed'
+                                              ' bulk loaded dataset with '
                                               'dataset id of {0} overlaps '
                                               'this dataset please process'
                                               ' this first'.format(dataset)
@@ -220,8 +190,6 @@ class CompareOutlines(QFrame, FORM_CLASS):
             # self.db.execute_no_commit(sql, data=(self.dataset_id, ))
         if commit_status:
             self.db.commit_open_cursor()
-        # update the locality fields
-        # self.mcb_imagery_layer.currentLayer().removeSelection()
 
     def exit_clicked(self):
         """Called when exit button is clicked"""
