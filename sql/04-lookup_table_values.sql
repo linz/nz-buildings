@@ -77,6 +77,7 @@ INSERT INTO buildings_bulk_load.organisation (value) VALUES ('Ecopia');
 
 INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Supplied');
 INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Added During QA');
+INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Deleted During QA');
 
 -- QA Status
 
