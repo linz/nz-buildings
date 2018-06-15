@@ -89,23 +89,6 @@ class CompareOutlines(QFrame, FORM_CLASS):
     def ok_clicked(self, commit_status):
         # check imagery field and value are not null
         self.db.open_cursor()
-        if str(self.fcb_imagery_field.currentField()) is '':
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report('\n ---------------- IMAGERY FIELD'
-                                          ' IS NULL ---------------- \n\n '
-                                          'Please enter an imagery field and'
-                                          ' value'
-                                          )
-            self.error_dialog.show()
-            return
-        if str(self.fcb_imagery_field.currentField()) is '':
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report('\n ---------------- IMAGERY VALUE '
-                                          'IS NULL ---------------- \n\n '
-                                          'Please enter an imagery value'
-                                          )
-            self.error_dialog.show()
-            return
         # find convex hull of supplied dataset outlines
         result = processing.runalg('qgis:convexhull', self.building_layer,
                                    None, 0, None)
@@ -160,7 +143,8 @@ class CompareOutlines(QFrame, FORM_CLASS):
                 self.error_dialog.show()
                 self.db.rollback_open_cursor()
                 return
-        sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
+        # sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s));'
+        sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s)) AND bo.building_outline_id NOT IN (SELECT building_outline_id FROM buildings_bulk_load.removed);'
         result = self.db.execute_no_commit(sql, data=(self.dataset_id, ))
         results = result.fetchall()
         if len(results) == 0:  # no existing outlines in this area
@@ -180,14 +164,14 @@ class CompareOutlines(QFrame, FORM_CLASS):
                     # insert relevant data into existing_subset_extract
                     sql = 'SELECT buildings_bulk_load.existing_subset_extracts_insert(%s, %s, %s);'
                     result = self.db.execute_no_commit(sql, data=(ls[0],
-                                                                  self.dataset_id,
-                                                                  ls[10]))
+                                                       self.dataset_id,
+                                                       ls[10]))
                 else:
                     sql = 'UPDATE buildings_bulk_load.existing_subset_extracts SET supplied_dataset_id = %s WHERE building_outline_id = %s;'
                     self.db.execute_no_commit(sql, (self.dataset_id, ls[0]))
             # run comparisons function
-            # sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
-            # self.db.execute_no_commit(sql, data=(self.dataset_id, ))
+            sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
+            self.db.execute_no_commit(sql, data=(self.dataset_id, ))
         if commit_status:
             self.db.commit_open_cursor()
 

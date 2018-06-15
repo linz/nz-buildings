@@ -18,7 +18,8 @@
 
 import unittest
 from PyQt4.QtCore import *
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry, QgsFeature, QgsPoint, QgsGeometry, QgsField
+from qgis.core import QgsVectorLayer, QgsMapLayerRegistry
+from qgis.core import QgsFeature, QgsPoint, QgsGeometry, QgsField
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
@@ -80,7 +81,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
         # check external source id value is correctly populated
-        sql = 'SELECT COUNT(external_source_id) FROM buildings_common.capture_source'
+        sql = 'SELECT COUNT(external_source_id) FROM buildings_common.capture_source;'
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), result3)
@@ -111,35 +112,16 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # feature one
         feature_one = QgsFeature()
         feature_one.setAttributes([1])
-        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
-                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
-        # points = [QgsPoint(1878056, 5555355), QgsPoint(1878056, 5555300),
-        #           QgsPoint(1878156, 5555300), QgsPoint(1878156, 5555355)]
+        points = [QgsPoint(1878380, 5555298),
+                  QgsPoint(1878442, 5555298),
+                  QgsPoint(1878442, 5555284),
+                  QgsPoint(1878380, 5555284)]
         feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
         # add outlines to temporary layer
         layer.startEditing()
         layer.addFeature(feature_one, True)
         layer.commitChanges()
         QgsMapLayerRegistry.instance().addMapLayer(layer)
-        # create temporary imagery layer
-        imagery_layer = QgsVectorLayer("Polygon?crs=epsg:2193",
-                                       "temporary_imagery", "memory")
-        imagery_layer.dataProvider().addAttributes([QgsField('id',
-                                                             QVariant.String)])
-        imagery_layer.updateFields()
-        outline = QgsFeature()
-        outline.setAttributes(['1'])
-        points = [QgsPoint(1878380, 5555298), QgsPoint(1878442, 5555298),
-                  QgsPoint(1878442, 5555284), QgsPoint(1878380, 5555284)]
-        # points = points = [QgsPoint(1878000, 5555400),
-        #                    QgsPoint(1878000, 5554999),
-        #                    QgsPoint(1878300, 5554999),
-        #                    QgsPoint(1878300, 5555400)]
-        outline.setGeometry(QgsGeometry.fromPolygon([points]))
-        imagery_layer.startEditing()
-        imagery_layer.addFeature(outline, True)
-        imagery_layer.commitChanges()
-        QgsMapLayerRegistry.instance().addMapLayer(imagery_layer)
         # set combobox values
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
@@ -150,16 +132,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
             idx = idx + 1
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
-        # set imagery layer
-        count = self.bulk_load_frame.mcb_imagery_layer.count()
-        idx = 0
-        while idx < count:
-            if self.bulk_load_frame.mcb_imagery_layer.layer(idx).name() == 'temporary_imagery':
-                self.bulk_load_frame.mcb_imagery_layer.setLayer(self.bulk_load_frame.mcb_imagery_layer.layer(idx))
-                break
-            idx = idx + 1
-        # set imagery field
-        self.bulk_load_frame.fcb_imagery_field.setCurrentIndex(0)
         # add outlines
         self.bulk_load_frame.ok_clicked(commit_status=False)
         # check 1 outlines were added to bulk load outlines
