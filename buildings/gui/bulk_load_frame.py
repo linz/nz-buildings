@@ -49,6 +49,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         else:
             sql = 'SELECT count(*) FROM buildings_bulk_load.supplied_datasets WHERE transfer_date is NULL;'
             result2 = self.db._execute(sql)
+            result2 = result2.fetchall()[0][0]
             if result2 == 1:
                 sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE transfer_date is NULL;'
                 t_result = self.db._execute(sql)
@@ -196,7 +197,17 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         result = result.fetchall()[0][0]
         self.le_data_description.setText(result)
         # External Id/fields
+        sql = 'SELECT cs.external_source_id FROM buildings_common.capture_source cs, buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2 AND blo.capture_source_id = cs.capture_source_id;'
+        ex_result = self.db._execute(sql, (self.current_dataset,))
+        ex_result = ex_result.fetchall()[0][0]
+        if ex_result is not None:
+            self.rad_external_source.setChecked(True)
+            self.cmb_external_id.setCurrentIndex(self.cmb_external_id.findText(ex_result))
         # capture source group
+        sql = 'SELECT cs.capture_source_group_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs, buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 2 AND blo.capture_source_id = cs.capture_source_id AND cs.capture_source_group_id = csg.capture_source_group_id;'
+        result = self.db._execute(sql, (self.current_dataset,))
+        result = result.fetchall()[0][0]
+        self.cmb_capture_src_grp.setCurrentIndex(result-1)
 
     def enable_external_bulk(self):
         """Called when radio button is toggled"""
@@ -758,9 +769,18 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             result = self.db._execute(sql, (self.bulk_load_outline_id,))
             result = result.fetchall()[0][0]
             self.cmb_capture_method_2.setCurrentIndex(self.cmb_capture_method_2.findText(result))
-            # TODO capture source
-            
-            
+            # capture source
+            sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
+            result = self.db._execute(sql)
+            ls = result.fetchall()
+            sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs, buildings_bulk_load.bulk_load_outlines blo WHERE csg.capture_source_group_id = cs.capture_source_group_id AND blo.capture_source_id = cs.capture_source_id and blo.bulk_load_outline_id = %s;'
+            result = self.db._execute(sql, (self.bulk_load_outline_id,))
+            result = result.fetchall()[0]
+            value_index = 0
+            for index, item in enumerate(ls):
+                if item == result:
+                    value_index = index
+            self.cmb_capture_source.setCurrentIndex(value_index)
             # suburb
             sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality sl, buildings_bulk_load.bulk_load_outlines blo WHERE sl.suburb_locality_id = blo.suburb_locality_id AND blo.bulk_load_outline_id = %s;'
             result = self.db._execute(sql, (self.bulk_load_outline_id,))
