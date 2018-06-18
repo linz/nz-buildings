@@ -547,7 +547,6 @@ def get_columns(table_str, file_content, this_table_columns):
 
 
     for column_details in columns_strip:
-        print "column details: ", column_details
         for data_type in data_types.keys():
             regex = data_types[data_type]['regex']
             search = re.search(regex, column_details)
@@ -560,11 +559,9 @@ def get_columns(table_str, file_content, this_table_columns):
                 columns = data_types[data_type]['columns']
 
                 if extra == "bold":
-                    print "bold", regex
                     column_name_str = " **" + column_name_strip + "** "
                     columns[0] = column_name_str
                 else:
-                    print "not bold", regex
                     column_name_str = column_name_strip
                     columns[0] = column_name_str
                 if extra == "length":
