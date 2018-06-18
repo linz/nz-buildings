@@ -9,7 +9,7 @@ import qgis
 from qgis.core import QgsProject, QgsCoordinateReferenceSystem
 from qgis.utils import iface
 
-from buildings.gui.menu_frame import MenuFrame
+from buildings.gui.start_up import StartUpFrame
 from buildings.gui.error_dialog import ErrorDialog
 
 from utilities.layers import LayerRegistry
@@ -213,7 +213,7 @@ class Buildings:
             dw = qgis.utils.plugins['roads'].dockwidget
             self.layer_registry = LayerRegistry()
             # no base layers
-            self.menu_frame = MenuFrame(self.layer_registry)
+            self.menu_frame = StartUpFrame(self.layer_registry)
             home_dir = os.path.split(os.path.dirname(__file__))
             icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
             item = QListWidgetItem("Buildings")
@@ -234,7 +234,7 @@ class Buildings:
             dw.stk_options.setCurrentIndex(4)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.stk_options.setCurrentIndex(3)
-        dw.stk_options.addWidget(MenuFrame(self.layer_registry))
+        dw.stk_options.addWidget(StartUpFrame(self.layer_registry))
         dw.stk_options.setCurrentIndex(4)
 
     def setup_main_toolbar(self):

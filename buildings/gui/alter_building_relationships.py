@@ -920,12 +920,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Relate the buildings in the list
         Called when cancel botton is clicked
         """
-        from buildings.gui.menu_frame import MenuFrame
+        from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
-
-        self.db.close_connection()
+        dw.new_widget(BulkLoadFrame(self.layer_registry))
 
         self.tbl_original.clearSelection()
         self.lst_existing.clearSelection()
