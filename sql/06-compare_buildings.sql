@@ -85,12 +85,12 @@ $$
     -- <5% overlap, and are therefore marked for removal from the dataset.
     SELECT building_outline_id
     FROM buildings_bulk_load.existing_subset_extracts current
-    LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
+    LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON (ST_Intersects(current.shape, supplied.shape) AND supplied.supplied_dataset_id = $1)
     LEFT JOIN intersects USING (building_outline_id)
     WHERE supplied.bulk_load_outline_id IS NULL
     AND current.supplied_dataset_id = $1
     OR (     intersects.current_intersect < 5
-         AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ))
+         AND current.building_outline_id NOT IN ( SELECT building_outline_id FROM current_count ) AND supplied.supplied_dataset_id = $1)
     ;
 
 $$
