@@ -87,13 +87,13 @@ Description: {{ item.table_comment }}
 {% endfor %}
 
 
-Schema: {{ schema_gen_buildings_admin_bdys["name"] }}
+Schema: {{ schema_gen_buildings_reference["name"] }}
 -------------------------------------------------------
 
-Description: {{ schema_gen_buildings_admin_bdys["comment"] }}
+Description: {{ schema_gen_buildings_reference["comment"] }}
 
 
-{% for item in schema_tab_buildings_admin_bdys  %}
+{% for item in schema_tab_buildings_reference  %}
 .. _table-name-{{item.table_nam}}:
 
 Table: {{ item.table_nam }}
