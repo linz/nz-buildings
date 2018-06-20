@@ -61,7 +61,7 @@ $$
     )
     SELECT count(*)::integer FROM update_shape;
 
-$$ LANGUAGE sql;
+$$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer) IS
 'Update shape in bulk_load_outlines table';
 
@@ -93,7 +93,7 @@ $$
     )
     SELECT count(*)::integer FROM update_attributes;
 
-$$ LANGUAGE sql;
+$$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in bulk_load_outlines table';
 
@@ -144,7 +144,7 @@ $$
     )
     SELECT count(*)::integer FROM update_supplied_dataset;
 
-$$ LANGUAGE sql;
+$$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(integer, integer) IS
 'Update supplied_dataset_id in existing_subset_extracts table';
 
@@ -230,7 +230,7 @@ $$
     )
     SELECT count(*)::integer FROM transferred_insert;
 
-$$ LANGUAGE sql;
+$$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.transferred_insert(integer, integer) IS
 'Create new records in transferred table';
 
