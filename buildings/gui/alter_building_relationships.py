@@ -920,11 +920,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Relate the buildings in the list
         Called when cancel botton is clicked
         """
-        from buildings.gui.bulk_load_frame import BulkLoadFrame
-        dw = plugins['roads'].dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(self.layer_registry))
-
         self.tbl_original.clearSelection()
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
@@ -942,6 +937,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.clear_layer_filter()
 
         self.layer_registry.remove_all_layers()
+
+        from buildings.gui.bulk_load_frame import BulkLoadFrame
+        dw = plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(BulkLoadFrame(self.layer_registry))
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry

@@ -58,7 +58,7 @@
       <item>
        <widget class="QPushButton" name="btn_new_entry">
         <property name="text">
-         <string>Edit Look Up Tables</string>
+         <string>Add To Look Up Tables</string>
         </property>
        </widget>
       </item>
