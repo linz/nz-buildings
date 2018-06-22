@@ -34,7 +34,7 @@ $$
     )
     -- Find supplied bulk_load_outline_id that do not intersect or intersect
     -- with <5% overlap, and are therefore marked as new to the dataset.
-    SELECT bulk_load_outline_id
+    SELECT DISTINCT bulk_load_outline_id
     FROM buildings_bulk_load.bulk_load_outlines supplied
     LEFT JOIN buildings_bulk_load.existing_subset_extracts current ON ST_Intersects(supplied.shape, current.shape)
     LEFT JOIN intersects USING (bulk_load_outline_id)
@@ -83,7 +83,7 @@ $$
     )
     -- Find current building_outline_id that do not intersect or intersect with
     -- <5% overlap, and are therefore marked for removal from the dataset.
-    SELECT building_outline_id
+    SELECT DISTINCT building_outline_id
     FROM buildings_bulk_load.existing_subset_extracts current
     LEFT JOIN buildings_bulk_load.bulk_load_outlines supplied ON (ST_Intersects(current.shape, supplied.shape) AND supplied.supplied_dataset_id = $1)
     LEFT JOIN intersects USING (building_outline_id)
