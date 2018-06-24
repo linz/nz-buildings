@@ -10,18 +10,21 @@ class BulkLoad:
     def populate_bulk_comboboxes(self):
         """Populate bulk load comboboxes"""
         # populate organisation combobox
+        self.bulk_lf.cmb_organisation.clear()
         sql = 'SELECT value FROM buildings_bulk_load.organisation;'
         result = self.bulk_lf.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.bulk_lf.cmb_organisation.addItem(item[0])
         # populate capture method combobox
+        self.bulk_lf.cmb_capture_method.clear()
         sql = 'SELECT value FROM buildings_common.capture_method;'
         result = self.bulk_lf.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.bulk_lf.cmb_capture_method.addItem(item[0])
         # populate capture source group
+        self.bulk_lf.cmb_capture_src_grp.clear()
         sql = 'SELECT value, description FROM buildings_common.capture_source_group;'
         result = self.bulk_lf.db._execute(sql)
         ls = result.fetchall()
@@ -66,7 +69,7 @@ class BulkLoad:
             self.bulk_lf.fcb_external_id.setEnabled(1)
             self.bulk_lf.fcb_external_id.setLayer(self.bulk_lf.ml_outlines_layer.currentLayer())
             self.bulk_lf.cmb_external_id.setEnabled(1)
-            self.bulk_lf.populate_external_id_cmb()
+            self.populate_external_id_cmb()
         else:
             self.bulk_lf.fcb_external_id.setDisabled(1)
             self.bulk_lf.fcb_external_id.setLayer(None)
@@ -93,7 +96,7 @@ class BulkLoad:
     def populate_external_fcb(self):
         self.bulk_lf.fcb_external_id.setLayer(self.bulk_lf.ml_outlines_layer.currentLayer())
 
-    def bulk_load(self, commit_status=True):
+    def bulk_load(self, commit_status):
         # description
         if self.bulk_lf.le_data_description.text() == '':
             self.bulk_lf.error_dialog = ErrorDialog()
@@ -182,7 +185,9 @@ class BulkLoad:
         if self.bulk_lf.db._open_cursor is None:
             self.bulk_lf.db.open_cursor()
         sql = 'SELECT buildings_bulk_load.supplied_datasets_insert(%s, %s);'
-        results = self.bulk_lf.db.execute_no_commit(sql, (description, organisation))
+        results = self.bulk_lf.db.execute_no_commit(sql,
+                                                    (description,
+                                                     organisation))
         return results.fetchall()[0][0]
 
     def insert_supplied_outlines(self, dataset_id, layer, capture_method,
@@ -195,8 +200,8 @@ class BulkLoad:
         if len(self.bulk_lf.cmb_external_id.currentText()) is not 0:
             sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
             result = self.bulk_lf.db.execute_no_commit(sql,
-                                                       data=(capture_source_group,
-                                                       external_source_id))
+                                                       (capture_source_group,
+                                                        external_source_id))
             value = result.fetchall()
             if len(value) == 0:
                 self.bulk_lf.error_dialog = ErrorDialog()

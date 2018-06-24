@@ -1,6 +1,10 @@
 from buildings.gui.error_dialog import ErrorDialog
+
 from qgis.core import QgsFeatureRequest
 from qgis.utils import iface
+
+from PyQt4.QtGui import QToolButton
+from functools import partial
 
 
 class Changes:
@@ -31,6 +35,10 @@ class Changes:
         self.bulk_lf.cmb_suburb.setDisabled(1)
         self.bulk_lf.btn_edit_reset.setDisabled(1)
         self.bulk_lf.btn_edit_ok.setDisabled(1)
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ["mActionPan"]:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
     def populate_edit_comboboxes(self):
         # populate capture method combobox
@@ -117,8 +125,30 @@ class AddBulkLoad(Changes):
         Changes.__init__(self, bulk_load_frame)
         # set editing to add polygon
         iface.actionAddFeature().trigger()
+        selecttools = iface.attributesToolBar().findChildren(QToolButton)
+        # selection actions
+        iface.building_toolbar.addSeparator()
+        for sel in selecttools:
+            if sel.text() == "Select Feature(s)":
+                for a in sel.actions()[0:3]:
+                    iface.building_toolbar.addAction(a)
+        # editing actions
+        iface.building_toolbar.addSeparator()
+        for dig in iface.digitizeToolBar().actions():
+            if dig.objectName() in [
+                "mActionAddFeature"
+            ]:
+                iface.building_toolbar.addAction(dig)
+        # advanced Actions
+        iface.building_toolbar.addSeparator()
+        for adv in iface.advancedDigitizeToolBar().actions():
+            if adv.objectName() in [
+                "mActionUndo", "mActionRedo"
+            ]:
+                iface.building_toolbar.addAction(adv)
+        iface.building_toolbar.show()
 
-    def edit_ok_clicked(self, holder, commit_status=True):
+    def edit_ok_clicked(self, commit_status):
         self.bulk_lf.db.open_cursor()
         # capture method id
         text = self.bulk_lf.cmb_capture_method_2.currentText()
@@ -265,8 +295,30 @@ class EditBulkLoad(Changes):
         Changes.__init__(self, bulk_load_frame)
         # set editing to edit polygon
         iface.actionNodeTool().trigger()
+        selecttools = iface.attributesToolBar().findChildren(QToolButton)
+        # selection actions
+        iface.building_toolbar.addSeparator()
+        for sel in selecttools:
+            if sel.text() == "Select Feature(s)":
+                for a in sel.actions()[0:3]:
+                    iface.building_toolbar.addAction(a)
+        # editing actions
+        iface.building_toolbar.addSeparator()
+        for dig in iface.digitizeToolBar().actions():
+            if dig.objectName() in [
+                "mActionNodeTool", "mActionMoveFeature"
+            ]:
+                iface.building_toolbar.addAction(dig)
+        # advanced Actions
+        iface.building_toolbar.addSeparator()
+        for adv in iface.advancedDigitizeToolBar().actions():
+            if adv.objectName() in [
+                "mActionUndo", "mActionRedo", "mActionReshapeFeatures", "mActionOffsetCurve"
+            ]:
+                iface.building_toolbar.addAction(adv)
+        iface.building_toolbar.show()
 
-    def edit_ok_clicked(self, holder, commit_status=True):
+    def edit_ok_clicked(self, commit_status):
         self.bulk_lf.btn_edit_ok.setDisabled(1)
         self.bulk_lf.btn_edit_reset.setDisabled(1)
         self.bulk_lf.db.open_cursor()
@@ -274,8 +326,9 @@ class EditBulkLoad(Changes):
         if self.bulk_lf.geom_changed and not self.bulk_lf.select_changed:
             for key in self.bulk_lf.geoms:
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
-                self.bulk_lf.db.execute_no_commit(sql, (self.bulk_lf.geoms[key],
-                                                  key))
+                self.bulk_lf.db.execute_no_commit(sql,
+                                                  (self.bulk_lf.geoms[key],
+                                                   key))
         # if only attributes are changed
         if self.bulk_lf.select_changed and not self.bulk_lf.geom_changed:
             # bulk load status
