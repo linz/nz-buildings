@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 ################################################################################
 #
@@ -62,13 +62,17 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_load_outlines.click()
+        self.setup_frame = self.building_plugin.setup_frame
+        self.setup_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.db.open_cursor()
+        self.bulk_load_frame.compare_outlines_clicked(False)
+        self.bulk_load_frame.publish_clicked(False)
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+        self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_external_id_radiobutton(self):
         """external source fields enable when external id radio button is enabled"""
@@ -133,7 +137,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines
-        self.bulk_load_frame.ok_clicked(commit_status=False)
+        self.bulk_load_frame.bulk_load_ok_clicked(False)
         # check 1 outlines were added to bulk load outlines
         sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
         result2 = db._execute(sql)
@@ -145,4 +149,4 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
-        self.assertIsNotNone(self.bulk_load_frame.dataset_id)
+        self.assertIsNotNone(self.bulk_load_frame.current_dataset)

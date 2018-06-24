@@ -52,39 +52,26 @@ class SetUpBulkNewTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Bulk Load Dataset'))
-        self.new_bulk_frame = self.dockwidget.current_frame
-        if self.new_bulk_frame.error_dialog is not None:
-            self.no_supplied_data = True
-            self.new_bulk_frame.error_dialog.close()
-        else:
-            self.no_supplied_data = False
+        self.setup_frame = self.building_plugin.setup_frame
+        self.setup_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.rad_add.click()
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_bulk_frame.btn_exit.click()
+        self.bulk_load_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
         """Buttons and comboboxes correctly enabled/disables on startup"""
-        if self.no_supplied_data:
-            self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
-            self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_exit.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
-        else:
-            self.assertFalse(self.new_bulk_frame.btn_save.isEnabled())
-            self.assertFalse(self.new_bulk_frame.btn_reset.isEnabled())
-            self.assertTrue(self.new_bulk_frame.btn_exit.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_capture_method.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_capture_source.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_ta.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_town.isEnabled())
-            self.assertFalse(self.new_bulk_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
 
     def test_layer_registry(self):
         """Bulk load outlines table added to canvas when frame opened"""
@@ -98,9 +85,5 @@ class SetUpBulkNewTest(unittest.TestCase):
                 layer_bool = True
                 if layer.layer().isEditable():
                     edit_bool = True
-        if self.no_supplied_data:
-            self.assertFalse(layer_bool)
-            self.assertFalse(edit_bool)
-        elif self.no_supplied_data is False:
-            self.assertTrue(layer_bool)
-            self.assertTrue(edit_bool)
+        self.assertTrue(layer_bool)
+        self.assertTrue(edit_bool)

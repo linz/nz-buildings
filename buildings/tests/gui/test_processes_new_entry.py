@@ -55,8 +55,8 @@ class ProcessNewEntryTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_new_entry.click()
+        self.setup_frame = self.building_plugin.setup_frame
+        self.setup_frame.btn_new_entry.click()
         self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):

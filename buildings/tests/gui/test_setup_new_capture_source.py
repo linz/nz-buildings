@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: New Entry GUI setup confirm default settings
+    Tests: New Capture Source GUI setup confirm default settings
 
  ***************************************************************************/
 """
@@ -20,9 +20,11 @@ import unittest
 
 from qgis.utils import plugins
 
+from buildings.utilities import database as db
 
-class SetUpNewEntryTest(unittest.TestCase):
-    """Test New Entry GUI initial setup confirm default settings"""
+
+class SetUpCaptureSourceTest(unittest.TestCase):
+    """Test New Capture Source GUI initial setup confirm default settings"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -38,12 +40,14 @@ class SetUpNewEntryTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
+                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
+        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -52,35 +56,23 @@ class SetUpNewEntryTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.setup_frame = self.building_plugin.setup_frame
-        self.setup_frame.btn_new_entry.click()
-        self.new_entry_frame = self.dockwidget.current_frame
+        self.setup_frame.btn_new_capture_source.click()
+        self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_entry_frame.btn_exit.click()
+        self.capture_frame.btn_exit.click()
 
-    def test_combobox_default(self):
-        """Initial combobox text is organisation"""
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(
-                          self.new_entry_frame.cmb_new_type_selection.currentIndex()),
-                          'Organisation')
+    def test_external_source_default(self):
+        """External source line edit is disabled and radiobutton is not checked"""
+        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
 
-    def test_combobox_options(self):
-        """Four options in combobox"""
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
-
-    def test_value_enabled(self):
-        """Line edit: value is enabled on start up"""
-        self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
-
-    def test_description_disabled(self):
-        """Line edit: description is disbaled on startup"""
-        self.assertFalse(self.new_entry_frame.le_description.isEnabled())
-
-    def test_description_enabled_on_capture_source_group(self):
-        """Description enabled when change to capture source group option"""
-        self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
-        self.assertTrue(self.new_entry_frame.le_description.isEnabled())
+    def test_capture_source_dropdowns(self):
+        """Number of options in dropdown = number of entries in table"""
+        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
+                         result)
+        self.capture_frame.rad_external_source.click()

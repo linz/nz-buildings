@@ -11,18 +11,22 @@
 #
 ################################################################################
 
-    Tests: New Entry GUI setup confirm default settings
+    Tests: Edit Bulk Load Outline GUI setup confirm default settings
 
  ***************************************************************************/
 """
 
 import unittest
 
+from qgis.core import QgsProject
 from qgis.utils import plugins
 
 
-class SetUpNewEntryTest(unittest.TestCase):
-    """Test New Entry GUI initial setup confirm default settings"""
+class SetUpEditBulkLoad(unittest.TestCase):
+    """
+    Test Add Production Outline GUI initial
+    setup confirm default settings
+    """
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -52,35 +56,36 @@ class SetUpNewEntryTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.setup_frame = self.building_plugin.setup_frame
-        self.setup_frame.btn_new_entry.click()
-        self.new_entry_frame = self.dockwidget.current_frame
+        self.setup_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.rad_edit.click()
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_entry_frame.btn_exit.click()
+        self.bulk_load_frame.btn_exit.click()
 
-    def test_combobox_default(self):
-        """Initial combobox text is organisation"""
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(
-                          self.new_entry_frame.cmb_new_type_selection.currentIndex()),
-                          'Organisation')
+    def test_bulk_load_gui_set_up(self):
+        """ Initial set up of the frame """
+        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
 
-    def test_combobox_options(self):
-        """Four options in combobox"""
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
-
-    def test_value_enabled(self):
-        """Line edit: value is enabled on start up"""
-        self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
-
-    def test_description_disabled(self):
-        """Line edit: description is disbaled on startup"""
-        self.assertFalse(self.new_entry_frame.le_description.isEnabled())
-
-    def test_description_enabled_on_capture_source_group(self):
-        """Description enabled when change to capture source group option"""
-        self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
-        self.assertTrue(self.new_entry_frame.le_description.isEnabled())
+    def test_layer_registry(self):
+        """ Layer registry has the correct components """
+        layer_bool = False
+        edit_bool = False
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup('Building Tool Layers')
+        layers = group.findLayers()
+        for layer in layers:
+            if layer.layer().name() == 'bulk_load_outlines':
+                layer_bool = True
+                if layer.layer().isEditable():
+                    edit_bool = True
+        self.assertTrue(layer_bool)
+        self.assertTrue(edit_bool)

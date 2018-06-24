@@ -11,20 +11,23 @@
 #
 ################################################################################
 
-    Tests: Bulk Load Outlines GUI setup confirm default settings
+    Tests: Compare Outlines Button Click Confirm Processes
 
  ***************************************************************************/
 """
 
 import unittest
 
-from qgis.utils import plugins, iface
+from qgis.utils import plugins
 
 from buildings.utilities import database as db
 
 
-class SetUpBulkLoadTest(unittest.TestCase):
-    """Test Bulk Load Outlines GUI initial setup confirm default settings"""
+class SetUpEditBulkLoad(unittest.TestCase):
+    """
+    Test Add Production Outline GUI initial
+    setup confirm default settings
+    """
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -40,14 +43,12 @@ class SetUpBulkLoadTest(unittest.TestCase):
             if not plugins.get('buildings'):
                 pass
             else:
-                db.connect()
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        db.close_connection()
         cls.road_plugin.dockwidget.close()
 
     def setUp(self):
@@ -65,44 +66,39 @@ class SetUpBulkLoadTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+
+    def test_load_building_outlines(self):
+        """"""
+        sql = 'SELECT count(*) FROM buildings.building_outlines;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 66)
+        sql = 'SELECT count(*) FROM buildings.building_outlines WHERE end_lifespan IS NULL;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 33)
         self.bulk_load_frame.db.rollback_open_cursor()
 
-    def test_external_defaults(self):
-        """External source comboboxes disabled on setup"""
+    def test_populate_building_lds(self):
+        """"""
+        sql = 'SELECT count(*) FROM buildings_lds.nz_building_outlines;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 33)
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_gui_on_publish_clicked(self):
+        """"""
+        self.assertEqual(self.bulk_load_frame.current_dataset, None)
+        self.assertFalse(self.bulk_load_frame.btn_publish.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_compare_outlines.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_alter_rel.isEnabled())
+        self.assertTrue(self.bulk_load_frame.ml_outlines_layer.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_method.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_organisation.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_src_grp.isEnabled())
+        self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
+        self.assertFalse(self.bulk_load_frame.rad_external_source.isChecked())
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
-        self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 0)
-
-    def test_supplied_layer_combobox(self):
-        """Bulk load layer combobox contains only the layers in the qgis legend"""
-        layers = iface.legendInterface().layers()
-        self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(),
-                         len(layers))
-
-    def test_data_description_default(self):
-        """Data description is enabled and empty"""
-        self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
-        self.assertEqual(self.bulk_load_frame.le_data_description.text(), '')
-
-    def test_organisation_combobox(self):
-        """Organisation combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
-        result = db._execute(sql)
-        result = result.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_organisation.count(), result)
-
-    def test_capture_method_combobox(self):
-        """Capture method combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
-        result2 = db._execute(sql)
-        result2 = result2.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(),
-                         result2)
-
-    def test_capture_source_group(self):
-        """Capture source group combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
-        result3 = db._execute(sql)
-        result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(),
-                         result3)
+        self.bulk_load_frame.db.rollback_open_cursor()
