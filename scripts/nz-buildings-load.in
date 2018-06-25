@@ -136,5 +136,7 @@ if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql
     echo ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql
+    psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
     psql -c "SELECT buildings_bulk_load.create_building_relationship_view();"
+
 fi
