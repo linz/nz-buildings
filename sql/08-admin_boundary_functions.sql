@@ -8,19 +8,12 @@ CREATE OR REPLACE FUNCTION buildings.suburb_locality_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   suburb_locality_id
-    FROM     buildings_reference.suburb_locality
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT suburb_locality_id
+    FROM buildings_reference.suburb_locality
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC,
+             ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -58,19 +51,12 @@ CREATE OR REPLACE FUNCTION buildings.town_city_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   town_city_id
-    FROM     buildings_reference.town_city
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT town_city_id
+    FROM buildings_reference.town_city
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC,
+             ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -108,19 +94,12 @@ CREATE OR REPLACE FUNCTION buildings.territorial_authority_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   territorial_authority_id
-    FROM     buildings_reference.territorial_authority
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT territorial_authority_id
+    FROM buildings_reference.territorial_authority
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC,
+             ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
