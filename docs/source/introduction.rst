@@ -78,18 +78,20 @@ The Building Outlines contain spatial detail reflective of the visible character
 Valid Geometry
 ---------------------------
 
-A building outline polygon is considered to have valid geometry if;
-* It does not overlap with any other current building outline polygons;
-* It does not contain any spikes (a series of vertices which create an extremely acute angle);
-* It does not contain lines that are intersected with each other;
-* It can contain polygons with interior rings (holes);
-* It does not contain polygons with multiple exterior rings;
+A building outline polygon is considered to have valid geometry if:
+* It does not overlap with any other current building outline polygon
+* It does not contain any spikes (a series of vertices which create an extremely acute angle)
+* It does not contain lines that are intersected with each other
+* It can contain polygons with interior rings (holes)
+* It does not contain polygons with multiple exterior rings
 
 
-File format
+Formats
 ---------------------------
 
-Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZ Transverse Mercator 2000 (EPSG 2193).
+Textual data uses UTF-8 character encoding. 
+
+The source geometry of all spatial data uses NZGD2000 / New Zealand Transverse Mercator 2000 (EPSG 2193) as the spatial reference system.
 
 
 
