@@ -56,7 +56,7 @@ The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readt
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the LDS. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
+The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the LINZ Data Service. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
 | .. figure:: _static/current_building_outlines_coverage.jpg  | .. figure:: _static/upcoming_building_outlines_coverage.jpg | .. figure:: _static/future_building_outlines_coverage.jpg |
