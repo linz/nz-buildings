@@ -28,7 +28,7 @@ class Buildings:
         self.iface = iface
         self.plugin_dir = __location__
         self.image_dir = os.path.join(__location__, "..", "images")
-        self.setup_frame = None
+        self.startup_frame = None
         self.layer_registry = None
 
         # declare instance attributes
@@ -176,7 +176,7 @@ class Buildings:
             iface.addToolBar(iface.building_toolbar, Qt.RightToolBarArea)
 
         self.setup_main_toolbar()
-        if self.setup_frame:
+        if self.startup_frame:
             if not qgis.utils.plugins['roads'].is_active:
                 qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
                 dw = qgis.utils.plugins['roads'].dockwidget
@@ -207,13 +207,13 @@ class Buildings:
                 dw.lst_options.setCurrentRow(2)
                 dw.stk_options.setCurrentIndex(4)
 
-        if not self.setup_frame:
+        if not self.startup_frame:
             if not qgis.utils.plugins['roads'].dockwidget:
                 qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
             dw = qgis.utils.plugins['roads'].dockwidget
             self.layer_registry = LayerRegistry()
             # no base layers
-            self.setup_frame = StartUpFrame(self.layer_registry)
+            self.startup_frame = StartUpFrame(self.layer_registry)
             home_dir = os.path.split(os.path.dirname(__file__))
             icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
             item = QListWidgetItem("Buildings")

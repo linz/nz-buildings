@@ -4,17 +4,18 @@ from qgis.core import QgsFeatureRequest
 from qgis.utils import iface
 
 from PyQt4.QtGui import QToolButton
-from functools import partial
 
 
 class Changes:
     def __init__(self, bulk_load_frame):
+        """"""
         self.bulk_lf = bulk_load_frame
         # enable editing
         iface.setActiveLayer(self.bulk_lf.bulk_load_layer)
         iface.actionToggleEditing().trigger()
 
     def edit_cancel_clicked(self):
+        """"""
         iface.actionCancelEdits().trigger()
         self.bulk_lf.rad_edit.setAutoExclusive(False)
         self.bulk_lf.rad_edit.setChecked(False)
@@ -41,12 +42,14 @@ class Changes:
         iface.building_toolbar.hide()
 
     def populate_edit_comboboxes(self):
+        """"""
         # populate capture method combobox
         sql = 'SELECT value FROM buildings_common.capture_method;'
         result = self.bulk_lf.db._execute(sql)
         ls = result.fetchall()
         for item in ls:
             self.bulk_lf.cmb_capture_method_2.addItem(item[0])
+
         # populate capture source group
         sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
         result = self.bulk_lf.db._execute(sql)
@@ -54,6 +57,7 @@ class Changes:
         for item in ls:
             text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
             self.bulk_lf.cmb_capture_source.addItem(text)
+
         # populate suburb combobox
         sql = 'SELECT DISTINCT suburb_4th FROM buildings_reference.suburb_locality'
         result = self.bulk_lf.db._execute(sql)
@@ -61,6 +65,7 @@ class Changes:
         for item in ls:
             if item[0] is not None:
                 self.bulk_lf.cmb_suburb.addItem(item[0])
+
         # populate town combobox
         sql = 'SELECT DISTINCT name FROM buildings_reference.town_city'
         result = self.bulk_lf.db._execute(sql)
@@ -68,6 +73,7 @@ class Changes:
         for item in ls:
             if item[0] is not None:
                 self.bulk_lf.cmb_town.addItem(item[0])
+
         # populate territorial authority combobox
         sql = 'SELECT DISTINCT name FROM buildings_reference.territorial_authority'
         result = self.bulk_lf.db._execute(sql)
@@ -75,6 +81,7 @@ class Changes:
         for item in ls:
             if item[0] is not None:
                 self.bulk_lf.cmb_ta.addItem(item[0])
+
         if self.bulk_lf.rad_edit.isChecked():
             # bulk load status
             sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status;'
@@ -86,11 +93,13 @@ class Changes:
             result = self.bulk_lf.db._execute(sql, (self.bulk_lf.bulk_load_outline_id,))
             result = result.fetchall()[0][0]
             self.bulk_lf.cmb_status.setCurrentIndex(self.bulk_lf.cmb_status.findText(result))
+
             # capture method
             sql = 'SELECT value FROM buildings_common.capture_method cm, buildings_bulk_load.bulk_load_outlines blo WHERE blo.capture_method_id = cm.capture_method_id AND blo.bulk_load_outline_id = %s;'
             result = self.bulk_lf.db._execute(sql, (self.bulk_lf.bulk_load_outline_id,))
             result = result.fetchall()[0][0]
             self.bulk_lf.cmb_capture_method_2.setCurrentIndex(self.bulk_lf.cmb_capture_method_2.findText(result))
+
             # capture source
             sql = 'SELECT csg.value, csg.description, cs.external_source_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs WHERE cs.capture_source_group_id = csg.capture_source_group_id;'
             result = self.bulk_lf.db._execute(sql)
@@ -103,16 +112,19 @@ class Changes:
                 if item == result:
                     value_index = index
             self.bulk_lf.cmb_capture_source.setCurrentIndex(value_index)
+
             # suburb
             sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality sl, buildings_bulk_load.bulk_load_outlines blo WHERE sl.suburb_locality_id = blo.suburb_locality_id AND blo.bulk_load_outline_id = %s;'
             result = self.bulk_lf.db._execute(sql, (self.bulk_lf.bulk_load_outline_id,))
             result = result.fetchall()[0][0]
             self.bulk_lf.cmb_suburb.setCurrentIndex(self.bulk_lf.cmb_suburb.findText(result))
+
             # town city
             sql = 'SELECT name FROM buildings_reference.town_city tc, buildings_bulk_load.bulk_load_outlines blo WHERE tc.town_city_id = blo.town_city_id AND blo.bulk_load_outline_id = %s;'
             result = self.bulk_lf.db._execute(sql, (self.bulk_lf.bulk_load_outline_id,))
             result = result.fetchall()[0][0]
             self.bulk_lf.cmb_town.setCurrentIndex(self.bulk_lf.cmb_town.findText(result))
+
             # territorial Authority
             sql = 'SELECT name FROM buildings_reference.territorial_authority ta, buildings_bulk_load.bulk_load_outlines blo WHERE ta.territorial_authority_id = blo.territorial_authority_id AND blo.bulk_load_outline_id = %s;'
             result = self.bulk_lf.db._execute(sql, (self.bulk_lf.bulk_load_outline_id,))

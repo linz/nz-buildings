@@ -20,7 +20,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, layer_registry, current_dataset, parent=None):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
@@ -29,6 +29,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.layer_registry = layer_registry
+
+        self.current_dataset = current_dataset
 
         self.open_alter_relationship_frame()
 
@@ -88,11 +90,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
         self.lyr_existing = self.layer_registry.add_postgres_layer(
-            "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+            "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "supplied_dataset_id = {0}".format(self.current_dataset))
         self.lyr_existing.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_bulk_load = self.layer_registry.add_postgres_layer(
-            "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+            "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "supplied_dataset_id = {0}".format(self.current_dataset))
         self.lyr_bulk_load.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(

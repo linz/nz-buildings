@@ -23,7 +23,8 @@ class StartUpFrame(QFrame, FORM_CLASS):
         super(StartUpFrame, self).__init__(parent)
         self.setupUi(self)
         self.layer_registry = layer_registry
-        db.connect()
+        self.db = db
+        self.db.connect()
 
         # set up signals and slots
         self.btn_bulk_load.clicked.connect(self.bulk_load_clicked)
@@ -35,7 +36,7 @@ class StartUpFrame(QFrame, FORM_CLASS):
         """
         Called when bulk loaded button is clicked
         """
-        db.close_connection()
+        self.db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadFrame(self.layer_registry))
@@ -50,7 +51,7 @@ class StartUpFrame(QFrame, FORM_CLASS):
         """
         Called when new entry button is clicked
         """
-        db.close_connection()
+        self.db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry(self.layer_registry))
@@ -59,7 +60,7 @@ class StartUpFrame(QFrame, FORM_CLASS):
         """
         Called when new capture source button is clicked
         """
-        db.close_connection()
+        self.db.close_connection()
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(self.layer_registry))
