@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 ################################################################################
 #
@@ -17,11 +17,13 @@
 """
 
 import unittest
-from PyQt4.QtCore import *
+
 from qgis.core import QgsVectorLayer, QgsMapLayerRegistry
-from qgis.core import QgsFeature, QgsPoint, QgsGeometry, QgsField
+from qgis.core import QgsFeature, QgsGeometry
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
+import qgis
+import os
 
 
 class ProcessBulkLoadTest(unittest.TestCase):
@@ -54,7 +56,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # remove temporary layers from canvas
         layers = iface.legendInterface().layers()
         for layer in layers:
-            if 'temporary' in str(layer.id()):
+            if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def setUp(self):
@@ -62,17 +64,17 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.setup_frame = self.building_plugin.setup_frame
-        self.setup_frame.btn_bulk_load.click()
+        self.startup_frame = self.building_plugin.startup_frame
+        self.startup_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
-        self.bulk_load_frame.compare_outlines_clicked(False)
         self.bulk_load_frame.publish_clicked(False)
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
         self.bulk_load_frame.db.rollback_open_cursor()
+        qgis.utils.reloadPlugin('buildings')
 
     def test_external_id_radiobutton(self):
         """external source fields enable when external id radio button is enabled"""
@@ -101,36 +103,13 @@ class ProcessBulkLoadTest(unittest.TestCase):
 
     def test_bulk_load_ok_clicked(self):
         """When save is clicked data is added to the correct tables"""
-        # create temporary outlines layer
-        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
-        result = db._execute(sql)
-        if result is None:
-            result = 0
-        else:
-            result = result.fetchall()[0][0]
-        layer = QgsVectorLayer("Polygon?crs=epsg:2193",
-                               "temporary_outlines", "memory")
-        layer.dataProvider().addAttributes([QgsField('id', QVariant.Int)])
-        layer.updateFields()
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
-        # feature one
-        feature_one = QgsFeature()
-        feature_one.setAttributes([1])
-        points = [QgsPoint(1878380, 5555298),
-                  QgsPoint(1878442, 5555298),
-                  QgsPoint(1878442, 5555284),
-                  QgsPoint(1878380, 5555284)]
-        feature_one.setGeometry(QgsGeometry.fromPolygon([points]))
-        # add outlines to temporary layer
-        layer.startEditing()
-        layer.addFeature(feature_one, True)
-        layer.commitChanges()
-        QgsMapLayerRegistry.instance().addMapLayer(layer)
-        # set combobox values
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                            'testdata/test_bulk_load_shapefile.shp')
+        iface.addVectorLayer(path, '', 'ogr')
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'temporary_outlines':
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_bulk_load_shapefile':
                 self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
@@ -138,14 +117,14 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines
         self.bulk_load_frame.bulk_load_ok_clicked(False)
-        # check 1 outlines were added to bulk load outlines
+        # check outlines were added to bulk load outlines
         sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
-        result2 = db._execute(sql)
-        if result2 is None:
-            result2 = 0
+        result = db._execute(sql)
+        if result is None:
+            result = 0
         else:
-            resultT = result2.fetchall()[0][0]
-        self.assertEqual(result + 1, resultT)
+            result = result.fetchall()[0][0]
+        self.assertEqual(48, result)
         # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
