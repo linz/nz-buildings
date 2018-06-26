@@ -18,7 +18,7 @@
 
 import unittest
 
-from qgis.core import QgsPoint, QgsCoordinateReferenceSystem, QgsRectangle
+from qgis.core import QgsPoint, QgsCoordinateReferenceSystem, QgsRectangle, QgsMapLayerRegistry
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
@@ -59,9 +59,10 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Alter Building Relationships'))
+        self.startup_frame = self.building_plugin.startup_frame
+        self.startup_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.btn_alter_rel.click()
         self.alter_relationships_frame = self.dockwidget.current_frame
 
         widget = iface.mapCanvas().viewport()
@@ -86,6 +87,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.alter_relationships_frame.btn_cancel.click()
+        self.alter_relationships_frame.db.rollback_open_cursor()
 
     def test_alter_relationship_to_added_or_removed(self):
         """When save is clicked buildings in matched are moved to added/removed"""
@@ -97,7 +99,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
+                         pos=canvas_point(QgsPoint(1878177.80, 5555336.00)),
                          delay=-1)
         QTest.qWait(1)
 
@@ -142,7 +144,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(row_count, 1)
         index = self.alter_relationships_frame.tbl_original.model().index(0, 1)
         self.assertEqual(index.data(), '2003')
-
+        layerList = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
+        iface.setActiveLayer(layerList[0])
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
@@ -194,13 +197,15 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         QTest.mouseClick(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
+                         pos=canvas_point(QgsPoint(1878033.55, 5555355.73)),
                          delay=-1)
         QTest.qWait(1)
 
+        layerList = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
+        iface.setActiveLayer(layerList[0])
         QTest.mouseClick(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878033.55, 5555355.73)),
+                         pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
                          delay=-1)
         QTest.qWait(1)
 
@@ -256,13 +261,13 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
         self.assertEqual(row_count, 0)
 
-    def test_relink_botton(self):
+    def test_relink_button(self):
         """When relink button is clicked the building ids in listwidget are moved back to tablewidget"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
+                         pos=canvas_point(QgsPoint(1878182.7, 5555332.0)),
                          delay=-1)
         QTest.qWait(1)
 
@@ -283,7 +288,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878182.75, 5555328.09)),
+                         pos=canvas_point(QgsPoint(1878182.7, 5555332.0)),
                          delay=-1)
         QTest.qWait(1)
 

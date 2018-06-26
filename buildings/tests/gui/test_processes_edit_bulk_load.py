@@ -59,8 +59,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.setup_frame = self.building_plugin.setup_frame
-        self.setup_frame.btn_bulk_load.click()
+        self.startup_frame = self.building_plugin.startup_frame
+        self.startup_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_edit.click()
 
@@ -285,7 +285,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+                         pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
                          delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))

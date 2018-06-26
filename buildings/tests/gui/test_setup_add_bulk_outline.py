@@ -22,7 +22,7 @@ from qgis.core import QgsProject
 from qgis.utils import plugins
 
 
-class SetUpBulkNewTest(unittest.TestCase):
+class SetUpBulkAddTest(unittest.TestCase):
     """Test Add New Bulk Outline GUI processes"""
     @classmethod
     def setUpClass(cls):
@@ -52,8 +52,8 @@ class SetUpBulkNewTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.setup_frame = self.building_plugin.setup_frame
-        self.setup_frame.btn_bulk_load.click()
+        self.startup_frame = self.building_plugin.startup_frame
+        self.startup_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_add.click()
 

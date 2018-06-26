@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Menu GUI setup confirm default settings
+    Tests: Menu GUI startup confirm default settings
 
  ***************************************************************************/
 """
@@ -22,7 +22,7 @@ import unittest
 
 
 class SetUpMenuTest(unittest.TestCase):
-    """Test Menu GUI initial setup confirm default settings"""
+    """Test Menu GUI initial startup confirm default settings"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -52,39 +52,30 @@ class SetUpMenuTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.road_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
+        self.startup_frame = self.building_plugin.startup_frame
 
     def tearDown(self):
         """Runs after each test"""
-        # Do nothing
         self.road_plugin.dockwidget.close()
 
     def test_menu_gui_buttons_enabled(self):
         """Buttons are enabled"""
-        self.assertTrue(self.menu_frame.btn_new_entry.isEnabled())
-        self.assertTrue(self.menu_frame.btn_add_capture_source.isEnabled())
-        self.assertTrue(self.menu_frame.btn_load_outlines.isEnabled())
+        self.assertTrue(self.startup_frame.btn_new_entry.isEnabled())
+        self.assertTrue(self.startup_frame.btn_new_capture_source.isEnabled())
+        self.assertTrue(self.startup_frame.btn_bulk_load.isEnabled())
+        self.assertTrue(self.startup_frame.btn_production.isEnabled())
 
     def test_menu_gui_button_names(self):
         """Buttons have correct names"""
-        self.assertEqual(self.menu_frame.btn_new_entry.text(), 'New Entry')
-        self.assertEqual(self.menu_frame.btn_add_capture_source.text(),
-                         'Add Capture Source')
-        self.assertEqual(self.menu_frame.btn_load_outlines.text(),
-                         'Bulk Load Outlines')
-
-    def test_menu_gui_combo_enabled(self):
-        """Combo box index is 'add outlines' and enabled"""
-        self.assertTrue(self.menu_frame.cmb_add_outline.isEnabled())
-
-    def test_menu_gui_combo_options(self):
-        """Combo box has four options"""
-        self.assertEqual(self.menu_frame.cmb_add_outline.count(), 4)
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(0),
-                         'Add Outlines')
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(1),
-                         'Alter Building Relationships')
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(2),
-                         'Add New Outline to Bulk Load Dataset')
-        self.assertEqual(self.menu_frame.cmb_add_outline.itemText(3),
-                         'Add New Outline to Production')
+        self.assertEqual(self.startup_frame.btn_new_entry.text(),
+                         u'Add To Lookup Tables'
+                         )
+        self.assertEqual(self.startup_frame.btn_new_capture_source.text(),
+                         'New Capture Source'
+                         )
+        self.assertEqual(self.startup_frame.btn_bulk_load.text(),
+                         'Bulk Load'
+                         )
+        self.assertEqual(self.startup_frame.btn_production.text(),
+                         'Production'
+                         )
