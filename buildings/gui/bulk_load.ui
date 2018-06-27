@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>587</width>
-    <height>972</height>
+    <width>664</width>
+    <height>1006</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,153 +21,233 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="grb_1">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="lb_dataset">
+       <property name="styleSheet">
+        <string notr="true">QLabel {
+    font-size: 11pt;
+    font-colour: #FF0000;
+}</string>
+       </property>
+       <property name="text">
+        <string>Current Dataset ID:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lb_dataset_id">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gpb_2">
+     <property name="styleSheet">
+      <string notr="true">
+QGroupBox {
+    border: 1px solid #D8D4D3;
+    border-radius: 9px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 1px 0 3px;
+}</string>
+     </property>
      <property name="title">
-      <string/>
+      <string>Bulk Load</string>
      </property>
      <property name="flat">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="checkable">
       <bool>false</bool>
      </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <widget class="QGroupBox" name="gpb_2">
-        <property name="title">
-         <string/>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="4" column="0">
+       <widget class="QLabel" name="lb_capture_src_grp">
+        <property name="text">
+         <string>Capture Source Group:</string>
         </property>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="11" column="2">
-          <widget class="QComboBox" name="cmb_capture_method"/>
-         </item>
-         <item row="1" column="2">
-          <widget class="QgsMapLayerComboBox" name="ml_outlines_layer"/>
-         </item>
-         <item row="6" column="2">
-          <widget class="QLineEdit" name="le_data_description"/>
-         </item>
-         <item row="12" column="2">
-          <widget class="QComboBox" name="cmb_organisation"/>
-         </item>
-         <item row="11" column="0">
-          <widget class="QLabel" name="lb_capture_method">
-           <property name="text">
-            <string>Capture Method:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QgsFieldComboBox" name="fcb_external_id"/>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="lb_capture_src_grp">
-           <property name="text">
-            <string>Capture Source Group:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="lb_external_id">
-           <property name="text">
-            <string>External ID Field:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QRadioButton" name="rad_external_source">
-           <property name="text">
-            <string>External Source Exists</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="lb_data_desc">
-           <property name="text">
-            <string>Data Description:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QComboBox" name="cmb_capture_src_grp"/>
-         </item>
-         <item row="12" column="0">
-          <widget class="QLabel" name="lb_organisation">
-           <property name="text">
-            <string>Organisation:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="2">
-          <layout class="QHBoxLayout" name="hzly_1">
-           <item>
-            <widget class="QPushButton" name="btn_bl_ok">
-             <property name="text">
-              <string>Ok</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_bl_reset">
-             <property name="text">
-              <string>Reset</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="lb_outlines">
-           <property name="text">
-            <string>Bulk Outlines Layer:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="lb_external_id_2">
-           <property name="text">
-            <string>External ID:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="2">
-          <widget class="QComboBox" name="cmb_external_id"/>
-         </item>
-         <item row="0" column="0" colspan="3">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>                                  Bulk Load Outline</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </widget>
       </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="lb_external_id_2">
+        <property name="text">
+         <string>External ID:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="cmb_capture_src_grp"/>
+      </item>
+      <item row="3" column="1">
+       <widget class="QgsFieldComboBox" name="fcb_external_id"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QLabel" name="lb_data_desc">
+        <property name="text">
+         <string>Data Description:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="1">
+       <layout class="QHBoxLayout" name="hzly_1">
+        <item>
+         <widget class="QPushButton" name="btn_bl_ok">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Ok</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_bl_reset">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="12" column="1">
+       <widget class="QComboBox" name="cmb_organisation"/>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="lb_capture_method">
+        <property name="text">
+         <string>Capture Method:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QComboBox" name="cmb_external_id"/>
+      </item>
       <item row="2" column="1">
-       <spacer name="verticalSpacer">
+       <widget class="QRadioButton" name="rad_external_source">
+        <property name="text">
+         <string>External Source Exists</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QComboBox" name="cmb_capture_method"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lb_external_id">
+        <property name="text">
+         <string>External ID Field:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0">
+       <widget class="QLabel" name="lb_organisation">
+        <property name="text">
+         <string>Organisation:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QLineEdit" name="le_data_description"/>
+      </item>
+      <item row="1" column="1">
+       <widget class="QgsMapLayerComboBox" name="ml_outlines_layer"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lb_outlines">
+        <property name="text">
+         <string>Bulk Outlines Layer:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <spacer name="verticalSpacer_5">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>30</height>
+          <height>40</height>
          </size>
         </property>
        </spacer>
       </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="btn_compare_outlines">
-        <property name="text">
-         <string>Compare Outlines</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_compare_outlines">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
+     <property name="text">
+      <string>Compare Outlines</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QGroupBox" name="grpb_edits">
@@ -177,17 +257,33 @@
        <height>16760000</height>
       </size>
      </property>
+     <property name="styleSheet">
+      <string notr="true">QGroupBox {
+    border: 1px solid #D8D4D3;
+    border-radius: 9px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
+     </property>
      <property name="title">
-      <string/>
+      <string>Edit Outlines</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <property name="fieldGrowthPolicy">
        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
       </property>
-      <item row="0" column="0" colspan="2">
+      <item row="1" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QRadioButton" name="rad_add">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
            <string>Add Outline</string>
           </property>
@@ -202,7 +298,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="lb_bulk_load_status">
         <property name="font">
          <font>
@@ -216,63 +312,66 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="3" column="1">
        <widget class="QComboBox" name="cmb_status"/>
       </item>
-      <item row="2" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="l_capture_method">
         <property name="text">
          <string>Capture Method:</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="4" column="1">
        <widget class="QComboBox" name="cmb_capture_method_2"/>
       </item>
-      <item row="3" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="l_capture_source">
         <property name="text">
          <string>Capture Source:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="cmb_capture_source"/>
       </item>
-      <item row="4" column="0">
+      <item row="6" column="0">
        <widget class="QLabel" name="lb_town">
         <property name="text">
          <string>Town City:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="cmb_town"/>
       </item>
-      <item row="5" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="lb_suburb">
         <property name="text">
          <string>Suburb Locality:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="7" column="1">
        <widget class="QComboBox" name="cmb_suburb"/>
       </item>
-      <item row="6" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="lb_ta">
         <property name="text">
          <string>Territorial Authority: </string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="8" column="1">
        <widget class="QComboBox" name="cmb_ta"/>
       </item>
-      <item row="7" column="0" colspan="2">
+      <item row="9" column="0" colspan="2">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QPushButton" name="btn_edit_ok">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
            <string>Ok</string>
           </property>
@@ -280,6 +379,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="btn_edit_reset">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
            <string>Reset</string>
           </property>
@@ -287,6 +389,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="btn_edit_cancel">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="text">
            <string>Exit Editing</string>
           </property>
@@ -299,6 +404,32 @@
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="0" column="0">
+       <spacer name="verticalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>30</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="0">
+       <spacer name="verticalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
      <zorder>cmb_status</zorder>
@@ -314,10 +445,28 @@
      <zorder>lb_ta</zorder>
      <zorder>cmb_ta</zorder>
      <zorder></zorder>
+     <zorder>verticalSpacer_6</zorder>
+     <zorder>verticalSpacer_7</zorder>
     </widget>
    </item>
    <item>
+    <spacer name="verticalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QPushButton" name="btn_alter_rel">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
       <string>Alter Relationships</string>
      </property>
@@ -325,6 +474,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="btn_publish">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="text">
       <string>Publish</string>
      </property>
@@ -332,6 +484,13 @@
    </item>
    <item>
     <widget class="QPushButton" name="btn_exit">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    font-size: 11pt;
+    font-weight: bold;
+}
+</string>
+     </property>
      <property name="text">
       <string>Exit</string>
      </property>

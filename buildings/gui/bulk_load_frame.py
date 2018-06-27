@@ -15,23 +15,25 @@ from buildings.utilities import database as db
 from buildings.utilities import layers
 from buildings.gui import bulkLoad
 from buildings.gui import comparisons
-from buildings.gui import changes
+from buildings.gui import bulk_load_changes
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
 
 
 class BulkLoadFrame(QFrame, FORM_CLASS):
+    """ Bulk Load outlines frame class
+    """
 
     def __init__(self, layer_registry, parent=None):
-        """Constructor."""
+        """Constructor"""
         super(BulkLoadFrame, self).__init__(parent)
         self.setupUi(self)
-
+        # Frame fields
         self.layer_registry = layer_registry
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
-
+        # Bulk loadings & editing fields
         self.added_building_ids = []
         self.ids = []
         self.geoms = {}
@@ -39,13 +41,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.select_changed = False
         self.geom_changed = False
         self.edit_status = None
+        # processing class instances
         self.change_instance = None
         self.bulk_load = bulkLoad.BulkLoad(self)
         self.comparison = comparisons.Comparisons(self)
-
+        # database setup
         self.db = db
         db.connect()
-
+        # selection colour
         iface.mapCanvas().setSelectionColor(QColor("Yellow"))
 
         # Find current supplied dataset
@@ -58,6 +61,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE processed_date is NULL;'
             p_result = self.db._execute(sql)
             self.current_dataset = p_result.fetchall()[0][0]
+            self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
             self.display_current_bl_not_compared()
 
@@ -72,12 +76,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 sql = 'SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE transfer_date is NULL;'
                 t_result = self.db._execute(sql)
                 self.current_dataset = t_result.fetchall()[0][0]
+                self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
                 self.display_not_published()
 
             # No current dataset is being worked on
             else:
                 self.current_dataset = None
+                self.lb_dataset_id.setText('None')
                 self.display_no_bulk_load()
 
         # set up signals and slots
@@ -96,7 +102,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
 
     def display_no_bulk_load(self):
-        """UI Display When there is no Current dataset"""
+        """UI Display When there is no Current dataset
+        """
         self.bulk_load.populate_bulk_comboboxes()
         self.ml_outlines_layer.setEnabled(1)
         self.rad_external_source.setEnabled(1)
@@ -115,6 +122,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_bl_reset.show()
 
         self.current_dataset = None
+        self.lb_dataset_id.setText('None')
 
         self.grpb_edits.hide()
 
@@ -123,9 +131,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.setDisabled(1)
 
     def display_not_published(self):
-        """UI display when there is a dataset that hasn't been published"""
+        """UI display when there is a dataset that hasn't been published
+        """
         self.bulk_load.populate_bulk_comboboxes()
-        self.bulk_load.bulk_load_current_fields()
+        self.bulk_load.load_current_fields()
 
         self.ml_outlines_layer.setDisabled(1)
         self.rad_external_source.setDisabled(1)
@@ -153,9 +162,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.setEnabled(1)
 
     def display_current_bl_not_compared(self):
-        """UI Display when there is a dataset that hasn't been compared"""
+        """UI Display when there is a dataset that hasn't been compared
+        """
         self.bulk_load.populate_bulk_comboboxes()
-        self.bulk_load.bulk_load_current_fields()
+        self.bulk_load.load_current_fields()
 
         self.ml_outlines_layer.setDisabled(1)
         self.rad_external_source.setDisabled(1)
@@ -183,7 +193,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.setDisabled(1)
 
     def add_outlines(self):
-        """Add bulk load outlines to canvas"""
+        """Add bulk load outlines of current dataset to canvas
+        """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         self.layer_registry.remove_layer(self.bulk_load_layer)
@@ -197,18 +208,21 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.setActiveLayer(self.bulk_load_layer)
 
     def bulk_load_ok_clicked(self, commit_status):
-        """Called when bulk load outlines ok clicked"""
+        """ When bulk load outlines ok clicked
+        """
         self.bulk_load.bulk_load(commit_status)
         # find if adding was sucessful
         sql = 'SELECT count(*) FROM buildings_bulk_load.supplied_datasets WHERE processed_date is NULL AND transfer_date is NULL;'
         result = self.db._execute(sql)
         result = result.fetchall()[0][0]
+        # if bulk loading completed without errors
         if result == 1:
             self.add_outlines()
             self.display_current_bl_not_compared()
 
     def bulk_load_reset_clicked(self):
-        """Called when bulk Load reset clicked"""
+        """ When bulk Load reset clicked
+        """
         self.cmb_capture_method.setCurrentIndex(0)
         self.ml_outlines_layer.setCurrentIndex(0)
         self.cmb_organisation.setCurrentIndex(0)
@@ -216,59 +230,30 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_external_source.setChecked(False)
 
     def compare_outlines_clicked(self, commit_status):
-        """Called when compare outlines button is clicked"""
+        """ When compare outlines clicked
+        """
         self.comparison.compare_outlines(commit_status)
         self.btn_publish.setEnabled(1)
         self.btn_compare_outlines.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
 
     def canvas_add_outline(self):
-        """Called when add outline radio button toggled"""
+        """ When add outline radio button toggled
+        """
         iface.actionCancelEdits().trigger()
+        # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
-        self.change_instance = changes.AddBulkLoad(self)
+        # set change instance to added class
+        self.change_instance = bulk_load_changes.AddBulkLoad(self)
+        # connect signals and slots
         self.btn_edit_ok.clicked.connect(partial(self.change_instance.edit_ok_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
-        iface.activeLayer().removeSelection()
-        self.cmb_capture_method_2.clear()
-        self.cmb_capture_method_2.setDisabled(1)
-        self.cmb_capture_source.clear()
-        self.cmb_capture_source.setDisabled(1)
-        self.cmb_status.setDisabled(1)
-        self.cmb_status.clear()
-        self.cmb_ta.clear()
-        self.cmb_ta.setDisabled(1)
-        self.cmb_town.clear()
-        self.cmb_town.setDisabled(1)
-        self.cmb_suburb.clear()
-        self.cmb_suburb.setDisabled(1)
-        self.btn_edit_ok.setDisabled(1)
-        self.btn_edit_reset.setDisabled(1)
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        # change style of TAs
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
-
         self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
-
-    def canvas_edit_outlines(self):
-        """Called when edit outline radio button toggled"""
-        iface.actionCancelEdits().trigger()
-        # from buildings.gui import changes
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
-                iface.building_toolbar.removeAction(action)
-        self.change_instance = changes.EditBulkLoad(self)
-        self.btn_edit_ok.clicked.connect(partial(self.change_instance.edit_ok_clicked, True))
-        self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
+        # layer and UI setup
         iface.activeLayer().removeSelection()
         self.cmb_capture_method_2.clear()
         self.cmb_capture_method_2.setDisabled(1)
@@ -284,18 +269,57 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_ok.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
+        # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
             'shape', 'buildings_reference', '', ''
         )
-        # change style of TAs
         layers.style_layer(self.territorial_auth,
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
+    def canvas_edit_outlines(self):
+        """ When edit outline radio button toggled
+        """
+        iface.actionCancelEdits().trigger()
+        # reset toolbar
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ["mActionPan"]:
+                iface.building_toolbar.removeAction(action)
+        # set change instance to edit class
+        self.change_instance = bulk_load_changes.EditBulkLoad(self)
+        # set up signals and slots
+        self.btn_edit_ok.clicked.connect(partial(self.change_instance.edit_ok_clicked, True))
+        self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
+        self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
         self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
         self.bulk_load_layer.geometryChanged.connect(self.change_instance.feature_changed)
+        # layer and UI setup
+        iface.activeLayer().removeSelection()
+        self.cmb_capture_method_2.clear()
+        self.cmb_capture_method_2.setDisabled(1)
+        self.cmb_capture_source.clear()
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_status.setDisabled(1)
+        self.cmb_status.clear()
+        self.cmb_ta.clear()
+        self.cmb_ta.setDisabled(1)
+        self.cmb_town.clear()
+        self.cmb_town.setDisabled(1)
+        self.cmb_suburb.clear()
+        self.cmb_suburb.setDisabled(1)
+        self.btn_edit_ok.setDisabled(1)
+        self.btn_edit_reset.setDisabled(1)
+        # add territorial authority layer
+        self.territorial_auth = self.layer_registry.add_postgres_layer(
+            'territorial_authorities', 'territorial_authority',
+            'shape', 'buildings_reference', '', ''
+        )
+        layers.style_layer(self.territorial_auth,
+                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def alter_relationships_clicked(self):
-        """Called when alter relationships button clicked"""
+        """ When alter relationships button clicked
+        """
         if self.change_instance is not None:
             self.change_instance.edit_cancel_clicked()
         self.db.close_connection()
@@ -306,7 +330,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.new_widget(AlterRelationships(self.layer_registry, self.current_dataset))
 
     def publish_clicked(self, commit_status):
-        """Called when publish button clicked"""
+        """ When publish button clicked
+        """
         if self.change_instance is not None:
             self.change_instance.edit_cancel_clicked()
         self.db.open_cursor()
@@ -318,11 +343,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.db.commit_open_cursor()
         self.display_no_bulk_load()
         self.current_dataset = None
+        self.lb_dataset_id.setText('None')
         self.layer_registry.remove_all_layers()
 
     def exit_clicked(self):
         """Called when bulk load frame exit button clicked,
-        Return to start up frame"""
+           Return to start up frame
+        """
         iface.actionCancelEdits().trigger()
         self.layer_registry.remove_all_layers()
         from buildings.gui.start_up import StartUpFrame
