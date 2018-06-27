@@ -13,26 +13,34 @@ class Comparisons:
         """Method called to compare outlines of current unprocessed dataset
         """
         self.bulk_load_frame.db.open_cursor()
-        # extract polygon centroids
-        result = processing.runalg("qgis:polygoncentroids",
-                                   self.bulk_load_frame.bulk_load_layer,
-                                   None)
-        centroids = processing.getObject(result['OUTPUT_LAYER'])
+        feature_count = self.bulk_load_frame.bulk_load_layer.featureCount()
+        if feature_count < 100:
+            result = processing.runalg('qgis:convexhull',
+                                       self.bulk_load_frame.bulk_load_layer,
+                                       None, 0, None)
+            hull = processing.getObject(result['OUTPUT'])
 
-        # use centroids to generate concave hull
-        result = processing.runalg("qgis:concavehull",
-                                   centroids, 0.1, True,
-                                   True, None, progress=None)
+        else:
+            # extract polygon centroids
+            result = processing.runalg("qgis:polygoncentroids",
+                                       self.bulk_load_frame.bulk_load_layer,
+                                       None)
+            centroids = processing.getObject(result['OUTPUT_LAYER'])
 
-        concave_hull = processing.getObject(result['OUTPUT'])
+            # use centroids to generate concave hull
+            result = processing.runalg("qgis:concavehull",
+                                       centroids, 0.1, True,
+                                       True, None, progress=None)
+
+            hull = processing.getObject(result['OUTPUT'])
+
         results = []
-        for feat in concave_hull.getFeatures():
+        for feat in hull.getFeatures():
             geom = feat.geometry()
             wkt = geom.exportToWkt()
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
             result = self.bulk_load_frame.db.execute_no_commit(sql, (wkt, ))
             geom = result.fetchall()[0][0]
-            print geom
             # Find intersecting buildings
             sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, %s) AND bo.building_outline_id NOT IN (SELECT building_outline_id FROM buildings_bulk_load.removed);'
             result = self.bulk_load_frame.db.execute_no_commit(sql, (geom,))
