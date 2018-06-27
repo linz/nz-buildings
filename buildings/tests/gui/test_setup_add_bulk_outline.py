@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Add New Bulk Outline GUI processes
+    Tests: Add New Bulk Outline GUI confirm default settings
 
  ***************************************************************************/
 """

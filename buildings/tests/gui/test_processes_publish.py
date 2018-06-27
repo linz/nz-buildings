@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Compare Outlines Button Click Confirm Processes
+    Tests: Publish Outlines Button Click Confirm Processes
 
  ***************************************************************************/
 """
@@ -60,14 +60,14 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.startup_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
-        self.bulk_load_frame.publish_clicked(False)
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
 
     def test_load_building_outlines(self):
-        """"""
+        """Publish loads outlines to buildings schema"""
+        self.bulk_load_frame.publish_clicked(False)
         sql = 'SELECT count(*) FROM buildings.building_outlines;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -79,7 +79,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_populate_building_lds(self):
-        """"""
+        """Publish populates LDS table"""
+        self.bulk_load_frame.publish_clicked(False)
         sql = 'SELECT count(*) FROM buildings_lds.nz_building_outlines;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -87,7 +88,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_gui_on_publish_clicked(self):
-        """"""
+        """Publish GUI changes"""
+        self.bulk_load_frame.publish_clicked(False)
         self.assertEqual(self.bulk_load_frame.current_dataset, None)
         self.assertFalse(self.bulk_load_frame.btn_publish.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_compare_outlines.isEnabled())
@@ -101,3 +103,17 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
         self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_outlines_on_publish(self):
+        """Check outlines that are deleted during QA the outlines are not added to building_outlines layer"""
+        sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE bulk_load_outline_id = 2025 OR bulk_load_outline_id = 2030 OR bulk_load_outline_id = 2026 OR bulk_load_outline_id = 2027 OR bulk_load_outline_id = 2028 OR bulk_load_outline_id = 2029;'
+        db._execute(sql)
+        self.bulk_load_frame.publish_clicked(False)
+        sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1031;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, None)
+        sql = 'SELECT count(*) FROM buildings.building_outlines;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, 60)

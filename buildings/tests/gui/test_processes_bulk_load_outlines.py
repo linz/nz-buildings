@@ -18,8 +18,7 @@
 
 import unittest
 
-from qgis.core import QgsVectorLayer, QgsMapLayerRegistry
-from qgis.core import QgsFeature, QgsGeometry
+from qgis.core import QgsMapLayerRegistry
 from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 import qgis
@@ -124,7 +123,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.assertEqual(48, result)
+        self.assertEqual(81, result)
         # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added

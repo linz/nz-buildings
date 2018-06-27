@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests:Edit Bulk Loaded Outlines GUI Processes
+    Tests: Edit Bulk Loaded Outlines GUI Processes
 
  ***************************************************************************/
 """
@@ -161,7 +161,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
                          delay=30)
         QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),  
+                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
                          delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton,
                            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),

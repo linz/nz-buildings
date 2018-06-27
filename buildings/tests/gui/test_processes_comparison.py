@@ -53,47 +53,50 @@ class SetUpEditBulkLoad(unittest.TestCase):
         cls.startup_frame = cls.building_plugin.startup_frame
         cls.startup_frame.btn_bulk_load.click()
         cls.bulk_load_frame = cls.dockwidget.current_frame
-        cls.bulk_load_frame.db.open_cursor()
-        cls.bulk_load_frame.publish_clicked(False)
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'testdata/test_bulk_load_shapefile.shp')
-        layer = iface.addVectorLayer(path, '', 'ogr')
-        count = cls.bulk_load_frame.ml_outlines_layer.count()
-        idx = 0
-        while idx < count:
-            if cls.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_bulk_load_shapefile':
-                cls.bulk_load_frame.ml_outlines_layer.setLayer(cls.bulk_load_frame.ml_outlines_layer.layer(idx))
-                break
-            idx = idx + 1
-        # add description
-        cls.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
-        # add outlines
-        cls.bulk_load_frame.bulk_load_ok_clicked(False)
-        cls.bulk_load_frame.bulk_load_layer = layer
-        cls.bulk_load_frame.compare_outlines_clicked(False)
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        cls.bulk_load_frame.db.rollback_open_cursor()
+        qgis.utils.reloadPlugin('buildings')
+        cls.road_plugin.dockwidget.close()
+
+    def setUp(self):
+        """Runs before each test."""
+        self.buildings_plugin = plugins.get('buildings')
+        self.startup_frame = self.building_plugin.startup_frame
+        self.startup_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.db.open_cursor()
+        self.bulk_load_frame.publish_clicked(False)
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                            'testdata/test_bulk_load_shapefile.shp')
+        layer = iface.addVectorLayer(path, '', 'ogr')
+        count = self.bulk_load_frame.ml_outlines_layer.count()
+        idx = 0
+        while idx < count:
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_bulk_load_shapefile':
+                self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
+                break
+            idx = idx + 1
+        # add description
+        self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
+        # add outlines
+        self.bulk_load_frame.bulk_load_ok_clicked(False)
+        self.bulk_load_frame.bulk_load_layer = layer
+
+    def tearDown(self):
+        """Runs after each test."""
+        self.bulk_load_frame.db.rollback_open_cursor()
         # remove temporary layers from canvas
         layers = iface.legendInterface().layers()
         for layer in layers:
             if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-        cls.road_plugin.dockwidget.close()
-        qgis.utils.reloadPlugin('buildings')
-
-    def setUp(self):
-        """Runs before each test."""
-        pass
-
-    def tearDown(self):
-        """Runs after each test."""
-        pass
+        self.road_plugin.dockwidget.close()
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
+        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -101,6 +104,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_compare_removed(self):
         """Check correct number of ids are determined as 'Removed'"""
+        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -108,6 +112,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_compare_matched(self):
         """Check correct number of ids are determined as 'Matched'"""
+        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -115,6 +120,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_compare_related(self):
         """Check correct number of ids are determined as 'Related'"""
+        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
@@ -122,5 +128,36 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_gui_on_compare_clicked(self):
         """Check buttons are enabled/disabled"""
+        self.bulk_load_frame.compare_outlines_clicked(False)
         self.assertFalse(plugins.get('roads').dockwidget.current_frame.btn_compare_outlines.isEnabled())
         self.assertTrue(plugins.get('roads').dockwidget.current_frame.btn_publish.isEnabled())
+
+    def test_delete_during_qa(self):
+        """Checks outlines that are deleted during qa before comparisons is run are not carried through"""
+        sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE supplied_dataset_id = %s;'
+        db._execute(sql, (result,))
+        self.bulk_load_frame.compare_outlines_clicked(False)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 2)
+        # Matched
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 4)
+        # related
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 43)
+        # removed
+        self.bulk_load_frame.compare_outlines_clicked(False)
+        sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 13)
