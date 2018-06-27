@@ -13,22 +13,32 @@ class Comparisons:
         """Method called to compare outlines of current unprocessed dataset
         """
         self.bulk_load_frame.db.open_cursor()
-        # find convex hull of supplied dataset outlines
-        result = processing.runalg('qgis:convexhull',
+        # extract polygon centroids
+        result = processing.runalg("qgis:polygoncentroids",
                                    self.bulk_load_frame.bulk_load_layer,
-                                   None, 0, None)
-        convex_hull = processing.getObject(result['OUTPUT'])
-        for feat in convex_hull.getFeatures():
+                                   None)
+        centroids = processing.getObject(result['OUTPUT_LAYER'])
+
+        # use centroids to generate concave hull
+        result = processing.runalg("qgis:concavehull",
+                                   centroids, 0.1, True,
+                                   True, None, progress=None)
+
+        concave_hull = processing.getObject(result['OUTPUT'])
+        results = []
+        for feat in concave_hull.getFeatures():
             geom = feat.geometry()
             wkt = geom.exportToWkt()
             sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
             result = self.bulk_load_frame.db.execute_no_commit(sql, (wkt, ))
             geom = result.fetchall()[0][0]
-        # Find intersecting buildings
-        sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, (SELECT ST_ConvexHull(ST_Collect(buildings_bulk_load.bulk_load_outlines.shape)) FROM buildings_bulk_load.bulk_load_outlines WHERE buildings_bulk_load.bulk_load_outlines.supplied_dataset_id = %s)) AND bo.building_outline_id NOT IN (SELECT building_outline_id FROM buildings_bulk_load.removed);'
-        result = self.bulk_load_frame.db.execute_no_commit(sql,
-                                                           (self.bulk_load_frame.current_dataset,))
-        results = result.fetchall()
+            print geom
+            # Find intersecting buildings
+            sql = 'SELECT * FROM buildings.building_outlines bo WHERE ST_Intersects(bo.shape, %s) AND bo.building_outline_id NOT IN (SELECT building_outline_id FROM buildings_bulk_load.removed);'
+            result = self.bulk_load_frame.db.execute_no_commit(sql, (geom,))
+            outlines = result.fetchall()
+            for item in outlines:
+                results.append(item)
 
         if len(results) == 0:
             # No intersecting outlines
