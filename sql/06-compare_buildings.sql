@@ -20,6 +20,7 @@ $$
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
         AND supplied.supplied_dataset_id = $1
+        AND supplied.bulk_load_status_id != 3
     ), supplied_count AS (
         -- Find all supplied building outlines that have more than or exactly one >5%
         -- overlap with the current building outlines.
@@ -40,6 +41,7 @@ $$
     LEFT JOIN intersects USING (bulk_load_outline_id)
     WHERE current.building_outline_id IS NULL
     AND supplied.supplied_dataset_id = $1
+    AND supplied.bulk_load_status_id != 3
     OR (     intersects.supplied_intersect < 5
          AND supplied.bulk_load_outline_id NOT IN ( SELECT bulk_load_outline_id FROM supplied_count ))
     ;
@@ -119,6 +121,7 @@ $$
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
         AND supplied.supplied_dataset_id = $1
+        AND supplied.bulk_load_status_id != 3
     ), current_count AS (
         -- Find all current building outlines that have exactly one >5%
         -- overlap with the supplied building outlines.
@@ -185,6 +188,7 @@ $$
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
         AND supplied.supplied_dataset_id = $1
+        AND supplied.bulk_load_status_id != 3
     ), current_count AS (
         -- Find all current building outlines that have more than one >5%
         -- overlap with the supplied building outlines.
@@ -283,6 +287,7 @@ IF ( SELECT processed_date
         LEFT JOIN buildings_bulk_load.matched matched ON matched.bulk_load_outline_id = blo.bulk_load_outline_id
         LEFT JOIN buildings_bulk_load.related related ON related.bulk_load_outline_id = blo.bulk_load_outline_id
         WHERE blo.supplied_dataset_id = p_supplied_dataset_id
+        AND blo.bulk_load_status_id != 3
         AND added.bulk_load_outline_id IS NULL
         AND matched.bulk_load_outline_id IS NULL
         AND related.bulk_load_outline_id IS NULL;
