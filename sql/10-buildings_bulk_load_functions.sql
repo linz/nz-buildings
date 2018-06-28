@@ -317,7 +317,8 @@ $$
         SELECT bulk_load_outline_id
         FROM buildings_bulk_load.added
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1 AND supplied.bulk_load_status_id != 3
+        WHERE supplied.supplied_dataset_id = $1
+            AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.added_select_by_dataset(integer) IS
@@ -333,7 +334,8 @@ $$
         SELECT bulk_load_outline_id
         FROM buildings_bulk_load.matched
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1 AND supplied.bulk_load_status_id != 3
+        WHERE supplied.supplied_dataset_id = $1 
+            AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.matched_select_by_dataset(integer) IS
@@ -364,7 +366,8 @@ $$
         SELECT DISTINCT bulk_load_outline_id
         FROM buildings_bulk_load.related
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1 AND supplied.bulk_load_status_id != 3
+        WHERE supplied.supplied_dataset_id = $1 
+            AND supplied.bulk_load_status_id != 3
         ORDER BY bulk_load_outline_id DESC
     );
 
