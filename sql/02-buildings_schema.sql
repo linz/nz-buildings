@@ -49,8 +49,8 @@ COMMENT ON COLUMN buildings.use.value IS
 
 CREATE TABLE IF NOT EXISTS buildings.buildings (
       building_id serial PRIMARY KEY
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , end_lifespan timestamptz
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , end_lifespan timestamp
 );
 
 SELECT setval('buildings.buildings_building_id_seq', coalesce((SELECT max(building_id) + 1 FROM buildings.buildings), 1000000), false);
@@ -79,8 +79,8 @@ CREATE TABLE IF NOT EXISTS buildings.building_outlines (
     , suburb_locality_id integer NOT NULL
     , town_city_id integer
     , territorial_authority_id integer NOT NULL
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , end_lifespan timestamptz
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , end_lifespan timestamp
     , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
@@ -143,8 +143,8 @@ CREATE TABLE IF NOT EXISTS buildings.building_name (
       building_name_id serial PRIMARY KEY
     , building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
     , building_name character varying(250) NOT NULL DEFAULT ''
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , end_lifespan timestamptz
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , end_lifespan timestamp
 );
 
 SELECT setval('buildings.building_name_building_name_id_seq', coalesce((SELECT max(building_name_id) + 1 FROM buildings.building_name), 1000000), false);
@@ -177,8 +177,8 @@ CREATE TABLE IF NOT EXISTS buildings.building_use (
       building_use_id serial PRIMARY KEY
     , building_id integer NOT NULL REFERENCES buildings.buildings (building_id)
     , use_id integer NOT NULL REFERENCES buildings.use (use_id)
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , end_lifespan timestamptz
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , end_lifespan timestamp
 );
 
 SELECT setval('buildings.building_use_building_use_id_seq', coalesce((SELECT max(building_use_id) + 1 FROM buildings.building_use), 1000000), false);

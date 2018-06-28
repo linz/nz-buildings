@@ -70,8 +70,8 @@ Structure requirements of SQL schema build files:
 
   CREATE TABLE IF NOT EXISTS buildings.buildings (
       building_id serial PRIMARY KEY
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
-    , end_lifespan timestamptz
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , end_lifespan timestamp
 );
 
 4. Every schema, table, and column must have a comment describing it.
