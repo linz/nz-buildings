@@ -221,12 +221,18 @@ $$
     WHERE building_outline_id IN (
         SELECT building_outline_id
         FROM current_count )
+    AND bulk_load_outline_id NOT IN (
+        SELECT bulk_load_outline_id 
+        FROM buildings_bulk_load.matched )
     OR bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
     AND (   (current_intersect > 5 AND supplied_intersect > 5)
           OR (current_intersect > 90)
           OR (supplied_intersect > 90)  )
+    AND bulk_load_outline_id NOT IN (
+        SELECT bulk_load_outline_id 
+        FROM buildings_bulk_load.matched )
     ;
 
 $$
