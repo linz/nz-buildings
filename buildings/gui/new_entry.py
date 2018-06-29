@@ -138,10 +138,10 @@ class NewEntry(QFrame, FORM_CLASS):
         Called when exit button is clicked
         """
         self.db.close_connection()
-        from buildings.gui.start_up import StartUpFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(StartUpFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(self.layer_registry))
 
     def new_organisation(self, organisation, commit_status):
         """

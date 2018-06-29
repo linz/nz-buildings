@@ -63,8 +63,8 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
         self.bulk_load_frame.publish_clicked(False)
@@ -100,7 +100,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
 
-    def test_bulk_load_ok_clicked(self):
+    def test_bulk_load_save_clicked(self):
         """When save is clicked data is added to the correct tables"""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'testdata/test_bulk_load_shapefile.shp')
@@ -115,7 +115,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines
-        self.bulk_load_frame.bulk_load_ok_clicked(False)
+        self.bulk_load_frame.bulk_load_save_clicked(False)
         # check outlines were added to bulk load outlines
         sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines;'
         result = db._execute(sql)

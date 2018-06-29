@@ -87,7 +87,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.display_no_bulk_load()
 
         # set up signals and slots
-        self.btn_bl_ok.clicked.connect(partial(self.bulk_load_ok_clicked, True))
+        self.btn_bl_save.clicked.connect(partial(self.bulk_load_save_clicked, True))
         self.btn_bl_reset.clicked.connect(self.bulk_load_reset_clicked)
 
         self.btn_compare_outlines.clicked.connect(partial(self.compare_outlines_clicked, True))
@@ -118,7 +118,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_capture_method.setCurrentIndex(0)
         self.cmb_organisation.setEnabled(1)
         self.cmb_organisation.setCurrentIndex(0)
-        self.btn_bl_ok.show()
+        self.btn_bl_save.show()
         self.btn_bl_reset.show()
 
         self.current_dataset = None
@@ -144,7 +144,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_data_description.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_organisation.setDisabled(1)
-        self.btn_bl_ok.hide()
+        self.btn_bl_save.hide()
         self.btn_bl_reset.hide()
 
         self.btn_compare_outlines.setDisabled(1)
@@ -156,7 +156,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.cmb_ta.setDisabled(1)
-        self.btn_edit_ok.setDisabled(1)
+        self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
 
         self.btn_publish.setEnabled(1)
@@ -175,7 +175,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_data_description.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_organisation.setDisabled(1)
-        self.btn_bl_ok.hide()
+        self.btn_bl_save.hide()
         self.btn_bl_reset.hide()
 
         self.grpb_edits.show()
@@ -185,7 +185,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_ta.setDisabled(1)
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
-        self.btn_edit_ok.setDisabled(1)
+        self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
 
         self.btn_compare_outlines.setEnabled(1)
@@ -207,8 +207,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.bulk_load_layer.loadNamedStyle(path + 'building_yellow.qml')
         iface.setActiveLayer(self.bulk_load_layer)
 
-    def bulk_load_ok_clicked(self, commit_status):
-        """ When bulk load outlines ok clicked
+    def bulk_load_save_clicked(self, commit_status):
+        """ When bulk load outlines save clicked
         """
         self.bulk_load.bulk_load(commit_status)
         # find if adding was sucessful
@@ -248,7 +248,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to added class
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
-        self.btn_edit_ok.clicked.connect(partial(self.change_instance.edit_ok_clicked, True))
+        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
         self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
@@ -267,7 +267,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.clear()
         self.cmb_suburb.setDisabled(1)
-        self.btn_edit_ok.setDisabled(1)
+        self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -288,7 +288,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to edit class
         self.change_instance = bulk_load_changes.EditBulkLoad(self)
         # set up signals and slots
-        self.btn_edit_ok.clicked.connect(partial(self.change_instance.edit_ok_clicked, True))
+        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
         self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
@@ -307,7 +307,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.clear()
         self.cmb_suburb.setDisabled(1)
-        self.btn_edit_ok.setDisabled(1)
+        self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
         # add territorial authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -352,7 +352,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         iface.actionCancelEdits().trigger()
         self.layer_registry.remove_all_layers()
-        from buildings.gui.start_up import StartUpFrame
+        from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(StartUpFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(self.layer_registry))

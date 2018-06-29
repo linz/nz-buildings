@@ -55,8 +55,8 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_new_capture_source.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_new_capture_source.click()
         self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):

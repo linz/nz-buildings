@@ -59,8 +59,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_edit.click()
 
@@ -94,7 +94,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
                            delay=30)
         QTest.qWait(10)
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -125,7 +125,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
                          delay=30)
         QTest.qWait(10)
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
@@ -174,7 +174,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
 
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
@@ -252,7 +252,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.btn_edit_reset.click()
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), '')
@@ -293,7 +293,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.cmb_ta.setCurrentIndex(self.bulk_load_frame.cmb_ta.findText('Manawatu-Whanganui'))
         self.bulk_load_frame.cmb_town.setCurrentIndex(self.bulk_load_frame.cmb_town.findText('Palmerston North'))
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(self.bulk_load_frame.cmb_suburb.findText('Hokowhitu'))
-        self.bulk_load_frame.change_instance.edit_ok_clicked(False)
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
         result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
         result = result.fetchall()[0]
@@ -353,13 +353,13 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878132.1, 5555303.9)),
                            delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.change_instance.edit_ok_clicked(False)
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for key in self.bulk_load_frame.geoms:
             sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
             self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.bulk_load_frame.geoms = {}
@@ -405,7 +405,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.cmb_ta.setCurrentIndex(self.bulk_load_frame.cmb_ta.findText('Manawatu-Whanganui'))
         self.bulk_load_frame.cmb_town.setCurrentIndex(self.bulk_load_frame.cmb_town.findText('Palmerston North'))
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(self.bulk_load_frame.cmb_suburb.findText('Hokowhitu'))
-        self.bulk_load_frame.change_instance.edit_ok_clicked(False)
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for i in self.bulk_load_frame.ids:
             sql = 'SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
             result = db._execute(sql, (i,))
@@ -476,13 +476,13 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseRelease(widget, Qt.LeftButton,
                            pos=canvas_point(QgsPoint(1878222.6, 5555275.2)),
                            delay=30)
-        self.bulk_load_frame.change_instance.edit_ok_clicked(False)
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for key in self.bulk_load_frame.geoms:
             sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
             self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.bulk_load_frame.geoms = {}

@@ -38,7 +38,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_town.setDisabled(1)
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
-        self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+        self.bulk_load_frame.btn_edit_save.setDisabled(1)
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ["mActionPan"]:
@@ -171,8 +171,8 @@ class AddBulkLoad(BulkLoadChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
-    def edit_ok_clicked(self, commit_status):
-        """ When bulk load frame btn_edit_ok clicked
+    def edit_save_clicked(self, commit_status):
+        """ When bulk load frame btn_edit_save clicked
         """
         self.bulk_load_frame.db.open_cursor()
         # capture method id
@@ -256,11 +256,11 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_town.setDisabled(1)
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(0)
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
-        self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+        self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
 
     def edit_reset_clicked(self):
-        """ When bulk load frame btn_reset_ok clicked
+        """ When bulk load frame btn_reset_save clicked
         """
         iface.actionCancelEdits().trigger()
         # restart editing
@@ -279,7 +279,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_town.setDisabled(1)
         self.bulk_load_frame.cmb_suburb.clear()
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
-        self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+        self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
 
     def creator_feature_added(self, qgsfId):
@@ -305,7 +305,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_town.setEnabled(1)
         self.bulk_load_frame.cmb_suburb.setEnabled(1)
         # enable save
-        self.bulk_load_frame.btn_edit_ok.setEnabled(1)
+        self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
         self.populate_edit_comboboxes()
 
@@ -323,7 +323,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.cmb_town.setDisabled(1)
                 self.bulk_load_frame.cmb_suburb.setDisabled(1)
                 # disable save
-                self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+                self.bulk_load_frame.btn_edit_save.setDisabled(1)
                 self.bulk_load_frame.btn_edit_reset.setDisabled(1)
 
 
@@ -360,10 +360,10 @@ class EditBulkLoad(BulkLoadChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
-    def edit_ok_clicked(self, commit_status):
-        """ When bulk load frame btn_edit_ok clicked
+    def edit_save_clicked(self, commit_status):
+        """ When bulk load frame btn_edit_save clicked
         """
-        self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+        self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
         self.bulk_load_frame.db.open_cursor()
         # if only geometries are changed
@@ -546,7 +546,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.db.commit_open_cursor()
 
     def edit_reset_clicked(self):
-        """ When bulk load frame btn_reset_ok clicked
+        """ When bulk load frame btn_reset_save clicked
         """
         iface.actionCancelEdits().trigger()
         self.bulk_load_frame.geoms = {}
@@ -569,7 +569,7 @@ class EditBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_town.setDisabled(1)
         self.bulk_load_frame.cmb_suburb.clear()
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
-        self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+        self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
 
     def feature_changed(self, qgsfId, geom):
@@ -593,7 +593,7 @@ class EditBulkLoad(BulkLoadChanges):
         else:
             self.bulk_load_frame.geoms[qgsfId] = self.bulk_load_frame.geom
         self.bulk_load_frame.geom_changed = True
-        self.bulk_load_frame.btn_edit_ok.setEnabled(1)
+        self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
 
     def selection_changed(self, added, removed, cleared):
@@ -616,7 +616,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.cmb_suburb.clear()
             self.populate_edit_comboboxes()
             # enable save and reset
-            self.bulk_load_frame.btn_edit_ok.setEnabled(1)
+            self.bulk_load_frame.btn_edit_save.setEnabled(1)
             self.bulk_load_frame.btn_edit_reset.setEnabled(1)
             self.bulk_load_frame.select_changed = True
         # if more than one outline is selected
@@ -661,7 +661,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.cmb_town.setDisabled(1)
                 self.bulk_load_frame.cmb_suburb.clear()
                 self.bulk_load_frame.cmb_suburb.setDisabled(1)
-                self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+                self.bulk_load_frame.btn_edit_save.setDisabled(1)
                 self.bulk_load_frame.btn_edit_reset.setDisabled(1)
                 iface.activeLayer().removeSelection()
                 self.bulk_load_frame.select_changed = False
@@ -682,7 +682,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.cmb_suburb.clear()
                 self.populate_edit_comboboxes()
                 # enable save and reset
-                self.bulk_load_frame.btn_edit_ok.setEnabled(1)
+                self.bulk_load_frame.btn_edit_save.setEnabled(1)
                 self.bulk_load_frame.btn_edit_reset.setEnabled(1)
                 self.bulk_load_frame.select_changed = True
         # If no outlines are selected
@@ -700,6 +700,6 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.cmb_town.setDisabled(1)
             self.bulk_load_frame.cmb_suburb.clear()
             self.bulk_load_frame.cmb_suburb.setDisabled(1)
-            self.bulk_load_frame.btn_edit_ok.setDisabled(1)
+            self.bulk_load_frame.btn_edit_save.setDisabled(1)
             self.bulk_load_frame.btn_edit_reset.setDisabled(1)
             self.bulk_load_frame.select_changed = False

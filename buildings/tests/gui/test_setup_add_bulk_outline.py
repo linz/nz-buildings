@@ -52,8 +52,8 @@ class SetUpBulkAddTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_add.click()
 
@@ -63,7 +63,7 @@ class SetUpBulkAddTest(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """Buttons and comboboxes correctly enabled/disables on startup"""
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())

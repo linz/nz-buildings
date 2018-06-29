@@ -13,14 +13,14 @@ from buildings.utilities import database as db
 import qgis
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'start_up.ui'))
+    os.path.dirname(__file__), 'menu_frame.ui'))
 
 
-class StartUpFrame(QFrame, FORM_CLASS):
+class MenuFrame(QFrame, FORM_CLASS):
 
     def __init__(self, layer_registry, parent=None):
         """Constructor."""
-        super(StartUpFrame, self).__init__(parent)
+        super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
         self.layer_registry = layer_registry
         self.db = db

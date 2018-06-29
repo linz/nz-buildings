@@ -50,9 +50,9 @@ class SetUpEditBulkLoad(unittest.TestCase):
             else:
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
-        cls.startup_frame = cls.building_plugin.startup_frame
-        cls.startup_frame.btn_bulk_load.click()
-        cls.bulk_load_frame = cls.dockwidget.current_frame
+        # cls.menu_frame = cls.building_plugin.menu_frame
+        # cls.menu_frame.btn_bulk_load.click()
+        # cls.bulk_load_frame = cls.dockwidget.current_frame
 
     @classmethod
     def tearDownClass(cls):
@@ -63,8 +63,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.buildings_plugin = plugins.get('buildings')
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
         self.bulk_load_frame.publish_clicked(False)
@@ -81,7 +81,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines
-        self.bulk_load_frame.bulk_load_ok_clicked(False)
+        self.bulk_load_frame.bulk_load_save_clicked(False)
         self.bulk_load_frame.bulk_load_layer = layer
 
     def tearDown(self):

@@ -59,8 +59,8 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_add.click()
 
@@ -102,7 +102,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -147,7 +147,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -173,7 +173,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_town.currentIndex(), -1)
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentIndex(), -1)
         # check comboboxes disabled
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -224,7 +224,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -239,7 +239,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.cmb_ta.setCurrentIndex(0)
         self.bulk_load_frame.cmb_town.setCurrentIndex(0)
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(0)
-        self.bulk_load_frame.change_instance.edit_ok_clicked(False)
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines;'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]

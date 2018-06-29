@@ -55,8 +55,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
-        self.startup_frame = self.building_plugin.startup_frame
-        self.startup_frame.btn_bulk_load.click()
+        self.menu_frame = self.building_plugin.menu_frame
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_edit.click()
 
@@ -66,7 +66,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
-        self.assertFalse(self.bulk_load_frame.btn_edit_ok.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
