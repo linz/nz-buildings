@@ -13,7 +13,7 @@ from functools import partial
 
 from buildings.utilities import database as db
 from buildings.utilities import layers
-from buildings.gui import bulkLoad
+from buildings.gui import bulk_load
 from buildings.gui import comparisons
 from buildings.gui import bulk_load_changes
 
@@ -43,7 +43,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_status = None
         # processing class instances
         self.change_instance = None
-        self.bulk_load = bulkLoad.BulkLoad(self)
+        self.bulk_load = bulk_load.BulkLoad(self)
         self.comparison = comparisons.Comparisons(self)
         # database setup
         self.db = db
