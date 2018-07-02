@@ -8,19 +8,13 @@ CREATE OR REPLACE FUNCTION buildings.suburb_locality_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   suburb_locality_id
-    FROM     buildings_reference.suburb_locality
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT suburb_locality_id
+    FROM buildings_reference.suburb_locality
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY
+          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
+        , ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -33,14 +27,17 @@ CREATE OR REPLACE FUNCTION buildings.bulk_load_outlines_update_suburb(integer)
 RETURNS integer AS
 $$
 
-    WITH update_suburb AS(
+    WITH update_suburb AS (
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
         SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
         FROM (
-            SELECT buildings.suburb_locality_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
+            SELECT
+                  buildings.suburb_locality_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) suburb_locality_intersect
-        WHERE outlines.bulk_load_outline_id = suburb_locality_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        WHERE outlines.bulk_load_outline_id = suburb_locality_intersect.bulk_load_outline_id
+        AND outlines.supplied_dataset_id = $1
         RETURNING *
     )
     SELECT count(*)::integer FROM update_suburb;
@@ -58,19 +55,13 @@ CREATE OR REPLACE FUNCTION buildings.town_city_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   town_city_id
-    FROM     buildings_reference.town_city
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT town_city_id
+    FROM buildings_reference.town_city
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY
+          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
+        , ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -83,14 +74,17 @@ CREATE OR REPLACE FUNCTION buildings.bulk_load_outlines_update_town_city(integer
 RETURNS integer AS
 $$
 
-    WITH update_town_city AS(
+    WITH update_town_city AS (
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
         SET town_city_id = town_city_intersect.town_city_intersect_polygon
         FROM (
-            SELECT buildings.town_city_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
+            SELECT
+                  buildings.town_city_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) town_city_intersect
-        WHERE outlines.bulk_load_outline_id = town_city_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        WHERE outlines.bulk_load_outline_id = town_city_intersect.bulk_load_outline_id
+        AND outlines.supplied_dataset_id = $1
         RETURNING *
     )
     SELECT count(*)::integer FROM update_town_city;
@@ -108,19 +102,13 @@ CREATE OR REPLACE FUNCTION buildings.territorial_authority_intersect_polygon(
 RETURNS integer AS
 $$
 
-    SELECT   territorial_authority_id
-    FROM     buildings_reference.territorial_authority
-    WHERE    ST_Intersects(
-                   p_polygon_geometry
-                 , shape
-             )
-    ORDER BY ST_Area(
-                 ST_Intersection(
-                       p_polygon_geometry
-                     , shape
-                 )
-             ) / ST_Area(shape) DESC
-    LIMIT    1;
+    SELECT territorial_authority_id
+    FROM buildings_reference.territorial_authority
+    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    ORDER BY
+          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
+        , ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -133,14 +121,17 @@ CREATE OR REPLACE FUNCTION buildings.bulk_load_outlines_update_territorial_autho
 RETURNS integer AS
 $$
 
-    WITH update_territorial_auth AS(
+    WITH update_territorial_auth AS (
         UPDATE buildings_bulk_load.bulk_load_outlines outlines
         SET territorial_authority_id = territorial_authority_intersect.territorial_authority_intersect_polygon
         FROM (
-            SELECT buildings.territorial_authority_intersect_polygon(outlines.shape), outlines.bulk_load_outline_id
+            SELECT
+                  buildings.territorial_authority_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) territorial_authority_intersect
-        WHERE outlines.bulk_load_outline_id = territorial_authority_intersect.bulk_load_outline_id AND outlines.supplied_dataset_id = $1
+        WHERE outlines.bulk_load_outline_id = territorial_authority_intersect.bulk_load_outline_id
+        AND outlines.supplied_dataset_id = $1
         RETURNING $1
     )
     SELECT count(*)::integer FROM update_territorial_auth;
