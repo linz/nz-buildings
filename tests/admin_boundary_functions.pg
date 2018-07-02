@@ -19,7 +19,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 
-SELECT plan(9);
+SELECT plan(12);
 
 -- Tests
 
@@ -28,8 +28,15 @@ SELECT has_function('buildings', 'suburb_locality_intersect_polygon', 'Should ha
 SELECT results_eq(
 	$$SELECT buildings.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (2)$$,
-    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value'
+    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building intersects suburb polygon'
 );
+
+SELECT results_eq(
+    $$SELECT buildings.suburb_locality_intersect_polygon('01030000209108000001000000050000003460F2F8D9A93C417F87C576D7305541D6ECEDF2DAA93C41C1E8E623D0305541569A5626FCA93C4112AFE4A0D030554170F46338F9A93C412EC1C7F9D63055413460F2F8D9A93C417F87C576D7305541');$$,
+    $$VALUES (4)$$,
+    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building is outside suburb polygon'
+);
+
 SELECT results_eq(
 	$$SELECT suburb_locality_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
     $$VALUES (1)$$,
@@ -41,8 +48,15 @@ SELECT has_function('buildings', 'town_city_intersect_polygon', 'Should have fun
 SELECT results_eq(
 	$$SELECT buildings.town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (200)$$,
-    'town_city_intersect_polygon not returning correct town_city_id value'
+    'town_city_intersect_polygon not returning correct town_city_id value when building intersects town_city polygon'
 );
+
+SELECT results_eq(
+    $$SELECT buildings.town_city_intersect_polygon('01030000209108000001000000050000003460F2F8D9A93C417F87C576D7305541D6ECEDF2DAA93C41C1E8E623D0305541569A5626FCA93C4112AFE4A0D030554170F46338F9A93C412EC1C7F9D63055413460F2F8D9A93C417F87C576D7305541');$$,
+    $$VALUES (400)$$,
+    'town_city_intersect_polygon not returning correct town_city_id value when building is outside town_city polygon'
+);
+
 SELECT results_eq(
 	$$SELECT town_city_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
     $$VALUES (100)$$,
@@ -54,8 +68,15 @@ SELECT has_function('buildings', 'territorial_authority_intersect_polygon', 'Sho
 SELECT results_eq(
 	$$SELECT buildings.territorial_authority_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (1)$$,
-    'nz_territorial_authority_intersect_polygon not returning correct territorial_authority value'
+    'nz_territorial_authority_intersect_polygon not returning correct territorial_authority value when building intersects territorial_authority polygon'
 );
+
+SELECT results_eq(
+    $$SELECT buildings.territorial_authority_intersect_polygon('01030000209108000001000000050000003460F2F8D9A93C417F87C576D7305541D6ECEDF2DAA93C41C1E8E623D0305541569A5626FCA93C4112AFE4A0D030554170F46338F9A93C412EC1C7F9D63055413460F2F8D9A93C417F87C576D7305541');$$,
+    $$VALUES (1)$$,
+    'territorial_authority_intersect_polygon not returning correct territorial_authority value when building is outside territorial_authority polygon'
+);
+
 SELECT results_eq(
 	$$SELECT territorial_authority_id from buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = 3;$$,
     $$VALUES (1)$$,
@@ -64,5 +85,5 @@ SELECT results_eq(
 
 -- Finish pgTAP testing
 SELECT * FROM finish();
- 
+
 ROLLBACK;
