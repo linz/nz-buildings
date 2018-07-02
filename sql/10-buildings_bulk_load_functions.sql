@@ -131,7 +131,7 @@ LANGUAGE sql VOLATILE;
 --SUPPLIED DATASET select transfer_date
 -------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.supplied_datasets_select_transfer_date(integer)
-    RETURNS timestamp with time zone AS
+    RETURNS timestamp AS
 $$
     SELECT transfer_date
     FROM buildings_bulk_load.supplied_datasets
