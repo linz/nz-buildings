@@ -11,9 +11,9 @@ This document provides detailed metadata (data dictionary) for the NZ Building O
 Background
 ----------------------------
 
-Over the next decade, the LINZ Topographic Office is working towards its vision of recognising the way location information can help unlock new patterns and knowledge, particularly when it is combined with other types of information. One of our strategic goals is to improve national scale datasets and maximize their opportunities for reuse by a variety of national and regional stakeholders.
 
 Building outlines have been identified as a dataset of national importance, and influence a multitude of decisions made across New Zealand at both the national and regional levels. It is therefore critical to have a consistent and dynamic dataset available. In 2016 LINZ conducted a pilot project to capture building outlines over three regions of New Zealand (Canterbury, Hawke’s Bay and Waikato). A survey was sent out to assess users’ opinion and determine the usefulness and suitability of the data for their purposes. The majority of the respondents (90%) to the survey agreed that the data is useful for their organisation. Many commented that the data is better than existing data, it is fit for purpose, and has become invaluable when enriched with other datasets. LINZ will continue to procure building outlines aligning with aerial imagery capture. This building outline dataset will provide a foundation for various stakeholders to map risk modelling, environmental assessment, urban development, resilience planning in addition to the visualization and physical location of buildings. 
+Over the next decade, the LINZ Topographic Office is working towards its vision of recognising the way location information can help unlock new patterns and knowledge, particularly when it is combined with other types of information. One of our `strategic goals <https://www.linz.govt.nz/about-linz/publications/strategy/topographic-strategy-2015>`_ is to improve national scale datasets and maximize their opportunities for reuse by a variety of national and regional stakeholders.
 
 
 Description
@@ -56,7 +56,7 @@ The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readt
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the LDS. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
+The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/53413-nz-building-outlines-pilot/>`_. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
 | .. figure:: _static/current_building_outlines_coverage.jpg  | .. figure:: _static/upcoming_building_outlines_coverage.jpg | .. figure:: _static/future_building_outlines_coverage.jpg |
@@ -78,18 +78,20 @@ The Building Outlines contain spatial detail reflective of the visible character
 Valid Geometry
 ---------------------------
 
-A building outline polygon is considered to have valid geometry if;
-* It does not overlap with any other current building outline polygons;
-* It does not contain any spikes (a series of vertices which create an extremely acute angle);
-* It does not contain lines that are intersected with each other;
-* It can contain polygons with interior rings (holes);
-* It does not contain polygons with multiple exterior rings;
+A building outline polygon is considered to have valid geometry if:
+* It does not overlap with any other current building outline polygon
+* It does not contain any spikes (a series of vertices which create an extremely acute angle)
+* It does not contain lines that are intersected with each other
+* It can contain polygons with interior rings (holes)
+* It does not contain polygons with multiple exterior rings
 
 
-File format
+Formats
 ---------------------------
 
-Aspatial data is provided in UTF-8 format. The source geometry of all spatial tables is NZ Transverse Mercator 2000 (EPSG 2193).
+Textual data uses UTF-8 character encoding. 
+
+The source geometry of all spatial data uses NZGD2000 / New Zealand Transverse Mercator 2000 (EPSG 2193) as the spatial reference system.
 
 
 
