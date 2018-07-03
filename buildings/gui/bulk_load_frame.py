@@ -43,8 +43,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_status = None
         # processing class instances
         self.change_instance = None
-        self.bulk_load = bulk_load.BulkLoad(self)
-        self.comparison = comparisons.Comparisons(self)
+        # self.bulk_load = bulk_load.BulkLoad(self)
         # database setup
         self.db = db
         db.connect()
@@ -87,10 +86,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.display_no_bulk_load()
 
         # set up signals and slots
-        self.btn_bl_save.clicked.connect(partial(self.bulk_load_save_clicked, True))
+        self.rad_external_source.toggled.connect(
+            partial(bulk_load.enable_external_bulk, self))
+        self.ml_outlines_layer.currentIndexChanged.connect(
+            partial(bulk_load.populate_external_fcb, self))
+        self.btn_bl_save.clicked.connect(
+            partial(self.bulk_load_save_clicked, True))
         self.btn_bl_reset.clicked.connect(self.bulk_load_reset_clicked)
 
-        self.btn_compare_outlines.clicked.connect(partial(self.compare_outlines_clicked, True))
+        self.btn_compare_outlines.clicked.connect(
+            partial(self.compare_outlines_clicked, True))
 
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
@@ -104,7 +109,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def display_no_bulk_load(self):
         """UI Display When there is no Current dataset
         """
-        self.bulk_load.populate_bulk_comboboxes()
+        bulk_load.populate_bulk_comboboxes(self)
         self.ml_outlines_layer.setEnabled(1)
         self.rad_external_source.setEnabled(1)
         self.rad_external_source.setChecked(False)
@@ -133,8 +138,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def display_not_published(self):
         """UI display when there is a dataset that hasn't been published
         """
-        self.bulk_load.populate_bulk_comboboxes()
-        self.bulk_load.load_current_fields()
+        bulk_load.populate_bulk_comboboxes(self)
+        bulk_load.load_current_fields(self)
 
         self.ml_outlines_layer.setDisabled(1)
         self.rad_external_source.setDisabled(1)
@@ -164,8 +169,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def display_current_bl_not_compared(self):
         """UI Display when there is a dataset that hasn't been compared
         """
-        self.bulk_load.populate_bulk_comboboxes()
-        self.bulk_load.load_current_fields()
+        bulk_load.populate_bulk_comboboxes(self)
+        bulk_load.load_current_fields(self)
 
         self.ml_outlines_layer.setDisabled(1)
         self.rad_external_source.setDisabled(1)
@@ -210,7 +215,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def bulk_load_save_clicked(self, commit_status):
         """ When bulk load outlines save clicked
         """
-        self.bulk_load.bulk_load(commit_status)
+        bulk_load.bulk_load(self, commit_status)
         # find if adding was sucessful
         sql = 'SELECT count(*) FROM buildings_bulk_load.supplied_datasets WHERE processed_date is NULL AND transfer_date is NULL;'
         result = self.db._execute(sql)
@@ -232,7 +237,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def compare_outlines_clicked(self, commit_status):
         """ When compare outlines clicked
         """
-        self.comparison.compare_outlines(commit_status)
+        comparisons.compare_outlines(self, commit_status)
         self.btn_publish.setEnabled(1)
         self.btn_compare_outlines.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
@@ -248,11 +253,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to added class
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
-        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
-        self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
-        self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
-        self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        self.btn_edit_save.clicked.connect(
+            partial(self.change_instance.edit_save_clicked, True))
+        self.btn_edit_reset.clicked.connect(
+            self.change_instance.edit_reset_clicked)
+        self.btn_edit_cancel.clicked.connect(
+            self.change_instance.edit_cancel_clicked)
+        self.bulk_load_layer.featureAdded.connect(
+            self.change_instance.creator_feature_added)
+        self.bulk_load_layer.featureDeleted.connect(
+            self.change_instance.creator_feature_deleted)
         # layer and UI setup
         iface.activeLayer().removeSelection()
         self.cmb_capture_method_2.clear()
@@ -288,11 +298,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to edit class
         self.change_instance = bulk_load_changes.EditBulkLoad(self)
         # set up signals and slots
-        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
-        self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.change_instance.edit_cancel_clicked)
-        self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
-        self.bulk_load_layer.geometryChanged.connect(self.change_instance.feature_changed)
+        self.btn_edit_save.clicked.connect(
+            partial(self.change_instance.edit_save_clicked, True))
+        self.btn_edit_reset.clicked.connect(
+            self.change_instance.edit_reset_clicked)
+        self.btn_edit_cancel.clicked.connect(
+            self.change_instance.edit_cancel_clicked)
+        self.bulk_load_layer.selectionChanged.connect(
+            self.change_instance.selection_changed)
+        self.bulk_load_layer.geometryChanged.connect(
+            self.change_instance.feature_changed)
         # layer and UI setup
         iface.activeLayer().removeSelection()
         self.cmb_capture_method_2.clear()
@@ -327,7 +342,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         from buildings.gui.alter_building_relationships import AlterRelationships
         dw = qgis.utils.plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(AlterRelationships(self.layer_registry, self.current_dataset))
+        dw.new_widget(AlterRelationships(
+            self.layer_registry, self.current_dataset))
 
     def publish_clicked(self, commit_status):
         """ When publish button clicked
