@@ -9,6 +9,7 @@ from functools import partial
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
+from buildings.sql import select_statements as select
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_entry.ui'))
@@ -33,8 +34,8 @@ class NewEntry(QFrame, FORM_CLASS):
         self.lifecycle_stage_id = None
         self.capture_method_id = None
         self.capture_source_group_id = None
-        self.btn_ok.clicked.connect(partial(self.ok_clicked,
-                                            commit_status=True))
+        self.btn_ok.clicked.connect(
+            partial(self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.le_description.setDisabled(1)
         self.cmb_new_type_selection.currentIndexChanged.connect(self.set_new_type)
@@ -51,20 +52,18 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         if self.le_new_entry.text() == '':
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report('\n -------------------- '
-                                          'EMPTY VALUE FIELD ------'
-                                          '-------------- \n\n Null '
-                                          'values not allowed'
-                                          )
+            self.error_dialog.fill_report(
+                '\n -------------------- EMPTY VALUE FIELD ------'
+                '-------------- \n\n Null values not allowed'
+            )
             self.error_dialog.show()
             return
         if len(self.le_new_entry.text()) >= 40:
             self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report('\n -------------------- '
-                                          'VALUE TOO LONG ---------'
-                                          '----------- \n\n Enter '
-                                          'less than 40 characters'
-                                          )
+            self.error_dialog.fill_report(
+                '\n -------------------- VALUE TOO LONG ---------'
+                '----------- \n\n Enter less than 40 characters'
+            )
             self.error_dialog.show()
             return
         return self.le_new_entry.text()
@@ -80,20 +79,18 @@ class NewEntry(QFrame, FORM_CLASS):
         else:
             if self.le_description.text() == '':
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n -------------------- '
-                                              'EMPTY DESCRIPTION FIELD '
-                                              '-------------------- \n\n'
-                                              ' Null values not allowed'
-                                              )
+                self.error_dialog.fill_report(
+                    '\n -------------------- EMPTY DESCRIPTION FIELD '
+                    '-------------------- \n\n Null values not allowed'
+                )
                 self.error_dialog.show()
                 return
             if len(self.le_description.text()) >= 40:
                 self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report('\n -------------------- '
-                                              'DESCRIPTION TOO LONG ---'
-                                              '----------------- \n\n '
-                                              'Enter less than 40 characters'
-                                              )
+                self.error_dialog.fill_report(
+                    '\n -------------------- DESCRIPTION TOO LONG ---'
+                    '----------------- \n\n Enter less than 40 characters'
+                )
                 self.error_dialog.show()
                 return
             return self.le_description.text()
@@ -130,8 +127,8 @@ class NewEntry(QFrame, FORM_CLASS):
             elif self.new_type == 'Capture Source Group':
                 self.description = self.get_description()
                 if self.description is not None:
-                    self.new_capture_source_group(self.value, self.description,
-                                                  commit_status)
+                    self.new_capture_source_group(
+                        self.value, self.description, commit_status)
 
     def exit_clicked(self):
         """
@@ -149,17 +146,16 @@ class NewEntry(QFrame, FORM_CLASS):
             value output = organisation auto generate id
         """
         # check if organisation in buildings_bulk_load.organisation table
-        sql = 'SELECT * FROM buildings_bulk_load.organisation WHERE buildings_bulk_load.organisation.value = %s;'
-        result = self.db._execute(sql, data=(organisation,))
+        result = self.db._execute(
+            select.organisation_by_value.format(organisation))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(' ')
-            self.error_dialog.fill_report('\n -------------------- '
-                                          'ORGANISATION EXISTS ----'
-                                          '---------------- \n\n Value'
-                                          ' entered exists in table')
+            self.error_dialog.fill_report(
+                '\n -------------------- ORGANISATION EXISTS ----'
+                '---------------- \n\n Value entered exists in table')
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
@@ -179,17 +175,17 @@ class NewEntry(QFrame, FORM_CLASS):
         value = lifecycle stage auto generate id
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
-        sql = 'SELECT * FROM buildings.lifecycle_stage WHERE buildings.lifecycle_stage.value = %s;'
-        result = self.db._execute(sql, data=(lifecycle_stage,))
+        result = self.db._execute(
+            select.Lifecycle_stage_by_value.format(lifecycle_stage))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(' ')
-            self.error_dialog.fill_report('\n -------------------- '
-                                          'LIFECYCLE STAGE EXISTS -'
-                                          '------------------- \n\n '
-                                          'Value entered exists in table')
+            self.error_dialog.fill_report(
+                '\n -------------------- LIFECYCLE STAGE EXISTS -'
+                '------------------- \n\n Value entered exists in table'
+            )
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
@@ -210,18 +206,17 @@ class NewEntry(QFrame, FORM_CLASS):
         """
 
         # check if capture method in buildings_common.capture_method table
-        sql = 'SELECT * FROM buildings_common.capture_method WHERE buildings_common.capture_method.value = %s;'
-        result = self.db._execute(sql, data=(capture_method,))
+        result = self.db._execute(
+            select.capture_method_by_value.format(capture_method))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(' ')
-            self.error_dialog.fill_report('\n -------------------- '
-                                          'CAPTURE METHOD EXISTS --'
-                                          '------------------ \n\n '
-                                          'Value entered exists in '
-                                          'table')
+            self.error_dialog.fill_report(
+                '\n -------------------- CAPTURE METHOD EXISTS --'
+                '------------------ \n\n Value entered exists in table'
+            )
             self.error_dialog.show()
             return
         # if it isn't in the table add to table
@@ -243,26 +238,24 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # Check if capture source group in buildings
         # _common.capture_source_group table
-        sql = 'SELECT * FROM buildings_common.capture_source_group WHERE buildings_common.capture_source_group.value = %s;'
-        result = self.db._execute(sql, data=(capture_source_group,))
+        result = self.db._execute(select.capture_srcgrp_by_value.format(capture_source_group,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(' ')
-            self.error_dialog.fill_report('\n ---------------- '
-                                          'CAPTURE SOURCE GROUP '
-                                          '---------------- \n\n '
-                                          'Value entered exists in '
-                                          'table')
+            self.error_dialog.fill_report(
+                '\n ---------------- CAPTURE SOURCE GROUP '
+                '---------------- \n\n Value entered exists in table'
+            )
             self.error_dialog.show()
             return
         elif len(ls) == 0:
             # enter but don't commit
             self.db.open_cursor()
             sql = 'SELECT buildings_common.capture_source_group_insert(%s, %s);'
-            result = self.db.execute_no_commit(sql, (capture_source_group,
-                                                     description))
+            result = self.db.execute_no_commit(
+                sql, (capture_source_group, description))
             self.capture_method_id = result.fetchall()[0][0]
             if commit_status:
                 self.db.commit_open_cursor()

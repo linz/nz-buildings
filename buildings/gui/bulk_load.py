@@ -1,29 +1,28 @@
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.sql import select_statements as select
 
 
 def populate_bulk_comboboxes(self):
-    """ Populate bulk load comboboxes
+    """
+        Populate bulk load comboboxes
     """
     # organisation combobox
     self.cmb_organisation.clear()
-    sql = 'SELECT value FROM buildings_bulk_load.organisation;'
-    result = self.db._execute(sql)
+    result = self.db._execute(select.organisation_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_organisation.addItem(item[0])
 
     # capture method combobox
     self.cmb_capture_method.clear()
-    sql = 'SELECT value FROM buildings_common.capture_method;'
-    result = self.db._execute(sql)
+    result = self.db._execute(select.capture_method_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_capture_method.addItem(item[0])
 
     # capture source group
     self.cmb_capture_src_grp.clear()
-    sql = 'SELECT value, description FROM buildings_common.capture_source_group;'
-    result = self.db._execute(sql)
+    result = self.db._execute(select.capture_srcgrp_value_description)
     ls = result.fetchall()
     for item in ls:
         text = str(item[0]) + '- ' + str(item[1])
@@ -31,31 +30,34 @@ def populate_bulk_comboboxes(self):
 
 
 def load_current_fields(self):
-    """ Function to load fields related to the current supplied dataset
+    """
+        Function to load fields related to the current supplied dataset
     """
     # capture method
-    sql = 'SELECT value FROM buildings_common.capture_method cm, buildings_bulk_load.bulk_load_outlines blo WHERE blo.capture_method_id = cm.capture_method_id AND blo.supplied_dataset_id = %s;'
-    result = self.db._execute(sql, (self.current_dataset,))
+    result = self.db._execute(
+        select.capture_method_value_by_datasetID.format(
+            self.current_dataset)
+    )
     result = result.fetchall()[0][0]
     self.cmb_capture_method.setCurrentIndex(
         self.cmb_capture_method.findText(result))
 
     # organisation
-    sql = 'SELECT value FROM buildings_bulk_load.organisation o, buildings_bulk_load.bulk_load_outlines blo, buildings_bulk_load.supplied_datasets sd WHERE blo.supplied_dataset_id = %s AND blo.supplied_dataset_id = sd.supplied_dataset_id AND sd.supplier_id = o.organisation_id;'
-    result = self.db._execute(sql, (self.current_dataset,))
+    result = self.db._execute(
+        select.organisation_value_by_datasetID.format(self.current_dataset))
     result = result.fetchall()[0][0]
     self.cmb_organisation.setCurrentIndex(
         self.cmb_organisation.findText(result))
 
     # data description
-    sql = 'SELECT description FROM buildings_bulk_load.supplied_datasets sd WHERE sd.supplied_dataset_id = %s;'
-    result = self.db._execute(sql, (self.current_dataset,))
+    result = self.db._execute(
+        select.dataset_description_by_datasetID.format(self.current_dataset))
     result = result.fetchall()[0][0]
     self.le_data_description.setText(result)
 
     # External Id/fields
-    sql = 'SELECT cs.external_source_id FROM buildings_common.capture_source cs, buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = %s AND blo.capture_source_id = cs.capture_source_id;'
-    ex_result = self.db._execute(sql, (self.current_dataset,))
+    ex_result = self.db._execute(
+        select.capture_src_extsrcID_by_datasetID.format(self.current_dataset))
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_source.setChecked(True)
@@ -63,8 +65,9 @@ def load_current_fields(self):
             self.cmb_external_id.findText(ex_result))
 
     # capture source group
-    sql = 'SELECT cs.capture_source_group_id FROM buildings_common.capture_source_group csg, buildings_common.capture_source cs, buildings_bulk_load.bulk_load_outlines blo WHERE blo.supplied_dataset_id = %s AND blo.capture_source_id = cs.capture_source_id AND cs.capture_source_group_id = csg.capture_source_group_id;'
-    result = self.db._execute(sql, (self.current_dataset,))
+    result = self.db._execute(
+        select.capture_srcgrp_capture_srcgrpID_by_datasetID.format(
+            self.current_dataset))
     result = result.fetchall()[0][0]
     self.cmb_capture_src_grp.setCurrentIndex(result - 1)
 
@@ -74,7 +77,8 @@ def load_current_fields(self):
 
 
 def enable_external_bulk(self):
-    """ Called when external source radio button is toggled
+    """
+        Called when external source radio button is toggled
     """
     if self.rad_external_source.isChecked():
         self.fcb_external_id.setEnabled(1)
@@ -90,10 +94,10 @@ def enable_external_bulk(self):
 
 
 def populate_external_id_cmb(self):
-    """ populates external source combobox when radiobutton is selected
     """
-    sql = 'SELECT external_source_id FROM buildings_common.capture_source;'
-    result = self.db._execute(sql)
+        populates external source combobox when radiobutton is selected
+    """
+    result = self.db._execute(select.capture_source_external_sourceID)
     ls = result.fetchall()
     for item in ls:
         if item[0] is not None:
@@ -108,14 +112,16 @@ def populate_external_id_cmb(self):
 
 
 def populate_external_fcb(self):
-    """ Populate external field combobox
+    """
+        Populate external field combobox
     """
     self.fcb_external_id.setLayer(
         self.ml_outlines_layer.currentLayer())
 
 
 def bulk_load(self, commit_status):
-    """ Begins the process of bulk load data into buildings_bulk_load.
+    """
+        Begins the process of bulk load data into buildings_bulk_load.
         bulk_load_outlines Called when bulk load outlines ok button
         is clicked
     """
@@ -143,21 +149,20 @@ def bulk_load(self, commit_status):
 
     # organisation
     text = self.cmb_organisation.currentText()
-    sql = 'SELECT organisation_id FROM buildings_bulk_load.organisation o WHERE o.value = %s;'
-    result = self.db._execute(sql, (text,))
+    sql = select.organisation_ID_by_value.format(text)
+    result = self.db._execute(sql)
     organisation = result.fetchall()[0][0]
 
     # capture method
     text = self.cmb_capture_method.currentText()
-    sql = 'SELECT capture_method_id FROM buildings_common.capture_method cm WHERE cm.value = %s;'
-    result = self.db._execute(sql, (text,))
+    result = self.db._execute(select.capture_method_ID_by_value.format(text))
     capture_method = result.fetchall()[0][0]
 
     # capture source group
     text = self.cmb_capture_src_grp.currentText()
     text_ls = text.split('-')
-    sql = 'SELECT capture_source_group_id FROM buildings_common.capture_source_group csg WHERE csg.value = %s;'
-    result = self.db._execute(sql, (text_ls[0],))
+    result = self.db._execute(
+        select.capture_source_group_srcrpID_by_value.format(text_ls[0]))
     capture_source_group = result.fetchall()[0][0]
 
     # external source
@@ -208,7 +213,8 @@ def bulk_load(self, commit_status):
 
 
 def insert_supplied_dataset(self, organisation, description):
-    """ Generates new supplied outline dataset for incoming data
+    """
+        Generates new supplied outline dataset for incoming data
     """
     if self.db._open_cursor is None:
         self.db.open_cursor()
@@ -220,14 +226,16 @@ def insert_supplied_dataset(self, organisation, description):
 
 def insert_supplied_outlines(self, dataset_id, layer, capture_method,
                              capture_source_group, external_source_id):
-    """ Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
+    """
+        Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """
     # Capture source id
     capture_source = None
     if len(self.cmb_external_id.currentText()) is not 0:
-        sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs, buildings_common.capture_source_group csg WHERE cs.capture_source_group_id = %s AND cs.external_source_id = %s;'
         result = self.db.execute_no_commit(
-            sql, (capture_source_group, external_source_id))
+            select.capture_source_ID_by_capsrcgrpID_and_externalSrcID.format(
+                capture_source_group, external_source_id
+            ))
         value = result.fetchall()
         # if no related capture source exists
         if len(value) == 0:
@@ -243,9 +251,9 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
         else:
             capture_source = value[0][0]
     else:
-        sql = 'SELECT capture_source_id FROM buildings_common.capture_source cs WHERE cs.capture_source_group_id = %s AND cs.external_source_id is Null;'
         result = self.db.execute_no_commit(
-            sql, (capture_source_group,))
+            select.capture_source_ID_by_capsrcgrdID_is_null.format(
+                capture_source_group))
         value = result.fetchall()
         # if no related capture source exists
         if len(value) == 0:
