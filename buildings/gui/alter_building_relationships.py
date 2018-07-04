@@ -63,7 +63,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.add_building_lyrs()
         self.clear_layer_filter()
 
-        iface.mapCanvas().setExtent(self.lyr_bulk_load.extent())
         iface.setActiveLayer(self.lyr_bulk_load)
         iface.actionSelectRectangle().trigger()
 
