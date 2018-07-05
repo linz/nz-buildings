@@ -1,10 +1,11 @@
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 
-from qgis.core import QgsFeatureRequest
+from qgis.core import QgsFeatureRequest, QgsMapLayerRegistry
 from qgis.utils import iface
 
 from PyQt4.QtGui import QToolButton
+import os
 
 
 class BulkLoadChanges:
@@ -296,6 +297,14 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.db.execute_no_commit(
             sql, (self.bulk_load_frame.outline_id,))
 
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
+        self.bulk_load_frame.layer_registry.remove_layer(
+            QgsMapLayerRegistry.instance().mapLayersByName('added_outlines')[0])
+        self.bulk_load_frame.bulk_load_added = self.bulk_load_frame.layer_registry.add_postgres_layer(
+            'added_outlines', 'bulk_load_outlines',
+            'shape', 'buildings_bulk_load', '',
+            'supplied_dataset_id = {0} AND bulk_load_status_id = 2'.format(self.bulk_load_frame.current_dataset))
+        self.bulk_load_frame.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
 
@@ -491,6 +500,14 @@ class EditBulkLoad(BulkLoadChanges):
                           bulk_load_status_id, capture_method_id,
                           capture_source_id, suburb, town, t_a)
                 )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
+        self.bulk_load_frame.layer_registry.remove_layer(
+            QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
+        self.bulk_load_frame.bulk_load_removed = self.bulk_load_frame.layer_registry.add_postgres_layer(
+            'removed_outlines', 'bulk_load_outlines',
+            'shape', 'buildings_bulk_load', '',
+            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.bulk_load_frame.current_dataset))
+        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(path + 'building_orange.qml')
         if commit_status:
             self.bulk_load_frame.geoms = {}
             self.bulk_load_frame.ids = []
