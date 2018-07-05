@@ -248,6 +248,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
+        try:
+            self.btn_edit_save.clicked.disconnect()
+        except Exception:
+            pass
+        try:
+            self.btn_edit_reset.clicked.disconnect()
+        except Exception:
+            pass
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
         self.btn_edit_save.clicked.connect(
@@ -294,6 +302,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
+        try:
+            self.btn_edit_save.clicked.disconnect()
+        except Exception:
+            pass
+        try:
+            self.btn_edit_reset.clicked.disconnect()
+        except Exception:
+            pass
         self.change_instance = bulk_load_changes.EditBulkLoad(self)
         # set up signals and slots
         self.btn_edit_save.clicked.connect(

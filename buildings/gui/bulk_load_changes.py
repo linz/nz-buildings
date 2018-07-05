@@ -44,6 +44,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
         self.bulk_load_frame.btn_edit_save.setDisabled(1)
+
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ["mActionPan"]:
@@ -485,29 +486,37 @@ class EditBulkLoad(BulkLoadChanges):
             result = self.bulk_load_frame.db.execute_no_commit(
                 select.territorial_authority_ID_by_name.format(text))
             t_a = result.fetchall()[0][0]
-            if len(self.bulk_load_frame.ids) > 0:
-                # if there is more than one feature to update
-                for i in self.bulk_load_frame.ids:
+            status = True
+            if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+                # can only delete outlines if no relationship
+                status = self.remove_compared_outlines()
+            if status:
+                if len(self.bulk_load_frame.ids) > 0:
+                    # if there is more than one feature to update
+                    for i in self.bulk_load_frame.ids:
+                        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
+                        self.bulk_load_frame.db.execute_no_commit(
+                            sql, (i, bulk_load_status_id, capture_method_id,
+                                  capture_source_id, suburb, town, t_a))
+                else:
+                    # one feature to update
                     sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                     self.bulk_load_frame.db.execute_no_commit(
-                        sql, (i, bulk_load_status_id, capture_method_id,
-                              capture_source_id, suburb, town, t_a))
-            else:
-                # one feature to update
-                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                self.bulk_load_frame.db.execute_no_commit(
-                    sql, (self.bulk_load_frame.bulk_load_outline_id,
-                          bulk_load_status_id, capture_method_id,
-                          capture_source_id, suburb, town, t_a)
-                )
+                        sql, (self.bulk_load_frame.bulk_load_outline_id,
+                              bulk_load_status_id, capture_method_id,
+                              capture_source_id, suburb, town, t_a)
+                    )
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
             QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
         self.bulk_load_frame.bulk_load_removed = self.bulk_load_frame.layer_registry.add_postgres_layer(
             'removed_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.bulk_load_frame.current_dataset))
-        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(path + 'building_orange.qml')
+            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(
+                self.bulk_load_frame.current_dataset
+            ))
+        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
+            path + 'building_orange.qml')
         if commit_status:
             self.bulk_load_frame.geoms = {}
             self.bulk_load_frame.ids = []
@@ -606,3 +615,85 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.bulk_load_outline_id = None
             BulkLoadChanges.disbale_UI_functions(self)
             self.bulk_load_frame.select_changed = False
+
+    def remove_compared_outlines(self):
+        """
+            called to check can mark outline for deletion
+        """
+        added_outlines = self.bulk_load_frame.db.execute_no_commit(
+            select.current_added_outlines.format(
+                self.bulk_load_frame.current_dataset))
+        added_outlines = added_outlines.fetchall()
+        matched_outlines = self.bulk_load_frame.db.execute_no_commit(
+            select.current_matched_outlines.format(
+                self.bulk_load_frame.current_dataset))
+        matched_outlines = matched_outlines.fetchall()
+        related_outlines = self.bulk_load_frame.db.execute_no_commit(
+            select.current_related_outlines.format(
+                self.bulk_load_frame.current_dataset))
+        related_outlines = related_outlines.fetchall()
+        idk = {}
+        for outline in related_outlines:
+            if outline[0] in idk:
+                idk[outline[0]].append(outline[1])
+            else:
+                idk[outline[0]] = [outline[1]]
+        if len(self.bulk_load_frame.ids) > 0:
+            # if there is more than one feature to update
+            for item in self.bulk_load_frame.ids:
+                # remove from added table
+                for outline in added_outlines:
+                    if item in outline:
+                        # remove outline from added table
+                        sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                        self.bulk_load_frame.db.execute_no_commit(sql, (item,))
+                        return True
+                for outline in matched_outlines:
+                    if item == outline[0]:
+                        self.bulk_load_frame.error_dialog = ErrorDialog()
+                        self.bulk_load_frame.error_dialog.fill_report(
+                            '\n --------------- RELATIONSHIP EXISTS ---------'
+                            '-------\n\nCan only mark for deletion outline if'
+                            ' no relationship exists'
+                        )
+                        self.bulk_load_frame.error_dialog.show()
+                        return False
+                if item in idk:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n ------------------- RELATIONSHIP EXISTS ---------'
+                        '---------- \n\nCan only mark for deletion outline if'
+                        ' no relationship exists'
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    return False
+        # only one feature selected
+        else:
+            # remove from added table
+            for outline in added_outlines:
+                if self.bulk_load_frame.bulk_load_outline_id in outline:
+                    # remove outline from added table
+                    sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                    self.bulk_load_frame.db.execute_no_commit(
+                        sql, (self.bulk_load_frame.bulk_load_outline_id,))
+                    return True
+            for outline in matched_outlines:
+                if self.bulk_load_frame.bulk_load_outline_id == outline[0]:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n ------------------- RELATIONSHIP EXISTS ---------'
+                        '---------- \n\nCan only mark for deletion outline if'
+                        ' no relationship exists'
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    return False
+
+            if self.bulk_load_frame.bulk_load_outline_id in idk:
+                self.bulk_load_frame.error_dialog = ErrorDialog()
+                self.bulk_load_frame.error_dialog.fill_report(
+                    '\n ---------------------- RELATIONSHIP EXISTS ---------'
+                    '------------- \n\nCan only mark for deletion outline if'
+                    ' no relationship exists'
+                )
+                self.bulk_load_frame.error_dialog.show()
+                return False

@@ -145,6 +145,38 @@ FROM buildings_bulk_load.existing_subset_extracts
 WHERE building_outline_id = {};
 """
 
+# added
+current_added_outlines = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.added
+WHERE bulk_load_outline_id IN (
+      SELECT bulk_load_outline_id
+      FROM buildings_bulk_load.bulk_load_outlines
+      WHERE supplied_dataset_id = {});
+"""
+
+# matched
+current_matched_outlines = """
+SELECT bulk_load_outline_id,
+       building_outline_id
+FROM buildings_bulk_load.matched
+WHERE bulk_load_outline_id IN(
+      SELECT bulk_load_outline_id
+      FROM buildings_bulk_load.bulk_load_outlines
+      WHERE supplied_dataset_id = {});
+"""
+
+# related
+current_related_outlines = """
+SELECT bulk_load_outline_id,
+       building_outline_id
+FROM buildings_bulk_load.related
+WHERE bulk_load_outline_id IN (
+    SELECT bulk_load_outline_id
+    FROM buildings_bulk_load.bulk_load_outlines
+    WHERE supplied_dataset_id = {});
+"""
+
 """
 ----------------------------------------------------------------
 Buildings Common
