@@ -288,7 +288,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Added During QA'))
         self.bulk_load_frame.cmb_capture_method.setCurrentIndex(self.bulk_load_frame.cmb_capture_method_2.findText('Unknown'))
         self.bulk_load_frame.cmb_ta.setCurrentIndex(self.bulk_load_frame.cmb_ta.findText('Manawatu-Whanganui'))
         self.bulk_load_frame.cmb_town.setCurrentIndex(self.bulk_load_frame.cmb_town.findText('Palmerston North'))
@@ -400,7 +400,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878315, 5555631)),
                          delay=50)
         QTest.qWait(100)
-        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Added During QA'))
         self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(self.bulk_load_frame.cmb_capture_method_2.findText('Unknown'))
         self.bulk_load_frame.cmb_ta.setCurrentIndex(self.bulk_load_frame.cmb_ta.findText('Manawatu-Whanganui'))
         self.bulk_load_frame.cmb_town.setCurrentIndex(self.bulk_load_frame.cmb_town.findText('Palmerston North'))
@@ -485,6 +485,89 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_geom(self):
+        """Check geom 'deleted' when save clicked"""
+        iface.actionSelect().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
+                         delay=30)
+        QTest.qWait(10)
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
+        result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        result = result.fetchall()[0]
+        # status
+        sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
+        status = db._execute(sql, (result[0],))
+        status = status.fetchall()[0][0]
+        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result, [])
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_fails(self):
+        """Check 'deleting' geom fails when save clicked"""
+        iface.actionSelect().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878090.9, 5555322.0)),
+                         delay=30)
+        QTest.qWait(10)
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        self.bulk_load_frame.error_dialog.close()
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
+        result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        result = result.fetchall()[0]
+        # status
+        sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
+        status = db._execute(sql, (result[0],))
+        status = status.fetchall()[0][0]
+        self.assertEqual('Supplied', status)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = 2031;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result, [(2031,)])
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
