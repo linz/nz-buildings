@@ -97,8 +97,8 @@ class BulkLoadChanges:
             for item in ls:
                 self.bulk_load_frame.cmb_status.addItem(item[0])
             result = self.bulk_load_frame.db._execute(
-                select.bulk_load_status_value_by_outlineID.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.bulk_load_status_value_by_outlineID, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_status.setCurrentIndex(
@@ -106,8 +106,8 @@ class BulkLoadChanges:
 
             # capture method
             result = self.bulk_load_frame.db._execute(
-                select.capture_method_value_by_bulk_outlineID.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.capture_method_value_by_bulk_outlineID, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
@@ -118,8 +118,8 @@ class BulkLoadChanges:
                 select.capture_source_group_value_desc_external)
             ls = result.fetchall()
             result = self.bulk_load_frame.db._execute(
-                select.capture_source_group_value_desc_external_by_bulk_outlineID.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.capture_source_group_value_desc_external_by_bulk_outlineID, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0]
             value_index = 0
@@ -131,8 +131,8 @@ class BulkLoadChanges:
 
             # suburb
             result = self.bulk_load_frame.db._execute(
-                select.suburb_locality_suburb_4th_by_bulk_outlineID.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.suburb_locality_suburb_4th_by_bulk_outlineID, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_suburb.setCurrentIndex(
@@ -140,8 +140,8 @@ class BulkLoadChanges:
 
             # town city
             result = self.bulk_load_frame.db._execute(
-                select.town_city_name_by_bulk_outlineID.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.town_city_name_by_bulk_outlineID, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_town.setCurrentIndex(
@@ -149,8 +149,8 @@ class BulkLoadChanges:
 
             # territorial Authority
             result = self.bulk_load_frame.db._execute(
-                select.territorial_authority_name_by_bulk_outline_id.format(
-                    self.bulk_load_frame.bulk_load_outline_id
+                select.territorial_authority_name_by_bulk_outline_id, (
+                    self.bulk_load_frame.bulk_load_outline_id,
                 ))
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_ta.setCurrentIndex(
@@ -238,7 +238,7 @@ class AddBulkLoad(BulkLoadChanges):
         # capture method id
         text = self.bulk_load_frame.cmb_capture_method_2.currentText()
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value.format(text))
+            select.capture_method_ID_by_value, (text,))
         capture_method_id = result.fetchall()[0][0]
 
         # capture source
@@ -254,16 +254,16 @@ class AddBulkLoad(BulkLoadChanges):
             return
         text_ls = text.split('- ')
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description.format(
+            select.capture_srcgrp_by_value_and_description, (
                 text_ls[0], text_ls[1]
             ))
         data = result.fetchall()[0][0]
         if text_ls[2] == 'None':
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null.format(data))
+                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
         else:
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID.format(
+                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
                     data, text_ls[2]
                 ))
         capture_source_id = result.fetchall()[0][0]
@@ -271,18 +271,18 @@ class AddBulkLoad(BulkLoadChanges):
         # suburb
         text = self.bulk_load_frame.cmb_suburb.currentText()
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.suburb_locality_id_by_suburb_4th.format(text))
+            select.suburb_locality_id_by_suburb_4th, (text,))
         suburb = result.fetchall()[0][0]
 
         # town
         text = self.bulk_load_frame.cmb_town.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(select.town_city_ID_by_name.format(text))
+        result = self.bulk_load_frame.db.execute_no_commit(select.town_city_ID_by_name, (text, ))
         town = result.fetchall()[0][0]
 
         # territorial Authority
         text = self.bulk_load_frame.cmb_ta.currentText()
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.territorial_authority_ID_by_name.format(text))
+            select.territorial_authority_ID_by_name, (text,))
         t_a = result.fetchall()[0][0]
 
         # insert into bulk_load_outlines table
@@ -434,13 +434,13 @@ class EditBulkLoad(BulkLoadChanges):
             # bulk load status
             text = self.bulk_load_frame.cmb_status.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.bulk_load_status_id_by_value.format(text))
+                select.bulk_load_status_id_by_value, (text,))
             bulk_load_status_id = result.fetchall()[0][0]
 
             # capture method
             text = self.bulk_load_frame.cmb_capture_method_2.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_method_ID_by_value.format(text))
+                select.capture_method_ID_by_value, (text,))
             capture_method_id = result.fetchall()[0][0]
 
             # capture source
@@ -455,36 +455,36 @@ class EditBulkLoad(BulkLoadChanges):
                 return
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_srcgrp_by_value_and_description.format(
+                select.capture_srcgrp_by_value_and_description, (
                     text_ls[0], text_ls[1]
                 ))
             data = result.fetchall()[0][0]
             if text_ls[2] == 'None':
                 result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrdID_is_null.format(
-                        data
+                    select.capture_source_ID_by_capsrcgrdID_is_null, (
+                        data,
                     ))
             else:
                 result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID.format(data, text_ls[2]))
+                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (data, text_ls[2]))
             capture_source_id = result.fetchall()[0][0]
 
             # suburb
             text = self.bulk_load_frame.cmb_suburb.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.suburb_locality_id_by_suburb_4th.format(text))
+                select.suburb_locality_id_by_suburb_4th, (text,))
             suburb = result.fetchall()[0][0]
 
             # town
             text = self.bulk_load_frame.cmb_town.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.town_city_ID_by_name.format(text))
+                select.town_city_ID_by_name, (text,))
             town = result.fetchall()[0][0]
 
             # territorial authority
             text = self.bulk_load_frame.cmb_ta.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.territorial_authority_ID_by_name.format(text))
+                select.territorial_authority_ID_by_name, (text,))
             t_a = result.fetchall()[0][0]
             status = True
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
@@ -553,7 +553,7 @@ class EditBulkLoad(BulkLoadChanges):
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         result = self.bulk_load_frame.db._execute(
-            select.bulk_load_outline_shape_by_id.format(qgsfId))
+            select.bulk_load_outline_shape_by_id, (qgsfId,))
         result = result.fetchall()[0][0]
         if self.bulk_load_frame.geom == result:
             if qgsfId in self.bulk_load_frame.geoms.keys():
@@ -621,16 +621,16 @@ class EditBulkLoad(BulkLoadChanges):
             called to check can mark outline for deletion
         """
         added_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_added_outlines.format(
-                self.bulk_load_frame.current_dataset))
+            select.current_added_outlines, (
+                self.bulk_load_frame.current_dataset,))
         added_outlines = added_outlines.fetchall()
         matched_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_matched_outlines.format(
-                self.bulk_load_frame.current_dataset))
+            select.current_matched_outlines, (
+                self.bulk_load_frame.current_dataset,))
         matched_outlines = matched_outlines.fetchall()
         related_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_related_outlines.format(
-                self.bulk_load_frame.current_dataset))
+            select.current_related_outlines, (
+                self.bulk_load_frame.current_dataset,))
         related_outlines = related_outlines.fetchall()
         idk = {}
         for outline in related_outlines:

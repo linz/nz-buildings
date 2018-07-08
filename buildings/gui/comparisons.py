@@ -36,7 +36,7 @@ def compare_outlines(self, commit_status):
         geom = result.fetchall()[0][0]
         # Find intersecting buildings
         result = self.db.execute_no_commit(
-            select.building_outlines.format(geom))
+            select.building_outlines, (geom,))
         outlines = result.fetchall()
         for item in outlines:
             results.append(item)
@@ -44,8 +44,8 @@ def compare_outlines(self, commit_status):
     if len(results) == 0:
         # No intersecting outlines
         results = self.db.execute_no_commit(
-            select.bulk_load_outlines_id_by_datasetID.format(
-                self.current_dataset
+            select.bulk_load_outlines_id_by_datasetID, (
+                self.current_dataset,
             ))
         bulk_loaded_ids = results.fetchall()
         for id in bulk_loaded_ids:
@@ -60,12 +60,12 @@ def compare_outlines(self, commit_status):
         # intersecting outlines exist
         for ls in results:
             life_span_check = self.db.execute_no_commit(
-                select.building_outlines_end_lifespan_by_id.format(ls[0]))
+                select.building_outlines_end_lifespan_by_id, (ls[0],))
             life_span_check = life_span_check.fetchall()[0][0]
             if life_span_check is None:
                 # If the outline is still 'active'
                 result = self.db.execute_no_commit(
-                    select.existing_subset_extracts_by_building_outlineID.format(ls[0]))
+                    select.existing_subset_extracts_by_building_outlineID, (ls[0],))
                 result = result.fetchall()
                 if len(result) == 0:
                     # insert new outline into existing subset extracts

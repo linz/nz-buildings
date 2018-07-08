@@ -35,8 +35,8 @@ def load_current_fields(self):
     """
     # capture method
     result = self.db._execute(
-        select.capture_method_value_by_datasetID.format(
-            self.current_dataset)
+        select.capture_method_value_by_datasetID, (
+            self.current_dataset,)
     )
     result = result.fetchall()[0][0]
     self.cmb_capture_method.setCurrentIndex(
@@ -44,20 +44,20 @@ def load_current_fields(self):
 
     # organisation
     result = self.db._execute(
-        select.organisation_value_by_datasetID.format(self.current_dataset))
+        select.organisation_value_by_datasetID, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_organisation.setCurrentIndex(
         self.cmb_organisation.findText(result))
 
     # data description
     result = self.db._execute(
-        select.dataset_description_by_datasetID.format(self.current_dataset))
+        select.dataset_description_by_datasetID, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.le_data_description.setText(result)
 
     # External Id/fields
     ex_result = self.db._execute(
-        select.capture_src_extsrcID_by_datasetID.format(self.current_dataset))
+        select.capture_src_extsrcID_by_datasetID, (self.current_dataset,))
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_source.setChecked(True)
@@ -66,8 +66,8 @@ def load_current_fields(self):
 
     # capture source group
     result = self.db._execute(
-        select.capture_srcgrp_capture_srcgrpID_by_datasetID.format(
-            self.current_dataset))
+        select.capture_srcgrp_capture_srcgrpID_by_datasetID, (
+            self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_capture_src_grp.setCurrentIndex(result - 1)
 
@@ -149,20 +149,19 @@ def bulk_load(self, commit_status):
 
     # organisation
     text = self.cmb_organisation.currentText()
-    sql = select.organisation_ID_by_value.format(text)
-    result = self.db._execute(sql)
+    result = self.db._execute(select.organisation_ID_by_value, (text,))
     organisation = result.fetchall()[0][0]
 
     # capture method
     text = self.cmb_capture_method.currentText()
-    result = self.db._execute(select.capture_method_ID_by_value.format(text))
+    result = self.db._execute(select.capture_method_ID_by_value, (text,))
     capture_method = result.fetchall()[0][0]
 
     # capture source group
     text = self.cmb_capture_src_grp.currentText()
     text_ls = text.split('-')
     result = self.db._execute(
-        select.capture_source_group_srcrpID_by_value.format(text_ls[0]))
+        select.capture_source_group_srcrpID_by_value, (text_ls[0],))
     capture_source_group = result.fetchall()[0][0]
 
     # external source
@@ -233,8 +232,8 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
     capture_source = None
     if len(self.cmb_external_id.currentText()) is not 0:
         result = self.db.execute_no_commit(
-            select.capture_source_ID_by_capsrcgrpID_and_externalSrcID.format(
-                capture_source_group, external_source_id
+            select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                capture_source_group, external_source_id,
             ))
         value = result.fetchall()
         # if no related capture source exists
@@ -252,8 +251,8 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
             capture_source = value[0][0]
     else:
         result = self.db.execute_no_commit(
-            select.capture_source_ID_by_capsrcgrdID_is_null.format(
-                capture_source_group))
+            select.capture_source_ID_by_capsrcgrdID_is_null, (
+                capture_source_group,))
         value = result.fetchall()
         # if no related capture source exists
         if len(value) == 0:
@@ -276,7 +275,7 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
         # outline geometry
         wkt = outline.geometry().exportToWkt()
         sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-        result = self.db.execute_no_commit(sql, data=(wkt, ))
+        result = self.db.execute_no_commit(sql, (wkt, ))
         geom = result.fetchall()[0][0]
 
         # suburb
