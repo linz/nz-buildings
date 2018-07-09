@@ -137,3 +137,11 @@ DROP INDEX IF EXISTS shx_canal_polygons;
 CREATE INDEX shx_canal_polygons
     ON buildings_reference.canal_polygons USING gist (shape);
 
+-- Imagery Surveys
+
+CREATE TABLE IF NOT EXISTS buildings_reference.imagery_surveys (
+      imagery_polygon_id serial PRIMARY KEY
+    , external_imagery_polygon_id integer
+    , imagery varchar (250)
+    , shape public.geometry(MultiPolygon, 2193)
+);
