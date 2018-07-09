@@ -48,7 +48,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         Called on opening of frame populate combobox with capture source group
         """
-        # print select.capture_srcgrp_value_description
         result = self.db._execute(select.capture_srcgrp_value_description)
         ls = result.fetchall()
         for item in ls:
