@@ -19,7 +19,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(22);
+SELECT plan(23);
 
 -- Schema
 SELECT has_schema('buildings_reference');
@@ -30,6 +30,8 @@ SELECT has_table('buildings_reference', 'suburb_locality', 'Should have suburb_l
 SELECT has_table('buildings_reference', 'town_city', 'Should have town_city table in the buildings_reference schema.');
 
 SELECT has_table('buildings_reference', 'territorial_authority', 'Should have territorial_authority table in the buildings_reference schema.');
+
+SELECT has_table('buildings_reference', 'imagery_surveys', 'Should have imagery_surveys table in the buildings_reference schema.');
 
 SELECT has_table('buildings_reference', 'coastlines_and_islands', 'Should have coastlines_and_islands table in the buildings_reference schema.');
 SELECT has_index(
