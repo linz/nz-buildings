@@ -17,7 +17,7 @@ def compare_outlines(self, commit_status):
     if len(results) == 0:
         # No intersecting outlines
         results = self.db.execute_no_commit(
-            select.bulk_load_outlines_id_by_datasetID.format(
+            select.bulk_load_outlines_ID_by_datasetID.format(
                 self.current_dataset
             ))
         bulk_loaded_ids = results.fetchall()
