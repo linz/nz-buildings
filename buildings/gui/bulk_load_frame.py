@@ -16,6 +16,7 @@ from buildings.utilities import layers
 from buildings.gui import bulk_load
 from buildings.gui import comparisons
 from buildings.gui import bulk_load_changes
+from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -35,6 +36,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
+        self.error_dialog = None
         # Bulk loadings & editing fields
         self.added_building_ids = []
         self.ids = []
@@ -54,9 +56,19 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
         result = result.fetchall()[0][0]
-
         # if there is an unprocessed dataset
-        if result == 1:
+        if result > 1:
+            # error
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n ---------------------- DATASET ERROR ---------'
+                '----------------- \n\nThere are multiple not processed'
+                ' datasets. Please fix database tables before continuing'
+            )
+            self.error_dialog.show()
+            self.display_dataset_error()
+
+        elif result == 1:
             p_result = self.db._execute(select.dataset_processed_date_is_null)
             self.current_dataset = p_result.fetchall()[0][0]
             self.lb_dataset_id.setText(str(self.current_dataset))
@@ -68,8 +80,19 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             result2 = self.db._execute(select.dataset_count_transfer_date_is_null)
             result2 = result2.fetchall()[0][0]
 
-            # if there is a processed but not transerred dataset
-            if result2 == 1:
+            # if there is a processed but not transferred dataset
+            if result > 1:
+                # error
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report(
+                    '\n ---------------------- DATASET ERROR ---------'
+                    '----------------- \n\nThere are multiple not transferred'
+                    ' datasets. Please fix database tables before continuing'
+                )
+                self.error_dialog.show()
+                self.display_dataset_error()
+
+            elif result2 == 1:
                 t_result = self.db._execute(select.dataset_transfer_date_is_null)
                 self.current_dataset = t_result.fetchall()[0][0]
                 self.lb_dataset_id.setText(str(self.current_dataset))
@@ -103,10 +126,25 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.btn_exit.clicked.connect(self.exit_clicked)
 
+    def display_dataset_error(self):
+        """
+            UI Display when there are multiple supplied datasets
+        """
+        self.current_dataset = None
+        self.lb_dataset_id.setText('None')
+
+        self.grpb_bulk_load.hide()
+        self.grpb_edits.hide()
+
+        self.btn_compare_outlines.setDisabled(1)
+        self.btn_alter_rel.setDisabled(1)
+        self.btn_publish.setDisabled(1)
+
     def display_no_bulk_load(self):
         """
             UI Display When there is no Current dataset
         """
+        self.grpb_bulk_load.show()
         bulk_load.populate_bulk_comboboxes(self)
         self.ml_outlines_layer.setEnabled(1)
         self.rad_external_source.setEnabled(1)
@@ -142,6 +180,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         bulk_load.populate_bulk_comboboxes(self)
         bulk_load.load_current_fields(self)
 
+        self.grpb_bulk_load.show()
         self.ml_outlines_layer.setDisabled(1)
         self.rad_external_source.setDisabled(1)
         self.fcb_external_id.setDisabled(1)
