@@ -478,13 +478,13 @@ def get_columns(table_str, file_content, this_table_columns):
             "extra": "length",
             "columns": [column_name_str, "varchar", str(length), " ", " ", "No"]
         },
-        "timestamptz": {
-            "regex": r"(.*)\stimestamptz(?! NOT NULL)",
+        "timestamp": {
+            "regex": r"(.*)\stimestamp(?! NOT NULL)",
             "extra": "notbold",
             "columns": [column_name_str, "date", " ", " ", " ", "Yes"]
         },
-        "timestamptz_not_null": {
-            "regex": r"^(.*)\stimestamptz\sNOT NULL.*",
+        "timestamp_not_null": {
+            "regex": r"^(.*)\stimestamp\sNOT NULL.*",
             "extra": "notbold",
             "columns": [column_name_str, "date", " ", " ", " ", "No"]
         },

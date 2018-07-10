@@ -29,7 +29,7 @@ CREATE OR REPLACE FUNCTION buildings.building_outlines_insert(
     , p_suburb_locality_id integer
     , p_town_city_id integer
     , p_territorial_authority_id integer
-    , p_begin_lifespan timestamptz
+    , p_begin_lifespan timestamp
     , p_shape geometry
 )
 RETURNS integer AS

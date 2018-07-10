@@ -66,8 +66,8 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.supplied_datasets (
       supplied_dataset_id serial PRIMARY KEY
     , description character varying(250) NOT NULL
     , supplier_id integer NOT NULL REFERENCES buildings_bulk_load.organisation (organisation_id)
-    , processed_date timestamptz
-    , transfer_date timestamptz
+    , processed_date timestamp
+    , transfer_date timestamp
 );
 
 DROP INDEX IF EXISTS idx_supplied_datasets_supplier_id;
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
     , suburb_locality_id integer NOT NULL
     , town_city_id integer
     , territorial_authority_id integer NOT NULL
-    , begin_lifespan timestamptz NOT NULL DEFAULT now()
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
     , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
