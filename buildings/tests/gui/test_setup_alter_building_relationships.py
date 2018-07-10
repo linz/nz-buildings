@@ -58,8 +58,9 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Alter Building Relationships'))
+        self.menu_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.btn_alter_rel.click()
         self.alter_relationships_frame = self.dockwidget.current_frame
 
     def tearDown(self):

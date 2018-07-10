@@ -20,7 +20,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, layer_registry, current_dataset, parent=None):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
@@ -30,22 +30,28 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.layer_registry = layer_registry
 
+        self.current_dataset = current_dataset
+
         self.open_alter_relationship_frame()
 
         # set up signals and slots
-        self.btn_clear_slt.clicked.connect(partial(self.clear_selection_clicked, [self.tbl_original]))
+        self.btn_clear_slt.clicked.connect(
+            partial(self.clear_selection_clicked, [self.tbl_original]))
         self.btn_remove_slt.clicked.connect(self.remove_selected_clicked)
         self.btn_remove_all.clicked.connect(self.remove_all_clicked)
 
         self.btn_unlink_all.clicked.connect(self.unlink_all_clicked)
 
-        self.btn_clear_slt2.clicked.connect(partial(self.clear_selection_clicked, [self.lst_existing, self.lst_bulk]))
+        self.btn_clear_slt2.clicked.connect(
+            partial(self.clear_selection_clicked,
+                    [self.lst_existing, self.lst_bulk]))
         self.btn_relink_all.clicked.connect(self.relink_all_clicked)
 
         self.btn_matched.clicked.connect(self.matched_clicked)
         self.btn_related.clicked.connect(self.related_clicked)
 
-        self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
+        self.btn_save.clicked.connect(
+            partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
     def open_alter_relationship_frame(self):
@@ -61,23 +67,26 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.add_building_lyrs()
         self.clear_layer_filter()
 
-        iface.mapCanvas().setExtent(self.lyr_bulk_load.extent())
         iface.setActiveLayer(self.lyr_bulk_load)
         iface.actionSelectRectangle().trigger()
 
         self.lst_highlight = []
 
         self.lyr_existing.removeSelection()
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer_existing)
+        self.lyr_existing.selectionChanged.connect(
+            self.select_from_layer_existing)
         self.lyr_existing.selectionChanged.connect(self.highlight_features)
 
         self.lyr_bulk_load.removeSelection()
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer_bulk)
+        self.lyr_bulk_load.selectionChanged.connect(
+            self.select_from_layer_bulk)
         self.lyr_bulk_load.selectionChanged.connect(self.highlight_features)
 
-        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
+        self.tbl_original.itemSelectionChanged.connect(
+            self.select_from_tbl_original)
 
-        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
+        self.lst_existing.itemSelectionChanged.connect(
+            self.select_from_lst_existing)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
 
     def add_building_lyrs(self):
@@ -88,60 +97,96 @@ class AlterRelationships(QFrame, FORM_CLASS):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
         self.lyr_existing = self.layer_registry.add_postgres_layer(
-            "existing_subset_extracts", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
+            "existing_subset_extracts", "existing_subset_extracts", "shape",
+            "buildings_bulk_load", "building_outline_id",
+            "supplied_dataset_id = {0}".format(self.current_dataset)
+        )
         self.lyr_existing.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_bulk_load = self.layer_registry.add_postgres_layer(
-            "bulk_load_outlines", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+            "bulk_load_outlines", "bulk_load_outlines", "shape",
+            "buildings_bulk_load", "bulk_load_outline_id",
+            "supplied_dataset_id = {0}".format(self.current_dataset)
+        )
         self.lyr_bulk_load.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
-            "related_bulk_load_outlines", "related_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+            "related_bulk_load_outlines", "related_bulk_load_outlines",
+            "shape", "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
         self.lyr_related_bulk_load.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_related_existing = self.layer_registry.add_postgres_layer(
-            "related_existing_outlines", "related_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+            "related_existing_outlines", "related_existing_outlines",
+            "shape", "buildings_bulk_load", "building_outline_id", ""
+        )
         self.lyr_related_existing.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_matched_bulk_load = self.layer_registry.add_postgres_layer(
-            "matched_bulk_load_outlines", "matched_bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+            "matched_bulk_load_outlines", "matched_bulk_load_outlines",
+            "shape", "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
         self.lyr_matched_bulk_load.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_matched_existing = self.layer_registry.add_postgres_layer(
-            "matched_existing_outlines", "matched_existing_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+            "matched_existing_outlines", "matched_existing_outlines", "shape",
+            "buildings_bulk_load", "building_outline_id", ""
+        )
         self.lyr_matched_existing.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_removed_existing = self.layer_registry.add_postgres_layer(
-            "removed_outlines", "removed_outlines", "shape", "buildings_bulk_load", "building_outline_id", "")
+            "removed_outlines", "removed_outlines", "shape",
+            "buildings_bulk_load", "building_outline_id", ""
+        )
         self.lyr_removed_existing.loadNamedStyle(path + 'building_orange.qml')
 
         self.lyr_added_bulk_load = self.layer_registry.add_postgres_layer(
-            "added_outlines", "added_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
+            "added_outlines", "added_outlines", "shape",
+            "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
         self.lyr_added_bulk_load.loadNamedStyle(path + 'building_green.qml')
 
         self.lyr_related_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "related_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
-        self.lyr_related_bulk_load_in_edit.loadNamedStyle(path + 'building_purple.qml')
+            "related_bulk_load_in_edit", "bulk_load_outlines", "shape",
+            "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
+        self.lyr_related_bulk_load_in_edit.loadNamedStyle(
+            path + 'building_purple.qml')
 
         self.lyr_related_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "related_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
-        self.lyr_related_existing_in_edit.loadNamedStyle(path + 'building_purple.qml')
+            "related_existing_in_edit", "existing_subset_extracts", "shape",
+            "buildings_bulk_load", "building_outline_id", ""
+        )
+        self.lyr_related_existing_in_edit.loadNamedStyle(
+            path + 'building_purple.qml')
 
         self.lyr_matched_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "matched_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
-        self.lyr_matched_bulk_load_in_edit.loadNamedStyle(path + 'building_blue.qml')
+            "matched_bulk_load_in_edit", "bulk_load_outlines", "shape",
+            "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
+        self.lyr_matched_bulk_load_in_edit.loadNamedStyle(
+            path + 'building_blue.qml')
 
         self.lyr_matched_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "matched_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
-        self.lyr_matched_existing_in_edit.loadNamedStyle(path + 'building_blue.qml')
+            "matched_existing_in_edit", "existing_subset_extracts", "shape",
+            "buildings_bulk_load", "building_outline_id", ""
+        )
+        self.lyr_matched_existing_in_edit.loadNamedStyle(
+            path + 'building_blue.qml')
 
         self.lyr_removed_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "removed_existing_in_edit", "existing_subset_extracts", "shape", "buildings_bulk_load", "building_outline_id", "")
-        self.lyr_removed_existing_in_edit.loadNamedStyle(path + 'building_orange.qml')
+            "removed_existing_in_edit", "existing_subset_extracts", "shape",
+            "buildings_bulk_load", "building_outline_id", ""
+        )
+        self.lyr_removed_existing_in_edit.loadNamedStyle(
+            path + 'building_orange.qml')
 
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "added_bulk_load_in_edit", "bulk_load_outlines", "shape", "buildings_bulk_load", "bulk_load_outline_id", "")
-        self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
+            "added_bulk_load_in_edit", "bulk_load_outlines", "shape",
+            "buildings_bulk_load", "bulk_load_outline_id", ""
+        )
+        self.lyr_added_bulk_load_in_edit.loadNamedStyle(
+            path + 'building_green.qml')
 
     def repaint_view(self):
         """Repaint views to update changes in result"""
@@ -201,7 +246,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_highlight = []
 
         for feat in self.lyr_existing.selectedFeatures():
-            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_existing)
+            h = QgsHighlight(
+                iface.mapCanvas(), feat.geometry(), self.lyr_existing)
 
             # set highlight symbol properties
             h.setColor(QColor(255, 0, 0, 255))
@@ -210,7 +256,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lst_highlight.append(h)
 
         for feat in self.lyr_bulk_load.selectedFeatures():
-            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
+            h = QgsHighlight(
+                iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
 
             # set highlight symbol properties
             h.setColor(QColor(255, 0, 0, 255))
@@ -244,7 +291,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_existing = [feat_id]
                 for (feat_id_related,) in feat_ids_related:
                     ids_bulk.append(feat_id_related)
-                    result = self.db._execute(sql_related_bulk, (feat_id_related,))
+                    result = self.db._execute(
+                        sql_related_bulk, (feat_id_related,))
                     ids = result.fetchall()
                     for (id_existing, ) in ids:
                         ids_existing.append(id_existing)
@@ -253,8 +301,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     for id_bulk in list(set(ids_bulk)):
                         row_tbl = tbl.rowCount()
                         tbl.setRowCount(row_tbl + 1)
-                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                        tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                        tbl.setItem(
+                            row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                        tbl.setItem(
+                            row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
                 continue
 
             result2 = self.db._execute(sql_matched, (feat_id,))
@@ -323,7 +373,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_existing = []
                 for (feat_id_related,) in feat_ids_related:
                     ids_existing.append(feat_id_related)
-                    result = self.db._execute(sql_related_existing, (feat_id_related,))
+                    result = self.db._execute(
+                        sql_related_existing, (feat_id_related,))
                     ids = result.fetchall()
                     for (id_bulk, ) in ids:
                         ids_bulk.append(id_bulk)
@@ -920,13 +971,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Relate the buildings in the list
         Called when cancel botton is clicked
         """
-        from buildings.gui.menu_frame import MenuFrame
-        dw = plugins['roads'].dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
-
-        self.db.close_connection()
-
         self.tbl_original.clearSelection()
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
@@ -944,6 +988,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.clear_layer_filter()
 
         self.layer_registry.remove_all_layers()
+
+        from buildings.gui.bulk_load_frame import BulkLoadFrame
+        dw = plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(BulkLoadFrame(self.layer_registry))
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry

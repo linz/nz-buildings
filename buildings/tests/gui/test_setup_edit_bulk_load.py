@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Add Production Outline GUI setup confirm default settings
+    Tests: Edit Bulk Load Outline GUI setup confirm default settings
 
  ***************************************************************************/
 """
@@ -22,7 +22,7 @@ from qgis.core import QgsProject
 from qgis.utils import plugins
 
 
-class SetUpProductionNewTest(unittest.TestCase):
+class SetUpEditBulkLoad(unittest.TestCase):
     """
     Test Add Production Outline GUI initial
     setup confirm default settings
@@ -56,24 +56,24 @@ class SetUpProductionNewTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add New Outline to Production'))
-        self.menu_frame.cmb_add_outline.setCurrentIndex(self.menu_frame.cmb_add_outline.findText('Add Outlines'))
-        self.new_production_frame = self.dockwidget.current_frame
+        self.menu_frame.btn_bulk_load.click()
+        self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.rad_edit.click()
 
     def tearDown(self):
         """Runs after each test."""
-        self.new_production_frame.btn_exit.click()
+        self.bulk_load_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
-        self.assertFalse(self.new_production_frame.btn_save.isEnabled())
-        self.assertFalse(self.new_production_frame.btn_reset.isEnabled())
-        self.assertFalse(self.new_production_frame.cmb_capture_method.isEnabled())
-        self.assertFalse(self.new_production_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.new_production_frame.cmb_ta.isEnabled())
-        self.assertFalse(self.new_production_frame.cmb_town.isEnabled())
-        self.assertFalse(self.new_production_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """
@@ -83,7 +83,7 @@ class SetUpProductionNewTest(unittest.TestCase):
         group = root.findGroup('Building Tool Layers')
         layers = group.findLayers()
         for layer in layers:
-            if layer.layer().name() == 'building_outlines':
+            if layer.layer().name() == 'bulk_load_outlines':
                 layer_bool = True
                 if layer.layer().isEditable():
                     edit_bool = True

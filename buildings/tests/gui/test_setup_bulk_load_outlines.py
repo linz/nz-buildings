@@ -56,12 +56,15 @@ class SetUpBulkLoadTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.dockwidget = self.road_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_load_outlines.click()
+        self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
+        self.bulk_load_frame.db.open_cursor()
+        self.bulk_load_frame.publish_clicked(False)
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+        self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_external_defaults(self):
         """External source comboboxes disabled on setup"""
