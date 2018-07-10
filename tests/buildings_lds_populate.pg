@@ -17,7 +17,7 @@
 
 BEGIN;
 
-\ir ./testdata/06-insert_test_data_publish_lds.sql
+\ir ./testdata/07-insert_test_data_publish_lds.sql
 
 SELECT buildings_lds.populate_buildings_lds();
 
@@ -81,7 +81,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500001 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500001, 1500001, NULL::varchar, NULL::varchar, '2017-01-01 09:00:00'::timestamp, '2018-01-01 09:00:00'::timestamp),
+    $$VALUES (1500001, 1500001, NULL::varchar, NULL::varchar, '2017-01-01 09:00:00'::timestamptz, '2018-01-01 09:00:00'::timestamptz),
              (1600001, 1500001, NULL, NULL, '2018-01-01 09:00:00', NULL)
     $$,
     'Check building outline change is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
@@ -91,7 +91,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500002 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500002, 1500002, NULL::varchar, NULL::varchar, '2017-01-02 09:00:00'::timestamp, '2018-01-02 09:00:00'::timestamp)
+    $$VALUES (1500002, 1500002, NULL::varchar, NULL::varchar, '2017-01-02 09:00:00'::timestamptz, '2018-01-02 09:00:00'::timestamptz)
     $$,
     'Check building / building outline removal is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );
@@ -100,7 +100,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500003 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500003, 1500003, NULL::varchar, NULL::varchar, '2017-01-03 09:00:00'::timestamp, '2018-01-03 09:00:00'::timestamp),
+    $$VALUES (1500003, 1500003, NULL::varchar, NULL::varchar, '2017-01-03 09:00:00'::timestamptz, '2018-01-03 09:00:00'::timestamptz),
              (1500003, 1500003, 'Name Added', NULL, '2018-01-03 09:00:00', NULL)
     $$,
     'Check building / building outline removal is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
@@ -110,7 +110,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500004 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500004, 1500004, NULL::varchar, NULL::varchar, '2017-01-04 09:00:00'::timestamp, '2018-01-04 09:00:00'::timestamp),
+    $$VALUES (1500004, 1500004, NULL::varchar, NULL::varchar, '2017-01-04 09:00:00'::timestamptz, '2018-01-04 09:00:00'::timestamptz),
              (1500004, 1500004, NULL, 'Abattoir', '2018-01-04 09:00:00', NULL)
     $$,
     'Check building / building outline removal is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
@@ -120,7 +120,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500005',
-    $$VALUES (1500005, 1500005, NULL::varchar, NULL::varchar, '2017-01-05 09:00:00'::timestamp, '2018-01-05 09:00:00'::timestamp),
+    $$VALUES (1500005, 1500005, NULL::varchar, NULL::varchar, '2017-01-05 09:00:00'::timestamptz, '2018-01-05 09:00:00'::timestamptz),
              (1500005, 1500005, 'Name and Use Added at Same Time', 'Abattoir', '2018-01-05 09:00:00', NULL)
     $$,
     'Name and use added on the same date is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
@@ -130,7 +130,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500006 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500006, 1500006, NULL::varchar, NULL::varchar, '2017-01-06 09:00:00'::timestamp, '2018-01-06 09:00:00'::timestamp),
+    $$VALUES (1500006, 1500006, NULL::varchar, NULL::varchar, '2017-01-06 09:00:00'::timestamptz, '2018-01-06 09:00:00'::timestamptz),
              (1500006, 1500006, 'Name and Use Added at Different Time', NULL, '2018-01-06 09:00:00', '2018-01-06 15:00:00'),
              (1500006, 1500006, 'Name and Use Added at Different Time', 'Abattoir', '2018-01-06 15:00:00', NULL)
     $$,
@@ -141,7 +141,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500007 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500007, 1500007, NULL::varchar, NULL::varchar, '2017-01-07 09:00:00'::timestamp, '2018-01-07 09:00:00'::timestamp),
+    $$VALUES (1500007, 1500007, NULL::varchar, NULL::varchar, '2017-01-07 09:00:00'::timestamptz, '2018-01-07 09:00:00'::timestamptz),
              (1500007, 1500007, 'Name Added and Removed', NULL, '2018-01-07 09:00:00', '2018-06-07 09:00:00'),
              (1500007, 1500007, NULL, NULL, '2018-06-07 09:00:00', NULL)
     $$,
@@ -152,7 +152,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500008 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500008, 1500008, NULL::varchar, NULL::varchar, '2017-01-08 09:00:00'::timestamp, '2018-01-08 09:00:00'::timestamp),
+    $$VALUES (1500008, 1500008, NULL::varchar, NULL::varchar, '2017-01-08 09:00:00'::timestamptz, '2018-01-08 09:00:00'::timestamptz),
              (1500008, 1500008, NULL, 'Abattoir', '2018-01-08 09:00:00', '2018-06-08 09:00:00'),
              (1500008, 1500008, NULL, NULL, '2018-06-08 09:00:00', NULL)
     $$,
@@ -163,7 +163,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500009 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500009, 1500009, NULL::varchar, NULL::varchar, '2017-01-09 09:00:00'::timestamp, '2018-01-09 09:00:00'::timestamp),
+    $$VALUES (1500009, 1500009, NULL::varchar, NULL::varchar, '2017-01-09 09:00:00'::timestamptz, '2018-01-09 09:00:00'::timestamptz),
              (1500009, 1500009, 'Name and Use Added and Removed Together', 'Abattoir', '2018-01-09 09:00:00', '2018-06-09 09:00:00'),
              (1500009, 1500009, NULL, NULL, '2018-06-09 09:00:00', NULL)
     $$,
@@ -174,7 +174,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500010 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500010, 1500010, NULL::varchar, NULL::varchar, '2017-01-10 09:00:00'::timestamp, '2018-01-10 09:00:00'::timestamp),
+    $$VALUES (1500010, 1500010, NULL::varchar, NULL::varchar, '2017-01-10 09:00:00'::timestamptz, '2018-01-10 09:00:00'::timestamptz),
              (1500010, 1500010, 'Name and Use Added and Removed Separately 1', NULL, '2018-01-10 09:00:00', '2018-02-10 09:00:00'),
              (1500010, 1500010, 'Name and Use Added and Removed Separately 1', 'Abattoir', '2018-02-10 09:00:00', '2018-05-10 09:00:00'),
              (1500010, 1500010, 'Name and Use Added and Removed Separately 1', NULL, '2018-05-10 09:00:00', '2018-06-10 09:00:00'),
@@ -187,7 +187,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500011 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500011, 1500011, NULL::varchar, NULL::varchar, '2017-01-11 09:00:00'::timestamp, '2018-01-11 09:00:00'::timestamp),
+    $$VALUES (1500011, 1500011, NULL::varchar, NULL::varchar, '2017-01-11 09:00:00'::timestamptz, '2018-01-11 09:00:00'::timestamptz),
              (1500011, 1500011, NULL, 'Abattoir', '2018-01-11 09:00:00', '2018-02-11 09:00:00'),
              (1500011, 1500011, 'Name and Use Added and Removed Separately 2', 'Abattoir', '2018-02-11 09:00:00', '2018-05-11 09:00:00'),
              (1500011, 1500011, NULL, 'Abattoir', '2018-05-11 09:00:00', '2018-06-11 09:00:00'),
@@ -200,7 +200,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500012 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500012, 1500012, NULL::varchar, NULL::varchar, '2017-01-12 09:00:00'::timestamp, '2018-01-12 09:00:00'::timestamp),
+    $$VALUES (1500012, 1500012, NULL::varchar, NULL::varchar, '2017-01-12 09:00:00'::timestamptz, '2018-01-12 09:00:00'::timestamptz),
              (1500012, 1500012, 'Name and Use Added and Removed Separately 3', NULL, '2018-01-12 09:00:00', '2018-02-12 09:00:00'),
              (1500012, 1500012, 'Name and Use Added and Removed Separately 3', 'Abattoir', '2018-02-12 09:00:00', '2018-05-12 09:00:00'),
              (1500012, 1500012, NULL, 'Abattoir', '2018-05-12 09:00:00', '2018-06-12 09:00:00'),
@@ -213,7 +213,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500013 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500013, 1500013, NULL::varchar, NULL::varchar, '2017-01-13 09:00:00'::timestamp, '2018-01-13 09:00:00'::timestamp),
+    $$VALUES (1500013, 1500013, NULL::varchar, NULL::varchar, '2017-01-13 09:00:00'::timestamptz, '2018-01-13 09:00:00'::timestamptz),
              (1500013, 1500013, NULL, 'Abattoir', '2018-01-13 09:00:00', '2018-02-13 09:00:00'),
              (1500013, 1500013, 'Name and Use Added and Removed Separately 4', 'Abattoir', '2018-02-13 09:00:00', '2018-05-13 09:00:00'),
              (1500013, 1500013, 'Name and Use Added and Removed Separately 4', NULL, '2018-05-13 09:00:00', '2018-06-13 09:00:00'),
@@ -226,7 +226,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500014 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500014, 1500014, NULL::varchar, NULL::varchar, '2017-01-14 09:00:00'::timestamp, '2018-01-14 09:00:00'::timestamp),
+    $$VALUES (1500014, 1500014, NULL::varchar, NULL::varchar, '2017-01-14 09:00:00'::timestamptz, '2018-01-14 09:00:00'::timestamptz),
              (1500014, 1500014, 'Name Added then', NULL, '2018-01-14 09:00:00', '2018-06-14 09:00:00'),
              (1500014, 1500014, 'Name Changed', NULL, '2018-06-14 09:00:00', NULL)
     $$,
@@ -237,7 +237,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500015 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500015, 1500015, NULL::varchar, NULL::varchar, '2017-01-15 09:00:00'::timestamp, '2018-01-15 09:00:00'::timestamp),
+    $$VALUES (1500015, 1500015, NULL::varchar, NULL::varchar, '2017-01-15 09:00:00'::timestamptz, '2018-01-15 09:00:00'::timestamptz),
              (1500015, 1500015, NULL, 'Abattoir', '2018-01-15 09:00:00', '2018-06-15 09:00:00'),
              (1500015, 1500015, NULL, 'Camp', '2018-06-15 09:00:00', NULL)
     $$,
@@ -248,7 +248,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500016 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500016, 1500016, NULL::varchar, NULL::varchar, '2017-01-16 09:00:00'::timestamp, '2018-01-16 09:00:00'::timestamp),
+    $$VALUES (1500016, 1500016, NULL::varchar, NULL::varchar, '2017-01-16 09:00:00'::timestamptz, '2018-01-16 09:00:00'::timestamptz),
              (1500016, 1500016, 'Name Added and Removed then', NULL, '2018-01-16 09:00:00', '2018-05-16 09:00:00'),
              (1500016, 1500016, NULL, NULL, '2018-05-16 09:00:00', '2018-06-16 09:00:00'),
              (1500016, 1500016, 'Name Added Again', NULL, '2018-06-16 09:00:00', NULL)
@@ -260,7 +260,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500017 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500017, 1500017, NULL::varchar, NULL::varchar, '2017-01-17 09:00:00'::timestamp, '2018-01-17 09:00:00'::timestamp),
+    $$VALUES (1500017, 1500017, NULL::varchar, NULL::varchar, '2017-01-17 09:00:00'::timestamptz, '2018-01-17 09:00:00'::timestamptz),
              (1500017, 1500017, NULL, 'Abattoir', '2018-01-17 09:00:00', '2018-05-17 09:00:00'),
              (1500017, 1500017, NULL, NULL, '2018-05-17 09:00:00', '2018-06-17 09:00:00'),
              (1500017, 1500017, NULL, 'Camp', '2018-06-17 09:00:00', NULL)
@@ -272,7 +272,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500018 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500018, 1500018, NULL::varchar, NULL::varchar, '2017-01-18 09:00:00'::timestamp, NULL::timestamp)
+    $$VALUES (1500018, 1500018, NULL::varchar, NULL::varchar, '2017-01-18 09:00:00'::timestamptz, NULL::timestamptz)
     $$,
     'Building with no name or use, never changed is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );
@@ -281,7 +281,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500019 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500019, 1500019, 'Name Added From Start'::varchar, NULL::varchar, '2017-01-19 09:00:00'::timestamp, NULL::timestamp)
+    $$VALUES (1500019, 1500019, 'Name Added From Start'::varchar, NULL::varchar, '2017-01-19 09:00:00'::timestamptz, NULL::timestamptz)
     $$,
     'Building created with a name is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );
@@ -290,7 +290,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500020 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500020, 1500020, 'Name Added From Start then Building Removed'::varchar, NULL::varchar, '2017-01-20 09:00:00'::timestamp, '2018-01-20 09:00:00'::timestamp)
+    $$VALUES (1500020, 1500020, 'Name Added From Start then Building Removed'::varchar, NULL::varchar, '2017-01-20 09:00:00'::timestamptz, '2018-01-20 09:00:00'::timestamptz)
     $$,
     'Building created with a name which was then removed is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );
@@ -299,7 +299,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500021 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500021, 1500021, NULL::varchar, 'Abattoir'::varchar, '2017-01-21 09:00:00'::timestamp, NULL::timestamp)
+    $$VALUES (1500021, 1500021, NULL::varchar, 'Abattoir'::varchar, '2017-01-21 09:00:00'::timestamptz, NULL::timestamptz)
     $$,
     'Building created with a use is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );
@@ -308,7 +308,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_outline_id, building_id, name, use, record_begin_lifespan, record_end_lifespan FROM buildings_lds.nz_building_outlines_full_history WHERE building_id = 1500022 ORDER BY building_outline_id, record_begin_lifespan',
-    $$VALUES (1500022, 1500022, NULL::varchar, 'Abattoir'::varchar, '2017-01-22 09:00:00'::timestamp, '2018-01-22 09:00:00'::timestamp)
+    $$VALUES (1500022, 1500022, NULL::varchar, 'Abattoir'::varchar, '2017-01-22 09:00:00'::timestamptz, '2018-01-22 09:00:00'::timestamptz)
     $$,
     'Building created with a use which was then removed is correctly represented in buildings_lds.nz_building_outlines_full_history table.'
 );

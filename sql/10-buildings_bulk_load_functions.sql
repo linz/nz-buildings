@@ -46,6 +46,57 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+------------------------------------------------------------------------
+-- BUILDINGS BULK LOAD update shape
+-- returns the number of shapes updated 
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer)
+    RETURNS integer AS
+$$
+    WITH update_shape AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines
+        SET shape = $1
+        WHERE bulk_load_outline_id = $2
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_shape;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer) IS
+'Update shape in bulk_load_outlines table';
+
+------------------------------------------------------------------------
+-- BUILDINGS BULK LOAD update attributes
+-- returns the number of shapes updated 
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(
+      p_bulk_load_outline_id integer
+    , p_bulk_load_status_id integer
+    , p_capture_method_id integer
+    , p_capture_source_id integer
+    , p_suburb_locality_id integer
+    , p_town_city_id integer
+    , p_territorial_authority_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_attributes AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines
+        SET bulk_load_status_id = $2
+        , capture_method_id = $3
+        , capture_source_id = $4
+        , suburb_locality_id = $5
+        , town_city_id = $6
+        , territorial_authority_id = $7
+        WHERE bulk_load_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_attributes;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
+'Update attributes in bulk_load_outlines table';
+
 -------------------------------------------------------------------------
 -- EXISTING SUBSET EXTRACT insert into
   -- returns number of rows inserted into table
@@ -74,6 +125,29 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+------------------------------------------------------------------------
+-- EXISTING SUBSET EXTRACT update
+-- update supplied dataset id of existing subset extracts outline
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(
+      p_supplied_dataset_id integer
+    , p_building_outline_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_supplied_dataset AS (
+        UPDATE buildings_bulk_load.existing_subset_extracts
+        SET supplied_dataset_id = $1
+        WHERE building_outline_id = $2
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_supplied_dataset;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(integer, integer) IS
+'Update supplied_dataset_id in existing_subset_extracts table';
+
 
 -------------------------------------------------------------------------
 -- SUPPLIED DATASET insert into
@@ -156,7 +230,7 @@ $$
     )
     SELECT count(*)::integer FROM transferred_insert;
 
-$$ LANGUAGE sql;
+$$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.transferred_insert(integer, integer) IS
 'Create new records in transferred table';
 
@@ -177,6 +251,24 @@ $$
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_update_transfer_date(integer) IS
 'Update transfer_date in supplied_datasets table';
+
+-------------------------------------------------------------------
+--SUPPLIED DATASET update processed_date
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.supplied_datasets_update_processed_date(integer)
+    RETURNS integer AS
+$$
+    WITH update_processed_date AS (
+        UPDATE buildings_bulk_load.supplied_datasets
+        SET processed_date = now()
+        WHERE supplied_dataset_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_processed_date;
+
+$$ LANGUAGE sql;
+COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_update_processed_date(integer) IS
+'Update processed_date in supplied_datasets table';
 
 -------------------------------------------------------------------
 --REMOVED select by dataset (BUILDING OUTLINES)
@@ -226,6 +318,7 @@ $$
         FROM buildings_bulk_load.added
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
         WHERE supplied.supplied_dataset_id = $1
+            AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.added_select_by_dataset(integer) IS
@@ -241,7 +334,8 @@ $$
         SELECT bulk_load_outline_id
         FROM buildings_bulk_load.matched
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1
+        WHERE supplied.supplied_dataset_id = $1 
+            AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.matched_select_by_dataset(integer) IS
@@ -272,7 +366,8 @@ $$
         SELECT DISTINCT bulk_load_outline_id
         FROM buildings_bulk_load.related
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1
+        WHERE supplied.supplied_dataset_id = $1 
+            AND supplied.bulk_load_status_id != 3
         ORDER BY bulk_load_outline_id DESC
     );
 
