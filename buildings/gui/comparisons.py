@@ -11,24 +11,8 @@ def compare_outlines(self, commit_status):
     result = self.db.execute_no_commit(sql, (self.cmb_imagery.currentText(),))
     hull = result.fetchall()[0][0]
 
-    result = self.db.execute_no_commit(select.building_outlines.format(hull))
+    result = self.db.execute_no_commit(select.building_outlines, (hull, ))
     results = result.fetchall()
-
-        hull = processing.getObject(result['OUTPUT'])
-
-    results = []
-    for feat in hull.getFeatures():
-        geom = feat.geometry()
-        wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-        result = self.db.execute_no_commit(sql, (wkt,))
-        geom = result.fetchall()[0][0]
-        # Find intersecting buildings
-        result = self.db.execute_no_commit(
-            select.building_outlines, (geom,))
-        outlines = result.fetchall()
-        for item in outlines:
-            results.append(item)
 
     if len(results) == 0:
         # No intersecting outlines
