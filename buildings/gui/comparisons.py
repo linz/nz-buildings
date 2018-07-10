@@ -25,7 +25,7 @@ def compare_outlines(self, commit_status):
         geom = result.fetchall()[0][0]
         # Find intersecting buildings
         result = self.db.execute_no_commit(
-            select.building_outlines.format(geom))
+            select.building_outlines, (geom,))
         outlines = result.fetchall()
         for item in outlines:
             results.append(item)
@@ -33,8 +33,8 @@ def compare_outlines(self, commit_status):
     if len(results) == 0:
         # No intersecting outlines
         results = self.db.execute_no_commit(
-            select.bulk_load_outlines_ID_by_datasetID.format(
-                self.current_dataset
+            select.bulk_load_outlines_ID_by_datasetID, (
+                self.current_dataset,
             ))
         bulk_loaded_ids = results.fetchall()
         for id in bulk_loaded_ids:
