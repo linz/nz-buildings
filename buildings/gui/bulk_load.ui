@@ -71,7 +71,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QGroupBox" name="gpb_bulk_load">
+    <widget class="QGroupBox" name="grpb_bulk_load">
      <property name="styleSheet">
       <string notr="true">
 QGroupBox {

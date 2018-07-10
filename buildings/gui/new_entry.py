@@ -147,7 +147,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if organisation in buildings_bulk_load.organisation table
         result = self.db._execute(
-            select.organisation_by_value.format(organisation))
+            select.organisation_by_value, (organisation,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
@@ -176,7 +176,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
         result = self.db._execute(
-            select.Lifecycle_stage_by_value.format(lifecycle_stage))
+            select.Lifecycle_stage_by_value, (lifecycle_stage,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
@@ -207,7 +207,7 @@ class NewEntry(QFrame, FORM_CLASS):
 
         # check if capture method in buildings_common.capture_method table
         result = self.db._execute(
-            select.capture_method_by_value.format(capture_method))
+            select.capture_method_by_value, (capture_method,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
@@ -238,7 +238,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # Check if capture source group in buildings
         # _common.capture_source_group table
-        result = self.db._execute(select.capture_srcgrp_by_value.format(capture_source_group,))
+        result = self.db._execute(select.capture_srcgrp_by_value, (capture_source_group,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:

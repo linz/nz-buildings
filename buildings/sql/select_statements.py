@@ -1,6 +1,6 @@
 """
 --------------------------------------------------------------------
-Buidlings
+Buildings
 --------------------------------------------------------------------
 """
 
@@ -9,14 +9,14 @@ Buidlings
 building_outlines = """
 SELECT *
 FROM buildings.building_outlines bo
-WHERE ST_Intersects(bo.shape, '{}')
+WHERE ST_Intersects(bo.shape, %s)
 AND bo.building_outline_id NOT IN ( SELECT building_outline_id FROM buildings_bulk_load.removed );
 """
 
 building_outlines_end_lifespan_by_id = """
 SELECT end_lifespan
 FROM buildings.building_outlines
-WHERE building_outline_id = {};
+WHERE building_outline_id = %s;
 """
 
 # lifecycle stage
@@ -24,7 +24,7 @@ WHERE building_outline_id = {};
 Lifecycle_stage_by_value = """
 SELECT *
 FROM buildings.lifecycle_stage
-WHERE value = '{}';
+WHERE value = %s;
 """
 
 """
@@ -38,13 +38,13 @@ Bulk Load Outlines
 bulk_load_outlines_ID_by_datasetID = """
 SELECT bulk_load_outline_id
 FROM buildings_bulk_load.bulk_load_outlines blo
-WHERE blo.supplied_dataset_id = {};
+WHERE blo.supplied_dataset_id = %s;
 """
 
 bulk_load_outline_shape_by_id = """
 SELECT shape
 FROM buildings_bulk_load.bulk_load_outlines
-WHERE bulk_load_outline_id = {};
+WHERE bulk_load_outline_id = %s;
 """
 
 # Organisation
@@ -52,7 +52,7 @@ WHERE bulk_load_outline_id = {};
 organisation_by_value = """
 SELECT *
 FROM buildings_bulk_load.organisation
-WHERE value = '{}';
+WHERE value = %s;
 """
 
 organisation_value = """
@@ -65,7 +65,7 @@ SELECT value
 FROM buildings_bulk_load.organisation o,
     buildings_bulk_load.bulk_load_outlines blo,
     buildings_bulk_load.supplied_datasets sd
-WHERE blo.supplied_dataset_id = {}
+WHERE blo.supplied_dataset_id = %s
 AND blo.supplied_dataset_id = sd.supplied_dataset_id
 AND sd.supplier_id = o.organisation_id;
 """
@@ -73,7 +73,7 @@ AND sd.supplier_id = o.organisation_id;
 organisation_ID_by_value = """
 SELECT organisation_id
 FROM buildings_bulk_load.organisation o
-WHERE o.value = '{}';
+WHERE o.value = %s;
 """
 
 
@@ -82,7 +82,7 @@ WHERE o.value = '{}';
 dataset_description_by_datasetID = """
 SELECT description
 FROM buildings_bulk_load.supplied_datasets sd
-WHERE sd.supplied_dataset_id = {};
+WHERE sd.supplied_dataset_id = %s;
 """
 
 dataset_count_processed_date_is_null = """
@@ -128,13 +128,13 @@ SELECT value
 FROM buildings_bulk_load.bulk_load_status bls,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE blo.bulk_load_status_id = bls.bulk_load_status_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 bulk_load_status_id_by_value = """
 SELECT bulk_load_status_id
 FROM buildings_bulk_load.bulk_load_status bls
-WHERE bls.value = '{}';
+WHERE bls.value = %s;
 """
 
 # existing subset extracts
@@ -142,7 +142,7 @@ WHERE bls.value = '{}';
 existing_subset_extracts_by_building_outlineID = """
 SELECT building_outline_id
 FROM buildings_bulk_load.existing_subset_extracts
-WHERE building_outline_id = {};
+WHERE building_outline_id = %s;
 """
 
 # added
@@ -152,7 +152,7 @@ FROM buildings_bulk_load.added
 WHERE bulk_load_outline_id IN (
       SELECT bulk_load_outline_id
       FROM buildings_bulk_load.bulk_load_outlines
-      WHERE supplied_dataset_id = {});
+      WHERE supplied_dataset_id = %s);
 """
 
 # matched
@@ -163,7 +163,7 @@ FROM buildings_bulk_load.matched
 WHERE bulk_load_outline_id IN(
       SELECT bulk_load_outline_id
       FROM buildings_bulk_load.bulk_load_outlines
-      WHERE supplied_dataset_id = {});
+      WHERE supplied_dataset_id = %s);
 """
 
 # related
@@ -174,7 +174,7 @@ FROM buildings_bulk_load.related
 WHERE bulk_load_outline_id IN (
     SELECT bulk_load_outline_id
     FROM buildings_bulk_load.bulk_load_outlines
-    WHERE supplied_dataset_id = {});
+    WHERE supplied_dataset_id = %s);
 """
 
 """
@@ -195,13 +195,13 @@ SELECT value
 FROM buildings_common.capture_method cm,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE blo.capture_method_id = cm.capture_method_id
-AND blo.supplied_dataset_id = {};
+AND blo.supplied_dataset_id = %s;
 """
 
 capture_method_ID_by_value = """
 SELECT capture_method_id
 FROM buildings_common.capture_method cm
-WHERE cm.value = '{}';
+WHERE cm.value = %s;
 """
 
 capture_method_value_by_bulk_outlineID = """
@@ -209,13 +209,13 @@ SELECT value
 FROM buildings_common.capture_method cm,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE blo.capture_method_id = cm.capture_method_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 capture_method_by_value = """
 SELECT *
 FROM buildings_common.capture_method
-WHERE buildings_common.capture_method.value = '{}';
+WHERE buildings_common.capture_method.value = %s;
 """
 
 # capture source group
@@ -228,7 +228,7 @@ FROM buildings_common.capture_source_group;
 capture_srcgrp_by_value = """
 SELECT *
 FROM buildings_common.capture_source_group
-WHERE buildings_common.capture_source_group.value = '{}';
+WHERE buildings_common.capture_source_group.value = %s;
 """
 
 capture_srcgrp_capture_srcgrpID_by_datasetID = """
@@ -236,7 +236,7 @@ SELECT cs.capture_source_group_id
 FROM buildings_common.capture_source_group csg,
      buildings_common.capture_source cs,
      buildings_bulk_load.bulk_load_outlines blo
-WHERE blo.supplied_dataset_id = {}
+WHERE blo.supplied_dataset_id = %s
 AND blo.capture_source_id = cs.capture_source_id
 AND cs.capture_source_group_id = csg.capture_source_group_id;
 """
@@ -244,14 +244,14 @@ AND cs.capture_source_group_id = csg.capture_source_group_id;
 capture_source_group_srcrpID_by_value = """
 SELECT capture_source_group_id
 FROM buildings_common.capture_source_group
-WHERE value = '{}';
+WHERE value = %s;
 """
 
 capture_srcgrp_by_value_and_description = """
 SELECT capture_source_group_id
 FROM buildings_common.capture_source_group csg
-WHERE csg.value = '{}'
-AND csg.description = '{}';
+WHERE csg.value = %s
+AND csg.description = %s;
 """
 
 capture_source_group_value_desc_external = """
@@ -272,7 +272,7 @@ FROM buildings_common.capture_source_group csg,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE csg.capture_source_group_id = cs.capture_source_group_id
 AND blo.capture_source_id = cs.capture_source_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 # capture source
@@ -281,7 +281,7 @@ capture_src_extsrcID_by_datasetID = """
 SELECT cs.external_source_id
 FROM buildings_common.capture_source cs,
      buildings_bulk_load.bulk_load_outlines blo
-WHERE blo.supplied_dataset_id = {}
+WHERE blo.supplied_dataset_id = %s
 AND blo.capture_source_id = cs.capture_source_id;
 """
 
@@ -293,14 +293,14 @@ FROM buildings_common.capture_source;
 capture_source_ID_by_capsrcgrpID_and_externalSrcID = """
 SELECT capture_source_id
 FROM buildings_common.capture_source cs,
-WHERE cs.capture_source_group_id = {0}
-AND cs.external_source_id = {1};
+WHERE cs.capture_source_group_id = %s
+AND cs.external_source_id = %s;
 """
 
 capture_source_ID_by_capsrcgrdID_is_null = """
 SELECT cs.capture_source_id
 FROM buildings_common.capture_source cs
-WHERE cs.capture_source_group_id = {}
+WHERE cs.capture_source_group_id = %s
 AND cs.external_source_id is NULL;
 """
 
@@ -312,14 +312,14 @@ FROM buildings_common.capture_source_group;
 
 capture_source_by_external_or_group_id = """
 SELECT * FROM buildings_common.capture_source
-WHERE buildings_common.capture_source.external_source_id = '{0}'
-OR buildings_common.capture_source.capture_source_group_id = {1};
+WHERE buildings_common.capture_source.external_source_id = %s
+OR buildings_common.capture_source.capture_source_group_id = %s;
 """
 
 capture_source_by_group_id_external_is_null = """
 SELECT * FROM buildings_common.capture_source
 WHERE buildings_common.capture_source.external_source_id = NULL
-OR buildings_common.capture_source.capture_source_group_id = {};
+OR buildings_common.capture_source.capture_source_group_id = %s;
 """
 
 
@@ -341,13 +341,13 @@ SELECT suburb_4th
 FROM buildings_reference.suburb_locality sl,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE sl.suburb_locality_id = blo.suburb_locality_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 suburb_locality_id_by_suburb_4th = """
 SELECT suburb_locality_id
 FROM buildings_reference.suburb_locality
-WHERE buildings_reference.suburb_locality.suburb_4th = '{}';
+WHERE buildings_reference.suburb_locality.suburb_4th = %s;
 """
 
 # town city
@@ -362,13 +362,13 @@ SELECT name
 FROM buildings_reference.town_city tc,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE tc.town_city_id = blo.town_city_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 town_city_ID_by_name = """
 SELECT town_city_id
 FROM buildings_reference.town_city
-WHERE buildings_reference.town_city.name = '{}';
+WHERE buildings_reference.town_city.name = %s;
 """
 
 # territorial Authority
@@ -383,11 +383,11 @@ SELECT name
 FROM buildings_reference.territorial_authority ta,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE ta.territorial_authority_id = blo.territorial_authority_id
-AND blo.bulk_load_outline_id = {};
+AND blo.bulk_load_outline_id = %s;
 """
 
 territorial_authority_ID_by_name = """
 SELECT territorial_authority_id
 FROM buildings_reference.territorial_authority
-WHERE buildings_reference.territorial_authority.name = '{}';
+WHERE buildings_reference.territorial_authority.name = %s;
 """
