@@ -7,11 +7,11 @@ def compare_outlines(self, commit_status):
     """
     self.db.open_cursor()
 
-    sql = 'SELECT shape FROM buildings_reference.imagery_surveys WHERE imagery = %s;'
-    result = self.db.execute_no_commit(sql, (self.cmb_imagery.currentText(),))
+    sql = 'SELECT shape FROM buildings_reference.capture_source_area WHERE area_title = %s;'
+    result = self.db.execute_no_commit(sql, (self.cmb_capture_source_area.currentText(),))
     hull = result.fetchall()[0][0]
 
-    result = self.db.execute_no_commit(select.building_outlines, (hull, ))
+    result = self.db.execute_no_commit(select.building_outlines, (hull,))
     results = result.fetchall()
 
     if len(results) == 0:

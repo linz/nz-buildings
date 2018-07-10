@@ -227,7 +227,7 @@ QGroupBox::title {
     </spacer>
    </item>
    <item>
-    <widget class="QComboBox" name="cmb_imagery"/>
+    <widget class="QComboBox" name="cmb_capture_source_area"/>
    </item>
    <item>
     <widget class="QPushButton" name="btn_compare_outlines">
