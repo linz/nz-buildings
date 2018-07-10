@@ -70,6 +70,3 @@ def compare_outlines(self, commit_status):
         self.db.execute_no_commit(sql, (self.current_dataset,))
     if commit_status:
         self.db.commit_open_cursor()
-
-            select.bulk_load_outlines_id_by_datasetID, (
-                self.current_dataset,
