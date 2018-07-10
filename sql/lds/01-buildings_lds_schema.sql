@@ -23,10 +23,10 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
     , capture_method character varying(250) NOT NULL
     , capture_source character varying(250) NOT NULL
     , external_source_id character varying(250)
-    , outline_begin_lifespan timestamp NOT NULL
-    , building_begin_lifespan timestamp NOT NULL
-    , name_begin_lifespan timestamp
-    , use_begin_lifespan timestamp
+    , outline_begin_lifespan timestamptz NOT NULL
+    , building_begin_lifespan timestamptz NOT NULL
+    , name_begin_lifespan timestamptz
+    , use_begin_lifespan timestamptz
     , shape public.geometry(Polygon, 2193) NOT NULL
 );
 
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines_full_history (
     , capture_source character varying(250) NOT NULL
     , external_source_id character varying(250)
     , building_lifecycle character varying(40) NOT NULL
-    , record_begin_lifespan timestamp NOT NULL
-    , record_end_lifespan timestamp
+    , record_begin_lifespan timestamptz NOT NULL
+    , record_end_lifespan timestamptz
     , shape public.geometry(Polygon, 2193) NOT NULL
 );
 

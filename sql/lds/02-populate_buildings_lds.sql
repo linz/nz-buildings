@@ -85,38 +85,50 @@ $$
             , record_end_lifespan
             , shape
         )
-        WITH full_history AS (
-            SELECT
-                  building_outlines.building_outline_id
-                , building_outlines.building_id
-                , building_name.building_name As name
-                , use.value AS use
-                , greatest(building_outlines.begin_lifespan, buildings.begin_lifespan, building_name.begin_lifespan, building_use.begin_lifespan) AS record_begin_lifespan
-                , least(building_outlines.end_lifespan, buildings.end_lifespan, building_name.end_lifespan, building_use.end_lifespan) AS record_end_lifespan
+        WITH events AS (
+            SELECT building_id, begin_lifespan AS change
+            FROM buildings.buildings
+            UNION
+            SELECT building_id, end_lifespan AS change
+            FROM buildings.buildings
+            UNION
+            SELECT building_id, begin_lifespan AS change
             FROM buildings.building_outlines
-            JOIN buildings.buildings USING (building_id)
-            LEFT JOIN buildings.building_name USING (building_id)
-            LEFT JOIN buildings.building_use USING (building_id)
-            LEFT JOIN buildings.use USING (use_id)
-            GROUP BY
-                  building_outlines.building_outline_id
-                , building_outlines.building_id
-                , building_name.building_name
-                , use.value
-                , building_outlines.begin_lifespan
-                , building_outlines.end_lifespan
-                , buildings.begin_lifespan
-                , buildings.end_lifespan
-                , building_name.begin_lifespan
-                , building_name.end_lifespan
-                , building_use.begin_lifespan
-                , building_use.end_lifespan
+            UNION
+            SELECT building_id, end_lifespan AS change
+            FROM buildings.building_outlines
+            UNION
+            SELECT building_id, begin_lifespan AS change
+            FROM buildings.building_name
+            UNION
+            SELECT building_id, end_lifespan AS change
+            FROM buildings.building_name
+            UNION
+            SELECT building_id, begin_lifespan AS change
+            FROM buildings.building_use
+            UNION
+            SELECT building_id, end_lifespan AS change
+            FROM buildings.building_use
+            ORDER BY 1, 2
+        ), unique_events AS (
+            SELECT
+                  row_number() OVER() AS change_id
+                , *
+            FROM events
+        ), record_dates AS (
+            SELECT
+                  a.building_id
+                , a.change AS record_begin_lifespan
+                , b.change AS record_end_lifespan
+            FROM unique_events a
+            JOIN unique_events b USING (building_id)
+            WHERE (a.change_id + 1) = b.change_id
         )
         SELECT
-              full_history.building_outline_id
-            , full_history.building_id
-            , full_history.name
-            , full_history.use
+              bo.building_outline_id
+            , rd.building_id
+            , bn.building_name
+            , u.value
             , suburb_locality.suburb_4th
             , town_city.name
             , territorial_authority.name
@@ -124,20 +136,31 @@ $$
             , capture_source_group.value
             , capture_source.external_source_id
             , lifecycle_stage.value
-            , full_history.record_begin_lifespan
-            , full_history.record_end_lifespan
-            , building_outlines.shape
-        FROM full_history
-        JOIN buildings.building_outlines USING (building_outline_id)
-        JOIN buildings.buildings ON full_history.building_id = buildings.building_id
+            , rd.record_begin_lifespan
+            , rd.record_end_lifespan
+            , bo.shape
+        FROM record_dates rd
+        JOIN buildings.buildings b ON rd.building_id = b.building_id
+            AND rd.record_begin_lifespan >= b.begin_lifespan
+            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(b.end_lifespan, now())
+        JOIN buildings.building_outlines bo ON rd.building_id = bo.building_id
+            AND rd.record_begin_lifespan >= bo.begin_lifespan
+            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bo.end_lifespan, now())
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
-        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
-        ORDER BY full_history.building_outline_id
+        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = bo.suburb_locality_id
+        JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
+        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = bo.territorial_authority_id
+        LEFT JOIN buildings.building_name bn ON rd.building_id = bn.building_id
+            AND rd.record_begin_lifespan >= bn.begin_lifespan
+            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bn.end_lifespan, now())
+        LEFT JOIN buildings.building_use bu ON rd.building_id = bu.building_id
+            AND rd.record_begin_lifespan >= bu.begin_lifespan
+            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bu.end_lifespan, now())
+        LEFT JOIN buildings.use u USING (use_id)
+        ORDER BY bo.building_outline_id, rd.record_begin_lifespan
         RETURNING *
     )
     SELECT count(*)::integer FROM populate_nz_building_outlines_full_history;
