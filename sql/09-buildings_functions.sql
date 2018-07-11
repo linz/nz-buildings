@@ -64,6 +64,58 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+-------------------------------------------------------------------
+--BUILDINGS update shape
+-------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_shape(geometry, integer)
+    RETURNS integer AS
+$$
+
+    WITH update_buildings AS (
+        UPDATE buildings.building_outlines
+        SET shape = $1
+        WHERE building_outline_id = $2
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_buildings;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.buildings_update_shape(geometry, integer) IS
+'Update shape in building_outlines table';
+
+------------------------------------------------------------------------
+-- BUILDING OUTLINES update attributes
+-- returns the number of outlines updated
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_attributes(
+      p_building_outline_id integer
+    , p_capture_method_id integer
+    , p_capture_source_id integer
+    , p_lifecycle_stage_id integer
+    , p_suburb_locality_id integer
+    , p_town_city_id integer
+    , p_territorial_authority_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_attributes AS (
+        UPDATE buildings.building_outlines
+        SET capture_method_id = $2
+        , capture_source_id = $3
+        , lifecycle_stage_id = $4
+        , suburb_locality_id = $5
+        , town_city_id = $6
+        , territorial_authority_id = $7
+        WHERE building_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_attributes;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings.building_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
+'Update attributes in building_outlines table';
+
 -------------------------------------------------------------------------
 -- LIFECYCLE STAGE insert into
 -------------------------------------------------------------------------
