@@ -8,6 +8,7 @@ from PyQt4.QtGui import QFrame
 from buildings.gui.bulk_load_frame import BulkLoadFrame
 from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
+from buildings.gui.production_frame import ProductionFrame
 from buildings.utilities import database as db
 
 import qgis
@@ -43,9 +44,12 @@ class MenuFrame(QFrame, FORM_CLASS):
 
     def production_clicked(self):
         """
-        Called when add capture source button is clicked
+        Called when production button is clicked
         """
-        pass
+        self.db.close_connection()
+        dw = qgis.utils.plugins['roads'].dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(ProductionFrame(self.layer_registry))
 
     def new_entry_clicked(self):
         """

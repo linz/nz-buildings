@@ -19,10 +19,35 @@ FROM buildings.building_outlines
 WHERE building_outline_id = %s;
 """
 
+building_outline_shape_by_id = """
+SELECT shape
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
+
 # lifecycle stage
 
-Lifecycle_stage_by_value = """
+lifecycle_stage_by_value = """
 SELECT *
+FROM buildings.lifecycle_stage
+WHERE value = %s;
+"""
+
+lifecycle_stage_value = """
+SELECT value
+FROM buildings.lifecycle_stage;
+"""
+
+lifecycle_stage_value_by_outlineID = """
+SELECT ls.value
+FROM buildings.lifecycle_stage ls,
+     buildings.building_outlines bo
+WHERE bo.building_outline_id = %s
+AND bo.lifecycle_stage_id = ls.lifecycle_stage_id;
+"""
+
+lifecycle_stage_ID_by_value = """
+SELECT lifecycle_stage_id
 FROM buildings.lifecycle_stage
 WHERE value = %s;
 """
@@ -212,6 +237,14 @@ WHERE blo.capture_method_id = cm.capture_method_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+capture_method_value_by_building_outlineID = """
+SELECT value
+FROM buildings_common.capture_method cm,
+     buildings.building_outlines bo
+WHERE bo.capture_method_id = cm.capture_method_id
+AND bo.building_outline_id = %s;
+"""
+
 capture_method_by_value = """
 SELECT *
 FROM buildings_common.capture_method
@@ -273,6 +306,18 @@ FROM buildings_common.capture_source_group csg,
 WHERE csg.capture_source_group_id = cs.capture_source_group_id
 AND blo.capture_source_id = cs.capture_source_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+capture_source_group_value_desc_external_by_building_outlineID = """
+SELECT csg.value,
+       csg.description,
+       cs.external_source_id
+FROM buildings_common.capture_source_group csg,
+     buildings_common.capture_source cs,
+     buildings.building_outlines bo
+WHERE csg.capture_source_group_id = cs.capture_source_group_id
+AND bo.capture_source_id = cs.capture_source_id
+AND bo.building_outline_id = %s;
 """
 
 # capture source
@@ -344,6 +389,14 @@ WHERE sl.suburb_locality_id = blo.suburb_locality_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+suburb_locality_suburb_4th_by_building_outlineID = """
+SELECT suburb_4th
+FROM buildings_reference.suburb_locality sl,
+     buildings.building_outlines bo
+WHERE sl.suburb_locality_id = bo.suburb_locality_id
+AND bo.building_outline_id = %s;
+"""
+
 suburb_locality_id_by_suburb_4th = """
 SELECT suburb_locality_id
 FROM buildings_reference.suburb_locality
@@ -365,6 +418,14 @@ WHERE tc.town_city_id = blo.town_city_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+town_city_name_by_building_outlineID = """
+SELECT name
+FROM buildings_reference.town_city tc,
+     buildings.building_outlines bo
+WHERE tc.town_city_id = bo.town_city_id
+AND bo.building_outline_id = %s;
+"""
+
 town_city_ID_by_name = """
 SELECT town_city_id
 FROM buildings_reference.town_city
@@ -384,6 +445,14 @@ FROM buildings_reference.territorial_authority ta,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE ta.territorial_authority_id = blo.territorial_authority_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+territorial_authority_name_by_building_outline_id = """
+SELECT name
+FROM buildings_reference.territorial_authority ta,
+     buildings.building_outlines bo
+WHERE ta.territorial_authority_id = bo.territorial_authority_id
+AND bo.building_outline_id = %s;
 """
 
 territorial_authority_ID_by_name = """
