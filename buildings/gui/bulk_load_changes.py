@@ -632,12 +632,12 @@ class EditBulkLoad(BulkLoadChanges):
             select.current_related_outlines, (
                 self.bulk_load_frame.current_dataset,))
         related_outlines = related_outlines.fetchall()
-        idk = {}
+        related_dictionary = {}
         for outline in related_outlines:
-            if outline[0] in idk:
-                idk[outline[0]].append(outline[1])
+            if outline[0] in related_dictionary:
+                related_dictionary[outline[0]].append(outline[1])
             else:
-                idk[outline[0]] = [outline[1]]
+                related_dictionary[outline[0]] = [outline[1]]
         if len(self.bulk_load_frame.ids) > 0:
             # if there is more than one feature to update
             for item in self.bulk_load_frame.ids:
@@ -658,7 +658,7 @@ class EditBulkLoad(BulkLoadChanges):
                         )
                         self.bulk_load_frame.error_dialog.show()
                         return False
-                if item in idk:
+                if item in related_dictionary:
                     self.bulk_load_frame.error_dialog = ErrorDialog()
                     self.bulk_load_frame.error_dialog.fill_report(
                         '\n ------------------- RELATIONSHIP EXISTS ---------'
@@ -688,7 +688,7 @@ class EditBulkLoad(BulkLoadChanges):
                     self.bulk_load_frame.error_dialog.show()
                     return False
 
-            if self.bulk_load_frame.bulk_load_outline_id in idk:
+            if self.bulk_load_frame.bulk_load_outline_id in related_dictionary:
                 self.bulk_load_frame.error_dialog = ErrorDialog()
                 self.bulk_load_frame.error_dialog.fill_report(
                     '\n ---------------------- RELATIONSHIP EXISTS ---------'

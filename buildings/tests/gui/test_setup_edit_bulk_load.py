@@ -24,7 +24,7 @@ from qgis.utils import plugins
 
 class SetUpEditBulkLoad(unittest.TestCase):
     """
-    Test Add Production Outline GUI initial
+    Test edit bulk_load Outline GUI initial
     setup confirm default settings
     """
     @classmethod

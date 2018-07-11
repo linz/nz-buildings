@@ -176,7 +176,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
         result = self.db._execute(
-            select.Lifecycle_stage_by_value, (lifecycle_stage,))
+            select.lifecycle_stage_by_value, (lifecycle_stage,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:

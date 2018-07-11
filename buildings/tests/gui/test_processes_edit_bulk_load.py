@@ -28,7 +28,7 @@ from buildings.utilities import database as db
 
 
 class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
-    """Test Add New Bulk Outline GUI Processes"""
+    """Test Edit Bulk Outline GUI Processes"""
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
