@@ -105,6 +105,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText('None')
                 self.display_no_bulk_load()
 
+        # populate imagery cmb
+        sql = 'SELECT area_title FROM buildings_reference.capture_source_area;'
+        results = self.db._execute(sql)
+        results = results.fetchall()
+        for thing in results:
+            self.cmb_capture_source_area.addItem(thing[0])
         # set up signals and slots
         self.rad_external_source.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
@@ -168,6 +174,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.grpb_edits.hide()
 
         self.btn_compare_outlines.setDisabled(1)
+        self.cmb_capture_source_area.setDisabled(1)
+        self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
@@ -208,6 +216,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
+        self.cmb_capture_source_area.setDisabled(1)
         self.btn_publish.setEnabled(1)
 
     def display_current_bl_not_compared(self):
@@ -216,6 +225,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         self.display_data_exists()
         self.btn_compare_outlines.setEnabled(1)
+        self.cmb_capture_source_area.setEnabled(1)
+        self.cmb_capture_source_area.setEnabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
@@ -275,6 +286,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         comparisons.compare_outlines(self, commit_status)
         self.btn_publish.setEnabled(1)
         self.btn_compare_outlines.setDisabled(1)
+        self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
 
     def canvas_add_outline(self):

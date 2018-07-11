@@ -50,9 +50,6 @@ class SetUpEditBulkLoad(unittest.TestCase):
             else:
                 cls.building_plugin = plugins.get('buildings')
                 cls.building_plugin.main_toolbar.actions()[0].trigger()
-        # cls.menu_frame = cls.building_plugin.menu_frame
-        # cls.menu_frame.btn_bulk_load.click()
-        # cls.bulk_load_frame = cls.dockwidget.current_frame
 
     @classmethod
     def tearDownClass(cls):
@@ -108,7 +105,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 11)
+        self.assertEqual(len(result), 33)
 
     def test_compare_matched(self):
         """Check correct number of ids are determined as 'Matched'"""
@@ -160,4 +157,4 @@ class SetUpEditBulkLoad(unittest.TestCase):
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 13)
+        self.assertEqual(len(result), 35)
