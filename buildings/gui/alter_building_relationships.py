@@ -993,6 +993,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         dw = plugins['roads'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadFrame(self.layer_registry))
+        iface.actionPan().trigger()
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry
