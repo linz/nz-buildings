@@ -18,7 +18,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(6);
+SELECT plan(8);
 
 -- Tests
 --Buildings-------------------------
@@ -36,6 +36,8 @@ SELECT set_has(
     $$VALUES (1000033)$$,
     'Check contents of building outlines table after building_outlines_insert function has run'
 );
+SELECT has_function('buildings', 'building_outlines_update_shape', 'Should have function buildings_outlines_update_shape in buildings_schema');
+SELECT has_function('buildings', 'building_outlines_update_attributes', 'Should have function buildings_outlines_update_attributes in buildings_schema');
 
 --Existing Subset Extracts-------------------------
 SELECT has_function('buildings_bulk_load', 'existing_subset_extracts_insert', 'Should have function existing_subset_extracts_insert in bulk_load stage schema.');
