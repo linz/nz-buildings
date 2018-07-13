@@ -77,7 +77,7 @@ class SetUpNewEntryTest(unittest.TestCase):
         self.assertTrue(self.new_entry_frame.le_new_entry.isEnabled())
 
     def test_description_disabled(self):
-        """Line edit: description is disbaled on startup"""
+        """Line edit: description is disabled on startup"""
         self.assertFalse(self.new_entry_frame.le_description.isEnabled())
 
     def test_description_enabled_on_capture_source_group(self):

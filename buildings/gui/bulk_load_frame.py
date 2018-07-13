@@ -411,6 +411,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             self.layer_registry, self.current_dataset))
+        from buildings.gui.alter_building_relationships import MultiLayerSelection
+        canvas = iface.mapCanvas()
+        self.tool = MultiLayerSelection(canvas)
+        canvas.setMapTool(self.tool)
 
     def publish_clicked(self, commit_status):
         """
