@@ -331,6 +331,7 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
                 sql, (dataset_id, external_id, capture_method,
                       capture_source, suburb, town_city,
                       territorial_authority, geom))
+    self.db.execute_no_commit(select.small_outlines_update_status)
     self.le_data_description.clear()
     # return 1 if function worked
     return 1
