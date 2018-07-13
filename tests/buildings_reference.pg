@@ -19,7 +19,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(23);
+SELECT plan(19);
 
 -- Schema
 SELECT has_schema('buildings_reference');
@@ -37,12 +37,6 @@ SELECT has_table('buildings_reference', 'coastlines_and_islands', 'Should have c
 SELECT has_index(
     'buildings_reference', 'coastlines_and_islands', 'shx_coastlines_and_islands', 'shape',
     'Should have spatial index on the shape column of the coastlines_and_islands table.'
-);
-
-SELECT has_table('buildings_reference', 'river_centrelines', 'Should have river_centrelines table in the buildings_reference schema.');
-SELECT has_index(
-    'buildings_reference', 'river_centrelines', 'shx_river_centrelines', 'shape',
-    'Should have spatial index on the shape column of the river_centrelines table.'
 );
 
 SELECT has_table('buildings_reference', 'river_polygons', 'Should have river_polygons table in the buildings_reference schema.');
@@ -73,12 +67,6 @@ SELECT has_table('buildings_reference', 'lagoon_polygons', 'Should have lagoon_p
 SELECT has_index(
     'buildings_reference', 'lagoon_polygons', 'shx_lagoon_polygons', 'shape',
     'Should have spatial index on the shape column of the lagoon_polygons table.'
-);
-
-SELECT has_table('buildings_reference', 'canal_centrelines', 'Should have canal_centrelines table in the buildings_reference schema.');
-SELECT has_index(
-    'buildings_reference', 'canal_centrelines', 'shx_canal_centrelines', 'shape',
-    'Should have spatial index on the shape column of the canal_centrelines table.'
 );
 
 SELECT has_table('buildings_reference', 'canal_polygons', 'Should have canal_polygons table in the buildings_reference schema.');

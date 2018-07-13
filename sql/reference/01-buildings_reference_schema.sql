@@ -49,17 +49,6 @@ DROP INDEX IF EXISTS shx_coastlines_and_islands;
 CREATE INDEX shx_coastlines_and_islands
     ON buildings_reference.coastlines_and_islands USING gist (shape);
 
--- River Centrelines
-
-CREATE TABLE IF NOT EXISTS buildings_reference.river_centrelines (
-      river_centreline_id serial PRIMARY KEY
-    , external_river_centreline_id integer
-    , shape public.geometry(Linestring, 2193)
-);
-DROP INDEX IF EXISTS shx_river_centrelines;
-CREATE INDEX shx_river_centrelines
-    ON buildings_reference.river_centrelines USING gist (shape);
-
 -- River Polygons
 
 CREATE TABLE IF NOT EXISTS buildings_reference.river_polygons (
@@ -114,17 +103,6 @@ CREATE TABLE IF NOT EXISTS buildings_reference.lagoon_polygons (
 DROP INDEX IF EXISTS shx_lagoon_polygons;
 CREATE INDEX shx_lagoon_polygons
     ON buildings_reference.lagoon_polygons USING gist (shape);
-
--- Canal Centrelines
-
-CREATE TABLE IF NOT EXISTS buildings_reference.canal_centrelines (
-      canal_centreline_id serial PRIMARY KEY
-    , external_canal_centreline_id integer
-    , shape public.geometry(Linestring, 2193)
-);
-DROP INDEX IF EXISTS shx_canal_centrelines;
-CREATE INDEX shx_canal_centrelines
-    ON buildings_reference.canal_centrelines USING gist (shape);
 
 -- Canal Polygons
 
