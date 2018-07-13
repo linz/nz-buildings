@@ -67,7 +67,7 @@ COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry
 
 ------------------------------------------------------------------------
 -- BUILDINGS BULK LOAD update attributes
--- returns the number of shapes updated 
+-- returns the number of outlines updated
 ------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(
       p_bulk_load_outline_id integer
@@ -96,6 +96,28 @@ $$
 $$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in bulk_load_outlines table';
+
+------------------------------------------------------------------------
+-- BUILDINGS BULK LOAD update bulk load status
+-- returns the number id of the outline updated
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status_id(
+      p_bulk_load_outline_id integer
+    , p_bulk_load_status_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_status AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines
+        SET bulk_load_status_id = $2
+        WHERE bulk_load_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_status;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status_id(integer, integer) IS
+'Update bulk load status in bulk_load_outlines table';
 
 -------------------------------------------------------------------------
 -- EXISTING SUBSET EXTRACT insert into
