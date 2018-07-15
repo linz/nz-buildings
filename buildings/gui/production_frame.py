@@ -177,6 +177,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_all_layers()
 
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))

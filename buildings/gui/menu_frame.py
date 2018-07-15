@@ -38,7 +38,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         Called when bulk loaded button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadFrame(self.layer_registry))
 
@@ -47,7 +47,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         Called when production button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(ProductionFrame(self.layer_registry))
 
@@ -56,7 +56,7 @@ class MenuFrame(QFrame, FORM_CLASS):
         Called when new entry button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewEntry(self.layer_registry))
 
@@ -65,6 +65,6 @@ class MenuFrame(QFrame, FORM_CLASS):
         Called when new capture source button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(self.layer_registry))

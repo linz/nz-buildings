@@ -474,7 +474,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.db.close_connection()
         self.layer_registry.remove_all_layers()
         from buildings.gui.alter_building_relationships import AlterRelationships
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             self.layer_registry, self.current_dataset))
@@ -509,6 +509,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         self.layer_registry.remove_all_layers()
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['roads'].dockwidget
+        dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
