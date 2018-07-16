@@ -98,26 +98,28 @@ COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(int
 'Update attributes in bulk_load_outlines table';
 
 ------------------------------------------------------------------------
--- BUILDINGS BULK LOAD update bulk load status
--- returns the number id of the outline updated
+-- BUILDINGS BULK LOAD update bulk load status of small buildings (less
+-- than 10sqm) to 'Deleted During QA'
+-- returns the number of outlines updated
 ------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status_id(
-      p_bulk_load_outline_id integer
-    , p_bulk_load_status_id integer
-)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_buildings(integer)
     RETURNS integer AS
 $$
-    WITH update_status AS (
+    WITH small_buildings AS (
         UPDATE buildings_bulk_load.bulk_load_outlines
-        SET bulk_load_status_id = $2
-        WHERE bulk_load_outline_id = $1
+        SET bulk_load_status_id = 3
+        WHERE bulk_load_outline_id in (SELECT
+            bulk_load_outline_id
+        FROM buildings_bulk_load.bulk_load_outlines
+        WHERE ST_Area(shape) < 10)
+        AND supplied_dataset_id = $1
         RETURNING *
     )
-    SELECT count(*)::integer FROM update_status;
+    SELECT count(*)::integer FROM small_buildings;
 
 $$ LANGUAGE sql VOLATILE;
-COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status_id(integer, integer) IS
-'Update bulk load status in bulk_load_outlines table';
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_buildings(integer) IS
+'Update bulk load status in bulk_load_outlines table of outlines less than 10sqm';
 
 -------------------------------------------------------------------------
 -- EXISTING SUBSET EXTRACT insert into
@@ -356,7 +358,7 @@ $$
         SELECT bulk_load_outline_id
         FROM buildings_bulk_load.matched
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1 
+        WHERE supplied.supplied_dataset_id = $1
             AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
@@ -388,7 +390,7 @@ $$
         SELECT DISTINCT bulk_load_outline_id
         FROM buildings_bulk_load.related
         JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1 
+        WHERE supplied.supplied_dataset_id = $1
             AND supplied.bulk_load_status_id != 3
         ORDER BY bulk_load_outline_id DESC
     );
