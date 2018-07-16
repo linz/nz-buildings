@@ -101,15 +101,6 @@ FROM buildings_bulk_load.organisation o
 WHERE o.value = %s;
 """
 
-small_outlines_update_status = """
-SELECT buildings_bulk_load.bulk_load_outlines_update_bulk_load_status_id(bulk_load_outline_id, 3)
-FROM buildings_bulk_load.bulk_load_outlines
-WHERE bulk_load_outline_id in (SELECT
-    bulk_load_outline_id
-FROM buildings_bulk_load.bulk_load_outlines
-WHERE ST_Area(shape) < 10);
-"""
-
 # supplied dataset
 
 dataset_description_by_datasetID = """
