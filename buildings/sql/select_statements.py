@@ -88,8 +88,8 @@ FROM buildings_bulk_load.organisation;
 organisation_value_by_datasetID = """
 SELECT value
 FROM buildings_bulk_load.organisation o,
-    buildings_bulk_load.bulk_load_outlines blo,
-    buildings_bulk_load.supplied_datasets sd
+     buildings_bulk_load.bulk_load_outlines blo,
+     buildings_bulk_load.supplied_datasets sd
 WHERE blo.supplied_dataset_id = %s
 AND blo.supplied_dataset_id = sd.supplied_dataset_id
 AND sd.supplier_id = o.organisation_id;
@@ -100,7 +100,6 @@ SELECT organisation_id
 FROM buildings_bulk_load.organisation o
 WHERE o.value = %s;
 """
-
 
 # supplied dataset
 

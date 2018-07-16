@@ -123,7 +123,14 @@ class ProcessBulkLoadTest(unittest.TestCase):
             result = 0
         else:
             result = result.fetchall()[0][0]
-        self.assertEqual(81, result)
+        self.assertEqual(82, result)
+        sql = 'SELECT count(*) FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_status_id = 3;'
+        result = db._execute(sql)
+        if result is None:
+            result = 0
+        else:
+            result = result.fetchall()[0][0]
+        self.assertEqual(1, result)
         # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
