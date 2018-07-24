@@ -32,33 +32,24 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
+        if not plugins.get('buildings'):
             pass
         else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                db.connect()
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+            db.connect()
+            cls.building_plugin = plugins.get('buildings')
+            cls.dockwidget = cls.building_plugin.dockwidget
+            cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         db.close_connection()
-        cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
-        self.dockwidget = self.road_plugin.dockwidget
+        self.building_plugin.main_toolbar.actions()[0].trigger() 
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_production.click()
         self.production_frame = self.dockwidget.current_frame
@@ -75,7 +66,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=-1)
+                         delay=30)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -87,19 +78,19 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878262, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878262, 5555290)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223, 5555290)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1878223, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.qWait(1)
         # tests
         self.assertTrue(self.production_frame.btn_save.isEnabled())
@@ -120,7 +111,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1747520, 5428152)),
-                         delay=-1)
+                         delay=30)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -132,19 +123,19 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878262, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878262, 5555290)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223, 5555290)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878223, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.mouseClick(widget, Qt.RightButton,
                          pos=canvas_point(QgsPoint(1878223, 5555314)),
-                         delay=-1)
+                         delay=30)
         QTest.qWait(1)
         # tests
         self.assertTrue(self.production_frame.btn_save.isEnabled())

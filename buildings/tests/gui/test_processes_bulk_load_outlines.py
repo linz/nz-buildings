@@ -16,13 +16,12 @@
  ***************************************************************************/
 """
 
+import os
 import unittest
 
 from qgis.core import QgsMapLayerRegistry
-from qgis.utils import plugins, iface
+from qgis.utils import iface, plugins
 from buildings.utilities import database as db
-import qgis
-import os
 
 
 class ProcessBulkLoadTest(unittest.TestCase):
@@ -31,27 +30,18 @@ class ProcessBulkLoadTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
+        if not plugins.get('buildings'):
             pass
         else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                db.connect()
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+            db.connect()
+            cls.building_plugin = plugins.get('buildings')
+            cls.dockwidget = cls.building_plugin.dockwidget
+            cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         db.close_connection()
-        cls.road_plugin.dockwidget.close()
         # remove temporary layers from canvas
         layers = iface.legendInterface().layers()
         for layer in layers:
@@ -60,9 +50,9 @@ class ProcessBulkLoadTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
-        self.dockwidget = self.road_plugin.dockwidget
+        self.building_plugin.main_toolbar.actions()[0].trigger() 
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
@@ -73,7 +63,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
         self.bulk_load_frame.db.rollback_open_cursor()
-        qgis.utils.reloadPlugin('buildings')
 
     def test_external_id_radiobutton(self):
         """external source fields enable when external id radio button is enabled"""

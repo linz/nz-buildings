@@ -32,33 +32,24 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
+        if not plugins.get('buildings'):
             pass
         else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                db.connect()
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+            db.connect()
+            cls.building_plugin = plugins.get('buildings')
+            cls.dockwidget = cls.building_plugin.dockwidget
+            cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         db.close_connection()
-        cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
-        self.dockwidget = self.road_plugin.dockwidget
+        self.building_plugin.main_toolbar.actions()[0].trigger() 
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame

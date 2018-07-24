@@ -1,19 +1,14 @@
 
-import unittest
 import os
-import getpass
+import sys
+import unittest
 
+__location__ = os.path.dirname(os.path.realpath(__file__))
 
-def run_test_modules(test_folder):
+def run_test_modules():
     """
     Loops through all TestCase instances in a test folder to find
     unique test modules
     """
-    unittest.TestLoader().discover(test_folder, pattern="test_setup*.py")
-    unittest.TestLoader().discover(test_folder, pattern="test_processes*.py")
-
-
-login = getpass.getuser()
-path = os.path.join('/home', login, '.qgis2/python/plugins/buildings/tests')
-
-run_test_modules(path)
+    test_suite = unittest.TestLoader().discover(__location__, pattern="test_*.py")
+    unittest.TextTestRunner(verbosity=3, stream=sys.stdout).run(test_suite)
