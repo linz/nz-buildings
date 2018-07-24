@@ -18,6 +18,9 @@ CREATE TABLE IF NOT EXISTS buildings_reference.suburb_locality (
     , suburb_1st character varying(60)
     , shape public.geometry(MultiPolygon, 2193)
 );
+DROP INDEX IF EXISTS shx_suburb_locality;
+CREATE INDEX shx_suburb_locality
+    ON buildings_reference.suburb_locality USING gist (shape);
 
 -- Town / City
 
@@ -27,6 +30,9 @@ CREATE TABLE IF NOT EXISTS buildings_reference.town_city (
     , name character varying(60)
     , shape public.geometry(MultiPolygon, 2193)
 );
+DROP INDEX IF EXISTS shx_town_city;
+CREATE INDEX shx_town_city
+    ON buildings_reference.town_city USING gist (shape);
 
 -- Territorial Authority
 
@@ -36,6 +42,9 @@ CREATE TABLE IF NOT EXISTS buildings_reference.territorial_authority (
     , name character varying(100)
     , shape public.geometry(MultiPolygon, 2193)
 );
+DROP INDEX IF EXISTS shx_territorial_authority;
+CREATE INDEX shx_territorial_authority
+    ON buildings_reference.territorial_authority USING gist (shape);
 
 -- Coastline
 
@@ -123,3 +132,6 @@ CREATE TABLE IF NOT EXISTS buildings_reference.capture_source_area (
     , area_title varchar (250)
     , shape public.geometry(MultiPolygon, 2193)
 );
+DROP INDEX IF EXISTS shx_capture_source_area;
+CREATE INDEX shx_capture_source_area
+    ON buildings_reference.capture_source_area USING gist (shape);
