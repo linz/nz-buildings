@@ -220,44 +220,25 @@ class Buildings:
         self.dockwidget.raise_()
 
         self.setup_main_toolbar()
-        if self.menu_frame:
-            dw = self.dockwidget
-            if dw.lst_options.item(0) is None:
-                home_dir = os.path.split(os.path.dirname(__file__))
-                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
-                item = QListWidgetItem("Buildings")
-                item.setIcon(QIcon(icon_path))
-                dw.lst_options.addItem(item)
-                dw.lst_options.setCurrentItem(item)
-            canvas = iface.mapCanvas()
-            selectedcrs = "EPSG:2193"
-            target_crs = QgsCoordinateReferenceSystem()
-            target_crs.createFromUserInput(selectedcrs)
-            canvas.setDestinationCrs(target_crs)
-            dw.lst_options.currentItemChanged.connect(self.item_changed)
-            dw.lst_options.setCurrentRow(0)
-            dw.stk_options.setCurrentIndex(1)
-
-        if not self.menu_frame:
-            dw = self.dockwidget
-            self.layer_registry = LayerRegistry()
-            # no base layers
-            self.menu_frame = MenuFrame(self.layer_registry)
-            dw.insert_into_frames('menu_frame', self.menu_frame)
-            if dw.lst_options.item(0) is None:
-                home_dir = os.path.split(os.path.dirname(__file__))
-                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
-                item = QListWidgetItem("Buildings")
-                item.setIcon(QIcon(icon_path))
-                dw.lst_options.addItem(item)
-                dw.lst_options.setCurrentItem(item)
-            canvas = iface.mapCanvas()
-            selectedcrs = "EPSG:2193"
-            target_crs = QgsCoordinateReferenceSystem()
-            target_crs.createFromUserInput(selectedcrs)
-            canvas.setDestinationCrs(target_crs)
-            dw.lst_options.currentItemChanged.connect(self.item_changed)
-            self.on_click()
+        dw = self.dockwidget
+        self.layer_registry = LayerRegistry()
+        # no base layers
+        self.menu_frame = MenuFrame(self.layer_registry)
+        dw.insert_into_frames('menu_frame', self.menu_frame)
+        if dw.lst_options.item(0) is None:
+            home_dir = os.path.split(os.path.dirname(__file__))
+            icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
+            item = QListWidgetItem("Buildings")
+            item.setIcon(QIcon(icon_path))
+            dw.lst_options.addItem(item)
+            dw.lst_options.setCurrentItem(item)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        dw.lst_options.currentItemChanged.connect(self.item_changed)
+        self.on_click()
 
     def on_click(self):
         dw = self.dockwidget
@@ -285,39 +266,33 @@ class Buildings:
         iface.actionPan().trigger()
 
     def item_changed(self, item):
-        if item.text() == "Road Workflows":
-            if QgsProject is not None:
-                root = QgsProject.instance().layerTreeRoot()
-                group = root.findGroup("Building Tool Layers")
-                layers = group.findLayers()
-                for layer in layers:
-                    if layer.layer().name() == "building_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        iface.actionCancelEdits().trigger()
-                    if layer.layer().name() == "bulk_load_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        iface.actionCancelEdits().trigger()
-        elif item.text() == "Buildings":
-            if QgsProject is not None:
-                root = QgsProject.instance().layerTreeRoot()
-                group = root.findGroup("Building Tool Layers")
-                layers = group.findLayers()
-                for layer in layers:
-                    if layer.layer().name() == "building_outlines":
-                        dw = qgis.utils.plugins['roads'].dockwidget
-                        if isinstance(dw.current_frame, ProductionFrame):
-                            if dw.current_frame.rad_edit.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionNodeTool().trigger()
-                            if dw.current_frame.rad_add.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionAddFeature().trigger()
-                    if layer.layer().name() == "bulk_load_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        layer.layer().startEditing()
-                        iface.actionAddFeature().trigger()
+        if item:
+            if item.text() != "Buildings":
+                if QgsProject is not None:
+                    root = QgsProject.instance().layerTreeRoot()
+                    group = root.findGroup("Building Tool Layers")
+                    layers = group.findLayers()
+                    for layer in layers:
+                        if layer.layer().name() == "building_outlines":
+                            iface.setActiveLayer(layer.layer())
+                            iface.actionCancelEdits().trigger()
+                        if layer.layer().name() == "bulk_load_outlines":
+                            iface.setActiveLayer(layer.layer())
+                            iface.actionCancelEdits().trigger()
+            else:
+                if QgsProject is not None:
+                    root = QgsProject.instance().layerTreeRoot()
+                    group = root.findGroup("Building Tool Layers")
+                    layers = group.findLayers()
+                    for layer in layers:
+                        if layer.layer().name() == "building_outlines":
+                            iface.setActiveLayer(layer.layer())
+                            layer.layer().startEditing()
+                            iface.actionAddFeature().trigger()
+                        if layer.layer().name() == "bulk_load_outlines":
+                            iface.setActiveLayer(layer.layer())
+                            layer.layer().startEditing()
+                            iface.actionAddFeature().trigger()
 
     def on_dockwidget_closed(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
