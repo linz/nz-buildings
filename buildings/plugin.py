@@ -215,7 +215,7 @@ class Buildings:
             # no base layers
             self.menu_frame = MenuFrame(self.layer_registry)
             home_dir = os.path.split(os.path.dirname(__file__))
-            icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+            icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
             item = QListWidgetItem("Buildings")
             item.setIcon(QIcon(icon_path))
             dw.lst_options.addItem(item)
