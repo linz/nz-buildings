@@ -113,7 +113,7 @@ class Buildings:
     def initGui(self):
         """Inserts buildings plugin into the roads plugin"""
         home_dir = os.path.split(os.path.dirname(__file__))
-        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
         self.add_action(icon_path,
                         text=self.tr(u'Building Maintenance'),
                         callback=self.run,
@@ -181,7 +181,7 @@ class Buildings:
                 qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
                 dw = qgis.utils.plugins['roads'].dockwidget
                 home_dir = os.path.split(os.path.dirname(__file__))
-                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "roads_plugin.png")
+                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
                 item = QListWidgetItem("Buildings")
                 item.setIcon(QIcon(icon_path))
                 if dw.lst_options.item(2) is None:
