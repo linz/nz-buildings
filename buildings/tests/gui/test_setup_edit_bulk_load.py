@@ -21,6 +21,8 @@ import unittest
 from qgis.core import QgsProject
 from qgis.utils import plugins
 
+from buildings.utilities import database as db
+
 
 class SetUpEditBulkLoad(unittest.TestCase):
     """
