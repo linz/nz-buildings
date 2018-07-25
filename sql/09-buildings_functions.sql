@@ -81,7 +81,7 @@ $$
 
 $$ LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings.buildings_update_shape(geometry, integer) IS
+COMMENT ON FUNCTION buildings.building_outlines_update_shape(geometry, integer) IS
 'Update shape in building_outlines table';
 
 ------------------------------------------------------------------------
