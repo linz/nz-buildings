@@ -358,7 +358,7 @@ class AddBulkLoad(BulkLoadChanges):
         # territorial authority
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
-            (self.bulk_load_frame.geom,))
+                                                  (self.bulk_load_frame.geom,))
         ta = self.bulk_load_frame.db._execute(
             select.territorial_authority_name_by_id,
             (result.fetchall()[0][0],)
@@ -369,7 +369,7 @@ class AddBulkLoad(BulkLoadChanges):
         # town locality
         sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
-            (self.bulk_load_frame.geom,))
+                                                  (self.bulk_load_frame.geom,))
         town = self.bulk_load_frame.db._execute(
             select.town_city_name_by_id,
             (result.fetchall()[0][0],)
@@ -380,7 +380,7 @@ class AddBulkLoad(BulkLoadChanges):
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
-            (self.bulk_load_frame.geom,))
+                                                  (self.bulk_load_frame.geom,))
         suburb = self.bulk_load_frame.db._execute(
             select.suburb_locality_suburb_4th_by_id,
             (result.fetchall()[0][0],)
