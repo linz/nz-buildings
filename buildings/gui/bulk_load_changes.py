@@ -351,16 +351,46 @@ class AddBulkLoad(BulkLoadChanges):
         sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
-        # enable comboboxes
+        # enable & populate comboboxes
+        self.populate_edit_comboboxes()
         self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
         self.bulk_load_frame.cmb_capture_source.setEnabled(1)
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+            (self.bulk_load_frame.geom,))
+        ta = self.bulk_load_frame.db._execute(
+            select.territorial_authority_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_ta.setCurrentIndex(
+            self.bulk_load_frame.cmb_ta.findText(ta.fetchall()[0][0]))
         self.bulk_load_frame.cmb_ta.setEnabled(1)
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+            (self.bulk_load_frame.geom,))
+        town = self.bulk_load_frame.db._execute(
+            select.town_city_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_town.setCurrentIndex(
+            self.bulk_load_frame.cmb_town.findText(town.fetchall()[0][0]))
         self.bulk_load_frame.cmb_town.setEnabled(1)
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+            (self.bulk_load_frame.geom,))
+        suburb = self.bulk_load_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_suburb.setCurrentIndex(
+            self.bulk_load_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
         self.bulk_load_frame.cmb_suburb.setEnabled(1)
         # enable save
         self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
-        self.populate_edit_comboboxes()
 
     def creator_feature_deleted(self, qgsfId):
         """
