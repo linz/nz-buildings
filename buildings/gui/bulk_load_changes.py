@@ -697,3 +697,4 @@ class EditBulkLoad(BulkLoadChanges):
                 )
                 self.bulk_load_frame.error_dialog.show()
                 return False
+        return True
