@@ -314,25 +314,54 @@ class AddProduction(ProductionChanges):
             self.production_frame.added_building_ids.append(qgsfId)
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
-        new_feature = next(
-            self.production_frame.building_layer.getFeatures(request))
+        new_feature = next(self.production_frame.building_layer.getFeatures(request))
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
-        # enable comboboxes
+        # enable & populate comboboxes
+        self.populate_edit_comboboxes()
         self.production_frame.cmb_capture_method.setEnabled(1)
         self.production_frame.cmb_capture_source.setEnabled(1)
         self.production_frame.cmb_lifecycle_stage.setEnabled(1)
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+            (self.production_frame.geom,))
+        ta = self.production_frame.db._execute(
+            select.territorial_authority_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.production_frame.cmb_ta.setCurrentIndex(
+            self.production_frame.cmb_ta.findText(ta.fetchall()[0][0]))
         self.production_frame.cmb_ta.setEnabled(1)
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+            (self.production_frame.geom,))
+        town = self.production_frame.db._execute(
+            select.town_city_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.production_frame.cmb_town.setCurrentIndex(
+            self.production_frame.cmb_town.findText(town.fetchall()[0][0]))
         self.production_frame.cmb_town.setEnabled(1)
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+            (self.production_frame.geom,))
+        suburb = self.production_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.production_frame.cmb_suburb.setCurrentIndex(
+            self.production_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
         self.production_frame.cmb_suburb.setEnabled(1)
         # enable save
         self.production_frame.btn_save.setEnabled(1)
         self.production_frame.btn_reset.setEnabled(1)
-        self.populate_edit_comboboxes()
 
     def creator_feature_deleted(self, qgsfId):
         """
