@@ -612,6 +612,7 @@ class EditProduction(ProductionChanges):
             self.production_frame.btn_save.setEnabled(1)
             self.production_frame.btn_reset.setEnabled(1)
             self.production_frame.select_changed = True
+            self.production_frame.ids = []
         # if more than one outline is selected
         if len(self.production_frame.building_layer.selectedFeatures()) > 1:
             feats = []
