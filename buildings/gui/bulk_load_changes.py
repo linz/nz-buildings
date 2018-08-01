@@ -20,37 +20,6 @@ class BulkLoadChanges:
         iface.setActiveLayer(self.bulk_load_frame.bulk_load_layer)
         iface.actionToggleEditing().trigger()
 
-    def edit_cancel_clicked(self):
-        """
-            When cancel clicked
-        """
-        iface.actionCancelEdits().trigger()
-        # deselect both comboboxes
-        self.bulk_load_frame.rad_edit.setAutoExclusive(False)
-        self.bulk_load_frame.rad_edit.setChecked(False)
-        self.bulk_load_frame.rad_edit.setAutoExclusive(True)
-        self.bulk_load_frame.rad_add.setAutoExclusive(False)
-        self.bulk_load_frame.rad_add.setChecked(False)
-        self.bulk_load_frame.rad_add.setAutoExclusive(True)
-        # reload layers
-        self.bulk_load_frame.layer_registry.remove_all_layers()
-        self.bulk_load_frame.add_outlines()
-        # disable comboboxes
-        self.bulk_load_frame.cmb_status.setDisabled(1)
-        self.bulk_load_frame.cmb_capture_method_2.setDisabled(1)
-        self.bulk_load_frame.cmb_capture_source.setDisabled(1)
-        self.bulk_load_frame.cmb_ta.setDisabled(1)
-        self.bulk_load_frame.cmb_town.setDisabled(1)
-        self.bulk_load_frame.cmb_suburb.setDisabled(1)
-        self.bulk_load_frame.btn_edit_reset.setDisabled(1)
-        self.bulk_load_frame.btn_edit_save.setDisabled(1)
-
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
-                iface.building_toolbar.removeAction(action)
-        iface.building_toolbar.hide()
-
     def populate_edit_comboboxes(self):
         """
             Populate editing combox fields
@@ -173,6 +142,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_ta.clear()
         self.bulk_load_frame.cmb_town.clear()
         self.bulk_load_frame.cmb_suburb.clear()
+        self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
         self.populate_edit_comboboxes()
 
     def disbale_UI_functions(self):
@@ -446,6 +416,51 @@ class EditBulkLoad(BulkLoadChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
+        if len(iface.activeLayer().selectedFeatures()) > 0:
+            if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 1:
+                self.enable_UI_functions()
+                # enable save and reset
+                self.bulk_load_frame.btn_edit_save.setEnabled(1)
+                self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+                self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
+                self.bulk_load_frame.select_changed = True
+                self.bulk_load_frame.ids = []
+            # if more than one outline is selected
+            if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
+                feats = []
+                self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
+                for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
+                    ls = []
+                    ls.append(feature.attributes()[3])
+                    ls.append(feature.attributes()[4])
+                    ls.append(feature.attributes()[5])
+                    ls.append(feature.attributes()[6])
+                    ls.append(feature.attributes()[7])
+                    ls.append(feature.attributes()[8])
+                    if ls not in feats:
+                        feats.append(ls)
+                # if selected features have different attributes (not allowed)
+                if len(feats) > 1:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
+                        'TED ---- \n\n Can only edit attributes of mul'
+                        'tiple features when all existing attributes a'
+                        're identical.'
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    self.bulk_load_frame.bulk_load_outline_id = None
+                    self.disbale_UI_functions()
+                    self.bulk_load_frame.select_changed = False
+                # if all selected features have the same attributes (allowed)
+                elif len(feats) == 1:
+                    self.enable_UI_functions()
+                    # enable save and reset
+                    self.bulk_load_frame.btn_edit_save.setEnabled(1)
+                    self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+                    self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
+                    self.bulk_load_frame.select_changed = True
+
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -593,6 +608,7 @@ class EditBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.geom_changed = True
         self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+        self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
 
     def selection_changed(self, added, removed, cleared):
         """
@@ -604,6 +620,7 @@ class EditBulkLoad(BulkLoadChanges):
             # enable save and reset
             self.bulk_load_frame.btn_edit_save.setEnabled(1)
             self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+            self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
             self.bulk_load_frame.select_changed = True
         # if more than one outline is selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
@@ -639,6 +656,7 @@ class EditBulkLoad(BulkLoadChanges):
                 # enable save and reset
                 self.bulk_load_frame.btn_edit_save.setEnabled(1)
                 self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+                self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
                 self.bulk_load_frame.select_changed = True
         # If no outlines are selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
