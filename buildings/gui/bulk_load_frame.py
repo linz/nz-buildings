@@ -243,18 +243,18 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'bulk_load_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id != 3'.format(self.current_dataset))
-        self.bulk_load_layer.loadNamedStyle(path + 'building_yellow.qml')
+        self.bulk_load_layer.loadNamedStyle(path + 'building_bulk_load.qml')
         iface.setActiveLayer(self.bulk_load_layer)
         self.bulk_load_removed = self.layer_registry.add_postgres_layer(
             'removed_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.current_dataset))
-        self.bulk_load_removed.loadNamedStyle(path + 'building_orange.qml')
+        self.bulk_load_removed.loadNamedStyle(path + 'building_removed.qml')
         self.bulk_load_added = self.layer_registry.add_postgres_layer(
             'added_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id = 2'.format(self.current_dataset))
-        self.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
+        self.bulk_load_added.loadNamedStyle(path + 'building_added.qml')
 
     def bulk_load_save_clicked(self, commit_status):
         """
