@@ -75,12 +75,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_existing.selectionChanged.connect(
             self.select_from_layer_existing)
-        # self.lyr_existing.selectionChanged.connect(self.highlight_features)
 
         self.lyr_bulk_load.removeSelection()
         self.lyr_bulk_load.selectionChanged.connect(
             self.select_from_layer_bulk)
-        # self.lyr_bulk_load.selectionChanged.connect(self.highlight_features)
 
         self.tbl_original.itemSelectionChanged.connect(
             self.select_from_tbl_original)
@@ -983,9 +981,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         try:
             self.lyr_existing.selectionChanged.disconnect(self.select_from_layer_existing)
-            # self.lyr_existing.selectionChanged.disconnect(self.highlight_features)
             self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer_bulk)
-            # self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_features)
             self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
             self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
             self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
