@@ -250,7 +250,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 iface.mapCanvas(), feat.geometry(), self.lyr_existing)
 
             # set highlight symbol properties
-            h.setColor(QColor(255, 0, 0, 255))
+            h.setColor(QColor(255, 255, 0, 255))
             h.setWidth(4)
             h.setFillColor(QColor(255, 255, 255, 0))
             self.lst_highlight.append(h)
@@ -260,7 +260,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
 
             # set highlight symbol properties
-            h.setColor(QColor(255, 0, 0, 255))
+            h.setColor(QColor(255, 255, 0, 255))
             h.setWidth(4)
             h.setFillColor(QColor(255, 255, 255, 0))
             self.lst_highlight.append(h)
