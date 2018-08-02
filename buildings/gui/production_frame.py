@@ -56,13 +56,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
             'historic_outlines', 'building_outlines',
             'shape', 'buildings', '',
             'end_lifespan is not NULL')
-        self.building_historic.loadNamedStyle(path + 'building_removed.qml')
+        self.building_historic.loadNamedStyle(path + 'building_red.qml')
         self.building_layer = None
         self.building_layer = self.layer_registry.add_postgres_layer(
             'building_outlines', 'building_outlines',
             'shape', 'buildings', '',
             'end_lifespan is NULL')
-        self.building_layer.loadNamedStyle(path + 'building_bulk_load.qml')
+        self.building_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.building_layer)
 
     def canvas_add_outline(self):
