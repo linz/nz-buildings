@@ -649,7 +649,6 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.bulk_load_outline_id = None
                 BulkLoadChanges.disbale_UI_functions(self)
                 self.bulk_load_frame.select_changed = False
-                iface.activeLayer().removeSelection()
             # if all selected features have the same attributes (allowed)
             elif len(feats) == 1:
                 BulkLoadChanges.enable_UI_functions(self)

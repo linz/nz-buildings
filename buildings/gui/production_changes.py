@@ -639,7 +639,6 @@ class EditProduction(ProductionChanges):
                 self.production_frame.building_outline_id = None
                 ProductionChanges.disable_UI_functions(self)
                 self.production_frame.select_changed = False
-                iface.activeLayer().removeSelection()
             # if all selected features have the same attributes (allowed)
             elif len(feats) == 1:
                 self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
