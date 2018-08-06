@@ -48,7 +48,7 @@ LANGUAGE sql VOLATILE;
 
 ------------------------------------------------------------------------
 -- BUILDINGS BULK LOAD update shape
--- returns the number of shapes updated 
+-- returns the number of shapes updated
 ------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer)
     RETURNS integer AS
@@ -570,6 +570,18 @@ $$
     INSERT INTO buildings_bulk_load.related (bulk_load_outline_id, building_outline_id, qa_status_id)
     VALUES ($1, $2, 2)
     RETURNING related.related_id;
+
+$$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.deletion_description_insert(integer, varchar(250))
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.deletion_description (bulk_load_outline_id, description)
+    VALUES ($1, $2)
+    RETURNING deletion_description.bulk_load_outline_id;
 
 $$
 LANGUAGE sql;
