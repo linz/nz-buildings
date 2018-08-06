@@ -522,6 +522,15 @@ class EditBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
                 status = self.remove_compared_outlines()
+                description_del = self.bulk_load_frame.le_deletion_reason.text()
+                if status:
+                    if len(self.bulk_load_frame.ids) > 0:
+                        for i in self.bulk_load_frame.ids:
+                            sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i, description_del))
+                    else:
+                        sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, description_del))
             if status:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
