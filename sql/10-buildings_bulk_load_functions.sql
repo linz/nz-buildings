@@ -123,7 +123,7 @@ COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_building
 
 -------------------------------------------------------------------------
 -- EXISTING SUBSET EXTRACT insert into
-  -- returns number of rows inserted into table
+-- returns number of rows inserted into table
 -------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.existing_subset_extracts_insert(
       p_building_outline_id integer
@@ -574,6 +574,10 @@ $$
 $$
 LANGUAGE sql;
 
+
+-------------------------------------------------------------------------
+-- DELETION_DESCRIPTION insert into
+-------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.deletion_description_insert(integer, varchar(250))
 RETURNS integer AS
