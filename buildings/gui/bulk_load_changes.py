@@ -484,6 +484,7 @@ class EditBulkLoad(BulkLoadChanges):
                     '-----\n\n There are no capture source entries.'
                 )
                 self.bulk_load_frame.error_dialog.show()
+                self.disbale_UI_functions()
                 return
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
@@ -531,6 +532,7 @@ class EditBulkLoad(BulkLoadChanges):
                             '-------------- \n\n There are no "reason for deletion" entries '
                         )
                         self.bulk_load_frame.error_dialog.show()
+                        self.disbale_UI_functions()
                         return
 
                     if len(self.bulk_load_frame.ids) > 0:
@@ -556,6 +558,7 @@ class EditBulkLoad(BulkLoadChanges):
                               bulk_load_status_id, capture_method_id,
                               capture_source_id, suburb, town, t_a)
                     )
+            self.disbale_UI_functions()
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
