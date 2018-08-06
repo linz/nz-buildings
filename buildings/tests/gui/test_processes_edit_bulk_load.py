@@ -657,7 +657,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
         status = db._execute(sql, (result[0],))
         status = status.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010;'
         result = db._execute(sql)

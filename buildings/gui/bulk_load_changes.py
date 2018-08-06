@@ -449,7 +449,6 @@ class EditBulkLoad(BulkLoadChanges):
                         're identical.'
                     )
                     self.bulk_load_frame.error_dialog.show()
-                    self.bulk_load_frame.bulk_load_outline_id = None
                     self.disbale_UI_functions()
                     self.bulk_load_frame.select_changed = False
                 # if all selected features have the same attributes (allowed)
@@ -531,6 +530,8 @@ class EditBulkLoad(BulkLoadChanges):
             result = self.bulk_load_frame.db.execute_no_commit(
                 select.territorial_authority_ID_by_name, (text,))
             t_a = result.fetchall()[0][0]
+
+            # bulk load status
             status = True
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
@@ -543,14 +544,8 @@ class EditBulkLoad(BulkLoadChanges):
                         self.bulk_load_frame.db.execute_no_commit(
                             sql, (i, bulk_load_status_id, capture_method_id,
                                   capture_source_id, suburb, town, t_a))
-                else:
-                    # one feature to update
-                    sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                    self.bulk_load_frame.db.execute_no_commit(
-                        sql, (self.bulk_load_frame.bulk_load_outline_id,
-                              bulk_load_status_id, capture_method_id,
-                              capture_source_id, suburb, town, t_a)
-                    )
+                    if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+                        self.bulk_load_frame.bulk_load_layer.removeSelection()
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
             QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
@@ -615,6 +610,7 @@ class EditBulkLoad(BulkLoadChanges):
            Called when feature is selected
         """
         # if only one outline is selected
+        self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 1:
             BulkLoadChanges.enable_UI_functions(self)
             # enable save and reset
@@ -626,7 +622,6 @@ class EditBulkLoad(BulkLoadChanges):
         # if more than one outline is selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
             feats = []
-            self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
                 ls = []
                 ls.append(feature.attributes()[3])
@@ -647,7 +642,6 @@ class EditBulkLoad(BulkLoadChanges):
                     're identical.'
                 )
                 self.bulk_load_frame.error_dialog.show()
-                self.bulk_load_frame.bulk_load_outline_id = None
                 BulkLoadChanges.disbale_UI_functions(self)
                 self.bulk_load_frame.select_changed = False
             # if all selected features have the same attributes (allowed)
@@ -660,7 +654,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.select_changed = True
         # If no outlines are selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
-            self.bulk_load_frame.bulk_load_outline_id = None
+            self.bulk_load_frame.ids = []
             BulkLoadChanges.disbale_UI_functions(self)
             self.bulk_load_frame.select_changed = False
 
@@ -715,34 +709,4 @@ class EditBulkLoad(BulkLoadChanges):
                     )
                     self.bulk_load_frame.error_dialog.show()
                     return False
-        # only one feature selected
-        else:
-            # remove from added table
-            for outline in added_outlines:
-                if self.bulk_load_frame.bulk_load_outline_id in outline:
-                    # remove outline from added table
-                    sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
-                    self.bulk_load_frame.db.execute_no_commit(
-                        sql, (self.bulk_load_frame.bulk_load_outline_id,))
-                    return True
-            for outline in matched_outlines:
-                if self.bulk_load_frame.bulk_load_outline_id == outline[0]:
-                    self.bulk_load_frame.error_dialog = ErrorDialog()
-                    self.bulk_load_frame.error_dialog.fill_report(
-                        '\n ------------------- RELATIONSHIP EXISTS ---------'
-                        '---------- \n\nCan only mark for deletion outline if'
-                        ' no relationship exists'
-                    )
-                    self.bulk_load_frame.error_dialog.show()
-                    return False
-
-            if self.bulk_load_frame.bulk_load_outline_id in related_dictionary:
-                self.bulk_load_frame.error_dialog = ErrorDialog()
-                self.bulk_load_frame.error_dialog.fill_report(
-                    '\n ---------------------- RELATIONSHIP EXISTS ---------'
-                    '------------- \n\nCan only mark for deletion outline if'
-                    ' no relationship exists'
-                )
-                self.bulk_load_frame.error_dialog.show()
-                return False
         return True
