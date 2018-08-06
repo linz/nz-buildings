@@ -522,15 +522,33 @@ class EditBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
                 status = self.remove_compared_outlines()
-                description_del = self.bulk_load_frame.le_deletion_reason.text()
                 if status:
+                    self.description_del = self.bulk_load_frame.le_deletion_reason.text()
+                    if len(self.description_del) == 0:
+                        self.bulk_load_frame.error_dialog = ErrorDialog()
+                        self.bulk_load_frame.error_dialog.fill_report(
+                            '\n -------------------- EMPTY VALUE FIELD ------'
+                            '-------------- \n\n There are no "reason for deletion" entries '
+                        )
+                        self.bulk_load_frame.error_dialog.show()
+                        return
+                    elif len(self.description_del) > 250:
+                        self.bulk_load_frame.error_dialog = ErrorDialog()
+                        self.bulk_load_frame.error_dialog.fill_report(
+                            '\n -------------------- VALUE TOO LONG ---------'
+                            '----------- \n\n Enter less than 250 characters '
+                            ' in "reason for deletion" '
+                        )
+                        self.bulk_load_frame.error_dialog.show()
+                        return
+
                     if len(self.bulk_load_frame.ids) > 0:
                         for i in self.bulk_load_frame.ids:
                             sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                            self.bulk_load_frame.db.execute_no_commit(sql, (i, description_del))
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i, self.description_del))
                     else:
                         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, description_del))
+                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, self.description_del))
             if status:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
