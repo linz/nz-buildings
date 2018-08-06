@@ -329,7 +329,7 @@ class AddProduction(ProductionChanges):
         # territorial authority
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
-            (self.production_frame.geom,))
+                                                   (self.production_frame.geom,))
         ta = self.production_frame.db._execute(
             select.territorial_authority_name_by_id,
             (result.fetchall()[0][0],)
@@ -340,7 +340,7 @@ class AddProduction(ProductionChanges):
         # town locality
         sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
-            (self.production_frame.geom,))
+                                                   (self.production_frame.geom,))
         town = self.production_frame.db._execute(
             select.town_city_name_by_id,
             (result.fetchall()[0][0],)
@@ -351,7 +351,7 @@ class AddProduction(ProductionChanges):
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
-            (self.production_frame.geom,))
+                                                   (self.production_frame.geom,))
         suburb = self.production_frame.db._execute(
             select.suburb_locality_suburb_4th_by_id,
             (result.fetchall()[0][0],)
@@ -454,6 +454,7 @@ class EditProduction(ProductionChanges):
                     '-----\n\n There are no capture source entries.'
                 )
                 self.production_frame.error_dialog.show()
+                self.disable_UI_functions()
                 return
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
@@ -507,6 +508,8 @@ class EditProduction(ProductionChanges):
                           capture_method_id, capture_source_id,
                           lifecycle_stage_id, suburb, town, t_a)
                 )
+            self.disable_UI_functions()
+
         if commit_status:
             self.production_frame.geoms = {}
             self.production_frame.ids = []
