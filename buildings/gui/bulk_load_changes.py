@@ -37,6 +37,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.add_outlines()
         # disable comboboxes
         self.bulk_load_frame.cmb_status.setDisabled(1)
+        self.bulk_load_frame.le_deletion_reason.setDisabled(1)
         self.bulk_load_frame.cmb_capture_method_2.setDisabled(1)
         self.bulk_load_frame.cmb_capture_source.setDisabled(1)
         self.bulk_load_frame.cmb_ta.setDisabled(1)
@@ -185,6 +186,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_capture_source.setDisabled(1)
         self.bulk_load_frame.cmb_status.clear()
         self.bulk_load_frame.cmb_status.setDisabled(1)
+        self.bulk_load_frame.le_deletion_reason.setDisabled(1)
         self.bulk_load_frame.cmb_ta.clear()
         self.bulk_load_frame.cmb_ta.setDisabled(1)
         self.bulk_load_frame.cmb_town.clear()

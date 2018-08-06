@@ -111,6 +111,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         results = results.fetchall()
         for thing in results:
             self.cmb_capture_source_area.addItem(thing[0])
+
+        # set placeholder text
+        self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
+
         # set up signals and slots
         self.rad_external_source.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
@@ -125,6 +129,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
+
+        self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
 
@@ -202,6 +208,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.grpb_edits.show()
         self.cmb_status.setDisabled(1)
+        self.le_deletion_reason.setDisabled(1)
         self.cmb_capture_method_2.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
@@ -327,6 +334,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_capture_source.setDisabled(1)
         self.cmb_status.setDisabled(1)
         self.cmb_status.clear()
+        self.le_deletion_reason.setDisabled(1)
         self.cmb_ta.clear()
         self.cmb_ta.setDisabled(1)
         self.cmb_town.clear()
@@ -381,6 +389,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_capture_source.setDisabled(1)
         self.cmb_status.setDisabled(1)
         self.cmb_status.clear()
+        self.le_deletion_reason.setDisabled(1)
         self.cmb_ta.clear()
         self.cmb_ta.setDisabled(1)
         self.cmb_town.clear()
@@ -396,6 +405,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         )
         layers.style_layer(self.territorial_auth,
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
+    def enable_le_deletion_reason(self):
+        if self.cmb_status.currentText() == 'Deleted During QA':
+            self.le_deletion_reason.setEnabled(1)
+        else:
+            self.le_deletion_reason.setDisabled(1)
 
     def alter_relationships_clicked(self):
         """
