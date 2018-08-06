@@ -112,7 +112,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         for thing in results:
             self.cmb_capture_source_area.addItem(thing[0])
 
-        # set placeholder text
+        # initiate le_deletion_reason
+        self.le_deletion_reason.setMaxLength(250)
         self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
         self.description_del = self.le_deletion_reason.text()
 

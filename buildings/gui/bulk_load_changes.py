@@ -532,15 +532,6 @@ class EditBulkLoad(BulkLoadChanges):
                         )
                         self.bulk_load_frame.error_dialog.show()
                         return
-                    elif len(self.bulk_load_frame.description_del) > 250:
-                        self.bulk_load_frame.error_dialog = ErrorDialog()
-                        self.bulk_load_frame.error_dialog.fill_report(
-                            '\n -------------------- VALUE TOO LONG ---------'
-                            '----------- \n\n Enter less than 250 characters '
-                            ' in "reason for deletion" '
-                        )
-                        self.bulk_load_frame.error_dialog.show()
-                        return
 
                     if len(self.bulk_load_frame.ids) > 0:
                         for i in self.bulk_load_frame.ids:
