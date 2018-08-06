@@ -412,6 +412,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.cmb_status.currentText() == 'Deleted During QA':
             self.le_deletion_reason.setEnabled(1)
             self.le_deletion_reason.setText(self.description_del)
+            self.le_deletion_reason.selectAll()
         else:
             self.le_deletion_reason.setDisabled(1)
             self.le_deletion_reason.clear()
