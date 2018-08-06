@@ -523,8 +523,8 @@ class EditBulkLoad(BulkLoadChanges):
                 # can only delete outlines if no relationship
                 status = self.remove_compared_outlines()
                 if status:
-                    self.description_del = self.bulk_load_frame.le_deletion_reason.text()
-                    if len(self.description_del) == 0:
+                    self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
+                    if len(self.bulk_load_frame.description_del) == 0:
                         self.bulk_load_frame.error_dialog = ErrorDialog()
                         self.bulk_load_frame.error_dialog.fill_report(
                             '\n -------------------- EMPTY VALUE FIELD ------'
@@ -532,7 +532,7 @@ class EditBulkLoad(BulkLoadChanges):
                         )
                         self.bulk_load_frame.error_dialog.show()
                         return
-                    elif len(self.description_del) > 250:
+                    elif len(self.bulk_load_frame.description_del) > 250:
                         self.bulk_load_frame.error_dialog = ErrorDialog()
                         self.bulk_load_frame.error_dialog.fill_report(
                             '\n -------------------- VALUE TOO LONG ---------'
@@ -545,10 +545,10 @@ class EditBulkLoad(BulkLoadChanges):
                     if len(self.bulk_load_frame.ids) > 0:
                         for i in self.bulk_load_frame.ids:
                             sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                            self.bulk_load_frame.db.execute_no_commit(sql, (i, self.description_del))
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
                     else:
                         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, self.description_del))
+                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, self.bulk_load_frame.description_del))
             if status:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
@@ -565,6 +565,7 @@ class EditBulkLoad(BulkLoadChanges):
                               bulk_load_status_id, capture_method_id,
                               capture_source_id, suburb, town, t_a)
                     )
+
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
             QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])

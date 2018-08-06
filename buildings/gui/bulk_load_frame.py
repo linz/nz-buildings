@@ -114,6 +114,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         # set placeholder text
         self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
+        self.description_del = self.le_deletion_reason.text()
 
         # set up signals and slots
         self.rad_external_source.toggled.connect(
@@ -409,8 +410,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def enable_le_deletion_reason(self):
         if self.cmb_status.currentText() == 'Deleted During QA':
             self.le_deletion_reason.setEnabled(1)
+            self.le_deletion_reason.setText(self.description_del)
         else:
             self.le_deletion_reason.setDisabled(1)
+            self.le_deletion_reason.clear()
 
     def alter_relationships_clicked(self):
         """
