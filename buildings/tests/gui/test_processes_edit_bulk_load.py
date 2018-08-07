@@ -145,6 +145,143 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
 
+    def test_select_geom_before_edit(self):
+        """UI and Canvas behave correctly when geometry is selected before editing is toggled"""
+        self.bulk_load_frame.btn_edit_cancel.click()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+                         delay=30)
+        QTest.qWait(10)
+        self.bulk_load_frame.rad_edit.click()
+        iface.actionSelect().trigger()
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
+
+        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Feature Extraction')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
+
+    def test_select_multiple_geom_before_edit(self):
+        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        self.bulk_load_frame.btn_edit_cancel.click()
+        iface.actionSelectPolygon().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878053.0, 5555587.0,
+                                      1878315.0, 5555655.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878053, 5555631)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878053, 5555612)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555612)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555631)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555631)),
+                         delay=50)
+        QTest.qWait(100)
+        self.bulk_load_frame.rad_edit.click()
+        iface.actionSelect().trigger()
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
+
+        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Feature Extraction')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Kelburn')
+
+    def test_cannot_select_nonidentical_multiple_geoms_before_edit(self):
+        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        self.bulk_load_frame.btn_edit_cancel.click()
+        iface.actionSelectPolygon().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878155.0, 5555119.0,
+                                      1878219.0, 5555190.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878155, 5555190)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878155, 5555119)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878219, 5555612)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878219, 5555190)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878219, 5555190)),
+                         delay=50)
+        QTest.qWait(100)
+        self.bulk_load_frame.rad_edit.click()
+        iface.actionSelect().trigger()
+        self.bulk_load_frame.error_dialog.close()
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
+
     def test_ui_on_geom_changed_and_selected(self):
         """UI and Canvas behave correctly when both selections and geometry changes occur"""
         widget = iface.mapCanvas().viewport()
