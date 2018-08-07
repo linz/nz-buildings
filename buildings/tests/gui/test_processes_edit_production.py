@@ -301,27 +301,34 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT value FROM buildings.lifecycle_stage WHERE lifecycle_stage_id = %s;'
         lifecycle_stage = db._execute(sql, (result[0],))
         lifecycle_stage = lifecycle_stage.fetchall()[0][0]
-        self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), lifecycle_stage)
+        self.assertEqual('Replaced', lifecycle_stage)
         # capture method
         sql = 'SELECT value FROM buildings_common.capture_method WHERE capture_method_id = %s;'
         capture_method = db._execute(sql, (result[1],))
         capture_method = capture_method.fetchall()[0][0]
-        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), capture_method)
+        self.assertEqual('Unknown', capture_method)
         # suburb
         sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;'
         suburb = db._execute(sql, (result[2],))
         suburb = suburb.fetchall()[0][0]
-        self.assertEqual(self.production_frame.cmb_suburb.currentText(), suburb)
+        self.assertEqual('Hokowhitu', suburb)
         # town
         sql = 'SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;'
         town_city = db._execute(sql, (result[3],))
         town_city = town_city.fetchall()[0][0]
-        self.assertEqual(self.production_frame.cmb_town.currentText(), town_city)
+        self.assertEqual('Palmerston North', town_city)
         # territorial Authority
         sql = 'SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;'
         territorial_authority = db._execute(sql, (result[4],))
         territorial_authority = territorial_authority.fetchall()[0][0]
-        self.assertEqual(self.production_frame.cmb_ta.currentText(), territorial_authority)
+        self.assertEqual('Manawatu-Whanganui', territorial_authority)
+
+        self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_suburb.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_town.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_ta.currentText(), '')
+
         self.production_frame.geoms = {}
         self.production_frame.geom_changed = False
         self.production_frame.select_changed = False
@@ -414,28 +421,35 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
             sql = 'SELECT value FROM buildings.lifecycle_stage WHERE lifecycle_stage_id = %s;'
             lifecycle_stage = db._execute(sql, (result[0],))
             lifecycle_stage = lifecycle_stage.fetchall()[0][0]
-            self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), lifecycle_stage)
+            self.assertEqual('Replaced', lifecycle_stage)
             # capture method
             sql = 'SELECT value FROM buildings_common.capture_method WHERE capture_method_id = %s;'
             capture_method = db._execute(sql, (result[1],))
             capture_method = capture_method.fetchall()[0][0]
-            self.assertEqual(self.production_frame.cmb_capture_method.currentText(), capture_method)
+            self.assertEqual('Unknown', capture_method)
             # suburb
             sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;'
             suburb = db._execute(sql, (result[2],))
             suburb = suburb.fetchall()[0][0]
-            self.assertEqual(self.production_frame.cmb_suburb.currentText(), suburb)
+            self.assertEqual('Hokowhitu', suburb)
             # town
             sql = 'SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;'
             town_city = db._execute(sql, (result[3],))
             town_city = town_city.fetchall()[0][0]
-            self.assertEqual(self.production_frame.cmb_town.currentText(), town_city)
+            self.assertEqual('Palmerston North', town_city)
             # territorial Authority
             sql = 'SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;'
             territorial_authority = db._execute(sql, (result[4],))
             territorial_authority = territorial_authority.fetchall()[0][0]
-            self.assertEqual(self.production_frame.cmb_ta.currentText(), territorial_authority)
+            self.assertEqual('Manawatu-Whanganui', territorial_authority)
             self.assertEqual(len(self.production_frame.ids), 4)
+
+        self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_suburb.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_town.currentText(), '')
+        self.assertEqual(self.production_frame.cmb_ta.currentText(), '')
+
         self.production_frame.geoms = {}
         self.production_frame.geom_changed = False
         self.production_frame.select_changed = False
