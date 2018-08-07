@@ -66,6 +66,13 @@ FROM buildings_bulk_load.bulk_load_outlines blo
 WHERE blo.supplied_dataset_id = %s;
 """
 
+bulk_load_removed_outlines_ID_by_datasetID = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.bulk_load_outlines blo
+WHERE blo.supplied_dataset_id = %s
+  AND blo.bulk_load_status_id = 3;
+"""
+
 bulk_load_outline_shape_by_id = """
 SELECT shape
 FROM buildings_bulk_load.bulk_load_outlines
