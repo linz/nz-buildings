@@ -561,7 +561,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.current_dataset
             ))
         self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_orange.qml')
+            path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.geoms = {}
             self.bulk_load_frame.ids = []

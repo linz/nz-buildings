@@ -243,13 +243,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'bulk_load_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id != 3'.format(self.current_dataset))
-        self.bulk_load_layer.loadNamedStyle(path + 'building_yellow.qml')
+        self.bulk_load_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.bulk_load_layer)
         self.bulk_load_removed = self.layer_registry.add_postgres_layer(
             'removed_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.current_dataset))
-        self.bulk_load_removed.loadNamedStyle(path + 'building_orange.qml')
+        self.bulk_load_removed.loadNamedStyle(path + 'building_red.qml')
         self.bulk_load_added = self.layer_registry.add_postgres_layer(
             'added_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',

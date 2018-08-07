@@ -75,12 +75,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_existing.selectionChanged.connect(
             self.select_from_layer_existing)
-        self.lyr_existing.selectionChanged.connect(self.highlight_features)
 
         self.lyr_bulk_load.removeSelection()
         self.lyr_bulk_load.selectionChanged.connect(
             self.select_from_layer_bulk)
-        self.lyr_bulk_load.selectionChanged.connect(self.highlight_features)
 
         self.tbl_original.itemSelectionChanged.connect(
             self.select_from_tbl_original)
@@ -138,7 +136,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "removed_outlines", "removed_outlines", "shape",
             "buildings_bulk_load", "building_outline_id", ""
         )
-        self.lyr_removed_existing.loadNamedStyle(path + 'building_orange.qml')
+        self.lyr_removed_existing.loadNamedStyle(path + 'building_red.qml')
 
         self.lyr_added_bulk_load = self.layer_registry.add_postgres_layer(
             "added_outlines", "added_outlines", "shape",
@@ -179,7 +177,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "buildings_bulk_load", "building_outline_id", ""
         )
         self.lyr_removed_existing_in_edit.loadNamedStyle(
-            path + 'building_orange.qml')
+            path + 'building_red.qml')
 
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "added_bulk_load_in_edit", "bulk_load_outlines", "shape",
@@ -250,7 +248,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 iface.mapCanvas(), feat.geometry(), self.lyr_existing)
 
             # set highlight symbol properties
-            h.setColor(QColor(255, 0, 0, 255))
+            h.setColor(QColor(255, 255, 0, 255))
             h.setWidth(4)
             h.setFillColor(QColor(255, 255, 255, 0))
             self.lst_highlight.append(h)
@@ -260,7 +258,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
 
             # set highlight symbol properties
-            h.setColor(QColor(255, 0, 0, 255))
+            h.setColor(QColor(255, 255, 0, 255))
             h.setWidth(4)
             h.setFillColor(QColor(255, 255, 255, 0))
             self.lst_highlight.append(h)
@@ -474,6 +472,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectByIds(feat_ids_existing)
         self.lyr_bulk_load.selectByIds(feat_ids_bulk)
 
+        self.highlight_features()
+
         self.lyr_existing.selectionChanged.connect(self.select_from_layer_existing)
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer_bulk)
 
@@ -606,6 +606,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lyr_existing.selectByIds(feat_ids_existing)
 
+        self.highlight_features()
+
         self.lyr_existing.selectionChanged.connect(self.select_from_layer_existing)
 
     def select_from_lst_bulk(self):
@@ -623,6 +625,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             feat_ids_bulk.append(int(item_bulk.text()))
 
         self.lyr_bulk_load.selectByIds(feat_ids_bulk)
+
+        self.highlight_features()
 
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer_bulk)
 
@@ -977,9 +981,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         try:
             self.lyr_existing.selectionChanged.disconnect(self.select_from_layer_existing)
-            self.lyr_existing.selectionChanged.disconnect(self.highlight_features)
             self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer_bulk)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_features)
             self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
             self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
             self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
