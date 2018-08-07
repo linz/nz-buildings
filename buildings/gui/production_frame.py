@@ -71,7 +71,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             'historic_outlines', 'building_outlines',
             'shape', 'buildings', '',
             'end_lifespan is not NULL')
-        self.building_historic.loadNamedStyle(path + 'building_red.qml')
+        self.building_historic.loadNamedStyle(path + 'building_historic.qml')
         self.building_layer = None
         self.building_layer = self.layer_registry.add_postgres_layer(
             'building_outlines', 'building_outlines',
