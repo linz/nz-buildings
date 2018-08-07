@@ -522,19 +522,18 @@ class EditBulkLoad(BulkLoadChanges):
             status = True
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
+                self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
+                if len(self.bulk_load_frame.description_del) == 0:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n -------------------- EMPTY VALUE FIELD ------'
+                        '-------------- \n\n There are no "reason for deletion" entries '
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    self.disbale_UI_functions()
+                    return
                 status = self.remove_compared_outlines()
                 if status:
-                    self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
-                    if len(self.bulk_load_frame.description_del) == 0:
-                        self.bulk_load_frame.error_dialog = ErrorDialog()
-                        self.bulk_load_frame.error_dialog.fill_report(
-                            '\n -------------------- EMPTY VALUE FIELD ------'
-                            '-------------- \n\n There are no "reason for deletion" entries '
-                        )
-                        self.bulk_load_frame.error_dialog.show()
-                        self.disbale_UI_functions()
-                        return
-
                     if len(self.bulk_load_frame.ids) > 0:
                         for i in self.bulk_load_frame.ids:
                             sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
