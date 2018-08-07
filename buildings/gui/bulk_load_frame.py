@@ -314,13 +314,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_reset.clicked.connect(
             self.change_instance.edit_reset_clicked)
         self.btn_edit_cancel.clicked.connect(
-            self.change_instance.edit_cancel_clicked)
+            self.edit_cancel_clicked)
         self.bulk_load_layer.featureAdded.connect(
             self.change_instance.creator_feature_added)
         self.bulk_load_layer.featureDeleted.connect(
             self.change_instance.creator_feature_deleted)
         # layer and UI setup
-        iface.activeLayer().removeSelection()
         self.cmb_capture_method_2.clear()
         self.cmb_capture_method_2.setDisabled(1)
         self.cmb_capture_source.clear()
@@ -335,6 +334,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
+        self.btn_edit_cancel.setEnabled(1)
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
@@ -353,6 +353,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
+        self.btn_edit_cancel.setEnabled(1)
         try:
             self.btn_edit_save.clicked.disconnect()
         except Exception:
@@ -361,41 +362,71 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except Exception:
             pass
-        self.change_instance = bulk_load_changes.EditBulkLoad(self)
-        # set up signals and slots
-        self.btn_edit_save.clicked.connect(
-            partial(self.change_instance.edit_save_clicked, True))
-        self.btn_edit_reset.clicked.connect(
-            self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(
-            self.change_instance.edit_cancel_clicked)
-        self.bulk_load_layer.selectionChanged.connect(
-            self.change_instance.selection_changed)
-        self.bulk_load_layer.geometryChanged.connect(
-            self.change_instance.feature_changed)
-        # layer and UI setup
-        iface.activeLayer().removeSelection()
-        self.cmb_capture_method_2.clear()
-        self.cmb_capture_method_2.setDisabled(1)
-        self.cmb_capture_source.clear()
-        self.cmb_capture_source.setDisabled(1)
+        if self.rad_edit.isChecked():
+            self.change_instance = bulk_load_changes.EditBulkLoad(self)
+            # set up signals and slots
+            self.btn_edit_save.clicked.connect(
+                partial(self.change_instance.edit_save_clicked, True))
+            self.btn_edit_reset.clicked.connect(
+                self.change_instance.edit_reset_clicked)
+            self.btn_edit_cancel.clicked.connect(
+                self.edit_cancel_clicked)
+            self.bulk_load_layer.selectionChanged.connect(
+                self.change_instance.selection_changed)
+            self.bulk_load_layer.geometryChanged.connect(
+                self.change_instance.feature_changed)
+            self.territorial_auth = self.layer_registry.add_postgres_layer(
+                'territorial_authorities', 'territorial_authority',
+                'shape', 'buildings_reference', '', ''
+            )
+            layers.style_layer(self.territorial_auth,
+                               {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
+    def edit_cancel_clicked(self):
+        """
+            When cancel clicked
+        """
+        # deselect both comboboxes
+        self.rad_edit.setAutoExclusive(False)
+        self.rad_edit.setChecked(False)
+        self.rad_edit.setAutoExclusive(True)
+        self.rad_add.setAutoExclusive(False)
+        self.rad_add.setChecked(False)
+        self.rad_add.setAutoExclusive(True)
+        iface.actionCancelEdits().trigger()
+        # reload layers
+        self.layer_registry.remove_layer(self.territorial_auth)
+        # disable comboboxes
         self.cmb_status.setDisabled(1)
         self.cmb_status.clear()
-        self.cmb_ta.clear()
+        self.cmb_capture_method_2.setDisabled(1)
+        self.cmb_capture_method_2.clear()
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_capture_source.clear()
         self.cmb_ta.setDisabled(1)
-        self.cmb_town.clear()
+        self.cmb_ta.clear()
         self.cmb_town.setDisabled(1)
-        self.cmb_suburb.clear()
+        self.cmb_town.clear()
         self.cmb_suburb.setDisabled(1)
-        self.btn_edit_save.setDisabled(1)
+        self.cmb_suburb.clear()
         self.btn_edit_reset.setDisabled(1)
-        # add territorial authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        self.btn_edit_save.setDisabled(1)
+        self.btn_edit_cancel.setDisabled(1)
+        try:
+            self.bulk_load_layer.selectionChanged.disconnect(
+                self.change_instance.selection_changed)
+        except Exception:
+            pass
+        try:
+            self.bulk_load_layer.geometryChanged.disconnect(
+                self.change_instance.feature_changed)
+        except Exception:
+            pass
+        # reset toolbar
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ["mActionPan"]:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
     def alter_relationships_clicked(self):
         """
@@ -403,7 +434,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             open alter relationships frame
         """
         if self.change_instance is not None:
-            self.change_instance.edit_cancel_clicked()
+            self.edit_cancel_clicked()
         self.db.close_connection()
         self.layer_registry.remove_all_layers()
         from buildings.gui.alter_building_relationships import AlterRelationships
@@ -421,7 +452,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             When publish button clicked
         """
         if self.change_instance is not None:
-            self.change_instance.edit_cancel_clicked()
+            self.edit_cancel_clicked()
         self.db.open_cursor()
         sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
         self.db.execute_no_commit(sql, (self.current_dataset,))

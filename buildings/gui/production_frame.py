@@ -45,6 +45,21 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
         self.btn_cancel.clicked.connect(self.exit_clicked)
 
+        self.cmb_capture_method.clear()
+        self.cmb_capture_method.setDisabled(1)
+        self.cmb_capture_source.clear()
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_lifecycle_stage.setDisabled(1)
+        self.cmb_lifecycle_stage.clear()
+        self.cmb_ta.clear()
+        self.cmb_ta.setDisabled(1)
+        self.cmb_town.clear()
+        self.cmb_town.setDisabled(1)
+        self.cmb_suburb.clear()
+        self.cmb_suburb.setDisabled(1)
+        self.btn_save.setDisabled(1)
+        self.btn_reset.setDisabled(1)
+
     def add_outlines(self):
         """
             Add building outlines to canvas
@@ -93,22 +108,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.change_instance.creator_feature_added)
         self.building_layer.featureDeleted.connect(
             self.change_instance.creator_feature_deleted)
-        # layer and UI setup
-        iface.activeLayer().removeSelection()
-        self.cmb_capture_method.clear()
-        self.cmb_capture_method.setDisabled(1)
-        self.cmb_capture_source.clear()
-        self.cmb_capture_source.setDisabled(1)
-        self.cmb_lifecycle_stage.setDisabled(1)
-        self.cmb_lifecycle_stage.clear()
-        self.cmb_ta.clear()
-        self.cmb_ta.setDisabled(1)
-        self.cmb_town.clear()
-        self.cmb_town.setDisabled(1)
-        self.cmb_suburb.clear()
-        self.cmb_suburb.setDisabled(1)
-        self.btn_save.setDisabled(1)
-        self.btn_reset.setDisabled(1)
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
@@ -135,45 +134,29 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.btn_reset.clicked.disconnect()
         except Exception:
             pass
-        self.change_instance = production_changes.EditProduction(self)
-        # set up signals and slots
-        self.btn_save.clicked.connect(
-            partial(self.change_instance.save_clicked, True))
-        self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
-        self.building_layer.selectionChanged.connect(
-            self.change_instance.selection_changed)
-        self.building_layer.geometryChanged.connect(
-            self.change_instance.feature_changed)
-        # layer and UI setup
-        iface.activeLayer().removeSelection()
-        self.cmb_capture_method.clear()
-        self.cmb_capture_method.setDisabled(1)
-        self.cmb_capture_source.clear()
-        self.cmb_capture_source.setDisabled(1)
-        self.cmb_lifecycle_stage.setDisabled(1)
-        self.cmb_lifecycle_stage.clear()
-        self.cmb_ta.clear()
-        self.cmb_ta.setDisabled(1)
-        self.cmb_town.clear()
-        self.cmb_town.setDisabled(1)
-        self.cmb_suburb.clear()
-        self.cmb_suburb.setDisabled(1)
-        self.btn_save.setDisabled(1)
-        self.btn_reset.setDisabled(1)
-        # add territorial authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        if self.rad_edit.isChecked():
+            self.change_instance = production_changes.EditProduction(self)
+            # set up signals and slots
+            self.btn_save.clicked.connect(
+                partial(self.change_instance.save_clicked, True))
+            self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
+            self.building_layer.selectionChanged.connect(
+                self.change_instance.selection_changed)
+            self.building_layer.geometryChanged.connect(
+                self.change_instance.feature_changed)
+            # add territorial authority layer
+            self.territorial_auth = self.layer_registry.add_postgres_layer(
+                'territorial_authorities', 'territorial_authority',
+                'shape', 'buildings_reference', '', ''
+            )
+            layers.style_layer(self.territorial_auth,
+                               {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def exit_clicked(self):
         """
             Called when production frame exit button clicked,
             Return to start up frame
         """
-        iface.actionCancelEdits().trigger()
         # deselect both comboboxes
         self.rad_edit.setAutoExclusive(False)
         self.rad_edit.setChecked(False)
@@ -182,8 +165,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.rad_add.setChecked(False)
         self.rad_add.setAutoExclusive(True)
         # reload layers
+        iface.actionCancelEdits().trigger()
         self.layer_registry.remove_all_layers()
-        self.add_outlines()
 
         # reset toolbar
         for action in iface.building_toolbar.actions():
