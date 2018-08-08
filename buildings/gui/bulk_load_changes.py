@@ -622,6 +622,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.btn_edit_reset.setEnabled(1)
             self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
             self.bulk_load_frame.select_changed = True
+            self.bulk_load_frame.ids = []
         # if more than one outline is selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
             feats = []

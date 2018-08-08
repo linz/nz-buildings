@@ -709,3 +709,54 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
         self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_selection_change(self):
+        """Check change only occurs on currently selected outlines.
+        This test protects against a regression of #55."""
+        iface.actionSelectPolygon().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878053.0, 5555587.0,
+                                      1878315.0, 5555655.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878053, 5555631)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878053, 5555612)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555612)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555631)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878315, 5555631)),
+                         delay=50)
+        QTest.qWait(100)
+        iface.actionSelect().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878202.1, 5555618.9)),
+                         delay=50)
+        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(self.bulk_load_frame.cmb_capture_method_2.findText('Unknown'))
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        sql = 'SELECT capture_method_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2027;'
+        result = db._execute(sql)
+        self.assertEqual(result.fetchall()[0][0], 1)
+        sql = 'SELECT capture_method_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2025;'
+        result = db._execute(sql)
+        self.assertNotEqual(result.fetchall()[0][0], 1)
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
