@@ -572,6 +572,7 @@ class EditBulkLoad(BulkLoadChanges):
                               capture_source_id, suburb, town, t_a)
                     )
             self.disbale_UI_functions()
+            self.bulk_load_frame.completerBox()
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
