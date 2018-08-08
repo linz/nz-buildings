@@ -499,7 +499,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.production_frame.db.rollback_open_cursor()
 
     def test_selection_change(self):
-        """Check change only occurs on currently selected outlines"""
+        """Check change only occurs on currently selected outlines.
+        This test protects against a regression of #55."""
         self.production_frame.rad_edit.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
