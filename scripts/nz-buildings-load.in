@@ -131,7 +131,6 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
-    psql -c "SELECT buildings_bulk_load.create_building_relationship_view();"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
     echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql $ON_ERROR_STOP
@@ -156,6 +155,5 @@ if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql $ON_ERROR_STOP
     psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
-    psql -c "SELECT buildings_bulk_load.create_building_relationship_view();"
 
 fi
