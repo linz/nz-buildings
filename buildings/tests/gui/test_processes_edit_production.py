@@ -85,13 +85,13 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
+                         pos=canvas_point(QgsPoint(1878202.0, 5555285.7)),
                          delay=30)
         QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878202.5, 5555285.3)),
+                         pos=canvas_point(QgsPoint(1878202.0, 5555285.7)),
                          delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
+                           pos=canvas_point(QgsPoint(1878209.0, 5555285.7)),
                            delay=30)
         QTest.qWait(10)
         self.assertTrue(self.production_frame.btn_save.isEnabled())
@@ -507,6 +507,58 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.production_frame.btn_save.isEnabled())
         self.assertFalse(self.production_frame.btn_reset.isEnabled())
         self.assertTrue(self.production_frame.btn_cancel.isEnabled())
+        self.production_frame.geoms = {}
+        self.production_frame.geom_changed = False
+        self.production_frame.select_changed = False
+        self.production_frame.db.rollback_open_cursor()
+
+    def test_selection_change(self):
+        """Check change only occurs on currently selected outlines.
+        This test protects against a regression of #55."""
+        self.production_frame.rad_edit.click()
+        iface.actionSelectPolygon().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878042, 5555668,
+                                      1878327, 5555358)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878149, 5555640)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878203, 5555640)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878203, 5555384)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878149, 5555384)),
+                         delay=50)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878203, 5555384)),
+                         delay=50)
+        QTest.qWait(100)
+        iface.actionSelect().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878202.1, 5555618.9)),
+                         delay=50)
+        self.production_frame.cmb_capture_method.setCurrentIndex(self.production_frame.cmb_capture_method.findText('Unknown'))
+        self.production_frame.change_instance.save_clicked(False)
+        sql = 'SELECT capture_method_id FROM buildings.building_outlines WHERE building_outline_id = 1031;'
+        result = db._execute(sql)
+        self.assertEqual(result.fetchall()[0][0], 1)
+        sql = 'SELECT capture_method_id FROM buildings.building_outlines WHERE building_outline_id = 1030;'
+        result = db._execute(sql)
+        self.assertNotEqual(result.fetchall()[0][0], 1)
         self.production_frame.geoms = {}
         self.production_frame.geom_changed = False
         self.production_frame.select_changed = False

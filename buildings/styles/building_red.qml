@@ -1,19 +1,34 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="2.18.17" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+<qgis version="2.18.16" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
-    <edittype widgetv2type="TextEdit" name="supplied_o">
+    <edittype widgetv2type="TextEdit" name="bulk_load_outline_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="supplied_d">
+    <edittype widgetv2type="TextEdit" name="supplied_dataset_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="qa_status_">
+    <edittype widgetv2type="TextEdit" name="external_outline_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="area_cover">
+    <edittype widgetv2type="TextEdit" name="bulk_load_status_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="percent_co">
+    <edittype widgetv2type="TextEdit" name="capture_method_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="capture_source_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="suburb_locality_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="town_city_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="territorial_authority_id">
+      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
+    </edittype>
+    <edittype widgetv2type="TextEdit" name="begin_lifespan">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
@@ -22,12 +37,12 @@
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
-          <prop k="color" v="255,194,14,128"/>
+          <prop k="color" v="241,86,35,0"/>
           <prop k="joinstyle" v="miter"/>
           <prop k="offset" v="0,0"/>
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
-          <prop k="outline_color" v="255,194,14,255"/>
+          <prop k="outline_color" v="255,43,1,255"/>
           <prop k="outline_style" v="solid"/>
           <prop k="outline_width" v="0.75"/>
           <prop k="outline_width_unit" v="MM"/>
@@ -69,7 +84,7 @@
     <property key="labeling/fieldName" value=""/>
     <property key="labeling/fitInPolygonOnly" value="false"/>
     <property key="labeling/fontCapitals" value="0"/>
-    <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
+    <property key="labeling/fontFamily" value="Ubuntu"/>
     <property key="labeling/fontItalic" value="false"/>
     <property key="labeling/fontLetterSpacing" value="0"/>
     <property key="labeling/fontLimitPixelSize" value="false"/>
@@ -96,7 +111,7 @@
     <property key="labeling/minFeatureSize" value="0"/>
     <property key="labeling/multilineAlign" value="4294967295"/>
     <property key="labeling/multilineHeight" value="1"/>
-    <property key="labeling/namedStyle" value="Normal"/>
+    <property key="labeling/namedStyle" value="Medium"/>
     <property key="labeling/obstacle" value="true"/>
     <property key="labeling/obstacleFactor" value="1"/>
     <property key="labeling/obstacleType" value="0"/>
@@ -238,23 +253,33 @@
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
   <annotationform>.</annotationform>
   <aliases>
-    <alias field="supplied_o" index="0" name=""/>
-    <alias field="supplied_d" index="1" name=""/>
-    <alias field="qa_status_" index="2" name=""/>
-    <alias field="area_cover" index="3" name=""/>
-    <alias field="percent_co" index="4" name=""/>
+    <alias field="bulk_load_outline_id" index="0" name=""/>
+    <alias field="supplied_dataset_id" index="1" name=""/>
+    <alias field="external_outline_id" index="2" name=""/>
+    <alias field="bulk_load_status_id" index="3" name=""/>
+    <alias field="capture_method_id" index="4" name=""/>
+    <alias field="capture_source_id" index="5" name=""/>
+    <alias field="suburb_locality_id" index="6" name=""/>
+    <alias field="town_city_id" index="7" name=""/>
+    <alias field="territorial_authority_id" index="8" name=""/>
+    <alias field="begin_lifespan" index="9" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
   <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="0">
     <columns>
-      <column width="-1" hidden="0" type="field" name="supplied_o"/>
-      <column width="-1" hidden="0" type="field" name="supplied_d"/>
-      <column width="-1" hidden="0" type="field" name="qa_status_"/>
-      <column width="-1" hidden="0" type="field" name="area_cover"/>
-      <column width="-1" hidden="0" type="field" name="percent_co"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="bulk_load_outline_id"/>
+      <column width="-1" hidden="0" type="field" name="supplied_dataset_id"/>
+      <column width="-1" hidden="0" type="field" name="external_outline_id"/>
+      <column width="-1" hidden="0" type="field" name="bulk_load_status_id"/>
+      <column width="-1" hidden="0" type="field" name="capture_method_id"/>
+      <column width="-1" hidden="0" type="field" name="capture_source_id"/>
+      <column width="-1" hidden="0" type="field" name="suburb_locality_id"/>
+      <column width="-1" hidden="0" type="field" name="town_city_id"/>
+      <column width="-1" hidden="0" type="field" name="territorial_authority_id"/>
+      <column width="-1" hidden="0" type="field" name="begin_lifespan"/>
     </columns>
   </attributetableconfig>
   <editform>.</editform>
@@ -286,11 +311,16 @@ def my_form_open(dialog, layer, feature):
     <fieldstyles/>
   </conditionalstyles>
   <defaults>
-    <default field="supplied_o" expression=""/>
-    <default field="supplied_d" expression=""/>
-    <default field="qa_status_" expression=""/>
-    <default field="area_cover" expression=""/>
-    <default field="percent_co" expression=""/>
+    <default field="bulk_load_outline_id" expression=""/>
+    <default field="supplied_dataset_id" expression=""/>
+    <default field="external_outline_id" expression=""/>
+    <default field="bulk_load_status_id" expression=""/>
+    <default field="capture_method_id" expression=""/>
+    <default field="capture_source_id" expression=""/>
+    <default field="suburb_locality_id" expression=""/>
+    <default field="town_city_id" expression=""/>
+    <default field="territorial_authority_id" expression=""/>
+    <default field="begin_lifespan" expression=""/>
   </defaults>
   <previewExpression></previewExpression>
   <layerGeometryType>2</layerGeometryType>

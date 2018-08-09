@@ -584,7 +584,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.current_dataset
             ))
         self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_orange.qml')
+            path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.geoms = {}
             self.bulk_load_frame.ids = []
@@ -645,6 +645,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.btn_edit_reset.setEnabled(1)
             self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
             self.bulk_load_frame.select_changed = True
+            self.bulk_load_frame.ids = []
         # if more than one outline is selected
         elif len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
             feats = []
