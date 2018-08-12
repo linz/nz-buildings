@@ -628,7 +628,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_geom(self):
-        """Check geom 'deleted' when save clicked"""
+        """Check geom 'deleted' when save clicked
+        This test protects against a regression of #59"""
         iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -662,6 +663,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 0)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
