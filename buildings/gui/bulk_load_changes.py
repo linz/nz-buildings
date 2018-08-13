@@ -424,7 +424,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.btn_edit_reset.setEnabled(1)
                 self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
                 self.bulk_load_frame.select_changed = True
-                self.bulk_load_frame.ids = []
+                self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
             # if more than one outline is selected
             if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
                 feats = []
@@ -532,14 +532,16 @@ class EditBulkLoad(BulkLoadChanges):
             t_a = result.fetchall()[0][0]
 
             # bulk load status
-            status = True
+            ls_relationships = {'added': [], 'matched': [], 'related': []}
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
-                status = self.remove_compared_outlines()
-            if status:
+                ls_relationships = self.remove_compared_outlines()
+            if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
                     for i in self.bulk_load_frame.ids:
+                        sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                        self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                         self.bulk_load_frame.db.execute_no_commit(
                             sql, (i, bulk_load_status_id, capture_method_id,
@@ -618,7 +620,6 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.btn_edit_reset.setEnabled(1)
             self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
             self.bulk_load_frame.select_changed = True
-            self.bulk_load_frame.ids = []
         # if more than one outline is selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
             feats = []
@@ -682,14 +683,13 @@ class EditBulkLoad(BulkLoadChanges):
                 related_dictionary[outline[0]] = [outline[1]]
         if len(self.bulk_load_frame.ids) > 0:
             # if there is more than one feature to update
+            ls_relationships = {'added': [], 'matched': [], 'related': []}
             for item in self.bulk_load_frame.ids:
                 # remove from added table
                 for outline in added_outlines:
                     if item in outline:
                         # remove outline from added table
-                        sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
-                        self.bulk_load_frame.db.execute_no_commit(sql, (item,))
-                        return True
+                        ls_relationships['added'].append(item)
                 for outline in matched_outlines:
                     if item == outline[0]:
                         self.bulk_load_frame.error_dialog = ErrorDialog()
@@ -699,7 +699,8 @@ class EditBulkLoad(BulkLoadChanges):
                             ' no relationship exists'
                         )
                         self.bulk_load_frame.error_dialog.show()
-                        return False
+                        ls_relationships['matched'].append(item)
+                        break
                 if item in related_dictionary:
                     self.bulk_load_frame.error_dialog = ErrorDialog()
                     self.bulk_load_frame.error_dialog.fill_report(
@@ -708,5 +709,5 @@ class EditBulkLoad(BulkLoadChanges):
                         ' no relationship exists'
                     )
                     self.bulk_load_frame.error_dialog.show()
-                    return False
-        return True
+                    ls_relationships['related'].append(item)
+        return ls_relationships
