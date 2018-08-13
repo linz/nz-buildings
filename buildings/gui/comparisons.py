@@ -21,7 +21,7 @@ def compare_outlines(self, commit_status):
             INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
             SELECT blo.bulk_load_outline_id, 1
             FROM buildings_bulk_load.bulk_load_outlines blo
-            WHERE blo.bulk_load_status_id = 1
+            WHERE blo.bulk_load_status_id !=3
               AND blo.supplied_dataset_id = %s;'''
         self.db.execute_no_commit(sql, (self.current_dataset,))
 

@@ -103,6 +103,12 @@ FROM buildings_bulk_load.supplied_datasets sd
 WHERE sd.supplied_dataset_id = %s;
 """
 
+dataset_processed_date_by_datasetID = """
+SELECT processed_date
+FROM buildings_bulk_load.supplied_datasets sd
+WHERE sd.supplied_dataset_id = %s;
+"""
+
 dataset_count_processed_date_is_null = """
 SELECT count(*)
 FROM buildings_bulk_load.supplied_datasets
