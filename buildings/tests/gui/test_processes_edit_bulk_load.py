@@ -785,7 +785,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.error_dialog.close()
 
-        print self.bulk_load_frame.bulk_load_outline_id
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
         result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
         result = result.fetchall()[0]
@@ -803,7 +802,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added;'
         result = db._execute(sql)
         result = result.fetchall()
-        print result
         self.assertEqual([(2010,)], result)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
