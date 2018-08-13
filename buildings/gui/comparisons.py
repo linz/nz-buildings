@@ -17,7 +17,6 @@ def compare_outlines(self, commit_status):
     if len(results) == 0:
         # No intersecting outlines
         # add all incoming outlines to added table
-        print 1
         sql = '''
             INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
             SELECT blo.bulk_load_outline_id, 1
