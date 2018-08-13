@@ -14,7 +14,23 @@ def compare_outlines(self, commit_status):
     result = self.db.execute_no_commit(select.building_outlines, (hull,))
     results = result.fetchall()
 
-    if len(results) > 0:
+    if len(results) == 0:
+        # No intersecting outlines
+        # add all incoming outlines to added table
+        print 1
+        sql = '''
+            INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
+            SELECT blo.bulk_load_outline_id, 1
+            FROM buildings_bulk_load.bulk_load_outlines blo
+            WHERE blo.bulk_load_status_id = 1
+              AND blo.supplied_dataset_id = %s;'''
+        self.db.execute_no_commit(sql, (self.current_dataset,))
+
+        # update processed date
+        sql = 'SELECT buildings_bulk_load.supplied_datasets_update_processed_date(%s);'
+        result = self.db.execute_no_commit(sql, (self.current_dataset,))
+
+    else:
         # intersecting outlines exist
         for ls in results:
             life_span_check = self.db.execute_no_commit(
@@ -36,8 +52,8 @@ def compare_outlines(self, commit_status):
                     self.db.execute_no_commit(
                         sql, (self.current_dataset, ls[0]))
 
-    # run comparisons function
-    sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
-    self.db.execute_no_commit(sql, (self.current_dataset,))
+        # run comparisons function
+        sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
+        self.db.execute_no_commit(sql, (self.current_dataset,))
     if commit_status:
         self.db.commit_open_cursor()

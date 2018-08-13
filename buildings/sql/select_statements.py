@@ -60,12 +60,6 @@ Bulk Load Outlines
 
 # bulk load outlines
 
-bulk_load_outlines_ID_by_datasetID = """
-SELECT bulk_load_outline_id
-FROM buildings_bulk_load.bulk_load_outlines blo
-WHERE blo.supplied_dataset_id = %s;
-"""
-
 bulk_load_outline_shape_by_id = """
 SELECT shape
 FROM buildings_bulk_load.bulk_load_outlines
@@ -105,12 +99,6 @@ WHERE o.value = %s;
 
 dataset_description_by_datasetID = """
 SELECT description
-FROM buildings_bulk_load.supplied_datasets sd
-WHERE sd.supplied_dataset_id = %s;
-"""
-
-dataset_processed_date_by_datasetID = """
-SELECT processed_date
 FROM buildings_bulk_load.supplied_datasets sd
 WHERE sd.supplied_dataset_id = %s;
 """
