@@ -117,7 +117,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_deletion_reason.setMaxLength(250)
         self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
         self.description_del = self.le_deletion_reason.text()
-        self.completerBox()
+        self.completer_box()
 
         # set up signals and slots
         self.rad_external_source.toggled.connect(
@@ -443,12 +443,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
-    def completerBox(self):
+    def completer_box(self):
         """Box automatic completion"""
         reasons = self.db._execute(select.reason_description_value)
-        reasonList = [row[0] for row in reasons.fetchall()]
+        reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
-        self.completer = QCompleter(reasonList)
+        self.completer = QCompleter(reason_list)
         self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.le_deletion_reason.setCompleter(self.completer)
