@@ -270,7 +270,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.current_dataset, )
         )
         processed_date = result.fetchall()[0][0]
-        print processed_date
+
         if processed_date:
             sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 1);'
             self.bulk_load_frame.db.execute_no_commit(
