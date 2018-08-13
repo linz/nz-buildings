@@ -28,9 +28,9 @@ import qgis
 import os
 
 
-class ProcessComparisonNoOverlapTest(unittest.TestCase):
+class ProcessComparisonNotIntersectTest(unittest.TestCase):
     """
-    Test comparison process for outlines that not overlap with previous dataset
+    Test comparison process for outlines that not intersect with previous dataset
     """
     @classmethod
     def setUpClass(cls):
@@ -92,6 +92,7 @@ class ProcessComparisonNoOverlapTest(unittest.TestCase):
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
         result = db._execute(sql)
@@ -100,14 +101,16 @@ class ProcessComparisonNoOverlapTest(unittest.TestCase):
 
     def test_compare_removed(self):
         """Check correct number of ids are determined as 'Removed'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 35)
+        self.assertEqual(len(result), 2)
 
     def test_compare_matched(self):
         """Check correct number of ids are determined as 'Matched'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
@@ -116,6 +119,7 @@ class ProcessComparisonNoOverlapTest(unittest.TestCase):
 
     def test_compare_related(self):
         """Check correct number of ids are determined as 'Related'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
@@ -129,6 +133,7 @@ class ProcessComparisonNoOverlapTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE supplied_dataset_id = %s;'
         db._execute(sql, (result,))
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
@@ -146,8 +151,7 @@ class ProcessComparisonNoOverlapTest(unittest.TestCase):
         result = result.fetchall()
         self.assertEqual(len(result), 43)
         # removed
-        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 35)
+        self.assertEqual(len(result), 2)
