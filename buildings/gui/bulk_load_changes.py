@@ -540,8 +540,10 @@ class EditBulkLoad(BulkLoadChanges):
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
                     for i in self.bulk_load_frame.ids:
+                        # remove outline from added table
                         sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
                         self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                        # change attributes
                         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                         self.bulk_load_frame.db.execute_no_commit(
                             sql, (i, bulk_load_status_id, capture_method_id,
@@ -675,33 +677,26 @@ class EditBulkLoad(BulkLoadChanges):
             select.current_related_outlines, (
                 self.bulk_load_frame.current_dataset,))
         related_outlines = related_outlines.fetchall()
-        related_dictionary = {}
-        for outline in related_outlines:
-            if outline[0] in related_dictionary:
-                related_dictionary[outline[0]].append(outline[1])
-            else:
-                related_dictionary[outline[0]] = [outline[1]]
         if len(self.bulk_load_frame.ids) > 0:
             # if there is more than one feature to update
             ls_relationships = {'added': [], 'matched': [], 'related': []}
             for item in self.bulk_load_frame.ids:
-                # remove from added table
-                for outline in added_outlines:
-                    if item in outline:
-                        # remove outline from added table
-                        ls_relationships['added'].append(item)
-                for outline in matched_outlines:
-                    if item == outline[0]:
-                        self.bulk_load_frame.error_dialog = ErrorDialog()
-                        self.bulk_load_frame.error_dialog.fill_report(
-                            '\n --------------- RELATIONSHIP EXISTS ---------'
-                            '-------\n\nCan only mark for deletion outline if'
-                            ' no relationship exists'
-                        )
-                        self.bulk_load_frame.error_dialog.show()
-                        ls_relationships['matched'].append(item)
-                        break
-                if item in related_dictionary:
+                # added
+                if (item, ) in added_outlines:
+                    ls_relationships['added'].append(item)
+                # matched
+                if (item, ) in matched_outlines:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n --------------- RELATIONSHIP EXISTS ---------'
+                        '-------\n\nCan only mark for deletion outline if'
+                        ' no relationship exists'
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    ls_relationships['matched'].append(item)
+                    break
+                # related
+                if (item, ) in related_outlines:
                     self.bulk_load_frame.error_dialog = ErrorDialog()
                     self.bulk_load_frame.error_dialog.fill_report(
                         '\n ------------------- RELATIONSHIP EXISTS ---------'
@@ -710,4 +705,5 @@ class EditBulkLoad(BulkLoadChanges):
                     )
                     self.bulk_load_frame.error_dialog.show()
                     ls_relationships['related'].append(item)
+                    break
         return ls_relationships
