@@ -155,6 +155,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_capture_source.setDisabled(1)
         self.bulk_load_frame.cmb_status.clear()
         self.bulk_load_frame.cmb_status.setDisabled(1)
+        self.bulk_load_frame.le_deletion_reason.setDisabled(1)
         self.bulk_load_frame.cmb_ta.clear()
         self.bulk_load_frame.cmb_ta.setDisabled(1)
         self.bulk_load_frame.cmb_town.clear()
@@ -496,6 +497,7 @@ class EditBulkLoad(BulkLoadChanges):
                     '-----\n\n There are no capture source entries.'
                 )
                 self.bulk_load_frame.error_dialog.show()
+                self.disbale_UI_functions()
                 return
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
@@ -535,7 +537,22 @@ class EditBulkLoad(BulkLoadChanges):
             ls_relationships = {'added': [], 'matched': [], 'related': []}
             if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                 # can only delete outlines if no relationship
+                self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
+                if len(self.bulk_load_frame.description_del) == 0:
+                    self.bulk_load_frame.error_dialog = ErrorDialog()
+                    self.bulk_load_frame.error_dialog.fill_report(
+                        '\n -------------------- EMPTY VALUE FIELD ------'
+                        '-------------- \n\n There are no "reason for deletion" entries '
+                    )
+                    self.bulk_load_frame.error_dialog.show()
+                    self.disbale_UI_functions()
+                    return
                 ls_relationships = self.remove_compared_outlines()
+                if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
+                    if len(self.bulk_load_frame.ids) > 0:
+                        for i in self.bulk_load_frame.ids:
+                            sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
@@ -550,6 +567,8 @@ class EditBulkLoad(BulkLoadChanges):
                                   capture_source_id, suburb, town, t_a))
                     if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
                         self.bulk_load_frame.bulk_load_layer.removeSelection()
+            self.disbale_UI_functions()
+            self.bulk_load_frame.completer_box()
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
             QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
@@ -623,7 +642,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
             self.bulk_load_frame.select_changed = True
         # if more than one outline is selected
-        if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
+        elif len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
             feats = []
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
                 ls = []
@@ -656,7 +675,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
                 self.bulk_load_frame.select_changed = True
         # If no outlines are selected
-        if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
+        elif len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
             self.bulk_load_frame.ids = []
             BulkLoadChanges.disbale_UI_functions(self)
             self.bulk_load_frame.select_changed = False

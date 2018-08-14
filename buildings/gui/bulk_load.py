@@ -333,6 +333,14 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
                       territorial_authority, geom))
     sql = 'SELECT buildings_bulk_load.bulk_load_outlines_remove_small_buildings(%s);'
     self.db.execute_no_commit(sql, (dataset_id, ))
+    # insert into deletion_description
+    results = self.db.execute_no_commit(
+        select.bulk_load_removed_outlines_ID_by_datasetID, (dataset_id,))
+    bulk_loaded_ids = results.fetchall()
+    for bulk_loaded_id in bulk_loaded_ids:
+        sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+        self.db.execute_no_commit(sql, (bulk_loaded_id, 'Building outlines smaller than 10m2'))
+
     self.le_data_description.clear()
     # return 1 if function worked
     return 1

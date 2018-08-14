@@ -3,7 +3,8 @@
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtGui import QFrame, QColor
+from PyQt4.QtGui import QFrame, QColor, QCompleter
+from PyQt4.QtCore import Qt
 
 import qgis
 from qgis.utils import iface
@@ -111,6 +112,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         results = results.fetchall()
         for thing in results:
             self.cmb_capture_source_area.addItem(thing[0])
+
+        # initiate le_deletion_reason
+        self.le_deletion_reason.setMaxLength(250)
+        self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
+        self.description_del = self.le_deletion_reason.text()
+        self.completer_box()
+
         # set up signals and slots
         self.rad_external_source.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
@@ -125,6 +133,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
+
+        self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
 
@@ -202,6 +212,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.grpb_edits.show()
         self.cmb_status.setDisabled(1)
+        self.le_deletion_reason.setDisabled(1)
         self.cmb_capture_method_2.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
@@ -326,6 +337,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_capture_source.setDisabled(1)
         self.cmb_status.setDisabled(1)
         self.cmb_status.clear()
+        self.le_deletion_reason.setDisabled(1)
+        self.le_deletion_reason.clear()
         self.cmb_ta.clear()
         self.cmb_ta.setDisabled(1)
         self.cmb_town.clear()
@@ -399,6 +412,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # disable comboboxes
         self.cmb_status.setDisabled(1)
         self.cmb_status.clear()
+        self.le_deletion_reason.setDisabled(1)
+        self.le_deletion_reason.clear()
         self.cmb_capture_method_2.setDisabled(1)
         self.cmb_capture_method_2.clear()
         self.cmb_capture_source.setDisabled(1)
@@ -428,6 +443,26 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+
+    def completer_box(self):
+        """Box automatic completion"""
+        reasons = self.db._execute(select.reason_description_value)
+        reason_list = [row[0] for row in reasons.fetchall()]
+        # Fill the search box
+        self.completer = QCompleter(reason_list)
+        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.le_deletion_reason.setCompleter(self.completer)
+
+    def enable_le_deletion_reason(self):
+        if self.cmb_status.currentText() == 'Deleted During QA':
+            self.le_deletion_reason.setEnabled(1)
+            self.le_deletion_reason.setFocus()
+            self.le_deletion_reason.setText(self.description_del)
+            self.le_deletion_reason.selectAll()
+        else:
+            self.le_deletion_reason.setDisabled(1)
+            self.le_deletion_reason.clear()
 
     def alter_relationships_clicked(self):
         """
