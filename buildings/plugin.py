@@ -10,6 +10,8 @@ from qgis.core import QgsProject, QgsCoordinateReferenceSystem
 from qgis.utils import iface
 
 from buildings.gui.menu_frame import MenuFrame
+from buildings.gui.bulk_load_frame import BulkLoadFrame
+from buildings.gui.production_frame import ProductionFrame
 from buildings.gui.error_dialog import ErrorDialog
 
 from utilities.layers import LayerRegistry
@@ -254,7 +256,7 @@ class Buildings:
         iface.actionPan().trigger()
 
     def item_changed(self, item):
-        if item.text() != "Buildings":
+        if item.text() == "Road Workflows":
             if QgsProject is not None:
                 root = QgsProject.instance().layerTreeRoot()
                 group = root.findGroup("Building Tool Layers")
@@ -266,17 +268,31 @@ class Buildings:
                     if layer.layer().name() == "bulk_load_outlines":
                         iface.setActiveLayer(layer.layer())
                         iface.actionCancelEdits().trigger()
-        else:
+        elif item.text() == "Buildings":
             if QgsProject is not None:
                 root = QgsProject.instance().layerTreeRoot()
                 group = root.findGroup("Building Tool Layers")
                 layers = group.findLayers()
                 for layer in layers:
                     if layer.layer().name() == "building_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        layer.layer().startEditing()
-                        iface.actionAddFeature().trigger()
+                        dw = qgis.utils.plugins['roads'].dockwidget
+                        if isinstance(dw.current_frame, ProductionFrame):
+                            if dw.current_frame.rad_edit.isChecked():
+                                iface.setActiveLayer(layer.layer())
+                                layer.layer().startEditing()
+                                iface.actionNodeTool().trigger()
+                            if dw.current_frame.rad_add.isChecked():
+                                iface.setActiveLayer(layer.layer())
+                                layer.layer().startEditing()
+                                iface.actionAddFeature().trigger()
                     if layer.layer().name() == "bulk_load_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        layer.layer().startEditing()
-                        iface.actionAddFeature().trigger()
+                        dw = qgis.utils.plugins['roads'].dockwidget
+                        if isinstance(dw.current_frame, BulkLoadFrame):
+                            if dw.current_frame.rad_edit.isChecked():
+                                iface.setActiveLayer(layer.layer())
+                                layer.layer().startEditing()
+                                iface.actionNodeTool().trigger()
+                            if dw.current_frame.rad_add.isChecked():
+                                iface.setActiveLayer(layer.layer())
+                                layer.layer().startEditing()
+                                iface.actionAddFeature().trigger()

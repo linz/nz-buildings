@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
+from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem, QgsExpression, QgsFeatureRequest
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -100,6 +100,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
         self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
@@ -130,6 +132,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
         self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
@@ -316,6 +320,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
         self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
@@ -397,6 +403,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), '')
         self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), '')
+        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
         self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), '')
         self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
@@ -426,7 +434,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Added During QA'))
-        self.bulk_load_frame.cmb_capture_method.setCurrentIndex(self.bulk_load_frame.cmb_capture_method_2.findText('Unknown'))
+        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(self.bulk_load_frame.cmb_capture_method_2.findText('Unknown'))
         self.bulk_load_frame.cmb_ta.setCurrentIndex(self.bulk_load_frame.cmb_ta.findText('Manawatu-Whanganui'))
         self.bulk_load_frame.cmb_town.setCurrentIndex(self.bulk_load_frame.cmb_town.findText('Palmerston North'))
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(self.bulk_load_frame.cmb_suburb.findText('Hokowhitu'))
@@ -438,27 +446,34 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
         status = db._execute(sql, (result[0],))
         status = status.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
+        self.assertEqual('Added During QA', status)
         # capture method
         sql = 'SELECT value FROM buildings_common.capture_method WHERE capture_method_id = %s;'
         capture_method = db._execute(sql, (result[1],))
         capture_method = capture_method.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), capture_method)
+        self.assertEqual('Unknown', capture_method)
         # suburb
         sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;'
         suburb = db._execute(sql, (result[2],))
         suburb = suburb.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), suburb)
+        self.assertEqual('Hokowhitu', suburb)
         # town
         sql = 'SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;'
         town_city = db._execute(sql, (result[3],))
         town_city = town_city.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), town_city)
+        self.assertEqual('Palmerston North', town_city)
         # territorial Authority
         sql = 'SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;'
         territorial_authority = db._execute(sql, (result[4],))
         territorial_authority = territorial_authority.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), territorial_authority)
+        self.assertEqual('Manawatu-Whanganui', territorial_authority)
+
+        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), '')
+
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
@@ -551,28 +566,35 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
             status = db._execute(sql, (result[0],))
             status = status.fetchall()[0][0]
-            self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
+            self.assertEqual('Added During QA', status)
             # capture method
             sql = 'SELECT value FROM buildings_common.capture_method WHERE capture_method_id = %s;'
             capture_method = db._execute(sql, (result[1],))
             capture_method = capture_method.fetchall()[0][0]
-            self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), capture_method)
+            self.assertEqual('Unknown', capture_method)
             # suburb
             sql = 'SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;'
             suburb = db._execute(sql, (result[2],))
             suburb = suburb.fetchall()[0][0]
-            self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), suburb)
+            self.assertEqual('Hokowhitu', suburb)
             # town
             sql = 'SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;'
             town_city = db._execute(sql, (result[3],))
             town_city = town_city.fetchall()[0][0]
-            self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), town_city)
+            self.assertEqual('Palmerston North', town_city)
             # territorial Authority
             sql = 'SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;'
             territorial_authority = db._execute(sql, (result[4],))
             territorial_authority = territorial_authority.fetchall()[0][0]
-            self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), territorial_authority)
+            self.assertEqual('Manawatu-Whanganui', territorial_authority)
             self.assertEqual(len(self.bulk_load_frame.ids), 6)
+
+        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), '')
+        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), '')
+
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
@@ -628,7 +650,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_geom(self):
-        """Check geom 'deleted' when save clicked"""
+        """Check geom 'deleted' when save clicked
+        This test protects against a regression of #59"""
         iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -649,6 +672,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.assertTrue(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
+
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
         result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
@@ -657,12 +684,47 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
         status = db._execute(sql, (result[0],))
         status = status.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
+        self.assertEqual('Deleted During QA', status)
+        # deletion description
+        sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
+        reason = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        reason = reason.fetchall()[0][0]
+        self.assertEqual('Reason for deletion', reason)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010;'
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 0)
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_multiple_deleted_geom(self):
+        """Check multiple geoms 'deleted' when save clicked
+        This test protects against a regression of #59"""
+        expr = QgsExpression("bulk_load_outline_id=2010 or bulk_load_outline_id =2003")
+        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 3)
+        self.assertEqual(result[1][0], 3)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result, [])
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 0)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
@@ -690,6 +752,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.error_dialog.close()
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
@@ -700,11 +763,112 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         status = db._execute(sql, (result[0],))
         status = status.fetchall()[0][0]
         self.assertEqual('Supplied', status)
+        # deletion description
+        sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
+        reason = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        reason = reason.fetchall()
+        self.assertEqual([], reason)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = 2031;'
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [(2031,)])
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_fails_reason(self):
+        """Check 'delete' fail when enter none in 'reason for deletion' """
+        iface.actionSelect().trigger()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878228.6, 5555334.9)),
+                         delay=30)
+        QTest.qWait(10)
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
+                         delay=30)
+        QTest.qWait(10)
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.assertTrue(self.bulk_load_frame.le_deletion_reason.isEnabled())
+        # check autocompleting of the previous reason
+        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), 'Reason for deletion')
+        self.bulk_load_frame.le_deletion_reason.setText('')
+
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        self.bulk_load_frame.error_dialog.close()
+
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
+        result = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        result = result.fetchall()[0]
+        # status
+        sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
+        status = db._execute(sql, (result[0],))
+        status = status.fetchall()[0][0]
+        self.assertEqual('Supplied', status)
+        # deletion description
+        sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
+        reason = db._execute(sql, (self.bulk_load_frame.bulk_load_outline_id,))
+        reason = reason.fetchall()
+        self.assertEqual([], reason)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual([(2010,)], result)
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_fails_multiple_selection(self):
+        """Check nothing is changed when correct and incorrect outlines are deleted
+        This test protects against a regression of #59"""
+        expr = QgsExpression("bulk_load_outline_id=2003 or bulk_load_outline_id =2004")
+        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        self.bulk_load_frame.error_dialog.close()
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2003 OR bulk_load_outline_id = 2004;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 1)
+        self.assertEqual(result[1][0], 1)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, 2003)
+        # matched
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = 2004;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, 2004)
+        # selection
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 2)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False

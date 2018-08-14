@@ -499,6 +499,7 @@ class EditProduction(ProductionChanges):
                     '-----\n\n There are no capture source entries.'
                 )
                 self.production_frame.error_dialog.show()
+                self.disable_UI_functions()
                 return
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
@@ -552,6 +553,8 @@ class EditProduction(ProductionChanges):
                           capture_method_id, capture_source_id,
                           lifecycle_stage_id, suburb, town, t_a)
                 )
+            self.disable_UI_functions()
+
         if commit_status:
             self.production_frame.geoms = {}
             self.production_frame.ids = []

@@ -60,10 +60,30 @@ Bulk Load Outlines
 
 # bulk load outlines
 
+bulk_load_outlines_ID_by_datasetID = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.bulk_load_outlines blo
+WHERE blo.supplied_dataset_id = %s;
+"""
+
+bulk_load_removed_outlines_ID_by_datasetID = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.bulk_load_outlines blo
+WHERE blo.supplied_dataset_id = %s
+  AND blo.bulk_load_status_id = 3;
+"""
+
 bulk_load_outline_shape_by_id = """
 SELECT shape
 FROM buildings_bulk_load.bulk_load_outlines
 WHERE bulk_load_outline_id = %s;
+"""
+
+# deletion_description
+
+reason_description_value = """
+SELECT DISTINCT description
+FROM buildings_bulk_load.deletion_description;
 """
 
 # Organisation
@@ -181,8 +201,7 @@ WHERE bulk_load_outline_id IN (
 
 # matched
 current_matched_outlines = """
-SELECT bulk_load_outline_id,
-       building_outline_id
+SELECT bulk_load_outline_id
 FROM buildings_bulk_load.matched
 WHERE bulk_load_outline_id IN(
       SELECT bulk_load_outline_id
@@ -192,8 +211,7 @@ WHERE bulk_load_outline_id IN(
 
 # related
 current_related_outlines = """
-SELECT bulk_load_outline_id,
-       building_outline_id
+SELECT bulk_load_outline_id
 FROM buildings_bulk_load.related
 WHERE bulk_load_outline_id IN (
     SELECT bulk_load_outline_id

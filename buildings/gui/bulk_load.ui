@@ -318,57 +318,57 @@ QGroupBox::title {
       <item row="3" column="1">
        <widget class="QComboBox" name="cmb_status"/>
       </item>
-      <item row="4" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="lb_capture_method_2">
         <property name="text">
          <string>Capture Method:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="7" column="1">
        <widget class="QComboBox" name="cmb_capture_method_2"/>
       </item>
-      <item row="5" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="lb_capture_source">
         <property name="text">
          <string>Capture Source:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="8" column="1">
        <widget class="QComboBox" name="cmb_capture_source"/>
       </item>
-      <item row="6" column="0">
+      <item row="9" column="0">
        <widget class="QLabel" name="lb_town">
         <property name="text">
          <string>Town City:</string>
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="9" column="1">
        <widget class="QComboBox" name="cmb_town"/>
       </item>
-      <item row="7" column="0">
+      <item row="10" column="0">
        <widget class="QLabel" name="lb_suburb">
         <property name="text">
          <string>Suburb Locality:</string>
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="10" column="1">
        <widget class="QComboBox" name="cmb_suburb"/>
       </item>
-      <item row="8" column="0">
+      <item row="11" column="0">
        <widget class="QLabel" name="lb_ta">
         <property name="text">
          <string>Territorial Authority: </string>
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
+      <item row="11" column="1">
        <widget class="QComboBox" name="cmb_ta"/>
       </item>
-      <item row="9" column="0" colspan="2">
+      <item row="12" column="0" colspan="2">
        <layout class="QHBoxLayout" name="hzly_4">
         <item>
          <widget class="QPushButton" name="btn_edit_save">
@@ -434,6 +434,9 @@ QGroupBox::title {
         </property>
        </spacer>
       </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="le_deletion_reason"/>
+      </item>
      </layout>
      <zorder>cmb_status</zorder>
      <zorder>lb_bulk_load_status</zorder>
@@ -450,6 +453,7 @@ QGroupBox::title {
      <zorder></zorder>
      <zorder>vtsp_6</zorder>
      <zorder>vtsp_7</zorder>
+     <zorder>le_deletion_reason</zorder>
     </widget>
    </item>
    <item>
