@@ -74,7 +74,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.dockwidget.lst_options.setCurrentItem(self.dockwidget.lst_options.item(2))
         self.assertTrue(self.bulk_load_frame.bulk_load_layer.isEditable())
 
-    def test_switing_editing(self):
+    def test_switching_editing(self):
         """Check not editing when switched to Roads and Back"""
         self.dockwidget.lst_options.setCurrentItem(self.dockwidget.lst_options.item(1))
         self.dockwidget.lst_options.setCurrentItem(self.dockwidget.lst_options.item(2))
