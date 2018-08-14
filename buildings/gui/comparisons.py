@@ -16,18 +16,19 @@ def compare_outlines(self, commit_status):
 
     if len(results) == 0:
         # No intersecting outlines
-        results = self.db.execute_no_commit(
-            select.bulk_load_outlines_ID_by_datasetID, (
-                self.current_dataset,
-            ))
-        bulk_loaded_ids = results.fetchall()
-        for id in bulk_loaded_ids:
-            # add all incoming outlines to added table
-            sql = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
-            self.db.execute_no_commit(sql, (id[0],))
+        # add all incoming outlines to added table
+        sql = '''
+            INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
+            SELECT blo.bulk_load_outline_id, 1
+            FROM buildings_bulk_load.bulk_load_outlines blo
+            WHERE blo.bulk_load_status_id !=3
+              AND blo.supplied_dataset_id = %s;'''
+        self.db.execute_no_commit(sql, (self.current_dataset,))
+
         # update processed date
         sql = 'SELECT buildings_bulk_load.supplied_datasets_update_processed_date(%s);'
         result = self.db.execute_no_commit(sql, (self.current_dataset,))
+
     else:
         # intersecting outlines exist
         for ls in results:
@@ -49,6 +50,7 @@ def compare_outlines(self, commit_status):
                     sql = 'SELECT buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(%s, %s);'
                     self.db.execute_no_commit(
                         sql, (self.current_dataset, ls[0]))
+
         # run comparisons function
         sql = 'SELECT buildings_bulk_load.compare_building_outlines(%s);'
         self.db.execute_no_commit(sql, (self.current_dataset,))

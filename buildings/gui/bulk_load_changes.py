@@ -264,10 +264,18 @@ class AddBulkLoad(BulkLoadChanges):
                   self.bulk_load_frame.geom)
         )
         self.bulk_load_frame.outline_id = result.fetchall()[0][0]
+
         # insert into added table
-        sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 2);'
-        self.bulk_load_frame.db.execute_no_commit(
-            sql, (self.bulk_load_frame.outline_id,))
+        result = self.bulk_load_frame.db._execute(
+            select.dataset_processed_date_by_datasetID, (
+                self.bulk_load_frame.current_dataset, )
+        )
+        processed_date = result.fetchall()[0][0]
+
+        if processed_date:
+            sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 1);'
+            self.bulk_load_frame.db.execute_no_commit(
+                sql, (self.bulk_load_frame.outline_id,))
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(

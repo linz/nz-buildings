@@ -28,10 +28,10 @@ import qgis
 import os
 
 
-class SetUpEditBulkLoad(unittest.TestCase):
+class ProcessComparisonNotIntersectTest(unittest.TestCase):
     """
-    Test Add Production Outline GUI initial
-    setup confirm default settings
+    Test comparison process for outlines that not intersect with previous dataset
+    These tests protect against a regression of #62
     """
     @classmethod
     def setUpClass(cls):
@@ -66,12 +66,12 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.bulk_load_frame.db.open_cursor()
         self.bulk_load_frame.publish_clicked(False)
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'testdata/test_bulk_load_shapefile.shp')
+                            'testdata/test_bulk_load_shapefile2.shp')
         layer = iface.addVectorLayer(path, '', 'ogr')
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_bulk_load_shapefile':
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_bulk_load_shapefile2':
                 self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
@@ -93,22 +93,25 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 16)
+        self.assertEqual(len(result), 5)
 
     def test_compare_removed(self):
         """Check correct number of ids are determined as 'Removed'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 33)
+        self.assertEqual(len(result), 2)
 
     def test_compare_matched(self):
         """Check correct number of ids are determined as 'Matched'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
@@ -117,17 +120,12 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_compare_related(self):
         """Check correct number of ids are determined as 'Related'"""
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 45)
-
-    def test_gui_on_compare_clicked(self):
-        """Check buttons are enabled/disabled"""
-        self.bulk_load_frame.compare_outlines_clicked(False)
-        self.assertFalse(plugins.get('roads').dockwidget.current_frame.btn_compare_outlines.isEnabled())
-        self.assertTrue(plugins.get('roads').dockwidget.current_frame.btn_publish.isEnabled())
+        self.assertEqual(len(result), 43)
 
     def test_delete_during_qa(self):
         """Checks outlines that are deleted during qa before comparisons is run are not carried through"""
@@ -136,6 +134,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
         result = result.fetchall()[0][0]
         sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE supplied_dataset_id = %s;'
         db._execute(sql, (result,))
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
@@ -153,28 +152,31 @@ class SetUpEditBulkLoad(unittest.TestCase):
         result = result.fetchall()
         self.assertEqual(len(result), 43)
         # removed
-        self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 35)
+        self.assertEqual(len(result), 2)
 
     def test_add_during_qa(self):
-        """Checks outlines that are added during qa before comparisons is not causing issues when carried through"""
+        """
+        Checks outlines that are added during qa before comparisons is not causing issues when carried through
+        The test protects against a regression of #63
+        """
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         # Add one outline in both bulk_load_outlines and added table
         sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
-        result = db._execute(sql, (result, None, 2, 1, 1, 1, 100, 1,
-                                   '0103000020910800000100000005000000EA7ABCBF6AA83C414C38B255343155417C46175878A83C413A28764134315541C18607A978A83C417A865C33323155412FBBAC106BA83C417A865C3332315541EA7ABCBF6AA83C414C38B25534315541'))
+        result = db._execute(sql, (result, None, 2, 1, 1, 4, 400, 1,
+                                   '0103000020910800000100000005000000F311221BB7AA3C41046171A564315541D2712DB1CCAA3C41046171A56431554115066169CDAA3C41E20FFCA060315541751FEF95B7AA3C414353AFBF60315541F311221BB7AA3C41046171A564315541'))
         result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 17)
+        self.assertEqual(len(result), 6)
         # Matched
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
@@ -184,9 +186,9 @@ class SetUpEditBulkLoad(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 45)
+        self.assertEqual(len(result), 43)
         # removed
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 33)
+        self.assertEqual(len(result), 2)
