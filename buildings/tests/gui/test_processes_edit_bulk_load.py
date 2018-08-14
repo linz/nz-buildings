@@ -711,6 +711,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
         self.bulk_load_frame.rad_edit.click()
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
         result = db._execute(sql)
@@ -847,6 +848,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
         self.bulk_load_frame.rad_edit.click()
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.error_dialog.close()
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2003 OR bulk_load_outline_id = 2004;'

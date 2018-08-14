@@ -547,16 +547,12 @@ class EditBulkLoad(BulkLoadChanges):
                     self.bulk_load_frame.error_dialog.show()
                     self.disbale_UI_functions()
                     return
-                status = self.remove_compared_outlines()
-                if status:
+                ls_relationships = self.remove_compared_outlines()
+                if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                     if len(self.bulk_load_frame.ids) > 0:
                         for i in self.bulk_load_frame.ids:
                             sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
                             self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
-                    else:
-                        sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                        self.bulk_load_frame.db.execute_no_commit(sql, (self.bulk_load_frame.bulk_load_outline_id, self.bulk_load_frame.description_del))
-                ls_relationships = self.remove_compared_outlines()
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.bulk_load_frame.ids) > 0:
                     # if there is more than one feature to update
