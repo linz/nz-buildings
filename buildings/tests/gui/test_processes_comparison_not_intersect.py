@@ -31,6 +31,7 @@ import os
 class ProcessComparisonNotIntersectTest(unittest.TestCase):
     """
     Test comparison process for outlines that not intersect with previous dataset
+    These tests protect against a regression of #62
     """
     @classmethod
     def setUpClass(cls):
@@ -157,7 +158,10 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     def test_add_during_qa(self):
-        """Checks outlines that are added during qa before comparisons is not causing issues when carried through"""
+        """
+        Checks outlines that are added during qa before comparisons is not causing issues when carried through
+        The test protects against a regression of #63
+        """
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
         result = db._execute(sql)
         result = result.fetchall()[0][0]
