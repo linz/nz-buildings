@@ -195,8 +195,7 @@ WHERE bulk_load_outline_id IN (
 
 # matched
 current_matched_outlines = """
-SELECT bulk_load_outline_id,
-       building_outline_id
+SELECT bulk_load_outline_id
 FROM buildings_bulk_load.matched
 WHERE bulk_load_outline_id IN(
       SELECT bulk_load_outline_id
@@ -206,8 +205,7 @@ WHERE bulk_load_outline_id IN(
 
 # related
 current_related_outlines = """
-SELECT bulk_load_outline_id,
-       building_outline_id
+SELECT bulk_load_outline_id
 FROM buildings_bulk_load.related
 WHERE bulk_load_outline_id IN (
     SELECT bulk_load_outline_id
