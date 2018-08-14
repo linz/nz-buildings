@@ -19,7 +19,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(28);
+SELECT plan(29);
 
 -- Tests
 SELECT has_schema('buildings_bulk_load');
@@ -109,6 +109,8 @@ SELECT has_index(
     'buildings_bulk_load', 'transferred', 'idx_transferred_new_building_outline_id', 'new_building_outline_id',
     'Should have index on the new_building_outline_id column of the transferred table.'
 );
+
+SELECT has_table('buildings_bulk_load', 'deletion_description', 'Should have deletion_description table in the buildings_bulk_load schema.');
 
 -- Finish pgTAP testing
 SELECT * FROM finish();

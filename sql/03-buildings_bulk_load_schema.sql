@@ -294,7 +294,6 @@ COMMENT ON COLUMN buildings_bulk_load.matched.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.matched.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
-
 -- Transferred
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.transferred (
@@ -315,3 +314,20 @@ COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
 'buildings_bulk_load.bulk_load_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.transferred.new_building_outline_id IS
 'Foreign key to the buildings.building_outlines table.';
+
+-- Deletion Description
+
+CREATE TABLE IF NOT EXISTS buildings_bulk_load.deletion_description (
+      bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
+    , description character varying(250) NOT NULL
+);
+
+COMMENT ON TABLE buildings_bulk_load.deletion_description IS
+'This table records information about the reason for deleting outlines '
+'during bulk load process.';
+
+COMMENT ON COLUMN buildings_bulk_load.deletion_description.bulk_load_outline_id IS
+'Unique identifier for the deletion_description table and foreign key to the '
+'buildings_bulk_load.bulk_load_outlines table.';
+COMMENT ON COLUMN buildings_bulk_load.deletion_description.description IS
+'The reason for deleting the building outlines.';
