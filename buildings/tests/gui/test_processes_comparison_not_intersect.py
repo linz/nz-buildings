@@ -166,8 +166,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = db._execute(sql, (result, None, 2, 1, 1, 4, 400, 1,
                                    '0103000020910800000100000005000000F311221BB7AA3C41046171A564315541D2712DB1CCAA3C41046171A56431554115066169CDAA3C41E20FFCA060315541751FEF95B7AA3C414353AFBF60315541F311221BB7AA3C41046171A564315541'))
         result = result.fetchall()[0][0]
-        sql = "INSERT INTO buildings_bulk_load.added VALUES (%s, 1)"
-        db._execute(sql, (result,))
         self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added

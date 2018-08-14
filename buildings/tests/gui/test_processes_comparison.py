@@ -158,3 +158,35 @@ class SetUpEditBulkLoad(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(len(result), 35)
+
+    def test_add_during_qa(self):
+        """Checks outlines that are added during qa before comparisons is not causing issues when carried through"""
+        sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        # Add one outline in both bulk_load_outlines and added table
+        sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
+        result = db._execute(sql, (result, None, 2, 1, 1, 1, 100, 1,
+                                   '0103000020910800000100000005000000EA7ABCBF6AA83C414C38B255343155417C46175878A83C413A28764134315541C18607A978A83C417A865C33323155412FBBAC106BA83C417A865C3332315541EA7ABCBF6AA83C414C38B25534315541'))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.compare_outlines_clicked(False)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 17)
+        # Matched
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 4)
+        # related
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 45)
+        # removed
+        sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 33)
