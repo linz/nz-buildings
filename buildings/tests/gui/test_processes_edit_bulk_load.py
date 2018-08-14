@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
+from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem, QgsExpression, QgsFeatureRequest
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -628,7 +628,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_geom(self):
-        """Check geom 'deleted' when save clicked"""
+        """Check geom 'deleted' when save clicked
+        This test protects against a regression of #59"""
         iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -657,12 +658,40 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
         status = db._execute(sql, (result[0],))
         status = status.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), status)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010;'
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 0)
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_multiple_deleted_geom(self):
+        """Check multiple geoms 'deleted' when save clicked
+        This test protects against a regression of #59"""
+        expr = QgsExpression("bulk_load_outline_id=2010 or bulk_load_outline_id =2003")
+        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 3)
+        self.assertEqual(result[1][0], 3)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result, [])
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 0)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
@@ -705,6 +734,40 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [(2031,)])
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_deleted_fails_multiple_selection(self):
+        """Check nothing is changed when correct and incorrect outlines are deleted
+        This test protects against a regression of #59"""
+        expr = QgsExpression("bulk_load_outline_id=2003 or bulk_load_outline_id =2004")
+        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        ids = [i.id() for i in it]
+        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        self.bulk_load_frame.error_dialog.close()
+        sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2003 OR bulk_load_outline_id = 2004;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(result[0][0], 1)
+        self.assertEqual(result[1][0], 1)
+        # added
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = 2003;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, 2003)
+        # matched
+        sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = 2004;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, 2004)
+        # selection
+        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        self.assertEqual(selection, 2)
         self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
