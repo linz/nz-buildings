@@ -571,12 +571,12 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                                       1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
+        iface.actionSelect().trigger()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
                          delay=30)
         QTest.qWait(10)
         self.production_frame.rad_edit.click()
-        iface.actionSelect().trigger()
         self.assertTrue(self.production_frame.btn_save.isEnabled())
         self.assertTrue(self.production_frame.btn_reset.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
