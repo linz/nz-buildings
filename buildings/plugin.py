@@ -51,7 +51,7 @@ class Buildings:
         # set up the customizable toolbar
         iface.building_toolbar = None
         self.is_active = False
-        self.dockwidget = None  # qgis.utils.plugins['roads'].dockwidget
+        self.dockwidget = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -133,7 +133,7 @@ class Buildings:
             dw = qgis.utils.plugins['buildings'].dockwidget
             exists = False
             if dw is not None:
-                self.dockwidget = qgis.utils.plugins['roads'].dockwidget
+                self.dockwidget = qgis.utils.plugins['buildings'].dockwidget
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
@@ -193,7 +193,7 @@ class Buildings:
             if act.text() == u"Buildings":
                 panel.removeAction(act)
 
-        # Delete the mainWindow reference to the roads dockwidget
+        # Delete the mainWindow reference to the buildings dockwidget
         for dock in iface.mainWindow().findChildren(QDockWidget, u"BuildingsDockWidgetBase"):
             dock.setParent(None)
 
