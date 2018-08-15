@@ -237,7 +237,6 @@ class Buildings:
         target_crs = QgsCoordinateReferenceSystem()
         target_crs.createFromUserInput(selectedcrs)
         canvas.setDestinationCrs(target_crs)
-        dw.lst_options.currentItemChanged.connect(self.item_changed)
         self.on_click()
 
     def on_click(self):
@@ -264,35 +263,6 @@ class Buildings:
             # iface.building_toolbar hadn't been created yet
             pass
         iface.actionPan().trigger()
-
-    def item_changed(self, item):
-        if item:
-            if item.text() != "Buildings":
-                if QgsProject is not None:
-                    root = QgsProject.instance().layerTreeRoot()
-                    group = root.findGroup("Building Tool Layers")
-                    layers = group.findLayers()
-                    for layer in layers:
-                        if layer.layer().name() == "building_outlines":
-                            iface.setActiveLayer(layer.layer())
-                            iface.actionCancelEdits().trigger()
-                        if layer.layer().name() == "bulk_load_outlines":
-                            iface.setActiveLayer(layer.layer())
-                            iface.actionCancelEdits().trigger()
-            else:
-                if QgsProject is not None:
-                    root = QgsProject.instance().layerTreeRoot()
-                    group = root.findGroup("Building Tool Layers")
-                    layers = group.findLayers()
-                    for layer in layers:
-                        if layer.layer().name() == "building_outlines":
-                            iface.setActiveLayer(layer.layer())
-                            layer.layer().startEditing()
-                            iface.actionAddFeature().trigger()
-                        if layer.layer().name() == "bulk_load_outlines":
-                            iface.setActiveLayer(layer.layer())
-                            layer.layer().startEditing()
-                            iface.actionAddFeature().trigger()
 
     def on_dockwidget_closed(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
