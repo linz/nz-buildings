@@ -36,30 +36,25 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
+        if not plugins.get('buildings'):
             pass
         else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+            db.connect()
+            cls.building_plugin = plugins.get('buildings')
+            cls.dockwidget = cls.building_plugin.dockwidget
+            cls.building_plugin.main_toolbar.actions()[0].trigger()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         qgis.utils.reloadPlugin('buildings')
-        cls.road_plugin.dockwidget.close()
+        cls.building_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
-        self.buildings_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get('buildings')
+        self.building_plugin.main_toolbar.actions()[0].trigger()
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
@@ -89,7 +84,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         for layer in layers:
             if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-        self.road_plugin.dockwidget.close()
+        self.building_plugin.dockwidget.close()
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
