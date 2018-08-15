@@ -468,7 +468,7 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_find_building_id(integer)
     RETURNS integer AS
 $$
 
-    SELECT outlines.building_outline_id
+    SELECT outlines.building_id
     FROM buildings.building_outlines outlines
     JOIN buildings_bulk_load.matched USING (building_outline_id)
     WHERE matched.bulk_load_outline_id = $1

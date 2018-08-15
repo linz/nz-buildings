@@ -38,7 +38,7 @@ SELECT isnt_empty(
 -- result of removed buildings in buildings table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (1004, 1006)',
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (10004, 10006)',
     'Check removed buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
@@ -67,10 +67,10 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000005, 1000002, 1000004, 1000003)',
-    $$VALUES (1001),
-             (1005),
-             (1003),
-             (1002)$$,
+    $$VALUES (10001),
+             (10005),
+             (10003),
+             (10002)$$,
     'Check matched buildings in building_outlines table after load_buildings function has run'
 );
 
@@ -115,18 +115,18 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT parent_building_id, building_id FROM buildings.lifecycle ORDER BY parent_building_id DESC',
-    $$VALUES (1033, 1000002),
-             (1032, 1000002), (1032, 1000003),
-             (1031, 1000004), (1031, 1000005), (1031, 1000006), (1031, 1000007), (1031, 1000008), (1031, 1000009),
-             (1030, 1000010), (1030, 1000011), (1030, 1000012), (1030, 1000013), (1030, 1000014),
-             (1029, 1000015), (1029, 1000016), (1029, 1000017), (1029, 1000018),
-             (1028, 1000019), (1028, 1000020), (1028, 1000021),
-             (1027, 1000022), (1027, 1000023),
-             (1026, 1000024), (1025, 1000024), (1024, 1000024), (1023, 1000024), (1022, 1000024), (1021, 1000024),
-             (1020, 1000025), (1019, 1000025), (1018, 1000025), (1017, 1000025), (1016, 1000025),
-             (1015, 1000026), (1014, 1000026), (1013, 1000026), (1012, 1000026),
-             (1011, 1000027), (1010, 1000027), (1009, 1000027),
-             (1008, 1000028), (1007, 1000028)$$,
+    $$VALUES (10033, 1000002),
+             (10032, 1000002), (10032, 1000003),
+             (10031, 1000004), (10031, 1000005), (10031, 1000006), (10031, 1000007), (10031, 1000008), (10031, 1000009),
+             (10030, 1000010), (10030, 1000011), (10030, 1000012), (10030, 1000013), (10030, 1000014),
+             (10029, 1000015), (10029, 1000016), (10029, 1000017), (10029, 1000018),
+             (10028, 1000019), (10028, 1000020), (10028, 1000021),
+             (10027, 1000022), (10027, 1000023),
+             (10026, 1000024), (10025, 1000024), (10024, 1000024), (10023, 1000024), (10022, 1000024), (10021, 1000024),
+             (10020, 1000025), (10019, 1000025), (10018, 1000025), (10017, 1000025), (10016, 1000025),
+             (10015, 1000026), (10014, 1000026), (10013, 1000026), (10012, 1000026),
+             (10011, 1000027), (10010, 1000027), (10009, 1000027),
+             (10008, 1000028), (10007, 1000028)$$,
     'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
 );
 
@@ -142,7 +142,7 @@ SELECT isnt_empty(
 -- result of related buildings in buildings table
 
 SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (1033, 1032, 1031, 1030, 1029, 1028, 1027, 1026, 1025, 1024, 1023, 1022, 1021, 1020, 1019, 1018, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009, 1008, 1007)',
+    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (10033, 10032, 10031, 10030, 10029, 10028, 10027, 10026, 10025, 10024, 10023, 10022, 10021, 10020, 10019, 10018, 10017, 10016, 10015, 10014, 10013, 10012, 10011, 100100, 10009, 10008, 10007)',
     'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
