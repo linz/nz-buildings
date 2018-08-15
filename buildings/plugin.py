@@ -267,6 +267,8 @@ class Buildings:
     def on_dockwidget_closed(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
+        from buildings.settings.project import set_attribute_dialog_setting
+
         # Clear selection on all layers
         self.layer_registry.clear_layer_selection()
 

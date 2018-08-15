@@ -155,6 +155,7 @@ class LayerRegistry(object):
         for layer in self.layers.values():
             layer.removeSelection()
 
+        from qgis.utils import iface
         iface.mapCanvas().refresh()
 
     def disconnect_layer_removed(self):
