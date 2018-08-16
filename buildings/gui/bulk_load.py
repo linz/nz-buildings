@@ -201,9 +201,15 @@ def bulk_load(self, commit_status):
 
     # Bulk Load Outlines
     val = insert_supplied_outlines(
-        self, self.current_dataset, bulk_load_layer,
+        self, self.current_dataset, bulk_load_layer, external_source_id)
+    # if insert_bulk_load_outlines function failed
+    if val is None:
+        return
+
+    val = insert_bulk_load_outlines(
+        self, self.current_dataset,
         capture_method, capture_source_group, external_source_id)
-    # if insert_supplied_outlines function failed
+    # if insert_bulk_load_outlines function failed
     if val is None:
         return
 
@@ -223,7 +229,39 @@ def insert_supplied_dataset(self, organisation, description):
     return results.fetchall()[0][0]
 
 
-def insert_supplied_outlines(self, dataset_id, layer, capture_method,
+def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
+    """
+    Inserts new outlines into buildings_bulk_load.supplied_outlines table
+    """
+    # external field
+    external_field = str(self.fcb_external_id.currentField())
+
+    # iterate through outlines in map layer
+    for outline in layer.getFeatures():
+        # outline geometry
+        wkt = outline.geometry().exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        result = self.db.execute_no_commit(sql, (wkt, ))
+        geom = result.fetchall()[0][0]
+
+        # insert outlines
+        if external_source_id is None:
+            # if no external source
+            sql = 'SELECT buildings_bulk_load.supplied_outlines_insert(%s, NULL, %s);'
+            self.db.execute_no_commit(
+                sql, (dataset_id, geom))
+        else:
+            # if external source
+            external_id = outline.attribute(external_field)
+            sql = 'SELECT buildings_bulk_load.supplied_outlines_insert(%s, %s, %s);'
+            self.db.execute_no_commit(
+                sql, (dataset_id, external_id, geom))
+
+    # return 1 if function worked
+    return 1
+
+
+def insert_bulk_load_outlines(self, dataset_id, capture_method,
                              capture_source_group, external_source_id):
     """
         Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
@@ -267,70 +305,13 @@ def insert_supplied_outlines(self, dataset_id, layer, capture_method,
             return
         else:
             capture_source = value[0][0]
-    # external field
-    external_field = str(self.fcb_external_id.currentField())
 
-    # iterate through outlines in map layer
-    for outline in layer.getFeatures():
-        # outline geometry
-        wkt = outline.geometry().exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-        result = self.db.execute_no_commit(sql, (wkt, ))
-        geom = result.fetchall()[0][0]
+    sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert_supplied(%s, 1, %s, %s);'
+    self.db.execute_no_commit(
+        sql, (dataset_id, capture_method, capture_source))
 
-        # suburb
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
-        result = self.db.execute_no_commit(sql, (geom, ))
-        suburb = result.fetchall()[0][0]
-        # if no suburb
-        if suburb is None:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- No Suburb Admin Boundary ------'
-                '-------------- \n\n Data will not be added to table as '
-                'has null suburb Id'
-            )
-            self.error_dialog.show()
-            self.db.rollback_open_cursor()
-            return
+    # Remove small buildings
 
-        # town city
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
-        result = self.db.execute_no_commit(sql, (geom, ))
-        town_city = result.fetchall()[0][0]
-
-        # Territorial Authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
-        result = self.db.execute_no_commit(sql, (geom, ))
-        territorial_authority = result.fetchall()[0][0]
-        # if no territorial authority
-        if territorial_authority is None:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- No TA Admin Boundary -----------'
-                '--------- \n\n Data will not be added to table as has null'
-                ' TA Id'
-            )
-            self.error_dialog.show()
-            self.db.rollback_open_cursor()
-            return
-
-        # insert outlines
-        if external_source_id is None:
-            # if no external source
-            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 1, %s, %s, %s, %s, %s, %s);'
-            self.db.execute_no_commit(
-                sql, (dataset_id, capture_method, capture_source, suburb,
-                      town_city, territorial_authority, geom)
-            )
-        else:
-            # if external source
-            external_id = outline.attribute(external_field)
-            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, 1, %s, %s, %s, %s, %s, %s);'
-            self.db.execute_no_commit(
-                sql, (dataset_id, external_id, capture_method,
-                      capture_source, suburb, town_city,
-                      territorial_authority, geom))
     sql = 'SELECT buildings_bulk_load.bulk_load_outlines_remove_small_buildings(%s);'
     self.db.execute_no_commit(sql, (dataset_id, ))
     # insert into deletion_description
