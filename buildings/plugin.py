@@ -3,22 +3,15 @@
 import os
 
 from PyQt4.QtCore import QCoreApplication, Qt
-from PyQt4.QtGui import QListWidgetItem, QIcon, QAction, QMenu, QDockWidget, QToolBar
-
-import qgis
-from qgis.core import QgsProject, QgsCoordinateReferenceSystem
-from qgis.utils import iface
+from PyQt4.QtGui import (QAction, QDockWidget, QIcon, QListWidgetItem,
+                         QMenu, QToolBar)
+from qgis.core import QgsCoordinateReferenceSystem
+from qgis.utils import iface, plugins
 
 from buildings.gui.dockwidget import BuildingsDockwidget
 from buildings.gui.menu_frame import MenuFrame
-from buildings.gui.bulk_load_frame import BulkLoadFrame
-from buildings.gui.production_frame import ProductionFrame
-from buildings.gui.error_dialog import ErrorDialog
-from buildings.settings.project import (
-    get_attribute_dialog_setting, LOCALE,
-    set_attribute_dialog_setting, set_crs
-)
-
+from buildings.settings.project import (get_attribute_dialog_setting,
+                                        set_attribute_dialog_setting)
 from utilities.layers import LayerRegistry
 
 # Get the path for the parent directory of this file.
@@ -130,10 +123,10 @@ class Buildings:
                         callback=self.run,
                         parent=iface.mainWindow())
         try:
-            dw = qgis.utils.plugins['buildings'].dockwidget
+            dw = plugins['buildings'].dockwidget
             exists = False
             if dw is not None:
-                self.dockwidget = qgis.utils.plugins['buildings'].dockwidget
+                self.dockwidget = plugins['buildings'].dockwidget
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
