@@ -92,6 +92,42 @@ COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.transfer_date IS
 
 -- Supplied Outlines
 
+CREATE TABLE IF NOT EXISTS buildings_bulk_load.supplied_outlines (
+      supplied_outline_id serial PRIMARY KEY
+    , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
+    , external_outline_id character varying(250)
+    , begin_lifespan timestamp NOT NULL DEFAULT now()
+    , shape public.geometry(Polygon, 2193) NOT NULL
+);
+
+SELECT setval('buildings_bulk_load.supplied_outlines_supplied_outline_id_seq', coalesce((SELECT max(supplied_outline_id) + 1 FROM buildings_bulk_load.supplied_outlines), 1000000), false);
+
+DROP INDEX IF EXISTS idx_supplied_outlines_supplied_dataset_id;
+CREATE INDEX idx_supplied_outlines_supplied_dataset_id
+    ON buildings_bulk_load.supplied_outlines USING btree (supplied_dataset_id);
+
+DROP INDEX IF EXISTS shx_supplied_outlines;
+CREATE INDEX shx_supplied_outlines
+    ON buildings_bulk_load.supplied_outlines USING gist (shape);
+
+COMMENT ON TABLE buildings_bulk_load.supplied_outlines IS
+'This dataset contains all building outline geometries as they are received '
+'from the supplier.';
+
+COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.supplied_outline_id IS
+'Unique identifier for the supplied_outlines table.';
+COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.supplied_dataset_id IS
+'Foreign key to the buildings_bulk_load.supplied_datasets table.';
+COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.external_outline_id IS
+'External identifier, held in order to compare with future bulk loads from '
+'the same external dataset.';
+COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.begin_lifespan IS
+'The date that the building was uploaded via bulk load tools.';
+COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.shape IS
+'The geometry of the building outline as received from the supplier.';
+
+-- Bulk Load Outlines
+
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
       bulk_load_outline_id serial PRIMARY KEY
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
@@ -129,8 +165,8 @@ CREATE INDEX shx_bulk_load_outlines
     ON buildings_bulk_load.bulk_load_outlines USING gist (shape);
 
 COMMENT ON TABLE buildings_bulk_load.bulk_load_outlines IS
-'This dataset contains all building outline geometries as they are received '
-'from the supplier, in addition to any new building outlines added during '
+'This dataset contains all building outline geometries received from the '
+'supplier, in addition to any new building outlines added during '
 'QA of that particular bulk load. A number of attributes are first '
 'connected to the building outline in this table, which are later '
 'loaded into the production buildings schema.';

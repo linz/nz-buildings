@@ -1,4 +1,79 @@
 -------------------------------------------------------------------------
+-- SUPPLIED OUTLINES insert into
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.supplied_outlines_insert(
+      p_supplied_dataset_id integer
+    , p_external_outline_id integer
+    , p_shape geometry
+)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.supplied_outlines(
+          supplied_outline_id
+        , supplied_dataset_id
+        , external_outline_id
+        , begin_lifespan
+        , shape
+    )
+    VALUES (
+          DEFAULT -- sequence
+        , p_supplied_dataset_id
+        , p_external_outline_id
+        , now()
+        , p_shape
+    )
+    RETURNING supplied_outline_id;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
+-- BULK LOAD OUTLINES insert into
+-------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_insert_supplied(
+      p_supplied_dataset_id integer
+    , p_bulk_load_status_id integer
+    , p_capture_method_id integer
+    , p_capture_source_id integer
+)
+RETURNS integer AS
+$$
+
+    WITH insert_supplied AS (
+        INSERT INTO buildings_bulk_load.bulk_load_outlines(
+              supplied_dataset_id
+            , external_outline_id
+            , bulk_load_status_id
+            , capture_method_id
+            , capture_source_id
+            , suburb_locality_id
+            , town_city_id
+            , territorial_authority_id
+            , begin_lifespan
+            , shape
+        )
+        SELECT
+              supplied_dataset_id
+            , external_outline_id
+            , p_bulk_load_status_id
+            , p_capture_method_id
+            , p_capture_source_id
+            , buildings.suburb_locality_intersect_polygon(shape)
+            , buildings.town_city_intersect_polygon(shape)
+            , buildings.territorial_authority_grid_intersect_polygon(shape)
+            , now()
+            , shape
+        FROM buildings_bulk_load.supplied_outlines s
+        WHERE s.supplied_dataset_id = p_supplied_dataset_id
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM insert_supplied;
+
+$$
+LANGUAGE sql VOLATILE;
+
+-------------------------------------------------------------------------
 -- BULK LOAD OUTLINES insert into
 -------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_insert(

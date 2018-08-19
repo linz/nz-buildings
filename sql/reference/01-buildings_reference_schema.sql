@@ -46,6 +46,21 @@ DROP INDEX IF EXISTS shx_territorial_authority;
 CREATE INDEX shx_territorial_authority
     ON buildings_reference.territorial_authority USING gist (shape);
 
+-- Territorial Authority Grid
+
+-- For faster spatial operations
+
+CREATE TABLE IF NOT EXISTS buildings_reference.territorial_authority_grid (
+      territorial_authority_grid_id serial PRIMARY KEY
+    , territorial_authority_id integer REFERENCES buildings_reference.territorial_authority (territorial_authority_id)
+    , external_territorial_authority_id integer
+    , name character varying(100)
+    , shape public.geometry(MultiPolygon, 2193)
+);
+DROP INDEX IF EXISTS shx_territorial_authority_grid;
+CREATE INDEX shx_territorial_authority_grid
+    ON buildings_reference.territorial_authority_grid USING gist (shape);
+
 -- Coastline
 
 CREATE TABLE IF NOT EXISTS buildings_reference.coastlines_and_islands (

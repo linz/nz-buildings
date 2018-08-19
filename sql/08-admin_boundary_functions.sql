@@ -138,3 +138,24 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+--------------------------------------------------------------------------
+-- TERRITORIAL AUTHORITY GRID INTERSECTION- find the id of the TA that has the most overlap with
+-- the provided building outline
+--------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.territorial_authority_grid_intersect_polygon(
+    p_polygon_geometry geometry
+)
+RETURNS integer AS
+$$
+
+    SELECT territorial_authority_id
+    FROM buildings_reference.territorial_authority_grid
+    WHERE ST_DWithin(p_polygon_geometry, shape, 1000)
+    ORDER BY
+          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
+        , ST_Distance(p_polygon_geometry, shape) ASC
+    LIMIT 1;
+
+$$
+LANGUAGE sql VOLATILE;
