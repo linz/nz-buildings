@@ -181,5 +181,5 @@ def set_uri():
     @rtype:     qgis.core.QgsDataSourceURI
     """
     uri = QgsDataSourceURI()
-    uri.setConnection(_host, _port, _dbname, _user, '')
+    uri.setConnection(_host, _port, _dbname, _user, _pw)
     return uri

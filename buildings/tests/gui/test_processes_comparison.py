@@ -16,19 +16,16 @@
  ***************************************************************************/
 """
 
+import os
 import unittest
 
-from qgis.utils import plugins
+from qgis.core import QgsMapLayerRegistry
+from qgis.utils import iface, plugins
 
 from buildings.utilities import database as db
 
-from qgis.core import QgsMapLayerRegistry
-from qgis.utils import iface
-import qgis
-import os
 
-
-class SetUpEditBulkLoad(unittest.TestCase):
+class ProcessComparison(unittest.TestCase):
     """
     Test Add Production Outline GUI initial
     setup confirm default settings
@@ -36,30 +33,18 @@ class SetUpEditBulkLoad(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
-            pass
-        else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        qgis.utils.reloadPlugin('buildings')
-        cls.road_plugin.dockwidget.close()
+        db.close_connection()
 
     def setUp(self):
         """Runs before each test."""
-        self.buildings_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get('buildings')
+        self.building_plugin.main_toolbar.actions()[0].trigger()
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame
@@ -89,7 +74,7 @@ class SetUpEditBulkLoad(unittest.TestCase):
         for layer in layers:
             if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-        self.road_plugin.dockwidget.close()
+        self.dockwidget.close()
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
@@ -126,8 +111,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
     def test_gui_on_compare_clicked(self):
         """Check buttons are enabled/disabled"""
         self.bulk_load_frame.compare_outlines_clicked(False)
-        self.assertFalse(plugins.get('roads').dockwidget.current_frame.btn_compare_outlines.isEnabled())
-        self.assertTrue(plugins.get('roads').dockwidget.current_frame.btn_publish.isEnabled())
+        self.assertFalse(self.dockwidget.current_frame.btn_compare_outlines.isEnabled())
+        self.assertTrue(self.dockwidget.current_frame.btn_publish.isEnabled())
 
     def test_delete_during_qa(self):
         """Checks outlines that are deleted during qa before comparisons is run are not carried through"""

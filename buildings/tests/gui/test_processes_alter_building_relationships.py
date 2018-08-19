@@ -18,13 +18,14 @@
 
 import unittest
 
-from qgis.core import QgsPoint, QgsCoordinateReferenceSystem, QgsRectangle, QgsMapLayerRegistry
-from qgis.utils import plugins, iface
-from buildings.utilities import database as db
-
-from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt, QModelIndex
+from PyQt4.QtTest import QTest
+from qgis.core import (QgsCoordinateReferenceSystem, QgsMapLayerRegistry,
+                       QgsPoint, QgsRectangle)
 from qgis.gui import QgsMapTool
+from qgis.utils import plugins, iface
+
+from buildings.utilities import database as db
 
 
 class ProcessAlterRelationshipsTest(unittest.TestCase):
@@ -32,33 +33,18 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('roads'):
-            pass
-        else:
-            cls.road_plugin = plugins.get('roads')
-            if cls.road_plugin.is_active is False:
-                cls.road_plugin.main_toolbar.actions()[0].trigger()
-                cls.dockwidget = cls.road_plugin.dockwidget
-            else:
-                cls.dockwidget = cls.road_plugin.dockwidget
-            if not plugins.get('buildings'):
-                pass
-            else:
-                db.connect()
-                cls.building_plugin = plugins.get('buildings')
-                cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
         db.close_connection()
-        cls.road_plugin.dockwidget.close()
 
     def setUp(self):
         """Runs before each test."""
-        self.road_plugin = plugins.get('roads')
         self.building_plugin = plugins.get('buildings')
-        self.dockwidget = self.road_plugin.dockwidget
+        self.building_plugin.main_toolbar.actions()[0].trigger()
+        self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()
         self.bulk_load_frame = self.dockwidget.current_frame

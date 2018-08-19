@@ -27,7 +27,7 @@
        <property name="styleSheet">
         <string notr="true">QLabel {
     font-size: 11pt;
-    font-colour: #FF0000;
+    color: #FF0000;
 }</string>
        </property>
        <property name="text">
@@ -535,12 +535,12 @@ QGroupBox::title {
   <customwidget>
    <class>QgsFieldComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgsfieldcombobox.h</header>
+   <header>qgis.gui</header>
   </customwidget>
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgsmaplayercombobox.h</header>
+   <header>qgis.gui</header>
   </customwidget>
  </customwidgets>
  <resources/>

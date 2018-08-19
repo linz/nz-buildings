@@ -3,17 +3,15 @@
 import os
 
 from PyQt4.QtCore import QCoreApplication, Qt
-from PyQt4.QtGui import QListWidgetItem, QIcon, QAction, QMenu, QDockWidget, QToolBar
+from PyQt4.QtGui import (QAction, QDockWidget, QIcon, QListWidgetItem,
+                         QMenu, QToolBar)
+from qgis.core import QgsCoordinateReferenceSystem
+from qgis.utils import iface, plugins
 
-import qgis
-from qgis.core import QgsProject, QgsCoordinateReferenceSystem
-from qgis.utils import iface
-
+from buildings.gui.dockwidget import BuildingsDockwidget
 from buildings.gui.menu_frame import MenuFrame
-from buildings.gui.bulk_load_frame import BulkLoadFrame
-from buildings.gui.production_frame import ProductionFrame
-from buildings.gui.error_dialog import ErrorDialog
-
+from buildings.settings.project import (get_attribute_dialog_setting,
+                                        set_attribute_dialog_setting)
 from utilities.layers import LayerRegistry
 
 # Get the path for the parent directory of this file.
@@ -27,6 +25,10 @@ class Buildings:
 
     def __init__(self, iface):
         """Constructor."""
+
+        # Store original enter attribute values dialog setting
+        self.attribute_dialog_setting = get_attribute_dialog_setting()
+
         self.iface = iface
         self.plugin_dir = __location__
         self.image_dir = os.path.join(__location__, "..", "images")
@@ -42,7 +44,7 @@ class Buildings:
         # set up the customizable toolbar
         iface.building_toolbar = None
         self.is_active = False
-        self.dockwidget = None  # qgis.utils.plugins['roads'].dockwidget
+        self.dockwidget = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -113,7 +115,7 @@ class Buildings:
         return action
 
     def initGui(self):
-        """Inserts buildings plugin into the roads plugin"""
+        """Initiate buildings plugin"""
         home_dir = os.path.split(os.path.dirname(__file__))
         icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
         self.add_action(icon_path,
@@ -121,10 +123,10 @@ class Buildings:
                         callback=self.run,
                         parent=iface.mainWindow())
         try:
-            dw = qgis.utils.plugins['roads'].dockwidget
+            dw = plugins['buildings'].dockwidget
             exists = False
             if dw is not None:
-                self.dockwidget = qgis.utils.plugins['roads'].dockwidget
+                self.dockwidget = plugins['buildings'].dockwidget
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         exists = True
@@ -132,11 +134,19 @@ class Buildings:
                     self.run()
         except KeyError:
             pass
+        set_attribute_dialog_setting(True)
 
     def unload(self):
-        """Removes the plugin from Roads."""
+        """Removes the buildings plugin."""
+
+        # Close dockwidget and delete widget completely
+        if self.is_active:
+            self.dockwidget.close()
+            self.dockwidget.setParent(None)
+            del self.dockwidget
+
         try:
-            dw = qgis.utils.plugins['roads'].dockwidget
+            dw = self.dockwidget
             if dw is not None:
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
@@ -145,10 +155,10 @@ class Buildings:
                     self.layer_registry.clear_layer_selection()
                     self.layer_registry.remove_all_layers()
                 dw.frames = {}
-                if dw.stk_options.count() == 5:
-                    dw.stk_options.setCurrentIndex(4)
-                    dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+                if dw.stk_options.count() == 2:
                     dw.stk_options.setCurrentIndex(1)
+                    dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+                    dw.stk_options.setCurrentIndex(0)
 
                     # Remove main toolbar
                     for action in self.actions:
@@ -170,6 +180,16 @@ class Buildings:
         except KeyError:
             pass
 
+        # Remove Dockwidget from Panel menu
+        panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
+        for act in panel.actions():
+            if act.text() == u"Buildings":
+                panel.removeAction(act)
+
+        # Delete the mainWindow reference to the buildings dockwidget
+        for dock in iface.mainWindow().findChildren(QDockWidget, u"BuildingsDockWidgetBase"):
+            dock.setParent(None)
+
     def run(self):
         """Run method that loads and starts the plugin"""
         if not iface.building_toolbar:
@@ -177,67 +197,49 @@ class Buildings:
             iface.building_toolbar = QToolBar(u'Building Tools')
             iface.addToolBar(iface.building_toolbar, Qt.RightToolBarArea)
 
+        # Create the dockwidget and dialog and keep reference
+        if not self.dockwidget:
+            self.dockwidget = BuildingsDockwidget()
+
+            # Connect with close
+            self.dockwidget.closed.connect(self.on_dockwidget_closed)
+
+            # Show the dockwidget as a tab
+            layerdock = iface.mainWindow().findChild(QDockWidget, "Layers")
+            iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
+            iface.mainWindow().tabifyDockWidget(layerdock, self.dockwidget)
+
+        self.dockwidget.show()
+        self.dockwidget.raise_()
+
         self.setup_main_toolbar()
-        if self.menu_frame:
-            if not qgis.utils.plugins['roads'].is_active:
-                qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
-                dw = qgis.utils.plugins['roads'].dockwidget
-                home_dir = os.path.split(os.path.dirname(__file__))
-                icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
-                item = QListWidgetItem("Buildings")
-                item.setIcon(QIcon(icon_path))
-                if dw.lst_options.item(2) is None:
-                    dw.lst_options.addItem(item)
-                    dw.lst_options.setCurrentItem(item)
-                canvas = iface.mapCanvas()
-                selectedcrs = "EPSG:2193"
-                target_crs = QgsCoordinateReferenceSystem()
-                target_crs.createFromUserInput(selectedcrs)
-                canvas.setDestinationCrs(target_crs)
-                dw.lst_options.currentItemChanged.connect(self.item_changed)
-                dw.lst_options.setCurrentRow(2)
-                dw.stk_options.setCurrentIndex(4)
-
-            else:
-                dw = qgis.utils.plugins['roads'].dockwidget
-                canvas = iface.mapCanvas()
-                selectedcrs = "EPSG:2193"
-                target_crs = QgsCoordinateReferenceSystem()
-                target_crs.createFromUserInput(selectedcrs)
-                canvas.setDestinationCrs(target_crs)
-                dw.lst_options.currentItemChanged.connect(self.item_changed)
-                dw.lst_options.setCurrentRow(2)
-                dw.stk_options.setCurrentIndex(4)
-
-        if not self.menu_frame:
-            if not qgis.utils.plugins['roads'].dockwidget:
-                qgis.utils.plugins['roads'].main_toolbar.actions()[0].trigger()
-            dw = qgis.utils.plugins['roads'].dockwidget
-            self.layer_registry = LayerRegistry()
-            # no base layers
-            self.menu_frame = MenuFrame(self.layer_registry)
+        dw = self.dockwidget
+        self.layer_registry = LayerRegistry()
+        # no base layers
+        self.menu_frame = MenuFrame(self.layer_registry)
+        dw.insert_into_frames('menu_frame', self.menu_frame)
+        if dw.lst_options.item(0) is None:
             home_dir = os.path.split(os.path.dirname(__file__))
             icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
             item = QListWidgetItem("Buildings")
             item.setIcon(QIcon(icon_path))
             dw.lst_options.addItem(item)
             dw.lst_options.setCurrentItem(item)
-            canvas = iface.mapCanvas()
-            selectedcrs = "EPSG:2193"
-            target_crs = QgsCoordinateReferenceSystem()
-            target_crs.createFromUserInput(selectedcrs)
-            canvas.setDestinationCrs(target_crs)
-            dw.lst_options.currentItemChanged.connect(self.item_changed)
-            self.on_click()
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        self.on_click()
 
     def on_click(self):
-        dw = qgis.utils.plugins['roads'].dockwidget
-        if dw.stk_options.count() == 5:  # 4th widget is not empty
-            dw.stk_options.setCurrentIndex(4)  # set to fourth
+        dw = self.dockwidget
+        if dw.stk_options.count() == 2:  # 4th widget is not empty
+            dw.stk_options.setCurrentIndex(1)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.stk_options.setCurrentIndex(3)
+        dw.stk_options.setCurrentIndex(0)
         dw.stk_options.addWidget(MenuFrame(self.layer_registry))
-        dw.stk_options.setCurrentIndex(4)
+        dw.stk_options.setCurrentIndex(1)
 
     def setup_main_toolbar(self):
         """ Set up the custom tool bar in its most basic state """
@@ -255,44 +257,17 @@ class Buildings:
             pass
         iface.actionPan().trigger()
 
-    def item_changed(self, item):
-        if item.text() == "Road Workflows":
-            if QgsProject is not None:
-                root = QgsProject.instance().layerTreeRoot()
-                group = root.findGroup("Building Tool Layers")
-                layers = group.findLayers()
-                for layer in layers:
-                    if layer.layer().name() == "building_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        iface.actionCancelEdits().trigger()
-                    if layer.layer().name() == "bulk_load_outlines":
-                        iface.setActiveLayer(layer.layer())
-                        iface.actionCancelEdits().trigger()
-        elif item.text() == "Buildings":
-            if QgsProject is not None:
-                root = QgsProject.instance().layerTreeRoot()
-                group = root.findGroup("Building Tool Layers")
-                layers = group.findLayers()
-                for layer in layers:
-                    if layer.layer().name() == "building_outlines":
-                        dw = qgis.utils.plugins['roads'].dockwidget
-                        if isinstance(dw.current_frame, ProductionFrame):
-                            if dw.current_frame.rad_edit.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionNodeTool().trigger()
-                            if dw.current_frame.rad_add.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionAddFeature().trigger()
-                    if layer.layer().name() == "bulk_load_outlines":
-                        dw = qgis.utils.plugins['roads'].dockwidget
-                        if isinstance(dw.current_frame, BulkLoadFrame):
-                            if dw.current_frame.rad_edit.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionNodeTool().trigger()
-                            if dw.current_frame.rad_add.isChecked():
-                                iface.setActiveLayer(layer.layer())
-                                layer.layer().startEditing()
-                                iface.actionAddFeature().trigger()
+    def on_dockwidget_closed(self):
+        """Cleanup necessary items here when plugin dockwidget is closed"""
+
+        from buildings.settings.project import set_attribute_dialog_setting
+
+        # Clear selection on all layers
+        self.layer_registry.clear_layer_selection()
+
+        set_attribute_dialog_setting(self.attribute_dialog_setting)
+        self.layer_registry.remove_all_layers()
+
+        # Set up toolbar
+        self.setup_main_toolbar()
+        self.is_active = False
