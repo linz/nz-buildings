@@ -28,18 +28,12 @@ class SetUpBulkLoadTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('buildings'):
-            pass
-        else:
-            db.connect()
-            cls.building_plugin = plugins.get('buildings')
-            cls.dockwidget = cls.building_plugin.dockwidget
-            cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
         """Runs at TestCase teardown."""
-        pass
+        db.close_connection()
 
     def setUp(self):
         """Runs before each test."""

@@ -18,13 +18,14 @@
 
 import unittest
 
-from qgis.core import QgsPoint, QgsCoordinateReferenceSystem, QgsRectangle, QgsMapLayerRegistry
-from qgis.utils import plugins, iface
-from buildings.utilities import database as db
-
-from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt, QModelIndex
+from PyQt4.QtTest import QTest
+from qgis.core import (QgsCoordinateReferenceSystem, QgsMapLayerRegistry,
+                       QgsPoint, QgsRectangle)
 from qgis.gui import QgsMapTool
+from qgis.utils import plugins, iface
+
+from buildings.utilities import database as db
 
 
 class ProcessAlterRelationshipsTest(unittest.TestCase):
@@ -32,13 +33,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('buildings'):
-            pass
-        else:
-            db.connect()
-            cls.building_plugin = plugins.get('buildings')
-            cls.dockwidget = cls.building_plugin.dockwidget
-            cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
@@ -48,7 +43,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.building_plugin = plugins.get('buildings')
-        self.building_plugin.main_toolbar.actions()[0].trigger() 
+        self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_bulk_load.click()

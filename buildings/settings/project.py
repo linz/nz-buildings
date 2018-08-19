@@ -8,7 +8,7 @@ QGIS_SETTINGS = QSettings()
 
 LOCALE = QGIS_SETTINGS.value('locale/userLocale')[0:2]
 
-SRID = 4167
+SRID = 2193
 
 
 def get_attribute_dialog_setting():

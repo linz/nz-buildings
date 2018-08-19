@@ -28,13 +28,7 @@ class ProcessNewEntryTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('buildings'):
-            pass
-        else:
-            db.connect()
-            cls.building_plugin = plugins.get('buildings')
-            cls.dockwidget = cls.building_plugin.dockwidget
-            cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
@@ -44,7 +38,7 @@ class ProcessNewEntryTest(unittest.TestCase):
     def setUp(self):
         """Runs before each test."""
         self.building_plugin = plugins.get('buildings')
-        self.building_plugin.main_toolbar.actions()[0].trigger() 
+        self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         self.menu_frame = self.building_plugin.menu_frame
         self.menu_frame.btn_new_entry.click()

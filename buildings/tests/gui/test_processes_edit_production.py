@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
+from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -32,13 +32,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
-        if not plugins.get('buildings'):
-            pass
-        else:
-            db.connect()
-            cls.building_plugin = plugins.get('buildings')
-            cls.dockwidget = cls.building_plugin.dockwidget
-            cls.building_plugin.main_toolbar.actions()[0].trigger()
+        db.connect()
 
     @classmethod
     def tearDownClass(cls):
