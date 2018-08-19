@@ -115,7 +115,7 @@ class Buildings:
         return action
 
     def initGui(self):
-        """Inserts buildings plugin into the roads plugin"""
+        """Initiate buildings plugin"""
         home_dir = os.path.split(os.path.dirname(__file__))
         icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
         self.add_action(icon_path,
@@ -137,7 +137,7 @@ class Buildings:
         set_attribute_dialog_setting(True)
 
     def unload(self):
-        """Removes the plugin from Roads."""
+        """Removes the buildings plugin."""
 
         # Close dockwidget and delete widget completely
         if self.is_active:
