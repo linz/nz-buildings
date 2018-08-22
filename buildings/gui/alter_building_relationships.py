@@ -54,6 +54,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
+        self.dockwidget = plugins['buildings'].dockwidget
+        self.dockwidget.closed.connect(self.on_dockwidget_closed)
+
     def open_alter_relationship_frame(self):
         """Called when opening of the frame"""
 
@@ -86,6 +89,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.itemSelectionChanged.connect(
             self.select_from_lst_existing)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
+
+    def on_dockwidget_closed(self):
+        """Remove highlight when the dockwideget closes"""
+        self.lst_highlight = []
 
     def add_building_lyrs(self):
         """ Add building layers """
