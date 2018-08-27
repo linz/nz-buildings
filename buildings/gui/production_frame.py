@@ -30,6 +30,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.db.connect()
         self.building_layer = QgsVectorLayer()
         self.building_removed = QgsVectorLayer()
+        self.territorial_auth = None
         self.add_outlines()
         # editing fields
         self.added_building_ids = []
@@ -44,6 +45,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
         self.btn_cancel.clicked.connect(self.exit_clicked)
+        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
 
         self.cmb_capture_method.clear()
         self.cmb_capture_method.setDisabled(1)
@@ -59,6 +61,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.cmb_suburb.setDisabled(1)
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
+        self.btn_exit_edits.setDisabled(1)
 
     def add_outlines(self):
         """
@@ -115,6 +118,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         )
         layers.style_layer(self.territorial_auth,
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        self.btn_exit_edits.setEnabled(1)
 
     def canvas_edit_outlines(self):
         """
@@ -151,6 +155,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             )
             layers.style_layer(self.territorial_auth,
                                {1: ['204,121,95', '0.3', 'dash', '5;2']})
+            self.btn_exit_edits.setEnabled(1)
 
     def exit_clicked(self):
         """
@@ -166,7 +171,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.rad_add.setAutoExclusive(True)
         # reload layers
         iface.actionCancelEdits().trigger()
-        self.layer_registry.remove_all_layers()
+        self.layer_registry.remove_layer(self.building_layer)
+        self.layer_registry.remove_layer(self.building_historic)
+        if self.territorial_auth is not None:
+            self.layer_registry.remove_layer(self.territorial_auth)
 
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -174,9 +182,51 @@ class ProductionFrame(QFrame, FORM_CLASS):
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
-        self.layer_registry.remove_all_layers()
-
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(self.layer_registry))
+
+    def exit_editing_clicked(self):
+        # deselect both comboboxes
+        self.rad_edit.setAutoExclusive(False)
+        self.rad_edit.setChecked(False)
+        self.rad_edit.setAutoExclusive(True)
+        self.rad_add.setAutoExclusive(False)
+        self.rad_add.setChecked(False)
+        self.rad_add.setAutoExclusive(True)
+        iface.actionCancelEdits().trigger()
+        # reload layers
+        self.layer_registry.remove_layer(self.territorial_auth)
+        # disable comboboxes
+        self.cmb_lifecycle_stage.setDisabled(1)
+        self.cmb_lifecycle_stage.clear()
+        self.cmb_capture_method.setDisabled(1)
+        self.cmb_capture_method.clear()
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_capture_source.clear()
+        self.cmb_ta.setDisabled(1)
+        self.cmb_ta.clear()
+        self.cmb_town.setDisabled(1)
+        self.cmb_town.clear()
+        self.cmb_suburb.setDisabled(1)
+        self.cmb_suburb.clear()
+        self.btn_reset.setDisabled(1)
+        self.btn_save.setDisabled(1)
+        self.btn_exit_edits.setDisabled(1)
+        self.ids = []
+        try:
+            self.building_layer.selectionChanged.disconnect(
+                self.change_instance.selection_changed)
+        except Exception:
+            pass
+        try:
+            self.building_layer.geometryChanged.disconnect(
+                self.change_instance.feature_changed)
+        except Exception:
+            pass
+        # reset toolbar
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ["mActionPan"]:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()

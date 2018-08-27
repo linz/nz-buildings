@@ -90,8 +90,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def add_building_lyrs(self):
         """ Add building layers """
 
-        self.layer_registry.remove_all_layers()
-
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
         self.lyr_existing = self.layer_registry.add_postgres_layer(
@@ -989,7 +987,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         self.clear_layer_filter()
 
-        self.layer_registry.remove_all_layers()
+        self.layer_registry.remove_layer(self.lyr_existing)
+        self.layer_registry.remove_layer(self.lyr_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_added_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_removed_existing)
+        self.layer_registry.remove_layer(self.lyr_matched_existing)
+        self.layer_registry.remove_layer(self.lyr_matched_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_related_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_related_existing)
+        self.layer_registry.remove_layer(self.lyr_added_bulk_load_in_edit)
+        self.layer_registry.remove_layer(self.lyr_removed_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_matched_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_matched_bulk_load_in_edit)
+        self.layer_registry.remove_layer(self.lyr_related_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_related_bulk_load_in_edit)
 
         from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = plugins['buildings'].dockwidget

@@ -59,6 +59,9 @@ class BulkLoadChanges:
                 self.bulk_load_frame.cmb_ta.addItem(item[0])
 
         # set to currently selected outline
+        if self.bulk_load_frame.rad_add.isChecked():
+            self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+                self.bulk_load_frame.cmb_capture_method_2.findText("Trace Orthophotography"))
         if self.bulk_load_frame.rad_edit.isChecked():
             # bulk load status
             result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
@@ -72,6 +75,13 @@ class BulkLoadChanges:
             result = result.fetchall()[0][0]
             self.bulk_load_frame.cmb_status.setCurrentIndex(
                 self.bulk_load_frame.cmb_status.findText(result))
+
+            if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+                # find reason
+                result = self.bulk_load_frame.db._execute(select.deletion_description_by_id, (self.bulk_load_frame.bulk_load_outline_id,))
+                desc = result.fetchall()[0][0]
+                self.bulk_load_frame.le_deletion_reason.setText(desc)
+                # set text
 
             # capture method
             result = self.bulk_load_frame.db._execute(
@@ -561,20 +571,23 @@ class EditBulkLoad(BulkLoadChanges):
                         for i in self.bulk_load_frame.ids:
                             sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
                             self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
-            if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
-                if len(self.bulk_load_frame.ids) > 0:
-                    # if there is more than one feature to update
-                    for i in self.bulk_load_frame.ids:
-                        # remove outline from added table
-                        sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
-                        self.bulk_load_frame.db.execute_no_commit(sql, (i,))
-                        # change attributes
-                        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                        self.bulk_load_frame.db.execute_no_commit(
-                            sql, (i, bulk_load_status_id, capture_method_id,
-                                  capture_source_id, suburb, town, t_a))
-                    if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+                            # remove outline from added table
+                            sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
+                            self.bulk_load_frame.db.execute_no_commit(
+                                sql, (i, bulk_load_status_id, capture_method_id,
+                                      capture_source_id, suburb, town, t_a))
                         self.bulk_load_frame.bulk_load_layer.removeSelection()
+            else:
+                for i in self.bulk_load_frame.ids:
+                    sql = 'SELECT buildings_bulk_load.deletion_description_remove(%s);'
+                    self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                    # change attributes
+                    sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
+                    self.bulk_load_frame.db.execute_no_commit(
+                        sql, (i, bulk_load_status_id, capture_method_id,
+                              capture_source_id, suburb, town, t_a))
             self.disbale_UI_functions()
             self.bulk_load_frame.completer_box()
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')

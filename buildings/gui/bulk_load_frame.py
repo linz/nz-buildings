@@ -37,6 +37,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
+        # layer set up
+        self.historic_layer = None
+        self.bulk_load_added = None
+        self.bulk_load_removed = None
+        self.bulk_load_layer = None
+        self.territorial_auth = None
         self.error_dialog = None
         # Bulk loadings & editing fields
         self.added_building_ids = []
@@ -119,6 +125,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.description_del = self.le_deletion_reason.text()
         self.completer_box()
 
+        # initiate le_data_description
+        self.le_data_description.setMaxLength(250)
+        self.le_data_description.setPlaceholderText("Data Description")
+
         # set up signals and slots
         self.rad_external_source.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
@@ -189,6 +199,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
+        self.add_historic_outlines()
+
     def display_data_exists(self):
         """
             Display setup when data has been bulk loaded
@@ -220,6 +232,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
+        self.btn_edit_cancel.setDisabled(1)
 
     def display_not_published(self):
         """
@@ -247,13 +260,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
-        self.layer_registry.remove_layer(self.bulk_load_layer)
-        self.bulk_load_layer = None
+        # self.layer_registry.remove_layer(self.bulk_load_layer)
+        # self.bulk_load_layer = None
         # add the bulk_load_outlines to the layer registry
         self.bulk_load_layer = self.layer_registry.add_postgres_layer(
             'bulk_load_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id != 3'.format(self.current_dataset))
+            'supplied_dataset_id = {0}'.format(self.current_dataset))
         self.bulk_load_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.bulk_load_layer)
         self.bulk_load_removed = self.layer_registry.add_postgres_layer(
@@ -267,6 +280,18 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'supplied_dataset_id = {0} AND bulk_load_status_id = 2'.format(self.current_dataset))
         self.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
 
+    def add_historic_outlines(self):
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                            'styles/')
+        sql = 'SELECT MAX(supplied_dataset_id) FROM buildings_bulk_load.bulk_load_outlines;'
+        result = self.db._execute(sql)
+        historic_id = result.fetchall()[0][0]
+        self.historic_layer = self.layer_registry.add_postgres_layer(
+            'Last_loaded_dataset', 'bulk_load_outlines',
+            'shape', 'buildings_bulk_load', '',
+            'supplied_dataset_id = {0}'.format(historic_id))
+        self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
+
     def bulk_load_save_clicked(self, commit_status):
         """
             When bulk load outlines save clicked
@@ -277,6 +302,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         result = result.fetchall()[0][0]
         # if bulk loading completed without errors
         if result == 1:
+            self.layer_registry.remove_layer(self.historic_layer)
             self.add_outlines()
             self.display_current_bl_not_compared()
 
@@ -472,7 +498,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.close_connection()
-        self.layer_registry.remove_all_layers()
+        self.layer_registry.remove_layer(self.bulk_load_added)
+        self.layer_registry.remove_layer(self.bulk_load_removed)
+        self.layer_registry.remove_layer(self.bulk_load_layer)
+        if self.territorial_auth is not None:
+            self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.alter_building_relationships import AlterRelationships
         dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
@@ -492,14 +522,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.db.open_cursor()
         sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
         self.db.execute_no_commit(sql, (self.current_dataset,))
-        sql = 'SELECT buildings_lds.populate_buildings_lds();'
-        self.db.execute_no_commit(sql)
         if commit_status:
             self.db.commit_open_cursor()
         self.display_no_bulk_load()
         self.current_dataset = None
         self.lb_dataset_id.setText('None')
-        self.layer_registry.remove_all_layers()
+        self.layer_registry.remove_layer(self.bulk_load_added)
+        self.layer_registry.remove_layer(self.bulk_load_removed)
+        self.layer_registry.remove_layer(self.bulk_load_layer)
+        self.add_historic_outlines()
 
     def exit_clicked(self):
         """
@@ -507,7 +538,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             Return to start up frame
         """
         iface.actionCancelEdits().trigger()
-        self.layer_registry.remove_all_layers()
+        if self.historic_layer is not None:
+            self.layer_registry.remove_layer(self.historic_layer)
+        else:
+            self.layer_registry.remove_layer(self.bulk_load_added)
+            self.layer_registry.remove_layer(self.bulk_load_removed)
+            self.layer_registry.remove_layer(self.bulk_load_layer)
+            if self.territorial_auth is not None:
+                self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
         dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())

@@ -86,6 +86,12 @@ SELECT DISTINCT description
 FROM buildings_bulk_load.deletion_description;
 """
 
+deletion_description_by_id = """
+SELECT description
+FROM buildings_bulk_load.deletion_description
+WHERE bulk_load_outline_id = %s;
+"""
+
 # Organisation
 
 organisation_by_value = """
