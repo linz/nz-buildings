@@ -260,8 +260,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
-        # self.layer_registry.remove_layer(self.bulk_load_layer)
-        # self.bulk_load_layer = None
         # add the bulk_load_outlines to the layer registry
         self.bulk_load_layer = self.layer_registry.add_postgres_layer(
             'bulk_load_outlines', 'bulk_load_outlines',
@@ -283,13 +281,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def add_historic_outlines(self):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
-        sql = 'SELECT MAX(supplied_dataset_id) FROM buildings_bulk_load.bulk_load_outlines;'
-        result = self.db._execute(sql)
-        historic_id = result.fetchall()[0][0]
         self.historic_layer = self.layer_registry.add_postgres_layer(
             'Last_loaded_dataset', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0}'.format(historic_id))
+            'shape', 'buildings_bulk_load', '', '')
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
     def bulk_load_save_clicked(self, commit_status):

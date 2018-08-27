@@ -76,13 +76,6 @@ class BulkLoadChanges:
             self.bulk_load_frame.cmb_status.setCurrentIndex(
                 self.bulk_load_frame.cmb_status.findText(result))
 
-            if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
-                # find reason
-                result = self.bulk_load_frame.db._execute(select.deletion_description_by_id, (self.bulk_load_frame.bulk_load_outline_id,))
-                desc = result.fetchall()[0][0]
-                self.bulk_load_frame.le_deletion_reason.setText(desc)
-                # set text
-
             # capture method
             result = self.bulk_load_frame.db._execute(
                 select.capture_method_value_by_bulk_outlineID, (
@@ -436,42 +429,52 @@ class EditBulkLoad(BulkLoadChanges):
         iface.building_toolbar.show()
 
         if len(iface.activeLayer().selectedFeatures()) > 0:
-            if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 1:
-                self.enable_UI_functions()
-                # enable save and reset
-                self.bulk_load_frame.btn_edit_save.setEnabled(1)
-                self.bulk_load_frame.btn_edit_reset.setEnabled(1)
-                self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
-                self.bulk_load_frame.select_changed = True
-                self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
+            self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
             # if more than one outline is selected
-            if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) > 1:
-                feats = []
-                self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
+            feats = []
+            self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
+            for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
+                ls = []
+                ls.append(feature.attributes()[3])
+                ls.append(feature.attributes()[4])
+                ls.append(feature.attributes()[5])
+                ls.append(feature.attributes()[6])
+                ls.append(feature.attributes()[7])
+                ls.append(feature.attributes()[8])
+                if ls not in feats:
+                    feats.append(ls)
+            # if selected features have different attributes (not allowed)
+            if len(feats) > 1:
+                self.bulk_load_frame.error_dialog = ErrorDialog()
+                self.bulk_load_frame.error_dialog.fill_report(
+                    '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
+                    'TED ---- \n\n Can only edit attributes of mul'
+                    'tiple features when all existing attributes a'
+                    're identical.'
+                )
+                self.bulk_load_frame.error_dialog.show()
+                self.disbale_UI_functions()
+                self.bulk_load_frame.select_changed = False
+            # if all selected features have the same attributes (allowed)
+            elif len(feats) == 1:
+                deleted = False
                 for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
-                    ls = []
-                    ls.append(feature.attributes()[3])
-                    ls.append(feature.attributes()[4])
-                    ls.append(feature.attributes()[5])
-                    ls.append(feature.attributes()[6])
-                    ls.append(feature.attributes()[7])
-                    ls.append(feature.attributes()[8])
-                    if ls not in feats:
-                        feats.append(ls)
-                # if selected features have different attributes (not allowed)
-                if len(feats) > 1:
+                    sql = 'SELECT bulk_load_status_id from buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
+                    result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
+                    bl_status = result.fetchall()[0][0]
+                    if bl_status == 3:
+                        deleted = True
+                if deleted:
                     self.bulk_load_frame.error_dialog = ErrorDialog()
                     self.bulk_load_frame.error_dialog.fill_report(
-                        '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
-                        'TED ---- \n\n Can only edit attributes of mul'
-                        'tiple features when all existing attributes a'
-                        're identical.'
+                        '\n ---- SELECTED A DELETED FEATURE ---- \n\n'
+                        'Can only edit attributes of'
+                        ' features that have not been deleted.'
                     )
                     self.bulk_load_frame.error_dialog.show()
-                    self.disbale_UI_functions()
+                    BulkLoadChanges.disbale_UI_functions(self)
                     self.bulk_load_frame.select_changed = False
-                # if all selected features have the same attributes (allowed)
-                elif len(feats) == 1:
+                else:
                     self.enable_UI_functions()
                     # enable save and reset
                     self.bulk_load_frame.btn_edit_save.setEnabled(1)

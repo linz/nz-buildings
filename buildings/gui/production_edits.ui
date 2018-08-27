@@ -267,64 +267,6 @@ QGroupBox::title {
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btn_cancel">
-          <property name="minimumSize">
-           <size>
-            <width>151</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>151</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Exit</string>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>16</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="16" column="0">
-       <spacer name="vtsp_4">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="14" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QPushButton" name="btn_exit_edits">
           <property name="minimumSize">
            <size>
@@ -342,6 +284,75 @@ QGroupBox::title {
            <string>Exit Editing</string>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="16" column="1">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="17" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_cancel">
+          <property name="minimumSize">
+           <size>
+            <width>450</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>450</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    font-size: 11pt;
+    font-weight: bold;
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Exit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -364,8 +375,8 @@ QGroupBox::title {
      <zorder>cmb_lifecycle_stage</zorder>
      <zorder>lb_lifeycle_stage</zorder>
      <zorder>vtsp_3</zorder>
-     <zorder>vtsp_4</zorder>
-     <zorder>horizontalLayoutWidget</zorder>
+     <zorder></zorder>
+     <zorder>verticalSpacer</zorder>
     </widget>
    </item>
    <item>
