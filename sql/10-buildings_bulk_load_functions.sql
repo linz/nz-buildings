@@ -664,3 +664,20 @@ $$
 
 $$
 LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.deletion_description_remove(integer)
+RETURNS void AS
+$$
+
+BEGIN 
+
+IF( SELECT bulk_load_outline_id FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = $1) IS NOT NULL THEN
+
+        DELETE FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = $1;
+
+END IF;
+
+END;
+
+$$ LANGUAGE plpgsql;
