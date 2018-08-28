@@ -282,7 +282,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         self.historic_layer = self.layer_registry.add_postgres_layer(
-            'Last_loaded_dataset', 'bulk_load_outlines',
+            'loaded_datasets', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '', '')
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
