@@ -7,7 +7,7 @@ from qgis.gui import QgsMessageBar, QgsHighlight
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame, QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QColor
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, pyqtSlot
 
 from buildings.utilities import database as db
 
@@ -76,18 +76,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_highlight = []
 
         self.lyr_existing.removeSelection()
-        self.lyr_existing.selectionChanged.connect(
-            self.select_from_layer_existing)
+        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
 
         self.lyr_bulk_load.removeSelection()
-        self.lyr_bulk_load.selectionChanged.connect(
-            self.select_from_layer_bulk)
+        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
 
-        self.tbl_original.itemSelectionChanged.connect(
-            self.select_from_tbl_original)
+        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-        self.lst_existing.itemSelectionChanged.connect(
-            self.select_from_lst_existing)
+        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
 
     def on_dockwidget_closed(self):
@@ -251,8 +247,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_highlight = []
 
         for feat in self.lyr_existing.selectedFeatures():
-            h = QgsHighlight(
-                iface.mapCanvas(), feat.geometry(), self.lyr_existing)
+            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_existing)
 
             # set highlight symbol properties
             h.setColor(QColor(255, 255, 0, 255))
@@ -261,8 +256,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lst_highlight.append(h)
 
         for feat in self.lyr_bulk_load.selectedFeatures():
-            h = QgsHighlight(
-                iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
+            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
 
             # set highlight symbol properties
             h.setColor(QColor(255, 255, 0, 255))
@@ -270,10 +264,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
             h.setFillColor(QColor(255, 255, 255, 0))
             self.lst_highlight.append(h)
 
-    def select_from_layer_existing(self):
+    @pyqtSlot(int)
+    def select_from_layer(self, selected):
         """
         When user selects features in existing outline layers, the ids will be added to the table
         """
+        current_layer = self.sender()
+
         tbl = self.tbl_original
 
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
@@ -281,138 +278,118 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
         sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
-        sql_matched = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
+
+        sql_matched_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
         sql_removed = "SELECT building_outline_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s;"
 
-        for feat_id in self.lyr_existing.selectedFeaturesIds():
-            result1 = self.db._execute(sql_related_existing, (feat_id,))
-            feat_ids_related = result1.fetchall()
-            if feat_ids_related:
-                # remove the current items inside table
-                for row_tbl in range(tbl.rowCount())[::-1]:  # reverse list so item could be removed from the bottom
-                    tbl.removeRow(row_tbl)
+        sql_matched_bulk = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
+        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
 
-                ids_bulk = []
-                ids_existing = [feat_id]
-                for (feat_id_related,) in feat_ids_related:
-                    ids_bulk.append(feat_id_related)
-                    result = self.db._execute(
-                        sql_related_bulk, (feat_id_related,))
-                    ids = result.fetchall()
-                    for (id_existing, ) in ids:
-                        ids_existing.append(id_existing)
-
-                for id_existing in list(set(ids_existing)):
-                    for id_bulk in list(set(ids_bulk)):
-                        row_tbl = tbl.rowCount()
-                        tbl.setRowCount(row_tbl + 1)
-                        tbl.setItem(
-                            row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                        tbl.setItem(
-                            row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                continue
-
-            result2 = self.db._execute(sql_matched, (feat_id,))
-            feat_id_matched = result2.fetchone()
-            if feat_id_matched:
-                # remove the current items inside table
-                for row_tbl in range(tbl.rowCount())[::-1]:
-                    tbl.removeRow(row_tbl)
-
-                row_tbl = tbl.rowCount()
-                tbl.setRowCount(row_tbl + 1)
-                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
-                continue
-
-            result3 = self.db._execute(sql_removed, (feat_id,))
-            if result3.fetchone:
-                # remove the currrent items if they are not from added or removed table
-                for row_tbl in range(tbl.rowCount())[::-1]:
-                    item_existing = tbl.item(row_tbl, 0)
-                    item_bulk = tbl.item(row_tbl, 1)
-                    if item_existing and item_bulk:
+        if current_layer.name() == 'existing_subset_extracts':
+            for feat_id in selected:
+                result1 = self.db._execute(sql_related_existing, (feat_id,))
+                feat_ids_related = result1.fetchall()
+                if feat_ids_related:
+                    # remove the current items inside table
+                    for row_tbl in range(tbl.rowCount())[::-1]:  # reverse list so item could be removed from the bottom
                         tbl.removeRow(row_tbl)
-                # add the removed building ids into table where not duplicate
-                have_duplicate_row = self.check_duplicate_rows(feat_id, None)
-                if not have_duplicate_row:
+
+                    ids_bulk = []
+                    ids_existing = [feat_id]
+                    for (feat_id_related,) in feat_ids_related:
+                        ids_bulk.append(feat_id_related)
+                        result = self.db._execute(
+                            sql_related_bulk, (feat_id_related,))
+                        ids = result.fetchall()
+                        for (id_existing, ) in ids:
+                            ids_existing.append(id_existing)
+
+                    for id_existing in list(set(ids_existing)):
+                        for id_bulk in list(set(ids_bulk)):
+                            row_tbl = tbl.rowCount()
+                            tbl.setRowCount(row_tbl + 1)
+                            tbl.setItem(
+                                row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                            tbl.setItem(
+                                row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                    continue
+
+                result2 = self.db._execute(sql_matched_existing, (feat_id,))
+                feat_id_matched = result2.fetchone()
+                if feat_id_matched:
+                    # remove the current items inside table
+                    for row_tbl in range(tbl.rowCount())[::-1]:
+                        tbl.removeRow(row_tbl)
+
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
                     tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
+                    continue
 
-        # set item not editable
-        for row in range(tbl.rowCount()):
-            tbl.showRow(row)
-            for col in range(2):
-                if tbl.item(row, col):
-                    tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-
-        tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
-
-        tbl.selectAll()
-
-    def select_from_layer_bulk(self):
-        """
-        When user selects features in bulk load outline layers, the ids will be added to the table
-        """
-
-        tbl = self.tbl_original
-
-        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-        tbl.clearSelection()
-
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
-        sql_matched = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
-        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
-
-        for feat_id in self.lyr_bulk_load.selectedFeaturesIds():
-            result1 = self.db._execute(sql_related_bulk, (feat_id,))
-            feat_ids_related = result1.fetchall()
-            if feat_ids_related:
-                # remove the current items inside table
-                for row_tbl in range(tbl.rowCount())[::-1]:
-                    tbl.removeRow(row_tbl)
-
-                ids_bulk = [feat_id]
-                ids_existing = []
-                for (feat_id_related,) in feat_ids_related:
-                    ids_existing.append(feat_id_related)
-                    result = self.db._execute(
-                        sql_related_existing, (feat_id_related,))
-                    ids = result.fetchall()
-                    for (id_bulk, ) in ids:
-                        ids_bulk.append(id_bulk)
-
-                for id_existing in list(set(ids_existing)):
-                    for id_bulk in list(set(ids_bulk)):
+                result3 = self.db._execute(sql_removed, (feat_id,))
+                if result3.fetchone:
+                    # remove the currrent items if they are not from added or removed table
+                    for row_tbl in range(tbl.rowCount())[::-1]:
+                        item_existing = tbl.item(row_tbl, 0)
+                        item_bulk = tbl.item(row_tbl, 1)
+                        if item_existing and item_bulk:
+                            tbl.removeRow(row_tbl)
+                    # add the removed building ids into table where not duplicate
+                    have_duplicate_row = self.check_duplicate_rows(feat_id, None)
+                    if not have_duplicate_row:
                         row_tbl = tbl.rowCount()
                         tbl.setRowCount(row_tbl + 1)
-                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                        tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                continue
+                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
 
-            result2 = self.db._execute(sql_matched, (feat_id,))
-            feat_id_matched = result2.fetchone()
-            if feat_id_matched:
-                # remove the current items inside table
-                for row_tbl in range(tbl.rowCount())[::-1]:
-                    tbl.removeRow(row_tbl)
-                # add the matched building ids into table
-                row_tbl = tbl.rowCount()
-                tbl.setRowCount(row_tbl + 1)
-                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
-                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
-                continue
-
-            result3 = self.db._execute(sql_added, (feat_id,))
-            if result3.fetchone:
-                # if the current items are not from added or removed table, remove them
-                for row_tbl in range(tbl.rowCount())[::-1]:
-                    item_existing = tbl.item(row_tbl, 0)
-                    item_bulk = tbl.item(row_tbl, 1)
-                    if item_existing and item_bulk:
+        elif current_layer.name() == 'bulk_load_outlines':
+            for feat_id in selected:
+                result1 = self.db._execute(sql_related_bulk, (feat_id,))
+                feat_ids_related = result1.fetchall()
+                if feat_ids_related:
+                    # remove the current items inside table
+                    for row_tbl in range(tbl.rowCount())[::-1]:
                         tbl.removeRow(row_tbl)
+
+                    ids_bulk = [feat_id]
+                    ids_existing = []
+                    for (feat_id_related,) in feat_ids_related:
+                        ids_existing.append(feat_id_related)
+                        result = self.db._execute(
+                            sql_related_existing, (feat_id_related,))
+                        ids = result.fetchall()
+                        for (id_bulk, ) in ids:
+                            ids_bulk.append(id_bulk)
+
+                    for id_existing in list(set(ids_existing)):
+                        for id_bulk in list(set(ids_bulk)):
+                            row_tbl = tbl.rowCount()
+                            tbl.setRowCount(row_tbl + 1)
+                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                    continue
+
+                result2 = self.db._execute(sql_matched_bulk, (feat_id,))
+                feat_id_matched = result2.fetchone()
+                if feat_id_matched:
+                    # remove the current items inside table
+                    for row_tbl in range(tbl.rowCount())[::-1]:
+                        tbl.removeRow(row_tbl)
+                    # add the matched building ids into table
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+                    continue
+
+                result3 = self.db._execute(sql_added, (feat_id,))
+                if result3.fetchone:
+                    # if the current items are not from added or removed table, remove them
+                    for row_tbl in range(tbl.rowCount())[::-1]:
+                        item_existing = tbl.item(row_tbl, 0)
+                        item_bulk = tbl.item(row_tbl, 1)
+                        if item_existing and item_bulk:
+                            tbl.removeRow(row_tbl)
                 # add the added building ids into table where not duplicate
                 have_duplicate_row = self.check_duplicate_rows(None, feat_id)
                 if not have_duplicate_row:
@@ -428,7 +405,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
-
         tbl.selectAll()
 
     def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
@@ -460,8 +436,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
 
-        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer_existing)
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
 
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
@@ -481,8 +457,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.highlight_features()
 
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer_existing)
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer_bulk)
+        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
 
     def clear_selection_clicked(self, widgets):
         """"
@@ -603,7 +579,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         self.tbl_original.clearSelection()
 
-        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer_existing)
+        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
         self.lyr_existing.removeSelection()
 
         feat_ids_existing = []
@@ -615,7 +591,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.highlight_features()
 
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer_existing)
+        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
 
     def select_from_lst_bulk(self):
         """
@@ -623,7 +599,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         self.tbl_original.clearSelection()
 
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer_bulk)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
         self.lyr_bulk_load.removeSelection()
 
         feat_ids_bulk = []
@@ -635,7 +611,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.highlight_features()
 
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer_bulk)
+        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
 
     def relink_all_clicked(self):
         """
@@ -987,8 +963,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.clearSelection()
 
         try:
-            self.lyr_existing.selectionChanged.disconnect(self.select_from_layer_existing)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer_bulk)
+            self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
             self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
             self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
             self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
