@@ -83,8 +83,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst_existing)
-        self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
+        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst)
+        self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst)
 
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
@@ -429,6 +429,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         have_duplicate_row = True
         return have_duplicate_row
 
+    @pyqtSlot()
     def select_from_tbl_original(self):
         """
         When users select rows in table, select the corresponding features in layers.
@@ -573,44 +574,31 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 break
         return have_duplicate_id
 
-    def select_from_lst_existing(self):
+    @pyqtSlot()
+    def select_from_lst(self):
         """
         When users select rows in lst_existing, select the corresponding features in layers.
         """
         self.tbl_original.clearSelection()
 
         self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
-        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
 
-        feat_ids_existing = []
-        for index in self.lst_existing.selectionModel().selectedRows():
-            item_existing = self.lst_existing.item(index.row())
-            feat_ids_existing.append(int(item_existing.text()))
+        current_list = self.sender()
 
-        self.lyr_existing.selectByIds(feat_ids_existing)
+        feat_ids = []
+        for index in current_list.selectionModel().selectedRows():
+            item = current_list.item(index.row())
+            feat_ids.append(int(item.text()))
+
+        if current_list == self.lst_existing:
+            self.lyr_existing.selectByIds(feat_ids)
+        elif current_list == self.lst_bulk:
+            self.lyr_bulk_load.selectByIds(feat_ids)
 
         self.highlight_features()
 
         self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-
-    def select_from_lst_bulk(self):
-        """
-        When users select rows in lst_bulk, select the corresponding features in layers.
-        """
-        self.tbl_original.clearSelection()
-
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
-        self.lyr_bulk_load.removeSelection()
-
-        feat_ids_bulk = []
-        for index in self.lst_bulk.selectionModel().selectedRows():
-            item_bulk = self.lst_bulk.item(index.row())
-            feat_ids_bulk.append(int(item_bulk.text()))
-
-        self.lyr_bulk_load.selectByIds(feat_ids_bulk)
-
-        self.highlight_features()
-
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
 
     def relink_all_clicked(self):
@@ -966,8 +954,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
             self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
             self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-            self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst_existing)
-            self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst_bulk)
+            self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst)
+            self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst)
         except TypeError:
             pass
         self.clear_layer_filter()
