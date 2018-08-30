@@ -94,12 +94,12 @@ class ProductionFrame(QFrame, FORM_CLASS):
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
-            self.btn_edit_save.clicked.disconnect()
-        except Exception:
+            self.btn_save.clicked.disconnect()
+        except TypeError:
             pass
         try:
-            self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+            self.btn_reset.clicked.disconnect()
+        except TypeError:
             pass
         self.change_instance = production_changes.AddProduction(self)
         # connect signals and slots
@@ -218,12 +218,12 @@ class ProductionFrame(QFrame, FORM_CLASS):
         try:
             self.building_layer.selectionChanged.disconnect(
                 self.change_instance.selection_changed)
-        except Exception:
+        except TypeError:
             pass
         try:
             self.building_layer.geometryChanged.disconnect(
                 self.change_instance.feature_changed)
-        except Exception:
+        except TypeError:
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():

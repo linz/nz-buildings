@@ -148,7 +148,7 @@ class BulkLoadChanges:
         self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
         self.populate_edit_comboboxes()
 
-    def disbale_UI_functions(self):
+    def disable_UI_functions(self):
         """
             Function called when comboboxes are to be disabled
         """
@@ -314,7 +314,7 @@ class AddBulkLoad(BulkLoadChanges):
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
-        BulkLoadChanges.disbale_UI_functions(self)
+        self.disable_UI_functions()
 
     def creator_feature_added(self, qgsfId):
         """
@@ -453,7 +453,7 @@ class EditBulkLoad(BulkLoadChanges):
                     're identical.'
                 )
                 self.bulk_load_frame.error_dialog.show()
-                self.disbale_UI_functions()
+                self.disable_UI_functions()
                 self.bulk_load_frame.select_changed = False
             # if all selected features have the same attributes (allowed)
             elif len(feats) == 1:
@@ -472,7 +472,7 @@ class EditBulkLoad(BulkLoadChanges):
                         ' features that have not been deleted.'
                     )
                     self.bulk_load_frame.error_dialog.show()
-                    BulkLoadChanges.disbale_UI_functions(self)
+                    self.disable_UI_functions()
                     self.bulk_load_frame.select_changed = False
                 else:
                     self.enable_UI_functions()
@@ -518,7 +518,7 @@ class EditBulkLoad(BulkLoadChanges):
                     '-----\n\n There are no capture source entries.'
                 )
                 self.bulk_load_frame.error_dialog.show()
-                self.disbale_UI_functions()
+                self.disable_UI_functions()
                 return
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
@@ -566,7 +566,7 @@ class EditBulkLoad(BulkLoadChanges):
                         '-------------- \n\n There are no "reason for deletion" entries '
                     )
                     self.bulk_load_frame.error_dialog.show()
-                    self.disbale_UI_functions()
+                    self.disable_UI_functions()
                     return
                 ls_relationships = self.remove_compared_outlines()
                 if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
@@ -589,7 +589,7 @@ class EditBulkLoad(BulkLoadChanges):
                     self.bulk_load_frame.db.execute_no_commit(
                         sql, (i, bulk_load_status_id, capture_method_id,
                               capture_source_id, suburb, town, t_a))
-            self.disbale_UI_functions()
+            self.disable_UI_functions()
             self.bulk_load_frame.completer_box()
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
@@ -622,7 +622,7 @@ class EditBulkLoad(BulkLoadChanges):
         iface.actionNodeTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
-        BulkLoadChanges.disbale_UI_functions(self)
+        self.disable_UI_functions()
 
     def feature_changed(self, qgsfId, geom):
         """
@@ -659,7 +659,7 @@ class EditBulkLoad(BulkLoadChanges):
         # If no outlines are selected
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
             self.bulk_load_frame.ids = []
-            BulkLoadChanges.disbale_UI_functions(self)
+            self.disable_UI_functions()
             self.bulk_load_frame.select_changed = False
         feats = []
         for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
@@ -682,7 +682,7 @@ class EditBulkLoad(BulkLoadChanges):
                 're identical.'
             )
             self.bulk_load_frame.error_dialog.show()
-            BulkLoadChanges.disbale_UI_functions(self)
+            self.disable_UI_functions()
             self.bulk_load_frame.select_changed = False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
@@ -701,7 +701,7 @@ class EditBulkLoad(BulkLoadChanges):
                     ' features that have not been deleted.'
                 )
                 self.bulk_load_frame.error_dialog.show()
-                BulkLoadChanges.disbale_UI_functions(self)
+                self.disable_UI_functions()
                 self.bulk_load_frame.select_changed = False
             else:
                 BulkLoadChanges.enable_UI_functions(self)
