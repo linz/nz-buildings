@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame, QColor, QCompleter
-from PyQt4.QtCore import Qt
-
-import qgis
-from qgis.utils import iface
-from qgis.core import QgsVectorLayer
-
 from functools import partial
 
-from buildings.utilities import database as db
-from buildings.utilities import layers
-from buildings.gui import bulk_load
-from buildings.gui import comparisons
-from buildings.gui import bulk_load_changes
+from PyQt4 import uic
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QColor, QCompleter, QFrame
+from qgis.core import QgsVectorLayer
+from qgis.utils import iface
+
+from buildings.gui import bulk_load, bulk_load_changes, comparisons
+from buildings.gui.alter_building_relationships import AlterRelationships
+from buildings.gui.alter_building_relationships import MultiLayerSelection
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
+from buildings.utilities import database as db, layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -497,12 +493,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
-        from buildings.gui.alter_building_relationships import AlterRelationships
         dw = qgis.utils.plugins['buildings'].dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             self.layer_registry, self.current_dataset))
-        from buildings.gui.alter_building_relationships import MultiLayerSelection
         canvas = iface.mapCanvas()
         self.tool = MultiLayerSelection(canvas)
         canvas.setMapTool(self.tool)

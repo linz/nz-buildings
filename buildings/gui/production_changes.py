@@ -1,10 +1,12 @@
-from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import select_statements as select
+# -*- coding: utf-8 -*-
+
+from PyQt4.QtGui import QToolButton
 
 from qgis.core import QgsFeatureRequest
 from qgis.utils import iface
 
-from PyQt4.QtGui import QToolButton
+from buildings.gui.error_dialog import ErrorDialog
+from buildings.sql import select_statements as select
 
 
 class ProductionChanges:

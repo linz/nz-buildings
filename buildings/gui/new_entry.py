@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
-import qgis
-from functools import partial
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.utilities import database as db
 from buildings.sql import select_statements as select
+from buildings.utilities import database as db
+
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_entry.ui'))

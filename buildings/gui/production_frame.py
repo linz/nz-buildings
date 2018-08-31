@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtGui import QFrame
-from qgis.utils import iface
 from qgis.core import QgsVectorLayer
-from functools import partial
+from qgis.utils import iface
 
+from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
-from buildings.gui import production_changes
-
-import qgis
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(

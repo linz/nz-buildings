@@ -6,12 +6,11 @@ from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.bulk_load_frame import BulkLoadFrame
-from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
+from buildings.gui.new_entry import NewEntry
 from buildings.gui.production_frame import ProductionFrame
 from buildings.utilities import database as db
 
-import qgis
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'menu_frame.ui'))

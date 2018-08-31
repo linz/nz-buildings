@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from qgis.utils import iface, plugins
-from qgis.gui import QgsMessageBar, QgsHighlight
+import re
+from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtGui import QFrame, QListWidgetItem, QAbstractItemView, QTableWidgetItem, QHeaderView, QColor
+from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
+                         QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt
+from qgis.gui import QgsHighlight, QgsMessageBar
+from qgis.utils import iface
 
 from buildings.utilities import database as db
 
-from functools import partial
-import re
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), "alter_building_relationship.ui"))

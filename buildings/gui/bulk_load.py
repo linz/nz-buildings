@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 
