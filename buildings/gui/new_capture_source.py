@@ -22,7 +22,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     value = ''
     external_source = ''
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
@@ -33,6 +33,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.populate_combobox()
         self.le_external_source_id.setDisabled(1)
 
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.error_dialog = None
 
@@ -119,9 +120,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))
 
     def insert_capture_source(self, value, external_source, commit_status):
         """

@@ -216,7 +216,7 @@ class Buildings:
         dw = self.dockwidget
         self.layer_registry = LayerRegistry()
         # no base layers
-        self.menu_frame = MenuFrame(self.layer_registry)
+        self.menu_frame = MenuFrame(self.dockwidget, self.layer_registry)
         dw.insert_into_frames('menu_frame', self.menu_frame)
         if dw.lst_options.item(0) is None:
             home_dir = os.path.split(os.path.dirname(__file__))
@@ -238,7 +238,7 @@ class Buildings:
             dw.stk_options.setCurrentIndex(1)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.stk_options.setCurrentIndex(0)
-        dw.stk_options.addWidget(MenuFrame(self.layer_registry))
+        dw.stk_options.addWidget(MenuFrame(self.dockwidget, self.layer_registry))
         dw.stk_options.setCurrentIndex(1)
 
     def setup_main_toolbar(self):

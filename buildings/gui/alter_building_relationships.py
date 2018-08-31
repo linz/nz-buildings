@@ -20,7 +20,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
-    def __init__(self, layer_registry, current_dataset, parent=None):
+    def __init__(self, dockwidget, layer_registry, current_dataset, parent=None):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
@@ -28,8 +28,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db = db
         self.db.connect()
 
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
-
         self.current_dataset = current_dataset
 
         self.open_alter_relationship_frame()
@@ -54,7 +54,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
-        self.dockwidget = plugins['buildings'].dockwidget
         self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
     def open_alter_relationship_frame(self):
@@ -1012,7 +1011,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(self.layer_registry))
+        dw.new_widget(BulkLoadFrame(dw, self.layer_registry))
         iface.actionPan().trigger()
 
 

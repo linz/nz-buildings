@@ -25,11 +25,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         Bulk Load outlines frame class
     """
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(BulkLoadFrame, self).__init__(parent)
         self.setupUi(self)
         # Frame fields
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
@@ -493,10 +494,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
-            self.layer_registry, self.current_dataset))
+            dw, self.layer_registry, self.current_dataset))
+
         canvas = iface.mapCanvas()
         self.tool = MultiLayerSelection(canvas)
         canvas.setMapTool(self.tool)
@@ -535,6 +537,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if self.territorial_auth is not None:
                 self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))
