@@ -65,15 +65,6 @@ class ProcessPublish(unittest.TestCase):
         self.assertEqual(result[0][0], 33)
         self.bulk_load_frame.db.rollback_open_cursor()
 
-    def test_populate_building_lds(self):
-        """Publish populates LDS table"""
-        self.bulk_load_frame.publish_clicked(False)
-        sql = 'SELECT count(*) FROM buildings_lds.nz_building_outlines;'
-        result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(result[0][0], 33)
-        self.bulk_load_frame.db.rollback_open_cursor()
-
     def test_gui_on_publish_clicked(self):
         """Publish GUI changes"""
         self.bulk_load_frame.publish_clicked(False)

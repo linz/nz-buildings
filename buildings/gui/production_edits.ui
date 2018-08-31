@@ -6,15 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>506</width>
+    <width>504</width>
     <height>1010</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>504</width>
+    <height>1010</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>504</width>
+    <height>1010</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Frame</string>
   </property>
   <property name="frameShape">
-   <enum>QFrame::StyledPanel</enum>
+   <enum>QFrame::NoFrame</enum>
   </property>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
@@ -195,46 +207,6 @@ QGroupBox::title {
       <item row="12" column="1">
        <widget class="QComboBox" name="cmb_ta"/>
       </item>
-      <item row="14" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="hzly_4">
-        <item>
-         <widget class="QPushButton" name="btn_save">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_reset">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Reset</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_cancel">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Exit</string>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>20</width>
-            <height>16</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
       <item row="13" column="1">
        <spacer name="vtsp_3">
         <property name="orientation">
@@ -248,18 +220,141 @@ QGroupBox::title {
         </property>
        </spacer>
       </item>
-      <item row="15" column="0">
-       <spacer name="vtsp_4">
+      <item row="15" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="hzly_4">
+        <item>
+         <widget class="QPushButton" name="btn_save">
+          <property name="minimumSize">
+           <size>
+            <width>151</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>151</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_reset">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Reset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_exit_edits">
+          <property name="minimumSize">
+           <size>
+            <width>151</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>151</width>
+            <height>27</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Exit Editing</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="16" column="1">
+       <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>10</height>
+          <height>40</height>
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="17" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btn_cancel">
+          <property name="minimumSize">
+           <size>
+            <width>450</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>450</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    font-size: 11pt;
+    font-weight: bold;
+}
+</string>
+          </property>
+          <property name="text">
+           <string>Exit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
      <zorder>lb_capture_method</zorder>
@@ -272,7 +367,6 @@ QGroupBox::title {
      <zorder>cmb_suburb</zorder>
      <zorder>lb_ta</zorder>
      <zorder>cmb_ta</zorder>
-     <zorder></zorder>
      <zorder>vtsp_6</zorder>
      <zorder>vtsp_7</zorder>
      <zorder>line</zorder>
@@ -281,7 +375,8 @@ QGroupBox::title {
      <zorder>cmb_lifecycle_stage</zorder>
      <zorder>lb_lifeycle_stage</zorder>
      <zorder>vtsp_3</zorder>
-     <zorder>vtsp_4</zorder>
+     <zorder></zorder>
+     <zorder>verticalSpacer</zorder>
     </widget>
    </item>
    <item>
