@@ -2,6 +2,7 @@
 
 import os.path
 
+from qgis.core import QgsFeatureRequest
 from qgis.utils import iface, plugins
 from qgis.gui import QgsMessageBar, QgsHighlight
 
@@ -86,9 +87,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lyr_existing.removeSelection()
         self.lyr_existing.selectionChanged.connect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.connect(self.highlight_features)
 
         self.lyr_bulk_load.removeSelection()
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.connect(self.highlight_features)
 
         self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
 
@@ -248,29 +251,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
         lst.clearSelection()
         lst.setSelectionMode(QAbstractItemView.MultiSelection)
 
+    @pyqtSlot()
     def highlight_features(self):
         """ Highlights selected features"""
 
         # remove all highlight objects
         self.lst_highlight = []
 
-        for feat in self.lyr_existing.selectedFeatures():
-            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_existing)
+        for lyr in [self.lyr_existing, self.lyr_bulk_load]:
+            for feat in lyr.selectedFeatures():
+                h = QgsHighlight(iface.mapCanvas(), feat.geometry(), lyr)
 
-            # set highlight symbol properties
-            h.setColor(QColor(255, 255, 0, 255))
-            h.setWidth(4)
-            h.setFillColor(QColor(255, 255, 255, 0))
-            self.lst_highlight.append(h)
-
-        for feat in self.lyr_bulk_load.selectedFeatures():
-            h = QgsHighlight(iface.mapCanvas(), feat.geometry(), self.lyr_bulk_load)
-
-            # set highlight symbol properties
-            h.setColor(QColor(255, 255, 0, 255))
-            h.setWidth(4)
-            h.setFillColor(QColor(255, 255, 255, 0))
-            self.lst_highlight.append(h)
+                # set highlight symbol properties
+                h.setColor(QColor(255, 255, 0, 255))
+                h.setWidth(4)
+                h.setFillColor(QColor(255, 255, 255, 0))
+                self.lst_highlight.append(h)
 
     @pyqtSlot(int)
     def select_from_layer(self, selected):
@@ -280,8 +276,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         current_layer = self.sender()
         tbl = self.tbl_original
 
+        if not selected:
+            return
+
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-        tbl.clearSelection()
+        # tbl.clearSelection()
 
         if current_layer.name() == 'bulk_load_outlines':
             self.select_from_bulk_load(selected)
@@ -296,7 +295,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
-        tbl.selectAll()
+        # tbl.selectAll()
 
     def insert_into_table(self, tbl, rows):
         for (id_existing, id_bulk) in rows:
@@ -306,15 +305,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
             if id_bulk:
                 tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-
-    def clear_table_if_matched_or_related_exists(self):
-        tbl = self.tbl_original
-        for row_tbl in range(tbl.rowCount()):
-            item_existing = tbl.item(row_tbl, 0)
-            item_bulk = tbl.item(row_tbl, 1)
-            if item_existing and item_bulk:
-                tbl.setRowCount(0)
-                break
 
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
@@ -326,6 +316,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if added.fetchone():
                     self.clear_table_if_matched_or_related_exists()
                     self.insert_into_table(tbl, [(None, feat_id)])
+                    tbl.selectRow(tbl.rowCount() - 1)
                     continue
                 # Matched
                 matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
@@ -333,6 +324,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if feat_id_matched:
                     tbl.setRowCount(0)  # remove the current items inside table
                     self.insert_into_table(tbl, [(feat_id_matched[0], feat_id)])
+                    tbl.selectAll()
                     continue
                 # Related
                 related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
@@ -347,6 +339,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if related_set:
                 related_set = list(set(related_set))
                 self.insert_into_table(tbl, related_set)
+                tbl.selectAll()
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
@@ -358,6 +351,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if removed.fetchone():
                     self.clear_table_if_matched_or_related_exists()
                     self.insert_into_table(tbl, [(feat_id, None)])
+                    tbl.selectRow(tbl.rowCount() - 1)
                     continue
                 # Matched
                 matched = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
@@ -365,6 +359,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if feat_id_matched:
                     tbl.setRowCount(0)
                     self.insert_into_table(tbl, [(feat_id, feat_id_matched[0])])
+                    tbl.selectAll()
                     continue
                 # Related
                 related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
@@ -379,6 +374,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if related_set:
                 related_set = list(set(related_set))
                 self.insert_into_table(tbl, related_set)
+                tbl.selectAll()
+
+    def clear_table_if_matched_or_related_exists(self):
+        tbl = self.tbl_original
+        for row_tbl in range(tbl.rowCount()):
+            item_existing = tbl.item(row_tbl, 0)
+            item_bulk = tbl.item(row_tbl, 1)
+            if item_existing and item_bulk:
+                tbl.setRowCount(0)
+                break
 
     def has_existing_in_tbl(self, feat_id):
         """
@@ -388,11 +393,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
+            is_matched_or_related = (item_existing and item_bulk)
             if item_bulk:
                 if feat_id == int(item_bulk.text()):
+                    if is_matched_or_related:
+                        tbl.selectAll()
+                    else:
+                        tbl.selectRow(row)
                     return True
             if item_existing:
                 if feat_id == int(item_existing.text()):
+                    if is_matched_or_related:
+                        tbl.selectAll()
+                    else:
+                        tbl.selectRow(row)
                     return True
         return False
 
@@ -423,7 +437,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectByIds(feat_ids_existing)
         self.lyr_bulk_load.selectByIds(feat_ids_bulk)
 
-        self.highlight_features()
+        # self.highlight_features()
 
         self.lyr_existing.selectionChanged.connect(self.select_from_layer)
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
@@ -585,7 +599,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_list == self.lst_bulk:
             self.lyr_bulk_load.selectByIds(feat_ids)
 
-        self.highlight_features()
+        # self.highlight_features()
 
         # self.lyr_existing.selectionChanged.connect(self.select_from_layer)
         # self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
@@ -956,7 +970,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         try:
             self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
+            self.lyr_existing.selectionChanged.disconnect(self.highlight_features)
             self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_features)
             self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
             self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst)
             self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst)
