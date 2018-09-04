@@ -10,6 +10,7 @@ from PyQt4.QtGui import QFrame, QListWidgetItem, QAbstractItemView, QTableWidget
 from PyQt4.QtCore import Qt, pyqtSlot
 
 from buildings.utilities import database as db
+from buildings.sql import select_statements as select
 
 from functools import partial
 import re
@@ -300,20 +301,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
-
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
-        sql_matched_bulk = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
-        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
-
         related_set = []
         for feat_id in selected:
             if not self.has_existing_in_tbl(feat_id):
                 # Added
-                added = self.db._execute(sql_added, (feat_id,))
+                added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
                 if added.fetchone():
-                    # add the added building ids into table where not duplicate
-
                     # if the current items are not from added or removed table, remove them
                     for row_tbl in range(tbl.rowCount()):
                         item_existing = tbl.item(row_tbl, 0)
@@ -326,26 +319,23 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
                     continue
                 # Matched
-                matched = self.db._execute(sql_matched_bulk, (feat_id,))
+                matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
                 feat_id_matched = matched.fetchone()
                 if feat_id_matched:
-                    # remove the current items inside table
-                    tbl.setRowCount(0)
-                    # add the matched building ids into table
+                    tbl.setRowCount(0)  # remove the current items inside table
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
                     tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
                     tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
                     continue
                 # Related
-                related = self.db._execute(sql_related_bulk, (feat_id,))
+                related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
                 feat_ids_related = related.fetchall()
                 if feat_ids_related:
-                    # remove the current items inside table
                     tbl.setRowCount(0)
                     for feat_id_related in feat_ids_related:
                         related_set.append((feat_id_related, feat_id))
-                        result = self.db._execute(sql_related_existing, (feat_id_related,))
+                        result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
                         for (id_bulk_related, ) in result.fetchall():
                             related_set.append((feat_id_related, id_bulk_related))
             if related_set:
@@ -358,17 +348,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
-
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
-        sql_matched_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
-        sql_removed = "SELECT building_outline_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s;"
-
         related_set = []
         for feat_id in selected:
             if not self.has_existing_in_tbl(feat_id):
                 # Removed
-                removed = self.db._execute(sql_removed, (feat_id,))
+                removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
                 if removed.fetchone():
                     for row_tbl in range(tbl.rowCount()):
                         item_existing = tbl.item(row_tbl, 0)
@@ -381,7 +365,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
                     continue
                 # Matched
-                result2 = self.db._execute(sql_matched_existing, (feat_id,))
+                result2 = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
                 feat_id_matched = result2.fetchone()
                 if feat_id_matched:
                     tbl.setRowCount(0)
@@ -391,13 +375,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
                     continue
                 # Related
-                related = self.db._execute(sql_related_existing, (feat_id,))
+                related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
                 feat_ids_related = related.fetchall()
                 if feat_ids_related:
                     tbl.setRowCount(0)
                     for (feat_id_related, ) in feat_ids_related:
                         related_set.append((feat_id, feat_id_related))
-                        result = self.db._execute(sql_related_bulk, (feat_id_related,))
+                        result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
                         for (id_existing_related, ) in result.fetchall():
                             related_set.append((id_existing_related, feat_id_related))
             if related_set:
@@ -423,24 +407,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if feat_id == int(item_existing.text()):
                     return True
         return False
-        # tbl = self.tbl_original
-
-        # have_duplicate_row = False
-        # for row in range(tbl.rowCount()):
-        #     item_existing = tbl.item(row, 0)
-        #     item_bulk = tbl.item(row, 1)
-        #     if item_existing:
-        #         if item_bulk:
-        #             if int(item_existing.text()) == feat_id_existing and int((item_bulk.text())) == feat_id_bulk:
-        #                 have_duplicate_row = True
-        #         else:
-        #             if int(item_existing.text()) == feat_id_existing:
-        #                 have_duplicate_row = True
-        #     else:
-        #         if item_bulk:
-        #             if int(item_bulk.text()) == feat_id_bulk:
-        #                 have_duplicate_row = True
-        # return have_duplicate_row
 
     @pyqtSlot()
     def select_from_tbl_original(self):
@@ -527,8 +493,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
 
-        for row in range(self.tbl_original.rowCount())[::-1]:
-            self.tbl_original.removeRow(row)
+        self.tbl_original.setRowCount(0)
 
     def unlink_all_clicked(self):
         """
@@ -665,13 +630,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Remove building ids from list to table
         """
         tbl = self.tbl_original
-
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s"
-        sql_matched_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s"
-        sql_removed = "SELECT * FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
-        sql_added = "SELECT * FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s"
-
         rows_lst_existing = []
         rows_lst_bulk = []
 
@@ -682,7 +640,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
                 id_existing = int(self.lst_existing.item(row_lst).text())
 
-                result = self.db._execute(sql_related_existing, (id_existing,))
+                result = self.db._execute(select.related_by_existing_outlines, (id_existing, self.current_dataset))
                 ids_related = result.fetchall()
                 if ids_related:
                     id_bulk_count = 0
@@ -704,7 +662,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.lst_existing.removeItemWidget(item)
 
                     if id_bulk_count == 1:
-                        result = self.db._execute(sql_related_bulk, (id_bulk_0,))
+                        result = self.db._execute(select.related_by_bulk_load_outlines, (id_bulk_0, self.current_dataset))
                         ids = result.fetchall()
                         for row in range(self.lst_existing.count())[::-1]:
                             id_item_existing = int(self.lst_existing.item(row).text())
@@ -721,7 +679,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                 self.lst_existing.removeItemWidget(item)
                     continue
 
-                result = self.db._execute(sql_matched_existing, (id_existing,))
+                result = self.db._execute(select.matched_by_existing_outlines, (id_existing, self.current_dataset))
                 id_matched = result.fetchone()
                 if id_matched:
                     for row in range(self.lst_bulk.count())[::-1]:
@@ -742,7 +700,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.lst_existing.removeItemWidget(item)
                     continue
 
-                result = self.db._execute(sql_removed, (id_existing,))
+                result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
                 if result.fetchone():
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
@@ -757,7 +715,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
                 id_bulk = int(self.lst_bulk.item(row_lst).text())
 
-                result = self.db._execute(sql_added, (id_bulk,))
+                result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
                 if result.fetchone():
                     row_tbl = tbl.rowCount()
                     tbl.setRowCount(row_tbl + 1)
