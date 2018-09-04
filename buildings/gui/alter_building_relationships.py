@@ -282,126 +282,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
         tbl.clearSelection()
 
-        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
-        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
+        if current_layer.name() == 'bulk_load_outlines':
+            self.select_from_bulk_load(selected)
 
-        sql_matched_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
-        sql_removed = "SELECT building_outline_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s;"
-
-        sql_matched_bulk = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
-        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
-
-        if current_layer.name() == 'existing_subset_extracts':
-            for feat_id in selected:
-                result1 = self.db._execute(sql_related_existing, (feat_id,))
-                feat_ids_related = result1.fetchall()
-                if feat_ids_related:
-                    # remove the current items inside table
-                    for row_tbl in range(tbl.rowCount())[::-1]:  # reverse list so item could be removed from the bottom
-                        tbl.removeRow(row_tbl)
-
-                    ids_bulk = []
-                    ids_existing = [feat_id]
-                    for (feat_id_related,) in feat_ids_related:
-                        ids_bulk.append(feat_id_related)
-                        result = self.db._execute(
-                            sql_related_bulk, (feat_id_related,))
-                        ids = result.fetchall()
-                        for (id_existing, ) in ids:
-                            ids_existing.append(id_existing)
-
-                    for id_existing in list(set(ids_existing)):
-                        for id_bulk in list(set(ids_bulk)):
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(
-                                row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(
-                                row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                    continue
-
-                result2 = self.db._execute(sql_matched_existing, (feat_id,))
-                feat_id_matched = result2.fetchone()
-                if feat_id_matched:
-                    # remove the current items inside table
-                    for row_tbl in range(tbl.rowCount())[::-1]:
-                        tbl.removeRow(row_tbl)
-
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
-                    continue
-
-                result3 = self.db._execute(sql_removed, (feat_id,))
-                if result3.fetchone:
-                    # remove the currrent items if they are not from added or removed table
-                    for row_tbl in range(tbl.rowCount())[::-1]:
-                        item_existing = tbl.item(row_tbl, 0)
-                        item_bulk = tbl.item(row_tbl, 1)
-                        if item_existing and item_bulk:
-                            tbl.removeRow(row_tbl)
-                    # add the removed building ids into table where not duplicate
-                    have_duplicate_row = self.check_duplicate_rows(feat_id, None)
-                    if not have_duplicate_row:
-                        row_tbl = tbl.rowCount()
-                        tbl.setRowCount(row_tbl + 1)
-                        tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-
-        elif current_layer.name() == 'bulk_load_outlines':
-            for feat_id in selected:
-                result1 = self.db._execute(sql_related_bulk, (feat_id,))
-                feat_ids_related = result1.fetchall()
-                if feat_ids_related:
-                    # remove the current items inside table
-                    for row_tbl in range(tbl.rowCount())[::-1]:
-                        tbl.removeRow(row_tbl)
-
-                    ids_bulk = [feat_id]
-                    ids_existing = []
-                    for (feat_id_related,) in feat_ids_related:
-                        ids_existing.append(feat_id_related)
-                        result = self.db._execute(
-                            sql_related_existing, (feat_id_related,))
-                        ids = result.fetchall()
-                        for (id_bulk, ) in ids:
-                            ids_bulk.append(id_bulk)
-
-                    for id_existing in list(set(ids_existing)):
-                        for id_bulk in list(set(ids_bulk)):
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                    continue
-
-                result2 = self.db._execute(sql_matched_bulk, (feat_id,))
-                feat_id_matched = result2.fetchone()
-                if feat_id_matched:
-                    # remove the current items inside table
-                    for row_tbl in range(tbl.rowCount())[::-1]:
-                        tbl.removeRow(row_tbl)
-                    # add the matched building ids into table
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
-                    continue
-
-                result3 = self.db._execute(sql_added, (feat_id,))
-                if result3.fetchone:
-                    # if the current items are not from added or removed table, remove them
-                    for row_tbl in range(tbl.rowCount())[::-1]:
-                        item_existing = tbl.item(row_tbl, 0)
-                        item_bulk = tbl.item(row_tbl, 1)
-                        if item_existing and item_bulk:
-                            tbl.removeRow(row_tbl)
-                # add the added building ids into table where not duplicate
-                have_duplicate_row = self.check_duplicate_rows(None, feat_id)
-                if not have_duplicate_row:
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+        elif current_layer.name() == 'existing_subset_extracts':
+            self.select_from_existing(selected)
 
         # set item not editable
         for row in range(tbl.rowCount()):
@@ -413,27 +298,149 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
         tbl.selectAll()
 
-    def check_duplicate_rows(self, feat_id_existing, feat_id_bulk):
+    def select_from_bulk_load(self, selected):
+        tbl = self.tbl_original
+
+        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
+        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
+        sql_matched_bulk = "SELECT building_outline_id FROM buildings_bulk_load.matched WHERE bulk_load_outline_id = %s;"
+        sql_added = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added WHERE bulk_load_outline_id = %s;"
+
+        related_set = []
+        for feat_id in selected:
+            if not self.has_existing_in_tbl(feat_id):
+                # Added
+                added = self.db._execute(sql_added, (feat_id,))
+                if added.fetchone():
+                    # add the added building ids into table where not duplicate
+
+                    # if the current items are not from added or removed table, remove them
+                    for row_tbl in range(tbl.rowCount()):
+                        item_existing = tbl.item(row_tbl, 0)
+                        item_bulk = tbl.item(row_tbl, 1)
+                        if item_existing and item_bulk:
+                            tbl.setRowCount(0)
+                            break
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+                    continue
+                # Matched
+                matched = self.db._execute(sql_matched_bulk, (feat_id,))
+                feat_id_matched = matched.fetchone()
+                if feat_id_matched:
+                    # remove the current items inside table
+                    tbl.setRowCount(0)
+                    # add the matched building ids into table
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+                    continue
+                # Related
+                related = self.db._execute(sql_related_bulk, (feat_id,))
+                feat_ids_related = related.fetchall()
+                if feat_ids_related:
+                    # remove the current items inside table
+                    tbl.setRowCount(0)
+                    for feat_id_related in feat_ids_related:
+                        related_set.append((feat_id_related, feat_id))
+                        result = self.db._execute(sql_related_existing, (feat_id_related,))
+                        for (id_bulk_related, ) in result.fetchall():
+                            related_set.append((feat_id_related, id_bulk_related))
+            if related_set:
+                related_set = list(set(related_set))
+                for (id_existing, id_bulk) in related_set:
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+
+    def select_from_existing(self, selected):
+        tbl = self.tbl_original
+
+        sql_related_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.related WHERE building_outline_id = %s;"
+        sql_related_bulk = "SELECT building_outline_id FROM buildings_bulk_load.related WHERE bulk_load_outline_id = %s;"
+        sql_matched_existing = "SELECT bulk_load_outline_id FROM buildings_bulk_load.matched WHERE building_outline_id = %s;"
+        sql_removed = "SELECT building_outline_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s;"
+
+        related_set = []
+        for feat_id in selected:
+            if not self.has_existing_in_tbl(feat_id):
+                # Removed
+                removed = self.db._execute(sql_removed, (feat_id,))
+                if removed.fetchone():
+                    for row_tbl in range(tbl.rowCount()):
+                        item_existing = tbl.item(row_tbl, 0)
+                        item_bulk = tbl.item(row_tbl, 1)
+                        if item_existing and item_bulk:
+                            tbl.setRowCount(0)
+                            break
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                    continue
+                # Matched
+                result2 = self.db._execute(sql_matched_existing, (feat_id,))
+                feat_id_matched = result2.fetchone()
+                if feat_id_matched:
+                    tbl.setRowCount(0)
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
+                    continue
+                # Related
+                related = self.db._execute(sql_related_existing, (feat_id,))
+                feat_ids_related = related.fetchall()
+                if feat_ids_related:
+                    tbl.setRowCount(0)
+                    for (feat_id_related, ) in feat_ids_related:
+                        related_set.append((feat_id, feat_id_related))
+                        result = self.db._execute(sql_related_bulk, (feat_id_related,))
+                        for (id_existing_related, ) in result.fetchall():
+                            related_set.append((id_existing_related, feat_id_related))
+            if related_set:
+                related_set = list(set(related_set))
+                for (id_existing, id_bulk) in related_set:
+                    row_tbl = tbl.rowCount()
+                    tbl.setRowCount(row_tbl + 1)
+                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+
+    def has_existing_in_tbl(self, feat_id):
         """
-        Check if table has the same row
+        Check if table has the same id
         """
         tbl = self.tbl_original
-        have_duplicate_row = False
         for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
+            if item_bulk:
+                if feat_id == int(item_bulk.text()):
+                    return True
             if item_existing:
-                if item_bulk:
-                    if int(item_existing.text()) == feat_id_existing and int(item_bulk.text()) == feat_id_bulk:
-                        have_duplicate_row = True
-                else:
-                    if int(item_existing.text()) == feat_id_existing:
-                        have_duplicate_row = True
-            else:
-                if item_bulk:
-                    if int(item_bulk.text()) == feat_id_bulk:
-                        have_duplicate_row = True
-        return have_duplicate_row
+                if feat_id == int(item_existing.text()):
+                    return True
+        return False
+        # tbl = self.tbl_original
+
+        # have_duplicate_row = False
+        # for row in range(tbl.rowCount()):
+        #     item_existing = tbl.item(row, 0)
+        #     item_bulk = tbl.item(row, 1)
+        #     if item_existing:
+        #         if item_bulk:
+        #             if int(item_existing.text()) == feat_id_existing and int((item_bulk.text())) == feat_id_bulk:
+        #                 have_duplicate_row = True
+        #         else:
+        #             if int(item_existing.text()) == feat_id_existing:
+        #                 have_duplicate_row = True
+        #     else:
+        #         if item_bulk:
+        #             if int(item_bulk.text()) == feat_id_bulk:
+        #                 have_duplicate_row = True
+        # return have_duplicate_row
 
     @pyqtSlot()
     def select_from_tbl_original(self):
