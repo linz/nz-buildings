@@ -2,7 +2,7 @@
 
 import os.path
 
-from qgis.core import QgsFeatureRequest
+from qgis.core import QgsVectorLayer
 from qgis.utils import iface, plugins
 from qgis.gui import QgsMessageBar, QgsHighlight
 
@@ -275,7 +275,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         current_layer = self.sender()
         tbl = self.tbl_original
-        if self.has_no_selection():
+        if self.has_no_selection_in_layers():
             tbl.clearSelection()
             return
         if not selected:
@@ -296,32 +296,48 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
 
-    def has_no_selection(self):
-        for lyr in [self.lyr_bulk_load, self.lyr_existing]:
-            selected = [feat for feat in lyr.selectedFeatures()]
-            if selected:
-                return False
-        return True
+    @pyqtSlot()
+    def select_from_tbl_original(self):
+        """
+        When users select rows in table, select the corresponding features in layers.
+        """
+        tbl = self.tbl_original
+        if self.has_no_selection_in_table():
+            return
 
-    def insert_into_table(self, tbl, rows):
-        for (id_existing, id_bulk) in rows:
-            row_tbl = tbl.rowCount()
-            tbl.setRowCount(row_tbl + 1)
-            if id_existing:
-                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            if id_bulk:
-                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+        self.lst_existing.clearSelection()
+        self.lst_bulk.clearSelection()
+
+        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
+
+        self.select_features_in_layers()
+
+        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+
+        # btn_unlink_all should be unable when table is empty
+        if tbl.rowCount() != 0:
+            self.btn_unlink_all.setEnabled(True)
+        else:
+            self.btn_unlink_all.setEnabled(False)
 
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
         related_set = []
         for feat_id in selected:
-            if self.has_existing_in_tbl(feat_id):
+            row = self.find_existing_row(feat_id)
+            if row is not None:
+                if self.has_pairs_in_table():
+                    tbl.selectAll()
+                else:
+                    tbl.selectRow(row)
                 continue
             # Added
             added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
             if added.fetchone():
-                self.clear_table_if_matched_or_related_exists()
+                if self.has_pairs_in_table():
+                    tbl.setRowCount(0)
                 self.insert_into_table(tbl, [(None, feat_id)])
                 tbl.clearSelection()
                 tbl.selectRow(tbl.rowCount() - 1)
@@ -353,12 +369,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_original
         related_set = []
         for feat_id in selected:
-            if self.has_existing_in_tbl(feat_id):
+            row = self.find_existing_row(feat_id)
+            if row is not None:
+                if self.has_pairs_in_table():
+                    tbl.selectAll()
+                else:
+                    tbl.selectRow(row)
                 continue
             # Removed
             removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
             if removed.fetchone():
-                self.clear_table_if_matched_or_related_exists()
+                if self.has_pairs_in_table():
+                    tbl.setRowCount(0)
                 self.insert_into_table(tbl, [(feat_id, None)])
                 tbl.clearSelection()
                 tbl.selectRow(tbl.rowCount() - 1)
@@ -386,16 +408,54 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.insert_into_table(tbl, related_set)
             tbl.selectAll()
 
-    def clear_table_if_matched_or_related_exists(self):
+    def insert_into_table(self, tbl, rows):
+        for (id_existing, id_bulk) in rows:
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            if id_existing:
+                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            if id_bulk:
+                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+
+    def has_no_selection_in_table(self):
+        if not self.tbl_original.selectionModel().selectedRows():
+            self.lst_highlight = []
+            return True
+        return False
+
+    def has_no_selection_in_layers(self):
+        for lyr in [self.lyr_bulk_load, self.lyr_existing]:
+            selected = [feat for feat in lyr.selectedFeatures()]
+            if selected:
+                return False
+        return True
+
+    def select_features_in_layers(self):
+
+        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.removeSelection()
+        feat_ids_existing = []
+        feat_ids_bulk = []
+        for index in self.tbl_original.selectionModel().selectedRows():
+            item_existing = self.tbl_original.item(index.row(), 0)
+            item_bulk = self.tbl_original.item(index.row(), 1)
+            if item_existing:
+                feat_ids_existing.append(int(item_existing.text()))
+            if item_bulk:
+                feat_ids_bulk.append(int(item_bulk.text()))
+        self.lyr_existing.selectByIds(feat_ids_existing)
+        self.lyr_bulk_load.selectByIds(feat_ids_bulk)
+
+    def has_pairs_in_table(self):
         tbl = self.tbl_original
         for row_tbl in range(tbl.rowCount()):
             item_existing = tbl.item(row_tbl, 0)
             item_bulk = tbl.item(row_tbl, 1)
             if item_existing and item_bulk:
-                tbl.setRowCount(0)
-                break
+                return True
+        return False
 
-    def has_existing_in_tbl(self, feat_id):
+    def find_existing_row(self, feat_id):
         """
         Check if table has the same id
         """
@@ -404,63 +464,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
-            is_matched_or_related = (item_existing and item_bulk)
             if item_bulk:
                 if feat_id == int(item_bulk.text()):
-                    if is_matched_or_related:
-                        tbl.selectAll()
-                    else:
-                        tbl.selectRow(row)
-                    return True
+                    return row
             if item_existing:
                 if feat_id == int(item_existing.text()):
-                    if is_matched_or_related:
-                        tbl.selectAll()
-                    else:
-                        tbl.selectRow(row)
-                    return True
-        return False
-
-    @pyqtSlot()
-    def select_from_tbl_original(self):
-        """
-        When users select rows in table, select the corresponding features in layers.
-        """
-        tbl = self.tbl_original
-        if not tbl.selectionModel().selectedRows():
-            self.lst_highlight = []
-            return
-
-        self.lst_existing.clearSelection()
-        self.lst_bulk.clearSelection()
-
-        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
-
-        self.lyr_existing.removeSelection()
-        self.lyr_bulk_load.removeSelection()
-
-        feat_ids_existing = []
-        feat_ids_bulk = []
-        for index in tbl.selectionModel().selectedRows():
-            item_existing = tbl.item(index.row(), 0)
-            if item_existing:
-                feat_ids_existing.append(int(item_existing.text()))
-            item_bulk = tbl.item(index.row(), 1)
-            if item_bulk:
-                feat_ids_bulk.append(int(item_bulk.text()))
-
-        self.lyr_existing.selectByIds(feat_ids_existing)
-        self.lyr_bulk_load.selectByIds(feat_ids_bulk)
-
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
-
-        # btn_unlink_all should be unable when table is empty
-        if tbl.rowCount() != 0:
-            self.btn_unlink_all.setEnabled(True)
-        else:
-            self.btn_unlink_all.setEnabled(False)
+                    return row
+        return None
 
     def clear_selection_clicked(self):
         """"
