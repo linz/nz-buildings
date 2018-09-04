@@ -95,6 +95,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.itemSelectionChanged.connect(self.select_from_lst)
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst)
 
+    @pyqtSlot()
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
         self.lst_highlight = []
@@ -277,7 +278,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         When user selects features in existing outline layers, the ids will be added to the table
         """
         current_layer = self.sender()
-
         tbl = self.tbl_original
 
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
@@ -285,7 +285,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         if current_layer.name() == 'bulk_load_outlines':
             self.select_from_bulk_load(selected)
-
         elif current_layer.name() == 'existing_subset_extracts':
             self.select_from_existing(selected)
 
@@ -299,6 +298,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
         tbl.selectAll()
 
+    def insert_into_table(self, tbl, rows):
+        for (id_existing, id_bulk) in rows:
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            if id_existing:
+                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            if id_bulk:
+                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+
+    def clear_table_if_matched_or_related_exists(self):
+        tbl = self.tbl_original
+        for row_tbl in range(tbl.rowCount()):
+            item_existing = tbl.item(row_tbl, 0)
+            item_bulk = tbl.item(row_tbl, 1)
+            if item_existing and item_bulk:
+                tbl.setRowCount(0)
+                break
+
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
         related_set = []
@@ -307,26 +324,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 # Added
                 added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
                 if added.fetchone():
-                    # if the current items are not from added or removed table, remove them
-                    for row_tbl in range(tbl.rowCount()):
-                        item_existing = tbl.item(row_tbl, 0)
-                        item_bulk = tbl.item(row_tbl, 1)
-                        if item_existing and item_bulk:
-                            tbl.setRowCount(0)
-                            break
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+                    self.clear_table_if_matched_or_related_exists()
+                    self.insert_into_table(tbl, [(None, feat_id)])
                     continue
                 # Matched
                 matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
                 feat_id_matched = matched.fetchone()
                 if feat_id_matched:
                     tbl.setRowCount(0)  # remove the current items inside table
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id_matched[0]))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id))
+                    self.insert_into_table(tbl, [(feat_id_matched[0], feat_id)])
                     continue
                 # Related
                 related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
@@ -340,11 +346,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                             related_set.append((feat_id_related, id_bulk_related))
             if related_set:
                 related_set = list(set(related_set))
-                for (id_existing, id_bulk) in related_set:
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                self.insert_into_table(tbl, related_set)
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
@@ -354,25 +356,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 # Removed
                 removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
                 if removed.fetchone():
-                    for row_tbl in range(tbl.rowCount()):
-                        item_existing = tbl.item(row_tbl, 0)
-                        item_bulk = tbl.item(row_tbl, 1)
-                        if item_existing and item_bulk:
-                            tbl.setRowCount(0)
-                            break
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
+                    self.clear_table_if_matched_or_related_exists()
+                    self.insert_into_table(tbl, [(feat_id, None)])
                     continue
                 # Matched
-                result2 = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
-                feat_id_matched = result2.fetchone()
+                matched = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
+                feat_id_matched = matched.fetchone()
                 if feat_id_matched:
                     tbl.setRowCount(0)
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % feat_id))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % feat_id_matched[0]))
+                    self.insert_into_table(tbl, [(feat_id, feat_id_matched[0])])
                     continue
                 # Related
                 related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
@@ -386,11 +378,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                             related_set.append((id_existing_related, feat_id_related))
             if related_set:
                 related_set = list(set(related_set))
-                for (id_existing, id_bulk) in related_set:
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                self.insert_into_table(tbl, related_set)
 
     def has_existing_in_tbl(self, feat_id):
         """
