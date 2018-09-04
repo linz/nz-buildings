@@ -275,12 +275,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         current_layer = self.sender()
         tbl = self.tbl_original
-
+        if self.has_no_selection():
+            tbl.clearSelection()
+            return
         if not selected:
             return
-
         tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-        # tbl.clearSelection()
 
         if current_layer.name() == 'bulk_load_outlines':
             self.select_from_bulk_load(selected)
@@ -295,7 +295,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
-        # tbl.selectAll()
+
+    def has_no_selection(self):
+        for lyr in [self.lyr_bulk_load, self.lyr_existing]:
+            selected = [feat for feat in lyr.selectedFeatures()]
+            if selected:
+                return False
+        return True
 
     def insert_into_table(self, tbl, rows):
         for (id_existing, id_bulk) in rows:
@@ -310,71 +316,75 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_original
         related_set = []
         for feat_id in selected:
-            if not self.has_existing_in_tbl(feat_id):
-                # Added
-                added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
-                if added.fetchone():
-                    self.clear_table_if_matched_or_related_exists()
-                    self.insert_into_table(tbl, [(None, feat_id)])
-                    tbl.selectRow(tbl.rowCount() - 1)
-                    continue
-                # Matched
-                matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
-                feat_id_matched = matched.fetchone()
-                if feat_id_matched:
-                    tbl.setRowCount(0)  # remove the current items inside table
-                    self.insert_into_table(tbl, [(feat_id_matched[0], feat_id)])
-                    tbl.selectAll()
-                    continue
-                # Related
-                related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
-                feat_ids_related = related.fetchall()
-                if feat_ids_related:
-                    tbl.setRowCount(0)
-                    for feat_id_related in feat_ids_related:
-                        related_set.append((feat_id_related, feat_id))
-                        result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
-                        for (id_bulk_related, ) in result.fetchall():
-                            related_set.append((feat_id_related, id_bulk_related))
-            if related_set:
-                related_set = list(set(related_set))
-                self.insert_into_table(tbl, related_set)
+            if self.has_existing_in_tbl(feat_id):
+                continue
+            # Added
+            added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
+            if added.fetchone():
+                self.clear_table_if_matched_or_related_exists()
+                self.insert_into_table(tbl, [(None, feat_id)])
+                tbl.clearSelection()
+                tbl.selectRow(tbl.rowCount() - 1)
+                continue
+            # Matched
+            matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
+            feat_id_matched = matched.fetchone()
+            if feat_id_matched:
+                tbl.setRowCount(0)  # remove the current items inside table
+                self.insert_into_table(tbl, [(feat_id_matched[0], feat_id)])
                 tbl.selectAll()
+                continue
+            # Related
+            related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
+            feat_ids_related = related.fetchall()
+            if feat_ids_related:
+                tbl.setRowCount(0)
+                for feat_id_related in feat_ids_related:
+                    related_set.append((feat_id_related, feat_id))
+                    result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
+                    for (id_bulk_related, ) in result.fetchall():
+                        related_set.append((feat_id_related, id_bulk_related))
+        if related_set:
+            related_set = list(set(related_set))
+            self.insert_into_table(tbl, related_set)
+            tbl.selectAll()
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
         related_set = []
         for feat_id in selected:
-            if not self.has_existing_in_tbl(feat_id):
-                # Removed
-                removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
-                if removed.fetchone():
-                    self.clear_table_if_matched_or_related_exists()
-                    self.insert_into_table(tbl, [(feat_id, None)])
-                    tbl.selectRow(tbl.rowCount() - 1)
-                    continue
-                # Matched
-                matched = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
-                feat_id_matched = matched.fetchone()
-                if feat_id_matched:
-                    tbl.setRowCount(0)
-                    self.insert_into_table(tbl, [(feat_id, feat_id_matched[0])])
-                    tbl.selectAll()
-                    continue
-                # Related
-                related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
-                feat_ids_related = related.fetchall()
-                if feat_ids_related:
-                    tbl.setRowCount(0)
-                    for (feat_id_related, ) in feat_ids_related:
-                        related_set.append((feat_id, feat_id_related))
-                        result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
-                        for (id_existing_related, ) in result.fetchall():
-                            related_set.append((id_existing_related, feat_id_related))
-            if related_set:
-                related_set = list(set(related_set))
-                self.insert_into_table(tbl, related_set)
+            if self.has_existing_in_tbl(feat_id):
+                continue
+            # Removed
+            removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
+            if removed.fetchone():
+                self.clear_table_if_matched_or_related_exists()
+                self.insert_into_table(tbl, [(feat_id, None)])
+                tbl.clearSelection()
+                tbl.selectRow(tbl.rowCount() - 1)
+                continue
+            # Matched
+            matched = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
+            feat_id_matched = matched.fetchone()
+            if feat_id_matched:
+                tbl.setRowCount(0)
+                self.insert_into_table(tbl, [(feat_id, feat_id_matched[0])])
                 tbl.selectAll()
+                continue
+            # Related
+            related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
+            feat_ids_related = related.fetchall()
+            if feat_ids_related:
+                tbl.setRowCount(0)
+                for (feat_id_related, ) in feat_ids_related:
+                    related_set.append((feat_id, feat_id_related))
+                    result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
+                    for (id_existing_related, ) in result.fetchall():
+                        related_set.append((id_existing_related, feat_id_related))
+        if related_set:
+            related_set = list(set(related_set))
+            self.insert_into_table(tbl, related_set)
+            tbl.selectAll()
 
     def clear_table_if_matched_or_related_exists(self):
         tbl = self.tbl_original
@@ -390,6 +400,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Check if table has the same id
         """
         tbl = self.tbl_original
+        tbl.clearSelection()
         for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
@@ -415,6 +426,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         When users select rows in table, select the corresponding features in layers.
         """
+        tbl = self.tbl_original
+        if not tbl.selectionModel().selectedRows():
+            self.lst_highlight = []
+            return
+
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
 
@@ -426,24 +442,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         feat_ids_existing = []
         feat_ids_bulk = []
-        for index in self.tbl_original.selectionModel().selectedRows():
-            item_existing = self.tbl_original.item(index.row(), 0)
+        for index in tbl.selectionModel().selectedRows():
+            item_existing = tbl.item(index.row(), 0)
             if item_existing:
                 feat_ids_existing.append(int(item_existing.text()))
-            item_bulk = self.tbl_original.item(index.row(), 1)
+            item_bulk = tbl.item(index.row(), 1)
             if item_bulk:
                 feat_ids_bulk.append(int(item_bulk.text()))
 
         self.lyr_existing.selectByIds(feat_ids_existing)
         self.lyr_bulk_load.selectByIds(feat_ids_bulk)
 
-        # self.highlight_features()
-
         self.lyr_existing.selectionChanged.connect(self.select_from_layer)
         self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
 
         # btn_unlink_all should be unable when table is empty
-        if self.tbl_original.rowCount() != 0:
+        if tbl.rowCount() != 0:
             self.btn_unlink_all.setEnabled(True)
         else:
             self.btn_unlink_all.setEnabled(False)
@@ -552,15 +566,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         item_existing = tbl.item(row, 0)
         if item_existing:
             id_existing = int(item_existing.text())
-            have_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_existing, id_existing)
-            if not have_duplicate_id:
+            has_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_existing, id_existing)
+            if not has_duplicate_id:
                 self.lst_existing.addItem(QListWidgetItem('%s' % id_existing))
 
         item_bulk = tbl.item(row, 1)
         if item_bulk:
             id_bulk = int(item_bulk.text())
-            have_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_bulk, id_bulk)
-            if not have_duplicate_id:
+            has_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_bulk, id_bulk)
+            if not has_duplicate_id:
                 self.lst_bulk.addItem(QListWidgetItem('%s' % id_bulk))
 
         tbl.removeRow(row)
@@ -569,13 +583,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         Check if list has the same row
         """
-        have_duplicate_id = False
+        has_duplicate_id = False
         for row in range(lst.count()):
             item = lst.item(row)
             if int(item.text()) == id_item:
-                have_duplicate_id = True
+                has_duplicate_id = True
                 break
-        return have_duplicate_id
+        return has_duplicate_id
 
     @pyqtSlot()
     def select_from_lst(self):
