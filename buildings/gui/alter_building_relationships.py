@@ -37,13 +37,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.open_alter_relationship_frame()
 
         # set up signals and slots
-        self.btn_clear_slt.clicked.connect(self.clear_selection_clicked)
+        self.btn_clear_tbl_slt.clicked.connect(self.clear_selection_clicked)
         self.btn_remove_slt.clicked.connect(self.remove_selected_clicked)
         self.btn_remove_all.clicked.connect(self.remove_all_clicked)
 
         self.btn_unlink_all.clicked.connect(self.unlink_all_clicked)
 
-        self.btn_clear_slt2.clicked.connect(self.clear_selection_clicked)
+        self.btn_clear_lst_slt.clicked.connect(self.clear_selection_clicked)
         self.btn_relink_all.clicked.connect(self.relink_all_clicked)
 
         self.btn_matched.clicked.connect(self.matched_clicked)
@@ -67,14 +67,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_remove_all.setEnabled(True)
         self.btn_remove_slt.setEnabled(True)
-        self.btn_clear_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
 
         self.btn_unlink_all.setEnabled(False)
 
         self.btn_relink_all.setEnabled(False)
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
-        self.btn_clear_slt2.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
         self.btn_save.setEnabled(False)
 
         self.add_building_lyrs()
@@ -85,18 +85,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lst_highlight = []
 
-        self.lyr_existing.removeSelection()
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        self.lyr_existing.selectionChanged.connect(self.highlight_features)
+        # self.lyr_existing.removeSelection()
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
 
-        self.lyr_bulk_load.removeSelection()
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.connect(self.highlight_features)
+        # self.lyr_bulk_load.removeSelection()
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
 
-        self.tbl_original.itemSelectionChanged.connect(self.select_from_tbl_original)
+        self.tbl_original.itemSelectionChanged.connect(self.tbl_original_item_selection_changed)
 
-        self.lst_existing.itemSelectionChanged.connect(self.select_from_lst)
-        self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst)
+        self.lst_existing.itemSelectionChanged.connect(self.lst_item_selection_changed)
+        self.lst_bulk.itemSelectionChanged.connect(self.lst_item_selection_changed)
 
     @pyqtSlot()
     def on_dockwidget_closed(self):
@@ -252,7 +252,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         lst.setSelectionMode(QAbstractItemView.MultiSelection)
 
     @pyqtSlot()
-    def highlight_features(self):
+    def highlight_selection_changed(self):
         """ Highlights selected features"""
 
         # remove all highlight objects
@@ -269,7 +269,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.lst_highlight.append(h)
 
     @pyqtSlot(int)
-    def select_from_layer(self, selected):
+    def lyr_selection_changed(self, selected):
         """
         When user selects features in existing outline layers, the ids will be added to the table
         """
@@ -280,7 +280,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             return
         if not selected:
             return
-        tbl.itemSelectionChanged.disconnect(self.select_from_tbl_original)
+        tbl.itemSelectionChanged.disconnect(self.tbl_original_item_selection_changed)
 
         if current_layer.name() == 'bulk_load_outlines':
             self.select_from_bulk_load(selected)
@@ -294,10 +294,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if tbl.item(row, col):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
-        tbl.itemSelectionChanged.connect(self.select_from_tbl_original)
+        tbl.itemSelectionChanged.connect(self.tbl_original_item_selection_changed)
 
     @pyqtSlot()
-    def select_from_tbl_original(self):
+    def tbl_original_item_selection_changed(self):
         """
         When users select rows in table, select the corresponding features in layers.
         """
@@ -308,13 +308,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clearSelection()
         self.lst_bulk.clearSelection()
 
-        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
 
         self.select_features_in_layers()
 
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
 
         # btn_unlink_all should be unable when table is empty
         if tbl.rowCount() != 0:
@@ -478,9 +478,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Called when clear_selection botton is clicked
         """
         btn = self.sender()
-        if btn == self.btn_clear_slt:
+        if btn == self.btn_clear_tbl_slt:
             self.tbl_original.clearSelection()
-        elif btn == self.btn_clear_slt2:
+        elif btn == self.btn_clear_lst_slt:
             self.lst_existing.clearSelection()
             self.lst_bulk.clearSelection()
 
@@ -549,19 +549,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.remove_from_tbl_to_lst(row)
 
         self.lyr_existing.removeSelection()
-        self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
 
         self.lyr_bulk_load.removeSelection()
-        self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
 
         self.btn_remove_all.setEnabled(False)
         self.btn_remove_slt.setEnabled(False)
-        self.btn_clear_slt.setEnabled(False)
+        self.btn_clear_tbl_slt.setEnabled(False)
 
         self.btn_relink_all.setEnabled(True)
         self.btn_matched.setEnabled(True)
         self.btn_related.setEnabled(True)
-        self.btn_clear_slt2.setEnabled(True)
+        self.btn_clear_lst_slt.setEnabled(True)
         self.btn_save.setEnabled(True)
 
     def remove_from_tbl_to_lst(self, row):
@@ -602,14 +602,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
         return has_duplicate_id
 
     @pyqtSlot()
-    def select_from_lst(self):
+    def lst_item_selection_changed(self):
         """
         When users select rows in lst_existing, select the corresponding features in layers.
         """
         self.tbl_original.clearSelection()
 
-        # self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
-        # self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
+        # self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+        # self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
 
         current_list = self.sender()
 
@@ -623,10 +623,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_list == self.lst_bulk:
             self.lyr_bulk_load.selectByIds(feat_ids)
 
-        # self.highlight_features()
+        # self.highlight_selection_changed()
 
-        # self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        # self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+        # self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        # self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
 
     def relink_all_clicked(self):
         """
@@ -640,16 +640,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_remove_all.setEnabled(True)
         self.btn_remove_slt.setEnabled(True)
         self.btn_unlink_all.setEnabled(True)
-        self.btn_clear_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
 
         self.btn_relink_all.setEnabled(False)
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
-        self.btn_clear_slt2.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
         self.btn_save.setEnabled(False)
 
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
 
     def remove_from_lst_to_tbl(self):
         """
@@ -964,8 +964,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
-        self.lyr_existing.selectionChanged.connect(self.select_from_layer)
-        self.lyr_bulk_load.selectionChanged.connect(self.select_from_layer)
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
 
         self.repaint_view()
         self.clear_layer_filter()
@@ -973,12 +973,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_remove_all.setEnabled(True)
         self.btn_remove_slt.setEnabled(True)
         self.btn_unlink_all.setEnabled(True)
-        self.btn_clear_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
 
         self.btn_relink_all.setEnabled(False)
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
-        self.btn_clear_slt2.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
         self.btn_save.setEnabled(False)
 
         iface.mapCanvas().refreshAllLayers()
@@ -993,13 +993,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.clearSelection()
 
         try:
-            self.lyr_existing.selectionChanged.disconnect(self.select_from_layer)
-            self.lyr_existing.selectionChanged.disconnect(self.highlight_features)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.select_from_layer)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_features)
-            self.tbl_original.itemSelectionChanged.disconnect(self.select_from_tbl_original)
-            self.lst_existing.itemSelectionChanged.disconnect(self.select_from_lst)
-            self.lst_bulk.itemSelectionChanged.disconnect(self.select_from_lst)
+            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
+            self.tbl_original.itemSelectionChanged.disconnect(self.tbl_original_item_selection_changed)
+            self.lst_existing.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
+            self.lst_bulk.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
         except TypeError:
             pass
         self.clear_layer_filter()
