@@ -69,13 +69,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_remove_slt.setEnabled(True)
         self.btn_clear_tbl_slt.setEnabled(True)
 
-        self.btn_unlink_all.setEnabled(False)
-
         self.btn_relink_all.setEnabled(False)
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
         self.btn_clear_lst_slt.setEnabled(False)
         self.btn_save.setEnabled(False)
+
+        self.btn_unlink_all.setEnabled(False)
 
         self.add_building_lyrs()
         self.clear_layer_filter()
@@ -393,6 +393,50 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_clear_lst_slt.setEnabled(True)
         self.btn_save.setEnabled(True)
 
+    @pyqtSlot()
+    def lst_item_selection_changed(self):
+        """
+        When users select rows in lst_existing, select the corresponding features in layers.
+        """
+        # current_list = self.sender()
+
+        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.removeSelection()
+
+        ids_existing = self.get_selected_ids_from_lst(self.lst_existing)
+        ids_bulk = self.get_selected_ids_from_lst(self.lst_bulk)
+
+        self.lyr_existing.selectByIds(ids_existing)
+        self.lyr_bulk_load.selectByIds(ids_bulk)
+
+    @pyqtSlot()
+    def relink_all_clicked(self):
+        """
+        Relink the buildings in the list
+        Called when relink_all botton is clicked
+        """
+        id_list = self.relink_outlines()
+        self.insert_into_table(self.tbl_original, id_list)
+
+        self.clear_layer_filter()
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+
+        self.btn_remove_all.setEnabled(True)
+        self.btn_remove_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
+
+        self.btn_relink_all.setEnabled(False)
+        self.btn_matched.setEnabled(False)
+        self.btn_related.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
+        self.btn_save.setEnabled(False)
+
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+        self.btn_unlink_all.setEnabled(True)
+
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
         related_set = []
@@ -404,33 +448,27 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 else:
                     tbl.selectRow(row)
                 continue
-            # Added
-            added = self.db._execute(select.added_by_bulk_load_outlines, (feat_id, self.current_dataset))
-            if added.fetchone():
+
+            id_matched = self.find_matched_existing_outlines(feat_id)
+            id_related = self.find_related_existing_outlines(feat_id)
+
+            if id_matched:
+                tbl.setRowCount(0)  # remove the current items inside table
+                self.insert_into_table(tbl, [(id_matched[0], feat_id)])
+                tbl.selectAll()
+            elif id_related:
+                tbl.setRowCount(0)
+                for feat_id_related in id_related:
+                    related_set.append((feat_id_related, feat_id))
+                    result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
+                    for (id_bulk_related, ) in result.fetchall():
+                        related_set.append((feat_id_related, id_bulk_related))
+            else:
                 if self.has_pairs_in_table():
                     tbl.setRowCount(0)
                 self.insert_into_table(tbl, [(None, feat_id)])
                 tbl.clearSelection()
                 tbl.selectRow(tbl.rowCount() - 1)
-                continue
-            # Matched
-            matched = self.db._execute(select.matched_by_bulk_load_outlines, (feat_id, self.current_dataset))
-            feat_id_matched = matched.fetchone()
-            if feat_id_matched:
-                tbl.setRowCount(0)  # remove the current items inside table
-                self.insert_into_table(tbl, [(feat_id_matched[0], feat_id)])
-                tbl.selectAll()
-                continue
-            # Related
-            related = self.db._execute(select.related_by_bulk_load_outlines, (feat_id, self.current_dataset))
-            feat_ids_related = related.fetchall()
-            if feat_ids_related:
-                tbl.setRowCount(0)
-                for feat_id_related in feat_ids_related:
-                    related_set.append((feat_id_related, feat_id))
-                    result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
-                    for (id_bulk_related, ) in result.fetchall():
-                        related_set.append((feat_id_related, id_bulk_related))
         if related_set:
             related_set = list(set(related_set))
             self.insert_into_table(tbl, related_set)
@@ -447,37 +485,55 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 else:
                     tbl.selectRow(row)
                 continue
-            # Removed
-            removed = self.db._execute(select.removed_by_existing_outlines, (feat_id, self.current_dataset))
-            if removed.fetchone():
+
+            id_matched = self.find_matched_bulk_load_outlines(feat_id)
+            id_related = self.find_related_bulk_load_outlines(feat_id)
+
+            if id_matched:
+                tbl.setRowCount(0)
+                self.insert_into_table(tbl, [(feat_id, id_matched[0])])
+                tbl.selectAll()
+            elif id_related:
+                tbl.setRowCount(0)
+                for (feat_id_related, ) in id_related:
+                    related_set.append((feat_id, feat_id_related))
+                    result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
+                    for (id_existing_related, ) in result.fetchall():
+                        related_set.append((id_existing_related, feat_id_related))
+            else:
                 if self.has_pairs_in_table():
                     tbl.setRowCount(0)
                 self.insert_into_table(tbl, [(feat_id, None)])
                 tbl.clearSelection()
                 tbl.selectRow(tbl.rowCount() - 1)
-                continue
-            # Matched
-            matched = self.db._execute(select.matched_by_existing_outlines, (feat_id, self.current_dataset))
-            feat_id_matched = matched.fetchone()
-            if feat_id_matched:
-                tbl.setRowCount(0)
-                self.insert_into_table(tbl, [(feat_id, feat_id_matched[0])])
-                tbl.selectAll()
-                continue
-            # Related
-            related = self.db._execute(select.related_by_existing_outlines, (feat_id, self.current_dataset))
-            feat_ids_related = related.fetchall()
-            if feat_ids_related:
-                tbl.setRowCount(0)
-                for (feat_id_related, ) in feat_ids_related:
-                    related_set.append((feat_id, feat_id_related))
-                    result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
-                    for (id_existing_related, ) in result.fetchall():
-                        related_set.append((id_existing_related, feat_id_related))
         if related_set:
             related_set = list(set(related_set))
             self.insert_into_table(tbl, related_set)
             tbl.selectAll()
+
+    # def find_added_outlines(self, id_bulk):
+    #     result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+    #     return result.fetchone()
+
+    # def find_removed_outlines(self, id_existing):
+    #     result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
+    #     return result.fetchone()
+
+    def find_matched_existing_outlines(self, id_bulk):
+        result = self.db._execute(select.matched_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        return result.fetchone()
+
+    def find_matched_bulk_load_outlines(self, id_existing):
+        result = self.db._execute(select.matched_by_existing_outlines, (id_existing, self.current_dataset))
+        return result.fetchone()
+
+    def find_related_existing_outlines(self, id_bulk):
+        result = self.db._execute(select.related_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        return result.fetchall()
+
+    def find_related_bulk_load_outlines(self, id_existing):
+        result = self.db._execute(select.related_by_existing_outlines, (id_existing, self.current_dataset))
+        return result.fetchall()
 
     def insert_into_table(self, tbl, ids):
         for (id_existing, id_bulk) in ids:
@@ -602,7 +658,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_original
         ids_existing = []
         ids_bulk = []
-        for row in range(tbl.rowCount())[::-1]:
+        for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
             if item_existing:
@@ -618,151 +674,53 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for id in ids:
             lst.addItem(QListWidgetItem('%s' % id))
 
-    @pyqtSlot()
-    def lst_item_selection_changed(self):
-        """
-        When users select rows in lst_existing, select the corresponding features in layers.
-        """
-        self.tbl_original.clearSelection()
-
-        # self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-        # self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
-
-        current_list = self.sender()
-
+    def get_selected_ids_from_lst(self, lst):
         feat_ids = []
-        for index in current_list.selectionModel().selectedRows():
-            item = current_list.item(index.row())
+        for index in lst.selectionModel().selectedRows():
+            item = lst.item(index.row())
             feat_ids.append(int(item.text()))
+        return feat_ids
 
-        if current_list == self.lst_existing:
-            self.lyr_existing.selectByIds(feat_ids)
-        elif current_list == self.lst_bulk:
-            self.lyr_bulk_load.selectByIds(feat_ids)
+    def get_ids_from_lst(self, lst):
+        feat_ids = []
+        for row in range(lst.count()):
+            feat_ids.append(int(lst.item(row).text()))
+        return feat_ids
 
-        # self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        # self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
-
-    def relink_all_clicked(self):
-        """
-        Relink the buildings in the list
-        Called when relink_all botton is clicked
-        """
-        self.remove_from_lst_to_tbl()
-
-        self.clear_layer_filter()
-
-        self.btn_remove_all.setEnabled(True)
-        self.btn_remove_slt.setEnabled(True)
-        self.btn_unlink_all.setEnabled(True)
-        self.btn_clear_tbl_slt.setEnabled(True)
-
-        self.btn_relink_all.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_clear_lst_slt.setEnabled(False)
-        self.btn_save.setEnabled(False)
-
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
-
-    def remove_from_lst_to_tbl(self):
+    def relink_outlines(self):
         """
         Remove building ids from list to table
         """
-        tbl = self.tbl_original
-        rows_lst_existing = []
-        rows_lst_bulk = []
+        id_list = []
 
-        for row_lst in range(self.lst_existing.count())[::-1]:
-            if row_lst not in rows_lst_existing:
+        ids_existing = self.get_ids_from_lst(self.lst_existing)
+        ids_bulk = self.get_ids_from_lst(self.lst_bulk)
 
-                rows_lst_existing.append(row_lst)
+        if (len(ids_existing) == 1) and (len(ids_bulk) == 1):
+            id_matched = self.find_matched_bulk_load_outlines(ids_existing[0])
+            if id_matched:
+                id_list.append((ids_existing[0], ids_bulk[0]))
+            else:
+                id_list.append((ids_existing[0], None))
+                id_list.append((None, ids_bulk[0]))
 
-                id_existing = int(self.lst_existing.item(row_lst).text())
+        elif (len(ids_existing) == 0) or (len(ids_bulk) == 0):
+            for id_existing in ids_existing:
+                id_list.append((id_existing, None))
+            for id_bulk in ids_bulk:
+                id_list.append((None, id_bulk))
 
-                result = self.db._execute(select.related_by_existing_outlines, (id_existing, self.current_dataset))
-                ids_related = result.fetchall()
-                if ids_related:
-                    id_bulk_count = 0
-                    for row in range(self.lst_bulk.count())[::-1]:
-                        id_bulk = int(self.lst_bulk.item(row).text())
-                        if (id_bulk,) in ids_related:
-                            id_bulk_count += 1
-                            id_bulk_0 = id_bulk
-
-                            rows_lst_bulk.append(row)
-
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                            item = self.lst_bulk.takeItem(row)
-                            self.lst_bulk.removeItemWidget(item)
-                    item = self.lst_existing.takeItem(row_lst)
-                    self.lst_existing.removeItemWidget(item)
-
-                    if id_bulk_count == 1:
-                        result = self.db._execute(select.related_by_bulk_load_outlines, (id_bulk_0, self.current_dataset))
-                        ids = result.fetchall()
-                        for row in range(self.lst_existing.count())[::-1]:
-                            id_item_existing = int(self.lst_existing.item(row).text())
-                            if (id_item_existing,) in ids:
-                                if row == row_lst:
-                                    continue
-                                rows_lst_existing.append(row)
-
-                                row_tbl = tbl.rowCount()
-                                tbl.setRowCount(row_tbl + 1)
-                                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_item_existing))
-                                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk_0))
-                                item = self.lst_existing.takeItem(row)
-                                self.lst_existing.removeItemWidget(item)
-                    continue
-
-                result = self.db._execute(select.matched_by_existing_outlines, (id_existing, self.current_dataset))
-                id_matched = result.fetchone()
-                if id_matched:
-                    for row in range(self.lst_bulk.count())[::-1]:
-                        id_bulk = int(self.lst_bulk.item(row).text())
-                        if id_bulk == id_matched[0]:
-                            rows_lst_bulk.append(row)
-
-                            row_tbl = tbl.rowCount()
-                            tbl.setRowCount(row_tbl + 1)
-                            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                            item = self.lst_bulk.takeItem(row)
-                            self.lst_bulk.removeItemWidget(item)
-
-                            break
-
-                    item = self.lst_existing.takeItem(row_lst)
-                    self.lst_existing.removeItemWidget(item)
-                    continue
-
-                result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
-                if result.fetchone():
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-                    item = self.lst_existing.takeItem(row_lst)
-                    self.lst_existing.removeItemWidget(item)
-
-        for row_lst in range(self.lst_bulk.count())[::-1]:
-            if row_lst not in rows_lst_bulk:
-
-                rows_lst_bulk.append(row_lst)
-
-                id_bulk = int(self.lst_bulk.item(row_lst).text())
-
-                result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
-                if result.fetchone():
-                    row_tbl = tbl.rowCount()
-                    tbl.setRowCount(row_tbl + 1)
-                    tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-                    item = self.lst_bulk.takeItem(row_lst)
-                    self.lst_bulk.removeItemWidget(item)
+        else:
+            if self.find_related_bulk_load_outlines(ids_existing[0]):
+                for id_existing in ids_existing:
+                    for id_bulk in ids_bulk:
+                        id_list.append((id_existing, id_bulk))
+            else:
+                for id_existing in ids_existing:
+                    id_list.append((id_existing, None))
+                for id_bulk in ids_bulk:
+                    id_list.append((None, id_bulk))
+        return id_list
 
     def matched_clicked(self):
         """
@@ -943,7 +901,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_remove_all.setEnabled(True)
         self.btn_remove_slt.setEnabled(True)
-        self.btn_unlink_all.setEnabled(True)
         self.btn_clear_tbl_slt.setEnabled(True)
 
         self.btn_relink_all.setEnabled(False)
@@ -951,6 +908,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_related.setEnabled(False)
         self.btn_clear_lst_slt.setEnabled(False)
         self.btn_save.setEnabled(False)
+
+        self.btn_unlink_all.setEnabled(True)
 
         iface.mapCanvas().refreshAllLayers()
 
