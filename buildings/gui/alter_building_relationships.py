@@ -295,6 +295,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 
         tbl.itemSelectionChanged.connect(self.tbl_original_item_selection_changed)
+        self.btn_unlink_all.setEnabled(True)
 
     @pyqtSlot()
     def tbl_original_item_selection_changed(self):
@@ -302,7 +303,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         When users select rows in table, select the corresponding features in layers.
         """
         tbl = self.tbl_original
+
         if self.has_no_selection_in_table():
+            self.lyr_existing.removeSelection()
+            self.lyr_bulk_load.removeSelection()
             return
 
         self.lst_existing.clearSelection()
@@ -321,6 +325,73 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_unlink_all.setEnabled(True)
         else:
             self.btn_unlink_all.setEnabled(False)
+
+    @pyqtSlot()
+    def clear_selection_clicked(self):
+        """"
+        Clear Selection in the widgets
+        Called when clear_selection botton is clicked
+        """
+        btn = self.sender()
+        if btn == self.btn_clear_tbl_slt:
+            self.tbl_original.clearSelection()
+        elif btn == self.btn_clear_lst_slt:
+            self.lst_existing.clearSelection()
+            self.lst_bulk.clearSelection()
+
+    @pyqtSlot()
+    def remove_selected_clicked(self):
+        """
+        Remove selected row and related row
+        Called when remove_selected botton is clicked
+        """
+        tbl = self.tbl_original
+        rows = [index.row() for index in reversed(tbl.selectionModel().selectedRows())]
+        tbl.clearSelection()
+        if self.has_pairs_in_table():
+            tbl.setRowCount(0)
+        else:
+            for row in rows:
+                tbl.removeRow(row)
+        if tbl.rowCount() == 0:
+            self.btn_unlink_all.setEnabled(False)
+
+    @pyqtSlot()
+    def remove_all_clicked(self):
+        """
+        Remove all rows in the table
+        Called when remove_all botton is clicked
+        """
+        self.tbl_original.setRowCount(0)
+        self.btn_unlink_all.setEnabled(False)
+
+    @pyqtSlot()
+    def unlink_all_clicked(self):
+        """
+        Unlink the buildings in the table
+        Called when unlink_all botton is clicked
+        """
+        self.btn_unlink_all.setEnabled(False)
+
+        ids_existing, ids_bulk = self.get_ids_from_tbl_original()
+
+        self.insert_into_list(self.lst_existing, ids_existing)
+        self.insert_into_list(self.lst_bulk, ids_bulk)
+
+        self.tbl_original.setRowCount(0)
+
+        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+
+        self.btn_remove_all.setEnabled(False)
+        self.btn_remove_slt.setEnabled(False)
+        self.btn_clear_tbl_slt.setEnabled(False)
+
+        self.btn_relink_all.setEnabled(True)
+        self.btn_matched.setEnabled(True)
+        self.btn_related.setEnabled(True)
+        self.btn_clear_lst_slt.setEnabled(True)
+        self.btn_save.setEnabled(True)
 
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
@@ -408,8 +479,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.insert_into_table(tbl, related_set)
             tbl.selectAll()
 
-    def insert_into_table(self, tbl, rows):
-        for (id_existing, id_bulk) in rows:
+    def insert_into_table(self, tbl, ids):
+        for (id_existing, id_bulk) in ids:
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
             if id_existing:
@@ -419,7 +490,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def has_no_selection_in_table(self):
         if not self.tbl_original.selectionModel().selectedRows():
-            self.lst_highlight = []
             return True
         return False
 
@@ -472,134 +542,81 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     return row
         return None
 
-    def clear_selection_clicked(self):
-        """"
-        Clear Selection in the widgets
-        Called when clear_selection botton is clicked
-        """
-        btn = self.sender()
-        if btn == self.btn_clear_tbl_slt:
-            self.tbl_original.clearSelection()
-        elif btn == self.btn_clear_lst_slt:
-            self.lst_existing.clearSelection()
-            self.lst_bulk.clearSelection()
+    def filter_lyr_removed_existing_in_edit(self, ids_existing):
+        for id_existing in ids_existing:
+            filter = self.lyr_removed_existing_in_edit.subsetString()
+            self.lyr_removed_existing_in_edit.setSubsetString(filter + ' or building_outline_id = %s' % id_existing)
 
-    def remove_selected_clicked(self):
+    def filter_lyr_added_bulk_load_in_edit(self, ids_bulk):
+        for id_bulk in ids_bulk:
+            filter = self.lyr_added_bulk_load_in_edit.subsetString()
+            self.lyr_added_bulk_load_in_edit.setSubsetString(filter + ' or bulk_load_outline_id = %s' % id_bulk)
+
+    def filter_lyr_existing_result(self, ids_existing):
         """
-        Remove selected row and related row
-        Called when remove_selected botton is clicked
+        Remove features in the view layer
         """
+        for id_existing in ids_existing:
+            if not self.lyr_removed_existing.subsetString():
+                self.lyr_removed_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+            else:
+                self.lyr_removed_existing.setSubsetString(
+                    self.lyr_removed_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+
+            if not self.lyr_matched_existing.subsetString():
+                self.lyr_matched_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+            else:
+                self.lyr_matched_existing.setSubsetString(
+                    self.lyr_matched_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+
+            if not self.lyr_related_existing.subsetString():
+                self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+            else:
+                self.lyr_related_existing.setSubsetString(
+                    self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+
+    def filter_lyr_bulk_load_result(self, ids_bulk):
+        """
+        Remove features in the view layer
+        """
+        for id_bulk in ids_bulk:
+            if not self.lyr_added_bulk_load.subsetString():
+                self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+            else:
+                self.lyr_added_bulk_load.setSubsetString(
+                    self.lyr_added_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+            if not self.lyr_matched_bulk_load.subsetString():
+                self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+            else:
+                self.lyr_matched_bulk_load.setSubsetString(
+                    self.lyr_matched_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+            if not self.lyr_related_bulk_load.subsetString():
+                self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+            else:
+                self.lyr_related_bulk_load.setSubsetString(
+                    self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+    def get_ids_from_tbl_original(self):
         tbl = self.tbl_original
-        rows = []
-        for index in tbl.selectionModel().selectedRows()[::-1]:
-            item_existing_0 = tbl.item(index.row(), 0)
-            item_bulk_0 = tbl.item(index.row(), 1)
-            if not item_existing_0 or not item_bulk_0:
-                rows.append(index.row())
-                continue
-
-            for row in range(tbl.rowCount())[::-1]:
-                item_existing = tbl.item(row, 0)
-                item_bulk = tbl.item(row, 1)
-                if not item_existing or not item_bulk:
-                    continue
-                if int(item_existing.text()) == int(item_existing_0.text())or int(item_bulk.text()) == int(item_bulk_0.text()):
-                    rows.append(row)
-
-        for row in sorted(set(rows), reverse=True):
-            tbl.removeRow(row)
-
-        tbl.clearSelection()
-
-    def remove_all_clicked(self):
-        """
-        Remove all rows in the table
-        Called when remove_all botton is clicked
-        """
-        self.lyr_existing.removeSelection()
-        self.lyr_bulk_load.removeSelection()
-
-        self.tbl_original.setRowCount(0)
-
-    def unlink_all_clicked(self):
-        """
-        Unlink the buildings in the table
-        Called when unlink_all botton is clicked
-        """
-        tbl = self.tbl_original
+        ids_existing = []
+        ids_bulk = []
         for row in range(tbl.rowCount())[::-1]:
             item_existing = tbl.item(row, 0)
-            if item_existing:
-                id_existing = int(item_existing.text())
-
-                self.lyr_removed_existing_in_edit.setSubsetString(
-                    self.lyr_removed_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
-
-                self.remove_features_from_layer_existing(id_existing)
-
             item_bulk = tbl.item(row, 1)
+            if item_existing:
+                ids_existing.append(int(item_existing.text()))
             if item_bulk:
-                id_bulk = int(item_bulk.text())
+                ids_bulk.append(int(item_bulk.text()))
+        ids_existing = list(set(ids_existing))
+        ids_bulk = list(set(ids_bulk))
 
-                self.lyr_added_bulk_load_in_edit.setSubsetString(
-                    self.lyr_added_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+        return ids_existing, ids_bulk
 
-                self.remove_features_from_layer_bulk(id_bulk)
-
-            self.remove_from_tbl_to_lst(row)
-
-        self.lyr_existing.removeSelection()
-        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-
-        self.lyr_bulk_load.removeSelection()
-        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
-
-        self.btn_remove_all.setEnabled(False)
-        self.btn_remove_slt.setEnabled(False)
-        self.btn_clear_tbl_slt.setEnabled(False)
-
-        self.btn_relink_all.setEnabled(True)
-        self.btn_matched.setEnabled(True)
-        self.btn_related.setEnabled(True)
-        self.btn_clear_lst_slt.setEnabled(True)
-        self.btn_save.setEnabled(True)
-
-    def remove_from_tbl_to_lst(self, row):
-        """
-        Remove building ids from table to list
-        """
-        tbl = self.tbl_original
-
-        self.lst_existing.clearSelection()
-        self.lst_bulk.clearSelection()
-
-        item_existing = tbl.item(row, 0)
-        if item_existing:
-            id_existing = int(item_existing.text())
-            has_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_existing, id_existing)
-            if not has_duplicate_id:
-                self.lst_existing.addItem(QListWidgetItem('%s' % id_existing))
-
-        item_bulk = tbl.item(row, 1)
-        if item_bulk:
-            id_bulk = int(item_bulk.text())
-            has_duplicate_id = self.check_duplicate_listwidgetitems(self.lst_bulk, id_bulk)
-            if not has_duplicate_id:
-                self.lst_bulk.addItem(QListWidgetItem('%s' % id_bulk))
-
-        tbl.removeRow(row)
-
-    def check_duplicate_listwidgetitems(self, lst, id_item):
-        """
-        Check if list has the same row
-        """
-        has_duplicate_id = False
-        for row in range(lst.count()):
-            item = lst.item(row)
-            if int(item.text()) == id_item:
-                has_duplicate_id = True
-                break
-        return has_duplicate_id
+    def insert_into_list(self, lst, ids):
+        for id in ids:
+            lst.addItem(QListWidgetItem('%s' % id))
 
     @pyqtSlot()
     def lst_item_selection_changed(self):
@@ -622,8 +639,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.selectByIds(feat_ids)
         elif current_list == self.lst_bulk:
             self.lyr_bulk_load.selectByIds(feat_ids)
-
-        # self.highlight_selection_changed()
 
         # self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         # self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
@@ -785,8 +800,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.lyr_removed_existing_in_edit.setSubsetString(
                         '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
 
-            self.remove_features_from_layer_existing(id_existing)
-            self.remove_features_from_layer_bulk(id_bulk)
+            self.filter_lyr_existing_result([id_existing])
+            self.filter_lyr_bulk_load_result([id_bulk])
 
             self.btn_matched.setEnabled(False)
 
@@ -825,7 +840,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         self.lyr_removed_existing_in_edit.setSubsetString(
                             '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
 
-                self.remove_features_from_layer_existing(id_existing)
+                self.filter_lyr_existing_result([id_existing])
 
                 item_existing.setFlags(Qt.NoItemFlags)
 
@@ -843,7 +858,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         self.lyr_added_bulk_load_in_edit.setSubsetString(
                             '(' + self.lyr_added_bulk_load_in_edit.subsetString() + ') and "bulk_load_outline_id" != %s' % id_bulk)
 
-                self.remove_features_from_layer_bulk(id_bulk)
+                self.filter_lyr_bulk_load_result([id_bulk])
 
                 item_bulk.setFlags(Qt.NoItemFlags)
 
@@ -851,50 +866,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lst_bulk.clearSelection()
         self.lst_existing.clearSelection()
-
-    def remove_features_from_layer_bulk(self, id_bulk):
-        """
-        Remove features in the view layer
-        """
-        if not self.lyr_added_bulk_load.subsetString():
-            self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-        else:
-            self.lyr_added_bulk_load.setSubsetString(
-                self.lyr_added_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
-
-        if not self.lyr_matched_bulk_load.subsetString():
-            self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-        else:
-            self.lyr_matched_bulk_load.setSubsetString(
-                self.lyr_matched_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
-
-        if not self.lyr_related_bulk_load.subsetString():
-            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-        else:
-            self.lyr_related_bulk_load.setSubsetString(
-                self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
-
-    def remove_features_from_layer_existing(self, id_existing):
-        """
-        Remove features in the view layer
-        """
-        if not self.lyr_removed_existing.subsetString():
-            self.lyr_removed_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-        else:
-            self.lyr_removed_existing.setSubsetString(
-                self.lyr_removed_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
-
-        if not self.lyr_matched_existing.subsetString():
-            self.lyr_matched_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-        else:
-            self.lyr_matched_existing.setSubsetString(
-                self.lyr_matched_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
-
-        if not self.lyr_related_existing.subsetString():
-            self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-        else:
-            self.lyr_related_existing.setSubsetString(
-                self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
     def save_clicked(self, commit_status=True):
         """
