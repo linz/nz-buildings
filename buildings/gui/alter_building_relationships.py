@@ -90,7 +90,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.itemSelectionChanged.connect(self.select_from_lst_bulk)
 
     def on_dockwidget_closed(self):
-        """Remove highlight when the dockwideget closes"""
+        """Remove highlight when the dockwidget closes."""
         self.lst_highlight = []
 
     def add_building_lyrs(self):
@@ -754,7 +754,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def matched_clicked(self):
         """
         Match the buildings in the list
-        Called when matched botton is clicked
+        Called when matched button is clicked
         """
         rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
         rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
