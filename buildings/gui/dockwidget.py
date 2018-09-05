@@ -19,8 +19,8 @@
 
 import os
 
-from PyQt4.QtCore import Qt, pyqtSignal, QSize, pyqtSlot, QDate, QSignalMapper
-from PyQt4.QtGui import QDockWidget, QPixmap, QIcon, QListWidgetItem, QMenu, QAction, QCursor
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt4.QtGui import QDockWidget, QListWidgetItem
 from PyQt4 import uic
 
 from buildings.settings.project import set_crs
@@ -47,8 +47,26 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         # Set focus policy so can track when user clicks back onto dock widget
         self.setFocusPolicy(Qt.StrongFocus)
 
-        # Change look of list widget
+        # Change look of options list widget
         self.lst_options.setStyleSheet(
+            """ QListWidget {
+                    background-color: rgb(69, 69, 69, 0);
+                    outline: 0;
+                }
+                QListWidget::item {
+                    color: white;
+                    padding: 3px;
+                }
+                QListWidget::item::selected {
+                    color: black;
+                    background-color:palette(Window);
+                    padding-right: 0px;
+                };
+            """
+        )
+
+        # Change look of sub menu list widget
+        self.lst_sub_menu.setStyleSheet(
             """ QListWidget {
                     background-color: rgb(69, 69, 69, 0);
                     outline: 0;
@@ -76,6 +94,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.lst_options.itemClicked.connect(self.show_selected_option)
         self.lst_options.itemClicked.emit(self.lst_options.item(0))
 
+        self.lst_sub_menu.itemClicked.connect(self.show_frame)
+
     def show_selected_option(self, item):
         if item:
             if item.text() == 'Buildings':
@@ -88,6 +108,28 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                     self.stk_options.setCurrentIndex(1)
                 else:
                     self.stk_options.setCurrentIndex(1)
+
+    @pyqtSlot(QListWidgetItem)
+    def show_frame(self, item):
+        if item:
+            print item.text()
+            from buildings.utilities.layers import LayerRegistry
+            from buildings.utilities import database as db
+            db.close_connection()
+            layer_registry = LayerRegistry()
+            self.stk_options.removeWidget(self.stk_options.currentWidget())
+            if item.text() == 'Capture Sources':
+                from buildings.gui.new_capture_source import NewCaptureSource
+                self.new_widget(NewCaptureSource(self, layer_registry))
+            elif item.text() == 'Bulk Load':
+                from buildings.gui.bulk_load_frame import BulkLoadFrame
+                self.new_widget(BulkLoadFrame(self, layer_registry))
+            elif item.text() == 'Edit Outlines':
+                from buildings.gui.production_frame import ProductionFrame
+                self.new_widget(ProductionFrame(self, layer_registry))
+            elif item.text() == 'Settings':
+                from buildings.gui.new_entry import NewEntry
+                self.new_widget(NewEntry(self, layer_registry))
 
     def new_widget(self, frame):
         self.stk_options.addWidget(frame)

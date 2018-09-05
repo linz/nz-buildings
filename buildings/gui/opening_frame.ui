@@ -31,7 +31,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>294</height>
+       <height>414</height>
       </size>
      </property>
     </spacer>
@@ -43,14 +43,14 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>10</width>
+       <width>99</width>
        <height>20</height>
       </size>
      </property>
     </spacer>
    </item>
    <item row="1" column="1">
-    <widget class="QLabel" name="lbl_half_tone_map">
+    <widget class="QLabel" name="label">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -59,14 +59,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>385</width>
-       <height>521</height>
+       <width>296</width>
+       <height>401</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
-       <width>385</width>
-       <height>521</height>
+       <width>296</width>
+       <height>401</height>
       </size>
      </property>
      <property name="text">

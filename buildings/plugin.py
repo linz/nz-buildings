@@ -225,6 +225,27 @@ class Buildings:
             item.setIcon(QIcon(icon_path))
             dw.lst_options.addItem(item)
             dw.lst_options.setCurrentItem(item)
+
+        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "capture_source.png")
+        item = QListWidgetItem("Capture Source")
+        item.setIcon(QIcon(icon_path))
+        dw.lst_sub_menu.addItem(item)
+
+        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "bulk_load.png")
+        item = QListWidgetItem("Bulk Load")
+        item.setIcon(QIcon(icon_path))
+        dw.lst_sub_menu.addItem(item)
+
+        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "edit.png")
+        item = QListWidgetItem("Edit Outlines")
+        item.setIcon(QIcon(icon_path))
+        dw.lst_sub_menu.addItem(item)
+
+        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "settings.png")
+        item = QListWidgetItem("Settings")
+        item.setIcon(QIcon(icon_path))
+        dw.lst_sub_menu.addItem(item)
+
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
