@@ -21,12 +21,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class BulkLoadFrame(QFrame, FORM_CLASS):
-    """
-        Bulk Load outlines frame class
-    """
+    """Bulk Load outlines frame class"""
 
     def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
+
         super(BulkLoadFrame, self).__init__(parent)
         self.setupUi(self)
         # Frame fields
@@ -142,17 +141,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
 
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
-
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
-
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
-
-        self.btn_exit.clicked.connect(self.exit_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)    
 
     def display_dataset_error(self):
-        """
-            UI Display when there are multiple supplied datasets
-        """
+        """UI Display when there are multiple supplied datasets."""
+
         self.current_dataset = None
         self.lb_dataset_id.setText('None')
 
@@ -164,9 +159,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.setDisabled(1)
 
     def display_no_bulk_load(self):
-        """
-            UI Display When there is no Current dataset
-        """
+        """UI Display When there is no Current dataset."""
+
         self.grpb_bulk_load.show()
         bulk_load.populate_bulk_comboboxes(self)
         self.ml_outlines_layer.setEnabled(1)
@@ -232,18 +226,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_cancel.setDisabled(1)
 
     def display_not_published(self):
-        """
-            UI display when there is a dataset that hasn't been published
-        """
+        """UI display when there is a dataset that hasn't been published."""
+
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
         self.cmb_capture_source_area.setDisabled(1)
         self.btn_publish.setEnabled(1)
 
     def display_current_bl_not_compared(self):
-        """
-            UI Display when there is a dataset that hasn't been compared
-        """
+        """UI Display when there is a dataset that hasn't been compared."""
+
         self.display_data_exists()
         self.btn_compare_outlines.setEnabled(1)
         self.cmb_capture_source_area.setEnabled(1)
@@ -252,9 +244,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.setDisabled(1)
 
     def add_outlines(self):
-        """
-            Add bulk load outlines of current dataset to canvas
-        """
+        """Add bulk load outlines of current dataset to canvas."""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         # add the bulk_load_outlines to the layer registry
@@ -318,9 +308,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_alter_rel.setEnabled(1)
 
     def canvas_add_outline(self):
-        """
-            When add outline radio button toggled
-        """
+        """When add outline radio button toggled"""
+
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -329,11 +318,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to added class
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
@@ -370,8 +359,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'territorial_authorities', 'territorial_authority',
             'shape', 'buildings_reference', '', ''
         )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        layers.style_layer(
+            self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def canvas_edit_outlines(self):
         """
@@ -386,11 +375,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_cancel.setEnabled(1)
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         if self.rad_edit.isChecked():
             self.change_instance = bulk_load_changes.EditBulkLoad(self)
@@ -448,12 +437,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         try:
             self.bulk_load_layer.selectionChanged.disconnect(
                 self.change_instance.selection_changed)
-        except Exception:
+        except TypeError:
             pass
         try:
             self.bulk_load_layer.geometryChanged.disconnect(
                 self.change_instance.feature_changed)
-        except Exception:
+        except TypeError:
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -463,6 +452,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     def completer_box(self):
         """Box automatic completion"""
+
         reasons = self.db._execute(select.reason_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
@@ -504,9 +494,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         canvas.setMapTool(self.tool)
 
     def publish_clicked(self, commit_status):
-        """
-            When publish button clicked
-        """
+        """When publish button clicked"""
+
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.open_cursor()
