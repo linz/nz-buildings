@@ -334,11 +334,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # set change instance to added class
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
@@ -392,11 +392,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_cancel.setEnabled(1)
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         if self.rad_edit.isChecked():
             self.change_instance = bulk_load_changes.EditBulkLoad(self)
@@ -455,12 +455,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         try:
             self.bulk_load_layer.selectionChanged.disconnect(
                 self.change_instance.selection_changed)
-        except Exception:
+        except TypeError:
             pass
         try:
             self.bulk_load_layer.geometryChanged.disconnect(
                 self.change_instance.feature_changed)
-        except Exception:
+        except TypeError:
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
