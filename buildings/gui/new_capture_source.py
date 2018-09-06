@@ -42,6 +42,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_ok.clicked.connect(partial(
             self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
+
         self.rad_external_source.toggled.connect(self.enable_external_source)
 
     def populate_combobox(self):

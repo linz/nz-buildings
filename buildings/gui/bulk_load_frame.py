@@ -141,7 +141,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
 
-        self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
+        self.cmb_status.currentIndexChanged.connect(
+            self.enable_le_deletion_reason)
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
 

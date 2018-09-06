@@ -268,7 +268,7 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
 
 
 def insert_bulk_load_outlines(self, dataset_id, capture_method,
-                             capture_source_group, external_source_id):
+                              capture_source_group, external_source_id):
     """
         Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """
