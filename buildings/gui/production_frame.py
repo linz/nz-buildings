@@ -91,7 +91,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
@@ -129,7 +129,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
         try:
@@ -181,7 +181,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
@@ -231,6 +231,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
