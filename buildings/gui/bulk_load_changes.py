@@ -63,7 +63,7 @@ class BulkLoadChanges:
         # set to currently selected outline
         if self.bulk_load_frame.rad_add.isChecked():
             self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                self.bulk_load_frame.cmb_capture_method_2.findText("Trace Orthophotography"))
+                self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
         if self.bulk_load_frame.rad_edit.isChecked():
             # bulk load status
             result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
@@ -187,21 +187,21 @@ class AddBulkLoad(BulkLoadChanges):
         # selection actions
         iface.building_toolbar.addSeparator()
         for sel in selecttools:
-            if sel.text() == "Select Feature(s)":
+            if sel.text() == 'Select Feature(s)':
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                "mActionAddFeature"
+                'mActionAddFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo", "mActionRedo"
+                'mActionUndo', 'mActionRedo'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -410,22 +410,22 @@ class EditBulkLoad(BulkLoadChanges):
         # selection actions
         iface.building_toolbar.addSeparator()
         for sel in selecttools:
-            if sel.text() == "Select Feature(s)":
+            if sel.text() == 'Select Feature(s)':
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                "mActionNodeTool", "mActionMoveFeature"
+                'mActionNodeTool', 'mActionMoveFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo", "mActionRedo",
-                "mActionReshapeFeatures", "mActionOffsetCurve"
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()

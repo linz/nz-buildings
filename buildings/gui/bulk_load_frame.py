@@ -55,7 +55,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.db = db
         db.connect()
         # selection colour
-        iface.mapCanvas().setSelectionColor(QColor("Yellow"))
+        iface.mapCanvas().setSelectionColor(QColor('Yellow'))
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -118,13 +118,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
-        self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
+        self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
         self.description_del = self.le_deletion_reason.text()
         self.completer_box()
 
         # initiate le_data_description
         self.le_data_description.setMaxLength(250)
-        self.le_data_description.setPlaceholderText("Data Description")
+        self.le_data_description.setPlaceholderText('Data Description')
 
         # set up signals and slots
         self.rad_external_source.toggled.connect(
@@ -324,7 +324,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
@@ -380,7 +380,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
         self.btn_edit_cancel.setEnabled(1)
@@ -457,7 +457,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
