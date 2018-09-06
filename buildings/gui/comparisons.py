@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from PyQt4.QtCore import pyqtSlot
 
 from buildings.sql import select_statements as select
