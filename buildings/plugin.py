@@ -116,12 +116,14 @@ class Buildings:
 
     def initGui(self):
         """Initiate buildings plugin"""
-        self.add_action(icon_path,
-                        text=self.tr(u'Building Maintenance'),
-                        callback=self.run,
-                        parent=iface.mainWindow())
         home_dir = os.path.dirname(__file__)
         icon_path = os.path.join(home_dir, 'icons', 'buildings_plugin.png')
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Building Maintenance'),
+            callback=self.run,
+            parent=iface.mainWindow()
+        )
         try:
             dw = plugins['buildings'].dockwidget
             exists = False
