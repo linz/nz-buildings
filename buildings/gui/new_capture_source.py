@@ -4,6 +4,7 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -73,6 +74,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         text_ls = text.split('-')
         return text_ls[0]
 
+    @pyqtSlot(bool)
     def enable_external_source(self, boolVal):
         """
         Called when external source radiobutton is toggled
@@ -83,6 +85,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.le_external_source_id.clear()
             self.le_external_source_id.setDisabled(1)
 
+    @pyqtSlot(bool)
     def ok_clicked(self, commit_status):
         """
         Called when ok button clicked
@@ -115,6 +118,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.value, self.external_source, commit_status)
         self.le_external_source_id.clear()
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
         Called when exit button is clicked
