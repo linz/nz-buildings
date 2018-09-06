@@ -19,8 +19,8 @@
 
 import os
 
-from PyQt4.QtCore import Qt, pyqtSignal, QSize, pyqtSlot, QDate, QSignalMapper
-from PyQt4.QtGui import QDockWidget, QPixmap, QIcon, QListWidgetItem, QMenu, QAction, QCursor
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt4.QtGui import QDockWidget, QListWidgetItem
 from PyQt4 import uic
 
 from buildings.settings.project import set_crs
@@ -76,6 +76,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.lst_options.itemClicked.connect(self.show_selected_option)
         self.lst_options.itemClicked.emit(self.lst_options.item(0))
 
+    @pyqtSlot(QListWidgetItem)
     def show_selected_option(self, item):
         if item:
             if item.text() == 'Buildings':

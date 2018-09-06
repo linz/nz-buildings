@@ -1,6 +1,9 @@
+from PyQt4.QtCore import pyqtSlot
+
 from buildings.sql import select_statements as select
 
 
+@pyqtSlot(bool)
 def compare_outlines(self, commit_status):
     """
         Method called to compare outlines of current unprocessed dataset
