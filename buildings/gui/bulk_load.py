@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from PyQt4.QtCore import pyqtSlot
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 
@@ -78,6 +80,7 @@ def load_current_fields(self):
         self.ml_outlines_layer.findText('bulk_load_outlines'))
 
 
+@pyqtSlot()
 def enable_external_bulk(self):
     """
         Called when external source radio button is toggled
@@ -95,6 +98,7 @@ def enable_external_bulk(self):
         self.cmb_external_id.clear()
 
 
+@pyqtSlot()
 def populate_external_id_cmb(self):
     """
         populates external source combobox when radiobutton is selected

@@ -1,4 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import os
+
 from PyQt4 import uic
 from PyQt4.QtGui import QDialog
 from PyQt4.QtCore import Qt

@@ -4,6 +4,7 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
@@ -82,6 +83,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.building_layer)
 
+    @pyqtSlot()
     def canvas_add_outline(self):
         """
             When add outline radio button toggled
@@ -89,7 +91,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
@@ -119,6 +121,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
         self.btn_exit_edits.setEnabled(1)
 
+    @pyqtSlot()
     def canvas_edit_outlines(self):
         """
             When edit outline radio button toggled
@@ -126,7 +129,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
         try:
@@ -156,6 +159,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                                {1: ['204,121,95', '0.3', 'dash', '5;2']})
             self.btn_exit_edits.setEnabled(1)
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
             Called when production frame exit button clicked,
@@ -177,7 +181,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
@@ -186,6 +190,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw, self.layer_registry))
 
+    @pyqtSlot()
     def exit_editing_clicked(self):
         # deselect both comboboxes
         self.rad_edit.setAutoExclusive(False)
@@ -226,6 +231,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()

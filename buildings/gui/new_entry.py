@@ -4,6 +4,7 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -101,6 +102,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         return self.cmb_new_type_selection.currentText()
 
+    @pyqtSlot()
     def set_new_type(self):
         """
         Called when type to add combobox index is chaged
@@ -111,6 +113,7 @@ class NewEntry(QFrame, FORM_CLASS):
         else:
             self.le_description.setDisabled(1)
 
+    @pyqtSlot(bool)
     def ok_clicked(self, commit_status):
         # get value
         self.value = self.get_comments()
@@ -130,6 +133,7 @@ class NewEntry(QFrame, FORM_CLASS):
                     self.new_capture_source_group(
                         self.value, self.description, commit_status)
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
         Called when exit button is clicked
