@@ -19,8 +19,8 @@
 
 import os
 
-from PyQt4.QtCore import Qt, pyqtSignal, QSize, pyqtSlot, QDate, QSignalMapper
-from PyQt4.QtGui import QDockWidget, QPixmap, QIcon, QListWidgetItem, QMenu, QAction, QCursor
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt4.QtGui import QDockWidget, QListWidgetItem
 from PyQt4 import uic
 
 from buildings.settings.project import set_crs
@@ -76,6 +76,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.lst_options.itemClicked.connect(self.show_selected_option)
         self.lst_options.itemClicked.emit(self.lst_options.item(0))
 
+    @pyqtSlot(QListWidgetItem)
     def show_selected_option(self, item):
         if item:
             if item.text() == 'Buildings':
@@ -104,34 +105,60 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
     def defaultStyle(self):
         """default tab Widget style"""
-        return """QTabWidget::pane { /* The tab widget frame */border-top: 2px solid #C2C7CB;}
-            QTabWidget::tab-bar {left: 5px; /* move to the right by 5px */}
 
-            QTabBar::tab {background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #E1E1E1, stop: 0.4 #e7e7e7,
-                                                    stop: 0.5 #e7e7e7, stop: 1.0 #D3D3D3);
-                            border: 2px solid #C4C4C3;border-bottom-color: #C2C7CB;
-                            border-top-left-radius: 4px;border-top-right-radius: 4px;padding: 3px;}
+        return """
+            QTabWidget::pane {
+                /* The tab widget frame */
+                border-top: 2px solid #C2C7CB;
+            }
+            QTabWidget::tab-bar {
+                /* move to the right by 5px */
+                left: 5px;
+            }
 
+            QTabBar::tab {
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E1E1E1,
+                    stop: 0.4 #e7e7e7, stop: 0.5 #e7e7e7, stop: 1.0 #D3D3D3
+                );
+                border: 2px solid #C4C4C3;
+                border-bottom-color: #C2C7CB;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                padding: 3px;
+            }
             QTabBar::tab:selected, QTabBar::tab:hover {
-                background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,stop: 0 #ececec, stop: 0.4 #f4f4f4,
-                                            stop: 0.5 #e7e7e7, stop: 1.0 #ececec);}
+                background: qlineargradient(
+                    x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ececec,
+                    stop: 0.4 #f4f4f4, stop: 0.5 #e7e7e7, stop: 1.0 #ececec
+                );
+            }
             QTabBar::tab:selected {
-                border-color: #9B9B9B;border-bottom-color: #f0f0f0; /* same as pane color */}
-
+                border-color: #9B9B9B;
+                border-bottom-color: #f0f0f0; /* same as pane color */
+            }
             QTabBar::tab:!selected {
-                margin-top: 2px; /* make non-selected tabs look smaller */}
-
-            QTabBar::tab:selected {/* expand/overlap to the left and right by 4px */
-                margin-left: 0px;margin-right: 0px;}/* make use of negative margins for overlapping tabs */
-
+                /* make non-selected tabs look smaller */
+                margin-top: 2px;
+            }
+            QTabBar::tab:selected {
+                /* expand to the left and right by 4px */
+                margin-left: 0px;
+                margin-right: 0px;
+            }
             QTabBar::tab:first:selected {
-                margin-left: 0; /* the first selected tab has nothing to overlap with on the left */}
-
+                /* the first selected tab has nothing to overlap with on the left */
+                margin-left: 0;
+            }
             QTabBar::tab:last:selected {
-                margin-right: 0; /* the last selected tab has nothing to overlap with on the right */}
-
+                /* the last selected tab has nothing to overlap with on the right */
+                margin-right: 0;
+            }
             QTabBar::tab:only-one {
-                margin: 1; /* if there is only one tab, we don't want overlapping margins */} """
+                /* if there is only one tab, we don't want overlapping margins */
+                margin: 1;
+            }
+        """
 
     def focusInEvent(self, event):
         self.in_focus.emit()

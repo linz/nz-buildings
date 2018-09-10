@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame
-import qgis
 from functools import partial
 
+from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QFrame
+
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.utilities import database as db
 from buildings.sql import select_statements as select
+from buildings.utilities import database as db
+
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_entry.ui'))
@@ -20,11 +21,11 @@ class NewEntry(QFrame, FORM_CLASS):
     value = ''
     new_type = ''
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(NewEntry, self).__init__(parent)
         self.setupUi(self)
-
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.db = db
         self.db.connect()
@@ -101,6 +102,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         return self.cmb_new_type_selection.currentText()
 
+    @pyqtSlot()
     def set_new_type(self):
         """
         Called when type to add combobox index is chaged
@@ -111,6 +113,7 @@ class NewEntry(QFrame, FORM_CLASS):
         else:
             self.le_description.setDisabled(1)
 
+    @pyqtSlot(bool)
     def ok_clicked(self, commit_status):
         # get value
         self.value = self.get_comments()
@@ -130,15 +133,16 @@ class NewEntry(QFrame, FORM_CLASS):
                     self.new_capture_source_group(
                         self.value, self.description, commit_status)
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
         Called when exit button is clicked
         """
         self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))
 
     def new_organisation(self, organisation, commit_status):
         """

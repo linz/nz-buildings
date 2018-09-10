@@ -14,7 +14,7 @@ SRID = 2193
 def get_attribute_dialog_setting():
     """
     Used to retrieve the user configuration of the attribute dialog so that
-    this configuration can be reinstated when the roads plugin is closed.
+    this configuration can be reinstated when the buildings plugin is closed.
     """
 
     return QGIS_SETTINGS.value(
@@ -23,7 +23,7 @@ def get_attribute_dialog_setting():
 
 def set_attribute_dialog_setting(attribute_dialog_setting):
     """
-    Set to True during use of the roads plugin to prevent attribute values
+    Set to True during use of the buildings plugin to prevent attribute values
     dialog from appearing - unnecessary during the use of this plugin. Set
     back to whatever the user configuration was when the plugin is closed.
     """
@@ -35,7 +35,7 @@ def set_attribute_dialog_setting(attribute_dialog_setting):
 
 
 def set_crs():
-    """Ensures that CRS settings are correct for use of the roads plugin"""
+    """Ensures that CRS settings are correct for use of the buildings plugin"""
 
     # Sets it away from prompting user
     QGIS_SETTINGS.setValue("/Projections/defaultBehaviour", "useProject")

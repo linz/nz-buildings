@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from PyQt4.QtCore import pyqtSlot
+
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 
@@ -76,6 +80,7 @@ def load_current_fields(self):
         self.ml_outlines_layer.findText('bulk_load_outlines'))
 
 
+@pyqtSlot()
 def enable_external_bulk(self):
     """
         Called when external source radio button is toggled
@@ -93,6 +98,7 @@ def enable_external_bulk(self):
         self.cmb_external_id.clear()
 
 
+@pyqtSlot()
 def populate_external_id_cmb(self):
     """
         populates external source combobox when radiobutton is selected
@@ -262,7 +268,7 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
 
 
 def insert_bulk_load_outlines(self, dataset_id, capture_method,
-                             capture_source_group, external_source_id):
+                              capture_source_group, external_source_id):
     """
         Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """

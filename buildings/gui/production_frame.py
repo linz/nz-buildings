@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame
-from qgis.utils import iface
-from qgis.core import QgsVectorLayer
 from functools import partial
 
+from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QFrame
+from qgis.core import QgsVectorLayer
+from qgis.utils import iface
+
+from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
-from buildings.gui import production_changes
-
-import qgis
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -21,10 +20,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ProductionFrame(QFrame, FORM_CLASS):
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(ProductionFrame, self).__init__(parent)
         self.setupUi(self)
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.db = db
         self.db.connect()
@@ -83,6 +83,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.building_layer)
 
+    @pyqtSlot()
     def canvas_add_outline(self):
         """
             When add outline radio button toggled
@@ -90,7 +91,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
@@ -120,6 +121,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
         self.btn_exit_edits.setEnabled(1)
 
+    @pyqtSlot()
     def canvas_edit_outlines(self):
         """
             When edit outline radio button toggled
@@ -127,7 +129,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
         try:
@@ -157,6 +159,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                                {1: ['204,121,95', '0.3', 'dash', '5;2']})
             self.btn_exit_edits.setEnabled(1)
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
             Called when production frame exit button clicked,
@@ -178,15 +181,16 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))
 
+    @pyqtSlot()
     def exit_editing_clicked(self):
         # deselect both comboboxes
         self.rad_edit.setAutoExclusive(False)
@@ -227,6 +231,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()

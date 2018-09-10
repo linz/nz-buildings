@@ -31,7 +31,7 @@ class Buildings:
 
         self.iface = iface
         self.plugin_dir = __location__
-        self.image_dir = os.path.join(__location__, "..", "images")
+        self.image_dir = os.path.join(__location__, '..', 'images')
         self.menu_frame = None
         self.layer_registry = None
 
@@ -116,12 +116,14 @@ class Buildings:
 
     def initGui(self):
         """Initiate buildings plugin"""
-        home_dir = os.path.split(os.path.dirname(__file__))
-        icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
-        self.add_action(icon_path,
-                        text=self.tr(u'Building Maintenance'),
-                        callback=self.run,
-                        parent=iface.mainWindow())
+        home_dir = os.path.dirname(__file__)
+        icon_path = os.path.join(home_dir, 'icons', 'buildings_plugin.png')
+        self.add_action(
+            icon_path,
+            text=self.tr(u'Building Maintenance'),
+            callback=self.run,
+            parent=iface.mainWindow()
+        )
         try:
             dw = plugins['buildings'].dockwidget
             exists = False
@@ -166,13 +168,13 @@ class Buildings:
                         iface.removeToolBarIcon(action)
                     del self.main_toolbar
 
-                    for toolbar in iface.mainWindow().findChildren(QToolBar, "Building Tools"):
+                    for toolbar in iface.mainWindow().findChildren(QToolBar, 'Building Tools'):
                         iface.mainWindow().removeToolBar(toolbar)
                         # Setting parent to None, deletes the widget completely
                         toolbar.setParent(None)
 
                         # Remove action triggering toolbar from ToolBar menu
-                        toolbar_menu = iface.mainWindow().findChildren(QMenu, "mToolbarMenu")[0]
+                        toolbar_menu = iface.mainWindow().findChildren(QMenu, 'mToolbarMenu')[0]
                         for act in toolbar_menu.actions():
                             if act.text() == u'Building Tools':
                                 toolbar_menu.removeAction(act)
@@ -181,13 +183,13 @@ class Buildings:
             pass
 
         # Remove Dockwidget from Panel menu
-        panel = iface.mainWindow().findChildren(QMenu, "mPanelMenu")[0]
+        panel = iface.mainWindow().findChildren(QMenu, 'mPanelMenu')[0]
         for act in panel.actions():
-            if act.text() == u"Buildings":
+            if act.text() == u'Buildings':
                 panel.removeAction(act)
 
         # Delete the mainWindow reference to the buildings dockwidget
-        for dock in iface.mainWindow().findChildren(QDockWidget, u"BuildingsDockWidgetBase"):
+        for dock in iface.mainWindow().findChildren(QDockWidget, u'BuildingsDockWidgetBase'):
             dock.setParent(None)
 
     def run(self):
@@ -205,7 +207,7 @@ class Buildings:
             self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
             # Show the dockwidget as a tab
-            layerdock = iface.mainWindow().findChild(QDockWidget, "Layers")
+            layerdock = iface.mainWindow().findChild(QDockWidget, 'Layers')
             iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             iface.mainWindow().tabifyDockWidget(layerdock, self.dockwidget)
 
@@ -216,17 +218,17 @@ class Buildings:
         dw = self.dockwidget
         self.layer_registry = LayerRegistry()
         # no base layers
-        self.menu_frame = MenuFrame(self.layer_registry)
+        self.menu_frame = MenuFrame(self.dockwidget, self.layer_registry)
         dw.insert_into_frames('menu_frame', self.menu_frame)
         if dw.lst_options.item(0) is None:
             home_dir = os.path.split(os.path.dirname(__file__))
-            icon_path = os.path.join(home_dir[0], home_dir[1], "icons", "buildings_plugin.png")
-            item = QListWidgetItem("Buildings")
+            icon_path = os.path.join(home_dir[0], home_dir[1], 'icons', 'buildings_plugin.png')
+            item = QListWidgetItem('Buildings')
             item.setIcon(QIcon(icon_path))
             dw.lst_options.addItem(item)
             dw.lst_options.setCurrentItem(item)
         canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
+        selectedcrs = 'EPSG:2193'
         target_crs = QgsCoordinateReferenceSystem()
         target_crs.createFromUserInput(selectedcrs)
         canvas.setDestinationCrs(target_crs)
@@ -238,7 +240,7 @@ class Buildings:
             dw.stk_options.setCurrentIndex(1)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.stk_options.setCurrentIndex(0)
-        dw.stk_options.addWidget(MenuFrame(self.layer_registry))
+        dw.stk_options.addWidget(MenuFrame(self.dockwidget, self.layer_registry))
         dw.stk_options.setCurrentIndex(1)
 
     def setup_main_toolbar(self):
@@ -250,7 +252,7 @@ class Buildings:
 
             # Choose necessary basic tools
             for nav in iface.mapNavToolToolBar().actions():
-                if nav.objectName() in ["mActionPan"]:
+                if nav.objectName() in ['mActionPan']:
                     iface.building_toolbar.addAction(nav)
         except AttributeError:
             # iface.building_toolbar hadn't been created yet
