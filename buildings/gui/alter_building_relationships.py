@@ -376,6 +376,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.insert_into_list(self.lst_existing, ids_existing)
         self.insert_into_list(self.lst_bulk, ids_bulk)
 
+        self.insert_into_lyr_removed_in_edit(ids_existing)
+        self.insert_into_lyr_added_in_edit(ids_bulk)
+
         self.tbl_original.setRowCount(0)
 
         self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
@@ -596,61 +599,59 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     return row
         return None
 
-    def filter_lyr_removed_existing_in_edit(self, ids_existing):
+    def insert_into_lyr_removed_in_edit(self, ids_existing):
         for id_existing in ids_existing:
             filter = self.lyr_removed_existing_in_edit.subsetString()
             self.lyr_removed_existing_in_edit.setSubsetString(filter + ' or building_outline_id = %s' % id_existing)
 
-    def filter_lyr_added_bulk_load_in_edit(self, ids_bulk):
+    def insert_into_lyr_added_in_edit(self, ids_bulk):
         for id_bulk in ids_bulk:
             filter = self.lyr_added_bulk_load_in_edit.subsetString()
             self.lyr_added_bulk_load_in_edit.setSubsetString(filter + ' or bulk_load_outline_id = %s' % id_bulk)
 
-    def filter_lyr_existing_result(self, ids_existing):
+    def delete_original_relationship_in_existing(self, id_existing):
         """
         Remove features in the view layer
         """
-        for id_existing in ids_existing:
-            if not self.lyr_removed_existing.subsetString():
-                self.lyr_removed_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-            else:
-                self.lyr_removed_existing.setSubsetString(
-                    self.lyr_removed_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+        if not self.lyr_removed_existing.subsetString():
+            self.lyr_removed_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_removed_existing.setSubsetString(
+                self.lyr_removed_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
-            if not self.lyr_matched_existing.subsetString():
-                self.lyr_matched_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-            else:
-                self.lyr_matched_existing.setSubsetString(
-                    self.lyr_matched_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+        if not self.lyr_matched_existing.subsetString():
+            self.lyr_matched_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_matched_existing.setSubsetString(
+                self.lyr_matched_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
-            if not self.lyr_related_existing.subsetString():
-                self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
-            else:
-                self.lyr_related_existing.setSubsetString(
-                    self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
+        if not self.lyr_related_existing.subsetString():
+            self.lyr_related_existing.setSubsetString('"building_outline_id" != %s' % id_existing)
+        else:
+            self.lyr_related_existing.setSubsetString(
+                self.lyr_related_existing.subsetString() + ' and "building_outline_id" != %s' % id_existing)
 
-    def filter_lyr_bulk_load_result(self, ids_bulk):
+    def delete_original_relationship_in_bulk_load(self, id_bulk):
         """
         Remove features in the view layer
         """
-        for id_bulk in ids_bulk:
-            if not self.lyr_added_bulk_load.subsetString():
-                self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-            else:
-                self.lyr_added_bulk_load.setSubsetString(
-                    self.lyr_added_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+        if not self.lyr_added_bulk_load.subsetString():
+            self.lyr_added_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_added_bulk_load.setSubsetString(
+                self.lyr_added_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
 
-            if not self.lyr_matched_bulk_load.subsetString():
-                self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-            else:
-                self.lyr_matched_bulk_load.setSubsetString(
-                    self.lyr_matched_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+        if not self.lyr_matched_bulk_load.subsetString():
+            self.lyr_matched_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_matched_bulk_load.setSubsetString(
+                self.lyr_matched_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
 
-            if not self.lyr_related_bulk_load.subsetString():
-                self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
-            else:
-                self.lyr_related_bulk_load.setSubsetString(
-                    self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+        if not self.lyr_related_bulk_load.subsetString():
+            self.lyr_related_bulk_load.setSubsetString('"bulk_load_outline_id" != %s' % id_bulk)
+        else:
+            self.lyr_related_bulk_load.setSubsetString(
+                self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
 
     def get_ids_from_tbl_original(self):
         tbl = self.tbl_original
@@ -720,6 +721,25 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     id_list.append((None, id_bulk))
         return id_list
 
+    def disable_listwidget_item(self, item):
+        item.setBackground(QColor('#E3ECEF'))
+        item.setFlags(Qt.NoItemFlags)
+
+    def delete_from_lyr_removed_in_edit(self, id_existing):
+        filter = self.lyr_removed_existing_in_edit.subsetString()
+        self.lyr_removed_existing_in_edit.setSubsetString('(' + filter + ') and "building_outline_id" != %s' % id_existing)
+
+    def delete_from_lyr_added_in_edit(self, id_bulk):
+        filter = self.lyr_added_bulk_load_in_edit.subsetString()
+        self.lyr_added_bulk_load_in_edit.setSubsetString('(' + filter + ') and "bulk_load_outline_id" != %s' % id_bulk)
+
+    def insert_into_lyr_matched_existing_in_edit(self, id_existing):
+        self.lyr_matched_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
+
+    def insert_into_lyr_matched_bulk_load_in_edit(self, id_bulk):
+        self.lyr_matched_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
+
+    @pyqtSlot()
     def matched_clicked(self):
         """
         Match the buildings in the list
@@ -731,42 +751,38 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
 
             item_existing = self.lst_existing.item(rows_lst_existing[0])
-            item_existing.setBackground(QColor('#E3ECEF'))
             id_existing = int(item_existing.text())
-
-            self.lyr_matched_existing_in_edit.setSubsetString('"building_outline_id" = %s' % id_existing)
-            item_existing.setFlags(Qt.NoItemFlags)
-
             item_bulk = self.lst_bulk.item(rows_lst_bulk[0])
-            item_bulk.setBackground(QColor('#E3ECEF'))
             id_bulk = int(item_bulk.text())
 
-            self.lyr_matched_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
-            item_bulk.setFlags(Qt.NoItemFlags)
+            self.disable_listwidget_item(item_existing)
+            self.disable_listwidget_item(item_bulk)
 
-            ids_added = re.findall('\d+', self.lyr_added_bulk_load_in_edit.subsetString())
-            for id_added in ids_added:
-                if int(id_added) == id_bulk:
-                    self.lyr_added_bulk_load_in_edit.setSubsetString(
-                        '(' + self.lyr_added_bulk_load_in_edit.subsetString() + ') and "bulk_load_outline_id" != %s' % id_bulk)
+            self.insert_into_lyr_matched_existing_in_edit(id_existing)
+            self.insert_into_lyr_matched_bulk_load_in_edit(id_bulk)
 
-            ids_removed = re.findall('\d+', self.lyr_removed_existing_in_edit.subsetString())
-            for id_removed in ids_removed:
-                if int(id_removed) == id_existing:
-                    self.lyr_removed_existing_in_edit.setSubsetString(
-                        '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
+            self.delete_from_lyr_removed_in_edit(id_existing)
+            self.delete_from_lyr_added_in_edit(id_bulk)
 
-            self.filter_lyr_existing_result([id_existing])
-            self.filter_lyr_bulk_load_result([id_bulk])
+            self.delete_original_relationship_in_existing(id_existing)
+            self.delete_original_relationship_in_bulk_load(id_bulk)
 
             self.btn_matched.setEnabled(False)
-
+            self.lst_bulk.clearSelection()
+            self.lst_existing.clearSelection()
         else:
             iface.messageBar().pushMessage("Error:", "Do not match other than one building in each layer", level=QgsMessageBar.WARNING)
+            return
 
-        self.lst_bulk.clearSelection()
-        self.lst_existing.clearSelection()
+    def insert_into_lyr_related_existing_in_edit(self, id_existing):
+        filter = self.lyr_related_existing_in_edit.subsetString()
+        self.lyr_related_existing_in_edit.setSubsetString(filter + ' or "building_outline_id" = %s' % id_existing)
 
+    def insert_into_lyr_related_bulk_load_in_edit(self, id_bulk):
+        filter = self.lyr_related_bulk_load_in_edit.subsetString()
+        self.lyr_related_bulk_load_in_edit.setSubsetString(filter + ' or "bulk_load_outline_id" = %s' % id_bulk)
+
+    @pyqtSlot()
     def related_clicked(self):
         """
         Relate the buildings in the list
@@ -777,51 +793,34 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         if len(rows_lst_bulk) < 1 or len(rows_lst_existing) < 1:
             iface.messageBar().pushMessage("Error:", "Do not relate less than one building in each layer", level=QgsMessageBar.WARNING)
-            self.btn_related.setEnabled(True)
+            return
         elif len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
             iface.messageBar().pushMessage("Error:", "Do not relate only one building in each layer", level=QgsMessageBar.WARNING)
-            self.btn_related.setEnabled(True)
+            return
         else:
             for index in self.lst_existing.selectionModel().selectedRows():
                 item_existing = self.lst_existing.item(index.row())
-                item_existing.setBackground(QColor('#E3ECEF'))
                 id_existing = int(item_existing.text())
 
-                self.lyr_related_existing_in_edit.setSubsetString(
-                    self.lyr_related_existing_in_edit.subsetString() + ' or "building_outline_id" = %s' % id_existing)
+                self.disable_listwidget_item(item_existing)
 
-                ids_removed = re.findall('\d+', self.lyr_removed_existing_in_edit.subsetString())
-                for id_removed in ids_removed:
-                    if int(id_removed) == id_existing:
-                        self.lyr_removed_existing_in_edit.setSubsetString(
-                            '(' + self.lyr_removed_existing_in_edit.subsetString() + ') and "building_outline_id" != %s' % id_existing)
-
-                self.filter_lyr_existing_result([id_existing])
-
-                item_existing.setFlags(Qt.NoItemFlags)
+                self.insert_into_lyr_related_existing_in_edit(id_existing)
+                self.delete_from_lyr_removed_in_edit(id_existing)
+                self.delete_original_relationship_in_existing(id_existing)
 
             for index in self.lst_bulk.selectionModel().selectedRows():
                 item_bulk = self.lst_bulk.item(index.row())
-                item_bulk.setBackground(QColor('#E3ECEF'))
                 id_bulk = int(item_bulk.text())
 
-                self.lyr_related_bulk_load_in_edit.setSubsetString(
-                    self.lyr_related_bulk_load_in_edit.subsetString() + ' or "bulk_load_outline_id" = %s' % id_bulk)
+                self.disable_listwidget_item(item_bulk)
 
-                ids_added = re.findall('\d+', self.lyr_added_bulk_load_in_edit.subsetString())
-                for id_added in ids_added:
-                    if int(id_added) == id_bulk:
-                        self.lyr_added_bulk_load_in_edit.setSubsetString(
-                            '(' + self.lyr_added_bulk_load_in_edit.subsetString() + ') and "bulk_load_outline_id" != %s' % id_bulk)
-
-                self.filter_lyr_bulk_load_result([id_bulk])
-
-                item_bulk.setFlags(Qt.NoItemFlags)
+                self.insert_into_lyr_related_bulk_load_in_edit(id_bulk)
+                self.delete_from_lyr_added_in_edit(id_bulk)
+                self.delete_original_relationship_in_bulk_load(id_bulk)
 
             self.btn_related.setEnabled(False)
-
-        self.lst_bulk.clearSelection()
-        self.lst_existing.clearSelection()
+            self.lst_bulk.clearSelection()
+            self.lst_existing.clearSelection()
 
     def save_clicked(self, commit_status=True):
         """
