@@ -181,21 +181,21 @@ class AddProduction(ProductionChanges):
         # selection actions
         iface.building_toolbar.addSeparator()
         for sel in selecttools:
-            if sel.text() == "Select Feature(s)":
+            if sel.text() == 'Select Feature(s)':
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                "mActionAddFeature"
+                'mActionAddFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo", "mActionRedo"
+                'mActionUndo', 'mActionRedo'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -400,22 +400,22 @@ class EditProduction(ProductionChanges):
         # selection actions
         iface.building_toolbar.addSeparator()
         for sel in selecttools:
-            if sel.text() == "Select Feature(s)":
+            if sel.text() == 'Select Feature(s)':
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                "mActionNodeTool", "mActionMoveFeature"
+                'mActionNodeTool', 'mActionMoveFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo", "mActionRedo",
-                "mActionReshapeFeatures", "mActionOffsetCurve"
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
