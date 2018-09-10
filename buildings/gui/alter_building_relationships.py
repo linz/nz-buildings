@@ -162,43 +162,37 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "related_bulk_load_in_edit", "bulk_load_outlines", "shape",
             "buildings_bulk_load", "bulk_load_outline_id", ""
         )
-        self.lyr_related_bulk_load_in_edit.loadNamedStyle(
-            path + 'building_purple.qml')
+        self.lyr_related_bulk_load_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_related_existing_in_edit = self.layer_registry.add_postgres_layer(
             "related_existing_in_edit", "existing_subset_extracts", "shape",
             "buildings_bulk_load", "building_outline_id", ""
         )
-        self.lyr_related_existing_in_edit.loadNamedStyle(
-            path + 'building_purple.qml')
+        self.lyr_related_existing_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_matched_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "matched_bulk_load_in_edit", "bulk_load_outlines", "shape",
             "buildings_bulk_load", "bulk_load_outline_id", ""
         )
-        self.lyr_matched_bulk_load_in_edit.loadNamedStyle(
-            path + 'building_blue.qml')
+        self.lyr_matched_bulk_load_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_matched_existing_in_edit = self.layer_registry.add_postgres_layer(
             "matched_existing_in_edit", "existing_subset_extracts", "shape",
             "buildings_bulk_load", "building_outline_id", ""
         )
-        self.lyr_matched_existing_in_edit.loadNamedStyle(
-            path + 'building_blue.qml')
+        self.lyr_matched_existing_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_removed_existing_in_edit = self.layer_registry.add_postgres_layer(
             "removed_existing_in_edit", "existing_subset_extracts", "shape",
             "buildings_bulk_load", "building_outline_id", ""
         )
-        self.lyr_removed_existing_in_edit.loadNamedStyle(
-            path + 'building_red.qml')
+        self.lyr_removed_existing_in_edit.loadNamedStyle(path + 'building_red.qml')
 
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
             "added_bulk_load_in_edit", "bulk_load_outlines", "shape",
             "buildings_bulk_load", "bulk_load_outline_id", ""
         )
-        self.lyr_added_bulk_load_in_edit.loadNamedStyle(
-            path + 'building_green.qml')
+        self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
 
     def repaint_view(self):
         """Repaint views to update changes in result"""
@@ -437,6 +431,164 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
         self.btn_unlink_all.setEnabled(True)
+
+    @pyqtSlot()
+    def matched_clicked(self):
+        """
+        Match the buildings in the list
+        Called when matched botton is clicked
+        """
+        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
+        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
+
+        if len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
+
+            item_existing = self.lst_existing.item(rows_lst_existing[0])
+            id_existing = int(item_existing.text())
+            item_bulk = self.lst_bulk.item(rows_lst_bulk[0])
+            id_bulk = int(item_bulk.text())
+
+            self.disable_listwidget_item(item_existing)
+            self.disable_listwidget_item(item_bulk)
+
+            self.insert_into_lyr_matched_existing_in_edit(id_existing)
+            self.insert_into_lyr_matched_bulk_load_in_edit(id_bulk)
+
+            self.delete_from_lyr_removed_in_edit(id_existing)
+            self.delete_from_lyr_added_in_edit(id_bulk)
+
+            self.delete_original_relationship_in_existing(id_existing)
+            self.delete_original_relationship_in_bulk_load(id_bulk)
+
+            self.btn_matched.setEnabled(False)
+            self.lst_bulk.clearSelection()
+            self.lst_existing.clearSelection()
+        else:
+            iface.messageBar().pushMessage("Error:", "Do not match other than one building in each layer", level=QgsMessageBar.WARNING)
+            return
+
+    @pyqtSlot()
+    def related_clicked(self):
+        """
+        Relate the buildings in the list
+        Called when related botton is clicked
+        """
+        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
+        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
+
+        if len(rows_lst_bulk) < 1 or len(rows_lst_existing) < 1:
+            iface.messageBar().pushMessage("Error:", "Do not relate less than one building in each layer", level=QgsMessageBar.WARNING)
+            return
+        elif len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
+            iface.messageBar().pushMessage("Error:", "Do not relate only one building in each layer", level=QgsMessageBar.WARNING)
+            return
+        else:
+            for index in self.lst_existing.selectionModel().selectedRows():
+                item_existing = self.lst_existing.item(index.row())
+                id_existing = int(item_existing.text())
+
+                self.disable_listwidget_item(item_existing)
+
+                self.insert_into_lyr_related_existing_in_edit(id_existing)
+                self.delete_from_lyr_removed_in_edit(id_existing)
+                self.delete_original_relationship_in_existing(id_existing)
+
+            for index in self.lst_bulk.selectionModel().selectedRows():
+                item_bulk = self.lst_bulk.item(index.row())
+                id_bulk = int(item_bulk.text())
+
+                self.disable_listwidget_item(item_bulk)
+
+                self.insert_into_lyr_related_bulk_load_in_edit(id_bulk)
+                self.delete_from_lyr_added_in_edit(id_bulk)
+                self.delete_original_relationship_in_bulk_load(id_bulk)
+
+            self.btn_related.setEnabled(False)
+            self.lst_bulk.clearSelection()
+            self.lst_existing.clearSelection()
+
+    @pyqtSlot()
+    def save_clicked(self, commit_status=True):
+        """
+        Save result and change database
+        Called when save botton is clicked
+        """
+        self.db.open_cursor()
+
+        self.delete_original_relationships()
+
+        self.insert_new_added_outlines()
+        self.insert_new_removed_outlines()
+        self.insert_new_matched_outlines()
+        self.insert_new_related_outlines()
+
+        if commit_status:
+            self.db.commit_open_cursor()
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+
+        self.repaint_view()
+        self.clear_layer_filter()
+
+        self.btn_remove_all.setEnabled(True)
+        self.btn_remove_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
+
+        self.btn_relink_all.setEnabled(False)
+        self.btn_matched.setEnabled(False)
+        self.btn_related.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
+        self.btn_save.setEnabled(False)
+
+        self.btn_unlink_all.setEnabled(True)
+
+        iface.mapCanvas().refreshAllLayers()
+
+    @pyqtSlot()
+    def cancel_clicked(self):
+        """
+        Relate the buildings in the list
+        Called when cancel botton is clicked
+        """
+        self.tbl_original.clearSelection()
+        self.lst_existing.clearSelection()
+        self.lst_bulk.clearSelection()
+
+        try:
+            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
+            self.tbl_original.itemSelectionChanged.disconnect(self.tbl_original_item_selection_changed)
+            self.lst_existing.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
+            self.lst_bulk.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
+        except TypeError:
+            pass
+
+        self.layer_registry.remove_layer(self.lyr_existing)
+        self.layer_registry.remove_layer(self.lyr_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_added_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_removed_existing)
+        self.layer_registry.remove_layer(self.lyr_matched_existing)
+        self.layer_registry.remove_layer(self.lyr_matched_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_related_bulk_load)
+        self.layer_registry.remove_layer(self.lyr_related_existing)
+        self.layer_registry.remove_layer(self.lyr_added_bulk_load_in_edit)
+        self.layer_registry.remove_layer(self.lyr_removed_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_matched_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_matched_bulk_load_in_edit)
+        self.layer_registry.remove_layer(self.lyr_related_existing_in_edit)
+        self.layer_registry.remove_layer(self.lyr_related_bulk_load_in_edit)
+
+        from buildings.gui.bulk_load_frame import BulkLoadFrame
+        dw = self.dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(BulkLoadFrame(self.layer_registry))
+        iface.actionPan().trigger()
 
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
@@ -739,41 +891,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def insert_into_lyr_matched_bulk_load_in_edit(self, id_bulk):
         self.lyr_matched_bulk_load_in_edit.setSubsetString('"bulk_load_outline_id" = %s' % id_bulk)
 
-    @pyqtSlot()
-    def matched_clicked(self):
-        """
-        Match the buildings in the list
-        Called when matched botton is clicked
-        """
-        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
-        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
-
-        if len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
-
-            item_existing = self.lst_existing.item(rows_lst_existing[0])
-            id_existing = int(item_existing.text())
-            item_bulk = self.lst_bulk.item(rows_lst_bulk[0])
-            id_bulk = int(item_bulk.text())
-
-            self.disable_listwidget_item(item_existing)
-            self.disable_listwidget_item(item_bulk)
-
-            self.insert_into_lyr_matched_existing_in_edit(id_existing)
-            self.insert_into_lyr_matched_bulk_load_in_edit(id_bulk)
-
-            self.delete_from_lyr_removed_in_edit(id_existing)
-            self.delete_from_lyr_added_in_edit(id_bulk)
-
-            self.delete_original_relationship_in_existing(id_existing)
-            self.delete_original_relationship_in_bulk_load(id_bulk)
-
-            self.btn_matched.setEnabled(False)
-            self.lst_bulk.clearSelection()
-            self.lst_existing.clearSelection()
-        else:
-            iface.messageBar().pushMessage("Error:", "Do not match other than one building in each layer", level=QgsMessageBar.WARNING)
-            return
-
     def insert_into_lyr_related_existing_in_edit(self, id_existing):
         filter = self.lyr_related_existing_in_edit.subsetString()
         self.lyr_related_existing_in_edit.setSubsetString(filter + ' or "building_outline_id" = %s' % id_existing)
@@ -782,71 +899,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         filter = self.lyr_related_bulk_load_in_edit.subsetString()
         self.lyr_related_bulk_load_in_edit.setSubsetString(filter + ' or "bulk_load_outline_id" = %s' % id_bulk)
 
-    @pyqtSlot()
-    def related_clicked(self):
-        """
-        Relate the buildings in the list
-        Called when related botton is clicked
-        """
-        rows_lst_existing = [index.row() for index in self.lst_existing.selectionModel().selectedRows()]
-        rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
-
-        if len(rows_lst_bulk) < 1 or len(rows_lst_existing) < 1:
-            iface.messageBar().pushMessage("Error:", "Do not relate less than one building in each layer", level=QgsMessageBar.WARNING)
-            return
-        elif len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
-            iface.messageBar().pushMessage("Error:", "Do not relate only one building in each layer", level=QgsMessageBar.WARNING)
-            return
-        else:
-            for index in self.lst_existing.selectionModel().selectedRows():
-                item_existing = self.lst_existing.item(index.row())
-                id_existing = int(item_existing.text())
-
-                self.disable_listwidget_item(item_existing)
-
-                self.insert_into_lyr_related_existing_in_edit(id_existing)
-                self.delete_from_lyr_removed_in_edit(id_existing)
-                self.delete_original_relationship_in_existing(id_existing)
-
-            for index in self.lst_bulk.selectionModel().selectedRows():
-                item_bulk = self.lst_bulk.item(index.row())
-                id_bulk = int(item_bulk.text())
-
-                self.disable_listwidget_item(item_bulk)
-
-                self.insert_into_lyr_related_bulk_load_in_edit(id_bulk)
-                self.delete_from_lyr_added_in_edit(id_bulk)
-                self.delete_original_relationship_in_bulk_load(id_bulk)
-
-            self.btn_related.setEnabled(False)
-            self.lst_bulk.clearSelection()
-            self.lst_existing.clearSelection()
-
-    def save_clicked(self, commit_status=True):
-        """
-        Save result and change database
-        Called when save botton is clicked
-        """
-
+    def delete_original_relationships(self):
         sql_delete_related_existing = 'SELECT buildings_bulk_load.related_delete_existing_outlines(%s);'
-
         sql_delete_matched_existing = 'SELECT buildings_bulk_load.matched_delete_existing_outlines(%s);'
-
         sql_delete_removed = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
-
         sql_delete_added = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
 
-        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
-
-        sql_insert_removed = 'SELECT buildings_bulk_load.removed_insert_bulk_load_outlines(%s);'
-
-        sql_insert_matched = 'SELECT buildings_bulk_load.matched_insert_buildling_outlines(%s, %s);'
-
-        sql_insert_related = 'SELECT buildings_bulk_load.related_insert_buildling_outlines(%s, %s);'
-
-        self.db.open_cursor()
-
-        for row in range(self.lst_existing.count())[::-1]:
+        for row in range(self.lst_existing.count()):
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
 
@@ -854,103 +913,43 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.db.execute_no_commit(sql_delete_matched_existing, (id_existing, ))
             self.db.execute_no_commit(sql_delete_related_existing, (id_existing, ))
 
-        for row in range(self.lst_bulk.count())[::-1]:
+        for row in range(self.lst_bulk.count()):
             item = self.lst_bulk.item(row)
             id_bulk = int(item.text())
 
             self.db.execute_no_commit(sql_delete_added, (id_bulk, ))
 
+    def insert_new_added_outlines(self):
         # added
+        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
             self.db.execute_no_commit(sql_insert_added, (id_bulk,))
 
+    def insert_new_removed_outlines(self):
         # removed
+        sql_insert_removed = 'SELECT buildings_bulk_load.removed_insert_bulk_load_outlines(%s);'
         for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
             self.db.execute_no_commit(sql_insert_removed, (id_existing, ))
 
+    def insert_new_matched_outlines(self):
         # matched
+        sql_insert_matched = 'SELECT buildings_bulk_load.matched_insert_buildling_outlines(%s, %s);'
         for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 self.db.execute_no_commit(sql_insert_matched, (id_bulk, id_existing))
 
+    def insert_new_related_outlines(self):
         # related
+        sql_insert_related = 'SELECT buildings_bulk_load.related_insert_buildling_outlines(%s, %s);'
         for feat1 in self.lyr_related_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 self.db.execute_no_commit(sql_insert_related, (id_bulk, id_existing))
-
-        if commit_status:
-            self.db.commit_open_cursor()
-
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
-
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
-
-        self.repaint_view()
-        self.clear_layer_filter()
-
-        self.btn_remove_all.setEnabled(True)
-        self.btn_remove_slt.setEnabled(True)
-        self.btn_clear_tbl_slt.setEnabled(True)
-
-        self.btn_relink_all.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_clear_lst_slt.setEnabled(False)
-        self.btn_save.setEnabled(False)
-
-        self.btn_unlink_all.setEnabled(True)
-
-        iface.mapCanvas().refreshAllLayers()
-
-    def cancel_clicked(self):
-        """
-        Relate the buildings in the list
-        Called when cancel botton is clicked
-        """
-        self.tbl_original.clearSelection()
-        self.lst_existing.clearSelection()
-        self.lst_bulk.clearSelection()
-
-        try:
-            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-            self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
-            self.tbl_original.itemSelectionChanged.disconnect(self.tbl_original_item_selection_changed)
-            self.lst_existing.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
-            self.lst_bulk.itemSelectionChanged.disconnect(self.lst_item_selection_changed)
-        except TypeError:
-            pass
-        self.clear_layer_filter()
-
-        self.layer_registry.remove_layer(self.lyr_existing)
-        self.layer_registry.remove_layer(self.lyr_bulk_load)
-        self.layer_registry.remove_layer(self.lyr_added_bulk_load)
-        self.layer_registry.remove_layer(self.lyr_removed_existing)
-        self.layer_registry.remove_layer(self.lyr_matched_existing)
-        self.layer_registry.remove_layer(self.lyr_matched_bulk_load)
-        self.layer_registry.remove_layer(self.lyr_related_bulk_load)
-        self.layer_registry.remove_layer(self.lyr_related_existing)
-        self.layer_registry.remove_layer(self.lyr_added_bulk_load_in_edit)
-        self.layer_registry.remove_layer(self.lyr_removed_existing_in_edit)
-        self.layer_registry.remove_layer(self.lyr_matched_existing_in_edit)
-        self.layer_registry.remove_layer(self.lyr_matched_bulk_load_in_edit)
-        self.layer_registry.remove_layer(self.lyr_related_existing_in_edit)
-        self.layer_registry.remove_layer(self.lyr_related_bulk_load_in_edit)
-
-        from buildings.gui.bulk_load_frame import BulkLoadFrame
-        dw = self.dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(self.layer_registry))
-        iface.actionPan().trigger()
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry
