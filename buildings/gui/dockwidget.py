@@ -55,7 +55,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                 }
                 QListWidget::item {
                     color: white;
-                    padding: 3px;
+                    padding-top: 3px;
+                    padding-bottom: 3px;
                 }
                 QListWidget::item::selected {
                     color: black;
@@ -73,7 +74,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                 }
                 QListWidget::item {
                     color: white;
-                    padding: 3px;
+                    padding-top: 3px;
+                    padding-bottom: 3px;
                 }
                 QListWidget::item::selected {
                     color: black;
@@ -102,13 +104,9 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             if item.text() == 'Buildings':
                 project.SRID = 2193
                 set_crs()
-                if self.stk_options.count() == 2:
-                    self.stk_options.setCurrentIndex(0)
-                    self.stk_options.addWidget(self.frames['menu_frame'])
-                    self.current_frame = self.frames['menu_frame']
-                    self.stk_options.setCurrentIndex(1)
-                else:
-                    self.stk_options.setCurrentIndex(1)
+                self.stk_options.removeWidget(self.stk_options.currentWidget())
+                self.stk_options.addWidget(self.frames['menu_frame'])
+                self.current_frame = self.frames['menu_frame']
 
     @pyqtSlot(QListWidgetItem)
     def show_frame(self, item):

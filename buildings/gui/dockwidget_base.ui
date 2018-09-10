@@ -62,7 +62,7 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>47</width>
+         <width>43</width>
          <height>400</height>
         </size>
        </property>
@@ -98,7 +98,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>42</width>
+            <width>38</width>
             <height>40</height>
            </size>
           </property>
@@ -157,7 +157,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>42</width>
+            <width>38</width>
             <height>200</height>
            </size>
           </property>
@@ -169,6 +169,12 @@
           </property>
           <property name="lineWidth">
            <number>0</number>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>32</width>
+            <height>32</height>
+           </size>
           </property>
          </widget>
         </item>
