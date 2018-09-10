@@ -2,8 +2,9 @@
 
 import os
 
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
-from qgis.core import QgsFeatureRequest, QgsMapLayerRegistry
+from qgis.core import QgsFeatureRequest, QgsGeometry, QgsMapLayerRegistry
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -206,6 +207,7 @@ class AddBulkLoad(BulkLoadChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
+    @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -307,6 +309,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
 
+    @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When bulk load frame btn_reset_save clicked
@@ -318,6 +321,7 @@ class AddBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
+    @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         """
            Called when feature is added
@@ -376,6 +380,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
 
+    @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
             Called when a Feature is Deleted
@@ -484,6 +489,7 @@ class EditBulkLoad(BulkLoadChanges):
                     self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
                     self.bulk_load_frame.select_changed = True
 
+    @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -611,6 +617,7 @@ class EditBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.select_changed = False
             self.bulk_load_frame.db.commit_open_cursor()
 
+    @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When bulk load frame btn_reset_save clicked
@@ -626,6 +633,7 @@ class EditBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
+    @pyqtSlot(int, QgsGeometry)
     def feature_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -652,6 +660,7 @@ class EditBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
         self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
 
+    @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
            Called when feature is selected

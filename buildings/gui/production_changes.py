@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
-
-from qgis.core import QgsFeatureRequest
+from qgis.core import QgsFeatureRequest, QgsGeometry
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -200,6 +200,7 @@ class AddProduction(ProductionChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
+    @pyqtSlot(bool)
     def save_clicked(self, commit_status):
         """
             When building frame btn_save clicked
@@ -295,6 +296,7 @@ class AddProduction(ProductionChanges):
         self.production_frame.btn_save.setDisabled(1)
         self.production_frame.btn_reset.setDisabled(1)
 
+    @pyqtSlot()
     def reset_clicked(self):
         """
             When production frame btn_reset clicked
@@ -306,6 +308,7 @@ class AddProduction(ProductionChanges):
         # reset and disable comboboxes
         ProductionChanges.disable_UI_functions(self)
 
+    @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         """
            Called when feature is added
@@ -365,6 +368,7 @@ class AddProduction(ProductionChanges):
         self.production_frame.btn_save.setEnabled(1)
         self.production_frame.btn_reset.setEnabled(1)
 
+    @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
             Called when a Feature is Deleted
@@ -465,6 +469,7 @@ class EditProduction(ProductionChanges):
                     self.production_frame.btn_reset.setEnabled(1)
                     self.production_frame.select_changed = True
 
+    @pyqtSlot(bool)
     def save_clicked(self, commit_status):
         """
             When production frame btn_save clicked
@@ -564,6 +569,7 @@ class EditProduction(ProductionChanges):
             self.production_frame.select_changed = False
             self.production_frame.db.commit_open_cursor()
 
+    @pyqtSlot()
     def reset_clicked(self):
         """
             When production frame btn_reset clicked
@@ -579,6 +585,7 @@ class EditProduction(ProductionChanges):
         # reset and disable comboboxes
         ProductionChanges.disable_UI_functions(self)
 
+    @pyqtSlot(int, QgsGeometry)
     def feature_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -604,6 +611,7 @@ class EditProduction(ProductionChanges):
         self.production_frame.btn_save.setEnabled(1)
         self.production_frame.btn_reset.setEnabled(1)
 
+    @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
            Called when feature is selected
