@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame
-import qgis
 from functools import partial
 
+from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QFrame
+
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.utilities import database as db
 from buildings.sql import select_statements as select
+from buildings.utilities import database as db
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -23,7 +23,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     value = ''
     external_source = ''
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
@@ -34,6 +34,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.populate_combobox()
         self.le_external_source_id.setDisabled(1)
 
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.error_dialog = None
 
@@ -42,6 +43,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_ok.clicked.connect(partial(
             self.ok_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
+
         self.rad_external_source.toggled.connect(self.enable_external_source)
 
     def populate_combobox(self):
@@ -72,6 +74,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         text_ls = text.split('-')
         return text_ls[0]
 
+    @pyqtSlot(bool)
     def enable_external_source(self, boolVal):
         """
         Called when external source radiobutton is toggled
@@ -82,6 +85,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.le_external_source_id.clear()
             self.le_external_source_id.setDisabled(1)
 
+    @pyqtSlot(bool)
     def ok_clicked(self, commit_status):
         """
         Called when ok button clicked
@@ -114,15 +118,16 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.value, self.external_source, commit_status)
         self.le_external_source_id.clear()
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
         Called when exit button is clicked
         """
         self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))
 
     def insert_capture_source(self, value, external_source, commit_status):
         """

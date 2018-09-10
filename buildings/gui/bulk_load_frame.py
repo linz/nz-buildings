@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame, QColor, QCompleter
-from PyQt4.QtCore import Qt
-
-import qgis
-from qgis.utils import iface
-from qgis.core import QgsVectorLayer
-
 from functools import partial
 
-from buildings.utilities import database as db
-from buildings.utilities import layers
-from buildings.gui import bulk_load
-from buildings.gui import comparisons
-from buildings.gui import bulk_load_changes
+from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtGui import QColor, QCompleter, QFrame
+from qgis.core import QgsVectorLayer
+from qgis.utils import iface
+
+from buildings.gui import bulk_load, bulk_load_changes, comparisons
+from buildings.gui.alter_building_relationships import AlterRelationships
+from buildings.gui.alter_building_relationships import MultiLayerSelection
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
+from buildings.utilities import database as db, layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -29,11 +25,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         Bulk Load outlines frame class
     """
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(BulkLoadFrame, self).__init__(parent)
         self.setupUi(self)
         # Frame fields
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
@@ -58,7 +55,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.db = db
         db.connect()
         # selection colour
-        iface.mapCanvas().setSelectionColor(QColor("Yellow"))
+        iface.mapCanvas().setSelectionColor(QColor('Yellow'))
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -121,13 +118,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
-        self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
+        self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
         self.description_del = self.le_deletion_reason.text()
         self.completer_box()
 
         # initiate le_data_description
         self.le_data_description.setMaxLength(250)
-        self.le_data_description.setPlaceholderText("Data Description")
+        self.le_data_description.setPlaceholderText('Data Description')
 
         # set up signals and slots
         self.rad_external_source.toggled.connect(
@@ -144,7 +141,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
 
-        self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
+        self.cmb_status.currentIndexChanged.connect(
+            self.enable_le_deletion_reason)
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
 
@@ -286,6 +284,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'shape', 'buildings_bulk_load', '', '')
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
+    @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
         """
             When bulk load outlines save clicked
@@ -300,6 +299,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.add_outlines()
             self.display_current_bl_not_compared()
 
+    @pyqtSlot()
     def bulk_load_reset_clicked(self):
         """
             When bulk Load reset clicked
@@ -310,6 +310,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_data_description.clear()
         self.rad_external_source.setChecked(False)
 
+    @pyqtSlot(bool)
     def compare_outlines_clicked(self, commit_status):
         """
             When compare outlines clicked
@@ -320,6 +321,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
 
+    @pyqtSlot()
     def canvas_add_outline(self):
         """
             When add outline radio button toggled
@@ -327,16 +329,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to added class
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # connect signals and slots
@@ -376,6 +378,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         layers.style_layer(self.territorial_auth,
                            {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
+    @pyqtSlot()
     def canvas_edit_outlines(self):
         """
             When edit outline radio button toggled
@@ -383,17 +386,17 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         # set change instance to edit class
         self.btn_edit_cancel.setEnabled(1)
         try:
             self.btn_edit_save.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         try:
             self.btn_edit_reset.clicked.disconnect()
-        except Exception:
+        except TypeError:
             pass
         if self.rad_edit.isChecked():
             self.change_instance = bulk_load_changes.EditBulkLoad(self)
@@ -415,6 +418,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             layers.style_layer(self.territorial_auth,
                                {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
+    @pyqtSlot()
     def edit_cancel_clicked(self):
         """
             When cancel clicked
@@ -451,16 +455,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         try:
             self.bulk_load_layer.selectionChanged.disconnect(
                 self.change_instance.selection_changed)
-        except Exception:
+        except TypeError:
             pass
         try:
             self.bulk_load_layer.geometryChanged.disconnect(
                 self.change_instance.feature_changed)
-        except Exception:
+        except TypeError:
             pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
+            if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
@@ -474,6 +478,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.le_deletion_reason.setCompleter(self.completer)
 
+    @pyqtSlot()
     def enable_le_deletion_reason(self):
         if self.cmb_status.currentText() == 'Deleted During QA':
             self.le_deletion_reason.setEnabled(1)
@@ -484,6 +489,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.le_deletion_reason.setDisabled(1)
             self.le_deletion_reason.clear()
 
+    @pyqtSlot()
     def alter_relationships_clicked(self):
         """
             When alter relationships button clicked
@@ -497,16 +503,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
-        from buildings.gui.alter_building_relationships import AlterRelationships
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
-            self.layer_registry, self.current_dataset))
-        from buildings.gui.alter_building_relationships import MultiLayerSelection
+            dw, self.layer_registry, self.current_dataset))
+
         canvas = iface.mapCanvas()
         self.tool = MultiLayerSelection(canvas)
         canvas.setMapTool(self.tool)
 
+    @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
         """
             When publish button clicked
@@ -526,6 +532,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_layer)
         self.add_historic_outlines()
 
+    @pyqtSlot()
     def exit_clicked(self):
         """
             Called when bulk load frame exit button clicked,
@@ -541,6 +548,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if self.territorial_auth is not None:
                 self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(self.layer_registry))
+        dw.new_widget(MenuFrame(dw, self.layer_registry))

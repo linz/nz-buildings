@@ -6,12 +6,11 @@ from PyQt4 import uic
 from PyQt4.QtGui import QFrame
 
 from buildings.gui.bulk_load_frame import BulkLoadFrame
-from buildings.gui.new_entry import NewEntry
 from buildings.gui.new_capture_source import NewCaptureSource
+from buildings.gui.new_entry import NewEntry
 from buildings.gui.production_frame import ProductionFrame
 from buildings.utilities import database as db
 
-import qgis
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'menu_frame.ui'))
@@ -19,10 +18,11 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class MenuFrame(QFrame, FORM_CLASS):
 
-    def __init__(self, layer_registry, parent=None):
+    def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
+        self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.db = db
         self.db.connect()
@@ -38,33 +38,33 @@ class MenuFrame(QFrame, FORM_CLASS):
         Called when bulk loaded button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(self.layer_registry))
+        dw.new_widget(BulkLoadFrame(self.dockwidget, self.layer_registry))
 
     def production_clicked(self):
         """
         Called when production button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(ProductionFrame(self.layer_registry))
+        dw.new_widget(ProductionFrame(dw, self.layer_registry))
 
     def new_entry_clicked(self):
         """
         Called when new entry button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewEntry(self.layer_registry))
+        dw.new_widget(NewEntry(dw, self.layer_registry))
 
     def new_capture_source_clicked(self):
         """
         Called when new capture source button is clicked
         """
         self.db.close_connection()
-        dw = qgis.utils.plugins['buildings'].dockwidget
+        dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(NewCaptureSource(self.layer_registry))
+        dw.new_widget(NewCaptureSource(dw, self.layer_registry))
