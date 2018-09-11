@@ -62,15 +62,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.init_list(self.lst_existing)
         self.init_list(self.lst_bulk)
 
-        self.btn_remove_all.setEnabled(True)
-        self.btn_remove_slt.setEnabled(True)
-        self.btn_clear_tbl_slt.setEnabled(True)
-
-        self.btn_relink_all.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_clear_lst_slt.setEnabled(False)
-        self.btn_save.setEnabled(False)
+        self.switch_buttons_table()
 
         self.btn_unlink_all.setEnabled(False)
 
@@ -80,13 +72,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         iface.setActiveLayer(self.lyr_bulk_load)
         iface.actionSelectRectangle().trigger()
 
-        self.lst_highlight = []
+        self.highlight_features = []
 
-        # self.lyr_existing.removeSelection()
         self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
 
-        # self.lyr_bulk_load.removeSelection()
         self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
 
@@ -98,7 +88,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
-        self.lst_highlight = []
+        self.highlight_features = []
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -245,7 +235,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """ Highlights selected features"""
 
         # remove all highlight objects
-        self.lst_highlight = []
+        self.highlight_features = []
 
         for lyr in [self.lyr_existing, self.lyr_bulk_load]:
             for feat in lyr.selectedFeatures():
@@ -255,7 +245,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 h.setColor(QColor(255, 255, 0, 255))
                 h.setWidth(4)
                 h.setFillColor(QColor(255, 255, 255, 0))
-                self.lst_highlight.append(h)
+                self.highlight_features.append(h)
 
     @pyqtSlot(int)
     def lyr_selection_changed(self, selected):
@@ -291,8 +281,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         When users select rows in table, select the corresponding features in layers.
         """
-        tbl = self.tbl_original
-
         if self.has_no_selection_in_table():
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
@@ -308,12 +296,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
-
-        # btn_unlink_all should be unable when table is empty
-        if tbl.rowCount() != 0:
-            self.btn_unlink_all.setEnabled(True)
-        else:
-            self.btn_unlink_all.setEnabled(False)
 
     @pyqtSlot()
     def clear_selection_clicked(self):
@@ -335,13 +317,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Called when remove_selected botton is clicked
         """
         tbl = self.tbl_original
-        rows = [index.row() for index in reversed(tbl.selectionModel().selectedRows())]
+        pair_rows = self.find_pairs_rows_in_table()
+        selected_rows = [index.row() for index in tbl.selectionModel().selectedRows()]
         tbl.clearSelection()
-        if self.has_pairs_in_table():
-            tbl.setRowCount(0)
+        selected_pair_rows = [row for row in selected_rows if row in pair_rows]
+        if selected_pair_rows:
+            rows = list(set(selected_rows + pair_rows))
         else:
-            for row in rows:
-                tbl.removeRow(row)
+            rows = selected_rows
+        for row in reversed(sorted(rows)):
+            tbl.removeRow(row)
         if tbl.rowCount() == 0:
             self.btn_unlink_all.setEnabled(False)
 
@@ -375,22 +360,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
 
-        self.btn_remove_all.setEnabled(False)
-        self.btn_remove_slt.setEnabled(False)
-        self.btn_clear_tbl_slt.setEnabled(False)
-
-        self.btn_relink_all.setEnabled(True)
-        self.btn_matched.setEnabled(True)
-        self.btn_related.setEnabled(True)
-        self.btn_clear_lst_slt.setEnabled(True)
-        self.btn_save.setEnabled(True)
+        self.switch_buttons_list()
 
     @pyqtSlot()
     def lst_item_selection_changed(self):
         """
         When users select rows in lst_existing, select the corresponding features in layers.
         """
-        # current_list = self.sender()
 
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
@@ -407,6 +383,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Relink the buildings in the list
         Called when relink_all botton is clicked
         """
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+
+        self.switch_buttons_table()
+        self.btn_unlink_all.setEnabled(True)
+
         id_list = self.relink_outlines()
         self.insert_into_table(self.tbl_original, id_list)
 
@@ -414,20 +396,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
-
-        self.btn_remove_all.setEnabled(True)
-        self.btn_remove_slt.setEnabled(True)
-        self.btn_clear_tbl_slt.setEnabled(True)
-
-        self.btn_relink_all.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_clear_lst_slt.setEnabled(False)
-        self.btn_save.setEnabled(False)
-
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
-        self.btn_unlink_all.setEnabled(True)
 
     @pyqtSlot()
     def matched_clicked(self):
@@ -528,18 +496,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
 
+        self.switch_buttons_table()
         self.repaint_view()
         self.clear_layer_filter()
-
-        self.btn_remove_all.setEnabled(True)
-        self.btn_remove_slt.setEnabled(True)
-        self.btn_clear_tbl_slt.setEnabled(True)
-
-        self.btn_relink_all.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_clear_lst_slt.setEnabled(False)
-        self.btn_save.setEnabled(False)
 
         self.btn_unlink_all.setEnabled(True)
 
@@ -587,87 +546,117 @@ class AlterRelationships(QFrame, FORM_CLASS):
         dw.new_widget(BulkLoadFrame(dw, self.layer_registry))
         iface.actionPan().trigger()
 
+    def switch_buttons_table(self):
+        self.btn_remove_all.setEnabled(True)
+        self.btn_remove_slt.setEnabled(True)
+        self.btn_clear_tbl_slt.setEnabled(True)
+
+        self.btn_relink_all.setEnabled(False)
+        self.btn_matched.setEnabled(False)
+        self.btn_related.setEnabled(False)
+        self.btn_clear_lst_slt.setEnabled(False)
+        self.btn_save.setEnabled(False)
+
+    def switch_buttons_list(self):
+        self.btn_remove_all.setEnabled(False)
+        self.btn_remove_slt.setEnabled(False)
+        self.btn_clear_tbl_slt.setEnabled(False)
+
+        self.btn_relink_all.setEnabled(True)
+        self.btn_matched.setEnabled(True)
+        self.btn_related.setEnabled(True)
+        self.btn_clear_lst_slt.setEnabled(True)
+        self.btn_save.setEnabled(True)
+
     def select_from_bulk_load(self, selected):
         tbl = self.tbl_original
+        tbl.clearSelection()
+
+        pair_rows = self.find_pairs_rows_in_table()
+
         related_set = []
         for feat_id in selected:
             row = self.find_existing_row(feat_id)
             if row is not None:
-                if self.has_pairs_in_table():
-                    tbl.selectAll()
+                if row in pair_rows:
+                    for pair_row in pair_rows:
+                        tbl.selectRow(pair_row)
                 else:
                     tbl.selectRow(row)
                 continue
 
             id_matched = self.find_matched_existing_outlines(feat_id)
             id_related = self.find_related_existing_outlines(feat_id)
-
             if id_matched:
-                tbl.setRowCount(0)  # remove the current items inside table
-                self.insert_into_table(tbl, [(id_matched[0], feat_id)])
-                tbl.selectAll()
+                for pair_row in pair_rows:
+                    tbl.removeRow(pair_row)
+                insert_rows = self.insert_into_table(tbl, [(id_matched[0], feat_id)])
+                self.select_rows_in_tbl_original(insert_rows)
             elif id_related:
-                tbl.setRowCount(0)
+                for pair_row in pair_rows:
+                    tbl.removeRow(pair_row)
                 for feat_id_related in id_related:
                     related_set.append((feat_id_related, feat_id))
                     result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
                     for (id_bulk_related, ) in result.fetchall():
                         related_set.append((feat_id_related, id_bulk_related))
             else:
-                if self.has_pairs_in_table():
-                    tbl.setRowCount(0)
-                self.insert_into_table(tbl, [(None, feat_id)])
-                tbl.clearSelection()
-                tbl.selectRow(tbl.rowCount() - 1)
+                insert_rows = self.insert_into_table(tbl, [(None, feat_id)])
+                self.select_rows_in_tbl_original(insert_rows)
+
         if related_set:
             related_set = list(set(related_set))
-            self.insert_into_table(tbl, related_set)
-            tbl.selectAll()
+            insert_rows = self.insert_into_table(tbl, related_set)
+            self.select_rows_in_tbl_original(insert_rows)
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
+        tbl.clearSelection()
+
+        pair_rows = self.find_pairs_rows_in_table()
+
         related_set = []
         for feat_id in selected:
             row = self.find_existing_row(feat_id)
             if row is not None:
-                if self.has_pairs_in_table():
-                    tbl.selectAll()
+                if row in pair_rows:
+                    for pair_row in pair_rows:
+                        tbl.selectRow(pair_row)
                 else:
                     tbl.selectRow(row)
                 continue
 
             id_matched = self.find_matched_bulk_load_outlines(feat_id)
             id_related = self.find_related_bulk_load_outlines(feat_id)
-
             if id_matched:
-                tbl.setRowCount(0)
-                self.insert_into_table(tbl, [(feat_id, id_matched[0])])
-                tbl.selectAll()
+                for pair_row in pair_rows:
+                    tbl.removeRow(pair_row)
+                insert_rows = self.insert_into_table(tbl, [(feat_id, id_matched[0])])
+                self.select_rows_in_tbl_original(insert_rows)
             elif id_related:
-                tbl.setRowCount(0)
+                for pair_row in pair_rows:
+                    tbl.removeRow(pair_row)
                 for (feat_id_related, ) in id_related:
                     related_set.append((feat_id, feat_id_related))
                     result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
                     for (id_existing_related, ) in result.fetchall():
                         related_set.append((id_existing_related, feat_id_related))
             else:
-                if self.has_pairs_in_table():
-                    tbl.setRowCount(0)
-                self.insert_into_table(tbl, [(feat_id, None)])
-                tbl.clearSelection()
-                tbl.selectRow(tbl.rowCount() - 1)
+                insert_rows = self.insert_into_table(tbl, [(feat_id, None)])
+                self.select_rows_in_tbl_original(insert_rows)
+
         if related_set:
             related_set = list(set(related_set))
-            self.insert_into_table(tbl, related_set)
-            tbl.selectAll()
+            insert_rows = self.insert_into_table(tbl, related_set)
+            self.select_rows_in_tbl_original(insert_rows)
 
-    # def find_added_outlines(self, id_bulk):
-    #     result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
-    #     return result.fetchone()
+    def find_added_outlines(self, id_bulk):
+        result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        return result.fetchone()
 
-    # def find_removed_outlines(self, id_existing):
-    #     result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
-    #     return result.fetchone()
+    def find_removed_outlines(self, id_existing):
+        result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
+        return result.fetchone()
 
     def find_matched_existing_outlines(self, id_bulk):
         result = self.db._execute(select.matched_by_bulk_load_outlines, (id_bulk, self.current_dataset))
@@ -686,6 +675,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         return result.fetchall()
 
     def insert_into_table(self, tbl, ids):
+        rows = []
         for (id_existing, id_bulk) in ids:
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -693,6 +683,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
             if id_bulk:
                 tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+            rows.append(row_tbl)
+        return rows
+
+    def select_rows_in_tbl_original(self, rows):
+        for row in rows:
+            self.tbl_original.selectRow(row)
 
     def has_no_selection_in_table(self):
         if not self.tbl_original.selectionModel().selectedRows():
@@ -722,21 +718,21 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.selectByIds(feat_ids_existing)
         self.lyr_bulk_load.selectByIds(feat_ids_bulk)
 
-    def has_pairs_in_table(self):
+    def find_pairs_rows_in_table(self):
         tbl = self.tbl_original
-        for row_tbl in range(tbl.rowCount()):
-            item_existing = tbl.item(row_tbl, 0)
-            item_bulk = tbl.item(row_tbl, 1)
+        rows = []
+        for row in range(tbl.rowCount()):
+            item_existing = tbl.item(row, 0)
+            item_bulk = tbl.item(row, 1)
             if item_existing and item_bulk:
-                return True
-        return False
+                rows.append(row)
+        return list(reversed(rows))
 
     def find_existing_row(self, feat_id):
         """
         Check if table has the same id
         """
         tbl = self.tbl_original
-        tbl.clearSelection()
         for row in range(tbl.rowCount()):
             item_existing = tbl.item(row, 0)
             item_bulk = tbl.item(row, 1)
@@ -859,15 +855,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_list.append((None, id_bulk))
 
         else:
-            if self.find_related_bulk_load_outlines(ids_existing[0]):
-                for id_existing in ids_existing:
-                    for id_bulk in ids_bulk:
-                        id_list.append((id_existing, id_bulk))
-            else:
-                for id_existing in ids_existing:
+            for id_existing in ids_existing:
+                id_removed = self.find_removed_outlines(id_existing)
+                id_matched = self.find_matched_bulk_load_outlines(id_existing)
+                ids_related = self.find_related_bulk_load_outlines(id_existing)
+                if id_removed:
                     id_list.append((id_existing, None))
-                for id_bulk in ids_bulk:
+                elif id_matched:
+                    id_list.append((id_existing, id_matched[0]))
+                elif ids_related:
+                    for (id_related, ) in ids_related:
+                        id_list.append((id_existing, id_related))
+
+            for id_bulk in ids_bulk:
+                if self.find_added_outlines(id_bulk):
                     id_list.append((None, id_bulk))
+
         return id_list
 
     def disable_listwidget_item(self, item):
@@ -947,17 +950,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 self.db.execute_no_commit(sql_insert_related, (id_bulk, id_existing))
-
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
-
-        self.repaint_view()
-        self.clear_layer_filter()
-
-        self.btn_matched.setEnabled(True)
-        self.btn_related.setEnabled(True)
-
-        iface.mapCanvas().refreshAllLayers()
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry
