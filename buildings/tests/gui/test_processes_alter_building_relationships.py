@@ -227,9 +227,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         index12 = self.alter_relationships_frame.tbl_original.model().index(0, 1)
         index21 = self.alter_relationships_frame.tbl_original.model().index(1, 0)
         index22 = self.alter_relationships_frame.tbl_original.model().index(1, 1)
-        self.assertEqual(index11.data(), '1008')
+        self.assertEqual(index11.data(), '1007')
         self.assertEqual(index12.data(), '2005')
-        self.assertEqual(index21.data(), '1007')
+        self.assertEqual(index21.data(), '1008')
         self.assertEqual(index22.data(), '2005')
 
         self.alter_relationships_frame.btn_remove_all.click()
@@ -280,6 +280,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.assertTrue(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
 
-        self.alter_relationships_frame.btn_clear_slt.click()
+        self.alter_relationships_frame.btn_clear_tbl_slt.click()
 
         self.assertFalse(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
