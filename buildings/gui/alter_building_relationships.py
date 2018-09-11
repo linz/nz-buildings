@@ -15,7 +15,7 @@ from buildings.sql import select_statements as select
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), "alter_building_relationship.ui"))
+    os.path.dirname(__file__), 'alter_building_relationship.ui'))
 
 
 class AlterRelationships(QFrame, FORM_CLASS):
@@ -56,7 +56,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Called when opening of the frame"""
 
         # set selected item color as transparent
-        iface.mapCanvas().setSelectionColor(QColor("Transparent"))
+        iface.mapCanvas().setSelectionColor(QColor('Transparent'))
 
         self.init_table(self.tbl_original)
         self.init_list(self.lst_existing)
@@ -96,88 +96,88 @@ class AlterRelationships(QFrame, FORM_CLASS):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
 
         self.lyr_existing = self.layer_registry.add_postgres_layer(
-            "existing_subset_extracts", "existing_subset_extracts", "shape",
-            "buildings_bulk_load", "building_outline_id",
-            "supplied_dataset_id = {0}".format(self.current_dataset)
+            'existing_subset_extracts', 'existing_subset_extracts', 'shape',
+            'buildings_bulk_load', 'building_outline_id',
+            'supplied_dataset_id = {0}'.format(self.current_dataset)
         )
         self.lyr_existing.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_bulk_load = self.layer_registry.add_postgres_layer(
-            "bulk_load_outlines", "bulk_load_outlines", "shape",
-            "buildings_bulk_load", "bulk_load_outline_id",
-            "supplied_dataset_id = {0}".format(self.current_dataset)
+            'bulk_load_outlines', 'bulk_load_outlines', 'shape',
+            'buildings_bulk_load', 'bulk_load_outline_id',
+            'supplied_dataset_id = {0}'.format(self.current_dataset)
         )
         self.lyr_bulk_load.loadNamedStyle(path + 'building_transparent.qml')
 
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
-            "related_bulk_load_outlines", "related_bulk_load_outlines",
-            "shape", "buildings_bulk_load", "bulk_load_outline_id", ""
+            'related_bulk_load_outlines', 'related_bulk_load_outlines',
+            'shape', 'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_related_bulk_load.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_related_existing = self.layer_registry.add_postgres_layer(
-            "related_existing_outlines", "related_existing_outlines",
-            "shape", "buildings_bulk_load", "building_outline_id", ""
+            'related_existing_outlines', 'related_existing_outlines',
+            'shape', 'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_related_existing.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_matched_bulk_load = self.layer_registry.add_postgres_layer(
-            "matched_bulk_load_outlines", "matched_bulk_load_outlines",
-            "shape", "buildings_bulk_load", "bulk_load_outline_id", ""
+            'matched_bulk_load_outlines', 'matched_bulk_load_outlines',
+            'shape', 'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_matched_bulk_load.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_matched_existing = self.layer_registry.add_postgres_layer(
-            "matched_existing_outlines", "matched_existing_outlines", "shape",
-            "buildings_bulk_load", "building_outline_id", ""
+            'matched_existing_outlines', 'matched_existing_outlines', 'shape',
+            'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_matched_existing.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_removed_existing = self.layer_registry.add_postgres_layer(
-            "removed_outlines", "removed_outlines", "shape",
-            "buildings_bulk_load", "building_outline_id", ""
+            'removed_outlines', 'removed_outlines', 'shape',
+            'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_removed_existing.loadNamedStyle(path + 'building_red.qml')
 
         self.lyr_added_bulk_load = self.layer_registry.add_postgres_layer(
-            "added_outlines", "added_outlines", "shape",
-            "buildings_bulk_load", "bulk_load_outline_id", ""
+            'added_outlines', 'added_outlines', 'shape',
+            'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_added_bulk_load.loadNamedStyle(path + 'building_green.qml')
 
         self.lyr_related_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "related_bulk_load_in_edit", "bulk_load_outlines", "shape",
-            "buildings_bulk_load", "bulk_load_outline_id", ""
+            'related_bulk_load_in_edit', 'bulk_load_outlines', 'shape',
+            'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_related_bulk_load_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_related_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "related_existing_in_edit", "existing_subset_extracts", "shape",
-            "buildings_bulk_load", "building_outline_id", ""
+            'related_existing_in_edit', 'existing_subset_extracts', 'shape',
+            'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_related_existing_in_edit.loadNamedStyle(path + 'building_purple.qml')
 
         self.lyr_matched_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "matched_bulk_load_in_edit", "bulk_load_outlines", "shape",
-            "buildings_bulk_load", "bulk_load_outline_id", ""
+            'matched_bulk_load_in_edit', 'bulk_load_outlines', 'shape',
+            'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_matched_bulk_load_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_matched_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "matched_existing_in_edit", "existing_subset_extracts", "shape",
-            "buildings_bulk_load", "building_outline_id", ""
+            'matched_existing_in_edit', 'existing_subset_extracts', 'shape',
+            'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_matched_existing_in_edit.loadNamedStyle(path + 'building_blue.qml')
 
         self.lyr_removed_existing_in_edit = self.layer_registry.add_postgres_layer(
-            "removed_existing_in_edit", "existing_subset_extracts", "shape",
-            "buildings_bulk_load", "building_outline_id", ""
+            'removed_existing_in_edit', 'existing_subset_extracts', 'shape',
+            'buildings_bulk_load', 'building_outline_id', ''
         )
         self.lyr_removed_existing_in_edit.loadNamedStyle(path + 'building_red.qml')
 
         self.lyr_added_bulk_load_in_edit = self.layer_registry.add_postgres_layer(
-            "added_bulk_load_in_edit", "bulk_load_outlines", "shape",
-            "buildings_bulk_load", "bulk_load_outline_id", ""
+            'added_bulk_load_in_edit', 'bulk_load_outlines', 'shape',
+            'buildings_bulk_load', 'bulk_load_outline_id', ''
         )
         self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + 'building_green.qml')
 
@@ -213,8 +213,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.setColumnCount(2)
         tbl.setRowCount(0)
 
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Bulk Load Outlines"))
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('Existing Outlines'))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem('Bulk Load Outlines'))
         tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
 
         tbl.verticalHeader().setVisible(False)
@@ -429,7 +429,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lst_bulk.clearSelection()
             self.lst_existing.clearSelection()
         else:
-            iface.messageBar().pushMessage("Error:", "Do not match other than one building in each layer", level=QgsMessageBar.WARNING)
+            iface.messageBar().pushMessage('Error:', 'Do not match other than one building in each layer', level=QgsMessageBar.WARNING)
             return
 
     @pyqtSlot()
@@ -442,10 +442,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         rows_lst_bulk = [index.row() for index in self.lst_bulk.selectionModel().selectedRows()]
 
         if len(rows_lst_bulk) < 1 or len(rows_lst_existing) < 1:
-            iface.messageBar().pushMessage("Error:", "Do not relate less than one building in each layer", level=QgsMessageBar.WARNING)
+            iface.messageBar().pushMessage('Error:', 'Do not relate less than one building in each layer', level=QgsMessageBar.WARNING)
             return
         elif len(rows_lst_bulk) == 1 and len(rows_lst_existing) == 1:
-            iface.messageBar().pushMessage("Error:", "Do not relate only one building in each layer", level=QgsMessageBar.WARNING)
+            iface.messageBar().pushMessage('Error:', 'Do not relate only one building in each layer', level=QgsMessageBar.WARNING)
             return
         else:
             for index in self.lst_existing.selectionModel().selectedRows():
@@ -962,32 +962,32 @@ class MultiLayerSelection(QgsMapTool):
     def __init__(self, canvas):
         self.canvas = canvas
         QgsMapTool.__init__(self, self.canvas)
-        self.cursor = QCursor(QPixmap(["16 16 3 1",
-                                       "# c None",
-                                       "a c #000000",
-                                       ". c #ffffff",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "aaaaaaaaaaaaaaaaa",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########",
-                                       "########a########"]))
+        self.cursor = QCursor(QPixmap(['16 16 3 1',
+                                       '# c None',
+                                       'a c #000000',
+                                       '. c #ffffff',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       'aaaaaaaaaaaaaaaaa',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########',
+                                       '########a########']))
 
     def canvasPressEvent(self, e):
 
-        layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName("bulk_load_outlines")
-        layer_existing = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
+        layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')
+        layer_existing = QgsMapLayerRegistry.instance().mapLayersByName('existing_subset_extracts')
         layers = [layer for layer in layer_bulk] + [layer for layer in layer_existing]
         p = self.toMapCoordinates(e.pos())
         w = self.canvas.mapUnitsPerPixel() * 3
