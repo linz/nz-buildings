@@ -231,7 +231,7 @@ class Buildings:
             dw.lst_options.setCurrentItem(item)
 
         icon_path = os.path.join(home_dir, "icons", "capture_source.png")
-        item = QListWidgetItem("Capture Source")
+        item = QListWidgetItem("Capture Sources")
         item.setIcon(QIcon(icon_path))
         dw.lst_sub_menu.addItem(item)
 

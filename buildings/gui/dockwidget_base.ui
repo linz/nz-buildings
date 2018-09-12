@@ -21,7 +21,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>521</width>
+    <width>468</width>
     <height>443</height>
    </size>
   </property>
@@ -40,7 +40,7 @@
      <widget class="QSplitter" name="splitter">
       <property name="maximumSize">
        <size>
-        <width>766</width>
+        <width>741</width>
         <height>16777215</height>
        </size>
       </property>
@@ -68,7 +68,7 @@
        </property>
        <property name="maximumSize">
         <size>
-         <width>200</width>
+         <width>175</width>
          <height>16777215</height>
         </size>
        </property>
@@ -104,7 +104,7 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>200</width>
+            <width>175</width>
             <height>40</height>
            </size>
           </property>
@@ -141,7 +141,7 @@
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>20</width>
+            <width>175</width>
             <height>10</height>
            </size>
           </property>
@@ -163,18 +163,27 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>200</width>
+            <width>175</width>
             <height>16777215</height>
            </size>
           </property>
           <property name="lineWidth">
            <number>0</number>
           </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
           <property name="iconSize">
            <size>
             <width>32</width>
             <height>32</height>
            </size>
+          </property>
+          <property name="resizeMode">
+           <enum>QListView::Adjust</enum>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
           </property>
          </widget>
         </item>

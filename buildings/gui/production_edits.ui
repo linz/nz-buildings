@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>504</width>
+    <width>400</width>
     <height>1010</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>504</width>
+    <width>400</width>
     <height>1010</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>504</width>
+    <width>506</width>
     <height>1010</height>
    </size>
   </property>
@@ -34,11 +34,25 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="grpb">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
        <height>16760000</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="styleSheet">
       <string notr="true">QGroupBox {
@@ -60,7 +74,7 @@ QGroupBox::title {
       <property name="fieldGrowthPolicy">
        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
       </property>
-      <item row="1" column="0" colspan="2">
+      <item row="0" column="0" colspan="2">
        <layout class="QHBoxLayout" name="hzly_3">
         <item>
          <widget class="QRadioButton" name="rad_add">
@@ -81,27 +95,27 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
-      <item row="4" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="lb_capture_method">
         <property name="text">
          <string>Capture Method:</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="2" column="1">
        <widget class="QComboBox" name="cmb_capture_method"/>
       </item>
-      <item row="5" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="lb_capture_source">
         <property name="text">
          <string>Capture Source:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
+      <item row="3" column="1">
        <widget class="QComboBox" name="cmb_capture_source"/>
       </item>
-      <item row="6" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="lb_lifeycle_stage">
         <property name="font">
          <font>
@@ -115,46 +129,50 @@ QGroupBox::title {
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="4" column="1">
        <widget class="QComboBox" name="cmb_lifecycle_stage"/>
       </item>
-      <item row="10" column="0">
+      <item row="5" column="0" colspan="2">
+       <widget class="Line" name="line">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
        <widget class="QLabel" name="lb_town">
         <property name="text">
          <string>Town City:</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="1">
+      <item row="6" column="1">
        <widget class="QComboBox" name="cmb_town"/>
       </item>
-      <item row="11" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="lb_suburb">
         <property name="text">
          <string>Suburb Locality:</string>
         </property>
        </widget>
       </item>
-      <item row="11" column="1">
+      <item row="7" column="1">
        <widget class="QComboBox" name="cmb_suburb"/>
       </item>
-      <item row="12" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="lb_ta">
         <property name="text">
          <string>Territorial Authority: </string>
         </property>
        </widget>
       </item>
-      <item row="12" column="1">
-       <widget class="QComboBox" name="cmb_ta"/>
-      </item>
-      <item row="15" column="0" colspan="2">
+      <item row="10" column="0" colspan="2">
        <layout class="QHBoxLayout" name="hzly_4">
         <item>
          <widget class="QPushButton" name="btn_save">
           <property name="minimumSize">
            <size>
-            <width>151</width>
+            <width>0</width>
             <height>27</height>
            </size>
           </property>
@@ -176,7 +194,7 @@ QGroupBox::title {
          <widget class="QPushButton" name="btn_reset">
           <property name="minimumSize">
            <size>
-            <width>150</width>
+            <width>0</width>
             <height>27</height>
            </size>
           </property>
@@ -198,7 +216,7 @@ QGroupBox::title {
          <widget class="QPushButton" name="btn_exit_edits">
           <property name="minimumSize">
            <size>
-            <width>151</width>
+            <width>0</width>
             <height>27</height>
            </size>
           </property>
@@ -215,146 +233,54 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
-      <item row="17" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_cancel">
-          <property name="minimumSize">
-           <size>
-            <width>450</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>450</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton {
+      <item row="11" column="0" colspan="2">
+       <widget class="QPushButton" name="btn_cancel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>450</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QPushButton {
     font-size: 11pt;
     font-weight: bold;
 }
 </string>
-          </property>
-          <property name="text">
-           <string>Exit</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+        </property>
+        <property name="text">
+         <string>Exit</string>
+        </property>
+       </widget>
       </item>
-      <item row="0" column="0" colspan="2">
-       <spacer name="vtsp_6">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>30</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <spacer name="vtsp_7">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <spacer name="vtsp_1">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="8" column="0" colspan="2">
-       <widget class="Line" name="line">
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="line_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
       <item row="9" column="0" colspan="2">
-       <spacer name="vtsp_2">
+       <widget class="Line" name="line_3">
         <property name="orientation">
-         <enum>Qt::Vertical</enum>
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
       </item>
-      <item row="13" column="0" colspan="2">
-       <spacer name="vtsp_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="16" column="0" colspan="2">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
+      <item row="8" column="1">
+       <widget class="QComboBox" name="cmb_ta"/>
       </item>
      </layout>
      <zorder>lb_capture_method</zorder>
@@ -366,17 +292,14 @@ QGroupBox::title {
      <zorder>lb_suburb</zorder>
      <zorder>cmb_suburb</zorder>
      <zorder>lb_ta</zorder>
-     <zorder>cmb_ta</zorder>
-     <zorder>vtsp_6</zorder>
-     <zorder>vtsp_7</zorder>
      <zorder>line</zorder>
-     <zorder>vtsp_1</zorder>
-     <zorder>vtsp_2</zorder>
      <zorder>cmb_lifecycle_stage</zorder>
      <zorder>lb_lifeycle_stage</zorder>
-     <zorder>vtsp_3</zorder>
      <zorder></zorder>
-     <zorder>verticalSpacer</zorder>
+     <zorder>btn_cancel</zorder>
+     <zorder>line_2</zorder>
+     <zorder>line_3</zorder>
+     <zorder>cmb_ta</zorder>
     </widget>
    </item>
    <item>
@@ -387,7 +310,7 @@ QGroupBox::title {
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>660</height>
       </size>
      </property>
     </spacer>

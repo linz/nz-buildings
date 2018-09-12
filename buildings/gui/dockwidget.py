@@ -47,6 +47,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         # Set focus policy so can track when user clicks back onto dock widget
         self.setFocusPolicy(Qt.StrongFocus)
 
+        self.prev_width = self.width()
+
         # Change look of options list widget
         self.lst_options.setStyleSheet(
             """ QListWidget {
@@ -98,6 +100,22 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
         self.lst_sub_menu.itemClicked.connect(self.show_frame)
 
+        self.splitter.splitterMoved.connect(self.resize_dockwidget)
+
+        from buildings.utilities.layers import LayerRegistry
+        from buildings.utilities import database as db
+        from buildings.gui.new_capture_source import NewCaptureSource
+        from buildings.gui.bulk_load_frame import BulkLoadFrame
+        from buildings.gui.production_frame import ProductionFrame
+        from buildings.gui.new_entry import NewEntry
+
+        self.layer_registry = LayerRegistry()
+        self.db = db
+        self.new_capture_source = NewCaptureSource
+        self.bulk_load_frame = BulkLoadFrame
+        self.production_frame = ProductionFrame
+        self.new_entry = NewEntry
+
     @pyqtSlot(QListWidgetItem)
     def show_selected_option(self, item):
         if item:
@@ -111,24 +129,16 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
     @pyqtSlot(QListWidgetItem)
     def show_frame(self, item):
         if item:
-            print item.text()
-            from buildings.utilities.layers import LayerRegistry
-            from buildings.utilities import database as db
-            db.close_connection()
-            layer_registry = LayerRegistry()
+            self.db.close_connection()
             self.stk_options.removeWidget(self.stk_options.currentWidget())
             if item.text() == 'Capture Sources':
-                from buildings.gui.new_capture_source import NewCaptureSource
-                self.new_widget(NewCaptureSource(self, layer_registry))
+                self.new_widget(self.new_capture_source(self, self.layer_registry))
             elif item.text() == 'Bulk Load':
-                from buildings.gui.bulk_load_frame import BulkLoadFrame
-                self.new_widget(BulkLoadFrame(self, layer_registry))
+                self.new_widget(self.bulk_load_frame(self, self.layer_registry))
             elif item.text() == 'Edit Outlines':
-                from buildings.gui.production_frame import ProductionFrame
-                self.new_widget(ProductionFrame(self, layer_registry))
+                self.new_widget(self.production_frame(self, self.layer_registry))
             elif item.text() == 'Settings':
-                from buildings.gui.new_entry import NewEntry
-                self.new_widget(NewEntry(self, layer_registry))
+                self.new_widget(self.new_entry(self, self.layer_registry))
 
     def new_widget(self, frame):
         self.stk_options.addWidget(frame)
@@ -138,6 +148,21 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
     # insert into dictionary
     def insert_into_frames(self, text, object):
         self.frames[text] = object
+
+    @pyqtSlot(int, int)
+    def resize_dockwidget(self, pos, index):
+        self.prev_width = self.width()
+        if pos < 175:
+            new_pos = 175 - pos
+            new_dock_width = 600 - new_pos
+            if new_dock_width > self.prev_width:
+                if (new_dock_width + 5) > 600:
+                    self.setFixedWidth(600)
+                else:
+                    self.setFixedWidth(new_dock_width + 5)
+            else:
+                self.setFixedWidth(new_dock_width)
+
 
     def closeEvent(self, event):
         self.closed.emit()
