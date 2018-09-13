@@ -7,7 +7,7 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
-from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils
+from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils, QgsVectorLayer
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface, isPluginLoaded, plugins
 
@@ -330,6 +330,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         When user selects features in existing outline layers, the ids will be added to the table
         """
         current_layer = self.sender()
+        if not isinstance(current_layer, QgsVectorLayer):
+            return
         tbl = self.tbl_original
         if self.has_no_selection_in_layers():
             tbl.clearSelection()
@@ -344,11 +346,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.select_from_existing(selected)
 
         # set item not editable
-        for row in range(tbl.rowCount()):
-            tbl.showRow(row)
-            for col in range(2):
-                if tbl.item(row, col):
-                    tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+        self.disable_tbl_editing(self.tbl_original)
 
         tbl.itemSelectionChanged.connect(self.tbl_original_item_selection_changed)
         self.btn_unlink_all.setEnabled(True)
@@ -646,28 +644,42 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def tbl_relationship_item_selection_changed(self):
-        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+        try:
+            self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
+            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
+        except TypeError:
+            pass
 
         self.tbl_original.setRowCount(0)
+        self.highlight_features = []
+        # self.lyr_existing.removeSelection()
+        # self.lyr_bulk_load.removeSelection()
         current_text = self.cmb_relationship.currentText()
         for index in self.tbl_relationship.selectionModel().selectedRows():
             if current_text == "Related Outlines":
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
                 self.lyr_existing.selectByIds([id_existing])
+                self.lyr_bulk_load.selectByIds([id_bulk])
             elif current_text == "Matched Outlines":
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
                 self.lyr_existing.selectByIds([id_existing])
+                self.lyr_bulk_load.selectByIds([id_bulk])
             elif current_text == "Removed Outlines":
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.lyr_existing.selectByIds([id_existing])
             elif current_text == "Added Outlines":
                 id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.lyr_bulk_load.selectByIds([id_bulk])
-        # self.zoom_to_feature()
+        self.zoom_to_feature()
+        self.highlight_selection_changed()
 
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+        try:
+            self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
+            self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
+        except TypeError:
+            pass
 
     @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
@@ -692,9 +704,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.refresh_tbl_relationship()
 
         if isPluginLoaded('liqa'):
-            if self.error_inspector.isVisible():
-                self.update_status_in_qa_lyr(id_existing, id_bulk, qa_status)
-                self.refresh_tbl_error_attr()
+            self.update_status_in_qa_lyr(id_existing, id_bulk, qa_status)
+            self.refresh_tbl_error_attr()
 
     @pyqtSlot()
     def error_inspector_btn_clicked(self, qa_status, commit_status=True):
@@ -1187,6 +1198,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def disable_tbl_editing(self, tbl):
         """Disable editing so item cannot be changed in the table"""
         for row in range(tbl.rowCount()):
+            tbl.showRow(row)
             for col in range(tbl.columnCount()):
                 if tbl.item(row, col):
                     tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
@@ -1286,12 +1298,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
         extent = None
         for lyr in [self.lyr_existing, self.lyr_bulk_load]:
             selected_feat = [feat for feat in lyr.selectedFeatures()]
+            print [feat.id() for feat in lyr.selectedFeatures()]
             if selected_feat:
                 if not extent:
                     extent = lyr.boundingBoxOfSelected()
                 else:
                     extent.combineExtentWith(lyr.boundingBoxOfSelected())
         if extent:
+            print extent.xMaximum(), extent.xMinimum(), extent.yMaximum(), extent.yMinimum()
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
 
@@ -1348,8 +1362,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def update_status_in_qa_lyr(self, id_existing, id_bulk, qa_status):
 
+        qa_lyrs = self.error_inspector.find_qa_lyrs()
         current_text = self.cmb_relationship.currentText()
-        for qa_lyr in self.error_inspector.qa_lyrs:
+        for qa_lyr in qa_lyrs:
             input_name = QgsExpressionContextUtils.layerScope(qa_lyr).variable('source_lyrs')
             relationship = input_name.split('_')[0]
             if relationship in current_text.lower():
@@ -1376,9 +1391,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def refresh_tbl_error_attr(self):
         # refresh tbl_error_attrs
-        self.error_inspector.tbl_error_attr.cellChanged.disconnect(self.error_inspector.update_comment)
-        self.error_inspector.init_tbl_error_attr()
-        self.error_inspector.tbl_error_attr.cellChanged.connect(self.error_inspector.update_comment)
+        if self.error_inspector.isVisible():
+            self.error_inspector.tbl_error_attr.cellChanged.disconnect(self.error_inspector.update_comment)
+            self.error_inspector.init_tbl_error_attr()
+            self.error_inspector.tbl_error_attr.cellChanged.connect(self.error_inspector.update_comment)
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry
