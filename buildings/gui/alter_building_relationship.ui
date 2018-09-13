@@ -230,7 +230,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QPushButton" name="btn_clear_slt2">
+         <widget class="QPushButton" name="btn_clear_lst_slt">
           <property name="text">
            <string>Clear Selection</string>
           </property>
@@ -388,7 +388,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QPushButton" name="btn_clear_slt">
+         <widget class="QPushButton" name="btn_clear_tbl_slt">
           <property name="text">
            <string>Clear Selection</string>
           </property>

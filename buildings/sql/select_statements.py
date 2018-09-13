@@ -219,6 +219,50 @@ WHERE bulk_load_outline_id IN (
     WHERE supplied_dataset_id = %s);
 """
 
+# alter-relationship
+
+related_by_bulk_load_outlines = """
+SELECT building_outline_id
+FROM buildings_bulk_load.related
+JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
+"""
+
+matched_by_bulk_load_outlines = """
+SELECT building_outline_id
+FROM buildings_bulk_load.matched
+JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
+"""
+
+added_by_bulk_load_outlines = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.added
+JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
+"""
+
+related_by_existing_outlines = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.related
+JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
+WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+"""
+
+matched_by_existing_outlines = """
+SELECT bulk_load_outline_id
+FROM buildings_bulk_load.matched
+JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
+WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+"""
+removed_by_existing_outlines = """
+SELECT building_outline_id
+FROM buildings_bulk_load.removed
+JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
+WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+"""
+
+
 """
 ----------------------------------------------------------------
 Buildings Common
