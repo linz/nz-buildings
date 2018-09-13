@@ -50,6 +50,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
 
+        self.btn_qa_okay.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_okay.text(), commit_status=True))
+        self.btn_qa_pending.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_pending.text(), commit_status=True))
+        self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
+        self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
+
         self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
     def open_alter_relationship_frame(self):
@@ -69,6 +74,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.add_building_lyrs()
         self.clear_layer_filter()
 
+        self.populate_cmb_relationship()
+
         iface.setActiveLayer(self.lyr_bulk_load)
         iface.actionSelectRectangle().trigger()
 
@@ -84,6 +91,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.lst_existing.itemSelectionChanged.connect(self.lst_item_selection_changed)
         self.lst_bulk.itemSelectionChanged.connect(self.lst_item_selection_changed)
+
+        self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
     def on_dockwidget_closed(self):
@@ -229,6 +239,58 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         lst.clearSelection()
         lst.setSelectionMode(QAbstractItemView.MultiSelection)
+
+    def init_tbl_matched_and_related(self):
+        """Initiates tbl_relationship when cmb_relationship switches to matched or related"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(3)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Bulk Load Outlines"))
+        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
+    def init_tbl_removed(self):
+        """Initiates tbl_relationship when cmb_relationship switches to removed"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(2)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
+    def init_tbl_added(self):
+        """Initiates tbl_relationship when cmb_relationship switches to added"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(2)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Bulk Load Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
 
     @pyqtSlot()
     def highlight_selection_changed(self):
@@ -545,6 +607,74 @@ class AlterRelationships(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(BulkLoadFrame(dw, self.layer_registry))
         iface.actionPan().trigger()
+
+    @pyqtSlot()
+    def cmb_relationship_current_index_changed(self):
+        current_text = self.cmb_relationship.currentText()
+        if current_text == "Related Outlines":
+            self.init_tbl_matched_and_related()
+            self.populate_tbl_related()
+        elif current_text == "Matched Outlines":
+            self.init_tbl_matched_and_related()
+            self.populate_tbl_matched()
+        elif current_text == "Removed Outlines":
+            self.init_tbl_removed()
+            self.populate_tbl_removed()
+        elif current_text == "Added Outlines":
+            self.init_tbl_added()
+            self.populate_tbl_added()
+        elif current_text == "":
+            self.tbl_relationship.setColumnCount(0)
+            self.tbl_relationship.setRowCount(0)
+
+        self.disable_tbl_editing(self.tbl_relationship)
+
+    @pyqtSlot()
+    def tbl_relationship_item_selection_changed(self):
+        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+
+        self.tbl_original.setRowCount(0)
+        current_text = self.cmb_relationship.currentText()
+        for index in self.tbl_relationship.selectionModel().selectedRows():
+            if current_text == "Related Outlines":
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.lyr_existing.selectByIds([id_existing])
+            elif current_text == "Matched Outlines":
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.lyr_existing.selectByIds([id_existing])
+            elif current_text == "Removed Outlines":
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.lyr_existing.selectByIds([id_existing])
+            elif current_text == "Added Outlines":
+                id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.lyr_bulk_load.selectByIds([id_bulk])
+        # self.zoom_to_feature()
+
+        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+
+    @pyqtSlot()
+    def btn_qa_status_clicked(self, qa_status, commit_status=True):
+
+        qa_status_id = self.get_qa_status_id(qa_status)
+        if not qa_status_id:
+            return
+        current_text = self.cmb_relationship.currentText()
+        self.db.open_cursor()
+        if current_text == "Related Outlines":
+            id_existing, id_bulk = self.update_qa_status_in_related(qa_status_id)
+        elif current_text == "Matched Outlines":
+            id_existing, id_bulk = self.update_qa_status_in_matched(qa_status_id)
+        elif current_text == "Removed Outlines":
+            id_existing, id_bulk = self.update_qa_status_in_removed(qa_status_id)
+        elif current_text == "Added Outlines":
+            id_existing, id_bulk = self.update_qa_status_in_added(qa_status_id)
+
+        if commit_status:
+            self.db.commit_open_cursor()
+
+        self.refresh_tbl_relationship()
 
     def switch_buttons_table(self):
         self.btn_remove_all.setEnabled(True)
@@ -950,6 +1080,168 @@ class AlterRelationships(QFrame, FORM_CLASS):
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
                 self.db.execute_no_commit(sql_insert_related, (id_bulk, id_existing))
+
+    def disable_tbl_editing(self, tbl):
+        """Disable editing so item cannot be changed in the table"""
+        for row in range(tbl.rowCount()):
+            for col in range(tbl.columnCount()):
+                if tbl.item(row, col):
+                    tbl.item(row, col).setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+    def refresh_tbl_relationship(self):
+        """Refresh tbl_relationship by switching cmb_relationship"""
+        text = self.cmb_relationship.currentText()
+        self.cmb_relationship.setCurrentIndex(0)
+        self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText(text))
+
+    def populate_cmb_relationship(self):
+        """Populates cmb_relationship"""
+        self.cmb_relationship.clear()
+        item_list = ['Removed Outlines', 'Added Outlines', 'Matched Outlines', 'Related Outlines']
+        self.cmb_relationship.addItems([""] + item_list)
+
+    def change_current_item_in_cmb_relationship(self, source_lyr):
+        if 'removed' in source_lyr:
+            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Removed Outlines'))
+        elif 'matched' in source_lyr:
+            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Matched Outlines'))
+        elif 'related' in source_lyr:
+            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Related Outlines'))
+        elif 'added' in source_lyr:
+            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Added Outlines'))
+
+    def populate_tbl_related(self):
+        """Populates tbl_relationship when cmb_relationship switches to related"""
+        tbl = self.tbl_relationship
+        sql_related = """SELECT r.building_outline_id, r.bulk_load_outline_id, q.value
+                         FROM buildings_bulk_load.related r
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+        result = self.db._execute(sql_related)
+        for (id_existing, id_bulk, qa_status) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+
+    def populate_tbl_matched(self):
+        """Populates tbl_relationship when cmb_relationship switches to matched"""
+        tbl = self.tbl_relationship
+        sql_matched = """SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
+                         FROM buildings_bulk_load.matched m
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+        result = self.db._execute(sql_matched)
+        for (id_existing, id_bulk, qa_status) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+
+    def populate_tbl_removed(self):
+        """Populates tbl_relationship when cmb_relationship switches to removed"""
+        tbl = self.tbl_relationship
+        sql_removed = """SELECT r.building_outline_id, q.value
+                         FROM buildings_bulk_load.removed r
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+        result = self.db._execute(sql_removed)
+        for (id_existing, qa_status) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+
+    def populate_tbl_added(self):
+        """Populates tbl_relationship when cmb_relationship switches to added"""
+        tbl = self.tbl_relationship
+        sql_added = """SELECT a.bulk_load_outline_id, q.value
+                       FROM buildings_bulk_load.added a
+                       JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+        result = self.db._execute(sql_added)
+        for (id_bulk, qa_status) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+
+    def get_qa_status_id(self, qa_status):
+        """Returns qa_status_id according to the sender button"""
+        if qa_status == 'Okay' or qa_status == 'Fixed':
+            qa_status_id = 2
+        elif qa_status == 'Pending':
+            qa_status_id = 3
+        elif qa_status == 'Refer to Supplier' or qa_status == 'Inform IIC':  # 'Inform IIC' can be removed after refactoring error inspector'
+            qa_status_id = 4
+        elif qa_status == 'Not Checked':
+            qa_status_id = 1
+        else:
+            qa_status_id = None
+        return qa_status_id
+
+    def zoom_to_feature(self):
+
+        extent = None
+        for lyr in [self.lyr_existing, self.lyr_bulk_load]:
+            selected_feat = [feat for feat in lyr.selectedFeatures()]
+            if selected_feat:
+                if not extent:
+                    extent = lyr.boundingBoxOfSelected()
+                else:
+                    extent.combineExtentWith(lyr.boundingBoxOfSelected())
+        if extent:
+            iface.mapCanvas().setExtent(extent)
+            iface.mapCanvas().zoomScale(300.0)
+
+    def update_qa_status_in_related(self, qa_status_id):
+        """Updates qa_status_id in related table"""
+        tbl = self.tbl_relationship
+        for index in tbl.selectionModel().selectedRows():
+            id_existing = tbl.item(index.row(), 0).text()
+            id_bulk = tbl.item(index.row(), 1).text()
+            sql_update_related = """UPDATE buildings_bulk_load.related
+                                    SET qa_status_id = %s
+                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+            self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
+
+            # if singleselection in tbl_relationship
+            return (id_existing, id_bulk)
+
+    def update_qa_status_in_matched(self, qa_status_id):
+        """Updates qa_status_id in matched table"""
+        tbl = self.tbl_relationship
+        for index in tbl.selectionModel().selectedRows():
+            id_existing = tbl.item(index.row(), 0).text()
+            id_bulk = tbl.item(index.row(), 1).text()
+            sql_update_matched = """UPDATE buildings_bulk_load.matched
+                                    SET qa_status_id = %s
+                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+            self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
+
+            return (id_existing, id_bulk)
+
+    def update_qa_status_in_removed(self, qa_status_id):
+        """Updates qa_status_id in removed table"""
+        tbl = self.tbl_relationship
+        for index in tbl.selectionModel().selectedRows():
+            id_existing = tbl.item(index.row(), 0).text()
+            sql_update_removed = """UPDATE buildings_bulk_load.removed
+                                    SET qa_status_id = %s
+                                    WHERE building_outline_id = %s;"""
+            self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
+
+            return (id_existing, None)
+
+    def update_qa_status_in_added(self, qa_status_id):
+        """Updates qa_status_id in added table"""
+        tbl = self.tbl_relationship
+        for index in tbl.selectionModel().selectedRows():
+            id_bulk = tbl.item(index.row(), 0).text()
+            sql_update_added = """UPDATE buildings_bulk_load.added
+                                  SET qa_status_id = %s
+                                  WHERE bulk_load_outline_id = %s;"""
+            self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
+
+            return (None, id_bulk)
 
 
 from qgis.core import QgsRectangle, QgsMapLayerRegistry
