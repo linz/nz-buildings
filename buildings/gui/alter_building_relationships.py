@@ -100,11 +100,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
-    @pyqtSlot()
-    def on_dockwidget_closed(self):
-        """Remove highlight when the dockwideget closes"""
-        self.highlight_features = []
-
     def add_building_lyrs(self):
         """ Add building layers """
 
@@ -296,6 +291,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         tbl.setShowGrid(True)
+
+    @pyqtSlot()
+    def on_dockwidget_closed(self):
+        """Remove highlight when the dockwideget closes"""
+        self.highlight_features = []
 
     @pyqtSlot()
     def highlight_selection_changed(self):
@@ -693,7 +693,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db.open_cursor()
         if current_text == "Related Outlines":
             ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
-            self.update_related_in_tbl_relationship(ids_existing, ids_bulk, qa_status_id, qa_status)
+            self.update_related_in_tbl_relationship(ids_existing, ids_bulk, qa_status_id, qa_status)  # need to fix
         elif current_text == "Matched Outlines":
             ids_existing, ids_bulk = self.update_qa_status_in_matched(qa_status_id)
         elif current_text == "Removed Outlines":
@@ -716,6 +716,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot(dict)
     def error_inspector_btn_clicked(self, update_dict, commit_status=True):
         self.db.open_cursor()
+        # If LIQA input layers have different relationships, this will just change one
+        # Alternative way is to search for the same outline ids in the table which could take long
         for qa_lyr_name in update_dict:
             lyr = QgsMapLayerRegistry.instance().mapLayersByName(qa_lyr_name)[0]
             for feat in update_dict[qa_lyr_name]:
