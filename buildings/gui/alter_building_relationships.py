@@ -691,15 +691,33 @@ class AlterRelationships(QFrame, FORM_CLASS):
             return
         current_text = self.cmb_relationship.currentText()
         self.db.open_cursor()
+        ids_existing = []
+        ids_bulk = []
         if current_text == "Related Outlines":
-            ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
-            self.update_related_in_tbl_relationship(ids_existing, ids_bulk, qa_status_id, qa_status)  # need to fix
+            for index in self.tbl_relationship.selectionModel().selectedRows():
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
+                self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
+                ids_existing.append(id_existing)
+                ids_bulk.append(id_bulk)
+            # self.update_related_in_tbl_relationship(ids_existing, ids_bulk, qa_status_id, qa_status)  # need to fix
         elif current_text == "Matched Outlines":
-            ids_existing, ids_bulk = self.update_qa_status_in_matched(qa_status_id)
+            for index in self.tbl_relationship.selectionModel().selectedRows():
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
+                self.update_qa_status_in_matched(id_existing, id_bulk, qa_status_id)
+                ids_existing.append(id_existing)
+                ids_bulk.append(id_bulk)
         elif current_text == "Removed Outlines":
-            ids_existing, ids_bulk = self.update_qa_status_in_removed(qa_status_id)
+            for index in self.tbl_relationship.selectionModel().selectedRows():
+                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.update_qa_status_in_removed(id_existing, qa_status_id)
+                ids_existing.append(id_existing)
         elif current_text == "Added Outlines":
-            ids_existing, ids_bulk = self.update_qa_status_in_added(qa_status_id)
+            for index in self.tbl_relationship.selectionModel().selectedRows():
+                id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
+                self.update_qa_status_in_added(id_bulk, qa_status_id)
+                ids_bulk.append(id_bulk)
         else:
             self.db.close_cursor()
             return
@@ -714,41 +732,46 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.refresh_tbl_error_attr()
 
     @pyqtSlot(dict)
-    def error_inspector_btn_clicked(self, update_dict, commit_status=True):
+    def error_inspector_btn_clicked(self, status_changed_dict, commit_status=True):
         self.db.open_cursor()
         # If LIQA input layers have different relationships, this will just change one
         # Alternative way is to search for the same outline ids in the table which could take long
-        for qa_lyr_name in update_dict:
+        for qa_lyr_name in status_changed_dict:
             lyr = QgsMapLayerRegistry.instance().mapLayersByName(qa_lyr_name)[0]
-            for feat in update_dict[qa_lyr_name]:
-                fid = feat[0]
+            for feat in status_changed_dict[qa_lyr_name]:
+                id_outline = feat[0]
                 qa_status = feat[1]
                 qa_status_id = self.get_qa_status_id(qa_status)
                 if qa_status_id is None:
                     return
-                id_outline = [feat.attributes()[3] for feat in lyr.getFeatures(QgsFeatureRequest().setFilterFid(fid))][0]
                 source_lyr_name = QgsExpressionContextUtils.layerScope(lyr).variable('source_lyrs')
                 if source_lyr_name == 'added_outlines':
-                    self.update_qa_status_in_added(qa_status_id)
+                    self.update_qa_status_in_added(id_outline, qa_status_id)
 
                 elif source_lyr_name == 'removed_outlines':
-                    self.update_qa_status_in_removed(qa_status_id)
+                    self.update_qa_status_in_removed(id_outline, qa_status_id)
 
                 elif source_lyr_name == 'matched_existing_outlines':
-                    ids_existing, ids_bulk = self.update_qa_status_in_matched(qa_status_id)
-                    self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    id_matched = self.find_matched_bulk_load_outlines(id_outline)
+                    if id_matched:
+                        self.update_qa_status_in_matched(id_outline, id_matched[0], qa_status_id)
+                        self.update_status_in_qa_lyr([], [id_matched[0]], qa_status)
 
                 elif source_lyr_name == 'matched_bulk_load_outlines':
-                    ids_existing, ids_bulk = self.update_qa_status_in_matched(qa_status_id)
-                    self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    id_matched = self.find_matched_bulk_load_outlines(id_outline)
+                    if id_matched:
+                        self.update_qa_status_in_matched(id_matched[0], id_outline, qa_status_id)
+                        self.update_status_in_qa_lyr([id_matched[0]], [], qa_status)
 
                 elif source_lyr_name == 'related_existing_outlines':
-                    ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
-                    self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    pass
+                    # self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
+                    # self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
 
                 elif source_lyr_name == 'related_bulk_load_outlines':
-                    ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
-                    self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    pass
+                    # ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
+                    # self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
                 else:
                     self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText(''))
 
@@ -1276,57 +1299,33 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
 
-    def update_qa_status_in_related(self, qa_status_id):
+    def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
-        ids_existing, ids_bulk = [], []
-        for index in self.tbl_relationship.selectionModel().selectedRows():
-            id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
-            id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
-            sql_update_related = """UPDATE buildings_bulk_load.related
-                                    SET qa_status_id = %s
-                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
-            self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
-            ids_existing.append(id_existing)
-            ids_bulk.append(id_bulk)
-        return ids_existing, ids_bulk
+        sql_update_related = """UPDATE buildings_bulk_load.related
+                                SET qa_status_id = %s
+                                WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+        self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
 
-    def update_qa_status_in_matched(self, qa_status_id):
+    def update_qa_status_in_matched(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in matched table"""
-        ids_existing, ids_bulk = [], []
-        for index in self.tbl_relationship.selectionModel().selectedRows():
-            id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
-            id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
-            sql_update_matched = """UPDATE buildings_bulk_load.matched
-                                    SET qa_status_id = %s
-                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
-            self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
-            ids_existing.append(id_existing)
-            ids_bulk.append(id_bulk)
-        return ids_existing, ids_bulk
+        sql_update_matched = """UPDATE buildings_bulk_load.matched
+                                SET qa_status_id = %s
+                                WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+        self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
 
-    def update_qa_status_in_removed(self, qa_status_id):
+    def update_qa_status_in_removed(self, id_existing, qa_status_id):
         """Updates qa_status_id in removed table"""
-        ids_existing = []
-        for index in self.tbl_relationship.selectionModel().selectedRows():
-            id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
-            sql_update_removed = """UPDATE buildings_bulk_load.removed
-                                    SET qa_status_id = %s
-                                    WHERE building_outline_id = %s;"""
-            self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
-            ids_existing.append(id_existing)
-        return ids_existing, []
+        sql_update_removed = """UPDATE buildings_bulk_load.removed
+                                SET qa_status_id = %s
+                                WHERE building_outline_id = %s;"""
+        self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
 
-    def update_qa_status_in_added(self, qa_status_id):
+    def update_qa_status_in_added(self, id_bulk, qa_status_id):
         """Updates qa_status_id in added table"""
-        ids_bulk = []
-        for index in self.tbl_relationship.selectionModel().selectedRows():
-            id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
-            sql_update_added = """UPDATE buildings_bulk_load.added
-                                  SET qa_status_id = %s
-                                  WHERE bulk_load_outline_id = %s;"""
-            self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
-            ids_bulk.append(id_bulk)
-        return [], ids_bulk
+        sql_update_added = """UPDATE buildings_bulk_load.added
+                              SET qa_status_id = %s
+                              WHERE bulk_load_outline_id = %s;"""
+        self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
 
     def update_related_in_tbl_relationship(self, ids_existing, ids_bulk, qa_status_id, qa_status):
         for row in range(self.tbl_relationship.rowCount()):
