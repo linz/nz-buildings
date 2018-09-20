@@ -638,7 +638,7 @@ $$
 LANGUAGE sql;
 
 
-CREATE OR REPLACE FUNCTION buildings_bulk_load.related_group_insert(integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_group_insert()
 RETURNS integer AS
 $$
 
