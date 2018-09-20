@@ -698,9 +698,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
-                ids_existing.append(id_existing)
-                ids_bulk.append(id_bulk)
-            # self.update_related_in_tbl_relationship(ids_existing, ids_bulk, qa_status_id, qa_status)  # need to fix
+                ids_related = self.find_related_existing_outlines(id_bulk)
+                for (id_existing, id_bulk) in ids_related:
+                    ids_existing.append(id_existing)
+                    ids_bulk.append(id_bulk)
         elif current_text == "Matched Outlines":
             for index in self.tbl_relationship.selectionModel().selectedRows():
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
@@ -728,7 +729,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.refresh_tbl_relationship()
 
         if isPluginLoaded('liqa'):
-            self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+            self.update_status_in_qa_lyr(list(set(ids_existing)), list(set(ids_bulk)), qa_status)
             self.refresh_tbl_error_attr()
 
     @pyqtSlot(dict)
@@ -764,14 +765,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
                         self.update_status_in_qa_lyr([id_matched[0]], [], qa_status)
 
                 elif source_lyr_name == 'related_existing_outlines':
-                    pass
-                    # self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
-                    # self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    ids_related = self.find_related_bulk_load_outlines(id_outline)
+                    if ids_related:
+                        self.update_qa_status_in_related(ids_related[0][0], ids_related[0][1], qa_status_id)
+                        ids_existing, ids_bulk = [], []
+                        for (id_existing, id_bulk) in ids_related:
+                            ids_existing.append(id_existing)
+                            ids_bulk.append(id_bulk)
+                        self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
 
                 elif source_lyr_name == 'related_bulk_load_outlines':
-                    pass
-                    # ids_existing, ids_bulk = self.update_qa_status_in_related(qa_status_id)
-                    # self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
+                    ids_related = self.find_related_existing_outlines(id_outline)
+                    if ids_related:
+                        self.update_qa_status_in_related(ids_related[0][0], ids_related[0][1], qa_status_id)
+                        ids_existing, ids_bulk = [], []
+                        for (id_existing, id_bulk) in ids_related:
+                            ids_existing.append(id_existing)
+                            ids_bulk.append(id_bulk)
+                        self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
                 else:
                     self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText(''))
 
@@ -810,7 +821,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         pair_rows = self.find_pairs_rows_in_table()
 
-        related_set = []
         for feat_id in selected:
             row = self.find_existing_row(feat_id)
             if row is not None:
@@ -831,19 +841,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
             elif ids_related:
                 for pair_row in pair_rows:
                     tbl.removeRow(pair_row)
-                for (feat_id_related,) in ids_related:
-                    related_set.append((feat_id_related, feat_id))
-                    result = self.db._execute(select.related_by_existing_outlines, (feat_id_related, self.current_dataset))
-                    for (id_bulk_related, ) in result.fetchall():
-                        related_set.append((feat_id_related, id_bulk_related))
+                insert_rows = self.insert_into_table(tbl, ids_related)
+                self.select_rows_in_tbl_original(insert_rows)
             else:
                 insert_rows = self.insert_into_table(tbl, [(None, feat_id)])
                 self.select_rows_in_tbl_original(insert_rows)
-
-        if related_set:
-            related_set = list(set(related_set))
-            insert_rows = self.insert_into_table(tbl, related_set)
-            self.select_rows_in_tbl_original(insert_rows)
 
     def select_from_existing(self, selected):
         tbl = self.tbl_original
@@ -851,7 +853,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         pair_rows = self.find_pairs_rows_in_table()
 
-        related_set = []
         for feat_id in selected:
             row = self.find_existing_row(feat_id)
             if row is not None:
@@ -863,28 +864,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 continue
 
             id_matched = self.find_matched_bulk_load_outlines(feat_id)
-            id_related = self.find_related_bulk_load_outlines(feat_id)
+            ids_related = self.find_related_bulk_load_outlines(feat_id)
             if id_matched:
                 for pair_row in pair_rows:
                     tbl.removeRow(pair_row)
                 insert_rows = self.insert_into_table(tbl, [(feat_id, id_matched[0])])
                 self.select_rows_in_tbl_original(insert_rows)
-            elif id_related:
+            elif ids_related:
                 for pair_row in pair_rows:
                     tbl.removeRow(pair_row)
-                for (feat_id_related, ) in id_related:
-                    related_set.append((feat_id, feat_id_related))
-                    result = self.db._execute(select.related_by_bulk_load_outlines, (feat_id_related, self.current_dataset))
-                    for (id_existing_related, ) in result.fetchall():
-                        related_set.append((id_existing_related, feat_id_related))
+                insert_rows = self.insert_into_table(tbl, ids_related)
+                self.select_rows_in_tbl_original(insert_rows)
             else:
                 insert_rows = self.insert_into_table(tbl, [(feat_id, None)])
                 self.select_rows_in_tbl_original(insert_rows)
-
-        if related_set:
-            related_set = list(set(related_set))
-            insert_rows = self.insert_into_table(tbl, related_set)
-            self.select_rows_in_tbl_original(insert_rows)
 
     def find_added_outlines(self, id_bulk):
         result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
@@ -1100,8 +1093,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 elif id_matched:
                     id_list.append((id_existing, id_matched[0]))
                 elif ids_related:
-                    for (id_related, ) in ids_related:
-                        id_list.append((id_existing, id_related))
+                    id_list = ids_related
 
             for id_bulk in ids_bulk:
                 if self.find_added_outlines(id_bulk):
@@ -1171,7 +1163,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_new_matched_outlines(self):
         # matched
-        sql_insert_matched = 'SELECT buildings_bulk_load.matched_insert_buildling_outlines(%s, %s);'
+        sql_insert_matched = 'SELECT buildings_bulk_load.matched_insert_building_outlines(%s, %s);'
         for feat1 in self.lyr_matched_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_matched_existing_in_edit.getFeatures():
@@ -1180,12 +1172,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_new_related_outlines(self):
         # related
-        sql_insert_related = 'SELECT buildings_bulk_load.related_insert_buildling_outlines(%s, %s);'
+        related_outlines = [feat for feat in self.lyr_related_bulk_load_in_edit.getFeatures()]
+        if related_outlines:
+            sql_insert_related_group = 'SELECT buildings_bulk_load.related_group_insert();'
+            result = self.db.execute_no_commit(sql_insert_related_group)
+            new_group_id = result.fetchone()[0]
+        sql_insert_related = 'SELECT buildings_bulk_load.related_insert_building_outlines(%s, %s, %s);'
         for feat1 in self.lyr_related_bulk_load_in_edit.getFeatures():
             id_bulk = feat1['bulk_load_outline_id']
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2['building_outline_id']
-                self.db.execute_no_commit(sql_insert_related, (id_bulk, id_existing))
+                self.db.execute_no_commit(sql_insert_related, (new_group_id, id_bulk, id_existing))
 
     def disable_tbl_editing(self, tbl):
         """Disable editing so item cannot be changed in the table"""
@@ -1197,9 +1194,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def refresh_tbl_relationship(self):
         """Refresh tbl_relationship by switching cmb_relationship"""
-        text = self.cmb_relationship.currentText()
+        index = self.cmb_relationship.currentIndex()
         self.cmb_relationship.setCurrentIndex(0)
-        self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText(text))
+        self.cmb_relationship.setCurrentIndex(index)
 
     def populate_cmb_relationship(self):
         """Populates cmb_relationship"""
@@ -1303,7 +1300,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Updates qa_status_id in related table"""
         sql_update_related = """UPDATE buildings_bulk_load.related
                                 SET qa_status_id = %s
-                                WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+                                WHERE related_group_id in(
+                                    SELECT related_group_id
+                                    FROM buildings_bulk_load.related
+                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s
+                                )
+                                """
         self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_matched(self, id_existing, id_bulk, qa_status_id):
