@@ -638,12 +638,24 @@ $$
 LANGUAGE sql;
 
 
-CREATE OR REPLACE FUNCTION buildings_bulk_load.related_insert_buildling_outlines(integer, integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_group_insert(integer)
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_bulk_load.related (bulk_load_outline_id, building_outline_id, qa_status_id)
-    VALUES ($1, $2, 2)
+    INSERT INTO buildings_bulk_load.related_groups (related_group_id)
+    VALUES (DEFAULT)
+    RETURNING related_groups.related_group_id;
+
+$$
+LANGUAGE sql;
+
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.related (related_group_id, bulk_load_outline_id, building_outline_id, qa_status_id)
+    VALUES ($1, $2, $3, 2)
     RETURNING related.related_id;
 
 $$
