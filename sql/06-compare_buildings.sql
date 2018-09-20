@@ -238,6 +238,54 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+CREATE OR REPLACE FUNCTION buildings_bulk_load.reassign_related_ids(
+    p_supplied_dataset_id integer
+)
+RETURNS TABLE(
+      reassigned_building_outline_id integer
+    , original_building_outline_id integer
+    , reassigned_bulk_load_outline_id integer
+    , original_bulk_load_outline_id integer
+) AS
+$$
+
+    WITH found_related AS (
+        SELECT
+              building_outline_id
+            , bulk_load_outline_id
+        FROM buildings_bulk_load.find_related(p_supplied_dataset_id)
+    ), reassigned_ids AS (
+        SELECT
+              row_number() OVER() AS new_id
+            , source_id
+            , category
+        FROM (
+            SELECT
+                  building_outline_id AS source_id
+                , 'building_outline_id' AS category
+            FROM found_related
+            GROUP BY building_outline_id
+            UNION
+            SELECT
+                  bulk_load_outline_id AS source_id
+                , 'bulk_load_outline_id' AS category
+            FROM found_related
+            GROUP BY bulk_load_outline_id
+        ) sources
+    )
+    SELECT
+          a.new_id::integer AS reassigned_building_outline_id
+        , a.source_id::integer AS original_building_outline_id
+        , b.new_id::integer AS reassigned_bulk_load_outline_id
+        , b.source_id::integer AS original_bulk_load_outline_id
+    FROM found_related
+    JOIN reassigned_ids a ON building_outline_id = a.source_id AND a.category = 'building_outline_id'
+    JOIN reassigned_ids b ON bulk_load_outline_id = b.source_id AND b.category = 'bulk_load_outline_id';
+
+$$
+LANGUAGE sql VOLATILE;
+
+
 -- OVERALL PROCESS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.compare_building_outlines(p_supplied_dataset_id integer)
@@ -279,62 +327,75 @@ IF ( SELECT processed_date
 
         -- RELATED
 
-        WITH found_related AS (
-            SELECT bulk_load_outline_id, building_outline_id
-            FROM buildings_bulk_load.find_related(p_supplied_dataset_id)
-        ), reassigned_ids AS (
-            SELECT row_number() OVER() AS new_id, source_id, category FROM (
-                SELECT bulk_load_outline_id AS source_id, 'bulk_load_outline_id' AS category
-                FROM found_related
-                GROUP BY bulk_load_outline_id
-                UNION
-                SELECT building_outline_id AS source_id, 'building_outline_id' AS category
-                FROM found_related
-                GROUP BY building_outline_id
-            ) sources
-        ), uniquely_identified_related AS (
-            SELECT a.new_id AS bulk_load_outline_id, b.new_id AS building_outline_id
-            FROM found_related
-            JOIN reassigned_ids a ON bulk_load_outline_id = a.source_id AND a.category = 'bulk_load_outline_id'
-            JOIN reassigned_ids b ON building_outline_id = b.source_id AND b.category = 'building_outline_id'
+        WITH uniquely_identified_related AS (
+            SELECT
+                  reassigned_building_outline_id AS building_outline_id
+                , original_building_outline_id
+                , reassigned_bulk_load_outline_id AS bulk_load_outline_id
+                , original_bulk_load_outline_id
+            FROM buildings_bulk_load.reassign_related_ids(p_supplied_dataset_id)
         )
         INSERT INTO buildings_bulk_load.related (related_group_id, bulk_load_outline_id, building_outline_id, qa_status_id)
         WITH RECURSIVE rels AS (
-          SELECT t.bulk_load_outline_id, t.building_outline_id, array[t.bulk_load_outline_id, t.building_outline_id] AS new_array
-          FROM uniquely_identified_related t
-            UNION
-          SELECT t.bulk_load_outline_id, t.building_outline_id, uniq(sort(array[t.bulk_load_outline_id, t.building_outline_id, rels.building_outline_id]::int[] || rels.new_array::int[])) AS new_array
-          FROM uniquely_identified_related t, rels
-          WHERE rels.bulk_load_outline_id = t.building_outline_id
-          OR rels.building_outline_id = t.building_outline_id
-          OR rels.bulk_load_outline_id = t.bulk_load_outline_id
+            SELECT
+                  t.bulk_load_outline_id
+                , t.building_outline_id
+                , array[t.bulk_load_outline_id
+                , t.building_outline_id] AS new_array
+            FROM uniquely_identified_related t
+              UNION
+            SELECT
+                  t.bulk_load_outline_id
+                , t.building_outline_id
+                , uniq(sort(array[
+                      t.bulk_load_outline_id
+                    , t.building_outline_id
+                    , rels.building_outline_id
+                  ]::int[] || rels.new_array::int[])) AS new_array
+            FROM uniquely_identified_related t, rels
+            WHERE rels.bulk_load_outline_id = t.building_outline_id
+            OR rels.building_outline_id = t.building_outline_id
+            OR rels.bulk_load_outline_id = t.bulk_load_outline_id
         )
         , length_of_arrays AS (
           -- Find the maximum length array
-          SELECT rels.bulk_load_outline_id, max(array_length(rels.new_array, 1)) AS maximum
+          SELECT
+                rels.bulk_load_outline_id
+              , max(array_length(rels.new_array, 1)) AS maximum
           FROM rels
           GROUP BY rels.bulk_load_outline_id
         ), groups AS (
         -- Select only those arrays that are maximum length for the bulk_load_outline_id
-            SELECT nextval('buildings_bulk_load.related_groups_related_group_id_seq') AS related_group_id, rels.new_array
+            SELECT
+                  nextval('buildings_bulk_load.related_groups_related_group_id_seq') AS related_group_id
+                , rels.new_array
             FROM rels
             JOIN length_of_arrays USING (bulk_load_outline_id)
             WHERE array_length(rels.new_array, 1) = length_of_arrays.maximum
             GROUP BY rels.new_array
         -- 
         ), unnest_groups AS (
-            SELECT related_group_id, unnest(new_array) AS new_array
+            SELECT
+                  related_group_id
+                , unnest(new_array) AS new_array
             FROM groups
+        -- 
         ), reassigned_id_result AS (
-            SELECT ug.related_group_id, t.bulk_load_outline_id, t.building_outline_id, 1 AS qa_status_id
+            SELECT
+                  ug.related_group_id
+                , t.bulk_load_outline_id
+                , t.building_outline_id, 1 AS qa_status_id
             FROM unnest_groups ug
             JOIN uniquely_identified_related t ON t.bulk_load_outline_id = ug.new_array
         )
         -- source_id result
-        SELECT related_group_id, a.source_id AS bulk_load_outline_id, b.source_id AS building_outline_id, qa_status_id
-        FROM reassigned_id_result
-        JOIN reassigned_ids a ON bulk_load_outline_id = a.new_id AND a.category = 'bulk_load_outline_id'
-        JOIN reassigned_ids b ON building_outline_id = b.new_id AND b.category = 'building_outline_id'
+        SELECT DISTINCT
+              t.related_group_id
+            , a.original_bulk_load_outline_id AS bulk_load_outline_id
+            , b.original_building_outline_id AS building_outline_id, qa_status_id
+        FROM reassigned_id_result t
+        JOIN uniquely_identified_related a ON t.bulk_load_outline_id = a.bulk_load_outline_id
+        JOIN uniquely_identified_related b ON t.building_outline_id = b.building_outline_id
         ;
 
         INSERT INTO buildings_bulk_load.related_groups(related_group_id)
