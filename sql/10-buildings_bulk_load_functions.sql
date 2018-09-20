@@ -626,7 +626,7 @@ $$
 LANGUAGE sql;
 
 
-CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_insert_buildling_outlines(integer, integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_insert_building_outlines(integer, integer)
 RETURNS integer AS
 $$
 
