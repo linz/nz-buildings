@@ -11,10 +11,10 @@ from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
-from buildings.gui.alter_building_relationships import MultiLayerSelection
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 from buildings.utilities import database as db, layers
+from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
