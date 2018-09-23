@@ -13,6 +13,7 @@ from qgis.utils import iface, isPluginLoaded, plugins
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
+from buildings.utilities.multi_layer_selection import MultiLayerSelection
 from buildings.sql import select_statements as select
 
 
@@ -36,9 +37,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         self.current_dataset = current_dataset
 
+        canvas = iface.mapCanvas()
+        self.tool = MultiLayerSelection(canvas)
+        canvas.setMapTool(self.tool)
+
         self.open_alter_relationship_frame()
 
         # set up signals and slots
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
 
         self.btn_unlink.clicked.connect(self.unlink_clicked)
 
@@ -78,7 +84,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.populate_cmb_relationship()
 
         iface.setActiveLayer(self.lyr_bulk_load)
-        iface.actionSelectRectangle().trigger()
+        # iface.actionSelectRectangle().trigger()
 
         self.highlight_features = []
 
@@ -283,8 +289,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 h.setFillColor(QColor(255, 255, 255, 0))
                 self.highlight_features.append(h)
 
+    def multi_relationship_selected_error_msg(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n------------- MULTIPLE RELATIONSHIP SELECTED -------------'
+            '\n\nThere are multiple relationships selected. Please unlink '
+            'matched or related outlines before altering relationships.'
+        )
+        self.error_dialog.show()
+
+    def reset_lyr_selection(self):
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+
     @pyqtSlot()
-    def selection_created(self):
+    def multi_selection_changed(self):
 
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
 
@@ -295,63 +315,98 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
 
-        for feat_id in selected:
+        selected_bulk = [feat.id() for feat in self.lyr_bulk_load.selectedFeatures()]
+        selected_existing = [feat.id() for feat in self.lyr_existing.selectedFeatures()]
+
+        has_added, has_removed, has_matched, has_related = False, False, False, False
+        for feat_id in selected_bulk:
             id_added = self.find_added_outlines(feat_id)
             id_matched = self.find_matched_existing_outlines(feat_id)
             ids_existing, ids_bulk = self.find_related_existing_outlines(feat_id)
             if id_added:
+                if has_matched or has_related:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_bulk, [feat_id])
+                has_added = True
             elif id_matched:
-                print id_matched[0], feat_id, 'bulk'
+                if has_added or has_removed or has_related:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_existing, [id_matched[0]])
                 self.insert_into_list(self.lst_bulk, [feat_id])
                 self.btn_unlink.setEnabled(True)
+                has_matched = True
             elif ids_existing and ids_bulk:
+                if has_added or has_removed or has_matched:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_existing, ids_existing)
                 self.insert_into_list(self.lst_bulk, ids_bulk)
                 self.btn_unlink.setEnabled(True)
+                has_related = True
 
-        if self.lst_bulk.count() == 0:
-            no_bulk_load_selected = True
-        else:
-            no_bulk_load_selected = False
-        for feat_id in selected:
+        for feat_id in selected_existing:
+            listed_id = self.get_ids_from_lst(self.lst_existing)
+            if feat_id in listed_id:
+                continue
             id_removed = self.find_removed_outlines(feat_id)
             id_matched = self.find_matched_bulk_load_outlines(feat_id)
             ids_existing, ids_bulk = self.find_related_bulk_load_outlines(feat_id)
             if id_removed:
+                if has_matched or has_related:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_existing, [feat_id])
                 self.lst_count.emit()
-            elif id_matched and no_bulk_load_selected:
-                print feat_id, id_matched[0], 'existing'
+                has_removed = True
+            elif id_matched:
+                if has_added or has_removed or has_related:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_existing, [feat_id])
                 self.insert_into_list(self.lst_bulk, [id_matched[0]])
                 self.btn_unlink.setEnabled(True)
-            elif ids_existing and ids_bulk and no_bulk_load_selected:
+                has_matched = True
+            elif ids_existing and ids_bulk:
+                if has_added or has_removed or has_matched:
+                    self.multi_relationship_selected_error_msg()
+                    self.reset_lyr_selection()
+                    return
                 self.insert_into_list(self.lst_existing, ids_existing)
                 self.insert_into_list(self.lst_bulk, ids_bulk)
                 self.btn_unlink.setEnabled(True)
-        pass
+                has_related = True
+
+        self.disable_listwidget(self.lst_existing)
+        self.disable_listwidget(self.lst_bulk)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot(int)
     def lyr_selection_changed(self, selected):
         """
         When user selects features in existing outline layers, the ids will be added to the table
         """
-        current_layer = self.sender()
-        if not isinstance(current_layer, QgsVectorLayer):
-            return
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-        if current_layer.name() == 'bulk_load_outlines':
-            self.select_from_bulk_load(selected)
-        elif current_layer.name() == 'existing_subset_extracts':
-            self.select_from_existing(selected)
+        # current_layer = self.sender()
+        # if not isinstance(current_layer, QgsVectorLayer):
+        #     return
+        # self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+        # if current_layer.name() == 'bulk_load_outlines':
+        #     self.select_from_bulk_load(selected)
+        # elif current_layer.name() == 'existing_subset_extracts':
+        #     self.select_from_existing(selected)
 
-        # self.select_row_in_tbl_relationship()
+        # # self.select_row_in_tbl_relationship()
 
-        self.disable_listwidget(self.lst_existing)
-        self.disable_listwidget(self.lst_bulk)
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+        # self.disable_listwidget(self.lst_existing)
+        # self.disable_listwidget(self.lst_bulk)
+        # self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+        pass
 
     @pyqtSlot()
     def lst_count_changed(self):

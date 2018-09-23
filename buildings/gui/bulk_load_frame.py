@@ -14,7 +14,6 @@ from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 from buildings.utilities import database as db, layers
-from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -507,10 +506,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             dw, self.layer_registry, self.current_dataset))
-
-        canvas = iface.mapCanvas()
-        self.tool = MultiLayerSelection(canvas)
-        canvas.setMapTool(self.tool)
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
