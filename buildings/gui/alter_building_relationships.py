@@ -8,7 +8,7 @@ from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
 from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils, QgsMapLayerRegistry
-from qgis.gui import QgsHighlight
+from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface, isPluginLoaded, plugins
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -39,6 +39,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.open_alter_relationship_frame()
 
+        self.message_bar = QgsMessageBar()
+        self.layout_msg_bar.addWidget(self.message_bar)
         # set up signals and slots
 
         self.btn_maptool.clicked.connect(self.maptool_clicked)
@@ -304,6 +306,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         selected_bulk = [feat.id() for feat in self.lyr_bulk_load.selectedFeatures()]
         selected_existing = [feat.id() for feat in self.lyr_existing.selectedFeatures()]
 
+        has_multi_set = False
         has_added, has_removed, has_matched, has_related = False, False, False, False
         existing_to_lst, bulk_to_list = [], []
         for feat_id in selected_bulk:
@@ -324,6 +327,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.multi_relationship_selected_error_msg()
                     self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
+                if has_matched:
+                    has_multi_set = True
                 existing_to_lst, bulk_to_list = [], []
                 existing_to_lst.append(id_matched[0])
                 bulk_to_list.append(feat_id)
@@ -333,6 +338,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.multi_relationship_selected_error_msg()
                     self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
+                if has_related:
+                    has_multi_set = True
                 existing_to_lst = ids_existing
                 bulk_to_list = ids_bulk
                 has_related = True
@@ -355,6 +362,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.multi_relationship_selected_error_msg()
                     self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
+                if has_matched:
+                    has_multi_set = True
                 existing_to_lst, bulk_to_list = [], []
                 existing_to_lst.append(feat_id)
                 bulk_to_list.append(id_matched[0])
@@ -364,18 +373,27 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.multi_relationship_selected_error_msg()
                     self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
+                if has_related:
+                    has_multi_set = True
                 existing_to_lst = ids_existing
                 bulk_to_list = ids_bulk
                 has_related = True
         self.insert_into_list(self.lst_existing, existing_to_lst)
         self.insert_into_list(self.lst_bulk, bulk_to_list)
+        self.disable_listwidget(self.lst_existing)
+        self.disable_listwidget(self.lst_bulk)
         self.lyr_existing.selectByIds(existing_to_lst)
         self.lyr_bulk_load.selectByIds(bulk_to_list)
+
+        # error msg when more than one set of matched or related set are selected
+        if has_multi_set:
+            self.message_bar.pushMessage('Multiple matched or related sets selected, can only unlink one at a time.')
+        # switch botton
         if has_matched or has_related:
             self.btn_unlink.setEnabled(True)
         elif has_added and has_removed:
             self.switch_btn_match_and_related()
-
+        # select rows in tbl_relationship
         if has_removed:
             self.select_row_in_tbl_removed(existing_to_lst[-1])
         elif has_matched:
@@ -383,8 +401,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif has_related:
             self.select_row_in_tbl_related(existing_to_lst[-1], bulk_to_list[-1])
 
-        self.disable_listwidget(self.lst_existing)
-        self.disable_listwidget(self.lst_bulk)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()

@@ -160,7 +160,7 @@ QGroupBox::title {
       <string>Edit Relationships</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="2" column="0">
+      <item row="3" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <spacer name="horizontalSpacer_5">
@@ -191,7 +191,7 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -377,6 +377,9 @@ QGroupBox::title {
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="0">
+       <layout class="QVBoxLayout" name="layout_msg_bar"/>
       </item>
      </layout>
     </widget>
