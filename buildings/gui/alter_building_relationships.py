@@ -35,14 +35,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         self.current_dataset = current_dataset
 
-        canvas = iface.mapCanvas()
-        self.tool = MultiLayerSelection(canvas)
-        canvas.setMapTool(self.tool)
+        self.maptool_clicked()
 
         self.open_alter_relationship_frame()
 
         # set up signals and slots
-        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+
+        self.btn_maptool.clicked.connect(self.maptool_clicked)
 
         self.btn_unlink.clicked.connect(self.unlink_clicked)
 
@@ -282,6 +281,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.highlight_features.append(h)
 
     @pyqtSlot()
+    def maptool_clicked(self):
+        canvas = iface.mapCanvas()
+        self.tool = MultiLayerSelection(canvas)
+        canvas.setMapTool(self.tool)
+        # set up signal and slot
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+
+    @pyqtSlot()
     def multi_selection_changed(self):
 
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
@@ -396,6 +403,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Called when unlink_all botton is clicked
         """
         self.btn_unlink.setEnabled(False)
+        self.btn_maptool.setEnabled(False)
         self.btn_save.setEnabled(True)
 
         ids_existing = self.get_ids_from_lst(self.lst_existing)
@@ -419,6 +427,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
+            self.btn_maptool.setEnabled(False)
             self.btn_save.setEnabled(True)
 
             id_existing = int(self.lst_existing.item(0).text())
@@ -449,6 +458,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         else:
             self.btn_related.setEnabled(False)
+            self.btn_maptool.setEnabled(False)
             self.btn_save.setEnabled(True)
             for row in range(self.lst_existing.count()):
                 id_existing = int(self.lst_existing.item(row).text())
@@ -497,6 +507,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.clear()
 
         self.btn_save.setEnabled(False)
+        self.btn_maptool.setEnabled(True)
 
         self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
         self.tool.multi_selection_changed.connect(self.multi_selection_changed)
@@ -515,6 +526,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
         self.btn_save.setEnabled(False)
+        self.btn_maptool.setEnabled(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
         self.lyr_existing.removeSelection()
