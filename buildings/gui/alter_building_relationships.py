@@ -41,6 +41,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.message_bar = QgsMessageBar()
         self.layout_msg_bar.addWidget(self.message_bar)
+
         # set up signals and slots
 
         self.btn_maptool.clicked.connect(self.maptool_clicked)
@@ -62,6 +63,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if isPluginLoaded('liqa'):
             self.error_inspector = plugins["liqa"].error_inspector
             self.error_inspector.clicked_in_error_inspector.connect(partial(self.error_inspector_btn_clicked, commit_status=True))
+            self.error_inspector.error_inspector_item_selection_changed.connect(self.multi_selection_changed)
 
         self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
@@ -350,6 +352,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 for id_bulk in bulk_to_list:
                     self.select_row_in_tbl_related(id_existing, id_bulk)
             self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
+
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
@@ -682,8 +685,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot(dict)
     def error_inspector_btn_clicked(self, status_changed_dict, commit_status=True):
         self.db.open_cursor()
-        # If LIQA input layers have different relationships, this will just change one
-        # Alternative way is to search for the same outline ids in the table which could take long
         for qa_lyr_name in status_changed_dict:
             lyr = QgsMapLayerRegistry.instance().mapLayersByName(qa_lyr_name)[0]
             for feat in status_changed_dict[qa_lyr_name]:
@@ -781,7 +782,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
-        return ids_existing, ids_bulk
+        return list(set(ids_existing)), list(set(ids_bulk))
 
     def insert_into_table(self, tbl, ids):
         rows = []
