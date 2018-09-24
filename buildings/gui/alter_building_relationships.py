@@ -6,8 +6,8 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
-from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
-from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils, QgsVectorLayer
+from PyQt4.QtCore import Qt, pyqtSlot
+from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils, QgsMapLayerRegistry
 from qgis.gui import QgsHighlight
 from qgis.utils import iface, isPluginLoaded, plugins
 
@@ -22,8 +22,6 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 
 class AlterRelationships(QFrame, FORM_CLASS):
-
-    lst_count = pyqtSignal()
 
     def __init__(self, dockwidget, layer_registry, current_dataset, parent=None):
         """Constructor."""
@@ -84,17 +82,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.populate_cmb_relationship()
 
         iface.setActiveLayer(self.lyr_bulk_load)
-        # iface.actionSelectRectangle().trigger()
 
         self.highlight_features = []
 
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
-
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
         self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
-
-        self.lst_count.connect(self.lst_count_changed)
 
         self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
@@ -289,24 +281,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 h.setFillColor(QColor(255, 255, 255, 0))
                 self.highlight_features.append(h)
 
-    def multi_relationship_selected_error_msg(self):
-        self.error_dialog = ErrorDialog()
-        self.error_dialog.fill_report(
-            '\n------------- MULTIPLE RELATIONSHIP SELECTED -------------'
-            '\n\nThere are multiple relationships selected. Please unlink '
-            'matched or related outlines before altering relationships.'
-        )
-        self.error_dialog.show()
-
-    def reset_lyr_selection(self):
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
-
     @pyqtSlot()
     def multi_selection_changed(self):
 
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+        self.tbl_relationship.clearSelection()
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -319,39 +298,40 @@ class AlterRelationships(QFrame, FORM_CLASS):
         selected_existing = [feat.id() for feat in self.lyr_existing.selectedFeatures()]
 
         has_added, has_removed, has_matched, has_related = False, False, False, False
+        existing_to_lst, bulk_to_list = [], []
         for feat_id in selected_bulk:
+            if feat_id in bulk_to_list:
+                continue
             id_added = self.find_added_outlines(feat_id)
             id_matched = self.find_matched_existing_outlines(feat_id)
             ids_existing, ids_bulk = self.find_related_existing_outlines(feat_id)
             if id_added:
                 if has_matched or has_related:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_bulk, [feat_id])
+                bulk_to_list.append(feat_id)
                 has_added = True
             elif id_matched:
                 if has_added or has_removed or has_related:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_existing, [id_matched[0]])
-                self.insert_into_list(self.lst_bulk, [feat_id])
-                self.btn_unlink.setEnabled(True)
+                existing_to_lst, bulk_to_list = [], []
+                existing_to_lst.append(id_matched[0])
+                bulk_to_list.append(feat_id)
                 has_matched = True
             elif ids_existing and ids_bulk:
                 if has_added or has_removed or has_matched:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_existing, ids_existing)
-                self.insert_into_list(self.lst_bulk, ids_bulk)
-                self.btn_unlink.setEnabled(True)
+                existing_to_lst = ids_existing
+                bulk_to_list = ids_bulk
                 has_related = True
 
         for feat_id in selected_existing:
-            listed_id = self.get_ids_from_lst(self.lst_existing)
-            if feat_id in listed_id:
+            if feat_id in existing_to_lst:
                 continue
             id_removed = self.find_removed_outlines(feat_id)
             id_matched = self.find_matched_bulk_load_outlines(feat_id)
@@ -359,65 +339,55 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if id_removed:
                 if has_matched or has_related:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_existing, [feat_id])
-                self.lst_count.emit()
+                existing_to_lst.append(feat_id)
                 has_removed = True
             elif id_matched:
                 if has_added or has_removed or has_related:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_existing, [feat_id])
-                self.insert_into_list(self.lst_bulk, [id_matched[0]])
-                self.btn_unlink.setEnabled(True)
+                existing_to_lst, bulk_to_list = [], []
+                existing_to_lst.append(feat_id)
+                bulk_to_list.append(id_matched[0])
                 has_matched = True
             elif ids_existing and ids_bulk:
                 if has_added or has_removed or has_matched:
                     self.multi_relationship_selected_error_msg()
-                    self.reset_lyr_selection()
+                    self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
                     return
-                self.insert_into_list(self.lst_existing, ids_existing)
-                self.insert_into_list(self.lst_bulk, ids_bulk)
-                self.btn_unlink.setEnabled(True)
+                existing_to_lst = ids_existing
+                bulk_to_list = ids_bulk
                 has_related = True
+        self.insert_into_list(self.lst_existing, existing_to_lst)
+        self.insert_into_list(self.lst_bulk, bulk_to_list)
+        self.lyr_existing.selectByIds(existing_to_lst)
+        self.lyr_bulk_load.selectByIds(bulk_to_list)
+        if has_matched or has_related:
+            self.btn_unlink.setEnabled(True)
+        elif has_added and has_removed:
+            self.switch_btn_match_and_related()
+
+        if has_removed:
+            self.select_row_in_tbl_removed(existing_to_lst[-1])
+        elif has_matched:
+            self.select_row_in_tbl_matched(existing_to_lst[-1], bulk_to_list[-1])
+        elif has_related:
+            self.select_row_in_tbl_related(existing_to_lst[-1], bulk_to_list[-1])
 
         self.disable_listwidget(self.lst_existing)
         self.disable_listwidget(self.lst_bulk)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
-    @pyqtSlot(int)
-    def lyr_selection_changed(self, selected):
-        """
-        When user selects features in existing outline layers, the ids will be added to the table
-        """
-        # current_layer = self.sender()
-        # if not isinstance(current_layer, QgsVectorLayer):
-        #     return
-        # self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-        # if current_layer.name() == 'bulk_load_outlines':
-        #     self.select_from_bulk_load(selected)
-        # elif current_layer.name() == 'existing_subset_extracts':
-        #     self.select_from_existing(selected)
-
-        # # self.select_row_in_tbl_relationship()
-
-        # self.disable_listwidget(self.lst_existing)
-        # self.disable_listwidget(self.lst_bulk)
-        # self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
-        pass
-
     @pyqtSlot()
-    def lst_count_changed(self):
-        if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
-            pass
-        elif self.lst_bulk.count() == 1 and self.lst_existing.count() == 1:
-            self.btn_matched.setEnabled(True)
-            self.btn_related.setEnabled(False)
-        else:
-            self.btn_related.setEnabled(True)
-            self.btn_matched.setEnabled(False)
+    def multi_selection_changed_error(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n------------- UNFINISHED PROCESS -------------'
+            '\n\nPlease click Save or Cancel to finish before continuing.'
+        )
+        self.error_dialog.show()
 
     @pyqtSlot()
     def unlink_clicked(self):
@@ -433,10 +403,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.insert_into_lyr_removed_in_edit(ids_existing)
         self.insert_into_lyr_added_in_edit(ids_bulk)
 
-        # Should we stop adding features in the lists?
-        self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
+
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
 
@@ -459,9 +430,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.delete_original_relationship_in_existing(id_existing)
             self.delete_original_relationship_in_bulk_load(id_bulk)
 
-            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+            self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+            self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -490,9 +462,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.insert_into_lyr_related_bulk_load_in_edit(id_bulk)
                 self.delete_original_relationship_in_bulk_load(id_bulk)
 
-            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+            self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+            self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -525,8 +498,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.btn_save.setEnabled(False)
 
-        self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
         self.repaint_view()
@@ -546,8 +520,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
         try:
-            self.lyr_existing.selectionChanged.connect(self.lyr_selection_changed)
-            self.lyr_bulk_load.selectionChanged.connect(self.lyr_selection_changed)
+            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
+            self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
             self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
         except TypeError:
             pass
@@ -563,17 +538,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Called when cancel botton is clicked
         """
         try:
-            self.lyr_existing.selectionChanged.disconnect(self.lyr_selection_changed)
+            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
             self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.lyr_selection_changed)
             self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
             self.cmb_relationship.currentIndexChanged.disconnect(self.cmb_relationship_current_index_changed)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
         except TypeError:
             pass
-        self.lst_existing.clearSelection()
-        self.lst_bulk.clearSelection()
-        self.tbl_relationship.clearSelection()
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+        self.tbl_relationship.setCurrentIndex(0)
         self.highlight_features = []
 
         self.layer_registry.remove_layer(self.lyr_existing)
@@ -673,6 +649,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
 
     @pyqtSlot()
+    def tbl_relationship_item_selection_changed_error(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n------------- UNFINISHED PROCESS -------------'
+            '\n\nPlease click Save or Cancel to finish before continuing.'
+        )
+        self.error_dialog.show()
+
+    @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
 
         qa_status_id = self.get_qa_status_id(qa_status)
@@ -769,49 +754,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.refresh_tbl_relationship()
 
-    def select_from_bulk_load(self, selected):
-        self.btn_unlink.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
-        for feat_id in selected:
-            id_added = self.find_added_outlines(feat_id)
-            id_matched = self.find_matched_existing_outlines(feat_id)
-            ids_existing, ids_bulk = self.find_related_existing_outlines(feat_id)
-            if id_added:
-                self.insert_into_list(self.lst_bulk, [feat_id])
-            elif id_matched:
-                print id_matched[0], feat_id, 'bulk'
-                self.insert_into_list(self.lst_existing, [id_matched[0]])
-                self.insert_into_list(self.lst_bulk, [feat_id])
-                self.btn_unlink.setEnabled(True)
-            elif ids_existing and ids_bulk:
-                self.insert_into_list(self.lst_existing, ids_existing)
-                self.insert_into_list(self.lst_bulk, ids_bulk)
-                self.btn_unlink.setEnabled(True)
-
-    def select_from_existing(self, selected):
-        if self.lst_bulk.count() == 0:
-            no_bulk_load_selected = True
+    def switch_btn_match_and_related(self):
+        if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
+            pass
+        elif self.lst_bulk.count() == 1 and self.lst_existing.count() == 1:
+            self.btn_matched.setEnabled(True)
+            self.btn_related.setEnabled(False)
         else:
-            no_bulk_load_selected = False
-        for feat_id in selected:
-            id_removed = self.find_removed_outlines(feat_id)
-            id_matched = self.find_matched_bulk_load_outlines(feat_id)
-            ids_existing, ids_bulk = self.find_related_bulk_load_outlines(feat_id)
-            if id_removed:
-                self.insert_into_list(self.lst_existing, [feat_id])
-                self.lst_count.emit()
-            elif id_matched and no_bulk_load_selected:
-                print feat_id, id_matched[0], 'existing'
-                self.insert_into_list(self.lst_existing, [feat_id])
-                self.insert_into_list(self.lst_bulk, [id_matched[0]])
-                self.btn_unlink.setEnabled(True)
-            elif ids_existing and ids_bulk and no_bulk_load_selected:
-                self.insert_into_list(self.lst_existing, ids_existing)
-                self.insert_into_list(self.lst_bulk, ids_bulk)
-                self.btn_unlink.setEnabled(True)
+            self.btn_related.setEnabled(True)
+            self.btn_matched.setEnabled(False)
+
+    def multi_relationship_selected_error_msg(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n------------- MULTIPLE RELATIONSHIP SELECTED -------------'
+            '\n\nThere are multiple relationships selected. Please unlink '
+            'matched or related outlines before altering relationships.'
+        )
+        self.error_dialog.show()
 
     def find_added_outlines(self, id_bulk):
         result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
@@ -861,13 +821,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if not tbl.selectionModel().selectedRows():
             return True
         return False
-
-    def has_no_selection_in_layers(self):
-        for lyr in [self.lyr_bulk_load, self.lyr_existing]:
-            selected = [feat for feat in lyr.selectedFeatures()]
-            if selected:
-                return False
-        return True
 
     def insert_into_lyr_removed_in_edit(self, ids_existing):
         for id_existing in ids_existing:
@@ -969,7 +922,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(self.lst_existing.count()):
             item = self.lst_existing.item(row)
             id_existing = int(item.text())
-
             self.db.execute_no_commit(sql_delete_removed, (id_existing, ))
             self.db.execute_no_commit(sql_delete_matched_existing, (id_existing, ))
             self.db.execute_no_commit(sql_delete_related_existing, (id_existing, ))
@@ -1210,30 +1162,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.error_inspector.tbl_error_attr.cellChanged.disconnect(self.error_inspector.update_comment)
             self.error_inspector.init_tbl_error_attr()
             self.error_inspector.tbl_error_attr.cellChanged.connect(self.error_inspector.update_comment)
-
-    def select_row_in_tbl_relationship(self):
-        # self.cmb_relationship.setCurrentIndex(0)
-        # for index in reversed(self.tbl_original.selectionModel().selectedRows()):
-        #     item_existing = self.tbl_original.item(index.row(), 0)
-        #     item_bulk = self.tbl_original.item(index.row(), 1)
-        #     self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
-        #     if item_existing and not item_bulk:
-        #         id_existing = int(item_existing.text())
-        #         self.select_row_in_tbl_removed(id_existing)
-        #     elif item_bulk and not item_existing:
-        #         id_bulk = int(item_bulk.text())
-        #         self.select_row_in_tbl_added(id_bulk)
-        #     elif item_existing and item_bulk:
-        #         id_existing = int(item_existing.text())
-        #         id_bulk = int(item_bulk.text())
-        #         id_matched = self.find_matched_bulk_load_outlines(id_existing)
-        #         id_related = self.find_related_bulk_load_outlines(id_existing)
-        #         if id_matched:
-        #             self.select_row_in_tbl_matched(id_existing, id_bulk)
-        #         elif id_related:
-        #             self.select_row_in_tbl_related(id_existing, id_bulk)
-        #     self.tbl_relationship.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        pass
 
     def select_row_in_tbl_matched(self, id_existing, id_bulk):
         tbl = self.tbl_relationship
