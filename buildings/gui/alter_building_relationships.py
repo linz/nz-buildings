@@ -445,7 +445,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         if self.lst_existing.count() == 0 or self.lst_bulk.count() == 0:
             pass
-        elif self.lst_existing.count() == 1 and self.lst_existing.count() == 1:
+        elif self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             pass
         else:
             self.btn_related.setEnabled(False)
@@ -549,7 +549,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         self.lst_existing.clear()
         self.lst_bulk.clear()
-        self.tbl_relationship.setCurrentIndex(0)
+        self.cmb_relationship.setCurrentIndex(0)
         self.highlight_features = []
 
         self.layer_registry.remove_layer(self.lyr_existing)
@@ -665,6 +665,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             return
         current_text = self.cmb_relationship.currentText()
         self.db.open_cursor()
+        ids_existing, ids_bulk = [], []
         if current_text == "Related Outlines":
             for index in self.tbl_relationship.selectionModel().selectedRows():
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
