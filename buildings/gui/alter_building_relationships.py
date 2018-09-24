@@ -34,6 +34,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.dockwidget = dockwidget
         self.layer_registry = layer_registry
         self.current_dataset = current_dataset
+        self.error_dialog = None
 
         self.maptool_clicked()
 
@@ -63,7 +64,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if isPluginLoaded('liqa'):
             self.error_inspector = plugins["liqa"].error_inspector
             self.error_inspector.clicked_in_error_inspector.connect(partial(self.error_inspector_btn_clicked, commit_status=True))
-            self.error_inspector.error_inspector_item_selection_changed.connect(self.multi_selection_changed)
+            self.error_inspector.selection_changed_in_error_inspector.connect(self.multi_selection_changed)
 
         self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
@@ -356,7 +357,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
-    def multi_selection_changed_error(self):
+    def unfinished_error_msg(self):
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
             '\n------------- UNFINISHED PROCESS -------------'
@@ -380,9 +381,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.insert_into_lyr_added_in_edit(ids_bulk)
 
         self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-        self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
+        self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
+        self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
 
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
@@ -408,9 +409,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.delete_original_relationship_in_bulk_load(id_bulk)
 
             self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
+            self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
+            self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -441,9 +442,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.delete_original_relationship_in_bulk_load(id_bulk)
 
             self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.connect(self.multi_selection_changed_error)
+            self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed_error)
+            self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -477,9 +478,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_save.setEnabled(False)
         self.btn_maptool.setEnabled(True)
 
-        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
+        self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
         self.tool.multi_selection_changed.connect(self.multi_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
         self.repaint_view()
@@ -500,9 +501,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
         try:
-            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
+            self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
             self.tool.multi_selection_changed.connect(self.multi_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
+            self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
             self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
         except TypeError:
             pass
@@ -519,12 +520,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         try:
             self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed_error)
+            self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
             self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
             self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
             self.cmb_relationship.currentIndexChanged.disconnect(self.cmb_relationship_current_index_changed)
             self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed_error)
+            self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
         except TypeError:
             pass
         self.lst_existing.clear()
@@ -627,15 +628,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
         except TypeError:
             pass
-
-    @pyqtSlot()
-    def tbl_relationship_item_selection_changed_error(self):
-        self.error_dialog = ErrorDialog()
-        self.error_dialog.fill_report(
-            '\n------------- UNFINISHED PROCESS -------------'
-            '\n\nPlease click Save or Cancel to finish before continuing.'
-        )
-        self.error_dialog.show()
 
     @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
