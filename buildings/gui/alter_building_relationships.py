@@ -530,7 +530,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         self.lst_existing.clear()
         self.lst_bulk.clear()
-        self.cmb_relationship.setCurrentIndex(0)
         self.highlight_features = []
 
         self.layer_registry.remove_layer(self.lyr_existing)
@@ -632,38 +631,48 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
 
-        qa_status_id = self.get_qa_status_id(qa_status)
-        if not qa_status_id:
+        selected_rows = self.tbl_relationship.selectionModel().selectedRows()
+        if not selected_rows:
             return
-        current_text = self.cmb_relationship.currentText()
         self.db.open_cursor()
+
+        qa_status_id = self.get_qa_status_id(qa_status)
+        current_text = self.cmb_relationship.currentText()
+
         ids_existing, ids_bulk = [], []
         if current_text == "Related Outlines":
-            for index in self.tbl_relationship.selectionModel().selectedRows():
+            for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 1).text())
                 id_bulk = int(self.tbl_relationship.item(index.row(), 2).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
         elif current_text == "Matched Outlines":
-            for index in self.tbl_relationship.selectionModel().selectedRows():
+            for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
                 self.update_qa_status_in_matched(id_existing, id_bulk, qa_status_id)
                 ids_existing.append(id_existing)
                 ids_bulk.append(id_bulk)
         elif current_text == "Removed Outlines":
-            for index in self.tbl_relationship.selectionModel().selectedRows():
+            for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
         elif current_text == "Added Outlines":
-            for index in self.tbl_relationship.selectionModel().selectedRows():
+            for index in selected_rows:
                 id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.update_qa_status_in_added(id_bulk, qa_status_id)
                 ids_bulk.append(id_bulk)
         else:
             self.db.close_cursor()
             return
+        # error if there're outline altering relationship
+        self.refresh_tbl_relationship()
+        if self.error_dialog:
+            if self.error_dialog.isVisible():
+                self.db.rollback_open_cursor()
+                self.refresh_tbl_relationship()
+                return
 
         if commit_status:
             self.db.commit_open_cursor()
