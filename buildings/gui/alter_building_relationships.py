@@ -208,58 +208,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_related_existing.setSubsetString('')
         self.lyr_related_bulk_load.setSubsetString('')
 
-    def init_tbl_matched_and_related(self):
-        """Initiates tbl_relationship when cmb_relationship switches to matched or related"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(3)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Bulk Load Outlines"))
-        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
-
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
-    def init_tbl_removed(self):
-        """Initiates tbl_relationship when cmb_relationship switches to removed"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(2)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
-
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
-    def init_tbl_added(self):
-        """Initiates tbl_relationship when cmb_relationship switches to added"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(2)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Bulk Load Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
-
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
     @pyqtSlot()
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
@@ -329,9 +277,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     return
                 if has_matched:
                     has_multi_set = True
-                existing_to_lst, bulk_to_list = [], []
-                existing_to_lst.append(id_matched[0])
-                bulk_to_list.append(feat_id)
+                existing_to_lst = [id_matched[0]]
+                bulk_to_list = [feat_id]
                 has_matched = True
             elif ids_existing and ids_bulk:
                 if has_added or has_removed or has_matched:
@@ -364,9 +311,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     return
                 if has_matched:
                     has_multi_set = True
-                existing_to_lst, bulk_to_list = [], []
-                existing_to_lst.append(feat_id)
-                bulk_to_list.append(id_matched[0])
+                existing_to_lst = [feat_id]
+                bulk_to_list = [id_matched[0]]
                 has_matched = True
             elif ids_existing and ids_bulk:
                 if has_added or has_removed or has_matched:
@@ -397,10 +343,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if has_removed:
             self.select_row_in_tbl_removed(existing_to_lst[-1])
         elif has_matched:
-            self.select_row_in_tbl_matched(existing_to_lst[-1], bulk_to_list[-1])
+            self.select_row_in_tbl_matched(existing_to_lst[0], bulk_to_list[0])
         elif has_related:
-            self.select_row_in_tbl_related(existing_to_lst[-1], bulk_to_list[-1])
-
+            self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
+            for id_existing in existing_to_lst:
+                for id_bulk in bulk_to_list:
+                    self.select_row_in_tbl_related(id_existing, id_bulk)
+            self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
@@ -605,10 +554,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
-            self.init_tbl_matched_and_related()
+            self.init_tbl_related()
             self.populate_tbl_related()
         elif current_text == "Matched Outlines":
-            self.init_tbl_matched_and_related()
+            self.init_tbl_matched()
             self.populate_tbl_matched()
         elif current_text == "Removed Outlines":
             self.init_tbl_removed()
@@ -640,13 +589,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
-            id_existing = int(self.tbl_relationship.item(row, 0).text())
-            id_bulk = int(self.tbl_relationship.item(row, 1).text())
+            id_existing = int(self.tbl_relationship.item(row, 1).text())
+            id_bulk = int(self.tbl_relationship.item(row, 2).text())
             ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
             self.insert_into_list(self.lst_existing, ids_existing)
             self.insert_into_list(self.lst_bulk, ids_bulk)
-            self.lyr_existing.selectByIds([id_existing])
-            self.lyr_bulk_load.selectByIds([id_bulk])
+            self.lyr_existing.selectByIds(ids_existing)
+            self.lyr_bulk_load.selectByIds(ids_bulk)
             self.btn_unlink.setEnabled(True)
         elif current_text == "Matched Outlines":
             row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
@@ -696,8 +645,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         ids_existing, ids_bulk = [], []
         if current_text == "Related Outlines":
             for index in self.tbl_relationship.selectionModel().selectedRows():
-                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
-                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
+                id_existing = int(self.tbl_relationship.item(index.row(), 1).text())
+                id_bulk = int(self.tbl_relationship.item(index.row(), 2).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
         elif current_text == "Matched Outlines":
@@ -727,7 +676,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.refresh_tbl_relationship()
 
         if isPluginLoaded('liqa'):
-            self.update_status_in_qa_lyr(list(set(ids_existing)), list(set(ids_bulk)), qa_status)
+            self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
             self.refresh_tbl_error_attr()
 
     @pyqtSlot(dict)
@@ -824,7 +773,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
-        return ids_existing, ids_bulk
+        return list(set(ids_existing)), list(set(ids_bulk))
 
     def find_related_bulk_load_outlines(self, id_existing):
         ids_existing, ids_bulk = [], []
@@ -906,8 +855,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
 
     def insert_into_list(self, lst, ids):
-        for id in list(set(ids)):
-            lst.addItem(QListWidgetItem('%s' % id))
+        for fid in ids:
+            lst.addItem(QListWidgetItem('%s' % fid))
 
     def get_ids_from_lst(self, lst):
         feat_ids = []
@@ -1028,19 +977,91 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif 'added' in source_lyr:
             self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Added Outlines'))
 
+    def init_tbl_related(self):
+        """Initiates tbl_relationship when cmb_relationship switches to related"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(4)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Group"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Existing"))
+        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("Bulk Load"))
+        tbl.setHorizontalHeaderItem(3, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
+    def init_tbl_matched(self):
+        """Initiates tbl_relationship when cmb_relationship switches to matched or related"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(3)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Bulk Load Outlines"))
+        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
+    def init_tbl_removed(self):
+        """Initiates tbl_relationship when cmb_relationship switches to removed"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(2)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
+    def init_tbl_added(self):
+        """Initiates tbl_relationship when cmb_relationship switches to added"""
+        tbl = self.tbl_relationship
+        tbl.clearContents()
+        tbl.setColumnCount(2)
+        tbl.setRowCount(0)
+
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Bulk Load Outlines"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.verticalHeader().setVisible(False)
+
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        tbl.setShowGrid(True)
+
     def populate_tbl_related(self):
         """Populates tbl_relationship when cmb_relationship switches to related"""
         tbl = self.tbl_relationship
-        sql_related = """SELECT r.building_outline_id, r.bulk_load_outline_id, q.value
+        sql_related = """SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value
                          FROM buildings_bulk_load.related r
                          JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
         result = self.db._execute(sql_related)
-        for (id_existing, id_bulk, qa_status) in result.fetchall():
+        for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_group))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % qa_status))
 
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
@@ -1143,18 +1164,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                               WHERE bulk_load_outline_id = %s;"""
         self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
 
-    def update_related_in_tbl_relationship(self, ids_existing, ids_bulk, qa_status_id, qa_status):
-        for row in range(self.tbl_relationship.rowCount()):
-            id_existing_tbl = int(self.tbl_relationship.item(row, 0).text())
-            id_bulk_tbl = int(self.tbl_relationship.item(row, 1).text())
-            qa_status_tbl = self.tbl_relationship.item(row, 2).text()
-            if (id_existing_tbl in ids_existing) or (id_bulk_tbl in ids_bulk):
-                if qa_status_tbl != qa_status:
-                    sql_update_related = """UPDATE buildings_bulk_load.related
-                                            SET qa_status_id = %s
-                                            WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
-                    self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing_tbl, id_bulk_tbl))
-
     def update_status_in_qa_lyr(self, ids_existing, ids_bulk, qa_status):
 
         qa_lyrs = self.error_inspector.find_qa_lyrs()
@@ -1208,7 +1217,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if self.cmb_relationship.currentIndex() != index:
             self.cmb_relationship.setCurrentIndex(index)
         for row in range(self.tbl_relationship.rowCount()):
-            if int(tbl.item(row, 0).text()) == id_existing and int(tbl.item(row, 1).text()) == id_bulk:
+            if int(tbl.item(row, 1).text()) == id_existing and int(tbl.item(row, 2).text()) == id_bulk:
                 tbl.selectRow(row)
                 tbl.scrollToItem(tbl.item(row, 0))
 
