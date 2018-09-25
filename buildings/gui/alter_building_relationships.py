@@ -507,6 +507,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         self.cancel_clicked()
 
+        if isPluginLoaded('liqa'):
+            try:
+                self.error_inspector.clicked_in_error_inspector.disconnect(self.error_inspector_btn_clicked)
+            except TypeError:
+                pass
+            try:
+                self.error_inspector.selection_changed_in_error_inspector.disconnect(self.multi_selection_changed)
+            except TypeError:
+                pass
+
         self.layer_registry.remove_layer(self.lyr_existing)
         self.layer_registry.remove_layer(self.lyr_bulk_load)
         self.layer_registry.remove_layer(self.lyr_added_bulk_load)
@@ -532,16 +542,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
-            self.init_tbl_related()
+            self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
         elif current_text == "Matched Outlines":
-            self.init_tbl_matched()
+            self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
         elif current_text == "Removed Outlines":
-            self.init_tbl_removed()
+            self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
         elif current_text == "Added Outlines":
-            self.init_tbl_added()
+            self.init_tbl_relationship(['Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_added()
         elif current_text == "":
             self.tbl_relationship.setColumnCount(0)
@@ -962,69 +972,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif 'added' in source_lyr:
             self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Added Outlines'))
 
-    def init_tbl_related(self):
-        """Initiates tbl_relationship when cmb_relationship switches to related"""
+    def init_tbl_relationship(self, header_items):
+        """Initiates tbl_relationship """
         tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(4)
         tbl.setRowCount(0)
+        tbl.setColumnCount(len(header_items))
 
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Group"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Existing"))
-        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("Bulk Load"))
-        tbl.setHorizontalHeaderItem(3, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
+        for i, header_item in enumerate(header_items):
+            tbl.setHorizontalHeaderItem(i, QTableWidgetItem(header_item))
 
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
-    def init_tbl_matched(self):
-        """Initiates tbl_relationship when cmb_relationship switches to matched or related"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(3)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Bulk Load Outlines"))
-        tbl.setHorizontalHeaderItem(2, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
-
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
-    def init_tbl_removed(self):
-        """Initiates tbl_relationship when cmb_relationship switches to removed"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(2)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Existing Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
-        tbl.verticalHeader().setVisible(False)
-
-        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
-
-        tbl.setShowGrid(True)
-
-    def init_tbl_added(self):
-        """Initiates tbl_relationship when cmb_relationship switches to added"""
-        tbl = self.tbl_relationship
-        tbl.clearContents()
-        tbl.setColumnCount(2)
-        tbl.setRowCount(0)
-
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Bulk Load Outlines"))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("QA Status"))
         tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
         tbl.verticalHeader().setVisible(False)
 
