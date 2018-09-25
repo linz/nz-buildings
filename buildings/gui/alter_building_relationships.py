@@ -522,9 +522,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == "Removed Outlines":
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
-        elif current_text == "Added Outlines":
-            self.init_tbl_relationship(['Bulk Load Outlines', 'QA Status'])
-            self.populate_tbl_added()
         elif current_text == "":
             self.tbl_relationship.setColumnCount(0)
             self.tbl_relationship.setRowCount(0)
@@ -571,10 +568,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.insert_into_list(self.lst_existing, [id_existing])
             self.lyr_existing.selectByIds([id_existing])
             self.lyr_bulk_load.selectByIds([])
-        elif current_text == "Added Outlines":
-            id_bulk = int(self.tbl_relationship.item(row, 0).text())
-            self.insert_into_list(self.lst_bulk, [id_bulk])
-            self.lyr_bulk_load.selectByIds([id_bulk])
 
         self.zoom_to_feature()
         self.highlight_selection_changed()
@@ -615,11 +608,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
-        elif current_text == "Added Outlines":
-            for index in selected_rows:
-                id_bulk = int(self.tbl_relationship.item(index.row(), 0).text())
-                self.update_qa_status_in_added(id_bulk, qa_status_id)
-                ids_bulk.append(id_bulk)
         else:
             self.db.close_cursor()
             return
@@ -876,18 +864,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_cmb_relationship(self):
         """Populates cmb_relationship"""
         self.cmb_relationship.clear()
-        item_list = ['Removed Outlines', 'Added Outlines', 'Matched Outlines', 'Related Outlines']
+        item_list = ['Removed Outlines', 'Matched Outlines', 'Related Outlines']
         self.cmb_relationship.addItems([""] + item_list)
-
-    def change_current_item_in_cmb_relationship(self, source_lyr):
-        if 'removed' in source_lyr:
-            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Removed Outlines'))
-        elif 'matched' in source_lyr:
-            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Matched Outlines'))
-        elif 'related' in source_lyr:
-            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Related Outlines'))
-        elif 'added' in source_lyr:
-            self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Added Outlines'))
 
     def init_tbl_relationship(self, header_items):
         """Initiates tbl_relationship """
@@ -948,19 +926,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
             tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
 
-    def populate_tbl_added(self):
-        """Populates tbl_relationship when cmb_relationship switches to added"""
-        tbl = self.tbl_relationship
-        sql_added = """SELECT a.bulk_load_outline_id, q.value
-                       FROM buildings_bulk_load.added a
-                       JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
-        result = self.db._execute(sql_added)
-        for (id_bulk, qa_status) in result.fetchall():
-            row_tbl = tbl.rowCount()
-            tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
-
     def get_qa_status_id(self, qa_status):
         """Returns qa_status_id according to the sender button"""
         if qa_status == 'Okay':
@@ -1015,13 +980,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                 WHERE building_outline_id = %s;"""
         self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
 
-    def update_qa_status_in_added(self, id_bulk, qa_status_id):
-        """Updates qa_status_id in added table"""
-        sql_update_added = """UPDATE buildings_bulk_load.added
-                              SET qa_status_id = %s
-                              WHERE bulk_load_outline_id = %s;"""
-        self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
-
     def select_row_in_tbl_matched(self, id_existing, id_bulk):
         tbl = self.tbl_relationship
         index = self.cmb_relationship.findText('Matched Outlines')
@@ -1039,16 +997,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.cmb_relationship.setCurrentIndex(index)
         for row in range(self.tbl_relationship.rowCount()):
             if int(tbl.item(row, 1).text()) == id_existing and int(tbl.item(row, 2).text()) == id_bulk:
-                tbl.selectRow(row)
-                tbl.scrollToItem(tbl.item(row, 0))
-
-    def select_row_in_tbl_added(self, id_bulk):
-        tbl = self.tbl_relationship
-        index = self.cmb_relationship.findText('Added Outlines')
-        if self.cmb_relationship.currentIndex() != index:
-            self.cmb_relationship.setCurrentIndex(index)
-        for row in range(self.tbl_relationship.rowCount()):
-            if int(tbl.item(row, 0).text()) == id_bulk:
                 tbl.selectRow(row)
                 tbl.scrollToItem(tbl.item(row, 0))
 
