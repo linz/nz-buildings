@@ -7,9 +7,8 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
-from qgis.core import QgsFeatureRequest, QgsExpression, QgsExpressionContextUtils, QgsMapLayerRegistry
 from qgis.gui import QgsHighlight, QgsMessageBar
-from qgis.utils import iface, isPluginLoaded, plugins
+from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
@@ -78,11 +77,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
         self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
-
-        if isPluginLoaded('liqa'):
-            self.error_inspector = plugins["liqa"].error_inspector
-            self.error_inspector.clicked_in_error_inspector.connect(partial(self.error_inspector_btn_clicked, commit_status=True))
-            self.error_inspector.selection_changed_in_error_inspector.connect(self.multi_selection_changed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -357,18 +351,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
-        if isPluginLoaded('liqa'):
-            self.error_inspector.selection_changed_in_error_inspector.disconnect(self.multi_selection_changed)
-            self.error_inspector.selection_changed_in_error_inspector.connect(self.unfinished_error_msg)
 
     def disconnect_to_error_msg(self):
         self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
         self.tool.multi_selection_changed.connect(self.multi_selection_changed)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
-        if isPluginLoaded('liqa'):
-            self.error_inspector.selection_changed_in_error_inspector.disconnect(self.unfinished_error_msg)
-            self.error_inspector.selection_changed_in_error_inspector.connect(self.multi_selection_changed)
 
     @pyqtSlot()
     def unlink_clicked(self):
@@ -464,12 +452,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if commit_status:
             self.db.commit_open_cursor()
 
-        if isPluginLoaded('liqa'):
-            ids_existing = self.get_ids_from_lst(self.lst_existing)
-            ids_bulk = self.get_ids_from_lst(self.lst_bulk)
-            self.update_status_in_qa_lyr(ids_existing, ids_bulk, 'Fixed')
-            self.refresh_tbl_error_attr()
-
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
@@ -506,16 +488,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Called when cancel botton is clicked
         """
         self.cancel_clicked()
-
-        if isPluginLoaded('liqa'):
-            try:
-                self.error_inspector.clicked_in_error_inspector.disconnect(self.error_inspector_btn_clicked)
-            except TypeError:
-                pass
-            try:
-                self.error_inspector.selection_changed_in_error_inspector.disconnect(self.multi_selection_changed)
-            except TypeError:
-                pass
 
         self.layer_registry.remove_layer(self.lyr_existing)
         self.layer_registry.remove_layer(self.lyr_bulk_load)
@@ -664,61 +636,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.refresh_tbl_relationship()
         self.reset_buttons()
-
-        if isPluginLoaded('liqa'):
-            self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
-            self.refresh_tbl_error_attr()
-
-    @pyqtSlot(dict)
-    def error_inspector_btn_clicked(self, status_changed_dict, commit_status=True):
-        self.db.open_cursor()
-        for qa_lyr_name in status_changed_dict:
-            lyr = QgsMapLayerRegistry.instance().mapLayersByName(qa_lyr_name)[0]
-            for feat in status_changed_dict[qa_lyr_name]:
-                id_outline = feat[0]
-                qa_status = feat[1]
-                qa_status_id = self.get_qa_status_id(qa_status)
-                if qa_status_id is None:
-                    return
-                source_lyr_name = QgsExpressionContextUtils.layerScope(lyr).variable('source_lyrs')
-                if source_lyr_name == 'added_outlines':
-                    self.update_qa_status_in_added(id_outline, qa_status_id)
-
-                elif source_lyr_name == 'removed_outlines':
-                    self.update_qa_status_in_removed(id_outline, qa_status_id)
-
-                elif source_lyr_name == 'matched_existing_outlines':
-                    id_matched = self.find_matched_bulk_load_outlines(id_outline)
-                    if id_matched:
-                        self.update_qa_status_in_matched(id_outline, id_matched[0], qa_status_id)
-                        self.update_status_in_qa_lyr([], [id_matched[0]], qa_status)
-
-                elif source_lyr_name == 'matched_bulk_load_outlines':
-                    id_matched = self.find_matched_bulk_load_outlines(id_outline)
-                    if id_matched:
-                        self.update_qa_status_in_matched(id_matched[0], id_outline, qa_status_id)
-                        self.update_status_in_qa_lyr([id_matched[0]], [], qa_status)
-
-                elif source_lyr_name == 'related_existing_outlines':
-                    ids_existing, ids_bulk = self.find_related_bulk_load_outlines(id_outline)
-                    if ids_existing and ids_bulk:
-                        self.update_qa_status_in_related(ids_existing[0], ids_bulk[0], qa_status_id)
-                        self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
-
-                elif source_lyr_name == 'related_bulk_load_outlines':
-                    ids_existing, ids_bulk = self.find_related_existing_outlines(id_outline)
-                    if ids_existing and ids_bulk:
-                        self.update_qa_status_in_related(ids_existing[0], ids_bulk[0], qa_status_id)
-                        self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
-                else:
-                    self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText(''))
-
-        self.refresh_tbl_error_attr()
-
-        if commit_status:
-            self.db.commit_open_cursor()
-
-        self.refresh_tbl_relationship()
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
@@ -1046,11 +963,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def get_qa_status_id(self, qa_status):
         """Returns qa_status_id according to the sender button"""
-        if qa_status == 'Okay' or qa_status == 'Fixed':
+        if qa_status == 'Okay':
             qa_status_id = 2
         elif qa_status == 'Pending':
             qa_status_id = 3
-        elif qa_status == 'Refer to Supplier' or qa_status == 'Inform IIC':  # 'Inform IIC' can be removed after refactoring error inspector'
+        elif qa_status == 'Refer to Supplier':
             qa_status_id = 4
         elif qa_status == 'Not Checked':
             qa_status_id = 1
@@ -1104,43 +1021,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                               SET qa_status_id = %s
                               WHERE bulk_load_outline_id = %s;"""
         self.db.execute_no_commit(sql_update_added, (qa_status_id, id_bulk))
-
-    def update_status_in_qa_lyr(self, ids_existing, ids_bulk, qa_status):
-
-        qa_lyrs = self.error_inspector.find_qa_lyrs()
-        current_text = self.cmb_relationship.currentText()
-        for qa_lyr in qa_lyrs:
-            input_name = QgsExpressionContextUtils.layerScope(qa_lyr).variable('source_lyrs')
-            relationship = input_name.split('_')[0]
-            if relationship in current_text.lower():
-                if ids_bulk and self.error_inspector.is_from_bulk_load(input_name):
-                    qa_lyr.startEditing()
-                    expr = QgsExpression(self.get_expression('bulk_load_', ids_bulk))
-                    for feat in qa_lyr.getFeatures(QgsFeatureRequest(expr)):
-                        qa_lyr.changeAttributeValue(feat.id(), 1, qa_status, True)
-                    qa_lyr.commitChanges()
-                elif ids_existing and self.error_inspector.is_from_existing(input_name):
-                    qa_lyr.startEditing()
-                    expr = QgsExpression(self.get_expression('building_o', ids_existing))
-                    for feat in qa_lyr.getFeatures(QgsFeatureRequest(expr)):
-                        qa_lyr.changeAttributeValue(feat.id(), 1, qa_status, True)
-                    qa_lyr.commitChanges()
-
-    def get_expression(self, field, ids):
-        expr = ''
-        for feat_id in ids:
-            if not expr:
-                expr = '"%s" = %s' % (field, feat_id)
-            else:
-                expr = expr + ' or "%s" = %s' % (field, feat_id)
-        return expr
-
-    def refresh_tbl_error_attr(self):
-        # refresh tbl_error_attrs
-        if self.error_inspector.isVisible():
-            self.error_inspector.tbl_error_attr.cellChanged.disconnect(self.error_inspector.update_comment)
-            self.error_inspector.init_tbl_error_attr()
-            self.error_inspector.tbl_error_attr.cellChanged.connect(self.error_inspector.update_comment)
 
     def select_row_in_tbl_matched(self, id_existing, id_bulk):
         tbl = self.tbl_relationship
