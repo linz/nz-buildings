@@ -35,65 +35,54 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry = layer_registry
         self.current_dataset = current_dataset
         self.error_dialog = None
+        self.highlight_features = []
 
-        self.maptool_clicked()
+        self.frame_setup()
+        self.layers_setup()
+        self.connect_signals()
 
-        self.open_alter_relationship_frame()
+    def frame_setup(self):
 
         self.message_bar = QgsMessageBar()
         self.layout_msg_bar.addWidget(self.message_bar)
 
-        # set up signals and slots
+        self.maptool_clicked()
+        self.reset_buttons()
+        self.populate_cmb_relationship()
 
-        self.btn_maptool.clicked.connect(self.maptool_clicked)
+    def layers_setup(self):
+        # set selected item color as transparent
+        iface.mapCanvas().setSelectionColor(QColor('Transparent'))
+        self.add_building_lyrs()
+        self.repaint_view()
+        self.clear_layer_filter()
+        iface.setActiveLayer(self.lyr_bulk_load)
 
-        self.btn_unlink.clicked.connect(self.unlink_clicked)
+    def connect_signals(self):
 
-        self.btn_matched.clicked.connect(self.matched_clicked)
-        self.btn_related.clicked.connect(self.related_clicked)
-
-        self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
-        self.btn_cancel.clicked.connect(self.cancel_clicked)
-        self.btn_exit.clicked.connect(self.exit_clicked)
+        self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
         self.btn_qa_okay.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_okay.text(), commit_status=True))
         self.btn_qa_pending.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_pending.text(), commit_status=True))
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
+        self.btn_maptool.clicked.connect(self.maptool_clicked)
+        self.btn_unlink.clicked.connect(self.unlink_clicked)
+        self.btn_matched.clicked.connect(self.matched_clicked)
+        self.btn_related.clicked.connect(self.related_clicked)
+        self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
+        self.btn_cancel.clicked.connect(self.cancel_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
+
+        self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
+        self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
+        self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
         if isPluginLoaded('liqa'):
             self.error_inspector = plugins["liqa"].error_inspector
             self.error_inspector.clicked_in_error_inspector.connect(partial(self.error_inspector_btn_clicked, commit_status=True))
             self.error_inspector.selection_changed_in_error_inspector.connect(self.multi_selection_changed)
-
-        self.dockwidget.closed.connect(self.on_dockwidget_closed)
-
-    def open_alter_relationship_frame(self):
-        """Called when opening of the frame"""
-
-        # set selected item color as transparent
-        iface.mapCanvas().setSelectionColor(QColor('Transparent'))
-
-        self.btn_unlink.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-
-        self.btn_save.setEnabled(False)
-
-        self.add_building_lyrs()
-        self.clear_layer_filter()
-
-        self.populate_cmb_relationship()
-
-        iface.setActiveLayer(self.lyr_bulk_load)
-
-        self.highlight_features = []
-
-        self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
-
-        self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -250,9 +239,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
-        self.btn_unlink.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
+        self.reset_buttons()
 
         selected_bulk = [feat.id() for feat in self.lyr_bulk_load.selectedFeatures()]
         selected_existing = [feat.id() for feat in self.lyr_existing.selectedFeatures()]
@@ -365,6 +352,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
         self.error_dialog.show()
 
+    def connect_to_error_msg(self):
+        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+        self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+        if isPluginLoaded('liqa'):
+            self.error_inspector.selection_changed_in_error_inspector.disconnect(self.multi_selection_changed)
+            self.error_inspector.selection_changed_in_error_inspector.connect(self.unfinished_error_msg)
+
+    def disconnect_to_error_msg(self):
+        self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+        if isPluginLoaded('liqa'):
+            self.error_inspector.selection_changed_in_error_inspector.disconnect(self.unfinished_error_msg)
+            self.error_inspector.selection_changed_in_error_inspector.connect(self.multi_selection_changed)
+
     @pyqtSlot()
     def unlink_clicked(self):
         """
@@ -380,10 +385,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.insert_into_lyr_removed_in_edit(ids_existing)
         self.insert_into_lyr_added_in_edit(ids_bulk)
 
-        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-        self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+        self.connect_to_error_msg()
 
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
@@ -408,10 +410,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.delete_original_relationship_in_existing(id_existing)
             self.delete_original_relationship_in_bulk_load(id_bulk)
 
-            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+            self.connect_to_error_msg()
+
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -441,10 +441,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.insert_into_lyr_related_bulk_load_in_edit(id_bulk)
                 self.delete_original_relationship_in_bulk_load(id_bulk)
 
-            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+            self.connect_to_error_msg()
+
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
@@ -475,13 +473,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()
 
-        self.btn_save.setEnabled(False)
-        self.btn_maptool.setEnabled(True)
+        self.reset_buttons()
 
-        self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
-        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+        self.disconnect_to_error_msg()
 
         self.repaint_view()
         self.clear_layer_filter()
@@ -491,20 +485,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def cancel_clicked(self):
-        self.btn_unlink.setEnabled(False)
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
-        self.btn_save.setEnabled(False)
-        self.btn_maptool.setEnabled(True)
+        self.reset_buttons()
         self.lst_existing.clear()
         self.lst_bulk.clear()
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
         try:
-            self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
-            self.tool.multi_selection_changed.connect(self.multi_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
-            self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+            self.disconnect_to_error_msg()
         except TypeError:
             pass
 
@@ -518,19 +505,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Relate the buildings in the list
         Called when cancel botton is clicked
         """
-        try:
-            self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-            self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
-            self.lyr_existing.selectionChanged.disconnect(self.highlight_selection_changed)
-            self.lyr_bulk_load.selectionChanged.disconnect(self.highlight_selection_changed)
-            self.cmb_relationship.currentIndexChanged.disconnect(self.cmb_relationship_current_index_changed)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-            self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
-        except TypeError:
-            pass
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
-        self.highlight_features = []
+        self.cancel_clicked()
 
         self.layer_registry.remove_layer(self.lyr_existing)
         self.layer_registry.remove_layer(self.lyr_bulk_load)
@@ -678,6 +653,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.db.commit_open_cursor()
 
         self.refresh_tbl_relationship()
+        self.reset_buttons()
 
         if isPluginLoaded('liqa'):
             self.update_status_in_qa_lyr(ids_existing, ids_bulk, qa_status)
@@ -855,6 +831,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.lyr_related_bulk_load.setSubsetString(
                 self.lyr_related_bulk_load.subsetString() + ' and "bulk_load_outline_id" != %s' % id_bulk)
+
+    def reset_buttons(self):
+        self.btn_unlink.setEnabled(False)
+        self.btn_matched.setEnabled(False)
+        self.btn_related.setEnabled(False)
+        self.btn_save.setEnabled(False)
+        self.btn_maptool.setEnabled(True)
 
     def insert_into_list(self, lst, ids):
         for fid in ids:
