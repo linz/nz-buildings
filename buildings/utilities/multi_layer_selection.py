@@ -70,6 +70,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
     def canvasReleaseEvent(self, event):
         """Overridden mouse release event from QgsMapTool"""
         self.is_emitting_point = False
+        self.end_point = self.toMapCoordinates(event.pos())
+        self.show_rectangle()
+
         self.rubber_band.reset(QGis.Polygon)
         layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName(
             'bulk_load_outlines')
