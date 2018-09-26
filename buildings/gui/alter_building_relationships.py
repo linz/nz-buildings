@@ -346,18 +346,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
         self.error_dialog.show()
 
-    def connect_to_error_msg(self):
-        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
-        self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
-
-    def disconnect_to_error_msg(self):
-        self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
-        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
-        self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
-        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
-
     @pyqtSlot()
     def unlink_clicked(self):
         """
@@ -687,6 +675,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
             rows.append(row_tbl)
         return rows
+
+    def connect_to_error_msg(self):
+        self.tool.multi_selection_changed.disconnect(self.multi_selection_changed)
+        self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+
+    def disconnect_to_error_msg(self):
+        self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
+        self.tool.multi_selection_changed.connect(self.multi_selection_changed)
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     def has_no_selection_in_table(self, tbl):
         if not tbl.selectionModel().selectedRows():
