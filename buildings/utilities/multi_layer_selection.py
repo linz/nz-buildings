@@ -3,7 +3,7 @@
 from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4.QtGui import QApplication, QCursor, QPixmap
 from qgis.core import QgsRectangle, QgsMapLayerRegistry, QgsPoint
-from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
+from qgis.gui import QgsMapTool, QgsMapToolEmitPoint, QgsRubberBand
 from qgis.utils import QGis
 
 
@@ -14,8 +14,6 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
     def __init__(self, canvas):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
-
-        self.shift_key = False
 
         self.rubber_band = QgsRubberBand(self.canvas, QGis.Polygon)
         self.start_point = None
@@ -50,6 +48,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
 
     def activate(self):
         self.canvas.setCursor(self.cursor)
+
+    def flags(self):
+        return QgsMapTool.Transient
 
     def canvasPressEvent(self, event):
         self.start_point = self.toMapCoordinates(event.pos())
