@@ -46,25 +46,22 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
-        self.assertTrue(self.alter_relationships_frame.btn_remove_slt.isEnabled())
-        self.assertTrue(self.alter_relationships_frame.btn_remove_all.isEnabled())
-        self.assertTrue(self.alter_relationships_frame.btn_clear_tbl_slt.isEnabled())
-        self.assertFalse(self.alter_relationships_frame.btn_unlink_all.isEnabled())
-        self.assertFalse(self.alter_relationships_frame.btn_clear_lst_slt.isEnabled())
-        self.assertFalse(self.alter_relationships_frame.btn_relink_all.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_unlink.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_matched.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_save.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_cancel.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_exit.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertTrue(row_count == 0)
+        self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 0)
+        self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 0)
 
-        row_count = self.alter_relationships_frame.lst_existing.model().rowCount(QModelIndex())
-        self.assertTrue(row_count == 0)
-
-        row_count = self.alter_relationships_frame.lst_bulk.model().rowCount(QModelIndex())
-        self.assertTrue(row_count == 0)
+        self.assertEqual(self.alter_relationships_frame.cmb_relationship.currentIndex(), 0)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), 0)
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """
