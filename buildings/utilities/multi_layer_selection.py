@@ -71,9 +71,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         """Overridden mouse release event from QgsMapTool"""
         self.is_emitting_point = False
         self.end_point = self.toMapCoordinates(event.pos())
-        self.show_rectangle()
 
-        self.rubber_band.reset(QGis.Polygon)
         layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName(
             'bulk_load_outlines')
         layer_existing = QgsMapLayerRegistry.instance().mapLayersByName(
@@ -100,7 +98,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
                     layer.select(layer_rect, True)
                 else:
                     layer.select(layer_rect, False)
-
+        self.rubber_band.hide()
         # Signal emits every time canvas release event occurs and selection
         # could potentially have changed.
         self.multi_selection_changed.emit()
