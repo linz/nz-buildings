@@ -106,7 +106,7 @@ class ProcessComparison(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 45)
+        self.assertEqual(len(result), 46)
 
     def test_gui_on_compare_clicked(self):
         """Check buttons are enabled/disabled"""
@@ -136,7 +136,7 @@ class ProcessComparison(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 43)
+        self.assertEqual(len(result), 44)
         # removed
         self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
@@ -169,7 +169,7 @@ class ProcessComparison(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 45)
+        self.assertEqual(len(result), 46)
         # removed
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
