@@ -584,7 +584,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
 
-        selected_rows = self.tbl_relationship.selectionModel().selectedRows()
+        selected_rows = [index.row() for index in self.tbl_relationship.selectionModel().selectedRows()]
         if not selected_rows:
             return
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
@@ -595,21 +595,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         ids_existing, ids_bulk = [], []
         if current_text == 'Related Outlines':
-            for index in selected_rows:
-                id_existing = int(self.tbl_relationship.item(index.row(), 1).text())
-                id_bulk = int(self.tbl_relationship.item(index.row(), 2).text())
+            qa_column = 3
+            for row in selected_rows:
+                id_existing = int(self.tbl_relationship.item(row, 1).text())
+                id_bulk = int(self.tbl_relationship.item(row, 2).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
         elif current_text == 'Matched Outlines':
-            for index in selected_rows:
-                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
-                id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
+            qa_column = 2
+            for row in selected_rows:
+                id_existing = int(self.tbl_relationship.item(row, 0).text())
+                id_bulk = int(self.tbl_relationship.item(row, 1).text())
                 self.update_qa_status_in_matched(id_existing, id_bulk, qa_status_id)
                 ids_existing.append(id_existing)
                 ids_bulk.append(id_bulk)
         elif current_text == 'Removed Outlines':
-            for index in selected_rows:
-                id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
+            qa_column = 1
+            for row in selected_rows:
+                id_existing = int(self.tbl_relationship.item(row, 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
 
@@ -623,6 +626,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_existing.clear()
         self.lst_bulk.clear()
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+
+        for row in range(self.tbl_relationship.rowCount()):
+            if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
+                self.tbl_relationship.selectRow(row)
+                break
+        self.tbl_relationship.setFocus(Qt.MouseFocusReason)
 
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
