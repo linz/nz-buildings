@@ -501,16 +501,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
-        if current_text == "Related Outlines":
+        if current_text == 'Related Outlines':
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
-        elif current_text == "Matched Outlines":
+        elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
-        elif current_text == "Removed Outlines":
+        elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
-        elif current_text == "":
+        elif current_text == '':
             self.tbl_relationship.setColumnCount(0)
             self.tbl_relationship.setRowCount(0)
 
@@ -533,7 +533,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
         current_text = self.cmb_relationship.currentText()
-        if current_text == "Related Outlines":
+        if current_text == 'Related Outlines':
             id_existing = int(self.tbl_relationship.item(row, 1).text())
             id_bulk = int(self.tbl_relationship.item(row, 2).text())
             ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
@@ -542,7 +542,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.selectByIds(ids_existing)
             self.lyr_bulk_load.selectByIds(ids_bulk)
             self.btn_unlink.setEnabled(True)
-        elif current_text == "Matched Outlines":
+        elif current_text == 'Matched Outlines':
             row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
             id_existing = int(self.tbl_relationship.item(row, 0).text())
             id_bulk = int(self.tbl_relationship.item(row, 1).text())
@@ -551,7 +551,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.selectByIds([id_existing])
             self.lyr_bulk_load.selectByIds([id_bulk])
             self.btn_unlink.setEnabled(True)
-        elif current_text == "Removed Outlines":
+        elif current_text == 'Removed Outlines':
             id_existing = int(self.tbl_relationship.item(row, 0).text())
             self.insert_into_list(self.lst_existing, [id_existing])
             self.lyr_existing.selectByIds([id_existing])
@@ -578,20 +578,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
         current_text = self.cmb_relationship.currentText()
 
         ids_existing, ids_bulk = [], []
-        if current_text == "Related Outlines":
+        if current_text == 'Related Outlines':
             for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 1).text())
                 id_bulk = int(self.tbl_relationship.item(index.row(), 2).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
-        elif current_text == "Matched Outlines":
+        elif current_text == 'Matched Outlines':
             for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 id_bulk = int(self.tbl_relationship.item(index.row(), 1).text())
                 self.update_qa_status_in_matched(id_existing, id_bulk, qa_status_id)
                 ids_existing.append(id_existing)
                 ids_bulk.append(id_bulk)
-        elif current_text == "Removed Outlines":
+        elif current_text == 'Removed Outlines':
             for index in selected_rows:
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
@@ -670,9 +670,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
             if id_existing:
-                tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+                tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
             if id_bulk:
-                tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+                tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % id_bulk))
             rows.append(row_tbl)
         return rows
 
