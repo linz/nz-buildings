@@ -7,7 +7,7 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
-from qgis.gui import QgsHighlight, QgsMessageBar
+from qgis.gui import QgsHighlight, QgsLegendInterface, QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -79,6 +79,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
         self.cmb_relationship.currentIndexChanged.connect(self.cmb_relationship_current_index_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+
+        self.cb_lyr_bulk_load.stateChanged.connect(self.cb_lyr_bulk_load_state_changed)
+        self.cb_lyr_existing.stateChanged.connect(self.cb_lyr_existing_state_changed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -617,6 +620,40 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.refresh_tbl_relationship()
         self.reset_buttons()
+
+    def cb_lyr_bulk_load_state_changed(self):
+        legend = iface.legendInterface()
+        if self.cb_lyr_bulk_load.isChecked():
+            legend.setLayerVisible(self.lyr_added_bulk_load_in_edit, True)
+            legend.setLayerVisible(self.lyr_matched_bulk_load_in_edit, True)
+            legend.setLayerVisible(self.lyr_related_bulk_load_in_edit, True)
+            legend.setLayerVisible(self.lyr_added_bulk_load, True)
+            legend.setLayerVisible(self.lyr_matched_bulk_load, True)
+            legend.setLayerVisible(self.lyr_related_bulk_load, True)
+        else:
+            legend.setLayerVisible(self.lyr_added_bulk_load_in_edit, False)
+            legend.setLayerVisible(self.lyr_matched_bulk_load_in_edit, False)
+            legend.setLayerVisible(self.lyr_related_bulk_load_in_edit, False)
+            legend.setLayerVisible(self.lyr_added_bulk_load, False)
+            legend.setLayerVisible(self.lyr_matched_bulk_load, False)
+            legend.setLayerVisible(self.lyr_related_bulk_load, False)
+
+    def cb_lyr_existing_state_changed(self):
+        legend = iface.legendInterface()
+        if self.cb_lyr_existing.isChecked():
+            legend.setLayerVisible(self.lyr_removed_existing_in_edit, True)
+            legend.setLayerVisible(self.lyr_matched_existing_in_edit, True)
+            legend.setLayerVisible(self.lyr_related_existing_in_edit, True)
+            legend.setLayerVisible(self.lyr_removed_existing, True)
+            legend.setLayerVisible(self.lyr_matched_existing, True)
+            legend.setLayerVisible(self.lyr_related_existing, True)
+        else:
+            legend.setLayerVisible(self.lyr_removed_existing_in_edit, False)
+            legend.setLayerVisible(self.lyr_matched_existing_in_edit, False)
+            legend.setLayerVisible(self.lyr_related_existing_in_edit, False)
+            legend.setLayerVisible(self.lyr_removed_existing, False)
+            legend.setLayerVisible(self.lyr_matched_existing, False)
+            legend.setLayerVisible(self.lyr_related_existing, False)
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
