@@ -42,8 +42,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def frame_setup(self):
 
-        self.message_bar = QgsMessageBar()
-        self.layout_msg_bar.addWidget(self.message_bar)
+        self.message_bar_edit = QgsMessageBar()
+        self.layout_msg_bar_edit.addWidget(self.message_bar_edit)
+        self.message_bar_qa = QgsMessageBar()
+        self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
         self.maptool_clicked()
         self.reset_buttons()
@@ -317,7 +319,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # error msg when more than one set of matched or related set are selected
         if has_multi_set:
-            self.message_bar.pushMessage('Multiple matched or related sets selected, can only unlink one at a time.')
+            self.message_bar_edit.pushMessage('Multiple matched or related sets selected, can only unlink one at a time.')
         # switch botton
         if has_matched or has_related:
             self.btn_unlink.setEnabled(True)
@@ -504,12 +506,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if current_text == 'Related Outlines':
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
+            self.is_empty_tbl_relationship('Related Outlines')
         elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
+            self.is_empty_tbl_relationship('Matched Outlines')
         elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
+            self.is_empty_tbl_relationship('Removed Outlines')
         elif current_text == '':
             self.tbl_relationship.setColumnCount(0)
             self.tbl_relationship.setRowCount(0)
@@ -925,6 +930,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
             tbl.setRowCount(row_tbl + 1)
             tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
             tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+
+    def is_empty_tbl_relationship(self, relationship):
+        if self.tbl_relationship.rowCount() == 0:
+            self.message_bar_qa.pushMessage('%s are not available in the current dataset.' % relationship)
 
     def get_qa_status_id(self, qa_status):
         """Returns qa_status_id according to the sender button"""
