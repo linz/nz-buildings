@@ -236,6 +236,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 0)
         self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 0)
 
+        self.alter_relationships_frame.btn_exit.click()
+
     def test_exit_clicked(self):
         self.alter_relationships_frame.btn_exit.click()
         self.assertNotEqual(self.alter_relationships_frame, self.dockwidget.current_frame)
@@ -252,6 +254,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1)
+
+        self.alter_relationships_frame.btn_exit.click()
 
     def test_tbl_relationship_item_selection_changed(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
