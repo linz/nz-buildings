@@ -7,7 +7,7 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
                          QListWidgetItem, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
-from qgis.gui import QgsHighlight, QgsLegendInterface, QgsMessageBar
+from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -329,16 +329,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif has_added and has_removed:
             self.switch_btn_match_and_related()
         # select rows in tbl_relationship
+        self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         if has_removed:
-            self.select_row_in_tbl_removed(existing_to_lst[-1])
+            for id_existing in existing_to_lst:
+                self.select_row_in_tbl_removed(id_existing)
         elif has_matched:
             self.select_row_in_tbl_matched(existing_to_lst[0], bulk_to_list[0])
         elif has_related:
-            self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
             for id_existing in existing_to_lst:
                 for id_bulk in bulk_to_list:
                     self.select_row_in_tbl_related(id_existing, id_bulk)
-            self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
 
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
@@ -360,6 +361,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_unlink.setEnabled(False)
         self.btn_maptool.setEnabled(False)
         self.btn_save.setEnabled(True)
+        self.qa_button_set_enable(False)
 
         ids_existing = self.get_ids_from_lst(self.lst_existing)
         ids_bulk = self.get_ids_from_lst(self.lst_bulk)
@@ -381,6 +383,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_matched.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.btn_save.setEnabled(True)
+            self.qa_button_set_enable(False)
 
             id_existing = int(self.lst_existing.item(0).text())
             id_bulk = int(self.lst_bulk.item(0).text())
@@ -410,6 +413,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_related.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.btn_save.setEnabled(True)
+            self.qa_button_set_enable(False)
+
             for row in range(self.lst_existing.count()):
                 id_existing = int(self.lst_existing.item(row).text())
 
@@ -449,6 +454,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.clear()
 
         self.reset_buttons()
+        self.qa_button_set_enable(True)
 
         self.disconnect_to_error_msg()
 
@@ -461,6 +467,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def cancel_clicked(self):
         self.reset_buttons()
+        self.qa_button_set_enable(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
         self.lyr_existing.removeSelection()
@@ -580,6 +587,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         selected_rows = self.tbl_relationship.selectionModel().selectedRows()
         if not selected_rows:
             return
+        self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
         self.db.open_cursor()
 
         qa_status_id = self.get_qa_status_id(qa_status)
@@ -604,22 +612,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_existing = int(self.tbl_relationship.item(index.row(), 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
-        else:
-            self.db.close_cursor()
-            return
-        # error if there're outline altering relationship
-        self.refresh_tbl_relationship()
-        if self.error_dialog:
-            if self.error_dialog.isVisible():
-                self.db.rollback_open_cursor()
-                self.refresh_tbl_relationship()
-                return
 
         if commit_status:
             self.db.commit_open_cursor()
 
         self.refresh_tbl_relationship()
         self.reset_buttons()
+        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.removeSelection()
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+        self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
@@ -795,6 +798,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_related.setEnabled(False)
         self.btn_save.setEnabled(False)
         self.btn_maptool.setEnabled(True)
+
+    def qa_button_set_enable(self, boolean):
+        self.btn_qa_okay.setEnabled(boolean)
+        self.btn_qa_pending.setEnabled(boolean)
+        self.btn_qa_refer2supplier.setEnabled(boolean)
+        self.btn_qa_not_checked.setEnabled(boolean)
 
     def insert_into_list(self, lst, ids):
         for fid in ids:
