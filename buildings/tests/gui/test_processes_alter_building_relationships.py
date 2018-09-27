@@ -268,7 +268,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.btn_exit.click()
 
-    def btn_qa_status_clicked(self):
+    def test_btn_qa_status_clicked(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
         self.alter_relationships_frame.tbl_relationship.selectRow(0)
         selected_id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text())
@@ -279,4 +279,28 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(qa_status_id, 2)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_cb_lyr_bulk_load_state_changed(self):
+        self.alter_relationships_frame.cb_lyr_bulk_load.setChecked(False)
+        legend = iface.legendInterface()
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load))
+
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_cb_lyr_existing_state_changed(self):
+        self.alter_relationships_frame.cb_lyr_existing.setChecked(False)
+        legend = iface.legendInterface()
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing))
+
         self.alter_relationships_frame.btn_exit.click()
