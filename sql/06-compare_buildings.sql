@@ -294,8 +294,6 @@ $$
 
 BEGIN
 
-CREATE EXTENSION IF NOT EXISTS intarray;
-
 IF ( SELECT processed_date
      FROM buildings_bulk_load.supplied_datasets
      WHERE buildings_bulk_load.supplied_datasets.supplied_dataset_id = p_supplied_dataset_id ) IS NULL THEN
