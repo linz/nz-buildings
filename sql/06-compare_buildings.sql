@@ -289,8 +289,11 @@ LANGUAGE sql VOLATILE;
 -- OVERALL PROCESS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.compare_building_outlines(p_supplied_dataset_id integer)
-    RETURNS void AS 
+    RETURNS void AS
 $$
+
+DECLARE
+    v_row_count integer;
 
 BEGIN
 
@@ -397,13 +400,21 @@ IF ( SELECT processed_date
         JOIN reassigned_id_result b ON a.related_group_id = b.related_group_id
         ;
 
-        INSERT INTO buildings_bulk_load.related_groups(related_group_id)
-        SELECT
-              generate_series(coalesce(max(related_group_id) + 1, 1)
-            , currval('buildings_bulk_load.related_groups_related_group_id_seq'))
-        FROM buildings_bulk_load.related_groups;
+        GET DIAGNOSTICS v_row_count = ROW_COUNT;
 
-        -- insert Bulk Load Outlines that don't get sorted into ADDED
+        -- If no rows were inserted in the previous statement, we don't need to create
+        -- any new related_groups
+        IF v_row_count != 0 THEN
+
+            INSERT INTO buildings_bulk_load.related_groups(related_group_id)
+            SELECT
+                  generate_series(coalesce(max(related_group_id) + 1, 1)
+                , currval('buildings_bulk_load.related_groups_related_group_id_seq'))
+            FROM buildings_bulk_load.related_groups;
+
+        END IF;
+
+        -- Insert Bulk Load Outlines that don't get sorted into ADDED
 
         INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id)
         SELECT blo.bulk_load_outline_id, 1 AS qa_status_id
@@ -417,7 +428,7 @@ IF ( SELECT processed_date
         AND matched.bulk_load_outline_id IS NULL
         AND related.bulk_load_outline_id IS NULL;
 
-        -- insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
+        -- Insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
 
         INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id)
         SELECT ex.building_outline_id, 1 AS qa_status_id
