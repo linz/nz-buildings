@@ -138,7 +138,7 @@ class ProcessComparison(unittest.TestCase):
         result = result.fetchall()
         self.assertEqual(len(result), 44)
         # removed
-        self.bulk_load_frame.compare_outlines_clicked(False)
+        # self.bulk_load_frame.compare_outlines_clicked(False)
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
