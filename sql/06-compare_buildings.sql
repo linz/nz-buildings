@@ -238,11 +238,62 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+CREATE OR REPLACE FUNCTION buildings_bulk_load.reassign_related_ids(
+    p_supplied_dataset_id integer
+)
+RETURNS TABLE(
+      reassigned_building_outline_id integer
+    , original_building_outline_id integer
+    , reassigned_bulk_load_outline_id integer
+    , original_bulk_load_outline_id integer
+) AS
+$$
+
+    WITH found_related AS (
+        SELECT
+              building_outline_id
+            , bulk_load_outline_id
+        FROM buildings_bulk_load.find_related(p_supplied_dataset_id)
+    ), reassigned_ids AS (
+        SELECT
+              row_number() OVER() AS new_id
+            , source_id
+            , category
+        FROM (
+            SELECT
+                  building_outline_id AS source_id
+                , 'building_outline_id' AS category
+            FROM found_related
+            GROUP BY building_outline_id
+            UNION
+            SELECT
+                  bulk_load_outline_id AS source_id
+                , 'bulk_load_outline_id' AS category
+            FROM found_related
+            GROUP BY bulk_load_outline_id
+        ) sources
+    )
+    SELECT
+          a.new_id::integer AS reassigned_building_outline_id
+        , a.source_id::integer AS original_building_outline_id
+        , b.new_id::integer AS reassigned_bulk_load_outline_id
+        , b.source_id::integer AS original_bulk_load_outline_id
+    FROM found_related
+    JOIN reassigned_ids a ON building_outline_id = a.source_id AND a.category = 'building_outline_id'
+    JOIN reassigned_ids b ON bulk_load_outline_id = b.source_id AND b.category = 'bulk_load_outline_id';
+
+$$
+LANGUAGE sql VOLATILE;
+
+
 -- OVERALL PROCESS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.compare_building_outlines(p_supplied_dataset_id integer)
-    RETURNS void AS 
+    RETURNS void AS
 $$
+
+DECLARE
+    v_row_count integer;
 
 BEGIN
 
@@ -277,14 +328,93 @@ IF ( SELECT processed_date
 
         -- RELATED
 
-        INSERT INTO buildings_bulk_load.related (bulk_load_outline_id, building_outline_id, qa_status_id)
-        SELECT
-              bulk_load_outline_id
-            , building_outline_id
-            , 1 AS qa_status_id
-        FROM buildings_bulk_load.find_related(p_supplied_dataset_id);
+        WITH uniquely_identified_related AS (
+            -- Select output from reassign_related_ids()
+            SELECT
+                  reassigned_building_outline_id AS building_outline_id
+                , original_building_outline_id
+                , reassigned_bulk_load_outline_id AS bulk_load_outline_id
+                , original_bulk_load_outline_id
+            FROM buildings_bulk_load.reassign_related_ids(p_supplied_dataset_id)
+        )
+        INSERT INTO buildings_bulk_load.related (related_group_id, bulk_load_outline_id, building_outline_id, qa_status_id)
+        WITH RECURSIVE rels AS (
+            SELECT
+                  t.bulk_load_outline_id
+                , t.building_outline_id
+                , array[t.bulk_load_outline_id, t.building_outline_id] AS all_ids_array
+            FROM uniquely_identified_related t
+              UNION
+            SELECT
+                  t.bulk_load_outline_id
+                , t.building_outline_id
+                , uniq(sort(array[
+                      t.bulk_load_outline_id
+                    , t.building_outline_id
+                    , rels.building_outline_id
+                  ]::int[] || rels.all_ids_array::int[])) AS all_ids_array
+            FROM uniquely_identified_related t, rels
+            WHERE rels.bulk_load_outline_id = t.building_outline_id
+            OR rels.building_outline_id = t.building_outline_id
+            OR rels.bulk_load_outline_id = t.bulk_load_outline_id
+        ), length_of_arrays AS (
+          -- Find the maximum length array
+          SELECT
+                rels.bulk_load_outline_id
+              , max(array_length(rels.all_ids_array, 1)) AS maximum
+          FROM rels
+          GROUP BY rels.bulk_load_outline_id
+        ), groups AS (
+        -- Select only those arrays that are maximum length for the bulk_load_outline_id
+            SELECT
+                  nextval('buildings_bulk_load.related_groups_related_group_id_seq') AS related_group_id
+                , rels.all_ids_array
+            FROM rels
+            JOIN length_of_arrays USING (bulk_load_outline_id)
+            WHERE array_length(rels.all_ids_array, 1) = length_of_arrays.maximum
+            GROUP BY rels.all_ids_array
+        ), unnest_groups AS (
+        -- Unnest arrays in order to rejoin
+            SELECT
+                  related_group_id
+                , unnest(all_ids_array) AS all_ids
+            FROM groups
+        ), reassigned_id_result AS (
+        -- Revert ids back to original
+            SELECT
+                  ug.related_group_id
+                , t.original_bulk_load_outline_id AS bulk_load_outline_id
+                , t.original_building_outline_id AS building_outline_id
+                , 1 AS qa_status_id
+            FROM unnest_groups ug
+            JOIN uniquely_identified_related t ON t.bulk_load_outline_id = ug.all_ids
+        )
+        -- Cross join using new group_id to get all combinations
+        -- This is then inserted into the related table
+        SELECT DISTINCT
+              a.related_group_id
+            , a.bulk_load_outline_id
+            , b.building_outline_id
+            , a.qa_status_id
+        FROM reassigned_id_result a
+        JOIN reassigned_id_result b ON a.related_group_id = b.related_group_id
+        ;
 
-        -- insert Bulk Load Outlines that don't get sorted into ADDED
+        GET DIAGNOSTICS v_row_count = ROW_COUNT;
+
+        -- If no rows were inserted in the previous statement, we don't need to create
+        -- any new related_groups
+        IF v_row_count != 0 THEN
+
+            INSERT INTO buildings_bulk_load.related_groups(related_group_id)
+            SELECT
+                  generate_series(coalesce(max(related_group_id) + 1, 1)
+                , currval('buildings_bulk_load.related_groups_related_group_id_seq'))
+            FROM buildings_bulk_load.related_groups;
+
+        END IF;
+
+        -- Insert Bulk Load Outlines that don't get sorted into ADDED
 
         INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id)
         SELECT blo.bulk_load_outline_id, 1 AS qa_status_id
@@ -298,7 +428,7 @@ IF ( SELECT processed_date
         AND matched.bulk_load_outline_id IS NULL
         AND related.bulk_load_outline_id IS NULL;
 
-        -- insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
+        -- Insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
 
         INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id)
         SELECT ex.building_outline_id, 1 AS qa_status_id
@@ -309,7 +439,7 @@ IF ( SELECT processed_date
         WHERE ex.supplied_dataset_id = p_supplied_dataset_id
         AND removed.building_outline_id IS NULL
         AND matched.building_outline_id IS NULL
-        AND related.building_outline_id IS NULL; 
+        AND related.building_outline_id IS NULL;
 
         -- UPDATE processed_date IN supplied_datasets
 

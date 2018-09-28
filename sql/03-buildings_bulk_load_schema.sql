@@ -269,14 +269,31 @@ COMMENT ON COLUMN buildings_bulk_load.removed.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.removed.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
+-- Related Groups
+
+CREATE TABLE IF NOT EXISTS buildings_bulk_load.related_groups (
+      related_group_id serial PRIMARY KEY
+);
+
+COMMENT ON TABLE buildings_bulk_load.related_groups IS
+'This table maintains the primary key for related groups.';
+
+COMMENT ON COLUMN buildings_bulk_load.related_groups.related_group_id IS
+'Unique identifier for the related groups table.';
+
 -- Related
 
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
       related_id serial PRIMARY KEY
+    , related_group_id integer NOT NULL REFERENCES buildings_bulk_load.related_groups (related_group_id) INITIALLY DEFERRED
     , bulk_load_outline_id integer NOT NULL REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
 );
+
+DROP INDEX IF EXISTS idx_related_related_group_id;
+CREATE INDEX idx_related_related_group_id
+    ON buildings_bulk_load.related USING btree (related_group_id);
 
 DROP INDEX IF EXISTS idx_related_bulk_load_outline_id;
 CREATE INDEX idx_related_bulk_load_outline_id
@@ -296,6 +313,8 @@ COMMENT ON TABLE buildings_bulk_load.related IS
 
 COMMENT ON COLUMN buildings_bulk_load.related.related_id IS
 'Unique identifier for the related table.';
+COMMENT ON COLUMN buildings_bulk_load.related.related_group_id IS
+'Foreign key to the buildings_bulk_load.related_groups table.';
 COMMENT ON COLUMN buildings_bulk_load.related.bulk_load_outline_id IS
 'Foreign key to the buildings_bulk_load.bulk_load_outlines table.';
 COMMENT ON COLUMN buildings_bulk_load.related.building_outline_id IS
