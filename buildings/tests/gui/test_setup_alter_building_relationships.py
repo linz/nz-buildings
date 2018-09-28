@@ -42,7 +42,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.alter_relationships_frame.btn_cancel.click()
+        self.alter_relationships_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
