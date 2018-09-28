@@ -222,10 +222,13 @@ WHERE bulk_load_outline_id IN (
 # alter-relationship
 
 related_by_bulk_load_outlines = """
-SELECT building_outline_id
+SELECT building_outline_id, bulk_load_outline_id
 FROM buildings_bulk_load.related
-JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
-WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
+WHERE related_group_id in (
+  SELECT DISTINCT related_group_id
+  FROM buildings_bulk_load.related
+  JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+  WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s);
 """
 
 matched_by_bulk_load_outlines = """
@@ -243,10 +246,13 @@ WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
 """
 
 related_by_existing_outlines = """
-SELECT bulk_load_outline_id
+SELECT building_outline_id, bulk_load_outline_id
 FROM buildings_bulk_load.related
-JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
-WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+WHERE related_group_id in (
+  SELECT DISTINCT related_group_id
+  FROM buildings_bulk_load.related
+  JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+  WHERE building_outline_id = %s AND supplied_dataset_id = %s);
 """
 
 matched_by_existing_outlines = """

@@ -18,10 +18,10 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt, QModelIndex
+from PyQt4.QtCore import Qt
+from PyQt4.QtGui import QListWidgetItem
 from PyQt4.QtTest import QTest
-from qgis.core import (QgsCoordinateReferenceSystem, QgsMapLayerRegistry,
-                       QgsPoint, QgsRectangle)
+from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -51,15 +51,11 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.bulk_load_frame.btn_alter_rel.click()
         self.alter_relationships_frame = self.dockwidget.current_frame
 
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        # right click in order to activate the canvas
-        QTest.mouseClick(widget,
-                         Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1878334, 5555224)),
-                         delay=-1)
-        QTest.qWait(1)
+    def tearDown(self):
+        """Runs after each test."""
+        self.alter_relationships_frame.db.rollback_open_cursor()
 
+    def test_multi_selection_changed(self):
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
         target_crs.createFromUserInput(selectedcrs)
@@ -70,216 +66,241 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
 
-    def tearDown(self):
-        """Runs after each test."""
-        self.alter_relationships_frame.btn_cancel.click()
-        self.alter_relationships_frame.db.rollback_open_cursor()
-
-    def test_alter_relationship_to_added_or_removed(self):
-        """When save is clicked buildings in matched are moved to added/removed"""
-        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
-        result = db._execute(sql)
-        result_original = result.fetchone()[0]
-
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
+        QTest.mousePress(widget,
                          Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878177.80, 5555336.00)),
+                         pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
                          delay=-1)
+        QTest.mouseRelease(widget,
+                           Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
+                           delay=-1)
         QTest.qWait(1)
+        count_lst_existing = self.alter_relationships_frame.lst_existing.count()
+        count_lst_bulk = self.alter_relationships_frame.lst_bulk.count()
+        self.assertEqual(count_lst_existing, 1)
+        self.assertEqual(count_lst_bulk, 1)
+        id_existing = int(self.alter_relationships_frame.lst_existing.item(0).text())
+        id_bulk = int(self.alter_relationships_frame.lst_bulk.item(0).text())
+        self.assertEqual(id_existing, 1006)
+        self.assertEqual(id_bulk, 2010)
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-        index1 = self.alter_relationships_frame.tbl_original.model().index(0, 0)
-        index2 = self.alter_relationships_frame.tbl_original.model().index(0, 1)
-        self.assertEqual(index1.data(), '1003')
-        self.assertEqual(index2.data(), '2002')
+        selected = self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()
+        self.assertEqual(len(selected), 1)
+        id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(selected[0].row(), 0).text())
+        self.assertEqual(id_tbl, 1006)
 
-        self.alter_relationships_frame.btn_unlink_all.click()
+        self.alter_relationships_frame.btn_exit.click()
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
-        row_count = self.alter_relationships_frame.lst_existing.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-        row_count = self.alter_relationships_frame.lst_bulk.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
+    def test_maptool_clicked(self):
+        iface.actionSelectRectangle().trigger()
+        self.alter_relationships_frame.btn_maptool.click()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas = iface.mapCanvas()
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14,
+                                      1878449.89, 5555644.95)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mousePress(widget,
+                         Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
+                         delay=-1)
+        QTest.mouseRelease(widget,
+                           Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
+                           delay=-1)
+        QTest.qWait(1)
+        self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 1)
+        self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 1)
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_unlink_and_save_clicked(self):
+
+        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
+        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        result = db._execute(sql_matched)
+        matched_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_original = result.fetchone()[0]
+
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.btn_unlink.setEnabled(True)
+        self.alter_relationships_frame.btn_unlink.click()
+        self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_maptool.isEnabled())
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        result = db._execute(sql)
-        self.assertEqual(result.fetchone()[0], result_original + 1)
+        result = db._execute(sql_matched)
+        matched_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_test = result.fetchone()[0]
+        self.assertEqual(matched_test, matched_original - 1)
+        self.assertEqual(added_test, added_original + 1)
+        self.assertEqual(removed_test, removed_original + 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
 
-    def test_alter_relationship_to_matched(self):
-        """When save is clicked buildings in added/removed are moved to matched"""
-        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
-        result = db._execute(sql)
-        result_original = result.fetchone()[0]
+    def test_match_and_save_clicked(self):
 
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878229.15, 5555335.28)),
-                         delay=-1)
-        QTest.qWait(1)
+        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
+        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        result = db._execute(sql_matched)
+        matched_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_original = result.fetchone()[0]
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-        index = self.alter_relationships_frame.tbl_original.model().index(0, 1)
-        self.assertEqual(index.data(), '2003')
-        layerList = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
-        iface.setActiveLayer(layerList[0])
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
-                         delay=-1)
-        QTest.qWait(1)
-
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 2)
-        index = self.alter_relationships_frame.tbl_original.model().index(1, 0)
-        self.assertEqual(index.data(), '1004')
-
-        self.alter_relationships_frame.btn_unlink_all.click()
-
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
-        row_count = self.alter_relationships_frame.lst_existing.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-        row_count = self.alter_relationships_frame.lst_bulk.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-
-        self.alter_relationships_frame.lst_existing.item(0).setSelected(True)
-        self.alter_relationships_frame.lst_bulk.item(0).setSelected(True)
-
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1006'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.btn_matched.setEnabled(True)
         self.alter_relationships_frame.btn_matched.click()
-        self.assertFalse(self.alter_relationships_frame.btn_matched.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_maptool.isEnabled())
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        result = db._execute(sql)
-        self.assertEqual(result.fetchone()[0], result_original + 1)
+        result = db._execute(sql_matched)
+        matched_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_test = result.fetchone()[0]
+        self.assertEqual(matched_test, matched_original + 1)
+        self.assertEqual(added_test, added_original - 1)
+        self.assertEqual(removed_test, removed_original - 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
 
-    def test_alter_relationship_to_related(self):
-        """When save is clicked buildings in added/removed are moved to related"""
-        sql = 'SELECT count(*)::integer FROM buildings_bulk_load.related'
-        result = db._execute(sql)
-        result_original = result.fetchone()[0]
+    def test_related_and_save_clicked(self):
+        sql_related = 'SELECT count(*)::integer FROM buildings_bulk_load.related'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
+        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        result = db._execute(sql_related)
+        related_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_original = result.fetchone()[0]
 
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878229.15, 5555335.28)),
-                         delay=-1)
-        QTest.qWait(1)
-
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878033.55, 5555355.73)),
-                         delay=-1)
-        QTest.qWait(1)
-
-        layerList = QgsMapLayerRegistry.instance().mapLayersByName("existing_subset_extracts")
-        iface.setActiveLayer(layerList[0])
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878223.60, 5555320.54)),
-                         delay=-1)
-        QTest.qWait(1)
-
-        self.alter_relationships_frame.btn_unlink_all.click()
-
-        self.alter_relationships_frame.lst_existing.item(0).setSelected(True)
-        self.alter_relationships_frame.lst_bulk.item(0).setSelected(True)
-        self.alter_relationships_frame.lst_bulk.item(1).setSelected(True)
-
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1006'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2003'))
+        self.alter_relationships_frame.btn_related.setEnabled(True)
         self.alter_relationships_frame.btn_related.click()
-        self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_maptool.isEnabled())
 
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
-        result = db._execute(sql)
-        self.assertEqual(result.fetchone()[0], result_original + 2)
+        result = db._execute(sql_related)
+        related_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_test = result.fetchone()[0]
+        self.assertEqual(related_test, related_original + 2)
+        self.assertEqual(added_test, added_original - 2)
+        self.assertEqual(removed_test, removed_original - 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
 
-    def test_remove_button(self):
-        """When remove button is clicked the building ids in tablewidget are removed"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878185.10, 5555290.52)),
-                         delay=-1)
-        QTest.qWait(1)
+    def test_cancel_clicked(self):
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.btn_unlink.setEnabled(True)
+        self.alter_relationships_frame.btn_unlink.click()
+        self.alter_relationships_frame.btn_cancel.click()
+        self.assertTrue(self.alter_relationships_frame.btn_maptool.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_unlink.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_matched.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_save.isEnabled())
+        self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 0)
+        self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 0)
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 2)
-        index11 = self.alter_relationships_frame.tbl_original.model().index(0, 0)
-        index12 = self.alter_relationships_frame.tbl_original.model().index(0, 1)
-        index21 = self.alter_relationships_frame.tbl_original.model().index(1, 0)
-        index22 = self.alter_relationships_frame.tbl_original.model().index(1, 1)
-        self.assertEqual(index11.data(), '1007')
-        self.assertEqual(index12.data(), '2005')
-        self.assertEqual(index21.data(), '1008')
-        self.assertEqual(index22.data(), '2005')
+        self.alter_relationships_frame.btn_exit.click()
 
-        self.alter_relationships_frame.btn_remove_all.click()
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
+    def test_exit_clicked(self):
+        self.alter_relationships_frame.btn_exit.click()
+        self.assertNotEqual(self.alter_relationships_frame, self.dockwidget.current_frame)
 
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878185.10, 5555290.52)),
-                         delay=-1)
-        QTest.qWait(1)
+    def test_cmb_relationship_current_index_changed(self):
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 2)
+        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1004)
 
-        self.alter_relationships_frame.tbl_original.item(0, 0).setSelected(True)
-        self.alter_relationships_frame.btn_remove_slt.click()
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 3)
+        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1001)
 
-    def test_relink_button(self):
-        """When relink button is clicked the building ids in listwidget are moved back to tablewidget"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878182.7, 5555332.0)),
-                         delay=-1)
-        QTest.qWait(1)
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
+        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1)
 
-        self.alter_relationships_frame.btn_unlink_all.click()
+        self.alter_relationships_frame.btn_exit.click()
 
-        self.alter_relationships_frame.btn_relink_all.click()
+    def test_tbl_relationship_item_selection_changed(self):
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
+        self.alter_relationships_frame.tbl_relationship.selectRow(0)
+        selected_id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text())
+        selected_id_lyr = [feat.id() for feat in self.alter_relationships_frame.lyr_existing.selectedFeatures()]
+        self.assertEqual(selected_id_lyr, [selected_id_tbl])
+        id_lst = int(self.alter_relationships_frame.lst_existing.item(0).text())
+        self.assertEqual(id_lst, selected_id_tbl)
 
-        row_count = self.alter_relationships_frame.tbl_original.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 1)
-        row_count = self.alter_relationships_frame.lst_existing.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
-        row_count = self.alter_relationships_frame.lst_bulk.model().rowCount(QModelIndex())
-        self.assertEqual(row_count, 0)
+        self.alter_relationships_frame.btn_exit.click()
 
-    def test_clear_selection_button(self):
-        """When clear_selection button is clicked the selections get cleared"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878182.7, 5555332.0)),
-                         delay=-1)
-        QTest.qWait(1)
+    def test_btn_qa_status_clicked(self):
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
+        self.alter_relationships_frame.tbl_relationship.selectRow(0)
+        selected_id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text())
+        self.alter_relationships_frame.btn_qa_status_clicked(qa_status='Okay', commit_status=False)
+        sql = 'SELECT qa_status_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s' % selected_id_tbl
+        result = db._execute(sql)
+        qa_status_id = result.fetchone()[0]
+        self.assertEqual(qa_status_id, 2)
 
-        self.assertTrue(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
+        self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
 
-        self.alter_relationships_frame.btn_clear_tbl_slt.click()
+    def test_cb_lyr_bulk_load_state_changed(self):
+        self.alter_relationships_frame.cb_lyr_bulk_load.setChecked(False)
+        legend = iface.legendInterface()
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load))
 
-        self.assertFalse(self.alter_relationships_frame.tbl_original.item(0, 0).isSelected())
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_cb_lyr_existing_state_changed(self):
+        self.alter_relationships_frame.cb_lyr_existing.setChecked(False)
+        legend = iface.legendInterface()
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing_in_edit))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing))
+        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing))
+
+        self.alter_relationships_frame.btn_exit.click()
