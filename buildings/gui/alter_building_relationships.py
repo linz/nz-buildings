@@ -595,14 +595,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         ids_existing, ids_bulk = [], []
         if current_text == 'Related Outlines':
-            qa_column = 3
+            # qa_column = 3
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 1).text())
                 id_bulk = int(self.tbl_relationship.item(row, 2).text())
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
         elif current_text == 'Matched Outlines':
-            qa_column = 2
+            # qa_column = 2
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 id_bulk = int(self.tbl_relationship.item(row, 1).text())
@@ -610,7 +610,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_existing.append(id_existing)
                 ids_bulk.append(id_bulk)
         elif current_text == 'Removed Outlines':
-            qa_column = 1
+            # qa_column = 1
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
@@ -627,11 +627,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lst_bulk.clear()
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
-        for row in range(self.tbl_relationship.rowCount()):
-            if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
-                self.tbl_relationship.selectRow(row)
-                break
-        self.tbl_relationship.setFocus(Qt.MouseFocusReason)
+        # Move to the next 'not checked'
+        # for row in range(self.tbl_relationship.rowCount()):
+        #     if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
+        #         self.tbl_relationship.selectRow(row)
+        #         break
+        # self.tbl_relationship.setFocus(Qt.MouseFocusReason)
 
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
