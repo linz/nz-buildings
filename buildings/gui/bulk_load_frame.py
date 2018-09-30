@@ -11,7 +11,6 @@ from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
-from buildings.gui.alter_building_relationships import MultiLayerSelection
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
 from buildings.utilities import database as db, layers
@@ -498,10 +497,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             dw, self.layer_registry, self.current_dataset))
-
-        canvas = iface.mapCanvas()
-        self.tool = MultiLayerSelection(canvas)
-        canvas.setMapTool(self.tool)
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):

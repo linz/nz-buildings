@@ -110,7 +110,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 43)
+        self.assertEqual(len(result), 44)
 
     def test_delete_during_qa(self):
         """Checks outlines that are deleted during qa before comparisons is run are not carried through"""
@@ -135,7 +135,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 43)
+        self.assertEqual(len(result), 44)
         # removed
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
@@ -171,7 +171,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
-        self.assertEqual(len(result), 43)
+        self.assertEqual(len(result), 44)
         # removed
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
