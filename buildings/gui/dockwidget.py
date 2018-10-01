@@ -94,10 +94,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             """
         )
 
-        # Signals for clicking on lst_options
+        # Signals for clicking on list widgets
         self.lst_options.itemClicked.connect(self.show_selected_option)
-        self.lst_options.itemClicked.emit(self.lst_options.item(0))
-
         self.lst_sub_menu.itemClicked.connect(self.show_frame)
 
         self.splitter.splitterMoved.connect(self.resize_dockwidget)
