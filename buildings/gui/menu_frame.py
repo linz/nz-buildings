@@ -20,6 +20,3 @@ class MenuFrame(QFrame, FORM_CLASS):
         """Constructor."""
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
-
-        pixmap = QPixmap(os.path.join(__location__, 'half_tone_nz.png'))
-        self.lbl_half_tone_map.setPixmap(pixmap)
