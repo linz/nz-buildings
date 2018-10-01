@@ -6,9 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>974</height>
+    <width>400</width>
+    <height>900</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>400</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>467</width>
+    <height>1100</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Frame</string>
@@ -43,22 +55,6 @@ QGroupBox::title {
       <string>Edit Relationships</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <spacer name="verticalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>10</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="2" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
@@ -230,9 +226,6 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="layout_msg_bar_edit"/>
-      </item>
       <item row="3" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
@@ -264,8 +257,43 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
+      <item row="1" column="0">
+       <layout class="QVBoxLayout" name="layout_msg_bar_edit"/>
+      </item>
+      <item row="0" column="0">
+       <spacer name="verticalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </widget>
+   </item>
+   <item row="3" column="0">
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="2" column="0">
     <widget class="QGroupBox" name="gb_building_relationships">
@@ -299,6 +327,43 @@ QGroupBox::title {
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="5" column="0" colspan="4">
+       <widget class="QTableWidget" name="tbl_relationship"/>
+      </item>
+      <item row="6" column="0">
+       <widget class="QPushButton" name="btn_qa_not_checked">
+        <property name="text">
+         <string>Not Checked</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="4">
+       <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
+      </item>
+      <item row="6" column="2">
+       <widget class="QPushButton" name="btn_qa_pending">
+        <property name="text">
+         <string>Pending</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QPushButton" name="btn_qa_refer2supplier">
+        <property name="text">
+         <string>Refer</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="4">
+       <widget class="QComboBox" name="cmb_relationship"/>
+      </item>
+      <item row="6" column="3">
+       <widget class="QPushButton" name="btn_qa_okay">
+        <property name="text">
+         <string>Okay</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1" colspan="2">
        <spacer name="verticalSpacer_8">
         <property name="orientation">
@@ -315,43 +380,6 @@ QGroupBox::title {
         </property>
        </spacer>
       </item>
-      <item row="6" column="3">
-       <widget class="QPushButton" name="btn_qa_okay">
-        <property name="text">
-         <string>Okay</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
-       <widget class="QComboBox" name="cmb_relationship"/>
-      </item>
-      <item row="6" column="2">
-       <widget class="QPushButton" name="btn_qa_pending">
-        <property name="text">
-         <string>Pending</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QPushButton" name="btn_qa_refer2supplier">
-        <property name="text">
-         <string>Refer to Supplier</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="4">
-       <widget class="QTableWidget" name="tbl_relationship"/>
-      </item>
-      <item row="6" column="0">
-       <widget class="QPushButton" name="btn_qa_not_checked">
-        <property name="text">
-         <string>Not Checked</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="4">
-       <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
-      </item>
      </layout>
     </widget>
    </item>
@@ -361,38 +389,6 @@ QGroupBox::title {
       <string>Exit</string>
      </property>
     </widget>
-   </item>
-   <item row="3" column="0">
-    <spacer name="verticalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="10" column="0">
-    <spacer name="verticalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>100</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item row="4" column="0">
     <widget class="QCheckBox" name="cb_lyr_bulk_load">

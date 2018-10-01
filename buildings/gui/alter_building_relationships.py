@@ -950,7 +950,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_relationship
         sql_related = """SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value
                          FROM buildings_bulk_load.related r
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+                         ORDER BY r.related_group_id ASC;"""
         result = self.db._execute(sql_related)
         for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
