@@ -18,6 +18,7 @@
 
 import unittest
 
+from PyQt4.QtCore import Qt
 from qgis.utils import plugins
 
 
@@ -29,8 +30,8 @@ class SetUpNewEntryTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_new_entry.click()
+        self.dockwidget.show_frame(self.dockwidget.lst_sub_menu.findItems(
+            'Settings', Qt.MatchExactly)[0])
         self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):

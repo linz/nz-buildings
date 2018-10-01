@@ -44,8 +44,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_production.click()
+        self.dockwidget.show_frame(self.dockwidget.lst_sub_menu.findItems(
+            'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
 
     def tearDown(self):

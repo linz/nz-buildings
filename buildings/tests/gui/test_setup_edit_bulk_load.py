@@ -18,6 +18,7 @@
 
 import unittest
 
+from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
 from qgis.utils import plugins
 
@@ -33,8 +34,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_bulk_load.click()
+        self.dockwidget.show_frame(self.dockwidget.lst_sub_menu.findItems(
+            'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.rad_edit.click()
 
