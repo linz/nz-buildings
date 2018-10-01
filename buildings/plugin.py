@@ -211,51 +211,51 @@ class Buildings:
             iface.addDockWidget(Qt.LeftDockWidgetArea, self.dockwidget)
             iface.mainWindow().tabifyDockWidget(layerdock, self.dockwidget)
 
+            self.setup_main_toolbar()
+            dw = self.dockwidget
+            self.layer_registry = LayerRegistry()
+            # no base layers
+            self.menu_frame = MenuFrame(self.dockwidget, self.layer_registry)
+            dw.insert_into_frames('menu_frame', self.menu_frame)
+
+            home_dir = os.path.dirname(__file__)
+
+            if dw.lst_options.item(0) is None:
+                icon_path = os.path.join(home_dir, 'icons', 'buildings_plugin.png')
+                item = QListWidgetItem('Buildings')
+                item.setIcon(QIcon(icon_path))
+                dw.lst_options.addItem(item)
+                dw.lst_options.setCurrentItem(item)
+
+            icon_path = os.path.join(home_dir, "icons", "capture_source.png")
+            item = QListWidgetItem("Capture Sources")
+            item.setIcon(QIcon(icon_path))
+            dw.lst_sub_menu.addItem(item)
+
+            icon_path = os.path.join(home_dir, "icons", "bulk_load.png")
+            item = QListWidgetItem("Bulk Load")
+            item.setIcon(QIcon(icon_path))
+            dw.lst_sub_menu.addItem(item)
+
+            icon_path = os.path.join(home_dir, "icons", "edit.png")
+            item = QListWidgetItem("Edit Outlines")
+            item.setIcon(QIcon(icon_path))
+            dw.lst_sub_menu.addItem(item)
+
+            icon_path = os.path.join(home_dir, "icons", "settings.png")
+            item = QListWidgetItem("Settings")
+            item.setIcon(QIcon(icon_path))
+            dw.lst_sub_menu.addItem(item)
+
+            canvas = iface.mapCanvas()
+            selectedcrs = 'EPSG:2193'
+            target_crs = QgsCoordinateReferenceSystem()
+            target_crs.createFromUserInput(selectedcrs)
+            canvas.setDestinationCrs(target_crs)
+            self.on_click()
+
         self.dockwidget.show()
         self.dockwidget.raise_()
-
-        self.setup_main_toolbar()
-        dw = self.dockwidget
-        self.layer_registry = LayerRegistry()
-        # no base layers
-        self.menu_frame = MenuFrame(self.dockwidget, self.layer_registry)
-        dw.insert_into_frames('menu_frame', self.menu_frame)
-
-        home_dir = os.path.dirname(__file__)
-
-        if dw.lst_options.item(0) is None:
-            icon_path = os.path.join(home_dir, 'icons', 'buildings_plugin.png')
-            item = QListWidgetItem('Buildings')
-            item.setIcon(QIcon(icon_path))
-            dw.lst_options.addItem(item)
-            dw.lst_options.setCurrentItem(item)
-
-        icon_path = os.path.join(home_dir, "icons", "capture_source.png")
-        item = QListWidgetItem("Capture Sources")
-        item.setIcon(QIcon(icon_path))
-        dw.lst_sub_menu.addItem(item)
-
-        icon_path = os.path.join(home_dir, "icons", "bulk_load.png")
-        item = QListWidgetItem("Bulk Load")
-        item.setIcon(QIcon(icon_path))
-        dw.lst_sub_menu.addItem(item)
-
-        icon_path = os.path.join(home_dir, "icons", "edit.png")
-        item = QListWidgetItem("Edit Outlines")
-        item.setIcon(QIcon(icon_path))
-        dw.lst_sub_menu.addItem(item)
-
-        icon_path = os.path.join(home_dir, "icons", "settings.png")
-        item = QListWidgetItem("Settings")
-        item.setIcon(QIcon(icon_path))
-        dw.lst_sub_menu.addItem(item)
-
-        canvas = iface.mapCanvas()
-        selectedcrs = 'EPSG:2193'
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        self.on_click()
 
     def on_click(self):
         dw = self.dockwidget
