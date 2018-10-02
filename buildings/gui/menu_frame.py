@@ -20,3 +20,5 @@ class MenuFrame(QFrame, FORM_CLASS):
         """Constructor."""
         super(MenuFrame, self).__init__(parent)
         self.setupUi(self)
+
+        self.txt_dashboard.viewport().setAutoFillBackground(False)
