@@ -23,7 +23,6 @@ from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QDockWidget, QListWidgetItem
 from PyQt4 import uic
 
-from buildings.settings.project import set_crs
 from buildings.settings import project
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -119,7 +118,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         if item:
             if item.text() == 'Buildings':
                 project.SRID = 2193
-                set_crs()
+                project.set_crs()
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
                 self.stk_options.addWidget(self.frames['menu_frame'])
                 self.current_frame = self.frames['menu_frame']
