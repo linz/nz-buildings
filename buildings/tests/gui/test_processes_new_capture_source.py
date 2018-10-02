@@ -42,7 +42,8 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.dockwidget.show_frame(self.dockwidget.lst_sub_menu.findItems(
+        sub_menu = self.dockwidget.lst_sub_menu
+        sub_menu.setCurrentItem(sub_menu.findItems(
             'Capture Sources', Qt.MatchExactly)[0])
         self.capture_frame = self.dockwidget.current_frame
 
