@@ -44,7 +44,6 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
         self.dockwidget.show_frame(self.dockwidget.lst_sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
@@ -52,7 +51,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.production_frame.btn_cancel.click()
+        self.production_frame.btn_exit.click()
 
     def test_ui_on_geometry_drawn(self):
         """UI comboboxes enable when geometry is drawn"""
@@ -90,7 +89,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         # tests
         self.assertTrue(self.production_frame.btn_save.isEnabled())
         self.assertTrue(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_cancel.isEnabled())
+        self.assertTrue(self.production_frame.btn_exit.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_source.isEnabled())
         self.assertTrue(self.production_frame.cmb_ta.isEnabled())
@@ -135,7 +134,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         # tests
         self.assertTrue(self.production_frame.btn_save.isEnabled())
         self.assertTrue(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_cancel.isEnabled())
+        self.assertTrue(self.production_frame.btn_exit.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_source.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.isEnabled())
@@ -164,7 +163,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         # check comboboxes disabled
         self.assertFalse(self.production_frame.btn_save.isEnabled())
         self.assertFalse(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_cancel.isEnabled())
+        self.assertTrue(self.production_frame.btn_exit.isEnabled())
         self.assertFalse(self.production_frame.cmb_capture_method.isEnabled())
         self.assertFalse(self.production_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.production_frame.cmb_ta.isEnabled())
@@ -212,7 +211,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         # tests
         self.assertTrue(self.production_frame.btn_save.isEnabled())
         self.assertTrue(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_cancel.isEnabled())
+        self.assertTrue(self.production_frame.btn_exit.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_source.isEnabled())
         self.assertTrue(self.production_frame.cmb_ta.isEnabled())

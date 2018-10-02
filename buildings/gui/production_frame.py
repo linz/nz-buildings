@@ -44,7 +44,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
-        self.btn_cancel.clicked.connect(self.exit_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
 
         self.cmb_capture_method.clear()

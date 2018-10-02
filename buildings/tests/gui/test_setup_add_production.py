@@ -41,7 +41,7 @@ class SetUpAddProduction(unittest.TestCase):
 
     def tearDown(self):
         """Runs after each test."""
-        self.production_frame.btn_cancel.click()
+        self.production_frame.btn_exit.click()
 
     def test_production_gui_set_up(self):
         """ Initial set up of the frame """

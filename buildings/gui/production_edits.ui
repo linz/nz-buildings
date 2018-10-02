@@ -234,7 +234,7 @@ QGroupBox::title {
        </layout>
       </item>
       <item row="11" column="0" colspan="2">
-       <widget class="QPushButton" name="btn_cancel">
+       <widget class="QPushButton" name="btn_exit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -296,7 +296,7 @@ QGroupBox::title {
      <zorder>cmb_lifecycle_stage</zorder>
      <zorder>lb_lifeycle_stage</zorder>
      <zorder></zorder>
-     <zorder>btn_cancel</zorder>
+     <zorder>btn_exit</zorder>
      <zorder>line_2</zorder>
      <zorder>line_3</zorder>
      <zorder>cmb_ta</zorder>

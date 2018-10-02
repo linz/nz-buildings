@@ -95,7 +95,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
         # Signals for clicking on list widgets
         self.lst_options.itemClicked.connect(self.show_selected_option)
-        self.lst_sub_menu.itemClicked.connect(self.show_frame)
+        self.lst_sub_menu.itemSelectionChanged.connect(self.show_frame)
 
         self.splitter.splitterMoved.connect(self.resize_dockwidget)
 
@@ -113,28 +113,36 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.production_frame = ProductionFrame
         self.new_entry = NewEntry
 
-    @pyqtSlot(QListWidgetItem)
-    def show_selected_option(self, item):
-        if item:
-            if item.text() == 'Buildings':
+    @pyqtSlot()
+    def show_selected_option(self):
+        if self.lst_options.selectedItems():
+            current = self.lst_options.selectedItems()[0]
+            if current.text() == 'Buildings':
                 project.SRID = 2193
                 project.set_crs()
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
                 self.stk_options.addWidget(self.frames['menu_frame'])
                 self.current_frame = self.frames['menu_frame']
 
-    @pyqtSlot(QListWidgetItem)
-    def show_frame(self, item):
-        if item:
-            self.db.close_connection()
-            self.stk_options.removeWidget(self.stk_options.currentWidget())
-            if item.text() == 'Capture Sources':
+    @pyqtSlot()
+    def show_frame(self):
+        if self.lst_sub_menu.selectedItems():
+            current = self.lst_sub_menu.selectedItems()[0]
+            # Remove the current widget and run its exit method
+            # If it has no exit method, just remove the current widget
+            try:
+                self.stk_options.removeWidget(self.stk_options.currentWidget())
+                self.current_frame.exit_clicked()
+            except AttributeError:
+                self.stk_options.removeWidget(self.stk_options.currentWidget())
+
+            if current.text() == 'Capture Sources':
                 self.new_widget(self.new_capture_source(self, self.layer_registry))
-            elif item.text() == 'Bulk Load':
+            elif current.text() == 'Bulk Load':
                 self.new_widget(self.bulk_load_frame(self, self.layer_registry))
-            elif item.text() == 'Edit Outlines':
+            elif current.text() == 'Edit Outlines':
                 self.new_widget(self.production_frame(self, self.layer_registry))
-            elif item.text() == 'Settings':
+            elif current.text() == 'Settings':
                 self.new_widget(self.new_entry(self, self.layer_registry))
 
     def new_widget(self, frame):
@@ -159,7 +167,6 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                     self.setFixedWidth(new_dock_width + 5)
             else:
                 self.setFixedWidth(new_dock_width)
-
 
     def closeEvent(self, event):
         self.closed.emit()
