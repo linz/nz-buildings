@@ -162,10 +162,15 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-            Called when production frame exit button clicked,
-            Return to start up frame
+        Called when edit production exit button clicked.
         """
-        # deselect both comboboxes
+        self.close_frame()
+        self.dockwidget.lst_sub_menu.clearSelection()
+
+    def close_frame(self):
+        """
+        Clean up and remove the edit production frame.
+        """
         self.rad_edit.setAutoExclusive(False)
         self.rad_edit.setChecked(False)
         self.rad_edit.setAutoExclusive(True)

@@ -4,7 +4,7 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QColor, QCompleter, QFrame
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
@@ -21,6 +21,8 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class BulkLoadFrame(QFrame, FORM_CLASS):
     """Bulk Load outlines frame class"""
+
+    closed = pyqtSignal()
 
     def __init__(self, dockwidget, layer_registry, parent=None):
         """Constructor."""
@@ -520,8 +522,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-            Called when bulk load frame exit button clicked,
-            Return to start up frame
+        Called when bulk load frame exit button clicked.
+        """
+        self.close_frame()
+        self.dockwidget.lst_sub_menu.clearSelection()
+
+    def close_frame(self):
+        """
+        Clean up and remove the bulk load frame.
         """
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:

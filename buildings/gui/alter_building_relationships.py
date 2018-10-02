@@ -484,8 +484,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-        Relate the buildings in the list
-        Called when cancel botton is clicked
+        Called when alter building relationships exit button clicked.
+        """
+        self.close_frame()
+
+    def close_frame(self):
+        """
+        Clean up and remove the alter building relationships frame.
         """
         self.cancel_clicked()
 

@@ -132,7 +132,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             # If it has no exit method, just remove the current widget
             try:
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
-                self.current_frame.exit_clicked()
+                self.current_frame.close_frame()
             except AttributeError:
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
 

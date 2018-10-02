@@ -121,7 +121,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-        Called when exit button is clicked
+        Called when new capture source exit button clicked.
+        """
+        self.close_frame()
+        self.dockwidget.lst_sub_menu.clearSelection()
+
+    def close_frame(self):
+        """
+        Clean up and remove the new capture source frame.
         """
         self.db.close_connection()
         from buildings.gui.menu_frame import MenuFrame
