@@ -103,6 +103,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         from buildings.utilities import database as db
         from buildings.gui.new_capture_source import NewCaptureSource
         from buildings.gui.bulk_load_frame import BulkLoadFrame
+        from buildings.gui.alter_building_relationships import AlterRelationships
         from buildings.gui.production_frame import ProductionFrame
         from buildings.gui.new_entry import NewEntry
 
@@ -110,6 +111,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.db = db
         self.new_capture_source = NewCaptureSource
         self.bulk_load_frame = BulkLoadFrame
+        self.alter_relationships = AlterRelationships
         self.production_frame = ProductionFrame
         self.new_entry = NewEntry
 
@@ -130,11 +132,14 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             current = self.lst_sub_menu.selectedItems()[0]
             # Remove the current widget and run its exit method
             # If it has no exit method, just remove the current widget
+            if isinstance(self.current_frame, self.alter_relationships):
+                self.current_frame.close_frame()
             try:
-                self.stk_options.removeWidget(self.stk_options.currentWidget())
                 self.current_frame.close_frame()
             except AttributeError:
-                self.stk_options.removeWidget(self.stk_options.currentWidget())
+                pass
+
+            self.stk_options.removeWidget(self.stk_options.currentWidget())
 
             if current.text() == 'Capture Sources':
                 self.new_widget(self.new_capture_source(self, self.layer_registry))
