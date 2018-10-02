@@ -227,23 +227,23 @@ class Buildings:
                 dw.lst_options.addItem(item)
                 dw.lst_options.setCurrentItem(item)
 
-            icon_path = os.path.join(home_dir, "icons", "capture_source.png")
-            item = QListWidgetItem("Capture Sources")
+            icon_path = os.path.join(home_dir, 'icons', 'capture_source.png')
+            item = QListWidgetItem('Capture Sources')
             item.setIcon(QIcon(icon_path))
             dw.lst_sub_menu.addItem(item)
 
-            icon_path = os.path.join(home_dir, "icons", "bulk_load.png")
-            item = QListWidgetItem("Bulk Load")
+            icon_path = os.path.join(home_dir, 'icons', 'bulk_load.png')
+            item = QListWidgetItem('Bulk Load')
             item.setIcon(QIcon(icon_path))
             dw.lst_sub_menu.addItem(item)
 
-            icon_path = os.path.join(home_dir, "icons", "edit.png")
-            item = QListWidgetItem("Edit Outlines")
+            icon_path = os.path.join(home_dir, 'icons', 'edit.png')
+            item = QListWidgetItem('Edit Outlines')
             item.setIcon(QIcon(icon_path))
             dw.lst_sub_menu.addItem(item)
 
-            icon_path = os.path.join(home_dir, "icons", "settings.png")
-            item = QListWidgetItem("Settings")
+            icon_path = os.path.join(home_dir, 'icons', 'settings.png')
+            item = QListWidgetItem('Settings')
             item.setIcon(QIcon(icon_path))
             dw.lst_sub_menu.addItem(item)
 
