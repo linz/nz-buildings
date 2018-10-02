@@ -125,6 +125,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
                 self.stk_options.addWidget(self.frames['menu_frame'])
                 self.current_frame = self.frames['menu_frame']
+            self.lst_sub_menu.clearSelection()
 
     @pyqtSlot()
     def show_frame(self):
