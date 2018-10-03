@@ -19,7 +19,11 @@ INSERT INTO buildings_common.capture_method (value) VALUES ('Estimated');
 
 -- Capture Source Group
 
-INSERT INTO buildings_common.capture_source_group (value, description) VALUES ('NZ Aerial Imagery', 'Replace with link to LDS table...');
+INSERT INTO buildings_common.capture_source_group (value, description)
+VALUES (
+	'NZ Aerial Imagery',
+	'external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/'
+);
 
 -- Lifecycle Stage
 
