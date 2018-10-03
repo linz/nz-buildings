@@ -123,7 +123,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
@@ -172,7 +172,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
@@ -583,7 +583,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
@@ -634,7 +634,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- Replace with link to LDS table...- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Kelburn')
