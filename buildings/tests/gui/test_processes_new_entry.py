@@ -18,6 +18,7 @@
 
 import unittest
 
+from PyQt4.QtCore import Qt
 from qgis.utils import plugins
 
 from buildings.utilities import database as db
@@ -40,8 +41,9 @@ class ProcessNewEntryTest(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_new_entry.click()
+        sub_menu = self.dockwidget.lst_sub_menu
+        sub_menu.setCurrentItem(sub_menu.findItems(
+            'Settings', Qt.MatchExactly)[0])
         self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):

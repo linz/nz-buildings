@@ -18,6 +18,7 @@
 
 import unittest
 
+from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
 from qgis.utils import plugins
 
@@ -33,14 +34,15 @@ class SetUpEditProduction(unittest.TestCase):
         self.building_plugin = plugins.get('buildings')
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
-        self.menu_frame = self.building_plugin.menu_frame
-        self.menu_frame.btn_production.click()
+        sub_menu = self.dockwidget.lst_sub_menu
+        sub_menu.setCurrentItem(sub_menu.findItems(
+            'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
         self.production_frame.rad_edit.click()
 
     def tearDown(self):
         """Runs after each test."""
-        self.production_frame.btn_cancel.click()
+        self.production_frame.btn_exit.click()
 
     def test_production_gui_set_up(self):
         """ Initial set up of the frame """

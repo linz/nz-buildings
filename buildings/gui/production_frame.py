@@ -44,7 +44,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
-        self.btn_cancel.clicked.connect(self.exit_clicked)
+        self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
 
         self.cmb_capture_method.clear()
@@ -162,10 +162,15 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-            Called when production frame exit button clicked,
-            Return to start up frame
+        Called when edit production exit button clicked.
         """
-        # deselect both comboboxes
+        self.close_frame()
+        self.dockwidget.lst_sub_menu.clearSelection()
+
+    def close_frame(self):
+        """
+        Clean up and remove the edit production frame.
+        """
         self.rad_edit.setAutoExclusive(False)
         self.rad_edit.setChecked(False)
         self.rad_edit.setAutoExclusive(True)
