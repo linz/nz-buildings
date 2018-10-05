@@ -146,7 +146,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
-        self.btn_exit.clicked.connect(self.exit_clicked)    
+        self.btn_exit.clicked.connect(self.exit_clicked)
 
     def display_dataset_error(self):
         """UI Display when there are multiple supplied datasets."""
@@ -443,16 +443,17 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
         self.ids = []
-        try:
-            self.bulk_load_layer.selectionChanged.disconnect(
-                self.change_instance.selection_changed)
-        except TypeError:
-            pass
-        try:
-            self.bulk_load_layer.geometryChanged.disconnect(
-                self.change_instance.feature_changed)
-        except TypeError:
-            pass
+        if self.change_instance.__class__.__name__ is "EditBulkLoad":
+            try:
+                self.bulk_load_layer.selectionChanged.disconnect(
+                    self.change_instance.selection_changed)
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect(
+                    self.change_instance.feature_changed)
+            except TypeError:
+                pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
