@@ -369,8 +369,12 @@ class AddBulkLoad(BulkLoadChanges):
             select.town_city_name_by_id,
             (result.fetchall()[0][0],)
         )
-        self.bulk_load_frame.cmb_town.setCurrentIndex(
-            self.bulk_load_frame.cmb_town.findText(town.fetchall()[0][0]))
+        town = town.fetchall()
+        if town:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(
+                self.bulk_load_frame.cmb_town.findText(town[0][0]))
+        else:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(0)
         self.bulk_load_frame.cmb_town.setEnabled(1)
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
