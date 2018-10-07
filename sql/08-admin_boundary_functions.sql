@@ -57,10 +57,9 @@ $$
 
     SELECT town_city_id
     FROM buildings_reference.town_city
-    WHERE shape && ST_Expand(p_polygon_geometry, 1000)
+    WHERE ST_Intersects(shape, p_polygon_geometry)
     ORDER BY
-          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
-        , ST_Distance(p_polygon_geometry, shape) ASC
+          ST_Area(ST_Intersection(p_polygon_geometry, shape)) DESC
     LIMIT 1;
 
 $$
