@@ -32,6 +32,20 @@ def populate_bulk_comboboxes(self):
         text = str(item[0]) + '- ' + str(item[1])
         self.cmb_capture_src_grp.addItem(text)
 
+    # populates external source combobox when radiobutton is selected
+    result = self.db._execute(select.capture_source_external_sourceID)
+    ls = result.fetchall()
+    for item in ls:
+        if item[0] is not None:
+            count = 0
+            exists = False
+            while count < self.cmb_external_id.count():
+                if self.cmb_external_id.itemText(count) == str(item[0]):
+                    exists = True
+                count = count + 1
+            if exists is False:
+                self.cmb_external_id.addItem(item[0])
+
 
 def load_current_fields(self):
     """
@@ -64,7 +78,7 @@ def load_current_fields(self):
         select.capture_src_extsrcID_by_datasetID, (self.current_dataset,))
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
-        self.rad_external_source.setChecked(True)
+        self.rad_external_id.setChecked(True)
         self.cmb_external_id.setCurrentIndex(
             self.cmb_external_id.findText(ex_result))
 
@@ -85,36 +99,14 @@ def enable_external_bulk(self):
     """
         Called when external source radio button is toggled
     """
-    if self.rad_external_source.isChecked():
+    if self.rad_external_id.isChecked():
         self.fcb_external_id.setEnabled(1)
         self.fcb_external_id.setLayer(
             self.ml_outlines_layer.currentLayer())
-        self.cmb_external_id.setEnabled(1)
-        populate_external_id_cmb(self)
+
     else:
         self.fcb_external_id.setDisabled(1)
         self.fcb_external_id.setLayer(None)
-        self.cmb_external_id.setDisabled(1)
-        self.cmb_external_id.clear()
-
-
-@pyqtSlot()
-def populate_external_id_cmb(self):
-    """
-        populates external source combobox when radiobutton is selected
-    """
-    result = self.db._execute(select.capture_source_external_sourceID)
-    ls = result.fetchall()
-    for item in ls:
-        if item[0] is not None:
-            count = 0
-            exists = False
-            while count < self.cmb_external_id.count():
-                if self.cmb_external_id.itemText(count) == str(item[0]):
-                    exists = True
-                count = count + 1
-            if exists is False:
-                self.cmb_external_id.addItem(item[0])
 
 
 def populate_external_fcb(self):
@@ -171,23 +163,14 @@ def bulk_load(self, commit_status):
     capture_source_group = result.fetchall()[0][0]
 
     # external source
-    if self.rad_external_source.isChecked():
+    if len(self.cmb_external_id.currentText()) > 0:
         external_source_id = self.cmb_external_id.currentText()
     else:
         # sets id to None
         external_source_id = None
-    # if user checks radio button then does not enter a source, error
-    if external_source_id is None and self.rad_external_source.isChecked():
-        self.error_dialog = ErrorDialog()
-        self.error_dialog.fill_report(
-            '\n -------------------- NO EXTERNAL ID -----------------'
-            '--- \n\n Please either uncheck the radiobutton or enter '
-            'a new capture source or External Source Id'
-        )
-        self.error_dialog.show()
-        return
+
     # if user checks radio button then does not enter a field, error
-    if self.fcb_external_id.currentField() is None and self.rad_external_source.isChecked():
+    if self.fcb_external_id.currentField() is None and self.rad_external_id.isChecked():
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
             '\n -------------------- NO EXTERNAL ID FIELD-------------'

@@ -127,7 +127,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_data_description.setPlaceholderText('Data Description')
 
         # set up signals and slots
-        self.rad_external_source.toggled.connect(
+        self.rad_external_id.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
         self.ml_outlines_layer.currentIndexChanged.connect(
             partial(bulk_load.populate_external_fcb, self))
@@ -167,12 +167,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.grpb_bulk_load.show()
         bulk_load.populate_bulk_comboboxes(self)
         self.ml_outlines_layer.setEnabled(1)
-        self.rad_external_source.setEnabled(1)
-        self.rad_external_source.setChecked(False)
+        self.rad_external_id.setEnabled(1)
+        self.rad_external_id.setChecked(False)
         self.fcb_external_id.setDisabled(1)
         self.cmb_capture_src_grp.setEnabled(1)
         self.cmb_capture_src_grp.setCurrentIndex(0)
-        self.cmb_external_id.setDisabled(1)
+        self.cmb_external_id.setEnabled(1)
         self.le_data_description.setEnabled(1)
         self.le_data_description.clear()
         self.cmb_capture_method.setEnabled(1)
@@ -206,7 +206,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.grpb_bulk_load.show()
         self.ml_outlines_layer.setDisabled(1)
-        self.rad_external_source.setDisabled(1)
+        self.rad_external_id.setDisabled(1)
         self.fcb_external_id.setDisabled(1)
         self.cmb_capture_src_grp.setDisabled(1)
         self.cmb_external_id.setDisabled(1)
@@ -300,7 +300,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.ml_outlines_layer.setCurrentIndex(0)
         self.cmb_organisation.setCurrentIndex(0)
         self.le_data_description.clear()
-        self.rad_external_source.setChecked(False)
+        self.rad_external_id.setChecked(False)
 
     @pyqtSlot(bool)
     def compare_outlines_clicked(self, commit_status):

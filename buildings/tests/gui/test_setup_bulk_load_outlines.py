@@ -56,7 +56,7 @@ class SetUpBulkLoadTest(unittest.TestCase):
     def test_external_defaults(self):
         """External source comboboxes disabled on setup"""
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 0)
 
     def test_supplied_layer_combobox(self):

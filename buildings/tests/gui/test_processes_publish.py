@@ -79,9 +79,9 @@ class ProcessPublish(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_organisation.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_src_grp.isEnabled())
         self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
-        self.assertFalse(self.bulk_load_frame.rad_external_source.isChecked())
+        self.assertFalse(self.bulk_load_frame.rad_external_id.isChecked())
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_external_id.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_outlines_on_publish(self):
