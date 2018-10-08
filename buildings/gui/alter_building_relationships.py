@@ -1003,7 +1003,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_status_id = 2
         elif qa_status == 'Pending':
             qa_status_id = 3
-        elif qa_status == 'Refer to Supplier':
+        elif qa_status == 'Refer':  # 'Refer to Supplier'
             qa_status_id = 4
         elif qa_status == 'Not Checked':
             qa_status_id = 1
