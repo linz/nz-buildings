@@ -1077,6 +1077,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         index = self.cmb_relationship.findText('Removed Outlines')
         if self.cmb_relationship.currentIndex() != index:
             self.cmb_relationship.setCurrentIndex(index)
+            self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         for row in range(self.tbl_relationship.rowCount()):
             if int(tbl.item(row, 0).text()) == id_existing:
                 tbl.selectRow(row)
