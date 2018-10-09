@@ -404,7 +404,7 @@ FROM buildings_common.capture_source;
 
 capture_source_ID_by_capsrcgrpID_and_externalSrcID = """
 SELECT capture_source_id
-FROM buildings_common.capture_source cs,
+FROM buildings_common.capture_source cs
 WHERE cs.capture_source_group_id = %s
 AND cs.external_source_id = %s;
 """

@@ -164,7 +164,7 @@ def bulk_load(self, commit_status):
 
     # external source
     if len(self.cmb_external_id.currentText()) > 0:
-        external_source_id = self.cmb_external_id.currentText()
+        external_source_id = str(self.cmb_external_id.currentText())
     else:
         # sets id to None
         external_source_id = None
@@ -234,13 +234,13 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
         geom = result.fetchall()[0][0]
 
         # insert outlines
-        if external_source_id is None:
-            # if no external source
+        if external_field is '':
+            # if no external field
             sql = 'SELECT buildings_bulk_load.supplied_outlines_insert(%s, NULL, %s);'
             self.db.execute_no_commit(
                 sql, (dataset_id, geom))
         else:
-            # if external source
+            # if external field
             external_id = outline.attribute(external_field)
             sql = 'SELECT buildings_bulk_load.supplied_outlines_insert(%s, %s, %s);'
             self.db.execute_no_commit(

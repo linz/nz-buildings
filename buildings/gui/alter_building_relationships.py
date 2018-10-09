@@ -531,8 +531,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.populate_tbl_removed()
             self.is_empty_tbl_relationship('Removed Outlines')
         elif current_text == '':
-            self.tbl_relationship.setColumnCount(0)
             self.tbl_relationship.setRowCount(0)
+            self.tbl_relationship.setColumnCount(0)
 
         self.disable_tbl_editing(self.tbl_relationship)
 
@@ -1003,7 +1003,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_status_id = 2
         elif qa_status == 'Pending':
             qa_status_id = 3
-        elif qa_status == 'Refer to Supplier':
+        elif qa_status == 'Refer':  # 'Refer to Supplier'
             qa_status_id = 4
         elif qa_status == 'Not Checked':
             qa_status_id = 1
@@ -1077,6 +1077,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         index = self.cmb_relationship.findText('Removed Outlines')
         if self.cmb_relationship.currentIndex() != index:
             self.cmb_relationship.setCurrentIndex(index)
+            self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         for row in range(self.tbl_relationship.rowCount()):
             if int(tbl.item(row, 0).text()) == id_existing:
                 tbl.selectRow(row)
