@@ -531,8 +531,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.populate_tbl_removed()
             self.is_empty_tbl_relationship('Removed Outlines')
         elif current_text == '':
-            self.tbl_relationship.setColumnCount(0)
             self.tbl_relationship.setRowCount(0)
+            self.tbl_relationship.setColumnCount(0)
 
         self.disable_tbl_editing(self.tbl_relationship)
 
