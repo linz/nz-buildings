@@ -47,13 +47,13 @@ SELECT results_eq(
 SELECT has_function('buildings', 'town_city_intersect_polygon', 'Should have function nz_locality_town_city_intersect_polygon in buildings schema.');
 SELECT results_eq(
 	$$SELECT buildings.town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
-    $$VALUES (200)$$,
+    $$VALUES (100)$$,
     'town_city_intersect_polygon not returning correct town_city_id value when building intersects town_city polygon'
 );
 
 SELECT results_eq(
     $$SELECT buildings.town_city_intersect_polygon('01030000209108000001000000050000003460F2F8D9A93C417F87C576D7305541D6ECEDF2DAA93C41C1E8E623D0305541569A5626FCA93C4112AFE4A0D030554170F46338F9A93C412EC1C7F9D63055413460F2F8D9A93C417F87C576D7305541');$$,
-    $$VALUES (400)$$,
+    $$VALUES (NULL::integer)$$,
     'town_city_intersect_polygon not returning correct town_city_id value when building is outside town_city polygon'
 );
 
