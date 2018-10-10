@@ -194,6 +194,60 @@ class ProductionChanges:
         self.production_frame.cmb_ta.setCurrentIndex(
             self.production_frame.cmb_ta.findText(result))
 
+    def get_comboboxes_values(self):
+        # capture method id
+        text = self.production_frame.cmb_capture_method.currentText()
+        result = self.production_frame.db.execute_no_commit(
+            select.capture_method_ID_by_value, (text,))
+        capture_method_id = result.fetchall()[0][0]
+
+        # capture source
+        text = self.production_frame.cmb_capture_source.currentText()
+        # if there are no capture source entries
+        if text == '':
+            self.production_frame.error_dialog = ErrorDialog()
+            self.production_frame.error_dialog.fill_report(
+                '\n ---------------- NO CAPTURE SOURCE ---------'
+                '------- \n\nThere are no capture source entries'
+            )
+            self.production_frame.error_dialog.show()
+            return
+        text_ls = text.split('- ')
+        result = self.production_frame.db.execute_no_commit(
+            select.capture_srcgrp_by_value_and_description, (
+                text_ls[0], text_ls[1]
+            ))
+        data = result.fetchall()[0][0]
+        if text_ls[2] == 'None':
+            result = self.production_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+        else:
+            result = self.production_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                    data, text_ls[2]
+                ))
+        capture_source_id = result.fetchall()[0][0]
+
+        # lifecycle stage
+        text = self.production_frame.cmb_lifecycle_stage.currentText()
+        result = self.production_frame.db.execute_no_commit(
+            select.lifecycle_stage_ID_by_value, (text,))
+        lifecycle_stage_id = result.fetchall()[0][0]
+
+        # suburb
+        index = self.production_frame.cmb_suburb.currentIndex()
+        suburb = self.production_frame.ids_suburb[index]
+
+        # town
+        index = self.production_frame.cmb_town.currentIndex()
+        town = self.production_frame.ids_town[index]
+
+        # territorial Authority
+        index = self.production_frame.cmb_ta.currentIndex()
+        t_a = self.production_frame.ids_ta[index]
+
+        return capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a
+
     def enable_UI_functions(self):
         """
             Function called when comboboxes are to be enabled
@@ -274,69 +328,12 @@ class AddProduction(ProductionChanges):
             When building frame btn_save clicked
         """
         self.production_frame.db.open_cursor()
-        # capture method id
-        text = self.production_frame.cmb_capture_method.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value, (text,))
-        capture_method_id = result.fetchall()[0][0]
 
-        # capture source
-        text = self.production_frame.cmb_capture_source.currentText()
-        # if there are no capture source entries
-        if text == '':
-            self.production_frame.error_dialog = ErrorDialog()
-            self.production_frame.error_dialog.fill_report(
-                '\n ---------------- NO CAPTURE SOURCE ---------'
-                '------- \n\nThere are no capture source entries'
-            )
-            self.production_frame.error_dialog.show()
-            return
-        text_ls = text.split('- ')
-        result = self.production_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description, (
-                text_ls[0], text_ls[1]
-            ))
-        data = result.fetchall()[0][0]
-        if text_ls[2] == 'None':
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
-        else:
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
-                    data, text_ls[2]
-                ))
-        capture_source_id = result.fetchall()[0][0]
-
-        # lifecycle stage
-        text = self.production_frame.cmb_lifecycle_stage.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.lifecycle_stage_ID_by_value, (text,))
-        lifecycle_stage_id = result.fetchall()[0][0]
-
-        # suburb
-        text = self.production_frame.cmb_suburb.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.suburb_locality_id_by_suburb_4th, (text,))
-        suburb = result.fetchall()[0][0]
-
-        # town
-        text = self.production_frame.cmb_town.currentText()
-        if text:
-            result = self.production_frame.db.execute_no_commit(
-                select.town_city_ID_by_name, (text,))
-            town = result.fetchall()[0][0]
-        else:
-            town = None
-
-        # territorial Authority
-        text = self.production_frame.cmb_ta.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.territorial_authority_ID_by_name, (text,))
-        t_a = result.fetchall()[0][0]
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
         # insert into buildings
         sql = 'SELECT buildings.buildings_insert();'
-        building_id = self.production_frame.db.execute_no_commit(sql)
+        result = self.production_frame.db.execute_no_commit(sql)
         building_id = result.fetchall()[0][0]
         # insert into building_outlines table
         sql = 'SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now()::timestamp, %s);'
@@ -455,67 +452,7 @@ class EditProduction(ProductionChanges):
                     sql, (self.production_frame.geoms[key], key))
         # if only attributes are changed
         if self.production_frame.select_changed:
-            # lifecycle stage
-            text = self.production_frame.cmb_lifecycle_stage.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.lifecycle_stage_ID_by_value, (text,))
-            lifecycle_stage_id = result.fetchall()[0][0]
-
-            # capture method
-            text = self.production_frame.cmb_capture_method.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_method_ID_by_value, (text,))
-            capture_method_id = result.fetchall()[0][0]
-
-            # capture source
-            text = self.production_frame.cmb_capture_source.currentText()
-            if text == '':
-                self.production_frame.error_dialog = ErrorDialog()
-                self.production_frame.error_dialog.fill_report(
-                    '\n ---------------- NO CAPTURE SOURCE -----------'
-                    '-----\n\n There are no capture source entries.'
-                )
-                self.production_frame.error_dialog.show()
-                self.disable_UI_functions()
-                return
-            text_ls = text.split('- ')
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_srcgrp_by_value_and_description, (
-                    text_ls[0], text_ls[1]
-                ))
-            data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
-                result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrdID_is_null, (
-                        data,
-                    ))
-            else:
-                result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID,
-                    (data, text_ls[2])
-                )
-            capture_source_id = result.fetchall()[0][0]
-
-            # suburb
-            text = self.production_frame.cmb_suburb.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.suburb_locality_id_by_suburb_4th, (text,))
-            suburb = result.fetchall()[0][0]
-
-            # town
-            text = self.production_frame.cmb_town.currentText()
-            if text:
-                result = self.production_frame.db.execute_no_commit(
-                    select.town_city_ID_by_name, (text,))
-                town = result.fetchall()[0][0]
-            else:
-                town = None
-
-            # territorial authority
-            text = self.production_frame.cmb_ta.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.territorial_authority_ID_by_name, (text,))
-            t_a = result.fetchall()[0][0]
+            capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
             if len(self.production_frame.ids) > 0:
                 for i in self.production_frame.ids:
