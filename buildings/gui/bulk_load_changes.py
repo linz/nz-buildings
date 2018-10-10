@@ -40,96 +40,142 @@ class BulkLoadChanges:
             text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
             self.bulk_load_frame.cmb_capture_source.addItem(text)
 
+        # populate territorial authority combobox
+        result = self.bulk_load_frame.db._execute(
+            select.territorial_authority_intersect_geom,
+            (self.bulk_load_frame.geom,)
+        )
+        for (name, ) in result.fetchall():
+            self.bulk_load_frame.cmb_ta.addItem(name)
+
         # populate suburb combobox
-        result = self.bulk_load_frame.db._execute(select.suburb_locality_suburb_4th)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.bulk_load_frame.cmb_suburb.addItem(item[0])
+        result = self.bulk_load_frame.db._execute(
+            select.suburb_locality_intersect_geom,
+            (self.bulk_load_frame.geom,)
+        )
+        for (name, ) in result.fetchall():
+            if name is not None:
+                self.bulk_load_frame.cmb_suburb.addItem(name)
 
         # populate town combobox
-        result = self.bulk_load_frame.db._execute(select.town_city_name)
+        result = self.bulk_load_frame.db._execute(
+            select.town_city_intersect_geom,
+            (self.bulk_load_frame.geom,)
+        )
+        self.bulk_load_frame.cmb_town.addItem('')
+        for (name, ) in result.fetchall():
+            if name is not None:
+                self.bulk_load_frame.cmb_town.addItem(name)
+
+    def select_comboboxes_value_during_adding(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # capture method
+        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+            self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
+
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+                                                  (self.bulk_load_frame.geom,))
+        ta = self.bulk_load_frame.db._execute(
+            select.territorial_authority_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_ta.setCurrentIndex(
+            self.bulk_load_frame.cmb_ta.findText(ta.fetchall()[0][0]))
+
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+                                                  (self.bulk_load_frame.geom,))
+        town = self.bulk_load_frame.db._execute(
+            select.town_city_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_town.setCurrentIndex(
+            self.bulk_load_frame.cmb_town.findText(town.fetchall()[0][0]))
+
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.bulk_load_frame.db._execute(sql,
+                                                  (self.bulk_load_frame.geom,))
+        suburb = self.bulk_load_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.bulk_load_frame.cmb_suburb.setCurrentIndex(
+            self.bulk_load_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
+
+    def select_comboboxes_value_during_editing(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # bulk load status
+        result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
         ls = result.fetchall()
         for item in ls:
-            if item[0] is not None:
-                self.bulk_load_frame.cmb_town.addItem(item[0])
+            self.bulk_load_frame.cmb_status.addItem(item[0])
+        result = self.bulk_load_frame.db._execute(
+            select.bulk_load_status_value_by_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_status.setCurrentIndex(
+            self.bulk_load_frame.cmb_status.findText(result))
 
-        # populate territorial authority combobox
-        result = self.bulk_load_frame.db._execute(select.territorial_authority_name)
+        # capture method
+        result = self.bulk_load_frame.db._execute(
+            select.capture_method_value_by_bulk_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+            self.bulk_load_frame.cmb_capture_method_2.findText(result))
+
+        # capture source
+        result = self.bulk_load_frame.db._execute(
+            select.capture_source_group_value_desc_external)
         ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.bulk_load_frame.cmb_ta.addItem(item[0])
+        result = self.bulk_load_frame.db._execute(
+            select.capture_source_group_value_desc_external_by_bulk_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0]
+        value_index = 0
+        for index, item in enumerate(ls):
+            if item == result:
+                value_index = index
+        self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
+            value_index)
 
-        # set to currently selected outline
-        if self.bulk_load_frame.rad_add.isChecked():
-            self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
-        if self.bulk_load_frame.rad_edit.isChecked():
-            # bulk load status
-            result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
-            ls = result.fetchall()
-            for item in ls:
-                self.bulk_load_frame.cmb_status.addItem(item[0])
-            result = self.bulk_load_frame.db._execute(
-                select.bulk_load_status_value_by_outlineID, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.bulk_load_frame.cmb_status.setCurrentIndex(
-                self.bulk_load_frame.cmb_status.findText(result))
+        # suburb
+        result = self.bulk_load_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_bulk_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_suburb.setCurrentIndex(
+            self.bulk_load_frame.cmb_suburb.findText(result))
 
-            # capture method
-            result = self.bulk_load_frame.db._execute(
-                select.capture_method_value_by_bulk_outlineID, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                self.bulk_load_frame.cmb_capture_method_2.findText(result))
+        # town city
+        result = self.bulk_load_frame.db._execute(
+            select.town_city_name_by_bulk_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_town.setCurrentIndex(
+            self.bulk_load_frame.cmb_town.findText(result))
 
-            # capture source
-            result = self.bulk_load_frame.db._execute(
-                select.capture_source_group_value_desc_external)
-            ls = result.fetchall()
-            result = self.bulk_load_frame.db._execute(
-                select.capture_source_group_value_desc_external_by_bulk_outlineID, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0]
-            value_index = 0
-            for index, item in enumerate(ls):
-                if item == result:
-                    value_index = index
-            self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
-                value_index)
-
-            # suburb
-            result = self.bulk_load_frame.db._execute(
-                select.suburb_locality_suburb_4th_by_bulk_outlineID, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.bulk_load_frame.cmb_suburb.setCurrentIndex(
-                self.bulk_load_frame.cmb_suburb.findText(result))
-
-            # town city
-            result = self.bulk_load_frame.db._execute(
-                select.town_city_name_by_bulk_outlineID, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.bulk_load_frame.cmb_town.setCurrentIndex(
-                self.bulk_load_frame.cmb_town.findText(result))
-
-            # territorial Authority
-            result = self.bulk_load_frame.db._execute(
-                select.territorial_authority_name_by_bulk_outline_id, (
-                    self.bulk_load_frame.bulk_load_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.bulk_load_frame.cmb_ta.setCurrentIndex(
-                self.bulk_load_frame.cmb_ta.findText(result))
+        # territorial Authority
+        result = self.bulk_load_frame.db._execute(
+            select.territorial_authority_name_by_bulk_outline_id, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.bulk_load_frame.cmb_ta.setCurrentIndex(
+            self.bulk_load_frame.cmb_ta.findText(result))
 
     def enable_UI_functions(self):
         """
@@ -340,45 +386,9 @@ class AddBulkLoad(BulkLoadChanges):
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
+        self.enable_UI_functions()
         self.populate_edit_comboboxes()
-        self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
-        self.bulk_load_frame.cmb_capture_source.setEnabled(1)
-        # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
-        result = self.bulk_load_frame.db._execute(sql,
-                                                  (self.bulk_load_frame.geom,))
-        ta = self.bulk_load_frame.db._execute(
-            select.territorial_authority_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.bulk_load_frame.cmb_ta.setCurrentIndex(
-            self.bulk_load_frame.cmb_ta.findText(ta.fetchall()[0][0]))
-        self.bulk_load_frame.cmb_ta.setEnabled(1)
-        # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
-        result = self.bulk_load_frame.db._execute(sql,
-                                                  (self.bulk_load_frame.geom,))
-        town = self.bulk_load_frame.db._execute(
-            select.town_city_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.bulk_load_frame.cmb_town.setCurrentIndex(
-            self.bulk_load_frame.cmb_town.findText(town.fetchall()[0][0]))
-        self.bulk_load_frame.cmb_town.setEnabled(1)
-        # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
-        result = self.bulk_load_frame.db._execute(sql,
-                                                  (self.bulk_load_frame.geom,))
-        suburb = self.bulk_load_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.bulk_load_frame.cmb_suburb.setCurrentIndex(
-            self.bulk_load_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
-        self.bulk_load_frame.cmb_suburb.setEnabled(1)
-        # enable save
-        self.bulk_load_frame.btn_edit_save.setEnabled(1)
-        self.bulk_load_frame.btn_edit_reset.setEnabled(1)
+        self.select_comboboxes_value_during_adding()
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -625,6 +635,13 @@ class EditBulkLoad(BulkLoadChanges):
     def select_features(self):
         self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
         self.bulk_load_frame.bulk_load_outline_id = self.bulk_load_frame.ids[0]
+        bulk_load_feat = [feat for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()][0]
+        bulk_load_geom = bulk_load_feat.geometry()
+        # convert to correct format
+        wkt = bulk_load_geom.exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        result = self.bulk_load_frame.db._execute(sql, (wkt,))
+        self.bulk_load_frame.geom = result.fetchall()[0][0]
 
         feats = []
         for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
@@ -671,6 +688,7 @@ class EditBulkLoad(BulkLoadChanges):
             else:
                 self.enable_UI_functions()
                 self.populate_edit_comboboxes()
+                self.select_comboboxes_value_during_editing()
                 self.bulk_load_frame.select_changed = True
 
     def remove_compared_outlines(self):
