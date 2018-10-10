@@ -44,92 +44,155 @@ class ProductionChanges:
         for item in ls:
             self.production_frame.cmb_lifecycle_stage.addItem(item[0])
 
+        # populate territorial authority combobox
+        result = self.production_frame.db._execute(
+            select.territorial_authority_intersect_geom,
+            (self.production_frame.geom,)
+        )
+        self.production_frame.ids_ta = []
+        for (id_ta, name) in result.fetchall():
+            self.production_frame.cmb_ta.addItem(name)
+            self.production_frame.ids_ta.append(id_ta)
+
         # populate suburb combobox
-        result = self.production_frame.db._execute(select.suburb_locality_suburb_4th)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_suburb.addItem(item[0])
+        result = self.production_frame.db._execute(
+            select.suburb_locality_intersect_geom,
+            (self.production_frame.geom,)
+        )
+        self.production_frame.ids_suburb = []
+        for (id_suburb, name) in result.fetchall():
+            if name is not None:
+                self.production_frame.cmb_suburb.addItem(name)
+                self.production_frame.ids_suburb.append(id_suburb)
 
         # populate town combobox
+        result = self.production_frame.db._execute(
+            select.town_city_intersect_geom,
+            (self.production_frame.geom,)
+        )
         self.production_frame.cmb_town.addItem('')
-        result = self.production_frame.db._execute(select.town_city_name)
+        self.production_frame.ids_town = [None]
+        for (id_town, name) in result.fetchall():
+            if name is not None:
+                self.production_frame.cmb_town.addItem(name)
+                self.production_frame.ids_town.append(id_town)
+
+    def select_combobox_value_during_adding(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # capture method
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
+
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        ta = self.production_frame.db._execute(
+            select.territorial_authority_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.production_frame.cmb_ta.setCurrentIndex(
+            self.production_frame.cmb_ta.findText(ta.fetchall()[0][0]))
+        self.production_frame.cmb_ta.setEnabled(1)
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        town = self.production_frame.db._execute(
+            select.town_city_name_by_id,
+            (result.fetchall()[0][0],)
+        )
+        town = town.fetchall()
+        if town:
+            self.production_frame.cmb_town.setCurrentIndex(
+                self.production_frame.cmb_town.findText(town[0][0]))
+        else:
+            self.production_frame.cmb_town.setCurrentIndex(0)
+        self.production_frame.cmb_town.setEnabled(1)
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        suburb = self.production_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_id,
+            (result.fetchall()[0][0],)
+        )
+        self.production_frame.cmb_suburb.setCurrentIndex(
+            self.production_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
+        self.production_frame.cmb_suburb.setEnabled(1)
+        # enable save
+        self.production_frame.btn_save.setEnabled(1)
+        self.production_frame.btn_reset.setEnabled(1)
+
+    def select_combobox_value_during_editing(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # lifeycle stage
+        result = self.production_frame.db._execute(
+            select.lifecycle_stage_value_by_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
+            self.production_frame.cmb_lifecycle_stage.findText(result))
+
+        # capture method
+        result = self.production_frame.db._execute(
+            select.capture_method_value_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText(result))
+
+        # capture source
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external)
         ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_town.addItem(item[0])
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0]
+        value_index = 0
+        for index, item in enumerate(ls):
+            if item == result:
+                value_index = index
+        self.production_frame.cmb_capture_source.setCurrentIndex(
+            value_index)
 
-        # populate territorial authority combobox
-        result = self.production_frame.db._execute(select.territorial_authority_name)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_ta.addItem(item[0])
-        # set to currently selected outline
-        if self.production_frame.rad_edit.isChecked():
-            # lifeycle stage
-            result = self.production_frame.db._execute(
-                select.lifecycle_stage_value_by_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
-                self.production_frame.cmb_lifecycle_stage.findText(result))
+        # suburb
+        result = self.production_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_suburb.setCurrentIndex(
+            self.production_frame.cmb_suburb.findText(result))
 
-            # capture method
-            result = self.production_frame.db._execute(
-                select.capture_method_value_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_capture_method.setCurrentIndex(
-                self.production_frame.cmb_capture_method.findText(result))
+        # town city
+        result = self.production_frame.db._execute(
+            select.town_city_name_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()
+        if result:
+            self.production_frame.cmb_town.setCurrentIndex(
+                self.production_frame.cmb_town.findText(result[0][0]))
+        else:
+            self.production_frame.cmb_town.setCurrentIndex(0)
 
-            # capture source
-            result = self.production_frame.db._execute(
-                select.capture_source_group_value_desc_external)
-            ls = result.fetchall()
-            result = self.production_frame.db._execute(
-                select.capture_source_group_value_desc_external_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0]
-            value_index = 0
-            for index, item in enumerate(ls):
-                if item == result:
-                    value_index = index
-            self.production_frame.cmb_capture_source.setCurrentIndex(
-                value_index)
-
-            # suburb
-            result = self.production_frame.db._execute(
-                select.suburb_locality_suburb_4th_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_suburb.setCurrentIndex(
-                self.production_frame.cmb_suburb.findText(result))
-
-            # town city
-            result = self.production_frame.db._execute(
-                select.town_city_name_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()
-            if result:
-                self.production_frame.cmb_town.setCurrentIndex(
-                    self.production_frame.cmb_town.findText(result[0][0]))
-            else:
-                self.production_frame.cmb_town.setCurrentIndex(0)
-
-            # territorial Authority
-            result = self.production_frame.db._execute(
-                select.territorial_authority_name_by_building_outline_id, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_ta.setCurrentIndex(
-                self.production_frame.cmb_ta.findText(result))
+        # territorial Authority
+        result = self.production_frame.db._execute(
+            select.territorial_authority_name_by_building_outline_id, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_ta.setCurrentIndex(
+            self.production_frame.cmb_ta.findText(result))
 
     def enable_UI_functions(self):
         """
@@ -288,21 +351,8 @@ class AddProduction(ProductionChanges):
         if commit_status:
             self.production_frame.db.commit_open_cursor()
 
-        # reset comboboxes for next outline
-        self.production_frame.cmb_capture_method.setCurrentIndex(0)
-        self.production_frame.cmb_capture_method.setDisabled(1)
-        self.production_frame.cmb_capture_source.setCurrentIndex(0)
-        self.production_frame.cmb_capture_source.setDisabled(1)
-        self.production_frame.cmb_lifecycle_stage.setDisabled(1)
-        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(0)
-        self.production_frame.cmb_ta.setCurrentIndex(0)
-        self.production_frame.cmb_ta.setDisabled(1)
-        self.production_frame.cmb_town.setCurrentIndex(0)
-        self.production_frame.cmb_town.setDisabled(1)
-        self.production_frame.cmb_suburb.setCurrentIndex(0)
-        self.production_frame.cmb_suburb.setDisabled(1)
-        self.production_frame.btn_save.setDisabled(1)
-        self.production_frame.btn_reset.setDisabled(1)
+        # reset and disable comboboxes
+        self.disable_UI_functions()
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -335,50 +385,9 @@ class AddProduction(ProductionChanges):
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
+        self.enable_UI_functions()
         self.populate_edit_comboboxes()
-        self.production_frame.cmb_capture_method.setEnabled(1)
-        self.production_frame.cmb_capture_source.setEnabled(1)
-        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
-        # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        ta = self.production_frame.db._execute(
-            select.territorial_authority_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_ta.setCurrentIndex(
-            self.production_frame.cmb_ta.findText(ta.fetchall()[0][0]))
-        self.production_frame.cmb_ta.setEnabled(1)
-        # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        town = self.production_frame.db._execute(
-            select.town_city_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        town = town.fetchall()
-        if town:
-            self.production_frame.cmb_town.setCurrentIndex(
-                self.production_frame.cmb_town.findText(town[0][0]))
-        else:
-            self.production_frame.cmb_town.setCurrentIndex(0)
-        self.production_frame.cmb_town.setEnabled(1)
-        # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        suburb = self.production_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_suburb.setCurrentIndex(
-            self.production_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
-        self.production_frame.cmb_suburb.setEnabled(1)
-        # enable save
-        self.production_frame.btn_save.setEnabled(1)
-        self.production_frame.btn_reset.setEnabled(1)
+        self.select_combobox_value_during_adding()
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -390,15 +399,7 @@ class AddProduction(ProductionChanges):
         if qgsfId in self.production_frame.added_building_ids:
             self.production_frame.added_building_ids.remove(qgsfId)
             if self.production_frame.added_building_ids == []:
-                self.production_frame.cmb_capture_method.setDisabled(1)
-                self.production_frame.cmb_capture_source.setDisabled(1)
-                self.production_frame.cmb_lifecycle_stage.setDisabled(1)
-                self.production_frame.cmb_ta.setDisabled(1)
-                self.production_frame.cmb_town.setDisabled(1)
-                self.production_frame.cmb_suburb.setDisabled(1)
-                # disable save
-                self.production_frame.btn_save.setDisabled(1)
-                self.production_frame.btn_reset.setDisabled(1)
+                self.disable_UI_functions()
 
 
 class EditProduction(ProductionChanges):
@@ -591,6 +592,13 @@ class EditProduction(ProductionChanges):
     def select_features(self):
         self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
         self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
+        building_feat = [feat for feat in self.production_frame.building_layer.selectedFeatures()][0]
+        building_geom = building_feat.geometry()
+        # convert to correct format
+        wkt = building_geom.exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        result = self.production_frame.db._execute(sql, (wkt,))
+        self.production_frame.geom = result.fetchall()[0][0]
 
         feats = []
         for feature in self.production_frame.building_layer.selectedFeatures():
@@ -622,4 +630,5 @@ class EditProduction(ProductionChanges):
             self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
             self.enable_UI_functions()
             self.populate_edit_comboboxes()
+            self.select_combobox_value_during_editing()
             self.production_frame.select_changed = True
