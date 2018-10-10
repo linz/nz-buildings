@@ -100,8 +100,12 @@ class BulkLoadChanges:
             select.town_city_name_by_id,
             (result.fetchall()[0][0],)
         )
-        self.bulk_load_frame.cmb_town.setCurrentIndex(
-            self.bulk_load_frame.cmb_town.findText(town.fetchall()[0][0]))
+        town = town.fetchall()
+        if town:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(
+                self.bulk_load_frame.cmb_town.findText(town[0][0]))
+        else:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(0)
 
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
@@ -170,9 +174,12 @@ class BulkLoadChanges:
             select.town_city_name_by_bulk_outlineID, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
-        result = result.fetchall()[0][0]
-        self.bulk_load_frame.cmb_town.setCurrentIndex(
-            self.bulk_load_frame.cmb_town.findText(result))
+        result = result.fetchall()
+        if result:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(
+                self.bulk_load_frame.cmb_town.findText(result[0][0]))
+        else:
+            self.bulk_load_frame.cmb_town.setCurrentIndex(0)
 
         # territorial Authority
         result = self.bulk_load_frame.db._execute(

@@ -52,6 +52,7 @@ class ProductionChanges:
                 self.production_frame.cmb_suburb.addItem(item[0])
 
         # populate town combobox
+        self.production_frame.cmb_town.addItem('')
         result = self.production_frame.db._execute(select.town_city_name)
         ls = result.fetchall()
         for item in ls:
@@ -114,9 +115,12 @@ class ProductionChanges:
                 select.town_city_name_by_building_outlineID, (
                     self.production_frame.building_outline_id,
                 ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_town.setCurrentIndex(
-                self.production_frame.cmb_town.findText(result))
+            result = result.fetchall()
+            if result:
+                self.production_frame.cmb_town.setCurrentIndex(
+                    self.production_frame.cmb_town.findText(result[0][0]))
+            else:
+                self.production_frame.cmb_town.setCurrentIndex(0)
 
             # territorial Authority
             result = self.production_frame.db._execute(
@@ -253,9 +257,12 @@ class AddProduction(ProductionChanges):
 
         # town
         text = self.production_frame.cmb_town.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.town_city_ID_by_name, (text,))
-        town = result.fetchall()[0][0]
+        if text:
+            result = self.production_frame.db.execute_no_commit(
+                select.town_city_ID_by_name, (text,))
+            town = result.fetchall()[0][0]
+        else:
+            town = None
 
         # territorial Authority
         text = self.production_frame.cmb_ta.currentText()
@@ -350,8 +357,12 @@ class AddProduction(ProductionChanges):
             select.town_city_name_by_id,
             (result.fetchall()[0][0],)
         )
-        self.production_frame.cmb_town.setCurrentIndex(
-            self.production_frame.cmb_town.findText(town.fetchall()[0][0]))
+        town = town.fetchall()
+        if town:
+            self.production_frame.cmb_town.setCurrentIndex(
+                self.production_frame.cmb_town.findText(town[0][0]))
+        else:
+            self.production_frame.cmb_town.setCurrentIndex(0)
         self.production_frame.cmb_town.setEnabled(1)
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
@@ -534,9 +545,12 @@ class EditProduction(ProductionChanges):
 
             # town
             text = self.production_frame.cmb_town.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.town_city_ID_by_name, (text,))
-            town = result.fetchall()[0][0]
+            if text:
+                result = self.production_frame.db.execute_no_commit(
+                    select.town_city_ID_by_name, (text,))
+                town = result.fetchall()[0][0]
+            else:
+                town = None
 
             # territorial authority
             text = self.production_frame.cmb_ta.currentText()
