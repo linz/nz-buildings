@@ -135,19 +135,20 @@ class ProductionChanges:
         """
             Function called when comboboxes are to be enabled
         """
-        self.production_frame.cmb_capture_method.setEnabled(1)
-        self.production_frame.cmb_capture_source.setEnabled(1)
-        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
         self.production_frame.cmb_capture_method.clear()
+        self.production_frame.cmb_capture_method.setEnabled(1)
         self.production_frame.cmb_capture_source.clear()
+        self.production_frame.cmb_capture_source.setEnabled(1)
         self.production_frame.cmb_lifecycle_stage.clear()
-        self.production_frame.cmb_ta.setEnabled(1)
-        self.production_frame.cmb_town.setEnabled(1)
-        self.production_frame.cmb_suburb.setEnabled(1)
+        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
         self.production_frame.cmb_ta.clear()
+        self.production_frame.cmb_ta.setEnabled(1)
         self.production_frame.cmb_town.clear()
+        self.production_frame.cmb_town.setEnabled(1)
         self.production_frame.cmb_suburb.clear()
-        self.populate_edit_comboboxes()
+        self.production_frame.cmb_suburb.setEnabled(1)
+        self.production_frame.btn_save.setEnabled(1)
+        self.production_frame.btn_reset.setEnabled(1)
 
     def disable_UI_functions(self):
         """
@@ -313,7 +314,7 @@ class AddProduction(ProductionChanges):
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
-        ProductionChanges.disable_UI_functions(self)
+        self.disable_UI_functions()
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -435,50 +436,7 @@ class EditProduction(ProductionChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
         if len(self.production_frame.building_layer.selectedFeatures()) > 0:
-            if len(self.production_frame.building_layer.selectedFeatures()) == 1:
-                # ProductionChanges.enable_UI_functions(self)
-                self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                self.enable_UI_functions()
-                # enable save and reset
-                self.production_frame.btn_save.setEnabled(1)
-                self.production_frame.btn_reset.setEnabled(1)
-                self.production_frame.select_changed = True
-                self.production_frame.ids = []
-            # if more than one outline is selected
-            if len(self.production_frame.building_layer.selectedFeatures()) > 1:
-                feats = []
-                self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
-                for feature in self.production_frame.building_layer.selectedFeatures():
-                    ls = []
-                    ls.append(feature.attributes()[2])
-                    ls.append(feature.attributes()[3])
-                    ls.append(feature.attributes()[4])
-                    ls.append(feature.attributes()[5])
-                    ls.append(feature.attributes()[6])
-                    ls.append(feature.attributes()[7])
-                    if ls not in feats:
-                        feats.append(ls)
-                # if selected features have different attributes (not allowed)
-                if len(feats) > 1:
-                    self.production_frame.error_dialog = ErrorDialog()
-                    self.production_frame.error_dialog.fill_report(
-                        '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
-                        'TED ---- \n\n Can only edit attributes of mul'
-                        'tiple features when all existing attributes a'
-                        're identical.'
-                    )
-                    self.production_frame.error_dialog.show()
-                    self.production_frame.building_outline_id = None
-                    self.disable_UI_functions()
-                    self.production_frame.select_changed = False
-                # if all selected features have the same attributes (allowed)
-                elif len(feats) == 1:
-                    self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                    self.enable_UI_functions()
-                    # enable save and reset
-                    self.production_frame.btn_save.setEnabled(1)
-                    self.production_frame.btn_reset.setEnabled(1)
-                    self.production_frame.select_changed = True
+            self.select_features()
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
@@ -559,21 +517,12 @@ class EditProduction(ProductionChanges):
             t_a = result.fetchall()[0][0]
 
             if len(self.production_frame.ids) > 0:
-                # if there is more than one feature to update
                 for i in self.production_frame.ids:
                     sql = 'SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                     self.production_frame.db.execute_no_commit(
                         sql, (i, capture_method_id,
                               capture_source_id, lifecycle_stage_id,
                               suburb, town, t_a))
-            else:
-                # one feature to update
-                sql = 'SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                self.production_frame.db.execute_no_commit(
-                    sql, (self.production_frame.building_outline_id,
-                          capture_method_id, capture_source_id,
-                          lifecycle_stage_id, suburb, town, t_a)
-                )
             self.disable_UI_functions()
 
         if commit_status:
@@ -597,7 +546,7 @@ class EditProduction(ProductionChanges):
         iface.actionNodeTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
-        ProductionChanges.disable_UI_functions(self)
+        self.disable_UI_functions()
 
     @pyqtSlot(int, QgsGeometry)
     def feature_changed(self, qgsfId, geom):
@@ -630,53 +579,47 @@ class EditProduction(ProductionChanges):
         """
            Called when feature is selected
         """
-        # if only one outline is selected
-        if len(self.production_frame.building_layer.selectedFeatures()) == 1:
-            # ProductionChanges.enable_UI_functions(self)
-            self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-            ProductionChanges.enable_UI_functions(self)
-            # enable save and reset
-            self.production_frame.btn_save.setEnabled(1)
-            self.production_frame.btn_reset.setEnabled(1)
-            self.production_frame.select_changed = True
-            self.production_frame.ids = []
-        # if more than one outline is selected
-        if len(self.production_frame.building_layer.selectedFeatures()) > 1:
-            feats = []
-            self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
-            for feature in self.production_frame.building_layer.selectedFeatures():
-                ls = []
-                ls.append(feature.attributes()[2])
-                ls.append(feature.attributes()[3])
-                ls.append(feature.attributes()[4])
-                ls.append(feature.attributes()[5])
-                ls.append(feature.attributes()[6])
-                ls.append(feature.attributes()[7])
-                if ls not in feats:
-                    feats.append(ls)
-            # if selected features have different attributes (not allowed)
-            if len(feats) > 1:
-                self.production_frame.error_dialog = ErrorDialog()
-                self.production_frame.error_dialog.fill_report(
-                    '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
-                    'TED ---- \n\n Can only edit attributes of mul'
-                    'tiple features when all existing attributes a'
-                    're identical.'
-                )
-                self.production_frame.error_dialog.show()
-                self.production_frame.building_outline_id = None
-                ProductionChanges.disable_UI_functions(self)
-                self.production_frame.select_changed = False
-            # if all selected features have the same attributes (allowed)
-            elif len(feats) == 1:
-                self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                ProductionChanges.enable_UI_functions(self)
-                # enable save and reset
-                self.production_frame.btn_save.setEnabled(1)
-                self.production_frame.btn_reset.setEnabled(1)
-                self.production_frame.select_changed = True
-        # if no outlines are selected
+        # If no outlines are selected the function will return
         if len(self.production_frame.building_layer.selectedFeatures()) == 0:
+            self.production_frame.ids = []
             self.production_frame.building_outline_id = None
-            ProductionChanges.disable_UI_functions(self)
+            self.disable_UI_functions()
             self.production_frame.select_changed = False
+            return
+        self.select_features()
+
+    def select_features(self):
+        self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
+        self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
+
+        feats = []
+        for feature in self.production_frame.building_layer.selectedFeatures():
+            ls = []
+            ls.append(feature.attributes()[2])
+            ls.append(feature.attributes()[3])
+            ls.append(feature.attributes()[4])
+            ls.append(feature.attributes()[5])
+            ls.append(feature.attributes()[6])
+            ls.append(feature.attributes()[7])
+            if ls not in feats:
+                feats.append(ls)
+        # if selected features have different attributes (not allowed)
+        if len(feats) > 1:
+            self.production_frame.error_dialog = ErrorDialog()
+            self.production_frame.error_dialog.fill_report(
+                '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
+                'TED ---- \n\n Can only edit attributes of mul'
+                'tiple features when all existing attributes a'
+                're identical.'
+            )
+            self.production_frame.error_dialog.show()
+            self.production_frame.ids = []
+            self.production_frame.building_outline_id = None
+            self.disable_UI_functions()
+            self.production_frame.select_changed = False
+        # if all selected features have the same attributes (allowed)
+        elif len(feats) == 1:
+            self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
+            self.enable_UI_functions()
+            self.populate_edit_comboboxes()
+            self.production_frame.select_changed = True
