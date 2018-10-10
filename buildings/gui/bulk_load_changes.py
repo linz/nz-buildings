@@ -45,17 +45,21 @@ class BulkLoadChanges:
             select.territorial_authority_intersect_geom,
             (self.bulk_load_frame.geom,)
         )
-        for (name, ) in result.fetchall():
+        self.bulk_load_frame.ids_ta = []
+        for (id_ta, name) in result.fetchall():
             self.bulk_load_frame.cmb_ta.addItem(name)
+            self.bulk_load_frame.ids_ta.append(id_ta)
 
         # populate suburb combobox
         result = self.bulk_load_frame.db._execute(
             select.suburb_locality_intersect_geom,
             (self.bulk_load_frame.geom,)
         )
-        for (name, ) in result.fetchall():
+        self.bulk_load_frame.ids_suburb = []
+        for (id_suburb, name) in result.fetchall():
             if name is not None:
                 self.bulk_load_frame.cmb_suburb.addItem(name)
+                self.bulk_load_frame.ids_suburb.append(id_suburb)
 
         # populate town combobox
         result = self.bulk_load_frame.db._execute(
@@ -63,9 +67,11 @@ class BulkLoadChanges:
             (self.bulk_load_frame.geom,)
         )
         self.bulk_load_frame.cmb_town.addItem('')
-        for (name, ) in result.fetchall():
+        self.bulk_load_frame.ids_town = [None]
+        for (id_town, name) in result.fetchall():
             if name is not None:
                 self.bulk_load_frame.cmb_town.addItem(name)
+                self.bulk_load_frame.ids_town.append(id_town)
 
     def select_comboboxes_value_during_adding(self):
         """
@@ -293,21 +299,16 @@ class AddBulkLoad(BulkLoadChanges):
         capture_source_id = result.fetchall()[0][0]
 
         # suburb
-        text = self.bulk_load_frame.cmb_suburb.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.suburb_locality_id_by_suburb_4th, (text,))
-        suburb = result.fetchall()[0][0]
+        index = self.bulk_load_frame.cmb_suburb.currentIndex()
+        suburb = self.bulk_load_frame.ids_suburb[index]
 
         # town
-        text = self.bulk_load_frame.cmb_town.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(select.town_city_ID_by_name, (text, ))
-        town = result.fetchall()[0][0]
+        index = self.bulk_load_frame.cmb_town.currentIndex()
+        town = self.bulk_load_frame.ids_town[index]
 
         # territorial Authority
-        text = self.bulk_load_frame.cmb_ta.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.territorial_authority_ID_by_name, (text,))
-        t_a = result.fetchall()[0][0]
+        index = self.bulk_load_frame.cmb_ta.currentIndex()
+        t_a = self.bulk_load_frame.ids_ta[index]
 
         # insert into bulk_load_outlines table
         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
@@ -504,22 +505,16 @@ class EditBulkLoad(BulkLoadChanges):
             capture_source_id = result.fetchall()[0][0]
 
             # suburb
-            text = self.bulk_load_frame.cmb_suburb.currentText()
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.suburb_locality_id_by_suburb_4th, (text,))
-            suburb = result.fetchall()[0][0]
+            index = self.bulk_load_frame.cmb_suburb.currentIndex()
+            suburb = self.bulk_load_frame.ids_suburb[index]
 
             # town
-            text = self.bulk_load_frame.cmb_town.currentText()
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.town_city_ID_by_name, (text,))
-            town = result.fetchall()[0][0]
+            index = self.bulk_load_frame.cmb_town.currentIndex()
+            town = self.bulk_load_frame.ids_town[index]
 
-            # territorial authority
-            text = self.bulk_load_frame.cmb_ta.currentText()
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.territorial_authority_ID_by_name, (text,))
-            t_a = result.fetchall()[0][0]
+            # territorial Authority
+            index = self.bulk_load_frame.cmb_ta.currentIndex()
+            t_a = self.bulk_load_frame.ids_ta[index]
 
             # bulk load status
             ls_relationships = {'added': [], 'matched': [], 'related': []}
