@@ -224,16 +224,17 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_save.setDisabled(1)
         self.btn_exit_edits.setDisabled(1)
         self.ids = []
-        try:
-            self.building_layer.selectionChanged.disconnect(
-                self.change_instance.selection_changed)
-        except TypeError:
-            pass
-        try:
-            self.building_layer.geometryChanged.disconnect(
-                self.change_instance.feature_changed)
-        except TypeError:
-            pass
+        if isinstance(self.change_instance, production_changes.EditProduction):
+            try:
+                self.building_layer.selectionChanged.disconnect(
+                    self.change_instance.selection_changed)
+            except TypeError:
+                pass
+            try:
+                self.building_layer.geometryChanged.disconnect(
+                    self.change_instance.feature_changed)
+            except TypeError:
+                pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
