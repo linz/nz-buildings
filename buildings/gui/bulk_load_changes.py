@@ -183,22 +183,82 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_ta.setCurrentIndex(
             self.bulk_load_frame.cmb_ta.findText(result))
 
+    def get_comboboxes_values(self):
+
+        # bulk load status
+        if self.bulk_load_frame.rad_edit.isChecked():
+            text = self.bulk_load_frame.cmb_status.currentText()
+            result = self.bulk_load_frame.db.execute_no_commit(
+                select.bulk_load_status_id_by_value, (text,))
+            bulk_load_status_id = result.fetchall()[0][0]
+        else:
+            bulk_load_status_id = None
+
+        # capture method id
+        text = self.bulk_load_frame.cmb_capture_method_2.currentText()
+        result = self.bulk_load_frame.db.execute_no_commit(
+            select.capture_method_ID_by_value, (text,))
+        capture_method_id = result.fetchall()[0][0]
+
+        # capture source
+        text = self.bulk_load_frame.cmb_capture_source.currentText()
+        # if there are no capture source entries
+        if text == '':
+            self.bulk_load_frame.error_dialog = ErrorDialog()
+            self.bulk_load_frame.error_dialog.fill_report(
+                '\n ---------------- NO CAPTURE SOURCE ---------'
+                '------- \n\nThere are no capture source entries'
+            )
+            self.bulk_load_frame.error_dialog.show()
+            self.disable_UI_functions()
+            return
+        text_ls = text.split('- ')
+        result = self.bulk_load_frame.db.execute_no_commit(
+            select.capture_srcgrp_by_value_and_description, (
+                text_ls[0], text_ls[1]
+            ))
+        data = result.fetchall()[0][0]
+        if text_ls[2] == 'None':
+            result = self.bulk_load_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+        else:
+            result = self.bulk_load_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                    data, text_ls[2]
+                ))
+        capture_source_id = result.fetchall()[0][0]
+
+        # suburb
+        index = self.bulk_load_frame.cmb_suburb.currentIndex()
+        suburb = self.bulk_load_frame.ids_suburb[index]
+
+        # town
+        index = self.bulk_load_frame.cmb_town.currentIndex()
+        town = self.bulk_load_frame.ids_town[index]
+
+        # territorial Authority
+        index = self.bulk_load_frame.cmb_ta.currentIndex()
+        t_a = self.bulk_load_frame.ids_ta[index]
+
+        return bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a
+
     def enable_UI_functions(self):
         """
             Function called when comboboxes are to be enabled
         """
-        self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
-        self.bulk_load_frame.cmb_capture_source.setEnabled(1)
-        self.bulk_load_frame.cmb_status.setEnabled(1)
-        self.bulk_load_frame.cmb_capture_method_2.clear()
-        self.bulk_load_frame.cmb_capture_source.clear()
         self.bulk_load_frame.cmb_status.clear()
-        self.bulk_load_frame.cmb_ta.setEnabled(1)
-        self.bulk_load_frame.cmb_town.setEnabled(1)
-        self.bulk_load_frame.cmb_suburb.setEnabled(1)
+        if self.bulk_load_frame.rad_edit.isChecked():
+            self.bulk_load_frame.cmb_status.setEnabled(1)
+        self.bulk_load_frame.cmb_capture_method_2.clear()
+        self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
+        self.bulk_load_frame.cmb_capture_source.clear()
+        self.bulk_load_frame.cmb_capture_source.setEnabled(1)
         self.bulk_load_frame.cmb_ta.clear()
+        self.bulk_load_frame.cmb_ta.setEnabled(1)
         self.bulk_load_frame.cmb_town.clear()
+        self.bulk_load_frame.cmb_town.setEnabled(1)
         self.bulk_load_frame.cmb_suburb.clear()
+        self.bulk_load_frame.cmb_suburb.setEnabled(1)
         self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
         self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
@@ -265,50 +325,8 @@ class AddBulkLoad(BulkLoadChanges):
             When bulk load frame btn_edit_save clicked
         """
         self.bulk_load_frame.db.open_cursor()
-        # capture method id
-        text = self.bulk_load_frame.cmb_capture_method_2.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value, (text,))
-        capture_method_id = result.fetchall()[0][0]
 
-        # capture source
-        text = self.bulk_load_frame.cmb_capture_source.currentText()
-        # if there are no capture source entries
-        if text == '':
-            self.bulk_load_frame.error_dialog = ErrorDialog()
-            self.bulk_load_frame.error_dialog.fill_report(
-                '\n ---------------- NO CAPTURE SOURCE ---------'
-                '------- \n\nThere are no capture source entries'
-            )
-            self.bulk_load_frame.error_dialog.show()
-            return
-        text_ls = text.split('- ')
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description, (
-                text_ls[0], text_ls[1]
-            ))
-        data = result.fetchall()[0][0]
-        if text_ls[2] == 'None':
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
-        else:
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
-                    data, text_ls[2]
-                ))
-        capture_source_id = result.fetchall()[0][0]
-
-        # suburb
-        index = self.bulk_load_frame.cmb_suburb.currentIndex()
-        suburb = self.bulk_load_frame.ids_suburb[index]
-
-        # town
-        index = self.bulk_load_frame.cmb_town.currentIndex()
-        town = self.bulk_load_frame.ids_town[index]
-
-        # territorial Authority
-        index = self.bulk_load_frame.cmb_ta.currentIndex()
-        t_a = self.bulk_load_frame.ids_ta[index]
+        _, capture_method_id, capture_source_id, suburb, town, t_a = self.get_comboboxes_values()
 
         # insert into bulk_load_outlines table
         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
@@ -342,19 +360,8 @@ class AddBulkLoad(BulkLoadChanges):
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
 
-        # reset comboboxes for next outline
-        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(0)
-        self.bulk_load_frame.cmb_capture_method_2.setDisabled(1)
-        self.bulk_load_frame.cmb_capture_source.setCurrentIndex(0)
-        self.bulk_load_frame.cmb_capture_source.setDisabled(1)
-        self.bulk_load_frame.cmb_ta.setCurrentIndex(0)
-        self.bulk_load_frame.cmb_ta.setDisabled(1)
-        self.bulk_load_frame.cmb_town.setCurrentIndex(0)
-        self.bulk_load_frame.cmb_town.setDisabled(1)
-        self.bulk_load_frame.cmb_suburb.setCurrentIndex(0)
-        self.bulk_load_frame.cmb_suburb.setDisabled(1)
-        self.bulk_load_frame.btn_edit_save.setDisabled(1)
-        self.bulk_load_frame.btn_edit_reset.setDisabled(1)
+        # reset and disable comboboxes
+        self.disable_UI_functions()
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -465,56 +472,8 @@ class EditBulkLoad(BulkLoadChanges):
                     sql, (self.bulk_load_frame.geoms[key], key))
         # if only attributes are changed
         if self.bulk_load_frame.select_changed:
-            # bulk load status
-            text = self.bulk_load_frame.cmb_status.currentText()
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.bulk_load_status_id_by_value, (text,))
-            bulk_load_status_id = result.fetchall()[0][0]
 
-            # capture method
-            text = self.bulk_load_frame.cmb_capture_method_2.currentText()
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_method_ID_by_value, (text,))
-            capture_method_id = result.fetchall()[0][0]
-
-            # capture source
-            text = self.bulk_load_frame.cmb_capture_source.currentText()
-            if text == '':
-                self.bulk_load_frame.error_dialog = ErrorDialog()
-                self.bulk_load_frame.error_dialog.fill_report(
-                    '\n ---------------- NO CAPTURE SOURCE -----------'
-                    '-----\n\n There are no capture source entries.'
-                )
-                self.bulk_load_frame.error_dialog.show()
-                self.disable_UI_functions()
-                return
-            text_ls = text.split('- ')
-            result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_srcgrp_by_value_and_description, (
-                    text_ls[0], text_ls[1]
-                ))
-            data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
-                result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrdID_is_null, (
-                        data,
-                    ))
-            else:
-                result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (data, text_ls[2]))
-            capture_source_id = result.fetchall()[0][0]
-
-            # suburb
-            index = self.bulk_load_frame.cmb_suburb.currentIndex()
-            suburb = self.bulk_load_frame.ids_suburb[index]
-
-            # town
-            index = self.bulk_load_frame.cmb_town.currentIndex()
-            town = self.bulk_load_frame.ids_town[index]
-
-            # territorial Authority
-            index = self.bulk_load_frame.cmb_ta.currentIndex()
-            t_a = self.bulk_load_frame.ids_ta[index]
+            bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a = self.get_comboboxes_values()
 
             # bulk load status
             ls_relationships = {'added': [], 'matched': [], 'related': []}
