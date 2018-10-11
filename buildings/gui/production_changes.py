@@ -77,7 +77,7 @@ class ProductionChanges:
                 self.production_frame.cmb_town.addItem(name)
                 self.production_frame.ids_town.append(id_town)
 
-    def select_combobox_value_during_adding(self):
+    def select_comboboxes_value_during_adding(self):
         """
             Select the correct combobox value for the geometry
         """
@@ -106,7 +106,7 @@ class ProductionChanges:
         index = self.production_frame.ids_suburb.index(result.fetchall()[0][0])
         self.production_frame.cmb_suburb.setCurrentIndex(index)
 
-    def select_combobox_value_during_editing(self):
+    def select_comboboxes_value_during_editing(self):
         """
             Select the correct combobox value for the geometry
         """
@@ -364,7 +364,7 @@ class AddProduction(ProductionChanges):
         # enable & populate comboboxes
         self.enable_UI_functions()
         self.populate_edit_comboboxes()
-        self.select_combobox_value_during_adding()
+        self.select_comboboxes_value_during_adding()
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
