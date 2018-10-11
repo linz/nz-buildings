@@ -77,103 +77,6 @@ class ProductionChanges:
                 self.production_frame.cmb_town.addItem(name)
                 self.production_frame.ids_town.append(id_town)
 
-    def select_comboboxes_value_during_adding(self):
-        """
-            Select the correct combobox value for the geometry
-        """
-        # capture method
-        self.production_frame.cmb_capture_method.setCurrentIndex(
-            self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
-
-        # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        index = self.production_frame.ids_ta.index(result.fetchall()[0][0])
-        self.production_frame.cmb_ta.setCurrentIndex(index)
-
-        # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        index = self.production_frame.ids_town.index(result.fetchall()[0][0])
-        self.production_frame.cmb_town.setCurrentIndex(index)
-
-        # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        index = self.production_frame.ids_suburb.index(result.fetchall()[0][0])
-        self.production_frame.cmb_suburb.setCurrentIndex(index)
-
-    def select_comboboxes_value_during_editing(self):
-        """
-            Select the correct combobox value for the geometry
-        """
-        # lifeycle stage
-        result = self.production_frame.db._execute(
-            select.lifecycle_stage_value_by_outlineID, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()[0][0]
-        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
-            self.production_frame.cmb_lifecycle_stage.findText(result))
-
-        # capture method
-        result = self.production_frame.db._execute(
-            select.capture_method_value_by_building_outlineID, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()[0][0]
-        self.production_frame.cmb_capture_method.setCurrentIndex(
-            self.production_frame.cmb_capture_method.findText(result))
-
-        # capture source
-        result = self.production_frame.db._execute(
-            select.capture_source_group_value_desc_external)
-        ls = result.fetchall()
-        result = self.production_frame.db._execute(
-            select.capture_source_group_value_desc_external_by_building_outlineID, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()[0]
-        value_index = 0
-        for index, item in enumerate(ls):
-            if item == result:
-                value_index = index
-        self.production_frame.cmb_capture_source.setCurrentIndex(
-            value_index)
-
-        # suburb
-        result = self.production_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_building_outlineID, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()[0][0]
-        self.production_frame.cmb_suburb.setCurrentIndex(
-            self.production_frame.cmb_suburb.findText(result))
-
-        # town city
-        result = self.production_frame.db._execute(
-            select.town_city_name_by_building_outlineID, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()
-        if result:
-            self.production_frame.cmb_town.setCurrentIndex(
-                self.production_frame.cmb_town.findText(result[0][0]))
-        else:
-            self.production_frame.cmb_town.setCurrentIndex(0)
-
-        # territorial Authority
-        result = self.production_frame.db._execute(
-            select.territorial_authority_name_by_building_outline_id, (
-                self.production_frame.building_outline_id,
-            ))
-        result = result.fetchall()[0][0]
-        self.production_frame.cmb_ta.setCurrentIndex(
-            self.production_frame.cmb_ta.findText(result))
-
     def get_comboboxes_values(self):
         # capture method id
         text = self.production_frame.cmb_capture_method.currentText()
@@ -364,7 +267,7 @@ class AddProduction(ProductionChanges):
         # enable & populate comboboxes
         self.enable_UI_functions()
         self.populate_edit_comboboxes()
-        self.select_comboboxes_value_during_adding()
+        self.select_comboboxes_value()
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -377,6 +280,35 @@ class AddProduction(ProductionChanges):
             self.production_frame.added_building_ids.remove(qgsfId)
             if self.production_frame.added_building_ids == []:
                 self.disable_UI_functions()
+
+    def select_comboboxes_value(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # capture method
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
+
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_ta.index(result.fetchall()[0][0])
+        self.production_frame.cmb_ta.setCurrentIndex(index)
+
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_town.index(result.fetchall()[0][0])
+        self.production_frame.cmb_town.setCurrentIndex(index)
+
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_suburb.index(result.fetchall()[0][0])
+        self.production_frame.cmb_suburb.setCurrentIndex(index)
 
 
 class EditProduction(ProductionChanges):
@@ -419,7 +351,7 @@ class EditProduction(ProductionChanges):
             self.select_features()
             if self.production_frame.select_changed:
                 self.populate_edit_comboboxes()
-                self.select_comboboxes_value_during_editing()
+                self.select_comboboxes_value()
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
@@ -513,7 +445,7 @@ class EditProduction(ProductionChanges):
         self.select_features()
         if self.production_frame.select_changed:
             self.populate_edit_comboboxes()
-            self.select_comboboxes_value_during_editing()
+            self.select_comboboxes_value()
 
     def select_features(self):
         self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
@@ -555,3 +487,71 @@ class EditProduction(ProductionChanges):
         elif len(feats) == 1:
             self.enable_UI_functions()
             self.production_frame.select_changed = True
+
+    def select_comboboxes_value(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # lifeycle stage
+        result = self.production_frame.db._execute(
+            select.lifecycle_stage_value_by_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
+            self.production_frame.cmb_lifecycle_stage.findText(result))
+
+        # capture method
+        result = self.production_frame.db._execute(
+            select.capture_method_value_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText(result))
+
+        # capture source
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external)
+        ls = result.fetchall()
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0]
+        value_index = 0
+        for index, item in enumerate(ls):
+            if item == result:
+                value_index = index
+        self.production_frame.cmb_capture_source.setCurrentIndex(
+            value_index)
+
+        # suburb
+        result = self.production_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_suburb.setCurrentIndex(
+            self.production_frame.cmb_suburb.findText(result))
+
+        # town city
+        result = self.production_frame.db._execute(
+            select.town_city_name_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()
+        if result:
+            self.production_frame.cmb_town.setCurrentIndex(
+                self.production_frame.cmb_town.findText(result[0][0]))
+        else:
+            self.production_frame.cmb_town.setCurrentIndex(0)
+
+        # territorial Authority
+        result = self.production_frame.db._execute(
+            select.territorial_authority_name_by_building_outline_id, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_ta.setCurrentIndex(
+            self.production_frame.cmb_ta.findText(result))
