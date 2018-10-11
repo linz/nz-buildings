@@ -467,7 +467,7 @@ AND bo.building_outline_id = %s;
 suburb_locality_intersect_geom = """
 SELECT suburb_locality_id, suburb_4th
 FROM buildings_reference.suburb_locality
-WHERE shape && ST_Expand(%s::Geometry, 200)
+WHERE shape && ST_Expand(%s::Geometry, 1000)
 ORDER BY suburb_4th;
 """
 
@@ -497,7 +497,7 @@ AND bo.building_outline_id = %s;
 town_city_intersect_geom = """
 SELECT town_city_id, name
 FROM buildings_reference.town_city
-WHERE ST_Intersects(shape, %s::geometry)
+WHERE ST_Intersects(shape, ST_Buffer(%s::Geometry, 1000))
 ORDER BY name
 """
 
@@ -527,6 +527,6 @@ AND bo.building_outline_id = %s;
 territorial_authority_intersect_geom = """
 SELECT territorial_authority_id, name
 FROM buildings_reference.territorial_authority
-WHERE shape && ST_Expand(%s::Geometry, 200)
+WHERE shape && ST_Expand(%s::Geometry, 1000)
 ORDER BY name;
 """
