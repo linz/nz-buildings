@@ -27,6 +27,13 @@ class BulkLoadChanges:
         """
             Populate editing combox fields
         """
+        # bulk load status
+        if self.bulk_load_frame.rad_edit.isChecked():
+            result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
+            ls = result.fetchall()
+            for item in ls:
+                self.bulk_load_frame.cmb_status.addItem(item[0])
+
         # populate capture method combobox
         result = self.bulk_load_frame.db._execute(select.capture_method_value)
         ls = result.fetchall()
@@ -107,10 +114,6 @@ class BulkLoadChanges:
             Select the correct combobox value for the geometry
         """
         # bulk load status
-        result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
-        ls = result.fetchall()
-        for item in ls:
-            self.bulk_load_frame.cmb_status.addItem(item[0])
         result = self.bulk_load_frame.db._execute(
             select.bulk_load_status_value_by_outlineID, (
                 self.bulk_load_frame.bulk_load_outline_id,
@@ -258,12 +261,12 @@ class BulkLoadChanges:
         """
             Function called when comboboxes are to be disabled
         """
+        self.bulk_load_frame.cmb_status.clear()
+        self.bulk_load_frame.cmb_status.setDisabled(1)
         self.bulk_load_frame.cmb_capture_method_2.clear()
         self.bulk_load_frame.cmb_capture_method_2.setDisabled(1)
         self.bulk_load_frame.cmb_capture_source.clear()
         self.bulk_load_frame.cmb_capture_source.setDisabled(1)
-        self.bulk_load_frame.cmb_status.clear()
-        self.bulk_load_frame.cmb_status.setDisabled(1)
         self.bulk_load_frame.le_deletion_reason.setDisabled(1)
         self.bulk_load_frame.cmb_ta.clear()
         self.bulk_load_frame.cmb_ta.setDisabled(1)
@@ -399,14 +402,7 @@ class AddBulkLoad(BulkLoadChanges):
         if qgsfId in self.bulk_load_frame.added_building_ids:
             self.bulk_load_frame.added_building_ids.remove(qgsfId)
             if self.bulk_load_frame.added_building_ids == []:
-                self.bulk_load_frame.cmb_capture_method_2.setDisabled(1)
-                self.bulk_load_frame.cmb_capture_source.setDisabled(1)
-                self.bulk_load_frame.cmb_ta.setDisabled(1)
-                self.bulk_load_frame.cmb_town.setDisabled(1)
-                self.bulk_load_frame.cmb_suburb.setDisabled(1)
-                # disable save
-                self.bulk_load_frame.btn_edit_save.setDisabled(1)
-                self.bulk_load_frame.btn_edit_reset.setDisabled(1)
+                self.disable_UI_functions()
 
 
 class EditBulkLoad(BulkLoadChanges):
@@ -444,8 +440,12 @@ class EditBulkLoad(BulkLoadChanges):
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
+        self.bulk_load_frame.select_changed = False
         if len(iface.activeLayer().selectedFeatures()) > 0:
             self.select_features()
+            if self.bulk_load_frame.select_changed:
+                self.populate_edit_comboboxes()
+                self.select_comboboxes_value_during_editing()
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
@@ -515,11 +515,11 @@ class EditBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
             path + 'building_red.qml')
         if commit_status:
-            self.bulk_load_frame.geoms = {}
-            self.bulk_load_frame.ids = []
-            self.bulk_load_frame.geom_changed = False
-            self.bulk_load_frame.select_changed = False
             self.bulk_load_frame.db.commit_open_cursor()
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -528,6 +528,7 @@ class EditBulkLoad(BulkLoadChanges):
         """
         iface.actionCancelEdits().trigger()
         self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.ids = []
         self.bulk_load_frame.geom_changed = False
         self.bulk_load_frame.select_changed = False
         # restart editing
@@ -570,12 +571,16 @@ class EditBulkLoad(BulkLoadChanges):
            Called when feature is selected
         """
         # If no outlines are selected the function will return
+        self.bulk_load_frame.select_changed = False
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
             self.bulk_load_frame.ids = []
+            self.bulk_load_frame.building_outline_id = None
             self.disable_UI_functions()
-            self.bulk_load_frame.select_changed = False
             return
         self.select_features()
+        if self.bulk_load_frame.select_changed:
+            self.populate_edit_comboboxes()
+            self.select_comboboxes_value_during_editing()
 
     def select_features(self):
         self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
@@ -628,12 +633,12 @@ class EditBulkLoad(BulkLoadChanges):
                     ' features that have not been deleted.'
                 )
                 self.bulk_load_frame.error_dialog.show()
+                self.bulk_load_frame.ids = []
+                self.bulk_load_frame.building_outline_id = None
                 self.disable_UI_functions()
                 self.bulk_load_frame.select_changed = False
             else:
                 self.enable_UI_functions()
-                self.populate_edit_comboboxes()
-                self.select_comboboxes_value_during_editing()
                 self.bulk_load_frame.select_changed = True
 
     def remove_compared_outlines(self):

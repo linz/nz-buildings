@@ -413,8 +413,13 @@ class EditProduction(ProductionChanges):
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
+
+        self.production_frame.select_changed = False
         if len(self.production_frame.building_layer.selectedFeatures()) > 0:
             self.select_features()
+            if self.production_frame.select_changed:
+                self.populate_edit_comboboxes()
+                self.select_comboboxes_value_during_editing()
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
@@ -444,11 +449,11 @@ class EditProduction(ProductionChanges):
             self.disable_UI_functions()
 
         if commit_status:
-            self.production_frame.geoms = {}
-            self.production_frame.ids = []
-            self.production_frame.geom_changed = False
-            self.production_frame.select_changed = False
             self.production_frame.db.commit_open_cursor()
+        self.production_frame.geoms = {}
+        self.production_frame.ids = []
+        self.production_frame.geom_changed = False
+        self.production_frame.select_changed = False
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -457,6 +462,7 @@ class EditProduction(ProductionChanges):
         """
         iface.actionCancelEdits().trigger()
         self.production_frame.geoms = {}
+        self.production_frame.ids = []
         self.production_frame.geom_changed = False
         self.production_frame.select_changed = False
         # restart editing
@@ -498,13 +504,16 @@ class EditProduction(ProductionChanges):
            Called when feature is selected
         """
         # If no outlines are selected the function will return
+        self.production_frame.select_changed = False
         if len(self.production_frame.building_layer.selectedFeatures()) == 0:
             self.production_frame.ids = []
             self.production_frame.building_outline_id = None
             self.disable_UI_functions()
-            self.production_frame.select_changed = False
             return
         self.select_features()
+        if self.production_frame.select_changed:
+            self.populate_edit_comboboxes()
+            self.select_comboboxes_value_during_editing()
 
     def select_features(self):
         self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
@@ -544,8 +553,5 @@ class EditProduction(ProductionChanges):
             self.production_frame.select_changed = False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
-            self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
             self.enable_UI_functions()
-            self.populate_edit_comboboxes()
-            self.select_combobox_value_during_editing()
             self.production_frame.select_changed = True
