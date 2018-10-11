@@ -85,38 +85,22 @@ class BulkLoadChanges:
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
-        ta = self.bulk_load_frame.db._execute(
-            select.territorial_authority_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.bulk_load_frame.cmb_ta.setCurrentIndex(
-            self.bulk_load_frame.cmb_ta.findText(ta.fetchall()[0][0]))
+        index = self.bulk_load_frame.ids_ta.index(result.fetchall()[0][0])
+        self.bulk_load_frame.cmb_ta.setCurrentIndex(index)
 
         # town locality
         sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
-        town = self.bulk_load_frame.db._execute(
-            select.town_city_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        town = town.fetchall()
-        if town:
-            self.bulk_load_frame.cmb_town.setCurrentIndex(
-                self.bulk_load_frame.cmb_town.findText(town[0][0]))
-        else:
-            self.bulk_load_frame.cmb_town.setCurrentIndex(0)
+        index = self.bulk_load_frame.ids_town.index(result.fetchall()[0][0])
+        self.bulk_load_frame.cmb_town.setCurrentIndex(index)
 
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
-        suburb = self.bulk_load_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.bulk_load_frame.cmb_suburb.setCurrentIndex(
-            self.bulk_load_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
+        index = self.bulk_load_frame.ids_suburb.index(result.fetchall()[0][0])
+        self.bulk_load_frame.cmb_suburb.setCurrentIndex(index)
 
     def select_comboboxes_value_during_editing(self):
         """

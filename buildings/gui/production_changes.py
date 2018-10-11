@@ -89,42 +89,22 @@ class ProductionChanges:
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
                                                    (self.production_frame.geom,))
-        ta = self.production_frame.db._execute(
-            select.territorial_authority_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_ta.setCurrentIndex(
-            self.production_frame.cmb_ta.findText(ta.fetchall()[0][0]))
-        self.production_frame.cmb_ta.setEnabled(1)
+        index = self.production_frame.ids_ta.index(result.fetchall()[0][0])
+        self.production_frame.cmb_ta.setCurrentIndex(index)
+
         # town locality
         sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
                                                    (self.production_frame.geom,))
-        town = self.production_frame.db._execute(
-            select.town_city_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        town = town.fetchall()
-        if town:
-            self.production_frame.cmb_town.setCurrentIndex(
-                self.production_frame.cmb_town.findText(town[0][0]))
-        else:
-            self.production_frame.cmb_town.setCurrentIndex(0)
-        self.production_frame.cmb_town.setEnabled(1)
+        index = self.production_frame.ids_town.index(result.fetchall()[0][0])
+        self.production_frame.cmb_town.setCurrentIndex(index)
+
         # suburb locality
         sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,
                                                    (self.production_frame.geom,))
-        suburb = self.production_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_suburb.setCurrentIndex(
-            self.production_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
-        self.production_frame.cmb_suburb.setEnabled(1)
-        # enable save
-        self.production_frame.btn_save.setEnabled(1)
-        self.production_frame.btn_reset.setEnabled(1)
+        index = self.production_frame.ids_suburb.index(result.fetchall()[0][0])
+        self.production_frame.cmb_suburb.setCurrentIndex(index)
 
     def select_combobox_value_during_editing(self):
         """

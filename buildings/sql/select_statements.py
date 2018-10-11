@@ -464,18 +464,6 @@ WHERE sl.suburb_locality_id = bo.suburb_locality_id
 AND bo.building_outline_id = %s;
 """
 
-suburb_locality_suburb_4th_by_id = """
-SELECT suburb_4th
-FROM buildings_reference.suburb_locality
-WHERE suburb_locality_id = %s;
-"""
-
-suburb_locality_id_by_suburb_4th = """
-SELECT suburb_locality_id
-FROM buildings_reference.suburb_locality
-WHERE buildings_reference.suburb_locality.suburb_4th = %s;
-"""
-
 suburb_locality_intersect_geom = """
 SELECT suburb_locality_id, suburb_4th
 FROM buildings_reference.suburb_locality
@@ -506,18 +494,6 @@ WHERE tc.town_city_id = bo.town_city_id
 AND bo.building_outline_id = %s;
 """
 
-town_city_name_by_id = """
-SELECT name
-FROM buildings_reference.town_city
-WHERE town_city_id = %s;
-"""
-
-town_city_ID_by_name = """
-SELECT town_city_id
-FROM buildings_reference.town_city
-WHERE buildings_reference.town_city.name = %s;
-"""
-
 town_city_intersect_geom = """
 SELECT town_city_id, name
 FROM buildings_reference.town_city
@@ -546,18 +522,6 @@ FROM buildings_reference.territorial_authority ta,
      buildings.building_outlines bo
 WHERE ta.territorial_authority_id = bo.territorial_authority_id
 AND bo.building_outline_id = %s;
-"""
-
-territorial_authority_name_by_id = """
-SELECT name
-FROM buildings_reference.territorial_authority
-WHERE territorial_authority_id = %s;
-"""
-
-territorial_authority_ID_by_name = """
-SELECT territorial_authority_id
-FROM buildings_reference.territorial_authority
-WHERE buildings_reference.territorial_authority.name = %s;
 """
 
 territorial_authority_intersect_geom = """
