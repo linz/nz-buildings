@@ -16,6 +16,7 @@
 import os
 import psycopg2
 
+from buildings.utilities.warnings import buildings_warning
 from qgis.core import QgsDataSourceURI, QgsApplication
 
 import config
@@ -44,7 +45,7 @@ try:
     )
 except psycopg2.DatabaseError as error:
     _conn = None
-    raise error
+    buildings_warning("Database Error", str(error), "critical")
 
 
 def rollback_open_cursor():
@@ -80,7 +81,7 @@ def connect():
         )
     except psycopg2.DatabaseError as error:
         _conn = None
-        raise error
+        buildings_warning("Database Error", str(error), "critical")
 
 
 def _execute(sql, data=None):
@@ -105,18 +106,21 @@ def _execute(sql, data=None):
         cursor.execute(sql, data)
         if not _open_cursor:
             _conn.commit()
-    except psycopg2.DatabaseError:
+    except psycopg2.DatabaseError as error:
         # Commit changes if not _open_cursor and no affected changes
         if not _open_cursor and cursor.rowcount == -1:
             _conn.commit()
         else:
             _conn.rollback()
+        buildings_warning("Database Error", str(error), "critical")
+
         return None
     except psycopg2.InterfaceError as error:
         # Raise the error
         cursor.close()
         _conn.rollback()
-        raise error
+        buildings_warning("Interface Error", str(error), "critical")
+
         return None
 
     return cursor
@@ -146,14 +150,17 @@ def execute_no_commit(sql, data=None):
     cursor = _open_cursor
     try:
         _open_cursor.execute(sql, data)
-    except psycopg2.DatabaseError:
+    except psycopg2.DatabaseError as error:
         _conn.rollback()
+        buildings_warning("Database Error", str(error), "critical")
+
         return None
     except psycopg2.InterfaceError as error:
         # Raise the error
         cursor.close()
         _conn.rollback()
-        raise error
+        buildings_warning("Interface Error", str(error), "critical")
+
         return None
 
     return cursor
