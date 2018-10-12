@@ -69,9 +69,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
         self.btn_maptool.clicked.connect(self.maptool_clicked)
-        self.btn_unlink.clicked.connect(self.unlink_clicked)
-        self.btn_matched.clicked.connect(self.matched_clicked)
-        self.btn_related.clicked.connect(self.related_clicked)
+        self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
+        self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
+        self.btn_related.clicked.connect(partial(self.related_clicked, commit_status=True))
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
@@ -356,7 +356,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog.show()
 
     @pyqtSlot()
-    def unlink_clicked(self):
+    def unlink_clicked(self, commit_status=True):
         """
         Unlink the buildings in the table
         Called when unlink_all botton is clicked
@@ -376,12 +376,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_bulk_load.removeSelection()
 
         if self.autosave:
-            self.save_clicked()
+            self.save_clicked(commit_status)
         else:
             self.btn_save.setEnabled(True)
 
     @pyqtSlot()
-    def matched_clicked(self):
+    def matched_clicked(self, commit_status=True):
         """
         Match the buildings in the list
         Called when matched botton is clicked
@@ -406,12 +406,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.removeSelection()
 
             if self.autosave:
-                self.save_clicked()
+                self.save_clicked(commit_status)
             else:
                 self.btn_save.setEnabled(True)
 
     @pyqtSlot()
-    def related_clicked(self):
+    def related_clicked(self, commit_status=True):
         """
         Relate the buildings in the list
         Called when related botton is clicked
@@ -443,7 +443,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.removeSelection()
 
             if self.autosave:
-                self.save_clicked()
+                self.save_clicked(commit_status)
             else:
                 self.btn_save.setEnabled(True)
 
