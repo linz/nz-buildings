@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
-                         QListWidgetItem, QTableWidgetItem)
+                         QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
@@ -35,6 +35,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.current_dataset = current_dataset
         self.error_dialog = None
         self.highlight_features = []
+        self.autosave = False
 
         self.frame_setup()
         self.layers_setup()
@@ -82,6 +83,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.cb_lyr_bulk_load.stateChanged.connect(self.cb_lyr_bulk_load_state_changed)
         self.cb_lyr_existing.stateChanged.connect(self.cb_lyr_existing_state_changed)
+
+        self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -360,7 +363,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         self.btn_unlink.setEnabled(False)
         self.btn_maptool.setEnabled(False)
-        self.btn_save.setEnabled(True)
         self.qa_button_set_enable(False)
 
         ids_existing = self.get_ids_from_lst(self.lst_existing)
@@ -373,6 +375,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
 
+        if self.autosave:
+            self.save_clicked()
+        else:
+            self.btn_save.setEnabled(True)
+
     @pyqtSlot()
     def matched_clicked(self):
         """
@@ -382,7 +389,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
             self.btn_maptool.setEnabled(False)
-            self.btn_save.setEnabled(True)
             self.qa_button_set_enable(False)
 
             id_existing = int(self.lst_existing.item(0).text())
@@ -399,6 +405,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
+            if self.autosave:
+                self.save_clicked()
+            else:
+                self.btn_save.setEnabled(True)
+
     @pyqtSlot()
     def related_clicked(self):
         """
@@ -412,7 +423,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.btn_related.setEnabled(False)
             self.btn_maptool.setEnabled(False)
-            self.btn_save.setEnabled(True)
             self.qa_button_set_enable(False)
 
             for row in range(self.lst_existing.count()):
@@ -431,6 +441,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
+
+            if self.autosave:
+                self.save_clicked()
+            else:
+                self.btn_save.setEnabled(True)
 
     @pyqtSlot()
     def save_clicked(self, commit_status=True):
@@ -639,6 +654,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         #         break
         # self.tbl_relationship.setFocus(Qt.MouseFocusReason)
 
+    @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
         if self.cb_lyr_bulk_load.isChecked():
@@ -656,6 +672,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_matched_bulk_load, False)
             legend.setLayerVisible(self.lyr_related_bulk_load, False)
 
+    @pyqtSlot()
     def cb_lyr_existing_state_changed(self):
         legend = iface.legendInterface()
         if self.cb_lyr_existing.isChecked():
@@ -672,6 +689,33 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_removed_existing, False)
             legend.setLayerVisible(self.lyr_matched_existing, False)
             legend.setLayerVisible(self.lyr_related_existing, False)
+
+    @pyqtSlot()
+    def cb_autosave_state_changed(self):
+        if self.btn_save.isEnabled():
+            self.unfinished_error_msg()
+            self.cb_autosave.setCheckState(0)
+            self.autosave = False
+            self.btn_save.setVisible(True)
+            return
+        if self.cb_autosave.isChecked():
+            if self.comfirm_to_autosave():
+                self.autosave = True
+                self.btn_save.setVisible(False)
+            else:
+                self.cb_autosave.setCheckState(0)
+                self.autosave = False
+                self.btn_save.setVisible(True)
+        else:
+            self.autosave = False
+            self.btn_save.setVisible(True)
+
+    def comfirm_to_autosave(self):
+        reply = QMessageBox().question(self, "Auto-save", "Are you sure to turn on auto-save?",
+                                       QMessageBox.Yes, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            return True
+        return False
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:

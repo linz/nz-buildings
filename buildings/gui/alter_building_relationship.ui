@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>900</height>
+    <width>467</width>
+    <height>868</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -240,6 +240,13 @@ QGroupBox::title {
            </size>
           </property>
          </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="cb_autosave">
+          <property name="text">
+           <string>Auto-save</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="btn_save">
