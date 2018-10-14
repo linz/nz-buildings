@@ -19,8 +19,12 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from qgis.utils import iface
 from qgis.utils import plugins
+from qgis.gui import QgsMapTool
+from PyQt4.QtCore import Qt
+from PyQt4.QtTest import QTest
+from qgis.core import QgsCoordinateReferenceSystem, QgsPoint
 
 from buildings.utilities import database as db
 
@@ -132,3 +136,39 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, (result + 1))
         self.capture_frame.db.rollback_open_cursor()
+
+    def test_adding_capture_source_by_capture_source_area_layer(self):
+        """Editing external source id using the capture source area layer"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747520, 5428152)),
+                         delay=-1)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        # test selecting an area
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878185, 5555335)), delay=-1)
+        self.assertTrue(self.capture_frame.rad_external_source.isChecked())
+        self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '1')
+        # test selecting an area and toggling on and off takes the value away and brings it back
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878733, 5555375)), delay=-1)
+        self.assertTrue(self.capture_frame.rad_external_source.isChecked())
+        self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '2')
+        self.capture_frame.rad_external_source.toggle()
+        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
+        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '')
+        self.capture_frame.rad_external_source.toggle()
+        self.assertTrue(self.capture_frame.rad_external_source.isChecked())
+        self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '2')
+        # check clicking outside the shapefile/deselecting removes from frame
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878996, 5555445)), delay=-1)
+        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
+        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '')

@@ -531,3 +531,11 @@ FROM buildings_reference.territorial_authority
 WHERE shape && ST_Expand(%s::Geometry, 1000)
 ORDER BY name;
 """
+
+# Capture Source Area
+
+
+capture_source_area_name_value = """
+SELECT DISTINCT area_title, external_area_polygon_id
+FROM buildings_reference.capture_source_area;
+"""

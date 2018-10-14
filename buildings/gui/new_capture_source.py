@@ -5,8 +5,10 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame, QColor, QToolButton
+from PyQt4.QtGui import QFrame, QColor, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
 from qgis.utils import iface
+from qgis.core import QgsVectorLayer
+from PyQt4.QtTest import QTest
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
@@ -33,6 +35,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.populate_combobox()
+        # self.completer_box()
         self.le_external_source_id.setDisabled(1)
 
         self.dockwidget = dockwidget
@@ -46,6 +49,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # setup toolbar
         self.setup_toolbar()
 
+        # initialise table
+        self.init_table()
+
         # set up signals and slots
         self.capture_source_id = None
         self.btn_ok.clicked.connect(partial(
@@ -53,7 +59,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
 
         self.rad_external_source.toggled.connect(self.enable_external_source)
+        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
     def populate_combobox(self):
         """Called on opening of frame populate combobox with capture source group
@@ -64,9 +72,31 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             text = str(item[0]) + '- ' + str(item[1])
             self.cmb_capture_source_group.addItem(text)
 
+    def init_table(self):
+        tbl = self.tbl_capture_source_area
+        tbl.setRowCount(0)
+        tbl.setColumnCount(2)
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('External Id'))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem('Area Title'))
+        tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+        tbl.verticalHeader().setVisible(False)
+        tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
+        tbl.setSelectionMode(QAbstractItemView.MultiSelection)
+        tbl.setShowGrid(True)
+        sql_csa = """SELECT csa.external_area_polygon_id, csa.area_title
+                         FROM buildings_reference.capture_source_area csa
+                         ORDER BY csa.area_title;
+                        """
+        result = self.db._execute(sql_csa)
+        for (polygon_id, area_title) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % polygon_id))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % area_title))
+
     def add_capture_source_area_layer(self):
         """Called on opening of frame to add capture source area layer
-        # """
+        """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         # add layer
@@ -131,16 +161,144 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     def selection_changed(self, added, removed, cleared):
         """Called when feature selection is changed
         """
+        # disconnect other signals
+        self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
+        # if nothing is selected clear line edit and table
         if len(self.capture_source_area.selectedFeatures()) == 0:
-            if self.rad_external_source.isChecked():
-                self.rad_external_source.toggle()
-            self.le_external_source_id.setDisabled(1)
-        else:
+            self.le_external_source_id.setText('')
+            self.tbl_capture_source_area.clearSelection()
+        # if areas are selected
+        if len(self.capture_source_area.selectedFeatures()) > 0:
+            # enable line edit
             if not self.rad_external_source.isChecked():
                 self.rad_external_source.toggle()
             self.le_external_source_id.setEnabled(1)
+            # list of line edit's current text
+            current_text = [s.strip() for s in self.le_external_source_id.text().split(',')]
+            # list of ids selected
             self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
-            self.le_external_source_id.setText(', '.join(self.ids))
+            # if selection is different to line edit text changes = True
+            changes = False
+            if len(current_text) != len(self.ids):
+                changes = True
+            else:
+                for item in self.ids:
+                    if item not in current_text:
+                        changes = True
+            # if changes required update line edit text
+            if changes:
+                # change line edit
+                self.le_external_source_id.setText(', '.join(self.ids))
+                # change table selection
+                self.tbl_capture_source_area.clearSelection()
+                rows = self.tbl_capture_source_area.rowCount()
+                selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+                for item in self.ids:
+                    index = 0
+                    while index < rows:
+                        if index not in selected_rows:
+                            if self.tbl_capture_source_area.item(index, 0).text() == item:
+                                self.tbl_capture_source_area.selectRow(index)
+                        index = index + 1
+        # reconnect line edit signal
+        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+
+    @pyqtSlot(str)
+    def lineedit_text_changed(self, text):
+        """Called when user enters/changes text in line edit
+        """
+        # disconnect other signals
+        self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
+        # add a wait for faster typers
+        QTest.qWait(0.5)
+        # if line edit cleared remove selection and clear table
+        if text == '':
+            self.capture_source_area.removeSelection()
+            self.tbl_capture_source_area.clearSelection()
+        # list of line edit text split by ','
+        ls_text = [t.strip() for t in text.split(',')]
+        # list of ids selected
+        self.selected_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
+        # list of all ids in capture_source_area
+        self.all_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.getFeatures()]
+        # if line edit is different to selection changes = True
+        changes = False
+        # if items in the line edit list are in capture_source_area all_in = True
+        all_in = True
+        # check for all items in line edit existing in capture_source_area
+        for item in ls_text:
+            if item not in self.all_ids:
+                all_in = False
+                # if not remove selection and clear table
+                self.capture_source_area.removeSelection()
+                self.tbl_capture_source_area.clearSelection()
+        if all_in:
+            # check for if text is different to selection
+            if ls_text != self.selected_ids:
+                changes = True
+        # if text is in capture_source_area and changes are required
+        if changes:
+            # select areas
+            for item in ls_text:
+                self.capture_source_area.selectByExpression('"external_area_polygon_id" = {}'.format(item), behaviour=QgsVectorLayer.AddToSelection)
+                self.tbl_capture_source_area.clearSelection()
+                rows = self.tbl_capture_source_area.rowCount()
+            selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+            for item in ls_text:
+                index = 0
+                while index < rows:
+                    if index not in selected_rows:
+                        if self.tbl_capture_source_area.item(index, 0).text() == item:
+                            self.tbl_capture_source_area.selectRow(index)
+                    index = index + 1
+        # reconnect other signals
+        self.capture_source_area.selectionChanged.connect(self.selection_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+
+    @ pyqtSlot()
+    def tbl_item_changed(self):
+        # disconnect other signals
+        self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
+        self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
+        # enable line edit
+        if not self.rad_external_source.isChecked():
+            self.rad_external_source.toggle()
+            self.le_external_source_id.setEnabled(1)
+        # list of selected ids
+        self.selected_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
+        # if current selection is different to table selection changes = True
+        changes = False
+        if len(self.selected_ids) != len(self.tbl_capture_source_area.selectionModel().selectedRows()):
+            changes = True
+        else:
+            for row in self.tbl_capture_source_area.selectionModel().selectedRows():
+                if self.tbl_capture_source_area.item(row.row(), 0).text() not in self.selected_ids:
+                    changes = True
+        if changes:
+            text = ''
+            selection = ''
+            for row in self.tbl_capture_source_area.selectionModel().selectedRows():
+                area_id = self.tbl_capture_source_area.item(row.row(), 0).text()
+                self.capture_source_area.removeSelection()
+                if text == '':
+                    text = text + area_id
+                    selection = '"external_area_polygon_id" = {}'.format(area_id)
+                else:
+                    text = text + ',{}'.format(area_id)
+                    selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
+            # change text
+            self.le_external_source_id.setText(text)
+            # change layer selection
+            if selection == '':
+                self.capture_source_area.removeSelection()
+            else:
+                self.capture_source_area.selectByExpression(selection)
+        # reconnect other signals
+        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
+        self.capture_source_area.selectionChanged.connect(self.selection_changed)
 
     @pyqtSlot(bool)
     def ok_clicked(self, commit_status):

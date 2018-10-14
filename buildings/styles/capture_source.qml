@@ -1,43 +1,19 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
 <qgis version="2.18.18" simplifyAlgorithm="0" minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" readOnly="0" simplifyMaxScale="1" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
   <edittypes>
-    <edittype widgetv2type="TextEdit" name="imagery_su">
+    <edittype widgetv2type="TextEdit" name="area_polygon_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="name">
+    <edittype widgetv2type="TextEdit" name="external_area_polygon_id">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
-    <edittype widgetv2type="TextEdit" name="imagery_id">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="index_id">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="set_order">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="ground_sam">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="accuracy">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="supplier">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="licensor">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="flown_from">
-      <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
-    </edittype>
-    <edittype widgetv2type="TextEdit" name="flown_to">
+    <edittype widgetv2type="TextEdit" name="area_title">
       <widgetv2config IsMultiline="0" fieldEditable="1" constraint="" UseHtml="0" labelOnTop="0" constraintDescription="" notNull="0"/>
     </edittype>
   </edittypes>
   <renderer-v2 forceraster="0" symbollevels="0" type="singleSymbol" enableorderby="0">
     <symbols>
-      <symbol alpha="0.490196" clip_to_extent="1" type="fill" name="0">
+      <symbol alpha="0.243137" clip_to_extent="1" type="fill" name="0">
         <layer pass="0" class="SimpleFill" locked="0">
           <prop k="border_width_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="color" v="166,206,227,255"/>
@@ -228,6 +204,7 @@
   <SingleCategoryDiagramRenderer diagramType="Histogram" sizeLegend="0" attributeLegend="1">
     <DiagramCategory penColor="#000000" labelPlacementMethod="XHeight" penWidth="0" diagramOrientation="Up" sizeScale="0,0,0,0,0,0" minimumSize="0" barWidth="5" penAlpha="255" maxScaleDenominator="1e+08" backgroundColor="#ffffff" transparency="0" width="15" scaleDependency="Area" backgroundAlpha="255" angleOffset="1440" scaleBasedVisibility="0" enabled="0" height="15" lineSizeScale="0,0,0,0,0,0" sizeType="MM" lineSizeType="MM" minScaleDenominator="inf">
       <fontProperties description="Ubuntu,11,-1,5,50,0,0,0,0,0" style=""/>
+      <attribute field="" color="#000000" label=""/>
     </DiagramCategory>
     <symbol alpha="1" clip_to_extent="1" type="marker" name="sizeSymbol">
       <layer pass="0" class="SimpleMarker" locked="0">
@@ -255,35 +232,19 @@
   <DiagramLayerSettings yPosColumn="-1" showColumn="-1" linePlacementFlags="10" placement="0" dist="0" xPosColumn="-1" priority="0" obstacle="0" zIndex="0" showAll="1"/>
   <annotationform></annotationform>
   <aliases>
-    <alias field="imagery_su" index="0" name=""/>
-    <alias field="name" index="1" name=""/>
-    <alias field="imagery_id" index="2" name=""/>
-    <alias field="index_id" index="3" name=""/>
-    <alias field="set_order" index="4" name=""/>
-    <alias field="ground_sam" index="5" name=""/>
-    <alias field="accuracy" index="6" name=""/>
-    <alias field="supplier" index="7" name=""/>
-    <alias field="licensor" index="8" name=""/>
-    <alias field="flown_from" index="9" name=""/>
-    <alias field="flown_to" index="10" name=""/>
+    <alias field="area_polygon_id" index="0" name=""/>
+    <alias field="external_area_polygon_id" index="1" name=""/>
+    <alias field="area_title" index="2" name=""/>
   </aliases>
   <excludeAttributesWMS/>
   <excludeAttributesWFS/>
   <attributeactions default="-1"/>
-  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="65">
+  <attributetableconfig actionWidgetStyle="dropDown" sortExpression="" sortOrder="0">
     <columns>
-      <column width="-1" hidden="0" type="field" name="imagery_su"/>
-      <column width="-1" hidden="0" type="field" name="name"/>
-      <column width="-1" hidden="0" type="field" name="imagery_id"/>
-      <column width="-1" hidden="0" type="field" name="index_id"/>
-      <column width="-1" hidden="0" type="field" name="set_order"/>
-      <column width="-1" hidden="0" type="field" name="ground_sam"/>
-      <column width="-1" hidden="0" type="field" name="accuracy"/>
-      <column width="-1" hidden="0" type="field" name="supplier"/>
-      <column width="-1" hidden="0" type="field" name="licensor"/>
-      <column width="-1" hidden="0" type="field" name="flown_from"/>
-      <column width="-1" hidden="0" type="field" name="flown_to"/>
       <column width="-1" hidden="1" type="actions"/>
+      <column width="-1" hidden="0" type="field" name="area_polygon_id"/>
+      <column width="-1" hidden="0" type="field" name="external_area_polygon_id"/>
+      <column width="-1" hidden="0" type="field" name="area_title"/>
     </columns>
   </attributetableconfig>
   <editform></editform>
@@ -315,18 +276,10 @@ def my_form_open(dialog, layer, feature):
     <fieldstyles/>
   </conditionalstyles>
   <defaults>
-    <default field="imagery_su" expression=""/>
-    <default field="name" expression=""/>
-    <default field="imagery_id" expression=""/>
-    <default field="index_id" expression=""/>
-    <default field="set_order" expression=""/>
-    <default field="ground_sam" expression=""/>
-    <default field="accuracy" expression=""/>
-    <default field="supplier" expression=""/>
-    <default field="licensor" expression=""/>
-    <default field="flown_from" expression=""/>
-    <default field="flown_to" expression=""/>
+    <default field="area_polygon_id" expression=""/>
+    <default field="external_area_polygon_id" expression=""/>
+    <default field="area_title" expression=""/>
   </defaults>
-  <previewExpression></previewExpression>
+  <previewExpression>COALESCE("name", '&lt;NULL>')</previewExpression>
   <layerGeometryType>2</layerGeometryType>
 </qgis>

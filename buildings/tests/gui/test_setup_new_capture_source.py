@@ -18,8 +18,9 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
 from qgis.utils import plugins
+from qgis.core import QgsProject
+from PyQt4.QtCore import Qt
 
 from buildings.utilities import database as db
 
@@ -63,3 +64,17 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
                          result)
         self.capture_frame.rad_external_source.click()
+
+    def test_capture_source_area_layer_registry(self):
+        """Capture source area layer is added to layer registry"""
+        layer_bool = True
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup('Building Tool Layers')
+        layers = group.findLayers()
+        layer_name = ['capture_source_area']
+        for layer in layers:
+            if layer.layer().name() not in layer_name:
+                layer_bool = False
+
+        self.assertEqual(len([layer for layer in layers]), len(layer_name))
+        self.assertTrue(layer_bool)
