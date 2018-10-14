@@ -54,6 +54,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.maptool_clicked()
         self.reset_buttons()
         self.populate_cmb_relationship()
+        self.setup_message_box()
 
     def layers_setup(self):
         # set selected item color as transparent
@@ -204,6 +205,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_matched_bulk_load.setSubsetString('')
         self.lyr_related_existing.setSubsetString('')
         self.lyr_related_bulk_load.setSubsetString('')
+
+    def setup_message_box(self):
+        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure to turn on auto-save?', buttons=QMessageBox.No)
+        self.msgbox.addButton(QMessageBox.Yes)
 
     @pyqtSlot()
     def on_dockwidget_closed(self):
@@ -714,8 +719,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_save.setVisible(True)
 
     def comfirm_to_autosave(self):
-        reply = QMessageBox().question(self, "Auto-save", "Are you sure to turn on auto-save?",
-                                       QMessageBox.Yes, QMessageBox.No)
+        reply = self.msgbox.exec_()
         if reply == QMessageBox.Yes:
             return True
         return False
