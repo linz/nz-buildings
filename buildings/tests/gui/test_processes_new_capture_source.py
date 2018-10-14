@@ -166,9 +166,9 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_frame.rad_external_source.toggle()
         self.assertTrue(self.capture_frame.rad_external_source.isChecked())
         self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
-        self.assertEquals(self.capture_frame.le_external_source_id.text(), '2')
+        self.assertEquals(self.capture_frame.le_external_source_id.text(), '')
         # check clicking outside the shapefile/deselecting removes from frame
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878996, 5555445)), delay=-1)
-        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
-        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
+        self.assertTrue(self.capture_frame.rad_external_source.isChecked())
+        self.assertTrue(self.capture_frame.le_external_source_id.isEnabled())
         self.assertEquals(self.capture_frame.le_external_source_id.text(), '')

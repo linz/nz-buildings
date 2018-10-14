@@ -254,11 +254,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         ext_src_id = ext_src_id.fetchall()[0][0]
         sql = """SELECT area_title
         FROM buildings_reference.capture_source_area csa
-        WHERE csa.external_area_polygon_id = %s
+        WHERE csa.external_area_polygon_id = %s;
         """
         area_id = self.db._execute(sql, (ext_src_id,))
         if area_id is not None:
-            self.area_id = area_id.fetchall()[0][0]
+            self.area_id = area_id.fetchall()
+        if len(self.area_id) > 0:
+            self.area_id = self.area_id[0][0]
             self.cmb_capture_source_area.setCurrentIndex(self.cmb_capture_source_area.findText(self.area_id))
         else:
             self.area_id = None
