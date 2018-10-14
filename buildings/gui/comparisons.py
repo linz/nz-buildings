@@ -10,11 +10,14 @@ def compare_outlines(self, commit_status):
     """Method called to compare outlines of current unprocessed dataset."""
 
     self.db.open_cursor()
-
-    sql = 'SELECT shape FROM buildings_reference.capture_source_area WHERE area_title = %s;'
-    result = self.db.execute_no_commit(sql, (self.cmb_capture_source_area.currentText(),))
-    hull = result.fetchall()[0][0]
-
+    if self.area_id is None:
+        sql = 'SELECT shape FROM buildings_reference.capture_source_area WHERE area_title = %s;'
+        result = self.db.execute_no_commit(sql, (self.cmb_capture_source_area.currentText(),))
+        hull = result.fetchall()[0][0]
+    else:
+        sql = 'SELECT shape FROM buildings_reference.capture_source_area WHERE area_title = %s;'
+        result = self.db.execute_no_commit(sql, (self.area_id,))
+        hull = result.fetchall()[0][0]
     result = self.db.execute_no_commit(select.building_outlines, (hull,))
     results = result.fetchall()
 

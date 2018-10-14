@@ -240,8 +240,29 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.display_data_exists()
         self.btn_compare_outlines.setEnabled(1)
-        self.cmb_capture_source_area.setEnabled(1)
-        self.cmb_capture_source_area.setEnabled(1)
+        sql = """SELECT capture_source_id
+        FROM buildings_bulk_load.bulk_load_outlines
+        WHERE supplied_dataset_id = %s;
+        """
+        cap_source = self.db._execute(sql, (self.current_dataset,))
+        cap_source = cap_source.fetchall()[0][0]
+        sql = """SELECT external_source_id
+        FROM buildings_common.capture_source cs
+        WHERE cs.capture_source_id = %s;
+        """
+        ext_src_id = self.db._execute(sql, (cap_source,))
+        ext_src_id = ext_src_id.fetchall()[0][0]
+        sql = """SELECT area_title
+        FROM buildings_reference.capture_source_area csa
+        WHERE csa.external_area_polygon_id = %s
+        """
+        area_id = self.db._execute(sql, (ext_src_id,))
+        if area_id is not None:
+            self.area_id = area_id.fetchall()[0][0]
+            self.cmb_capture_source_area.setCurrentIndex(self.cmb_capture_source_area.findText(self.area_id))
+        else:
+            self.area_id = None
+            self.cmb_capture_source_area.setEnabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
