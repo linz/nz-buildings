@@ -4,7 +4,7 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
+from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView, QIcon,
                          QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
 from qgis.gui import QgsHighlight, QgsMessageBar
@@ -16,6 +16,7 @@ from buildings.utilities.multi_layer_selection import MultiLayerSelection
 from buildings.sql import select_statements as select
 
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'alter_building_relationship.ui'))
 
@@ -47,6 +48,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layout_msg_bar_edit.addWidget(self.message_bar_edit)
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
+
+        self.btn_maptool.setIcon(QIcon(os.path.join(__location__, "..", "icons", "multi_layer_selection_tool.png")))
 
         self.maptool_clicked()
         self.reset_buttons()
