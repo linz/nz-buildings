@@ -49,7 +49,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
-        self.btn_maptool.setIcon(QIcon(os.path.join(__location__, "..", "icons", "multi_layer_selection_tool.png")))
+        self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
         self.maptool_clicked()
         self.reset_buttons()
@@ -982,7 +982,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Populates cmb_relationship"""
         self.cmb_relationship.clear()
         item_list = ['Removed Outlines', 'Matched Outlines', 'Related Outlines']
-        self.cmb_relationship.addItems([""] + item_list)
+        self.cmb_relationship.addItems([''] + item_list)
 
     def init_tbl_relationship(self, header_items):
         """Initiates tbl_relationship """
@@ -1012,10 +1012,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_group))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_group))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem('%s' % id_bulk))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem('%s' % qa_status))
 
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
@@ -1027,9 +1027,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % id_bulk))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem('%s' % qa_status))
 
     def populate_tbl_removed(self):
         """Populates tbl_relationship when cmb_relationship switches to removed"""
@@ -1041,8 +1041,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % qa_status))
 
     def is_empty_tbl_relationship(self, relationship):
         if self.tbl_relationship.rowCount() == 0:
