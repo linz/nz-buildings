@@ -119,7 +119,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
         self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
-        self.description_del = self.le_deletion_reason.text()
         self.completer_box()
 
         # initiate le_data_description
@@ -476,7 +475,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.cmb_status.currentText() == 'Deleted During QA':
             self.le_deletion_reason.setEnabled(1)
             self.le_deletion_reason.setFocus()
-            self.le_deletion_reason.setText(self.description_del)
             self.le_deletion_reason.selectAll()
         else:
             self.le_deletion_reason.setDisabled(1)
