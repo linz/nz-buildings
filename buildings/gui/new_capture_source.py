@@ -35,8 +35,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.populate_combobox()
-        # self.completer_box()
-        self.le_external_source_id.setDisabled(1)
 
         self.dockwidget = dockwidget
         self.layer_registry = layer_registry
@@ -54,11 +52,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
         # set up signals and slots
         self.capture_source_id = None
-        self.btn_ok.clicked.connect(partial(
-            self.ok_clicked, commit_status=True))
+        self.btn_save.setDisabled(1)
+        self.btn_save.clicked.connect(partial(
+            self.save_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-        self.rad_external_source.toggled.connect(self.enable_external_source)
         self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
@@ -132,10 +130,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         Returns comment from external source id line edit
         returns None if empty/disabled
         """
-        if not self.rad_external_source.isChecked():
-            return None
-        else:
-            return self.le_external_source_id.text()
+        return self.le_external_source_id.text()
 
     def get_combobox_value(self):
         """Returns capture source group from combobox
@@ -143,19 +138,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         text = self.cmb_capture_source_group.currentText()
         text_ls = text.split('-')
         return text_ls[0]
-
-    @pyqtSlot(bool)
-    def enable_external_source(self, boolVal):
-        """Called when external source radiobutton is toggled
-        """
-        if self.rad_external_source.isChecked():
-            self.le_external_source_id.setEnabled(1)
-            if len(self.capture_source_area.selectedFeatures()) > 0:
-                self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
-                self.le_external_source_id.setText(', '.join(self.ids))
-        if not self.rad_external_source.isChecked():
-            self.le_external_source_id.clear()
-            self.le_external_source_id.setDisabled(1)
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -168,11 +150,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         if len(self.capture_source_area.selectedFeatures()) == 0:
             self.le_external_source_id.setText('')
             self.tbl_capture_source_area.clearSelection()
+            self.btn_save.setDisabled(1)
         # if areas are selected
         if len(self.capture_source_area.selectedFeatures()) > 0:
             # enable line edit
-            if not self.rad_external_source.isChecked():
-                self.rad_external_source.toggle()
             self.le_external_source_id.setEnabled(1)
             # list of line edit's current text
             current_text = [s.strip() for s in self.le_external_source_id.text().split(',')]
@@ -183,8 +164,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             if len(current_text) != len(self.ids):
                 changes = True
             else:
-                for item in self.ids:
-                    if item not in current_text:
+                for item in current_text:
+                    if item not in self.ids:
                         changes = True
             # if changes required update line edit text
             if changes:
@@ -201,6 +182,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                             if self.tbl_capture_source_area.item(index, 0).text() == item:
                                 self.tbl_capture_source_area.selectRow(index)
                         index = index + 1
+            if len(self.ids) == 1:
+                self.btn_save.setEnabled(1)
+            else:
+                self.btn_save.setDisabled(1)
         # reconnect line edit signal
         self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
@@ -218,6 +203,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         if text == '':
             self.capture_source_area.removeSelection()
             self.tbl_capture_source_area.clearSelection()
+            self.btn_save.setDisabled(1)
         # list of line edit text split by ','
         ls_text = [t.strip() for t in text.split(',')]
         # list of ids selected
@@ -239,6 +225,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             # check for if text is different to selection
             if ls_text != self.selected_ids:
                 changes = True
+            # check if can enable line edit
+            if len(ls_text) == 1:
+                self.btn_save.setEnabled(1)
+            else:
+                self.btn_save.setDisabled(1)
         # if text is in capture_source_area and changes are required
         if changes:
             # select areas
@@ -264,9 +255,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         # enable line edit
-        if not self.rad_external_source.isChecked():
-            self.rad_external_source.toggle()
-            self.le_external_source_id.setEnabled(1)
+        self.le_external_source_id.setEnabled(1)
         # list of selected ids
         self.selected_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
         # if current selection is different to table selection changes = True
@@ -291,6 +280,12 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                     selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
             # change text
             self.le_external_source_id.setText(text)
+            if text == '':
+                self.btn_save.setDisabled(1)
+            elif len(self.tbl_capture_source_area.selectionModel().selectedRows()) == 1:
+                self.btn_save.setEnabled(1)
+            else:
+                self.btn_save.setDisabled(1)
             # change layer selection
             if selection == '':
                 self.capture_source_area.removeSelection()
@@ -301,30 +296,20 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
 
     @pyqtSlot(bool)
-    def ok_clicked(self, commit_status):
+    def save_clicked(self, commit_status):
         """Called when ok button clicked
         """
         # get external source id
         self.external_source = self.get_comments()
-        # if no external source is entered and radio button selected open error
-        if self.rad_external_source.isChecked():
-            if self.external_source == '':
-                self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report(
-                    '\n -------------------- EMPTY VALUE FIELD ------'
-                    '-------------- \n\n If no external source id deselect '
-                    'external source radio button'
-                )
-                self.error_dialog.show()
-                return
-            if len(self.external_source) > 250:
-                self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report(
-                    '\n -------------------- VALUE TOO LONG ---------'
-                    '----------- \n\n Enter less than 250 characters'
-                )
-                self.error_dialog.show()
-                return
+
+        if len(self.external_source) > 250:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n -------------------- VALUE TOO LONG ---------'
+                '----------- \n\n Enter less than 250 characters'
+            )
+            self.error_dialog.show()
+            return
         # get type
         self.value = self.get_combobox_value()
         # call insert function
