@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 from PyQt4.QtCore import Qt, pyqtSignal
 from PyQt4.QtGui import QApplication, QCursor, QPixmap
 from qgis.core import QgsRectangle, QgsMapLayerRegistry, QgsPoint
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.utils import QGis
+
+
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
 class MultiLayerSelection(QgsMapToolEmitPoint):
@@ -22,29 +27,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
 
         self.rubber_band.reset(QGis.Polygon)
 
-        self.cursor = QCursor(QPixmap([
-            '16 16 3 1',
-            '# c None',
-            'a c #000000',
-            '. c #ffffff',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            'aaaaaaaaaaaaaaaaa',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########',
-            '########a########'
-        ]))
+        self.cursor = QCursor(QPixmap(os.path.join(__location__, "..", "icons", "cursor.png")))
 
     def activate(self):
         self.canvas.setCursor(self.cursor)
