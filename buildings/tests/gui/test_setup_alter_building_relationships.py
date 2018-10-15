@@ -18,7 +18,7 @@
 
 import unittest
 
-from PyQt4.QtCore import QModelIndex, Qt
+from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
 from qgis.utils import plugins
 
@@ -50,6 +50,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
         self.assertFalse(self.alter_relationships_frame.btn_unlink.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_matched.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.cb_autosave.isChecked())
         self.assertFalse(self.alter_relationships_frame.btn_save.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_cancel.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_exit.isEnabled())
