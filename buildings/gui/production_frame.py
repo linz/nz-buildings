@@ -224,6 +224,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_save.setDisabled(1)
         self.btn_exit_edits.setDisabled(1)
         self.ids = []
+        self.selection_changed = False
+        self.feature_changed = False
         if isinstance(self.change_instance, production_changes.EditProduction):
             try:
                 self.building_layer.selectionChanged.disconnect(
