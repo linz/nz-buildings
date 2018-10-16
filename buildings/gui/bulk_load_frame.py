@@ -109,13 +109,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText('None')
                 self.display_no_bulk_load()
 
-        # populate imagery cmb
-        sql = 'SELECT area_title FROM buildings_reference.capture_source_area;'
-        results = self.db._execute(sql)
-        results = results.fetchall()
-        for thing in results:
-            self.cmb_capture_source_area.addItem(thing[0])
-
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
         self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
@@ -187,8 +180,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.grpb_edits.hide()
 
         self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
@@ -232,7 +223,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
         self.btn_publish.setEnabled(1)
 
     def display_current_bl_not_compared(self):
@@ -261,15 +251,23 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.area_id = area_id.fetchall()
         if len(self.area_id) > 0:
             self.area_id = self.area_id[0][0]
-            self.cmb_capture_source_area.setCurrentIndex(self.cmb_capture_source_area.findText(self.area_id))
         else:
             self.area_id = None
-            self.cmb_capture_source_area.setEnabled(1)
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n ---------------------- NO CAPTURE SOURCE AREA ---------'
+                '----------------- \n\nThere is no area id, please fix in database'
+            )
+            self.error_dialog.show()
+            self.display_dataset_error()
+            self.btn_compare_outlines.setDisabled(1)
+            return
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
     def add_outlines(self):
         """Add bulk load outlines of current dataset to canvas."""
+
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         # add the bulk_load_outlines to the layer registry
@@ -300,8 +298,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
-        """
-            When bulk load outlines save clicked
+        """When bulk load outlines save clicked
         """
         bulk_load.bulk_load(self, commit_status)
         # find if adding was sucessful
@@ -315,8 +312,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
-        """
-            When bulk Load reset clicked
+        """When bulk Load reset clicked
         """
         self.cmb_capture_method.setCurrentIndex(0)
         self.ml_outlines_layer.setCurrentIndex(0)
@@ -326,13 +322,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def compare_outlines_clicked(self, commit_status):
-        """
-            When compare outlines clicked
+        """When compare outlines clicked
         """
         comparisons.compare_outlines(self, commit_status)
         self.btn_publish.setEnabled(1)
         self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
 
     @pyqtSlot()
@@ -393,8 +387,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def canvas_edit_outlines(self):
-        """
-            When edit outline radio button toggled
+        """When edit outline radio button toggled
         """
         iface.actionCancelEdits().trigger()
         # reset toolbar
@@ -433,8 +426,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def edit_cancel_clicked(self):
-        """
-            When cancel clicked
+        """When cancel clicked
         """
         # deselect both comboboxes
         self.rad_edit.setAutoExclusive(False)
@@ -545,15 +537,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def exit_clicked(self):
-        """
-        Called when bulk load frame exit button clicked.
+        """Called when bulk load frame exit button clicked.
         """
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
     def close_frame(self):
-        """
-        Clean up and remove the bulk load frame.
+        """Clean up and remove the bulk load frame.
         """
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
