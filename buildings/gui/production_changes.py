@@ -44,110 +44,111 @@ class ProductionChanges:
         for item in ls:
             self.production_frame.cmb_lifecycle_stage.addItem(item[0])
 
+        # populate territorial authority combobox
+        result = self.production_frame.db._execute(
+            select.territorial_authority_intersect_geom,
+            (self.production_frame.geom,)
+        )
+        self.production_frame.ids_ta = []
+        for (id_ta, name) in result.fetchall():
+            self.production_frame.cmb_ta.addItem(name)
+            self.production_frame.ids_ta.append(id_ta)
+
         # populate suburb combobox
-        result = self.production_frame.db._execute(select.suburb_locality_suburb_4th)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_suburb.addItem(item[0])
+        result = self.production_frame.db._execute(
+            select.suburb_locality_intersect_geom,
+            (self.production_frame.geom,)
+        )
+        self.production_frame.ids_suburb = []
+        for (id_suburb, name) in result.fetchall():
+            if name is not None:
+                self.production_frame.cmb_suburb.addItem(name)
+                self.production_frame.ids_suburb.append(id_suburb)
 
         # populate town combobox
+        result = self.production_frame.db._execute(
+            select.town_city_intersect_geom,
+            (self.production_frame.geom,)
+        )
         self.production_frame.cmb_town.addItem('')
-        result = self.production_frame.db._execute(select.town_city_name)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_town.addItem(item[0])
+        self.production_frame.ids_town = [None]
+        for (id_town, name) in result.fetchall():
+            if name is not None:
+                self.production_frame.cmb_town.addItem(name)
+                self.production_frame.ids_town.append(id_town)
 
-        # populate territorial authority combobox
-        result = self.production_frame.db._execute(select.territorial_authority_name)
-        ls = result.fetchall()
-        for item in ls:
-            if item[0] is not None:
-                self.production_frame.cmb_ta.addItem(item[0])
-        # set to currently selected outline
-        if self.production_frame.rad_edit.isChecked():
-            # lifeycle stage
-            result = self.production_frame.db._execute(
-                select.lifecycle_stage_value_by_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
-                self.production_frame.cmb_lifecycle_stage.findText(result))
+    def get_comboboxes_values(self):
+        # capture method id
+        text = self.production_frame.cmb_capture_method.currentText()
+        result = self.production_frame.db.execute_no_commit(
+            select.capture_method_ID_by_value, (text,))
+        capture_method_id = result.fetchall()[0][0]
 
-            # capture method
-            result = self.production_frame.db._execute(
-                select.capture_method_value_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
+        # capture source
+        text = self.production_frame.cmb_capture_source.currentText()
+        # if there are no capture source entries
+        if text == '':
+            self.production_frame.error_dialog = ErrorDialog()
+            self.production_frame.error_dialog.fill_report(
+                '\n ---------------- NO CAPTURE SOURCE ---------'
+                '------- \n\nThere are no capture source entries'
+            )
+            self.production_frame.error_dialog.show()
+            return
+        text_ls = text.split('- ')
+        result = self.production_frame.db.execute_no_commit(
+            select.capture_srcgrp_by_value_and_description, (
+                text_ls[0], text_ls[1]
+            ))
+        data = result.fetchall()[0][0]
+        if text_ls[2] == 'None':
+            result = self.production_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+        else:
+            result = self.production_frame.db.execute_no_commit(
+                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                    data, text_ls[2]
                 ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_capture_method.setCurrentIndex(
-                self.production_frame.cmb_capture_method.findText(result))
+        capture_source_id = result.fetchall()[0][0]
 
-            # capture source
-            result = self.production_frame.db._execute(
-                select.capture_source_group_value_desc_external)
-            ls = result.fetchall()
-            result = self.production_frame.db._execute(
-                select.capture_source_group_value_desc_external_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0]
-            value_index = 0
-            for index, item in enumerate(ls):
-                if item == result:
-                    value_index = index
-            self.production_frame.cmb_capture_source.setCurrentIndex(
-                value_index)
+        # lifecycle stage
+        text = self.production_frame.cmb_lifecycle_stage.currentText()
+        result = self.production_frame.db.execute_no_commit(
+            select.lifecycle_stage_ID_by_value, (text,))
+        lifecycle_stage_id = result.fetchall()[0][0]
 
-            # suburb
-            result = self.production_frame.db._execute(
-                select.suburb_locality_suburb_4th_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_suburb.setCurrentIndex(
-                self.production_frame.cmb_suburb.findText(result))
+        # suburb
+        index = self.production_frame.cmb_suburb.currentIndex()
+        suburb = self.production_frame.ids_suburb[index]
 
-            # town city
-            result = self.production_frame.db._execute(
-                select.town_city_name_by_building_outlineID, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()
-            if result:
-                self.production_frame.cmb_town.setCurrentIndex(
-                    self.production_frame.cmb_town.findText(result[0][0]))
-            else:
-                self.production_frame.cmb_town.setCurrentIndex(0)
+        # town
+        index = self.production_frame.cmb_town.currentIndex()
+        town = self.production_frame.ids_town[index]
 
-            # territorial Authority
-            result = self.production_frame.db._execute(
-                select.territorial_authority_name_by_building_outline_id, (
-                    self.production_frame.building_outline_id,
-                ))
-            result = result.fetchall()[0][0]
-            self.production_frame.cmb_ta.setCurrentIndex(
-                self.production_frame.cmb_ta.findText(result))
+        # territorial Authority
+        index = self.production_frame.cmb_ta.currentIndex()
+        t_a = self.production_frame.ids_ta[index]
+
+        return capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a
 
     def enable_UI_functions(self):
         """
             Function called when comboboxes are to be enabled
         """
-        self.production_frame.cmb_capture_method.setEnabled(1)
-        self.production_frame.cmb_capture_source.setEnabled(1)
-        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
         self.production_frame.cmb_capture_method.clear()
+        self.production_frame.cmb_capture_method.setEnabled(1)
         self.production_frame.cmb_capture_source.clear()
+        self.production_frame.cmb_capture_source.setEnabled(1)
         self.production_frame.cmb_lifecycle_stage.clear()
-        self.production_frame.cmb_ta.setEnabled(1)
-        self.production_frame.cmb_town.setEnabled(1)
-        self.production_frame.cmb_suburb.setEnabled(1)
+        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
         self.production_frame.cmb_ta.clear()
+        self.production_frame.cmb_ta.setEnabled(1)
         self.production_frame.cmb_town.clear()
+        self.production_frame.cmb_town.setEnabled(1)
         self.production_frame.cmb_suburb.clear()
-        self.populate_edit_comboboxes()
+        self.production_frame.cmb_suburb.setEnabled(1)
+        self.production_frame.btn_save.setEnabled(1)
+        self.production_frame.btn_reset.setEnabled(1)
 
     def disable_UI_functions(self):
         """
@@ -210,69 +211,12 @@ class AddProduction(ProductionChanges):
             When building frame btn_save clicked
         """
         self.production_frame.db.open_cursor()
-        # capture method id
-        text = self.production_frame.cmb_capture_method.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value, (text,))
-        capture_method_id = result.fetchall()[0][0]
 
-        # capture source
-        text = self.production_frame.cmb_capture_source.currentText()
-        # if there are no capture source entries
-        if text == '':
-            self.production_frame.error_dialog = ErrorDialog()
-            self.production_frame.error_dialog.fill_report(
-                '\n ---------------- NO CAPTURE SOURCE ---------'
-                '------- \n\nThere are no capture source entries'
-            )
-            self.production_frame.error_dialog.show()
-            return
-        text_ls = text.split('- ')
-        result = self.production_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description, (
-                text_ls[0], text_ls[1]
-            ))
-        data = result.fetchall()[0][0]
-        if text_ls[2] == 'None':
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
-        else:
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
-                    data, text_ls[2]
-                ))
-        capture_source_id = result.fetchall()[0][0]
-
-        # lifecycle stage
-        text = self.production_frame.cmb_lifecycle_stage.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.lifecycle_stage_ID_by_value, (text,))
-        lifecycle_stage_id = result.fetchall()[0][0]
-
-        # suburb
-        text = self.production_frame.cmb_suburb.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.suburb_locality_id_by_suburb_4th, (text,))
-        suburb = result.fetchall()[0][0]
-
-        # town
-        text = self.production_frame.cmb_town.currentText()
-        if text:
-            result = self.production_frame.db.execute_no_commit(
-                select.town_city_ID_by_name, (text,))
-            town = result.fetchall()[0][0]
-        else:
-            town = None
-
-        # territorial Authority
-        text = self.production_frame.cmb_ta.currentText()
-        result = self.production_frame.db.execute_no_commit(
-            select.territorial_authority_ID_by_name, (text,))
-        t_a = result.fetchall()[0][0]
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
         # insert into buildings
         sql = 'SELECT buildings.buildings_insert();'
-        building_id = self.production_frame.db.execute_no_commit(sql)
+        result = self.production_frame.db.execute_no_commit(sql)
         building_id = result.fetchall()[0][0]
         # insert into building_outlines table
         sql = 'SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now()::timestamp, %s);'
@@ -287,21 +231,8 @@ class AddProduction(ProductionChanges):
         if commit_status:
             self.production_frame.db.commit_open_cursor()
 
-        # reset comboboxes for next outline
-        self.production_frame.cmb_capture_method.setCurrentIndex(0)
-        self.production_frame.cmb_capture_method.setDisabled(1)
-        self.production_frame.cmb_capture_source.setCurrentIndex(0)
-        self.production_frame.cmb_capture_source.setDisabled(1)
-        self.production_frame.cmb_lifecycle_stage.setDisabled(1)
-        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(0)
-        self.production_frame.cmb_ta.setCurrentIndex(0)
-        self.production_frame.cmb_ta.setDisabled(1)
-        self.production_frame.cmb_town.setCurrentIndex(0)
-        self.production_frame.cmb_town.setDisabled(1)
-        self.production_frame.cmb_suburb.setCurrentIndex(0)
-        self.production_frame.cmb_suburb.setDisabled(1)
-        self.production_frame.btn_save.setDisabled(1)
-        self.production_frame.btn_reset.setDisabled(1)
+        # reset and disable comboboxes
+        self.disable_UI_functions()
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -313,7 +244,7 @@ class AddProduction(ProductionChanges):
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
-        ProductionChanges.disable_UI_functions(self)
+        self.disable_UI_functions()
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -334,50 +265,9 @@ class AddProduction(ProductionChanges):
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
+        self.enable_UI_functions()
         self.populate_edit_comboboxes()
-        self.production_frame.cmb_capture_method.setEnabled(1)
-        self.production_frame.cmb_capture_source.setEnabled(1)
-        self.production_frame.cmb_lifecycle_stage.setEnabled(1)
-        # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        ta = self.production_frame.db._execute(
-            select.territorial_authority_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_ta.setCurrentIndex(
-            self.production_frame.cmb_ta.findText(ta.fetchall()[0][0]))
-        self.production_frame.cmb_ta.setEnabled(1)
-        # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        town = self.production_frame.db._execute(
-            select.town_city_name_by_id,
-            (result.fetchall()[0][0],)
-        )
-        town = town.fetchall()
-        if town:
-            self.production_frame.cmb_town.setCurrentIndex(
-                self.production_frame.cmb_town.findText(town[0][0]))
-        else:
-            self.production_frame.cmb_town.setCurrentIndex(0)
-        self.production_frame.cmb_town.setEnabled(1)
-        # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
-        result = self.production_frame.db._execute(sql,
-                                                   (self.production_frame.geom,))
-        suburb = self.production_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_id,
-            (result.fetchall()[0][0],)
-        )
-        self.production_frame.cmb_suburb.setCurrentIndex(
-            self.production_frame.cmb_suburb.findText(suburb.fetchall()[0][0]))
-        self.production_frame.cmb_suburb.setEnabled(1)
-        # enable save
-        self.production_frame.btn_save.setEnabled(1)
-        self.production_frame.btn_reset.setEnabled(1)
+        self.select_comboboxes_value()
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -389,15 +279,36 @@ class AddProduction(ProductionChanges):
         if qgsfId in self.production_frame.added_building_ids:
             self.production_frame.added_building_ids.remove(qgsfId)
             if self.production_frame.added_building_ids == []:
-                self.production_frame.cmb_capture_method.setDisabled(1)
-                self.production_frame.cmb_capture_source.setDisabled(1)
-                self.production_frame.cmb_lifecycle_stage.setDisabled(1)
-                self.production_frame.cmb_ta.setDisabled(1)
-                self.production_frame.cmb_town.setDisabled(1)
-                self.production_frame.cmb_suburb.setDisabled(1)
-                # disable save
-                self.production_frame.btn_save.setDisabled(1)
-                self.production_frame.btn_reset.setDisabled(1)
+                self.disable_UI_functions()
+
+    def select_comboboxes_value(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # capture method
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
+
+        # territorial authority
+        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_ta.index(result.fetchall()[0][0])
+        self.production_frame.cmb_ta.setCurrentIndex(index)
+
+        # town locality
+        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_town.index(result.fetchall()[0][0])
+        self.production_frame.cmb_town.setCurrentIndex(index)
+
+        # suburb locality
+        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        result = self.production_frame.db._execute(sql,
+                                                   (self.production_frame.geom,))
+        index = self.production_frame.ids_suburb.index(result.fetchall()[0][0])
+        self.production_frame.cmb_suburb.setCurrentIndex(index)
 
 
 class EditProduction(ProductionChanges):
@@ -434,51 +345,13 @@ class EditProduction(ProductionChanges):
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
+
+        self.production_frame.select_changed = False
         if len(self.production_frame.building_layer.selectedFeatures()) > 0:
-            if len(self.production_frame.building_layer.selectedFeatures()) == 1:
-                # ProductionChanges.enable_UI_functions(self)
-                self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                self.enable_UI_functions()
-                # enable save and reset
-                self.production_frame.btn_save.setEnabled(1)
-                self.production_frame.btn_reset.setEnabled(1)
-                self.production_frame.select_changed = True
-                self.production_frame.ids = []
-            # if more than one outline is selected
-            if len(self.production_frame.building_layer.selectedFeatures()) > 1:
-                feats = []
-                self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
-                for feature in self.production_frame.building_layer.selectedFeatures():
-                    ls = []
-                    ls.append(feature.attributes()[2])
-                    ls.append(feature.attributes()[3])
-                    ls.append(feature.attributes()[4])
-                    ls.append(feature.attributes()[5])
-                    ls.append(feature.attributes()[6])
-                    ls.append(feature.attributes()[7])
-                    if ls not in feats:
-                        feats.append(ls)
-                # if selected features have different attributes (not allowed)
-                if len(feats) > 1:
-                    self.production_frame.error_dialog = ErrorDialog()
-                    self.production_frame.error_dialog.fill_report(
-                        '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
-                        'TED ---- \n\n Can only edit attributes of mul'
-                        'tiple features when all existing attributes a'
-                        're identical.'
-                    )
-                    self.production_frame.error_dialog.show()
-                    self.production_frame.building_outline_id = None
-                    self.disable_UI_functions()
-                    self.production_frame.select_changed = False
-                # if all selected features have the same attributes (allowed)
-                elif len(feats) == 1:
-                    self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                    self.enable_UI_functions()
-                    # enable save and reset
-                    self.production_frame.btn_save.setEnabled(1)
-                    self.production_frame.btn_reset.setEnabled(1)
-                    self.production_frame.select_changed = True
+            self.select_features()
+            if self.production_frame.select_changed:
+                self.populate_edit_comboboxes()
+                self.select_comboboxes_value()
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
@@ -496,92 +369,23 @@ class EditProduction(ProductionChanges):
                     sql, (self.production_frame.geoms[key], key))
         # if only attributes are changed
         if self.production_frame.select_changed:
-            # lifecycle stage
-            text = self.production_frame.cmb_lifecycle_stage.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.lifecycle_stage_ID_by_value, (text,))
-            lifecycle_stage_id = result.fetchall()[0][0]
-
-            # capture method
-            text = self.production_frame.cmb_capture_method.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_method_ID_by_value, (text,))
-            capture_method_id = result.fetchall()[0][0]
-
-            # capture source
-            text = self.production_frame.cmb_capture_source.currentText()
-            if text == '':
-                self.production_frame.error_dialog = ErrorDialog()
-                self.production_frame.error_dialog.fill_report(
-                    '\n ---------------- NO CAPTURE SOURCE -----------'
-                    '-----\n\n There are no capture source entries.'
-                )
-                self.production_frame.error_dialog.show()
-                self.disable_UI_functions()
-                return
-            text_ls = text.split('- ')
-            result = self.production_frame.db.execute_no_commit(
-                select.capture_srcgrp_by_value_and_description, (
-                    text_ls[0], text_ls[1]
-                ))
-            data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
-                result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrdID_is_null, (
-                        data,
-                    ))
-            else:
-                result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID,
-                    (data, text_ls[2])
-                )
-            capture_source_id = result.fetchall()[0][0]
-
-            # suburb
-            text = self.production_frame.cmb_suburb.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.suburb_locality_id_by_suburb_4th, (text,))
-            suburb = result.fetchall()[0][0]
-
-            # town
-            text = self.production_frame.cmb_town.currentText()
-            if text:
-                result = self.production_frame.db.execute_no_commit(
-                    select.town_city_ID_by_name, (text,))
-                town = result.fetchall()[0][0]
-            else:
-                town = None
-
-            # territorial authority
-            text = self.production_frame.cmb_ta.currentText()
-            result = self.production_frame.db.execute_no_commit(
-                select.territorial_authority_ID_by_name, (text,))
-            t_a = result.fetchall()[0][0]
+            capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
             if len(self.production_frame.ids) > 0:
-                # if there is more than one feature to update
                 for i in self.production_frame.ids:
                     sql = 'SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                     self.production_frame.db.execute_no_commit(
                         sql, (i, capture_method_id,
                               capture_source_id, lifecycle_stage_id,
                               suburb, town, t_a))
-            else:
-                # one feature to update
-                sql = 'SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                self.production_frame.db.execute_no_commit(
-                    sql, (self.production_frame.building_outline_id,
-                          capture_method_id, capture_source_id,
-                          lifecycle_stage_id, suburb, town, t_a)
-                )
             self.disable_UI_functions()
 
         if commit_status:
-            self.production_frame.geoms = {}
-            self.production_frame.ids = []
-            self.production_frame.geom_changed = False
-            self.production_frame.select_changed = False
             self.production_frame.db.commit_open_cursor()
+        self.production_frame.geoms = {}
+        self.production_frame.ids = []
+        self.production_frame.geom_changed = False
+        self.production_frame.select_changed = False
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -590,6 +394,7 @@ class EditProduction(ProductionChanges):
         """
         iface.actionCancelEdits().trigger()
         self.production_frame.geoms = {}
+        self.production_frame.ids = []
         self.production_frame.geom_changed = False
         self.production_frame.select_changed = False
         # restart editing
@@ -597,7 +402,7 @@ class EditProduction(ProductionChanges):
         iface.actionNodeTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
-        ProductionChanges.disable_UI_functions(self)
+        self.disable_UI_functions()
 
     @pyqtSlot(int, QgsGeometry)
     def feature_changed(self, qgsfId, geom):
@@ -630,53 +435,123 @@ class EditProduction(ProductionChanges):
         """
            Called when feature is selected
         """
-        # if only one outline is selected
-        if len(self.production_frame.building_layer.selectedFeatures()) == 1:
-            # ProductionChanges.enable_UI_functions(self)
-            self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-            ProductionChanges.enable_UI_functions(self)
-            # enable save and reset
-            self.production_frame.btn_save.setEnabled(1)
-            self.production_frame.btn_reset.setEnabled(1)
-            self.production_frame.select_changed = True
-            self.production_frame.ids = []
-        # if more than one outline is selected
-        if len(self.production_frame.building_layer.selectedFeatures()) > 1:
-            feats = []
-            self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
-            for feature in self.production_frame.building_layer.selectedFeatures():
-                ls = []
-                ls.append(feature.attributes()[2])
-                ls.append(feature.attributes()[3])
-                ls.append(feature.attributes()[4])
-                ls.append(feature.attributes()[5])
-                ls.append(feature.attributes()[6])
-                ls.append(feature.attributes()[7])
-                if ls not in feats:
-                    feats.append(ls)
-            # if selected features have different attributes (not allowed)
-            if len(feats) > 1:
-                self.production_frame.error_dialog = ErrorDialog()
-                self.production_frame.error_dialog.fill_report(
-                    '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
-                    'TED ---- \n\n Can only edit attributes of mul'
-                    'tiple features when all existing attributes a'
-                    're identical.'
-                )
-                self.production_frame.error_dialog.show()
-                self.production_frame.building_outline_id = None
-                ProductionChanges.disable_UI_functions(self)
-                self.production_frame.select_changed = False
-            # if all selected features have the same attributes (allowed)
-            elif len(feats) == 1:
-                self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
-                ProductionChanges.enable_UI_functions(self)
-                # enable save and reset
-                self.production_frame.btn_save.setEnabled(1)
-                self.production_frame.btn_reset.setEnabled(1)
-                self.production_frame.select_changed = True
-        # if no outlines are selected
+        # If no outlines are selected the function will return
+        self.production_frame.select_changed = False
         if len(self.production_frame.building_layer.selectedFeatures()) == 0:
+            self.production_frame.ids = []
             self.production_frame.building_outline_id = None
-            ProductionChanges.disable_UI_functions(self)
+            self.disable_UI_functions()
+            return
+        self.select_features()
+        if self.production_frame.select_changed:
+            self.populate_edit_comboboxes()
+            self.select_comboboxes_value()
+
+    def select_features(self):
+        self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]
+        self.production_frame.building_outline_id = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()][0]
+        building_feat = [feat for feat in self.production_frame.building_layer.selectedFeatures()][0]
+        building_geom = building_feat.geometry()
+        # convert to correct format
+        wkt = building_geom.exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        result = self.production_frame.db._execute(sql, (wkt,))
+        self.production_frame.geom = result.fetchall()[0][0]
+
+        feats = []
+        for feature in self.production_frame.building_layer.selectedFeatures():
+            ls = []
+            ls.append(feature.attributes()[2])
+            ls.append(feature.attributes()[3])
+            ls.append(feature.attributes()[4])
+            ls.append(feature.attributes()[5])
+            ls.append(feature.attributes()[6])
+            ls.append(feature.attributes()[7])
+            if ls not in feats:
+                feats.append(ls)
+        # if selected features have different attributes (not allowed)
+        if len(feats) > 1:
+            self.production_frame.error_dialog = ErrorDialog()
+            self.production_frame.error_dialog.fill_report(
+                '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
+                'TED ---- \n\n Can only edit attributes of mul'
+                'tiple features when all existing attributes a'
+                're identical.'
+            )
+            self.production_frame.error_dialog.show()
+            self.production_frame.ids = []
+            self.production_frame.building_outline_id = None
+            self.disable_UI_functions()
             self.production_frame.select_changed = False
+        # if all selected features have the same attributes (allowed)
+        elif len(feats) == 1:
+            self.enable_UI_functions()
+            self.production_frame.select_changed = True
+
+    def select_comboboxes_value(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        # lifeycle stage
+        result = self.production_frame.db._execute(
+            select.lifecycle_stage_value_by_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_lifecycle_stage.setCurrentIndex(
+            self.production_frame.cmb_lifecycle_stage.findText(result))
+
+        # capture method
+        result = self.production_frame.db._execute(
+            select.capture_method_value_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_capture_method.setCurrentIndex(
+            self.production_frame.cmb_capture_method.findText(result))
+
+        # capture source
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external)
+        ls = result.fetchall()
+        result = self.production_frame.db._execute(
+            select.capture_source_group_value_desc_external_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0]
+        value_index = 0
+        for index, item in enumerate(ls):
+            if item == result:
+                value_index = index
+        self.production_frame.cmb_capture_source.setCurrentIndex(
+            value_index)
+
+        # suburb
+        result = self.production_frame.db._execute(
+            select.suburb_locality_suburb_4th_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_suburb.setCurrentIndex(
+            self.production_frame.cmb_suburb.findText(result))
+
+        # town city
+        result = self.production_frame.db._execute(
+            select.town_city_name_by_building_outlineID, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()
+        if result:
+            self.production_frame.cmb_town.setCurrentIndex(
+                self.production_frame.cmb_town.findText(result[0][0]))
+        else:
+            self.production_frame.cmb_town.setCurrentIndex(0)
+
+        # territorial Authority
+        result = self.production_frame.db._execute(
+            select.territorial_authority_name_by_building_outline_id, (
+                self.production_frame.building_outline_id,
+            ))
+        result = result.fetchall()[0][0]
+        self.production_frame.cmb_ta.setCurrentIndex(
+            self.production_frame.cmb_ta.findText(result))

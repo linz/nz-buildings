@@ -95,6 +95,13 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="lb_capture_method">
         <property name="text">
@@ -140,14 +147,14 @@ QGroupBox::title {
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QLabel" name="lb_town">
+       <widget class="QLabel" name="lb_ta">
         <property name="text">
-         <string>Town City:</string>
+         <string>Territorial Authority: </string>
         </property>
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QComboBox" name="cmb_town"/>
+       <widget class="QComboBox" name="cmb_ta"/>
       </item>
       <item row="7" column="0">
        <widget class="QLabel" name="lb_suburb">
@@ -156,17 +163,24 @@ QGroupBox::title {
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
-       <widget class="QComboBox" name="cmb_suburb"/>
-      </item>
       <item row="8" column="0">
-       <widget class="QLabel" name="lb_ta">
+       <widget class="QLabel" name="lb_town">
         <property name="text">
-         <string>Territorial Authority: </string>
+         <string>Town City:</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="0" colspan="2">
+      <item row="8" column="1">
+       <widget class="QComboBox" name="cmb_town"/>
+      </item>
+      <item row="11" column="0" colspan="2">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="12" column="0" colspan="2">
        <layout class="QHBoxLayout" name="hzly_4">
         <item>
          <widget class="QPushButton" name="btn_save">
@@ -233,7 +247,7 @@ QGroupBox::title {
         </item>
        </layout>
       </item>
-      <item row="11" column="0" colspan="2">
+      <item row="13" column="0" colspan="2">
        <widget class="QPushButton" name="btn_exit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -265,22 +279,8 @@ QGroupBox::title {
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="0" colspan="2">
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QComboBox" name="cmb_ta"/>
+      <item row="7" column="1">
+       <widget class="QComboBox" name="cmb_suburb"/>
       </item>
      </layout>
      <zorder>lb_capture_method</zorder>
@@ -289,9 +289,6 @@ QGroupBox::title {
      <zorder>lb_capture_source</zorder>
      <zorder>lb_town</zorder>
      <zorder>cmb_town</zorder>
-     <zorder>lb_suburb</zorder>
-     <zorder>cmb_suburb</zorder>
-     <zorder>lb_ta</zorder>
      <zorder>line</zorder>
      <zorder>cmb_lifecycle_stage</zorder>
      <zorder>lb_lifeycle_stage</zorder>
@@ -300,6 +297,9 @@ QGroupBox::title {
      <zorder>line_2</zorder>
      <zorder>line_3</zorder>
      <zorder>cmb_ta</zorder>
+     <zorder>lb_ta</zorder>
+     <zorder>cmb_suburb</zorder>
+     <zorder>lb_suburb</zorder>
     </widget>
    </item>
    <item>

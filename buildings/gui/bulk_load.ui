@@ -619,76 +619,7 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="lb_town">
-            <property name="text">
-             <string>Town/City:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="1">
-           <widget class="QComboBox" name="cmb_town">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="lb_suburb">
-            <property name="text">
-             <string>Suburb:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="1">
-           <widget class="QComboBox" name="cmb_suburb">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="lb_ta">
-            <property name="text">
-             <string>Territorial Authority: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QComboBox" name="cmb_ta">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0" colspan="2">
+          <item row="14" column="0" colspan="2">
            <layout class="QHBoxLayout" name="hzly_4">
             <item>
              <widget class="QPushButton" name="btn_edit_save">
@@ -764,6 +695,75 @@ QGroupBox::title {
             </item>
            </layout>
           </item>
+          <item row="8" column="1">
+           <widget class="QComboBox" name="cmb_ta">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="lb_ta">
+            <property name="text">
+             <string>Territorial Authority: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="lb_suburb">
+            <property name="text">
+             <string>Suburb:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QComboBox" name="cmb_suburb">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QComboBox" name="cmb_town">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="lb_town">
+            <property name="text">
+             <string>Town/City:</string>
+            </property>
+           </widget>
+          </item>
          </layout>
          <zorder>cmb_status</zorder>
          <zorder>lb_bulk_load_status</zorder>
@@ -771,14 +771,14 @@ QGroupBox::title {
          <zorder>cmb_capture_method_2</zorder>
          <zorder>cmb_capture_source</zorder>
          <zorder>lb_capture_source</zorder>
-         <zorder>lb_town</zorder>
-         <zorder>cmb_town</zorder>
-         <zorder>lb_suburb</zorder>
-         <zorder>cmb_suburb</zorder>
-         <zorder>lb_ta</zorder>
-         <zorder>cmb_ta</zorder>
          <zorder></zorder>
          <zorder>le_deletion_reason</zorder>
+         <zorder>cmb_ta</zorder>
+         <zorder>lb_ta</zorder>
+         <zorder>cmb_suburb</zorder>
+         <zorder>lb_suburb</zorder>
+         <zorder>cmb_town</zorder>
+         <zorder>lb_town</zorder>
         </widget>
        </item>
        <item>
