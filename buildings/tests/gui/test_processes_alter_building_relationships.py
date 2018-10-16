@@ -18,7 +18,9 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from functools import partial
+
+from PyQt4.QtCore import Qt, QTimer
 from PyQt4.QtGui import QListWidgetItem
 from PyQt4.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
@@ -303,5 +305,48 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing))
         self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing))
         self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing))
+
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_cb_autosave_stage_changed(self):
+        def click_btn(btn):
+            btn.click()
+
+        for btn in self.alter_relationships_frame.msgbox.buttons():
+            if btn.text() == '&Yes':
+                QTimer.singleShot(1000, partial(click_btn, btn))
+                break
+        self.alter_relationships_frame.cb_autosave.setChecked(True)
+
+        self.assertFalse(self.alter_relationships_frame.btn_save.isVisible())
+
+        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
+        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        result = db._execute(sql_matched)
+        matched_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_original = result.fetchone()[0]
+
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.unlink_clicked(commit_status=False)
+
+        result = db._execute(sql_matched)
+        matched_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        result = db._execute(sql_removed)
+        removed_test = result.fetchone()[0]
+        self.assertEqual(matched_test, matched_original - 1)
+        self.assertEqual(added_test, added_original + 1)
+        self.assertEqual(removed_test, removed_original + 1)
+
+        self.alter_relationships_frame.db.rollback_open_cursor()
+
+        self.alter_relationships_frame.cb_autosave.setChecked(False)
+        self.assertTrue(self.alter_relationships_frame.btn_save.isVisible())
 
         self.alter_relationships_frame.btn_exit.click()

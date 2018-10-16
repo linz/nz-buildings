@@ -4,8 +4,8 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView,
-                         QListWidgetItem, QTableWidgetItem)
+from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView, QIcon,
+                         QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
@@ -16,6 +16,7 @@ from buildings.utilities.multi_layer_selection import MultiLayerSelection
 from buildings.sql import select_statements as select
 
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'alter_building_relationship.ui'))
 
@@ -35,6 +36,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.current_dataset = current_dataset
         self.error_dialog = None
         self.highlight_features = []
+        self.autosave = False
 
         self.frame_setup()
         self.layers_setup()
@@ -47,9 +49,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
+        self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
+
         self.maptool_clicked()
         self.reset_buttons()
         self.populate_cmb_relationship()
+        self.setup_message_box()
 
     def layers_setup(self):
         # set selected item color as transparent
@@ -68,9 +73,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
         self.btn_maptool.clicked.connect(self.maptool_clicked)
-        self.btn_unlink.clicked.connect(self.unlink_clicked)
-        self.btn_matched.clicked.connect(self.matched_clicked)
-        self.btn_related.clicked.connect(self.related_clicked)
+        self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
+        self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
+        self.btn_related.clicked.connect(partial(self.related_clicked, commit_status=True))
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
@@ -82,6 +87,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.cb_lyr_bulk_load.stateChanged.connect(self.cb_lyr_bulk_load_state_changed)
         self.cb_lyr_existing.stateChanged.connect(self.cb_lyr_existing_state_changed)
+
+        self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -198,6 +205,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_matched_bulk_load.setSubsetString('')
         self.lyr_related_existing.setSubsetString('')
         self.lyr_related_bulk_load.setSubsetString('')
+
+    def setup_message_box(self):
+        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure you want to turn on auto-save?', buttons=QMessageBox.No)
+        self.msgbox.addButton(QMessageBox.Yes)
 
     @pyqtSlot()
     def on_dockwidget_closed(self):
@@ -353,14 +364,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog.show()
 
     @pyqtSlot()
-    def unlink_clicked(self):
+    def unlink_clicked(self, commit_status=True):
         """
         Unlink the buildings in the table
         Called when unlink_all botton is clicked
         """
         self.btn_unlink.setEnabled(False)
         self.btn_maptool.setEnabled(False)
-        self.btn_save.setEnabled(True)
         self.qa_button_set_enable(False)
 
         ids_existing = self.get_ids_from_lst(self.lst_existing)
@@ -373,8 +383,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_existing.removeSelection()
         self.lyr_bulk_load.removeSelection()
 
+        if self.autosave:
+            self.save_clicked(commit_status)
+        else:
+            self.btn_save.setEnabled(True)
+
     @pyqtSlot()
-    def matched_clicked(self):
+    def matched_clicked(self, commit_status=True):
         """
         Match the buildings in the list
         Called when matched botton is clicked
@@ -382,7 +397,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
             self.btn_maptool.setEnabled(False)
-            self.btn_save.setEnabled(True)
             self.qa_button_set_enable(False)
 
             id_existing = int(self.lst_existing.item(0).text())
@@ -399,8 +413,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
 
+            if self.autosave:
+                self.save_clicked(commit_status)
+            else:
+                self.btn_save.setEnabled(True)
+
     @pyqtSlot()
-    def related_clicked(self):
+    def related_clicked(self, commit_status=True):
         """
         Relate the buildings in the list
         Called when related botton is clicked
@@ -412,7 +431,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.btn_related.setEnabled(False)
             self.btn_maptool.setEnabled(False)
-            self.btn_save.setEnabled(True)
             self.qa_button_set_enable(False)
 
             for row in range(self.lst_existing.count()):
@@ -431,6 +449,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
+
+            if self.autosave:
+                self.save_clicked(commit_status)
+            else:
+                self.btn_save.setEnabled(True)
 
     @pyqtSlot()
     def save_clicked(self, commit_status=True):
@@ -639,6 +662,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         #         break
         # self.tbl_relationship.setFocus(Qt.MouseFocusReason)
 
+    @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
         if self.cb_lyr_bulk_load.isChecked():
@@ -656,6 +680,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_matched_bulk_load, False)
             legend.setLayerVisible(self.lyr_related_bulk_load, False)
 
+    @pyqtSlot()
     def cb_lyr_existing_state_changed(self):
         legend = iface.legendInterface()
         if self.cb_lyr_existing.isChecked():
@@ -672,6 +697,32 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_removed_existing, False)
             legend.setLayerVisible(self.lyr_matched_existing, False)
             legend.setLayerVisible(self.lyr_related_existing, False)
+
+    @pyqtSlot()
+    def cb_autosave_state_changed(self):
+        if self.btn_save.isEnabled():
+            self.unfinished_error_msg()
+            self.cb_autosave.setCheckState(0)
+            self.autosave = False
+            self.btn_save.setVisible(True)
+            return
+        if self.cb_autosave.isChecked():
+            if self.comfirm_to_autosave():
+                self.autosave = True
+                self.btn_save.setVisible(False)
+            else:
+                self.cb_autosave.setCheckState(0)
+                self.autosave = False
+                self.btn_save.setVisible(True)
+        else:
+            self.autosave = False
+            self.btn_save.setVisible(True)
+
+    def comfirm_to_autosave(self):
+        reply = self.msgbox.exec_()
+        if reply == QMessageBox.Yes:
+            return True
+        return False
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
@@ -931,7 +982,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """Populates cmb_relationship"""
         self.cmb_relationship.clear()
         item_list = ['Removed Outlines', 'Matched Outlines', 'Related Outlines']
-        self.cmb_relationship.addItems([""] + item_list)
+        self.cmb_relationship.addItems([''] + item_list)
 
     def init_tbl_relationship(self, header_items):
         """Initiates tbl_relationship """
@@ -961,10 +1012,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_group))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_group))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem('%s' % id_bulk))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem('%s' % qa_status))
 
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
@@ -976,9 +1027,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
-            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % id_bulk))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem('%s' % qa_status))
 
     def populate_tbl_removed(self):
         """Populates tbl_relationship when cmb_relationship switches to removed"""
@@ -990,8 +1041,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for (id_existing, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
-            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
-            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % qa_status))
 
     def is_empty_tbl_relationship(self, relationship):
         if self.tbl_relationship.rowCount() == 0:

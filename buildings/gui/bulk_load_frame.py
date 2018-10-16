@@ -442,6 +442,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
         self.ids = []
+        self.selection_changed = False
+        self.feature_changed = False
         if isinstance(self.change_instance, bulk_load_changes.EditBulkLoad):
             try:
                 self.bulk_load_layer.selectionChanged.disconnect(
