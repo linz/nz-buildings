@@ -27,7 +27,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
 
         self.rubber_band.reset(QGis.Polygon)
 
-        self.cursor = QCursor(QPixmap(os.path.join(__location__, "..", "icons", "cursor.png")))
+        self.cursor = QCursor(QPixmap(os.path.join(__location__, '..', 'icons', 'cursor.png')))
 
     def activate(self):
         self.canvas.setCursor(self.cursor)
