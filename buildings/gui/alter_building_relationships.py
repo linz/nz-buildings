@@ -207,7 +207,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_related_bulk_load.setSubsetString('')
 
     def setup_message_box(self):
-        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure to turn on auto-save?', buttons=QMessageBox.No)
+        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure you want to turn on auto-save?', buttons=QMessageBox.No)
         self.msgbox.addButton(QMessageBox.Yes)
 
     @pyqtSlot()
