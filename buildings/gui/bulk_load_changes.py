@@ -260,6 +260,9 @@ class AddBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
+        self.bulk_load_frame.geom = None
+        self.bulk_load_frame.added_building_ids = []
+
     @pyqtSlot()
     def edit_reset_clicked(self):
         """
@@ -271,6 +274,9 @@ class AddBulkLoad(BulkLoadChanges):
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
         self.disable_UI_functions()
+
+        self.bulk_load_frame.geom = None
+        self.bulk_load_frame.added_building_ids = []
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -306,6 +312,7 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.added_building_ids.remove(qgsfId)
             if self.bulk_load_frame.added_building_ids == []:
                 self.disable_UI_functions()
+                self.bulk_load_frame.geom = None
 
     def select_comboboxes_value(self):
         """

@@ -43,6 +43,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.error_dialog = None
         # Bulk loadings & editing fields
         self.added_building_ids = []
+        self.geom = None
         self.ids = []
         self.geoms = {}
         self.bulk_load_outline_id = None
@@ -315,7 +316,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot()
     def canvas_add_outline(self):
         """When add outline radio button toggled"""
-
+        self.added_building_ids = []
+        self.geom = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -373,6 +375,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When edit outline radio button toggled
         """
+        self.ids = []
+        self.geoms = {}
+        self.select_changed = False
+        self.geom_changed = False
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -441,9 +447,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_reset.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
+        # reset adding outlines
+        self.added_building_ids = []
+        self.geom = None
+        # reset editing outlines
         self.ids = []
-        self.selection_changed = False
-        self.feature_changed = False
+        self.geoms = {}
+        self.select_changed = False
+        self.geom_changed = False
         if isinstance(self.change_instance, bulk_load_changes.EditBulkLoad):
             try:
                 self.bulk_load_layer.selectionChanged.disconnect(
