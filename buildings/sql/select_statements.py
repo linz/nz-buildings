@@ -83,7 +83,8 @@ WHERE bulk_load_outline_id = %s;
 
 reason_description_value = """
 SELECT DISTINCT description
-FROM buildings_bulk_load.deletion_description;
+FROM buildings_bulk_load.deletion_description
+ORDER BY description;
 """
 
 # Organisation
