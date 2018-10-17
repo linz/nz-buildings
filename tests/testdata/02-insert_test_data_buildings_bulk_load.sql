@@ -3,7 +3,7 @@ INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, descripti
 VALUES (DEFAULT, 'Test Data', 1),
        (DEFAULT, 'Test Data Two', 1);
 
-INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (DEFAULT, 1, NULL);
+INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (DEFAULT, 1, '1');
 
 -- SUPPLIED DATASET ONE
 INSERT INTO buildings.buildings(building_id, begin_lifespan, end_lifespan)
