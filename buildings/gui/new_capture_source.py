@@ -91,6 +91,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             tbl.setRowCount(row_tbl + 1)
             tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % polygon_id))
             tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % area_title))
+        tbl.sortItems(0)
 
     def add_capture_source_area_layer(self):
         """Called on opening of frame to add capture source area layer
