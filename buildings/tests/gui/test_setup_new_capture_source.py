@@ -51,11 +51,6 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_exit.click()
 
-    def test_external_source_default(self):
-        """External source line edit is disabled and radiobutton is not checked"""
-        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
-        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
-
     def test_capture_source_dropdowns(self):
         """Number of options in dropdown = number of entries in table"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
@@ -63,7 +58,6 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
                          result)
-        self.capture_frame.rad_external_source.click()
 
     def test_capture_source_area_layer_registry(self):
         """Capture source area layer is added to layer registry"""
