@@ -76,7 +76,8 @@ class ProcessComparison(unittest.TestCase):
         for layer in layers:
             if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-        self.dockwidget.close()
+        self.bulk_load_frame.layer_registry.remove_all_layers()
+        self.bulk_load_frame.btn_exit.click()
 
     def test_compare(self):
         """test database on compare clicked"""
