@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QColor, QCompleter, QFrame
+from PyQt4.QtGui import QApplication, QColor, QCompleter, QFrame
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
 
@@ -281,6 +281,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When bulk load outlines save clicked
         """
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         bulk_load.bulk_load(self, commit_status)
         # find if adding was sucessful
         result = self.db._execute(select.dataset_count_both_dates_are_null)
@@ -290,6 +291,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.historic_layer)
             self.add_outlines()
             self.display_current_bl_not_compared()
+        QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -307,11 +309,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When compare outlines clicked
         """
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         comparisons.compare_outlines(self, commit_status)
         self.btn_publish.setEnabled(1)
         self.btn_compare_outlines.setDisabled(1)
         self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setEnabled(1)
+        QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def canvas_add_outline(self):
@@ -516,6 +520,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def publish_clicked(self, commit_status):
         """When publish button clicked"""
 
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.open_cursor()
@@ -530,6 +535,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
         self.add_historic_outlines()
+        QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def exit_clicked(self):
