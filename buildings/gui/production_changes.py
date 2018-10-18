@@ -234,6 +234,9 @@ class AddProduction(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
+        self.production_frame.geom = None
+        self.production_frame.added_building_ids = []
+
     @pyqtSlot()
     def reset_clicked(self):
         """
@@ -245,6 +248,9 @@ class AddProduction(ProductionChanges):
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
         self.disable_UI_functions()
+
+        self.production_frame.geom = None
+        self.production_frame.added_building_ids = []
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -280,6 +286,7 @@ class AddProduction(ProductionChanges):
             self.production_frame.added_building_ids.remove(qgsfId)
             if self.production_frame.added_building_ids == []:
                 self.disable_UI_functions()
+                self.production_frame.geom = None
 
     def select_comboboxes_value(self):
         """
