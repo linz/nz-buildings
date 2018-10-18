@@ -54,6 +54,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.maptool_clicked()
         self.reset_buttons()
+        self.qa_button_set_enable(False)
         self.btn_qa_not_removed.setEnabled(False)
         self.populate_cmb_relationship()
         self.setup_message_box()
@@ -547,21 +548,32 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if current_text == 'Related Outlines':
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
-            self.is_empty_tbl_relationship('Related Outlines')
             self.btn_qa_not_removed.setEnabled(False)
+            if self.is_empty_tbl_relationship('Related Outlines'):
+                self.qa_button_set_enable(False)
+            else:
+                self.qa_button_set_enable(True)
         elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
-            self.is_empty_tbl_relationship('Matched Outlines')
             self.btn_qa_not_removed.setEnabled(False)
+            if self.is_empty_tbl_relationship('Matched Outlines'):
+                self.qa_button_set_enable(False)
+            else:
+                self.qa_button_set_enable(True)
         elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
-            self.is_empty_tbl_relationship('Removed Outlines')
             self.btn_qa_not_removed.setEnabled(True)
+            if self.is_empty_tbl_relationship('Removed Outlines'):
+                self.qa_button_set_enable(False)
+                self.btn_qa_not_removed.setEnabled(False)
+            else:
+                self.qa_button_set_enable(True)
         elif current_text == '':
             self.tbl_relationship.setRowCount(0)
             self.tbl_relationship.setColumnCount(0)
+            self.qa_button_set_enable(False)
             self.btn_qa_not_removed.setEnabled(False)
 
         self.disable_tbl_editing(self.tbl_relationship)
@@ -1058,6 +1070,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def is_empty_tbl_relationship(self, relationship):
         if self.tbl_relationship.rowCount() == 0:
             self.message_bar_qa.pushMessage('%s are not available in the current dataset.' % relationship)
+            return True
+        return False
 
     def get_qa_status_id(self, qa_status):
         """Returns qa_status_id according to the sender button"""
