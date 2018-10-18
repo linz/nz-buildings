@@ -49,10 +49,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
+        self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'qa_not_removed.png')))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
         self.maptool_clicked()
         self.reset_buttons()
+        self.btn_qa_not_removed.setEnabled(False)
         self.populate_cmb_relationship()
         self.setup_message_box()
 
@@ -72,6 +74,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_pending.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_pending.text(), commit_status=True))
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
+        self.btn_qa_not_removed.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Removed', commit_status=True))
         self.btn_maptool.clicked.connect(self.maptool_clicked)
         self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
         self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
@@ -545,17 +548,21 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
             self.is_empty_tbl_relationship('Related Outlines')
+            self.btn_qa_not_removed.setEnabled(False)
         elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
             self.is_empty_tbl_relationship('Matched Outlines')
+            self.btn_qa_not_removed.setEnabled(False)
         elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
             self.is_empty_tbl_relationship('Removed Outlines')
+            self.btn_qa_not_removed.setEnabled(True)
         elif current_text == '':
             self.tbl_relationship.setRowCount(0)
             self.tbl_relationship.setColumnCount(0)
+            self.btn_qa_not_removed.setEnabled(False)
 
         self.disable_tbl_editing(self.tbl_relationship)
 
@@ -623,6 +630,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         ids_existing, ids_bulk = [], []
         if current_text == 'Related Outlines':
+            if qa_status_id == 5:
+                return
             # qa_column = 3
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 1).text())
@@ -630,6 +639,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.update_qa_status_in_related(id_existing, id_bulk, qa_status_id)
                 ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
         elif current_text == 'Matched Outlines':
+            if qa_status_id == 5:
+                return
             # qa_column = 2
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
@@ -1058,6 +1069,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_status_id = 4
         elif qa_status == 'Not Checked':
             qa_status_id = 1
+        elif qa_status == 'Not Removed':
+            qa_status_id = 5
         else:
             qa_status_id = None
         return qa_status_id
