@@ -18,10 +18,8 @@
 
 import unittest
 
-from functools import partial
-
 from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QListWidgetItem
+from PyQt4.QtGui import QListWidgetItem, QMessageBox
 from PyQt4.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
@@ -327,13 +325,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_exit.click()
 
     def test_cb_autosave_stage_changed(self):
-        def click_btn(btn):
-            btn.click()
 
-        for btn in self.alter_relationships_frame.msgbox.buttons():
-            if btn.text() == '&Yes':
-                QTimer.singleShot(1000, partial(click_btn, btn))
-                break
+        btn_yes = self.alter_relationships_frame.msgbox.button(QMessageBox.Yes)
+        QTimer.singleShot(1000, btn_yes.click)
         self.alter_relationships_frame.cb_autosave.setChecked(True)
 
         self.assertFalse(self.alter_relationships_frame.btn_save.isVisible())
