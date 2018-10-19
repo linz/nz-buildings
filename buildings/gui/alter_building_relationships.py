@@ -643,7 +643,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if current_text == 'Related Outlines':
             if qa_status_id == 5:
                 return
-            # qa_column = 3
+            qa_column = 3
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 1).text())
                 id_bulk = int(self.tbl_relationship.item(row, 2).text())
@@ -652,7 +652,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Matched Outlines':
             if qa_status_id == 5:
                 return
-            # qa_column = 2
+            qa_column = 2
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 id_bulk = int(self.tbl_relationship.item(row, 1).text())
@@ -660,7 +660,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_existing.append(id_existing)
                 ids_bulk.append(id_bulk)
         elif current_text == 'Removed Outlines':
-            # qa_column = 1
+            qa_column = 1
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
@@ -678,11 +678,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
         # Move to the next 'not checked'
-        # for row in range(self.tbl_relationship.rowCount()):
-        #     if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
-        #         self.tbl_relationship.selectRow(row)
-        #         break
-        # self.tbl_relationship.setFocus(Qt.MouseFocusReason)
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
+                self.tbl_relationship.selectRow(row)
+                break
+        if not self.tbl_relationship.selectionModel().selectedRows():
+            self.tbl_relationship.selectRow(max(selected_rows))
+        self.tbl_relationship.setFocus(Qt.MouseFocusReason)
 
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
@@ -1044,7 +1046,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_relationship
         sql_matched = """SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
                          FROM buildings_bulk_load.matched m
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+                         ORDER BY m.building_outline_id;"""
         result = self.db._execute(sql_matched)
         for (id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
@@ -1058,7 +1061,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_relationship
         sql_removed = """SELECT r.building_outline_id, q.value
                          FROM buildings_bulk_load.removed r
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id);"""
+                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+                         ORDER BY r.building_outline_id;"""
         result = self.db._execute(sql_removed)
         for (id_existing, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
