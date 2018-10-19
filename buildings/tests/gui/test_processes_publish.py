@@ -98,3 +98,14 @@ class ProcessPublish(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(result, 60)
         self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_not_removed_outlines_on_publish(self):
+        """Check removed outlines that are tagged as 'not removed' are not deleted from building outlines layer"""
+        sql = 'UPDATE buildings_bulk_load.removed SET qa_status_id = 5 WHERE building_outline_id = 1004;'
+        db._execute(sql)
+        self.bulk_load_frame.publish_clicked(False)
+        sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1004;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        self.assertEqual(result, None)
+        self.bulk_load_frame.db.rollback_open_cursor()

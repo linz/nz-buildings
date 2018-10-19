@@ -18,10 +18,8 @@
 
 import unittest
 
-from functools import partial
-
 from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QListWidgetItem
+from PyQt4.QtGui import QListWidgetItem, QMessageBox
 from PyQt4.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
@@ -250,13 +248,31 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 2)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1004)
 
+        self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
+
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 3)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1001)
 
+        self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
+
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1)
+
+        self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
+        self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
+        self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
 
         self.alter_relationships_frame.btn_exit.click()
 
@@ -309,13 +325,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_exit.click()
 
     def test_cb_autosave_stage_changed(self):
-        def click_btn(btn):
-            btn.click()
 
-        for btn in self.alter_relationships_frame.msgbox.buttons():
-            if btn.text() == '&Yes':
-                QTimer.singleShot(1000, partial(click_btn, btn))
-                break
+        btn_yes = self.alter_relationships_frame.msgbox.button(QMessageBox.Yes)
+        QTimer.singleShot(1000, btn_yes.click)
         self.alter_relationships_frame.cb_autosave.setChecked(True)
 
         self.assertFalse(self.alter_relationships_frame.btn_save.isVisible())
