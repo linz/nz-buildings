@@ -89,3 +89,4 @@ INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Checked');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Okay');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Pending');
 INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Refer to Supplier');
+INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Removed');

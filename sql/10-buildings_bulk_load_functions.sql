@@ -381,6 +381,7 @@ $$
         FROM buildings_bulk_load.removed
         JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
         WHERE current.supplied_dataset_id = $1
+          AND removed.qa_status_id != 5
     )
 
 $$ LANGUAGE sql;
@@ -400,6 +401,7 @@ $$
         JOIN buildings_bulk_load.removed USING (building_outline_id)
         JOIN buildings_bulk_load.existing_subset_extracts current USING (building_outline_id)
         WHERE current.supplied_dataset_id = $1
+          AND removed.qa_status_id != 5
     )
 
 $$ LANGUAGE sql;
