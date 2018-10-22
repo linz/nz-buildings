@@ -1,0 +1,44 @@
+------------------------------------------------------------------------------
+-- Provide unit testing for extensions using pgTAP
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+
+SELECT plan(2);
+
+-- Tests
+
+--intarray--------------------------
+SELECT has_extension(
+    'public',
+    'intarray',
+    'Schema public should have the intarray extension.'
+);
+
+--PostGIS--------------------------
+SELECT has_extension(
+    'public',
+    'postgis',
+    'Schema public should have the PostGIS extension.'
+);
+
+
+-- Finish pgTAP testing
+SELECT * FROM finish();
+
+ROLLBACK;
