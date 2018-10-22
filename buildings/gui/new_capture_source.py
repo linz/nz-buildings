@@ -62,7 +62,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
     def populate_combobox(self):
-        """Called on opening of frame populate combobox with capture source group
+        """
+            Called on opening of frame populate combobox with capture source group
         """
         result = self.db._execute(select.capture_srcgrp_value_description)
         ls = result.fetchall()
@@ -74,17 +75,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl = self.tbl_capture_source_area
         tbl.setRowCount(0)
         tbl.setColumnCount(2)
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('External Id'))
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('External Source Id'))
         tbl.setHorizontalHeaderItem(1, QTableWidgetItem('Area Title'))
         tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
         tbl.setSelectionMode(QAbstractItemView.MultiSelection)
         tbl.setShowGrid(True)
-        sql_csa = """SELECT csa.external_area_polygon_id, csa.area_title
-                         FROM buildings_reference.capture_source_area csa
-                         ORDER BY csa.area_title;
-                        """
+        sql_csa = select.capture_source_area_id_and_name
         result = self.db._execute(sql_csa)
         for (polygon_id, area_title) in result.fetchall():
             row_tbl = tbl.rowCount()
@@ -94,7 +92,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl.sortItems(0)
 
     def add_capture_source_area_layer(self):
-        """Called on opening of frame to add capture source area layer
+        """
+            Called on opening of frame to add capture source area layer
         """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
@@ -108,7 +107,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         iface.setActiveLayer(self.capture_source_area)
 
     def setup_toolbar(self):
-        """Called on opening of from to set up the buildings toolbar for selection only
+        """
+            Called on opening of from to set up the buildings toolbar for selection only
         """
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
         # reset toolbar
@@ -134,7 +134,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         return self.le_external_source_id.text()
 
     def get_combobox_value(self):
-        """Returns capture source group from combobox
+        """
+            Returns capture source group from combobox
         """
         text = self.cmb_capture_source_group.currentText()
         text_ls = text.split('-')
@@ -142,7 +143,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
-        """Called when feature selection is changed
+        """
+            Called when feature selection is changed
         """
         # disconnect other signals
         self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
@@ -193,7 +195,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     @pyqtSlot(str)
     def lineedit_text_changed(self, text):
-        """Called when user enters/changes text in line edit
+        """
+            Called when user enters/changes text in line edit
         """
         # disconnect other signals
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
@@ -252,6 +255,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     @ pyqtSlot()
     def tbl_item_changed(self):
+        """
+            called when item in table is changed
+        """
         # disconnect other signals
         self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
@@ -298,7 +304,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
-        """Called when ok button clicked
+        """
+            Called when ok button clicked
         """
         # get external source id
         self.external_source = self.get_comments()
@@ -320,13 +327,15 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def exit_clicked(self):
-        """Called when new capture source exit button clicked.
+        """
+            Called when new capture source exit button clicked.
         """
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
     def close_frame(self):
-        """Clean up and remove the new capture source frame.
+        """
+            Clean up and remove the new capture source frame.
         """
         self.db.close_connection()
         # remove capture source layer

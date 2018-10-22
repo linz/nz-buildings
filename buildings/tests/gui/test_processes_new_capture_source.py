@@ -19,8 +19,7 @@
 
 import unittest
 
-from qgis.utils import iface
-from qgis.utils import plugins
+from qgis.utils import iface, plugins
 from qgis.gui import QgsMapTool
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest

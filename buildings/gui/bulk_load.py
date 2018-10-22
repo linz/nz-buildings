@@ -207,7 +207,8 @@ def bulk_load(self, commit_status):
 
 
 def insert_supplied_dataset(self, organisation, description):
-    """Generates new supplied outline dataset for incoming data
+    """
+        Generates new supplied outline dataset for incoming data
     """
     if self.db._open_cursor is None:
         self.db.open_cursor()
@@ -218,7 +219,8 @@ def insert_supplied_dataset(self, organisation, description):
 
 
 def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
-    """Inserts new outlines into buildings_bulk_load.supplied_outlines table
+    """
+        Inserts new outlines into buildings_bulk_load.supplied_outlines table
     """
     # external field
     external_field = str(self.fcb_external_id.currentField())
@@ -250,7 +252,8 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
 
 def insert_bulk_load_outlines(self, dataset_id, capture_method,
                               capture_source_group, external_source_id):
-    """Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
+    """
+        Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """
     # Capture source id
     capture_source = None

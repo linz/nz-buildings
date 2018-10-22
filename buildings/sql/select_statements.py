@@ -435,6 +435,13 @@ WHERE buildings_common.capture_source.external_source_id = NULL
 OR buildings_common.capture_source.capture_source_group_id = %s;
 """
 
+capture_source_area_name_by_supplied_dataset = """
+SELECT csa.area_title
+FROM buildings_bulk_load.bulk_load_outlines blo
+JOIN buildings_common.capture_source cs USING (capture_source_id)
+JOIN buildings_reference.capture_source_area csa ON csa.external_area_polygon_id = cs.external_source_id
+WHERE supplied_dataset_id = %s;
+"""
 
 """
 --------------------------------------------------------------------
@@ -534,8 +541,8 @@ ORDER BY name;
 
 # Capture Source Area
 
-
-capture_source_area_name_value = """
-SELECT DISTINCT area_title, external_area_polygon_id
-FROM buildings_reference.capture_source_area;
+capture_source_area_id_and_name = """
+SELECT csa.external_area_polygon_id, csa.area_title
+FROM buildings_reference.capture_source_area csa
+ORDER BY csa.area_title;
 """
