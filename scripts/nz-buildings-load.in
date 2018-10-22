@@ -89,7 +89,7 @@ psql -c "DROP SCHEMA IF EXISTS buildings_reference CASCADE;"
 
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
 # intarray is used in compare_buildings.sql for array sorting
-psql -c "CREATE EXTENSION IF NOT EXISTS intarray;"
+psql -c "CREATE EXTENSION IF NOT EXISTS intarray SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
 
 export ON_ERROR_STOP="--set ON_ERROR_STOP=true"
