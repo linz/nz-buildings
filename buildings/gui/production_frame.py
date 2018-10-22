@@ -34,6 +34,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.add_outlines()
         # editing fields
         self.added_building_ids = []
+        self.geom = None
         self.ids = []
         self.geoms = {}
         self.building_outline_id = None
@@ -88,6 +89,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
             When add outline radio button toggled
         """
+        self.geom = None
+        self.added_building_ids = []
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -126,6 +129,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
             When edit outline radio button toggled
         """
+        self.geoms = {}
+        self.ids = []
+        self.geom_changed = False
+        self.select_changed = False
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -223,9 +230,14 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_reset.setDisabled(1)
         self.btn_save.setDisabled(1)
         self.btn_exit_edits.setDisabled(1)
+        # reset adding outlines
+        self.geom = None
+        self.added_building_ids = []
+        # reset editing outlines
+        self.geoms = {}
         self.ids = []
-        self.selection_changed = False
-        self.feature_changed = False
+        self.geom_changed = False
+        self.select_changed = False
         if isinstance(self.change_instance, production_changes.EditProduction):
             try:
                 self.building_layer.selectionChanged.disconnect(
