@@ -225,6 +225,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 # if not remove selection and clear table
                 self.capture_source_area.removeSelection()
                 self.tbl_capture_source_area.clearSelection()
+                self.btn_save.setDisabled(1)
         if all_in:
             # check for if text is different to selection
             if ls_text != self.selected_ids:
@@ -237,10 +238,16 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # if text is in capture_source_area and changes are required
         if changes:
             # select areas
+            self.tbl_capture_source_area.clearSelection()
+            self.capture_source_area.removeSelection()
+            selection = ''
             for item in ls_text:
-                self.capture_source_area.selectByExpression('"external_area_polygon_id" = {}'.format(item), behaviour=QgsVectorLayer.AddToSelection)
-                self.tbl_capture_source_area.clearSelection()
-                rows = self.tbl_capture_source_area.rowCount()
+                if selection == '':
+                    selection = '"external_area_polygon_id" = {}'.format(item)
+                else:
+                    selection = selection + 'or "external_area_polygon_id" = {}'.format(item)
+            self.capture_source_area.selectByExpression(selection)
+            rows = self.tbl_capture_source_area.rowCount()
             selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
             for item in ls_text:
                 index = 0

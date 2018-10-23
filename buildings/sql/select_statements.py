@@ -439,7 +439,7 @@ capture_source_area_name_by_supplied_dataset = """
 SELECT csa.area_title
 FROM buildings_bulk_load.bulk_load_outlines blo
 JOIN buildings_common.capture_source cs USING (capture_source_id)
-JOIN buildings_reference.capture_source_area csa ON csa.external_area_polygon_id = cs.external_source_id
+JOIN buildings_reference.capture_source_area csa ON CAST( csa.external_area_polygon_id as varchar(250) ) = cs.external_source_id
 WHERE supplied_dataset_id = %s;
 """
 
