@@ -75,7 +75,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl = self.tbl_capture_source_area
         tbl.setRowCount(0)
         tbl.setColumnCount(2)
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('External Source Id'))
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('Id'))
         tbl.setHorizontalHeaderItem(1, QTableWidgetItem('Area Title'))
         tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
@@ -178,6 +178,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 self.tbl_capture_source_area.clearSelection()
                 rows = self.tbl_capture_source_area.rowCount()
                 selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+                self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.MultiSelection)
                 for item in self.ids:
                     index = 0
                     while index < rows:
@@ -185,6 +186,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                             if self.tbl_capture_source_area.item(index, 0).text() == item:
                                 self.tbl_capture_source_area.selectRow(index)
                         index = index + 1
+                self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.ExtendedSelection)
             if len(self.ids) == 1:
                 self.btn_save.setEnabled(1)
             else:
