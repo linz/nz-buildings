@@ -80,7 +80,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.MultiSelection)
+        tbl.setSelectionMode(QAbstractItemView.ExtendedSelection)
         tbl.setShowGrid(True)
         sql_csa = select.capture_source_area_id_and_name
         result = self.db._execute(sql_csa)
