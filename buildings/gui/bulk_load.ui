@@ -79,7 +79,7 @@
         <x>0</x>
         <y>0</y>
         <width>377</width>
-        <height>930</height>
+        <height>973</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -408,6 +408,18 @@ QGroupBox::title {
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="l_cs_area_title">
+         <property name="font">
+          <font>
+           <kerning>true</kerning>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btn_compare_outlines">

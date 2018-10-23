@@ -186,6 +186,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.add_historic_outlines()
 
+        self.l_cs_area_title.setText('')
+
     def display_data_exists(self):
         """
             Display setup when data has been bulk loaded
@@ -219,11 +221,18 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_reset.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
 
+        sql = select.capture_source_area_name_by_supplied_dataset
+        area_id = self.db._execute(sql, (self.current_dataset,))
+        area_id = area_id.fetchall()
+        if area_id is not None:
+            self.l_cs_area_title.setText(area_id[0][0])
+        else:
+            self.l_cs_area_title.setText('')
+
     def display_not_published(self):
         """
             UI display when there is a dataset that hasn't been published.
         """
-
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
         self.btn_publish.setEnabled(1)
@@ -241,8 +250,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.area_id = area_id.fetchall()
         if len(self.area_id) > 0:
             self.area_id = self.area_id[0][0]
+            self.l_cs_area_title.setText(self.area_id)
         else:
             self.area_id = None
+            self.l_cs_area_title.setText('')
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
                 '\n ---------------------- NO CAPTURE SOURCE AREA ---------'
