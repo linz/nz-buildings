@@ -296,6 +296,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql)
         qa_status_id = result.fetchone()[0]
         self.assertEqual(qa_status_id, 2)
+        selected_row = [index.row() for index in self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()]
+        self.assertEqual(selected_row, [1])
 
         self.alter_relationships_frame.db.rollback_open_cursor()
         self.alter_relationships_frame.btn_exit.click()
