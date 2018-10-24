@@ -72,6 +72,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.cmb_capture_source_group.addItem(text)
 
     def init_table(self):
+        """
+            Set up capture source area table
+        """
         tbl = self.tbl_capture_source_area
         tbl.setRowCount(0)
         tbl.setColumnCount(2)
@@ -80,7 +83,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
-        tbl.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        tbl.setSelectionMode(QAbstractItemView.SingleSelection)
         tbl.setShowGrid(True)
         sql_csa = select.capture_source_area_id_and_name
         result = self.db._execute(sql_csa)
@@ -151,46 +154,24 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
         # if nothing is selected clear line edit and table
         if len(self.capture_source_area.selectedFeatures()) == 0:
-            self.le_external_source_id.setText('')
             self.tbl_capture_source_area.clearSelection()
-            self.btn_save.setDisabled(1)
         # if areas are selected
         if len(self.capture_source_area.selectedFeatures()) > 0:
-            # enable line edit
-            self.le_external_source_id.setEnabled(1)
-            # list of line edit's current text
-            current_text = [s.strip() for s in self.le_external_source_id.text().split(',')]
             # list of ids selected
             self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
-            # if selection is different to line edit text changes = True
-            changes = False
-            if len(current_text) != len(self.ids):
-                changes = True
-            else:
-                for item in current_text:
-                    if item not in self.ids:
-                        changes = True
-            # if changes required update line edit text
-            if changes:
-                # change line edit
-                self.le_external_source_id.setText(', '.join(self.ids))
-                # change table selection
-                self.tbl_capture_source_area.clearSelection()
-                rows = self.tbl_capture_source_area.rowCount()
-                selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
-                self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.MultiSelection)
-                for item in self.ids:
-                    index = 0
-                    while index < rows:
-                        if index not in selected_rows:
-                            if self.tbl_capture_source_area.item(index, 0).text() == item:
-                                self.tbl_capture_source_area.selectRow(index)
-                        index = index + 1
-                self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            if len(self.ids) == 1:
-                self.btn_save.setEnabled(1)
-            else:
-                self.btn_save.setDisabled(1)
+            # change table selection
+            self.tbl_capture_source_area.clearSelection()
+            rows = self.tbl_capture_source_area.rowCount()
+            selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+            self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.MultiSelection)
+            for item in self.ids:
+                index = 0
+                while index < rows:
+                    if index not in selected_rows:
+                        if self.tbl_capture_source_area.item(index, 0).text() == item:
+                            self.tbl_capture_source_area.selectRow(index)
+                    index = index + 1
+            self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.SingleSelection)
         # reconnect line edit signal
         self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
@@ -203,61 +184,19 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # disconnect other signals
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
-        # add a wait for faster typers
-        QTest.qWait(0.5)
-        # if line edit cleared remove selection and clear table
-        if text == '':
-            self.capture_source_area.removeSelection()
-            self.tbl_capture_source_area.clearSelection()
+        # remove selections
+        self.capture_source_area.removeSelection()
+        self.tbl_capture_source_area.clearSelection()
+        for row in range(self.tbl_capture_source_area.rowCount()):
+            if self.tbl_capture_source_area.item(row, 0).text() == text:
+                self.tbl_capture_source_area.selectRow(row)
+        # print selection
+        selection = '"external_area_polygon_id" = {}'.format(text)
+        self.capture_source_area.selectByExpression(selection)
+        if len([row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]) > 0:
+            self.btn_save.setEnabled(1)
+        else:
             self.btn_save.setDisabled(1)
-        # list of line edit text split by ','
-        ls_text = [t.strip() for t in text.split(',')]
-        # list of ids selected
-        self.selected_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
-        # list of all ids in capture_source_area
-        self.all_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.getFeatures()]
-        # if line edit is different to selection changes = True
-        changes = False
-        # if items in the line edit list are in capture_source_area all_in = True
-        all_in = True
-        # check for all items in line edit existing in capture_source_area
-        for item in ls_text:
-            if item not in self.all_ids:
-                all_in = False
-                # if not remove selection and clear table
-                self.capture_source_area.removeSelection()
-                self.tbl_capture_source_area.clearSelection()
-                self.btn_save.setDisabled(1)
-        if all_in:
-            # check for if text is different to selection
-            if ls_text != self.selected_ids:
-                changes = True
-            # check if can enable line edit
-            if len(ls_text) == 1:
-                self.btn_save.setEnabled(1)
-            else:
-                self.btn_save.setDisabled(1)
-        # if text is in capture_source_area and changes are required
-        if changes:
-            # select areas
-            self.tbl_capture_source_area.clearSelection()
-            self.capture_source_area.removeSelection()
-            selection = ''
-            for item in ls_text:
-                if selection == '':
-                    selection = '"external_area_polygon_id" = {}'.format(item)
-                else:
-                    selection = selection + 'or "external_area_polygon_id" = {}'.format(item)
-            self.capture_source_area.selectByExpression(selection)
-            rows = self.tbl_capture_source_area.rowCount()
-            selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
-            for item in ls_text:
-                index = 0
-                while index < rows:
-                    if index not in selected_rows:
-                        if self.tbl_capture_source_area.item(index, 0).text() == item:
-                            self.tbl_capture_source_area.selectRow(index)
-                    index = index + 1
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
@@ -270,43 +209,15 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # disconnect other signals
         self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
-        # enable line edit
-        self.le_external_source_id.setEnabled(1)
-        # list of selected ids
-        self.selected_ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
-        # if current selection is different to table selection changes = True
-        changes = False
-        if len(self.selected_ids) != len(self.tbl_capture_source_area.selectionModel().selectedRows()):
-            changes = True
-        else:
-            for row in self.tbl_capture_source_area.selectionModel().selectedRows():
-                if self.tbl_capture_source_area.item(row.row(), 0).text() not in self.selected_ids:
-                    changes = True
-        if changes:
-            text = ''
-            selection = ''
-            for row in self.tbl_capture_source_area.selectionModel().selectedRows():
-                area_id = self.tbl_capture_source_area.item(row.row(), 0).text()
-                self.capture_source_area.removeSelection()
-                if text == '':
-                    text = text + area_id
-                    selection = '"external_area_polygon_id" = {}'.format(area_id)
-                else:
-                    text = text + ',{}'.format(area_id)
-                    selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
-            # change text
-            self.le_external_source_id.setText(text)
-            if text == '':
-                self.btn_save.setDisabled(1)
-            elif len(self.tbl_capture_source_area.selectionModel().selectedRows()) == 1:
-                self.btn_save.setEnabled(1)
-            else:
-                self.btn_save.setDisabled(1)
-            # change layer selection
+        self.capture_source_area.removeSelection()
+        selection = ''
+        for row in self.tbl_capture_source_area.selectionModel().selectedRows():
+            area_id = self.tbl_capture_source_area.item(row.row(), 0).text()
             if selection == '':
-                self.capture_source_area.removeSelection()
+                selection = '"external_area_polygon_id" = {}'.format(area_id)
             else:
-                self.capture_source_area.selectByExpression(selection)
+                selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
+        self.capture_source_area.selectByExpression(selection)
         # reconnect other signals
         self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
