@@ -64,6 +64,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.le_external_source_id.setText('3')
+        self.capture_frame.btn_validate.click()
         self.assertTrue(self.capture_frame.btn_save.isEnabled())
         self.capture_frame.save_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
@@ -75,7 +76,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.assertEqual(result2, (result + 1))
         self.capture_frame.db.rollback_open_cursor()
 
-    def test_adding_capture_source_by_capture_source_area_layer(self):
+    def test_table_selection_by_layer_selection(self):
         """Editing external source id using the capture source area layer"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -90,55 +91,55 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         # test selecting an area
         # external id of 1
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878185, 5555335)), delay=-1)
-        self.assertEquals(self.capture_frame.le_external_source_id.text(), '1')
-        self.assertTrue(self.capture_frame.btn_save.isEnabled())
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEquals(rows[0], 0)
         # external id of 2
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878733, 5555375)), delay=-1)
-        self.assertEquals(self.capture_frame.le_external_source_id.text(), '2')
-        self.assertTrue(self.capture_frame.btn_save.isEnabled())
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEquals(rows[0], 1)
         # check clicking outside the shapefile/deselecting removes from frame
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878996, 5555445)), delay=-1)
-        self.assertEquals(self.capture_frame.le_external_source_id.text(), '')
-        self.assertFalse(self.capture_frame.btn_save.isEnabled())
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEquals(len(rows), 0)
 
     def test_adding_capture_source_by_line_edit(self):
         """Editing external source id using the line edit"""
         # adding by line edit one selection
         self.capture_frame.le_external_source_id.setText('1')
+        self.capture_frame.btn_validate.click()
         self.assertTrue(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
         self.assertEqual(len(self.ids), 1)
         self.assertEqual(self.ids[0], '1')
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEquals(rows[0], 0)
         # adding by line edit two selections
         self.capture_frame.le_external_source_id.setText('1,2')
+        self.capture_frame.btn_validate.click()
         self.assertFalse(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
-        self.assertEqual(len(self.ids), 2)
-        self.assertEqual(self.ids[0], '1')
-        self.assertEqual(self.ids[1], '2')
+        self.assertEqual(len(self.ids), 0)
         # clearing line edit
+        self.capture_frame.le_external_source_id.setText('1')
+        self.capture_frame.btn_validate.click()
         self.capture_frame.le_external_source_id.setText('')
         self.assertFalse(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
         self.assertEqual(len(self.ids), 0)
 
-    def test_adding_capture_source_by_table_selection(self):
+    def test_layer_selection_by_table_selection(self):
         """Editing external source id using the table"""
         # adding by table selection
         self.capture_frame.tbl_capture_source_area.selectRow(0)
-        self.assertTrue(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
         self.assertEqual(len(self.ids), 1)
         self.assertEqual(self.ids[0], '1')
         # selected two ids in table
         self.capture_frame.tbl_capture_source_area.selectRow(1)
-        self.assertFalse(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
-        self.assertEqual(len(self.ids), 2)
-        self.assertEqual(self.ids[0], '1')
-        self.assertEqual(self.ids[1], '2')
+        self.assertEqual(len(self.ids), 1)
+        self.assertEqual(self.ids[0], '2')
         # deselecting everthing from table
         self.capture_frame.tbl_capture_source_area.clearSelection()
-        self.assertFalse(self.capture_frame.btn_save.isEnabled())
         self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
         self.assertEqual(len(self.ids), 0)
