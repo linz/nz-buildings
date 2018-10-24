@@ -97,6 +97,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_reset_button(self):
@@ -141,6 +142,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
 
         # change indexes of comboboxes
         self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(1)
@@ -219,8 +221,8 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         # change indexes of comboboxes
-        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(1)
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(0)
         self.bulk_load_frame.cmb_ta.setCurrentIndex(0)
         self.bulk_load_frame.cmb_town.setCurrentIndex(0)
