@@ -1028,11 +1028,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_related(self):
         """Populates tbl_relationship when cmb_relationship switches to related"""
         tbl = self.tbl_relationship
-        sql_related = """SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value
-                         FROM buildings_bulk_load.related r
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
-                         ORDER BY r.related_group_id ASC;"""
-        result = self.db._execute(sql_related)
+        result = self.db._execute(select.related_by_datasetID, (self.current_dataset, ))
         for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -1044,11 +1040,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
         tbl = self.tbl_relationship
-        sql_matched = """SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
-                         FROM buildings_bulk_load.matched m
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
-                         ORDER BY m.building_outline_id;"""
-        result = self.db._execute(sql_matched)
+        result = self.db._execute(select.matched_by_datasetID, (self.current_dataset, ))
         for (id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -1059,11 +1051,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_removed(self):
         """Populates tbl_relationship when cmb_relationship switches to removed"""
         tbl = self.tbl_relationship
-        sql_removed = """SELECT r.building_outline_id, q.value
-                         FROM buildings_bulk_load.removed r
-                         JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
-                         ORDER BY r.building_outline_id;"""
-        result = self.db._execute(sql_removed)
+        result = self.db._execute(select.removed_by_datasetID, (self.current_dataset, ))
         for (id_existing, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
