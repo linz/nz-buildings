@@ -63,16 +63,6 @@
    <item row="2" column="0" colspan="2">
     <widget class="QWidget" name="widget" native="true">
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0" colspan="2">
-       <widget class="QComboBox" name="cmb_capture_source_group">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="l_capture_source_group">
         <property name="text">
@@ -106,12 +96,30 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="btn_validate">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <widget class="QComboBox" name="cmb_capture_source_group">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
      </layout>
      <zorder>le_external_source_id</zorder>
      <zorder>l_external_source_id</zorder>
      <zorder>l_capture_source_group</zorder>
      <zorder>cmb_capture_source_group</zorder>
      <zorder>verticalSpacer_4</zorder>
+     <zorder>btn_validate</zorder>
     </widget>
    </item>
    <item row="6" column="0" colspan="2">

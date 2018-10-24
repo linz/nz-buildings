@@ -5,10 +5,8 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame, QColor, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
+from PyQt4.QtGui import QFrame, QIcon, QColor, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
 from qgis.utils import iface
-from qgis.core import QgsVectorLayer
-from PyQt4.QtTest import QTest
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import select_statements as select
@@ -49,6 +47,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
 
         # initialise table
         self.init_table()
+        # button
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'tick.png')))
 
         # set up signals and slots
         self.capture_source_id = None
@@ -57,7 +58,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.save_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
+        self.le_external_source_id.textChanged.connect(self.disable)
+        self.btn_validate.clicked.connect(self.validate)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
@@ -150,7 +152,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             Called when feature selection is changed
         """
         # disconnect other signals
-        self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
+        self.btn_validate.clicked.disconnect(self.validate)
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
         # if nothing is selected clear line edit and table
         if len(self.capture_source_area.selectedFeatures()) == 0:
@@ -173,15 +175,26 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                     index = index + 1
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.SingleSelection)
         # reconnect line edit signal
-        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
+        self.btn_validate.clicked.connect(self.validate)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
-    @pyqtSlot(str)
-    def lineedit_text_changed(self, text):
+    @pyqtSlot()
+    def disable(self):
+        self.btn_save.setDisabled(1)
+        self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
+        self.capture_source_area.removeSelection()
+        self.tbl_capture_source_area.clearSelection()
+        self.capture_source_area.selectionChanged.connect(self.selection_changed)
+        self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+
+    @pyqtSlot()
+    def validate(self):
         """
             Called when user enters/changes text in line edit
         """
         # disconnect other signals
+        text = self.le_external_source_id.text()
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
         # remove selections
@@ -207,7 +220,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             called when item in table is changed
         """
         # disconnect other signals
-        self.le_external_source_id.textChanged.disconnect(self.lineedit_text_changed)
+        self.btn_validate.clicked.disconnect(self.validate)
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         self.capture_source_area.removeSelection()
         selection = ''
@@ -219,7 +232,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
         self.capture_source_area.selectByExpression(selection)
         # reconnect other signals
-        self.le_external_source_id.textChanged.connect(self.lineedit_text_changed)
+        self.btn_validate.clicked.connect(self.validate)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
 
     @pyqtSlot(bool)
@@ -244,6 +257,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_id = self.insert_capture_source(
             self.value, self.external_source, commit_status)
         self.le_external_source_id.clear()
+        self.capture_source_area.removeSelection()
+        self.tbl_capture_source_area.clearSelection()
+        self.btn_save.setDisabled(1)
 
     @pyqtSlot()
     def exit_clicked(self):
