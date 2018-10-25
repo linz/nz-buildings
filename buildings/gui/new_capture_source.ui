@@ -98,6 +98,9 @@
       </item>
       <item row="3" column="2">
        <widget class="QPushButton" name="btn_validate">
+        <property name="toolTip">
+         <string>Validate</string>
+        </property>
         <property name="text">
          <string/>
         </property>
