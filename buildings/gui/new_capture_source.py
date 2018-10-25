@@ -246,21 +246,12 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             Called when ok button clicked
         """
         # get external source id
-        self.external_source = self.get_comments()
-
-        if len(self.external_source) > 250:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- VALUE TOO LONG ---------'
-                '----------- \n\n Enter less than 250 characters'
-            )
-            self.error_dialog.show()
-            return
+        external_source = self.get_comments()
         # get type
-        self.value = self.get_combobox_value()
+        value = self.get_combobox_value()
         # call insert function
         self.capture_source_id = self.insert_capture_source(
-            self.value, self.external_source, commit_status)
+            value, external_source, commit_status)
         self.le_external_source_id.clear()
         self.capture_source_area.removeSelection()
         self.tbl_capture_source_area.clearSelection()
