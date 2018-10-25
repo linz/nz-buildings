@@ -941,13 +941,15 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.qWait(10)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
 
-        iface.actionSelect().trigger()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.qWait(10)
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        sql = """
+              SELECT method.value
+              FROM buildings_bulk_load.bulk_load_outlines blo
+              JOIN buildings_common.capture_method method USING (capture_method_id)
+              WHERE blo.bulk_load_outline_id = %s
+              """
+        for feat_id in self.bulk_load_frame.geoms:
+            result = db._execute(sql, (feat_id, ))
+            capture_method = result.fetchall()[0][0]
+            self.assertEqual(capture_method, 'Trace Orthophotography')
+
         self.bulk_load_frame.db.rollback_open_cursor()

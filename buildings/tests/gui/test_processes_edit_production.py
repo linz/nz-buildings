@@ -716,13 +716,15 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.qWait(10)
         self.production_frame.change_instance.save_clicked(False)
 
-        iface.actionSelect().trigger()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
-                         delay=30)
-        QTest.qWait(10)
-        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
-        self.production_frame.geoms = {}
-        self.production_frame.geom_changed = False
-        self.production_frame.select_changed = False
+        sql = """
+              SELECT method.value
+              FROM buildings.building_outlines bo
+              JOIN buildings_common.capture_method method USING (capture_method_id)
+              WHERE bo.building_outline_id = %s
+              """
+        for feat_id in self.production_frame.geoms:
+            result = db._execute(sql, (feat_id, ))
+            capture_method = result.fetchall()[0][0]
+            self.assertEqual(capture_method, 'Trace Orthophotography')
+
         self.production_frame.db.rollback_open_cursor()
