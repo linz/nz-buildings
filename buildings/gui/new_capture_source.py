@@ -49,7 +49,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.init_table()
         # button
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'go_arrow.png')))
+        self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'tick.png')))
 
         # set up signals and slots
         self.capture_source_id = None
