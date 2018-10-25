@@ -250,8 +250,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # get type
         value = self.get_combobox_value()
         # call insert function
-        self.capture_source_id = self.insert_capture_source(
-            value, external_source, commit_status)
+        self.capture_source_id = self.insert_capture_source(value, external_source, commit_status)
         self.le_external_source_id.clear()
         self.capture_source_area.removeSelection()
         self.tbl_capture_source_area.clearSelection()
@@ -291,45 +290,20 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         result = self.db._execute(select.capture_srcgrp_by_value, (value,))
         capture_source_group_id = result.fetchall()[0][0]
 
-        # check if capture source exists in table
-        if external_source is None:
-            result = self.db._execute(
-                select.capture_source_by_group_id_external_is_null, (
-                    capture_source_group_id,
-                ))
-        else:
-            result = self.db._execute(
-                select.capture_source_by_external_or_group_id, (
-                    external_source, capture_source_group_id,
-                ))
-        ls = result.fetchall()
-        if len(ls) > 0:
-            to_add = True
-            for item in ls:
-                # if capture source with same CSG and ES exists
-                if item[1] == capture_source_group_id:
-                    if item[2] == external_source:
-                        self.error_dialog = ErrorDialog()
-                        self.error_dialog.fill_report(
-                            '\n --------------- CAPTURE SOURCE GROUP '
-                            'EXISTS --------------- \n\n Group already'
-                            ' exists in table'
-                        )
-                        self.error_dialog.show()
-                        to_add = False
-            if to_add:
-                # enter but don't commit
-                self.db.open_cursor()
-                sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
-                result = self.db.execute_no_commit(
-                    sql, (capture_source_group_id, external_source))
-                self.capture_source_id = result.fetchall()[0][0]
-                if commit_status:
-                    self.db.commit_open_cursor()
-                self.le_external_source_id.clear()
-        # if sql querry returns nothing add to table
-        elif len(ls) == 0:
-            # enter but don't commit
+        result = self.db._execute(select.capture_source_by_group_id, (capture_source_group_id,))
+        to_add = True
+        for (external_source_id, ) in result.fetchall():
+            if external_source_id == external_source:
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report(
+                    '\n --------------- CAPTURE SOURCE GROUP '
+                    'EXISTS --------------- \n\n Group already'
+                    ' exists in table'
+                )
+                self.error_dialog.show()
+                to_add = False
+                break
+        if to_add:
             self.db.open_cursor()
             sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
             result = self.db.execute_no_commit(

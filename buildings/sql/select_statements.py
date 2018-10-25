@@ -423,16 +423,10 @@ SELECT value,
 FROM buildings_common.capture_source_group;
 """
 
-capture_source_by_external_or_group_id = """
-SELECT * FROM buildings_common.capture_source
-WHERE buildings_common.capture_source.external_source_id = %s
-OR buildings_common.capture_source.capture_source_group_id = %s;
-"""
-
-capture_source_by_group_id_external_is_null = """
-SELECT * FROM buildings_common.capture_source
-WHERE buildings_common.capture_source.external_source_id = NULL
-OR buildings_common.capture_source.capture_source_group_id = %s;
+capture_source_by_group_id = """
+SELECT external_source_id
+FROM buildings_common.capture_source
+WHERE buildings_common.capture_source.capture_source_group_id = %s;
 """
 
 capture_source_area_name_by_supplied_dataset = """
