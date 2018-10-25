@@ -947,3 +947,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
+        self.bulk_load_frame.geoms = {}
+        self.bulk_load_frame.geom_changed = False
+        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.db.rollback_open_cursor()

@@ -722,3 +722,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                          delay=30)
         QTest.qWait(10)
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.production_frame.geoms = {}
+        self.production_frame.geom_changed = False
+        self.production_frame.select_changed = False
+        self.production_frame.db.rollback_open_cursor()
