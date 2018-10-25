@@ -377,14 +377,17 @@ class EditProduction(ProductionChanges):
                 sql = 'SELECT buildings.building_outlines_update_shape(%s, %s);'
                 self.production_frame.db.execute_no_commit(
                     sql, (self.production_frame.geoms[key], key))
-                sql = """
-                      UPDATE buildings.building_outlines bo
-                      SET capture_method_id = c.capture_method_id
-                      FROM buildings_common.capture_method c
-                      WHERE c.value = %s
-                        AND bo.building_outline_id = %s;
-                      """
-                self.production_frame.db.execute_no_commit(sql, ('Trace Orthophotography', key))
+
+                result = self.production_frame.db.execute_no_commit(
+                    select.capture_method_ID_by_value,
+                    ('Trace Orthophotography',)
+                )
+                capture_method_id = result.fetchall()[0][0]
+
+                self.production_frame.db.execute_no_commit(
+                    'SELECT buildings.building_outlines_update_capture_method(%s, %s)',
+                    (key, capture_method_id)
+                )
         # if only attributes are changed
         if self.production_frame.select_changed:
             capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
@@ -452,7 +455,6 @@ class EditProduction(ProductionChanges):
             if self.production_frame.geom_changed:
                 self.production_frame.cmb_capture_method.setCurrentIndex(
                     self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
-                # self.production_frame.cmb_capture_method.setEnabled(False)
             else:
                 # capture method
                 result = self.production_frame.db._execute(
@@ -462,7 +464,6 @@ class EditProduction(ProductionChanges):
                 result = result.fetchall()[0][0]
                 self.production_frame.cmb_capture_method.setCurrentIndex(
                     self.production_frame.cmb_capture_method.findText(result))
-                # self.production_frame.cmb_capture_method.setEnabled(True)
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -484,7 +485,6 @@ class EditProduction(ProductionChanges):
             if self.production_frame.geom_changed:
                 self.production_frame.cmb_capture_method.setCurrentIndex(
                     self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
-                # self.production_frame.cmb_capture_method.setEnabled(False)
         else:
             self.disable_UI_functions()
 

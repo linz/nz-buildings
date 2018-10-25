@@ -403,14 +403,17 @@ class EditBulkLoad(BulkLoadChanges):
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(
                     sql, (self.bulk_load_frame.geoms[key], key))
-                sql = """
-                      UPDATE buildings_bulk_load.bulk_load_outlines blo
-                      SET capture_method_id = c.capture_method_id
-                      FROM buildings_common.capture_method c
-                      WHERE c.value = %s
-                        AND blo.bulk_load_outline_id = %s;
-                      """
-                self.bulk_load_frame.db.execute_no_commit(sql, ('Trace Orthophotography', key))
+
+                result = self.bulk_load_frame.db.execute_no_commit(
+                    select.capture_method_ID_by_value,
+                    ('Trace Orthophotography',)
+                )
+                capture_method_id = result.fetchall()[0][0]
+
+                self.bulk_load_frame.db.execute_no_commit(
+                    'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
+                    (key, capture_method_id)
+                )
         # if only attributes are changed
         if self.bulk_load_frame.select_changed:
 
@@ -521,7 +524,6 @@ class EditBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.geom_changed:
                 self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
                     self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
-                # self.bulk_load_frame.cmb_capture_method_2.setEnabled(False)
             else:
                 # capture method
                 result = self.bulk_load_frame.db._execute(
@@ -531,7 +533,6 @@ class EditBulkLoad(BulkLoadChanges):
                 result = result.fetchall()[0][0]
                 self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
                     self.bulk_load_frame.cmb_capture_method_2.findText(result))
-                # self.bulk_load_frame.cmb_capture_method_2.setEnabled(True)
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -553,7 +554,6 @@ class EditBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.geom_changed:
                 self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
                     self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
-                # self.bulk_load_frame.cmb_capture_method_2.setEnabled(False)
         else:
             self.disable_UI_functions()
 
