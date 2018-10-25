@@ -269,6 +269,32 @@ JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
 WHERE building_outline_id = %s AND supplied_dataset_id = %s;
 """
 
+related_by_datasetID = """
+SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value
+FROM buildings_bulk_load.related r
+JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+WHERE blo.supplied_dataset_id = %s
+ORDER BY r.related_group_id ASC;
+"""
+
+matched_by_datasetID = """
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
+FROM buildings_bulk_load.matched m
+JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+WHERE blo.supplied_dataset_id = %s
+ORDER BY m.building_outline_id ASC;
+"""
+
+removed_by_datasetID = """
+SELECT r.building_outline_id, q.value
+FROM buildings_bulk_load.removed r
+JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+JOIN buildings_bulk_load.existing_subset_extracts existing USING (building_outline_id)
+WHERE existing.supplied_dataset_id = %s
+ORDER BY r.building_outline_id ASC;
+"""
 
 """
 ----------------------------------------------------------------
