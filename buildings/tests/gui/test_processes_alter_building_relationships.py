@@ -329,7 +329,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def test_cb_autosave_stage_changed(self):
 
         btn_yes = self.alter_relationships_frame.msgbox.button(QMessageBox.Yes)
-        QTimer.singleShot(1000, btn_yes.click)
+        QTimer.singleShot(500, btn_yes.click)
         self.alter_relationships_frame.cb_autosave.setChecked(True)
 
         self.assertFalse(self.alter_relationships_frame.btn_save.isVisible())

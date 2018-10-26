@@ -18,7 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QMessageBox
 from qgis.utils import plugins, iface
 
 from buildings.utilities import database as db
@@ -46,6 +47,9 @@ class SetUpBulkLoadTest(unittest.TestCase):
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
+
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
 
     def tearDown(self):
