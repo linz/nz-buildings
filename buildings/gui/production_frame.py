@@ -4,9 +4,9 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QFrame
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer
 from qgis.utils import iface
 
 from buildings.gui import production_changes
@@ -42,11 +42,14 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.geom_changed = False
         self.edit_status = None
         self.change_instance = None
+
+        self.grpb_production.setChecked(True)
         # set up signals and slots
         self.rad_add.toggled.connect(self.canvas_add_outline)
         self.rad_edit.toggled.connect(self.canvas_edit_outlines)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
+        self.grpb_production.clicked.connect(self.grpb_production_clicked)
 
         self.cmb_capture_method.clear()
         self.cmb_capture_method.setDisabled(1)
@@ -83,6 +86,14 @@ class ProductionFrame(QFrame, FORM_CLASS):
             'end_lifespan is NULL')
         self.building_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.building_layer)
+
+    @pyqtSlot(bool)
+    def grpb_production_clicked(self, checked):
+        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        if checked:
+            group.setVisible(Qt.Checked)
+        else:
+            group.setVisible(Qt.Unchecked)
 
     @pyqtSlot()
     def canvas_add_outline(self):
