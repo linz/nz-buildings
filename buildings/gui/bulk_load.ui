@@ -172,10 +172,26 @@ QGroupBox::title {
           <bool>true</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="4" column="0">
-           <widget class="QLabel" name="lb_external_id_2">
+          <item row="0" column="1">
+           <widget class="QgsMapLayerComboBox" name="ml_outlines_layer">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="lb_capture_method">
             <property name="text">
-             <string>External Source Id :</string>
+             <string>Capture Method:</string>
             </property>
            </widget>
           </item>
@@ -195,19 +211,10 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QgsMapLayerComboBox" name="ml_outlines_layer">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lb_external_id_2">
+            <property name="text">
+             <string>External Source Id :</string>
             </property>
            </widget>
           </item>
@@ -218,10 +225,10 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lb_external_id">
+          <item row="3" column="0">
+           <widget class="QLabel" name="lb_capture_src_grp">
             <property name="text">
-             <string>External Id Field:</string>
+             <string>Capture Source Group:</string>
             </property>
            </widget>
           </item>
@@ -247,15 +254,8 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="lb_capture_method">
-            <property name="text">
-             <string>Capture Method:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QgsFieldComboBox" name="fcb_external_id">
+          <item row="10" column="1">
+           <widget class="QComboBox" name="cmb_capture_method">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -267,6 +267,45 @@ QGroupBox::title {
               <width>245</width>
               <height>16777215</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QComboBox" name="cmb_organisation">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="le_data_description">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="rad_external_id">
+            <property name="text">
+             <string>External Id Field:</string>
             </property>
            </widget>
           </item>
@@ -318,22 +357,6 @@ QGroupBox::title {
             </item>
            </layout>
           </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="le_data_description">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="lb_outlines">
             <property name="text">
@@ -341,8 +364,8 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="10" column="1">
-           <widget class="QComboBox" name="cmb_capture_method">
+          <item row="2" column="1">
+           <widget class="QgsFieldComboBox" name="fcb_external_id">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -354,36 +377,6 @@ QGroupBox::title {
               <width>245</width>
               <height>16777215</height>
              </size>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QComboBox" name="cmb_organisation">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lb_capture_src_grp">
-            <property name="text">
-             <string>Capture Source Group:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="rad_external_id">
-            <property name="text">
-             <string>External Id Field</string>
             </property>
            </widget>
           </item>
@@ -868,6 +861,19 @@ QGroupBox::title {
           <string>Exit</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>1</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

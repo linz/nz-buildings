@@ -54,7 +54,7 @@ QGroupBox::title {
 }</string>
      </property>
      <property name="title">
-      <string>Production</string>
+      <string>Production Layers</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
