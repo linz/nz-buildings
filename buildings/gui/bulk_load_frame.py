@@ -57,10 +57,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
-        # set up comfirmation message box
-        self.msgbox_bulk_load = self.comfirmation_dialog_box('bulk load')
-        self.msgbox_compare = self.comfirmation_dialog_box('compare')
-        self.msgbox_publish = self.comfirmation_dialog_box('publish')
+        # set up confirmation message box
+        self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
+        self.msgbox_compare = self.confirmation_dialog_box('compare')
+        self.msgbox_publish = self.confirmation_dialog_box('publish')
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -152,10 +152,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-    def comfirmation_dialog_box(self, button_text):
+    def confirmation_dialog_box(self, button_text):
         return QMessageBox(QMessageBox.Question, button_text.upper(), 'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
 
-    def comfirm(self, msgbox):
+    def confirm(self, msgbox):
         reply = msgbox.exec_()
         if reply == QMessageBox.Yes:
             return True
@@ -294,7 +294,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When bulk load outlines save clicked
         """
-        if self.comfirm(self.msgbox_bulk_load):
+        if self.confirm(self.msgbox_bulk_load):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             bulk_load.bulk_load(self, commit_status)
             # find if adding was sucessful
@@ -323,7 +323,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When compare outlines clicked
         """
-        if self.comfirm(self.msgbox_compare):
+        if self.confirm(self.msgbox_compare):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             comparisons.compare_outlines(self, commit_status)
             self.btn_publish.setEnabled(1)
@@ -535,7 +535,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def publish_clicked(self, commit_status):
         """When publish button clicked"""
 
-        if self.comfirm(self.msgbox_publish):
+        if self.confirm(self.msgbox_publish):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             if self.change_instance is not None:
                 self.edit_cancel_clicked()
