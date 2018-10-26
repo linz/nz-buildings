@@ -267,7 +267,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'removed_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.current_dataset))
-        self.bulk_load_removed.loadNamedStyle(path + 'building_red.qml')
+        self.bulk_load_removed.loadNamedStyle(path + 'building_removed.qml')
         self.bulk_load_added = self.layer_registry.add_postgres_layer(
             'added_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',

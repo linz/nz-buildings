@@ -452,7 +452,7 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.current_dataset
             ))
         self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_red.qml')
+            path + 'building_removed.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
         self.bulk_load_frame.geoms = {}
