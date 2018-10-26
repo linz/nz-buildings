@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QApplication, QColor, QCompleter, QFrame
+from PyQt4.QtGui import QApplication, QColor, QCompleter, QFrame, QMessageBox
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
 
@@ -57,6 +57,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
+        # set up comfirmation message box
+        self.msgbox_bulk_load = self.comfirmation_dialog_box('bulk load')
+        self.msgbox_compare = self.comfirmation_dialog_box('compare')
+        self.msgbox_publish = self.comfirmation_dialog_box('publish')
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -147,6 +151,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
         self.btn_exit.clicked.connect(self.exit_clicked)
+
+    def comfirmation_dialog_box(self, button_text):
+        return QMessageBox(QMessageBox.Question, button_text.upper(), 'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
+
+    def comfirm(self, msgbox):
+        reply = msgbox.exec_()
+        if reply == QMessageBox.Yes:
+            return True
+        return False
 
     def display_dataset_error(self):
         """UI Display when there are multiple supplied datasets."""
@@ -281,17 +294,18 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When bulk load outlines save clicked
         """
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        bulk_load.bulk_load(self, commit_status)
-        # find if adding was sucessful
-        result = self.db._execute(select.dataset_count_both_dates_are_null)
-        result = result.fetchall()[0][0]
-        # if bulk loading completed without errors
-        if result == 1:
-            self.layer_registry.remove_layer(self.historic_layer)
-            self.add_outlines()
-            self.display_current_bl_not_compared()
-        QApplication.restoreOverrideCursor()
+        if self.comfirm(self.msgbox_bulk_load):
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            bulk_load.bulk_load(self, commit_status)
+            # find if adding was sucessful
+            result = self.db._execute(select.dataset_count_both_dates_are_null)
+            result = result.fetchall()[0][0]
+            # if bulk loading completed without errors
+            if result == 1:
+                self.layer_registry.remove_layer(self.historic_layer)
+                self.add_outlines()
+                self.display_current_bl_not_compared()
+            QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -309,13 +323,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When compare outlines clicked
         """
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        comparisons.compare_outlines(self, commit_status)
-        self.btn_publish.setEnabled(1)
-        self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
-        self.btn_alter_rel.setEnabled(1)
-        QApplication.restoreOverrideCursor()
+        if self.comfirm(self.msgbox_compare):
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            comparisons.compare_outlines(self, commit_status)
+            self.btn_publish.setEnabled(1)
+            self.btn_compare_outlines.setDisabled(1)
+            self.cmb_capture_source_area.setDisabled(1)
+            self.btn_alter_rel.setEnabled(1)
+            QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def canvas_add_outline(self):
@@ -520,22 +535,23 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def publish_clicked(self, commit_status):
         """When publish button clicked"""
 
-        QApplication.setOverrideCursor(Qt.WaitCursor)
-        if self.change_instance is not None:
-            self.edit_cancel_clicked()
-        self.db.open_cursor()
-        sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
-        self.db.execute_no_commit(sql, (self.current_dataset,))
-        if commit_status:
-            self.db.commit_open_cursor()
-        self.display_no_bulk_load()
-        self.current_dataset = None
-        self.lb_dataset_id.setText('None')
-        self.layer_registry.remove_layer(self.bulk_load_added)
-        self.layer_registry.remove_layer(self.bulk_load_removed)
-        self.layer_registry.remove_layer(self.bulk_load_layer)
-        self.add_historic_outlines()
-        QApplication.restoreOverrideCursor()
+        if self.comfirm(self.msgbox_publish):
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            if self.change_instance is not None:
+                self.edit_cancel_clicked()
+            self.db.open_cursor()
+            sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
+            self.db.execute_no_commit(sql, (self.current_dataset,))
+            if commit_status:
+                self.db.commit_open_cursor()
+            self.display_no_bulk_load()
+            self.current_dataset = None
+            self.lb_dataset_id.setText('None')
+            self.layer_registry.remove_layer(self.bulk_load_added)
+            self.layer_registry.remove_layer(self.bulk_load_removed)
+            self.layer_registry.remove_layer(self.bulk_load_layer)
+            self.add_historic_outlines()
+            QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def exit_clicked(self):
