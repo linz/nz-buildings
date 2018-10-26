@@ -6,7 +6,7 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QApplication, QColor, QCompleter, QFrame
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer
 from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -57,6 +57,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
+        self.grpb_bulk_load.setCheckable(False)
+        self.grpb_bulk_load.setChecked(True)
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -79,6 +81,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
             self.display_current_bl_not_compared()
+            self.grpb_bulk_load.setCheckable(True)
 
         # if all datasets are processed
         else:
@@ -103,6 +106,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
                 self.display_not_published()
+                self.grpb_bulk_load.setCheckable(True)
 
             # No current dataset is being worked on
             else:
@@ -147,6 +151,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
         self.btn_exit.clicked.connect(self.exit_clicked)
+
+        self.grpb_bulk_load.clicked.connect(self.grpb_bulk_load_clicked)
 
     def display_dataset_error(self):
         """UI Display when there are multiple supplied datasets."""
@@ -277,6 +283,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
     @pyqtSlot(bool)
+    def grpb_bulk_load_clicked(self, checked):
+        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        if checked:
+            group.setVisible(Qt.Checked)
+        else:
+            group.setVisible(Qt.Unchecked)
+
+    @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
         """
             When bulk load outlines save clicked
@@ -292,6 +306,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.add_outlines()
             self.display_current_bl_not_compared()
         QApplication.restoreOverrideCursor()
+        self.grpb_bulk_load.setCheckable(True)
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -536,6 +551,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.bulk_load_layer)
         self.add_historic_outlines()
         QApplication.restoreOverrideCursor()
+        self.grpb_bulk_load.setCheckable(False)
 
     @pyqtSlot()
     def exit_clicked(self):
