@@ -383,8 +383,11 @@ class EditBulkLoad(BulkLoadChanges):
         if len(iface.activeLayer().selectedFeatures()) > 0:
             self.select_features()
             if self.bulk_load_frame.select_changed:
+                self.enable_UI_functions()
                 self.populate_edit_comboboxes()
                 self.select_comboboxes_value()
+            else:
+                self.disable_UI_functions()
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
@@ -400,6 +403,17 @@ class EditBulkLoad(BulkLoadChanges):
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(
                     sql, (self.bulk_load_frame.geoms[key], key))
+
+                result = self.bulk_load_frame.db.execute_no_commit(
+                    select.capture_method_ID_by_value,
+                    ('Trace Orthophotography',)
+                )
+                capture_method_id = result.fetchall()[0][0]
+
+                self.bulk_load_frame.db.execute_no_commit(
+                    'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
+                    (key, capture_method_id)
+                )
         # if only attributes are changed
         if self.bulk_load_frame.select_changed:
 
@@ -497,12 +511,28 @@ class EditBulkLoad(BulkLoadChanges):
         if self.bulk_load_frame.geom == result:
             if qgsfId in self.bulk_load_frame.geoms.keys():
                 del self.bulk_load_frame.geoms[qgsfId]
+            self.bulk_load_frame.geom_changed = False
         else:
             self.bulk_load_frame.geoms[qgsfId] = self.bulk_load_frame.geom
-        self.bulk_load_frame.geom_changed = True
+            self.bulk_load_frame.geom_changed = True
+
         self.bulk_load_frame.btn_edit_save.setEnabled(1)
         self.bulk_load_frame.btn_edit_reset.setEnabled(1)
         self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
+
+        if self.bulk_load_frame.select_changed:
+            if self.bulk_load_frame.geom_changed:
+                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+                    self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
+            else:
+                # capture method
+                result = self.bulk_load_frame.db._execute(
+                    select.capture_method_value_by_bulk_outlineID, (
+                        self.bulk_load_frame.bulk_load_outline_id,
+                    ))
+                result = result.fetchall()[0][0]
+                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+                    self.bulk_load_frame.cmb_capture_method_2.findText(result))
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -518,8 +548,14 @@ class EditBulkLoad(BulkLoadChanges):
             return
         self.select_features()
         if self.bulk_load_frame.select_changed:
+            self.enable_UI_functions()
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
+            if self.bulk_load_frame.geom_changed:
+                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+                    self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
+        else:
+            self.disable_UI_functions()
 
     def select_features(self):
         self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
@@ -553,7 +589,6 @@ class EditBulkLoad(BulkLoadChanges):
                 're identical.'
             )
             self.bulk_load_frame.error_dialog.show()
-            self.disable_UI_functions()
             self.bulk_load_frame.select_changed = False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
@@ -574,10 +609,8 @@ class EditBulkLoad(BulkLoadChanges):
                 self.bulk_load_frame.error_dialog.show()
                 self.bulk_load_frame.ids = []
                 self.bulk_load_frame.building_outline_id = None
-                self.disable_UI_functions()
                 self.bulk_load_frame.select_changed = False
             else:
-                self.enable_UI_functions()
                 self.bulk_load_frame.select_changed = True
 
     def select_comboboxes_value(self):

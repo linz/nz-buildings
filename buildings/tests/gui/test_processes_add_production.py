@@ -97,6 +97,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_town.isEnabled())
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.isEnabled())
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.production_frame.db.rollback_open_cursor()
 
     def test_reset_button(self):
@@ -142,6 +143,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_ta.isEnabled())
         self.assertTrue(self.production_frame.cmb_town.isEnabled())
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
 
         # change indexes of comboboxes
         self.production_frame.cmb_capture_method.setCurrentIndex(1)
@@ -219,6 +221,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_town.isEnabled())
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.isEnabled())
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         # change indexes of comboboxes
         self.production_frame.cmb_capture_method.setCurrentIndex(1)
         self.production_frame.cmb_capture_source.setCurrentIndex(0)
