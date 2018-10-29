@@ -24,3 +24,6 @@ $$
 
 $$
 LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.deletion_description_insert(integer, varchar(250)) IS
+'Create new records in deletion description table';

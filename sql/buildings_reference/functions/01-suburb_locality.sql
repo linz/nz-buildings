@@ -32,6 +32,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings.suburb_locality_intersect_polygon(geometry) IS
+'Return id of suburb/locality with most overlap';
+
 
 -- bulk_load_outlines_update_suburb (replace suburb values with the intersection result)
     -- param: integer supplied_dataset_id
@@ -57,3 +60,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.bulk_load_outlines_update_suburb(integer) IS
+'Replace suburb values with the intersection result';

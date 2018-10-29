@@ -40,3 +40,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.supplied_outlines_insert(integer, integer, geometry) IS
+'Insert new outlines into supplied outlines table';

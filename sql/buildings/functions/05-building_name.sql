@@ -3,5 +3,5 @@
 -- Future enhancement
 --------------------------------------------
 
--- FUNCTIONS
+-- Functions
 -- None

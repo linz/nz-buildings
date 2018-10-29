@@ -25,5 +25,6 @@ $$
     SELECT count(*)::integer FROM transferred_insert;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.transferred_insert(integer, integer) IS
 'Create new records in transferred table';

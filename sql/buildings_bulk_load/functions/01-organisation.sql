@@ -32,3 +32,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.organisation_insert(varchar(250)) IS
+'Insert new entry in organisation table';

@@ -41,6 +41,7 @@ $$
     );
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.related_select_by_dataset(integer) IS
 'Select bulk_load_outline_id in related table';
 
@@ -98,6 +99,9 @@ $$
 $$
 LANGUAGE sql;
 
+COMMENT ON FUNCTION buildings_bulk_load.related_delete_existing_outlines(integer) IS
+'Delete from related table by building_outline_id';
+
 
 -- related_group_insert (create new entry in related group insert table)
     -- params: None
@@ -113,6 +117,9 @@ $$
 $$
 LANGUAGE sql;
 
+COMMENT ON FUNCTION buildings_bulk_load.related_group_insert() IS
+'Create new entry in related group insert table';
+
 
 -- related_insert_building_outlines (insert new entry into related table)
     -- params: integer related_group_id, integer bulk_load_outline_id, integer qa_status_id
@@ -127,3 +134,6 @@ $$
 
 $$
 LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer) IS
+'Insert new entry into related table';

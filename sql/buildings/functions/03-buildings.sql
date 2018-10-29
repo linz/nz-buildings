@@ -33,6 +33,10 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings.buildings_insert() IS
+'Insert new building into buildings table using defaults';
+
+
 -- buildings_update_end_lifespan (update the end lifespan attr of building to now)
     -- params: integer[], building_ids
     -- return: number of outlines updated

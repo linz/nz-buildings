@@ -32,3 +32,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_common.capture_method_insert(varchar(250)) IS
+'Insert new entry into capture method table';

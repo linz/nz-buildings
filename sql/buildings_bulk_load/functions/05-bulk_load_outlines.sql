@@ -81,6 +81,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_insert_supplied(integer, integer, integer, integer) IS
+'Insert supplied outlines into bulk load outlines';
+
 
 -- bulk_load_outlines_insert (insert new bulk load outline)
     -- params: integer supplied_dataset_id, integer external_outline_id
@@ -134,6 +137,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_insert(integer, integer, integer, integer, integer, integer, integer, integer, geometry) IS
+'Insert new bulk load outline';
+
 
 -- bulk_load_outlines_update_shape (update the shape of an outline)
     -- params: geometry, integer bulk_load_outline_id
@@ -150,6 +156,7 @@ $$
     SELECT count(*)::integer FROM update_shape;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer) IS
 'Update shape in bulk_load_outlines table';
 
@@ -184,6 +191,7 @@ $$
     SELECT count(*)::integer FROM update_attributes;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in bulk_load_outlines table';
 
@@ -207,6 +215,7 @@ $$
     SELECT count(*)::integer FROM small_buildings;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_buildings(integer) IS
 'Update bulk load status in bulk_load_outlines table of outlines less than 10sqm';
 
@@ -233,6 +242,7 @@ $$
         WHERE supplied.bulk_load_outline_id = $2
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer) IS
 'Create new added records in building outlines table';
 
@@ -255,5 +265,6 @@ $$
     SELECT count(*)::integer FROM update_capture_method;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_capture_method(integer, integer) IS
 'Update capture method in bulk_load_outlines table';

@@ -29,6 +29,7 @@ $$
             AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.added_select_by_dataset(integer) IS
 'Select bulk_load_outline_id in added table';
 
@@ -47,6 +48,9 @@ $$
 $$
 LANGUAGE sql;
 
+COMMENT ON FUNCTION buildings_bulk_load.added_delete_bulk_load_outlines(integer) IS
+'Delete outline from added table by bulk_load_outline_id';
+
 
 -- added_insert_bulk_load_outlines (insert bulk load outline into added table)
     -- params: integer bulk_load_outline_id
@@ -60,3 +64,6 @@ $$
 
 $$
 LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer) IS
+'Insert bulk load outline into added table';

@@ -42,6 +42,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_insert(integer, integer, geometry) IS
+'Insert outlines into existing subset extracts';
+
 
 -- existing_subset_extracts_update_supplied_dataset (update supplied dataset id of existing subset extracts outline)
     -- params: integer supplied_dataset_id, integer building_outline_id
@@ -61,5 +64,6 @@ $$
     SELECT count(*)::integer FROM update_supplied_dataset;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(integer, integer) IS
 'Update supplied_dataset_id in existing_subset_extracts table';

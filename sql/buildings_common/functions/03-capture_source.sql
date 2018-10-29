@@ -34,3 +34,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_common.capture_source_insert(integer, varchar(250)) IS
+'Insert new capture source into table';

@@ -73,6 +73,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings.building_outlines_insert(integer, integer, integer, integer, integer, integer, integer, timestamp, geometry) IS
+'Insert new building outline into table';
+
 
 -- building outlines_update_shape (update the geometry of specified outline)
     -- params: shape to update to geometry, integer building_outline_id
@@ -146,6 +149,7 @@ $$
     SELECT count(*)::integer FROM update_attributes;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings.building_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in building_outlines table';
 
@@ -168,5 +172,6 @@ $$
     SELECT count(*)::integer FROM update_capture_method;
 
 $$ LANGUAGE sql VOLATILE;
+
 COMMENT ON FUNCTION buildings.building_outlines_update_capture_method(integer, integer) IS
 'Update capture method in building_outlines table';

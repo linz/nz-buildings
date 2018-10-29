@@ -36,6 +36,7 @@ $$
             AND supplied.bulk_load_status_id != 3
     );
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.matched_select_by_dataset(integer) IS
 'Select bulk_load_outline_id in matched table';
 
@@ -52,6 +53,7 @@ $$
         WHERE matched.bulk_load_outline_id = $1
     );
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.building_outlines_matched_select_by_dataset(integer) IS
 'Select building_outline_id in matched table';
 
@@ -69,6 +71,7 @@ $$
     WHERE matched.bulk_load_outline_id = $1
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.matched_find_building_id(integer) IS
 'Return the building_id of the matched building outlines';
 
@@ -87,6 +90,9 @@ $$
 $$
 LANGUAGE sql;
 
+COMMENT ON FUNCTION buildings_bulk_load.matched_delete_existing_outlines(integer) IS
+'delete by buildings outline id, returning deleted building outline id';
+
 
 -- matched_insert_building_outlines (insert new match returning building outline id of new entry)
     -- params: integer bulk_load_outline_id, integer building_outline_id
@@ -101,3 +107,6 @@ $$
 
 $$
 LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.matched_insert_building_outlines(integer, integer) IS
+'Insert new match returning building outline id of new entry';

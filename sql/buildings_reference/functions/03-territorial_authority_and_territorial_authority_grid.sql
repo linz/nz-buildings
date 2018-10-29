@@ -35,6 +35,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings.territorial_authority_intersect_polygon(geometry) IS
+'Return id of territorial authority with most overlap';
+
 
 -- bulk_load_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- param: integer supplied_dataset_id
@@ -61,6 +64,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings.bulk_load_outlines_update_territorial_authority(integer) IS
+'Replace the TA values with the intersection result';
+
 
 -- territorial_authority_grid_intersect_polygon (id of the TA that has the most overlap)
     -- param: p_polygon_geometry, geometry
@@ -81,3 +87,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.territorial_authority_grid_intersect_polygon(geometry) IS
+'Returns id of the TA Grid that has the most overlap';

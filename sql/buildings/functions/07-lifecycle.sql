@@ -28,5 +28,6 @@ $$
     RETURNING building_id;
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings.lifecycle_add_record(integer, integer) IS
 'Create new records in lifecycle table';

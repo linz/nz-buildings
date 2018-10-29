@@ -32,3 +32,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.lifecycle_stage_insert(varchar(40)) IS
+'Insert new lifecycle stage entry';

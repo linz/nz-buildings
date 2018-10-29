@@ -48,6 +48,9 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_insert(varchar(250), integer) IS
+'Insert new supplied dataset';
+
 
 -- supplied_datasets_select_transfer_date (get transfer date of supplied dataset)
     -- params: integer supplied_dataset
@@ -80,6 +83,7 @@ $$
     SELECT count(*)::integer FROM update_transfer_date;
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_update_transfer_date(integer) IS
 'Update transfer_date in supplied_datasets table';
 
@@ -99,5 +103,6 @@ $$
     SELECT count(*)::integer FROM update_processed_date;
 
 $$ LANGUAGE sql;
+
 COMMENT ON FUNCTION buildings_bulk_load.supplied_datasets_update_processed_date(integer) IS
 'Update processed_date in supplied_datasets table';

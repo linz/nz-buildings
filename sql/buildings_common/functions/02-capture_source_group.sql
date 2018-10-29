@@ -32,3 +32,6 @@ $$
 
 $$
 LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_common.capture_source_group_insert(varchar(80), varchar(400)) IS
+'Insert new capture source group into table';
