@@ -221,3 +221,25 @@ $$
 $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer) IS
 'Create new added records in building outlines table';
+
+------------------------------------------------------------------------
+-- BUILDINGS BULK LOAD update attribute: Capture Method
+-- returns the number of outlines updated
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_capture_method(
+      p_bulk_load_outline_id integer
+    , p_capture_method_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_capture_method AS(
+        UPDATE buildings_bulk_load.bulk_load_outlines
+        SET capture_method_id = $2
+        WHERE bulk_load_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_capture_method;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_capture_method(integer, integer) IS
+'Update capture method in bulk_load_outlines table';

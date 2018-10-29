@@ -1,7 +1,3 @@
-# Make output
-scripts/nz-buildings-load
-sql/05-buildings_version.sql
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

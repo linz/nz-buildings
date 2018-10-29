@@ -66,7 +66,7 @@ SCRIPTS_built = \
 
 # List of files built from .in files during install
 EXTRA_CLEAN = \
-	sql/05-buildings_version.sql \
+	sql/01-buildings_version.sql \
 	$(SCRIPTS_built)
 
 .dummy:

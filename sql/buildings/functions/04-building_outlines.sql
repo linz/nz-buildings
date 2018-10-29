@@ -146,3 +146,24 @@ $$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings.building_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in building_outlines table';
 
+------------------------------------------------------------------------
+-- BUILDINGS update attribute: Capture Method
+-- returns the number of outlines updated
+------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_capture_method(
+      p_building_outline_id integer
+    , p_capture_method_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_capture_method AS(
+        UPDATE buildings.building_outlines
+        SET capture_method_id = $2
+        WHERE building_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_capture_method;
+
+$$ LANGUAGE sql VOLATILE;
+COMMENT ON FUNCTION buildings.building_outlines_update_capture_method(integer, integer) IS
+'Update capture method in building_outlines table';
