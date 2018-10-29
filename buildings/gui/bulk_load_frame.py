@@ -314,7 +314,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
-        """When bulk load outlines save clicked
         """
             When bulk load outlines save clicked
         """
