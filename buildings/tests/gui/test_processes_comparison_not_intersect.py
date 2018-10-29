@@ -68,6 +68,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
             idx = idx + 1
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
+        self.bulk_load_frame.cmb_external_id.setCurrentIndex(self.bulk_load_frame.cmb_external_id.findText('2'))
         # add outlines
         btn_yes = self.bulk_load_frame.msgbox_bulk_load.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
@@ -87,8 +88,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
@@ -99,8 +98,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
 
     def test_compare_removed(self):
         """Check correct number of ids are determined as 'Removed'"""
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
@@ -111,8 +108,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
 
     def test_compare_matched(self):
         """Check correct number of ids are determined as 'Matched'"""
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
@@ -123,8 +118,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
 
     def test_compare_related(self):
         """Check correct number of ids are determined as 'Related'"""
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
@@ -140,8 +133,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE supplied_dataset_id = %s;'
         db._execute(sql, (result,))
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
@@ -179,8 +170,6 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = db._execute(sql, (result, None, 2, 1, 1, 4, 400, 1,
                                    '0103000020910800000100000005000000F311221BB7AA3C41046171A564315541D2712DB1CCAA3C41046171A56431554115066169CDAA3C41E20FFCA060315541751FEF95B7AA3C414353AFBF60315541F311221BB7AA3C41046171A564315541'))
         result = result.fetchall()[0][0]
-        self.bulk_load_frame.cmb_capture_source_area.setCurrentIndex(self.bulk_load_frame.cmb_capture_source_area.findText("Imagery Two"))
-
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)

@@ -114,13 +114,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText('None')
                 self.display_no_bulk_load()
 
-        # populate imagery cmb
-        sql = 'SELECT area_title FROM buildings_reference.capture_source_area;'
-        results = self.db._execute(sql)
-        results = results.fetchall()
-        for thing in results:
-            self.cmb_capture_source_area.addItem(thing[0])
-
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
         self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
@@ -201,12 +194,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.grpb_edits.hide()
 
         self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
         self.add_historic_outlines()
+
+        self.l_cs_area_title.setText('')
 
     def display_data_exists(self):
         """
@@ -241,26 +234,56 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_reset.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
 
-    def display_not_published(self):
-        """UI display when there is a dataset that hasn't been published."""
+        sql = select.capture_source_area_name_by_supplied_dataset
+        area_id = self.db._execute(sql, (self.current_dataset,))
+        area_id = area_id.fetchall()
+        if area_id is not None:
+            self.l_cs_area_title.setText(area_id[0][0])
+        else:
+            self.l_cs_area_title.setText('')
 
+    def display_not_published(self):
+        """
+            UI display when there is a dataset that hasn't been published.
+        """
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
-        self.cmb_capture_source_area.setDisabled(1)
         self.btn_publish.setEnabled(1)
 
     def display_current_bl_not_compared(self):
-        """UI Display when there is a dataset that hasn't been compared."""
+        """
+            UI Display when there is a dataset that hasn't been compared.
+        """
 
         self.display_data_exists()
         self.btn_compare_outlines.setEnabled(1)
-        self.cmb_capture_source_area.setEnabled(1)
-        self.cmb_capture_source_area.setEnabled(1)
+        sql = select.capture_source_area_name_by_supplied_dataset
+        area_id = self.db._execute(sql, (self.current_dataset,))
+        if area_id is not None:
+            self.area_id = area_id.fetchall()
+        if len(self.area_id) > 0:
+            self.area_id = self.area_id[0][0]
+            self.l_cs_area_title.setText(self.area_id)
+        else:
+            self.area_id = None
+            self.l_cs_area_title.setText('')
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n ---------------------- NO CAPTURE SOURCE AREA ---------'
+                '----------------- \n\nThere is no area id, please fix in database'
+            )
+            self.error_dialog.show()
+            self.display_dataset_error()
+            self.btn_compare_outlines.setDisabled(1)
+            return
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
 
     def add_outlines(self):
-        """Add bulk load outlines of current dataset to canvas."""
+        """
+            Add bulk load outlines of current dataset to canvas.
+        """
+
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'styles/')
         # add the bulk_load_outlines to the layer registry
@@ -291,6 +314,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
+        """When bulk load outlines save clicked
         """
             When bulk load outlines save clicked
         """
@@ -328,13 +352,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             comparisons.compare_outlines(self, commit_status)
             self.btn_publish.setEnabled(1)
             self.btn_compare_outlines.setDisabled(1)
-            self.cmb_capture_source_area.setDisabled(1)
             self.btn_alter_rel.setEnabled(1)
             QApplication.restoreOverrideCursor()
 
     @pyqtSlot()
     def canvas_add_outline(self):
-        """When add outline radio button toggled"""
+        """
+            When add outline radio button toggled
+        """
         self.added_building_ids = []
         self.geom = None
         iface.actionCancelEdits().trigger()
@@ -492,7 +517,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.building_toolbar.hide()
 
     def completer_box(self):
-        """Box automatic completion"""
+        """
+            Box automatic completion
+        """
 
         reasons = self.db._execute(select.reason_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
@@ -533,7 +560,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
-        """When publish button clicked"""
+        """
+            When publish button clicked
+        """
 
         if self.confirm(self.msgbox_publish):
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -556,14 +585,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot()
     def exit_clicked(self):
         """
-        Called when bulk load frame exit button clicked.
+            Called when bulk load frame exit button clicked.
         """
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
     def close_frame(self):
         """
-        Clean up and remove the bulk load frame.
+            Clean up and remove the bulk load frame.
         """
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:

@@ -18,8 +18,9 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
 from qgis.utils import plugins
+from qgis.core import QgsProject
+from PyQt4.QtCore import Qt
 
 from buildings.utilities import database as db
 
@@ -50,11 +51,6 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_exit.click()
 
-    def test_external_source_default(self):
-        """External source line edit is disabled and radiobutton is not checked"""
-        self.assertFalse(self.capture_frame.le_external_source_id.isEnabled())
-        self.assertFalse(self.capture_frame.rad_external_source.isChecked())
-
     def test_capture_source_dropdowns(self):
         """Number of options in dropdown = number of entries in table"""
         sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
@@ -62,4 +58,17 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
                          result)
-        self.capture_frame.rad_external_source.click()
+
+    def test_capture_source_area_layer_registry(self):
+        """Capture source area layer is added to layer registry"""
+        layer_bool = True
+        root = QgsProject.instance().layerTreeRoot()
+        group = root.findGroup('Building Tool Layers')
+        layers = group.findLayers()
+        layer_name = ['capture_source_area']
+        for layer in layers:
+            if layer.layer().name() not in layer_name:
+                layer_bool = False
+
+        self.assertEqual(len([layer for layer in layers]), len(layer_name))
+        self.assertTrue(layer_bool)
