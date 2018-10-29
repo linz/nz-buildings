@@ -59,14 +59,14 @@
           <bool>true</bool>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
          <property name="maximumSize">
           <size>
-           <width>365</width>
+           <width>360</width>
            <height>16777215</height>
           </size>
          </property>
@@ -94,7 +94,7 @@ QGroupBox::title {
           <item row="7" column="0">
            <widget class="QPushButton" name="btn_qa_not_checked">
             <property name="text">
-             <string>NC</string>
+             <string>Uncheck</string>
             </property>
            </widget>
           </item>
@@ -172,9 +172,15 @@ QGroupBox::title {
        </item>
        <item>
         <widget class="QGroupBox" name="gb_edit_relationships">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
-           <width>365</width>
+           <width>360</width>
            <height>16777215</height>
           </size>
          </property>
