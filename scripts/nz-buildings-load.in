@@ -44,9 +44,9 @@ if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
     SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
 fi
 
-if test ! -f "${SCRIPTSDIR}/sql/02-buildings_schema.sql"; then
+if test ! -f "${SCRIPTSDIR}/sql/buildings/01-create-schema-and-tables.sql"; then
     cat >&2 <<EOF
-Cannot find /sql/02-buildings_schema.sql in ${SCRIPTSDIR}
+Cannot find /sql/buildings/01-create-schema-and-tables.sql in ${SCRIPTSDIR}
 Please set BUILDINGSCHEMA_SQLDIR environment variable
 EOF
     exit 1
@@ -101,22 +101,65 @@ psql_exit() {
     fi
 }
 
-# Execute all files in the reference sql dir
-for file in ${SCRIPTSDIR}/sql/reference/*.sql; do
+# Execute schema and table files
+
+for file in ${SCRIPTSDIR}/sql/buildings_common/*.sql; do
     echo ${file} >&2
     psql -f ${file} $ON_ERROR_STOP
     psql_exit
 done
 
-# Execute all files in the main sql dir
-for file in ${SCRIPTSDIR}/sql/*.sql; do
+for file in ${SCRIPTSDIR}/sql/buildings/*.sql; do
     echo ${file} >&2
     psql -f ${file} $ON_ERROR_STOP
     psql_exit
 done
 
-# Execute all files in the lds sql dir
-for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
+for file in ${SCRIPTSDIR}/sql/buildings_reference/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings_bulk_load/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings_lds/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+# execute function files
+
+for file in ${SCRIPTSDIR}/sql/buildings_common/functions/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings/functions/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings_reference/functions/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings_bulk_load/functions/*.sql; do
+    echo ${file} >&2
+    psql -f ${file} $ON_ERROR_STOP
+    psql_exit
+done
+
+for file in ${SCRIPTSDIR}/sql/buildings_lds/functions/*.sql; do
     echo ${file} >&2
     psql -f ${file} $ON_ERROR_STOP
     psql_exit

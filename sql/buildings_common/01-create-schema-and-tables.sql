@@ -1,19 +1,25 @@
 ------------------------------------------------------------------------------
 -- Create buildings common schema and tables
+
+-- Tables
+
 ------------------------------------------------------------------------------
+
+-- SCHEMA
 
 SET client_min_messages TO WARNING;
 
-
+-- buildings_common
 CREATE SCHEMA IF NOT EXISTS buildings_common;
 
 COMMENT ON SCHEMA buildings_common IS
 'Schema that holds tables referenced in more than one other schema.';
 
--- LOOKUP TABLES
+
+-- TABLES
 
 -- Capture Method
-
+-- Lookup table that holds all of the methods by which the geometry was captured.
 CREATE TABLE IF NOT EXISTS buildings_common.capture_method (
       capture_method_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
@@ -27,8 +33,10 @@ COMMENT ON COLUMN buildings_common.capture_method.capture_method_id IS
 COMMENT ON COLUMN buildings_common.capture_method.value IS
 'The method by which the geometry was captured.';
 
--- Capture Source Group
 
+-- Capture Source Group
+-- Lookup table that holds all of the capture source groups. Capture source
+-- groups are categories of data sources, e.g. NZ Aerial Imagery
 CREATE TABLE IF NOT EXISTS buildings_common.capture_source_group (
       capture_source_group_id serial PRIMARY KEY
     , value character varying(80) NOT NULL
@@ -48,8 +56,9 @@ COMMENT ON COLUMN buildings_common.capture_source_group.description IS
 'group links to the primary key of the NZ Imagery Surveys layer, available '
 'on LINZ Data Service at: https://data.linz.govt.nz/layer/nnnnn.';
 
--- Capture Source
 
+-- Capture Source
+-- Lookup table that holds all of the methods by which the geometry was captured.
 CREATE TABLE IF NOT EXISTS buildings_common.capture_source (
       capture_source_id serial PRIMARY KEY
     , capture_source_group_id integer NOT NULL REFERENCES buildings_common.capture_source_group (capture_source_group_id)

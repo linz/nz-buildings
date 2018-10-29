@@ -1,4 +1,15 @@
--- ADDED
+------------------------------------------------------------
+-- Script to compare all new (most recent bulk load) outlines to the
+-- existing outlines that intersect with the new outlines's capture source
+-- area. The outlines are sorted into four categories:
+-- added: new outlines not intersecting with any existing
+-- removed: existing outlines not intersecting with any new
+-- matched: new and existing outlines 1:1 match
+-- related: more complex relationships between new and existing outlines
+--          such as 1:many or many:1 or many:many
+-------------------------------------------------------------
+
+-- ADDED BUILDINGS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.find_added(
       p_supplied_dataset_id integer
@@ -11,11 +22,11 @@ $$
     WITH intersects AS (
         -- Join current and supplied building outlines based on intersect
         -- and get the percentage of their areas that intersect.
-        SELECT 
+        SELECT
               current.building_outline_id
             , supplied.bulk_load_outline_id
             , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(current.shape) * 100 AS current_intersect
-            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect 
+            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect
         FROM buildings_bulk_load.existing_subset_extracts current
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
@@ -49,7 +60,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
--- REMOVED
+-- REMOVED BUILDINGS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.find_removed(
       p_supplied_dataset_id integer
@@ -62,11 +73,11 @@ $$
     WITH intersects AS (
         -- Join current and supplied building outlines based on intersect
         -- and get the percentage of their areas that intersect.
-        SELECT 
+        SELECT
               current.building_outline_id
             , supplied.bulk_load_outline_id
             , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(current.shape) * 100 AS current_intersect
-            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect 
+            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect
         FROM buildings_bulk_load.existing_subset_extracts current
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
@@ -98,7 +109,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
--- MATCHED
+-- MATCHED BUILDINGS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.find_matched(
       p_supplied_dataset_id integer
@@ -112,11 +123,11 @@ $$
     WITH intersects AS (
         -- Join current and supplied building outlines based on intersect
         -- and get the percentage of their areas that intersect.
-        SELECT 
+        SELECT
               current.building_outline_id
             , supplied.bulk_load_outline_id
             , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(current.shape) * 100 AS current_intersect
-            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect 
+            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect
         FROM buildings_bulk_load.existing_subset_extracts current
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
@@ -157,15 +168,15 @@ $$
     AND bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
         FROM supplied_count )
-    AND (   (current_intersect > 5 AND supplied_intersect > 5) 
-          OR (current_intersect > 90) 
+    AND (   (current_intersect > 5 AND supplied_intersect > 5)
+          OR (current_intersect > 90)
           OR (supplied_intersect > 90)  )
     ;
 
 $$
 LANGUAGE sql VOLATILE;
 
--- RELATED
+-- RELATED BUILDINGS
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.find_related(
       p_supplied_dataset_id integer
@@ -179,11 +190,11 @@ $$
     WITH intersects AS (
         -- Join current and supplied building outlines based on intersect
         -- and get the percentage of their areas that intersect.
-        SELECT 
+        SELECT
               current.building_outline_id
             , supplied.bulk_load_outline_id
             , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(current.shape) * 100 AS current_intersect
-            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect 
+            , ST_Area(ST_Intersection(current.shape, supplied.shape)) / ST_Area(supplied.shape) * 100 AS supplied_intersect
         FROM buildings_bulk_load.existing_subset_extracts current
         JOIN buildings_bulk_load.bulk_load_outlines supplied ON ST_Intersects(current.shape, supplied.shape)
         WHERE current.supplied_dataset_id = $1
@@ -222,7 +233,7 @@ $$
         SELECT building_outline_id
         FROM current_count )
     AND bulk_load_outline_id NOT IN (
-        SELECT bulk_load_outline_id 
+        SELECT bulk_load_outline_id
         FROM buildings_bulk_load.matched )
     OR bulk_load_outline_id IN (
         SELECT bulk_load_outline_id
@@ -231,7 +242,7 @@ $$
           OR (current_intersect > 90)
           OR (supplied_intersect > 90)  )
     AND bulk_load_outline_id NOT IN (
-        SELECT bulk_load_outline_id 
+        SELECT bulk_load_outline_id
         FROM buildings_bulk_load.matched )
     ;
 

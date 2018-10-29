@@ -1,3 +1,7 @@
+--------------------------------------------------------------------
+-- script to load data from the bulk load stage to the buildings schema
+--------------------------------------------------------------------
+
 CREATE OR REPLACE FUNCTION buildings_bulk_load.load_building_outlines(p_supplied_dataset_id integer)
     RETURNS void
 AS $$

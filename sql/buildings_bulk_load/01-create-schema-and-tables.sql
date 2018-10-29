@@ -1,18 +1,40 @@
 ------------------------------------------------------------------------------
--- Create buildings stage schema and tables
+-- Create buildings_bulk_load stage schema and tables
+
+-- Tables:
+-- organisation
+-- bulk_load_status
+-- qa_status
+-- supplied_datasets
+-- suplied_outlines
+-- bulk_load_outlines
+-- existing_subset_extracts
+-- added
+-- removed
+-- related_groups
+-- related
+-- matched
+-- tranferred
+-- deletion_description
+
 ------------------------------------------------------------------------------
 
+-- SCHEMA
+
 SET client_min_messages TO WARNING;
-
-
+-- buildings_bulk_load
 CREATE SCHEMA IF NOT EXISTS buildings_bulk_load;
 
 COMMENT ON SCHEMA buildings_bulk_load IS
 'Schema that holds building outlines data while quality assurance is '
 'conducted. Data is also prepared to be loaded into production.';
 
--- Organisation
 
+-- TABLES
+
+-- Organisation
+-- This is a lookup table that holds names of organisations that are related to
+-- buildings data. All suppliers of building outlines data must be recorded here.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.organisation (
       organisation_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
@@ -27,8 +49,10 @@ COMMENT ON COLUMN buildings_bulk_load.organisation.organisation_id IS
 COMMENT ON COLUMN buildings_bulk_load.organisation.value IS
 'The name of the organisation.';
 
--- Bulk Load Status
 
+-- Bulk Load Status
+-- This is a lookup table that holds the status of building outlines through
+-- the bulk load process.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_status (
       bulk_load_status_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
@@ -44,8 +68,10 @@ COMMENT ON COLUMN buildings_bulk_load.bulk_load_status.value IS
 'The bulk load status of the building outline. Options include: Supplied, '
 'Added';
 
--- QA Status
 
+-- QA Status
+-- This is a lookup table that holds the status of building outlines during
+-- QA of the bulk load process.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.qa_status (
       qa_status_id serial PRIMARY KEY
     , value character varying(40) NOT NULL
@@ -60,8 +86,10 @@ COMMENT ON COLUMN buildings_bulk_load.qa_status.qa_status_id IS
 COMMENT ON COLUMN buildings_bulk_load.qa_status.value IS
 'The QA status of the building outlines. ';
 
--- Supplied Datasets
 
+-- Supplied Datasets
+-- This table records information about datasets supplied to LINZ for bulk
+-- load into the buildings system.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.supplied_datasets (
       supplied_dataset_id serial PRIMARY KEY
     , description character varying(250) NOT NULL
@@ -90,8 +118,10 @@ COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.processed_date IS
 COMMENT ON COLUMN buildings_bulk_load.supplied_datasets.transfer_date IS
 'The date that the supplied dataset was transferred to production schema.';
 
--- Supplied Outlines
 
+-- Supplied Outlines
+-- This dataset contains all building outline geometries as they are received
+-- from the supplier.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.supplied_outlines (
       supplied_outline_id serial PRIMARY KEY
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
@@ -126,8 +156,13 @@ COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.begin_lifespan IS
 COMMENT ON COLUMN buildings_bulk_load.supplied_outlines.shape IS
 'The geometry of the building outline as received from the supplier.';
 
--- Bulk Load Outlines
 
+-- Bulk Load Outlines
+-- This dataset contains all building outline geometries received from the
+-- supplier, in addition to any new building outlines added during
+-- QA of that particular bulk load. A number of attributes are first
+-- connected to the building outline in this table, which are later
+-- loaded into the production buildings schema.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.bulk_load_outlines (
       bulk_load_outline_id serial PRIMARY KEY
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
@@ -196,8 +231,12 @@ COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.begin_lifespan IS
 COMMENT ON COLUMN buildings_bulk_load.bulk_load_outlines.shape IS
 'The geometry of the building outline as received from the supplier.';
 
--- Existing Subset Extracts
 
+-- Existing Subset Extracts
+-- This table contains extracts of production building outlines over the same
+-- area covered by a new bulk load of building outlines data. Each set of
+-- extracted building outlines is related to the new bulk load via the
+-- supplied_dataset_id.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.existing_subset_extracts (
       building_outline_id integer PRIMARY KEY REFERENCES buildings.building_outlines (building_outline_id)
     , supplied_dataset_id integer NOT NULL REFERENCES buildings_bulk_load.supplied_datasets (supplied_dataset_id)
@@ -226,8 +265,10 @@ COMMENT ON COLUMN buildings_bulk_load.existing_subset_extracts.supplied_dataset_
 COMMENT ON COLUMN buildings_bulk_load.existing_subset_extracts.shape IS
 'The geometry of the building outline that exists in the production schema.';
 
--- Added
 
+-- Added
+-- This table holds the building outlines that have been identified as new
+-- buildings within the building outlines dataset.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.added (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
@@ -247,8 +288,11 @@ COMMENT ON COLUMN buildings_bulk_load.added.bulk_load_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.added.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
--- Removed
 
+-- Removed
+-- This table holds the building outlines that have been identified as no
+-- longer existing. These building outlines were within the area of
+-- capture but were not found in a more recent capture process.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.removed (
       building_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
     , qa_status_id integer NOT NULL REFERENCES buildings_bulk_load.qa_status (qa_status_id)
@@ -269,8 +313,9 @@ COMMENT ON COLUMN buildings_bulk_load.removed.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.removed.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
--- Related Groups
 
+-- Related Groups
+-- This table maintains the primary key for related groups.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.related_groups (
       related_group_id serial PRIMARY KEY
 );
@@ -281,8 +326,10 @@ COMMENT ON TABLE buildings_bulk_load.related_groups IS
 COMMENT ON COLUMN buildings_bulk_load.related_groups.related_group_id IS
 'Unique identifier for the related groups table.';
 
--- Related
 
+-- Related
+-- This table holds potential m:n matches between outlines that have been
+-- loaded into the system in bulk and those that already exist.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
       related_id serial PRIMARY KEY
     , related_group_id integer NOT NULL REFERENCES buildings_bulk_load.related_groups (related_group_id) INITIALLY DEFERRED
@@ -322,8 +369,10 @@ COMMENT ON COLUMN buildings_bulk_load.related.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.related.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
--- Matched
 
+-- Matched
+-- This table holds potential 1:1 matches between outlines that have been
+-- loaded into the system in bulk and those that already exist.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.matched (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , building_outline_id integer NOT NULL REFERENCES buildings_bulk_load.existing_subset_extracts (building_outline_id)
@@ -349,8 +398,10 @@ COMMENT ON COLUMN buildings_bulk_load.matched.building_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.matched.qa_status_id IS
 'Foreign key to the buildings_bulk_load.qa_status table.';
 
--- Transferred
 
+-- Transferred
+-- This table holds the building_outline_id that was created for each
+-- bulk loaded building outline tranferred to production.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.transferred (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , new_building_outline_id integer NOT NULL REFERENCES buildings.building_outlines (building_outline_id)
@@ -370,8 +421,10 @@ COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
 COMMENT ON COLUMN buildings_bulk_load.transferred.new_building_outline_id IS
 'Foreign key to the buildings.building_outlines table.';
 
--- Deletion Description
 
+-- Deletion Description
+-- This table records information about the reason for deleting outlines
+-- during bulk load process.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.deletion_description (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , description character varying(250) NOT NULL
