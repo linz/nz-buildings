@@ -10,6 +10,7 @@
     -- returns: count(integer) number of building outlines updated
 --------------------------------------------
 
+-- Functions
 
 -- suburb_locality_intersect_polygon (id of suburb with most overlap)
     -- param: p_polygon_geometry geometry

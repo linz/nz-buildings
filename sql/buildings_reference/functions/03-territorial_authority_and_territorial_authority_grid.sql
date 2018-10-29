@@ -13,6 +13,8 @@
     -- return: integer territorial_authority_id
 ----------------------------------------------------------------------------------------------
 
+-- Functions
+
 -- territorial_authority_intersect_polygon (id of the TA that has the most overlap)
     -- param: p_polygon_geometry geometry
     -- return: integer territorial_authority_id

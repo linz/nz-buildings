@@ -2,6 +2,7 @@
 -- buildings_bulk_load.organisation
 
 -- Functions:
+
 -- organisation_insert (insert new value into organisation table)
   -- params: varchar(250) organisation
   -- return: new organisation_id

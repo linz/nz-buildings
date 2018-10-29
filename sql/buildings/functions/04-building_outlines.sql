@@ -18,6 +18,9 @@
             -- integer town_city_id, integer territorial_authority_id, timestamp begin_lifespan,
             -- shape geometry
     --return: number of outlines updated (should only be one)
+-- building_outlines_update_capture_method (update capture method attribute)
+    -- params integer building_outline_id, integer capture_method_id
+    -- return: integer count number of outlines updated
 
 --------------------------------------------
 
@@ -146,10 +149,10 @@ $$ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings.building_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in building_outlines table';
 
-------------------------------------------------------------------------
--- BUILDINGS update attribute: Capture Method
--- returns the number of outlines updated
-------------------------------------------------------------------------
+
+-- building_outlines_update_capture_method (update capture method attribute)
+    -- params integer building_outline_id, integer capture_method_id
+    -- return: integer count number of outlines updated
 CREATE OR REPLACE FUNCTION buildings.building_outlines_update_capture_method(
       p_building_outline_id integer
     , p_capture_method_id integer

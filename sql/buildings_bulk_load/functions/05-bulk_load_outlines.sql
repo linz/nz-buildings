@@ -2,6 +2,10 @@
 -- buildings_bulk_load.bulk_load_outlines
 
 -- Functions:
+-- bulk_load_outlines_insert_supplied (insert supplied outlines into bulk_load_outlines)
+    -- params: integer supplied_dataset_id, integer bulk_load_status_id
+            -- integer capture_method_id, integer capture_source_id
+    -- return: integer count of supplied outlines added
 -- bulk_load_outlines_insert (insert new bulk load outline)
     -- params: integer supplied_dataset_id, integer external_outline_id
             -- integer external_outline_id, integer bulk_load_status_id
@@ -23,8 +27,18 @@
 -- building_outlines_insert_bulk (Create new added records in building outlines table)
     -- params: integer building_outline_id, integer bulk_load_outline_id
     -- return: building_outline_id
+-- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
+    -- params: integer bulk_load_outline_id, integer capture_method_id
+    -- return: integer count of building outlines updated
 --------------------------------------------
 
+-- Functions
+
+
+-- bulk_load_outlines_insert_supplied (insert supplied outlines into bulk_load_outlines)
+    -- params: integer supplied_dataset_id, integer bulk_load_status_id
+            -- integer capture_method_id, integer capture_source_id
+    -- return: integer count of supplied outlines added
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_insert_supplied(
       p_supplied_dataset_id integer
     , p_bulk_load_status_id integer
@@ -222,10 +236,10 @@ $$ LANGUAGE sql;
 COMMENT ON FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer) IS
 'Create new added records in building outlines table';
 
-------------------------------------------------------------------------
--- BUILDINGS BULK LOAD update attribute: Capture Method
--- returns the number of outlines updated
-------------------------------------------------------------------------
+
+-- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
+    -- params: integer bulk_load_outline_id, integer capture_method_id
+    -- return: integer count of building outlines updated
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_capture_method(
       p_bulk_load_outline_id integer
     , p_capture_method_id integer

@@ -10,6 +10,8 @@
     -- return: count(integer) number of outlines updated
 --------------------------------------------
 
+-- Functions:
+
 -- town_city_intersect_polygon (id of the town/city that has the most overlap)
     -- param: p_polygon_geometry geometry
     -- returns: integer town_city_id

@@ -2,7 +2,9 @@
 -- Create buildings common schema and tables
 
 -- Tables
-
+-- capture_method
+-- capture_source_group
+-- capture_source
 ------------------------------------------------------------------------------
 
 -- SCHEMA

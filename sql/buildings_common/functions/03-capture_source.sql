@@ -2,9 +2,16 @@
 -- buildings_common.capture_source
 
 -- Functions:
-
+-- capture_source_insert (insert new capture source into table)
+  -- params: integer capture_source_group_id, varchar(250) external_source_id
+  -- return: integer capture_source_id
 --------------------------------------------
 
+-- Functions
+
+-- capture_source_insert (insert new capture source into table)
+  -- params: integer capture_source_group_id, varchar(250) external_source_id
+  -- return: integer capture_source_id
 CREATE OR REPLACE FUNCTION buildings_common.capture_source_insert(
       p_capture_source_group_id integer
     , p_external_source_id varchar(250)
