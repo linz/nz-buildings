@@ -2,10 +2,12 @@
 -- buildings_bulk_load.existing_subset_extracts
 
 -- Functions:
+
 -- existing_subset_extracts_insert (insert into existing subset extracts table)
     -- params: integer building_outline_id, integer supplied_dataset_id, integer
             -- geometry shape
     -- return: count of rows inserted into table
+
 -- existing_subset_extracts_update_supplied_dataset (update supplied dataset id of existing subset extracts outline)
     -- params: integer supplied_dataset_id, integer building_outline_id
     -- return: count of outlines added (should only be one)

@@ -3,16 +3,16 @@
 
 -- Functions:
 -- lifecycle_stage_insert (insert new lifecycle_stage entry)
-    -- param: p_value varchar(40)
-    -- returns: new lifecycle_stage_id
+    -- params: p_value varchar(40)
+    -- return: new lifecycle_stage_id
 
 --------------------------------------------
 
 -- Functions
 
 -- lifecycle_stage_insert (insert new lifecycle_stage entry)
-    -- param: p_value varchar(40)
-    -- returns: new lifecycle_stage_id
+    -- params: p_value varchar(40)
+    -- return: new lifecycle_stage_id
 CREATE OR REPLACE FUNCTION buildings.lifecycle_stage_insert(
       p_value varchar(40)
 )

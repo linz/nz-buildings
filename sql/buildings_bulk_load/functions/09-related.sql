@@ -2,48 +2,34 @@
 -- buildings_bulk_load.related
 
 -- Functions:
--- related_select_by_dataset (select bulk load ids in related table by supplied_datset)
-    -- params: integer supplied_dataset_id
-    -- return: integer[] distinct bulk_load_outline_ids
+
 -- building_outlines_related_select_by_dataset (select related building outlines by supplied_dataset)
     -- params: integer supplied_dataset_id
     -- return: integer[] building_outline_ids
+
 -- building_related_select_by_dataset (select building ids by supplied_dataset_id)
     -- params: integer supplied_dataset_id
     -- return: integer[] building_ids
+
 -- related_delete_existing_outlines (delete from related table by building_outline_id)
     -- params: integer building_outline_id
     -- return: integer building_outline_id removed
--- related_group_insert (create new entry in related group insert table)
-    -- params: None
-    -- return: integer related_group_id
+
 -- related_insert_building_outlines (insert new entry into related table)
     -- params: integer related_group_id, integer bulk_load_outline_id, integer qa_status_id
     -- return: integer related_id
 
---------------------------------------------
-
--- Functions
+-- related_group_insert (create new entry in related group insert table)
+    -- params: None
+    -- return: integer related_group_id
 
 -- related_select_by_dataset (select bulk load ids in related table by supplied_datset)
     -- params: integer supplied_dataset_id
     -- return: integer[] distinct bulk_load_outline_ids
-CREATE OR REPLACE FUNCTION buildings_bulk_load.related_select_by_dataset(integer)
-    RETURNS integer[] AS
-$$
-    SELECT ARRAY(
-        SELECT DISTINCT bulk_load_outline_id
-        FROM buildings_bulk_load.related
-        JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
-        WHERE supplied.supplied_dataset_id = $1
-            AND supplied.bulk_load_status_id != 3
-        ORDER BY bulk_load_outline_id DESC
-    );
 
-$$ LANGUAGE sql;
+--------------------------------------------
 
-COMMENT ON FUNCTION buildings_bulk_load.related_select_by_dataset(integer) IS
-'Select bulk_load_outline_id in related table';
+-- Functions
 
 
 -- building_outlines_related_select_by_dataset (select related building outlines by supplied_dataset)
@@ -103,6 +89,24 @@ COMMENT ON FUNCTION buildings_bulk_load.related_delete_existing_outlines(integer
 'Delete from related table by building_outline_id';
 
 
+-- related_insert_building_outlines (insert new entry into related table)
+    -- params: integer related_group_id, integer bulk_load_outline_id, integer qa_status_id
+    -- return: integer related_id
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer)
+RETURNS integer AS
+$$
+
+    INSERT INTO buildings_bulk_load.related (related_group_id, bulk_load_outline_id, building_outline_id, qa_status_id)
+    VALUES ($1, $2, $3, 2)
+    RETURNING related.related_id;
+
+$$
+LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer) IS
+'Insert new entry into related table';
+
+
 -- related_group_insert (create new entry in related group insert table)
     -- params: None
     -- return: integer related_group_id
@@ -121,19 +125,22 @@ COMMENT ON FUNCTION buildings_bulk_load.related_group_insert() IS
 'Create new entry in related group insert table';
 
 
--- related_insert_building_outlines (insert new entry into related table)
-    -- params: integer related_group_id, integer bulk_load_outline_id, integer qa_status_id
-    -- return: integer related_id
-CREATE OR REPLACE FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer)
-RETURNS integer AS
+-- related_select_by_dataset (select bulk load ids in related table by supplied_datset)
+    -- params: integer supplied_dataset_id
+    -- return: integer[] distinct bulk_load_outline_ids
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_select_by_dataset(integer)
+    RETURNS integer[] AS
 $$
+    SELECT ARRAY(
+        SELECT DISTINCT bulk_load_outline_id
+        FROM buildings_bulk_load.related
+        JOIN buildings_bulk_load.bulk_load_outlines supplied USING (bulk_load_outline_id)
+        WHERE supplied.supplied_dataset_id = $1
+            AND supplied.bulk_load_status_id != 3
+        ORDER BY bulk_load_outline_id DESC
+    );
 
-    INSERT INTO buildings_bulk_load.related (related_group_id, bulk_load_outline_id, building_outline_id, qa_status_id)
-    VALUES ($1, $2, $3, 2)
-    RETURNING related.related_id;
+$$ LANGUAGE sql;
 
-$$
-LANGUAGE sql;
-
-COMMENT ON FUNCTION buildings_bulk_load.related_insert_building_outlines(integer, integer, integer) IS
-'Insert new entry into related table';
+COMMENT ON FUNCTION buildings_bulk_load.related_select_by_dataset(integer) IS
+'Select bulk_load_outline_id in related table';

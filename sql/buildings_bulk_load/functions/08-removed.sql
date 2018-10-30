@@ -2,19 +2,22 @@
 -- buildings_bulk_load.removed
 
 -- Function:
+
 -- building_outlines_removed_select_by_dataset (select building outlines in removed by supplied dataset)
     -- params: integer supplied_dataset
     -- return: integer[] building_outline_ids
+
 -- buildings_removed_select_by_dataset (select buildings in removed by supplied dataset)
     -- params: integer supplied_dataset_id
     -- return: integer[] building_ids
+
 -- removed_delete_existing_outline (delete outline from removed table)
     -- params: integer building_outline_id
     -- return: building_outline_id removed
+
 -- removed_insert_building_outlines (insert new building outline entry into table)
     -- params: integer building_outline_id
     -- return: building_outline_id inserted
-
 
 --------------------------------------------
 
@@ -77,7 +80,7 @@ $$
 $$
 LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer) IS
 'Delete outline from removed table by building_outline_id';
 
 

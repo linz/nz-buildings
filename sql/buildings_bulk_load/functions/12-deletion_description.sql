@@ -2,6 +2,7 @@
 -- buildings_bulk_load.deletion_description
 
 -- Functions:
+
 -- deletion_description_insert (create new record in deletion description)
 	-- params: integer bulk_load_outline_id varchar(250) description
 	-- return: integer bulk_load_outline_id

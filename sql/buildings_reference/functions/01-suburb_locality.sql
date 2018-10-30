@@ -2,19 +2,21 @@
 -- buildings_reference.suburb_locality
 
 -- Functions
+
 -- suburb_locality_intersect_polygon (id of suburb with most overlap)
-    -- param: p_polygon_geometry geometry
-    -- returns: integer suburb_locality_id
+    -- params: p_polygon_geometry geometry
+    -- return: integer suburb_locality_id
+
 -- bulk_load_outlines_update_suburb (replace suburb values with the intersection result)
-    -- param: integer supplied_dataset_id
-    -- returns: count(integer) number of building outlines updated
+    -- params: integer supplied_dataset_id
+    -- return: count(integer) number of building outlines updated
 --------------------------------------------
 
 -- Functions
 
 -- suburb_locality_intersect_polygon (id of suburb with most overlap)
-    -- param: p_polygon_geometry geometry
-    -- returns: integer suburb_locality_id
+    -- params: p_polygon_geometry geometry
+    -- return: integer suburb_locality_id
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_intersect_polygon(
     p_polygon_geometry geometry
 )
@@ -37,8 +39,8 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_intersect_polygon(geomet
 
 
 -- bulk_load_outlines_update_suburb (replace suburb values with the intersection result)
-    -- param: integer supplied_dataset_id
-    -- returns: count(integer) number of building outlines updated
+    -- params: integer supplied_dataset_id
+    -- return: count(integer) number of building outlines updated
 CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_suburb(integer)
 RETURNS integer AS
 $$

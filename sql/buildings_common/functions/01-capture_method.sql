@@ -2,6 +2,7 @@
 -- buildings_common.capture_method
 
 -- Functions:
+
 -- capture_method_insert (insert new entry into capture method table)
   -- params: varchar(250) value
   -- return: integer capture_method_id

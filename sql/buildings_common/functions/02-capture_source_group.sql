@@ -1,6 +1,8 @@
 --------------------------------------------
 -- buildings_common.capture_source_group
 
+-- Functions:
+
 -- capture_source_group_insert (insert new capture source group into table)
   -- params: varchar(80) value, varchar(400) description
   -- return: integer capture_source_group_id

@@ -2,6 +2,7 @@
 -- buildings_bulk_load.transferred
 
 -- Functions:
+
 -- transferred_insert (Create new records in transferred table)
 	-- params: integer bulk_load_outline_id, integer new_building_outline_id
 	-- return: integer count of new outlines in transferred

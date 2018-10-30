@@ -2,6 +2,7 @@
 -- buildings_bulk_load.supplied_outlines
 
 -- Functions:
+
 -- supplied_outlines_insert (Insert into buildings_bulk_load.supplied_outlines)
     -- params: integer supplied_dataset_id, integer external_outline_id, geometry shape
     -- return: integer supplied_outline_id
