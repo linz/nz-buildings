@@ -21,6 +21,9 @@
 -- building_outlines_update_capture_method (update capture method attribute)
     -- params integer building_outline_id, integer capture_method_id
     -- return: integer count number of outlines updated
+-- building_outlines_insert_bulk (Create new added records in building outlines table)
+    -- params: integer building_outline_id, integer bulk_load_outline_id
+    -- return: building_outline_id
 
 --------------------------------------------
 
@@ -175,3 +178,29 @@ $$ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_capture_method(integer, integer) IS
 'Update capture method in building_outlines table';
+
+-- building_outlines_insert_bulk (Create new added records in building outlines table)
+    -- params: integer building_outline_id, integer bulk_load_outline_id
+    -- return: building_outline_id
+CREATE OR REPLACE FUNCTION buildings.building_outlines_insert_bulk(integer, integer)
+    RETURNS integer AS
+$$
+
+    SELECT buildings.building_outlines_insert (
+            $1
+          , supplied.capture_method_id
+          , supplied.capture_source_id
+          , 1
+          , supplied.suburb_locality_id
+          , supplied.town_city_id
+          , supplied.territorial_authority_id
+          , supplied.begin_lifespan
+          , supplied.shape
+          )
+        FROM buildings_bulk_load.bulk_load_outlines supplied
+        WHERE supplied.bulk_load_outline_id = $2
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings.building_outlines_insert_bulk(integer, integer) IS
+'Create new added records in building outlines table';

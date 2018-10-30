@@ -5,7 +5,7 @@
 -- town_city_intersect_polygon (id of the town/city that has the most overlap)
     -- param: p_polygon_geometry geometry
     -- returns: integer town_city_id
--- bulk_load_outliens_update_town_city (Replace the town/city values with the intersection)
+-- bulk_load_outlines_update_town_city (Replace the town/city values with the intersection)
     -- param: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
 --------------------------------------------

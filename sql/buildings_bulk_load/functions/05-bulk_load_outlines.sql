@@ -24,9 +24,6 @@
 -- bulk_load_outlines_remove_small_buildings (change bulk load status of buildings less than 10sqm)
     -- params: integer supplied_dataset_id
     -- return: number of small buildings that have been removed
--- building_outlines_insert_bulk (Create new added records in building outlines table)
-    -- params: integer building_outline_id, integer bulk_load_outline_id
-    -- return: building_outline_id
 -- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
     -- params: integer bulk_load_outline_id, integer capture_method_id
     -- return: integer count of building outlines updated
@@ -218,33 +215,6 @@ $$ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_buildings(integer) IS
 'Update bulk load status in bulk_load_outlines table of outlines less than 10sqm';
-
-
--- building_outlines_insert_bulk (Create new added records in building outlines table)
-    -- params: integer building_outline_id, integer bulk_load_outline_id
-    -- return: building_outline_id
-CREATE OR REPLACE FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer)
-    RETURNS integer AS
-$$
-
-    SELECT buildings.building_outlines_insert (
-            $1
-          , supplied.capture_method_id
-          , supplied.capture_source_id
-          , 1
-          , supplied.suburb_locality_id
-          , supplied.town_city_id
-          , supplied.territorial_authority_id
-          , supplied.begin_lifespan
-          , supplied.shape
-          )
-        FROM buildings_bulk_load.bulk_load_outlines supplied
-        WHERE supplied.bulk_load_outline_id = $2
-
-$$ LANGUAGE sql;
-
-COMMENT ON FUNCTION buildings_bulk_load.building_outlines_insert_bulk(integer, integer) IS
-'Create new added records in building outlines table';
 
 
 -- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)

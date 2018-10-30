@@ -84,7 +84,7 @@ COMMENT ON FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(inte
 -- removed_insert_building_outlines (insert new building outline entry into table)
     -- params: integer building_outline_id
     -- return: building_outline_id inserted
-CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_insert_bulk_load_outlines(integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_insert_building_outlines(integer)
 RETURNS integer AS
 $$
 
@@ -95,5 +95,5 @@ $$
 $$
 LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings_bulk_load.removed_insert_bulk_load_outlines(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.removed_insert_building_outlines(integer) IS
 'Insert new building_outline entry into removed table';

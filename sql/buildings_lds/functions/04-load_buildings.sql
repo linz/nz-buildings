@@ -39,7 +39,7 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
             SELECT buildings.buildings_insert()
             INTO v_new_building_id;
 
-            SELECT buildings_bulk_load.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
+            SELECT buildings.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
 
             PERFORM buildings_bulk_load.transferred_insert(v_bulk_load_outline_id, v_new_building_outline_id);
@@ -57,7 +57,7 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
             SELECT buildings_bulk_load.matched_find_building_id(v_bulk_load_outline_id)
             INTO v_old_building_id;
 
-            SELECT buildings_bulk_load.building_outlines_insert_bulk(v_old_building_id ,v_bulk_load_outline_id)
+            SELECT buildings.building_outlines_insert_bulk(v_old_building_id ,v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
 
             PERFORM buildings_bulk_load.transferred_insert(v_bulk_load_outline_id, v_new_building_outline_id);
@@ -81,7 +81,7 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
             SELECT buildings.buildings_insert()
             INTO v_new_building_id;
 
-            SELECT buildings_bulk_load.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
+            SELECT buildings.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
 
             PERFORM buildings.lifecycle_add_record(v_new_building_id, v_bulk_load_outline_id);
