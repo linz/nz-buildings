@@ -67,9 +67,9 @@ $$
             , p_bulk_load_status_id
             , p_capture_method_id
             , p_capture_source_id
-            , buildings.suburb_locality_intersect_polygon(shape)
-            , buildings.town_city_intersect_polygon(shape)
-            , buildings.territorial_authority_grid_intersect_polygon(shape)
+            , buildings_reference.suburb_locality_intersect_polygon(shape)
+            , buildings_reference.town_city_intersect_polygon(shape)
+            , buildings_reference.territorial_authority_grid_intersect_polygon(shape)
             , now()
             , shape
         FROM buildings_bulk_load.supplied_outlines s
