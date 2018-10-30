@@ -357,8 +357,11 @@ class EditProduction(ProductionChanges):
         if len(self.production_frame.building_layer.selectedFeatures()) > 0:
             self.select_features()
             if self.production_frame.select_changed:
+                self.enable_UI_functions()
                 self.populate_edit_comboboxes()
                 self.select_comboboxes_value()
+            else:
+                self.disable_UI_functions()
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
@@ -374,6 +377,17 @@ class EditProduction(ProductionChanges):
                 sql = 'SELECT buildings.building_outlines_update_shape(%s, %s);'
                 self.production_frame.db.execute_no_commit(
                     sql, (self.production_frame.geoms[key], key))
+
+                result = self.production_frame.db.execute_no_commit(
+                    select.capture_method_ID_by_value,
+                    ('Trace Orthophotography',)
+                )
+                capture_method_id = result.fetchall()[0][0]
+
+                self.production_frame.db.execute_no_commit(
+                    'SELECT buildings.building_outlines_update_capture_method(%s, %s)',
+                    (key, capture_method_id)
+                )
         # if only attributes are changed
         if self.production_frame.select_changed:
             capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
@@ -431,11 +445,25 @@ class EditProduction(ProductionChanges):
         if self.production_frame.geom == result:
             if qgsfId in self.production_frame.geoms.keys():
                 del self.production_frame.geoms[qgsfId]
+            self.production_frame.geom_changed = False
         else:
             self.production_frame.geoms[qgsfId] = self.production_frame.geom
-        self.production_frame.geom_changed = True
+            self.production_frame.geom_changed = True
         self.production_frame.btn_save.setEnabled(1)
         self.production_frame.btn_reset.setEnabled(1)
+        if self.production_frame.select_changed:
+            if self.production_frame.geom_changed:
+                self.production_frame.cmb_capture_method.setCurrentIndex(
+                    self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
+            else:
+                # capture method
+                result = self.production_frame.db._execute(
+                    select.capture_method_value_by_bulk_outlineID, (
+                        self.production_frame.building_outline_id,
+                    ))
+                result = result.fetchall()[0][0]
+                self.production_frame.cmb_capture_method.setCurrentIndex(
+                    self.production_frame.cmb_capture_method.findText(result))
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -451,8 +479,14 @@ class EditProduction(ProductionChanges):
             return
         self.select_features()
         if self.production_frame.select_changed:
+            self.enable_UI_functions()
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
+            if self.production_frame.geom_changed:
+                self.production_frame.cmb_capture_method.setCurrentIndex(
+                    self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
+        else:
+            self.disable_UI_functions()
 
     def select_features(self):
         self.production_frame.ids = [feat.id() for feat in self.production_frame.building_layer.selectedFeatures()]

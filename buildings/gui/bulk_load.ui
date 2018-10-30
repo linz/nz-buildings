@@ -78,8 +78,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>390</width>
-        <height>894</height>
+        <width>377</width>
+        <height>973</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -139,6 +139,12 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>359</width>
+           <height>363</height>
+          </size>
          </property>
          <property name="font">
           <font>
@@ -221,7 +227,7 @@ QGroupBox::title {
           <item row="11" column="0">
            <widget class="QLabel" name="lb_organisation">
             <property name="text">
-             <string>Organisation:</string>
+             <string>Capture Method:</string>
             </property>
            </widget>
           </item>
@@ -232,14 +238,8 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmb_capture_src_grp">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="0" column="1">
+           <widget class="QgsMapLayerComboBox" name="ml_outlines_layer">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -360,7 +360,7 @@ QGroupBox::title {
           <item row="0" column="0">
            <widget class="QLabel" name="lb_outlines">
             <property name="text">
-             <string>Layer:</string>
+             <string>Organisation:</string>
             </property>
            </widget>
           </item>
@@ -384,24 +384,27 @@ QGroupBox::title {
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="cmb_capture_source_area">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="minimumSize">
+         <property name="sizeHint" stdset="0">
           <size>
-           <width>0</width>
-           <height>25</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
-         <property name="maximumSize">
-          <size>
-           <width>400</width>
-           <height>16777215</height>
-          </size>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="l_cs_area_title">
+         <property name="font">
+          <font>
+           <kerning>true</kerning>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>
@@ -432,6 +435,19 @@ QGroupBox::title {
           <string>Compare Outlines</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="grpb_edits">

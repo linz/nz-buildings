@@ -71,13 +71,13 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878202.1,5555291.6)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
                          delay=30)
         QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878202.1,5555298.1)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555298.1)),
                          delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878211.4,5555304.6)),
+                           pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
                            delay=30)
         QTest.qWait(10)
         self.assertTrue(self.production_frame.btn_save.isEnabled())
@@ -123,7 +123,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
@@ -146,19 +147,19 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
                          delay=30)
         QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555298.1)),
                          delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
+                           pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
                            delay=30)
         QTest.qWait(10)
         iface.actionSelect().trigger()
         QTest.qWait(10)
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
                          delay=30)
         QTest.qWait(10)
 
@@ -171,11 +172,12 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_town.isEnabled())
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
-        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
-        self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
+        self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Newtown')
 
     def test_geometries_on_reset(self):
         """Check Geometries reset correctly when 'reset' called"""
@@ -195,13 +197,13 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
                          delay=30)
         QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
+                         pos=canvas_point(QgsPoint(1878202.1, 5555298.1)),
                          delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
+                           pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
                            delay=30)
         QTest.qWait(10)
         self.production_frame.btn_reset.click()
@@ -583,7 +585,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
@@ -634,7 +637,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.production_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- None')
+        self.assertEqual(self.production_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Kelburn')
@@ -682,3 +686,45 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.production_frame.cmb_ta.isEnabled())
         self.assertFalse(self.production_frame.cmb_town.isEnabled())
         self.assertFalse(self.production_frame.cmb_suburb.isEnabled())
+
+    def test_capture_method_on_geometry_changed(self):
+        """Check capture method is 'Trace Orthophotography' after the geometry changes occur. #100"""
+        self.production_frame.rad_edit.click()
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878202.1, 5555291.6)),
+                         delay=30)
+        QTest.mousePress(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878202.1, 5555298.1)),
+                         delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
+                           delay=30)
+        QTest.qWait(10)
+        self.production_frame.change_instance.save_clicked(False)
+
+        sql = """
+              SELECT method.value
+              FROM buildings.building_outlines bo
+              JOIN buildings_common.capture_method method USING (capture_method_id)
+              WHERE bo.building_outline_id = %s
+              """
+        for feat_id in self.production_frame.geoms:
+            result = db._execute(sql, (feat_id, ))
+            capture_method = result.fetchall()[0][0]
+            self.assertEqual(capture_method, 'Trace Orthophotography')
+
+        self.production_frame.db.rollback_open_cursor()

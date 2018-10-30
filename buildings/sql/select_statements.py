@@ -449,18 +449,19 @@ SELECT value,
 FROM buildings_common.capture_source_group;
 """
 
-capture_source_by_external_or_group_id = """
-SELECT * FROM buildings_common.capture_source
-WHERE buildings_common.capture_source.external_source_id = %s
-OR buildings_common.capture_source.capture_source_group_id = %s;
+capture_source_by_group_id = """
+SELECT external_source_id
+FROM buildings_common.capture_source
+WHERE buildings_common.capture_source.capture_source_group_id = %s;
 """
 
-capture_source_by_group_id_external_is_null = """
-SELECT * FROM buildings_common.capture_source
-WHERE buildings_common.capture_source.external_source_id = NULL
-OR buildings_common.capture_source.capture_source_group_id = %s;
+capture_source_area_name_by_supplied_dataset = """
+SELECT csa.area_title
+FROM buildings_bulk_load.bulk_load_outlines blo
+JOIN buildings_common.capture_source cs USING (capture_source_id)
+JOIN buildings_reference.capture_source_area csa ON CAST( csa.external_area_polygon_id as varchar(250) ) = cs.external_source_id
+WHERE supplied_dataset_id = %s;
 """
-
 
 """
 --------------------------------------------------------------------
@@ -556,4 +557,12 @@ SELECT territorial_authority_id, name
 FROM buildings_reference.territorial_authority
 WHERE shape && ST_Expand(%s::Geometry, 1000)
 ORDER BY name;
+"""
+
+# Capture Source Area
+
+capture_source_area_id_and_name = """
+SELECT csa.external_area_polygon_id, csa.area_title
+FROM buildings_reference.capture_source_area csa
+ORDER BY csa.area_title;
 """
