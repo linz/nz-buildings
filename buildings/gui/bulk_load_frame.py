@@ -343,7 +343,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
-        self.grpb_bulk_load.setCheckable(True)
+            self.grpb_bulk_load.setCheckable(True)
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -595,7 +595,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
-        self.grpb_bulk_load.setCheckable(False)
+            self.grpb_bulk_load.setCheckable(False)
 
     @pyqtSlot()
     def exit_clicked(self):
