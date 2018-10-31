@@ -89,27 +89,7 @@ scripts/nz-buildings-load: scripts/nz-buildings-load.in
 # Allow nz-buildings-load to be executed from anywhere
 install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	mkdir -p ${datadir}/sql
-	cp sql/*.sql ${datadir}/sql
-	mkdir -p ${datadir}/sql/buildings_reference
-	cp sql/buildings_reference/*.sql ${datadir}/sql/buildings_reference
-	mkdir -p ${datadir}/sql/buildings_reference/functions
-	cp sql/buildings_reference/functions/*.sql ${datadir}/sql/buildings_reference/functions
-	mkdir -p ${datadir}/sql/buildings_lds
-	cp sql/buildings_lds/*.sql ${datadir}/sql/buildings_lds
-	mkdir -p ${datadir}/sql/buildings_lds/functions
-	cp sql/buildings_lds/functions/*.sql ${datadir}/sql/buildings_lds/functions
-	mkdir -p ${datadir}/sql/buildings
-	cp sql/buildings/*.sql ${datadir}/sql/buildings
-	mkdir -p ${datadir}/sql/buildings/functions
-	cp sql/buildings/functions/*.sql ${datadir}/sql/buildings/functions
-	mkdir -p ${datadir}/sql/buildings_bulk_load
-	cp sql/buildings_bulk_load/*.sql ${datadir}/sql/buildings_bulk_load
-	mkdir -p ${datadir}/sql/buildings_bulk_load/functions
-	cp sql/buildings_bulk_load/functions/*.sql ${datadir}/sql/buildings_bulk_load/functions
-	mkdir -p ${datadir}/sql/buildings_common
-	cp sql/buildings_common/*.sql ${datadir}/sql/buildings_common
-	mkdir -p ${datadir}/sql/buildings_common/functions
-	cp sql/buildings_common/functions/*.sql ${datadir}/sql/buildings_common/functions
+	cp -R sql/* ${datadir}/sql
 	mkdir -p ${datadir}/tests/testdata
 	cp tests/testdata/*.sql ${datadir}/tests/testdata
 	mkdir -p ${bindir}
