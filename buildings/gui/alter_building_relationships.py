@@ -743,7 +743,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_save.setVisible(True)
             return
         if self.cb_autosave.isChecked():
-            if self.comfirm_to_autosave():
+            if self.confirm_to_autosave():
                 self.autosave = True
                 self.btn_save.setVisible(False)
             else:
@@ -754,7 +754,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.autosave = False
             self.btn_save.setVisible(True)
 
-    def comfirm_to_autosave(self):
+    def confirm_to_autosave(self):
         reply = self.msgbox.exec_()
         if reply == QMessageBox.Yes:
             return True
