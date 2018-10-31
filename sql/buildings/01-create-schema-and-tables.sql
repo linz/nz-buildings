@@ -8,7 +8,7 @@
 -- building_outlines
 -- building_name
 -- building_use
--- lifecycle 
+-- lifecycle
 
 ------------------------------------------------------------------------------
 
@@ -42,7 +42,7 @@ COMMENT ON COLUMN buildings.lifecycle_stage.value IS
 
 
 -- Use
--- Lookup table that holds all of the uses for a building. These uses are 
+-- Lookup table that holds all of the uses for a building. These uses are
 -- the same as those used in the Topo50 map series.
 CREATE TABLE IF NOT EXISTS buildings.use (
       use_id serial PRIMARY KEY
@@ -87,7 +87,7 @@ COMMENT ON COLUMN buildings.buildings.end_lifespan IS
 
 
 -- Building Outlines
--- The building_outline table holds a geometry, typically captured 
+-- The building_outline table holds a geometry, typically captured
 -- from an aerial photograph. A new record is created for each
 -- new outline that represents a building.
 CREATE TABLE IF NOT EXISTS buildings.building_outlines (
@@ -240,7 +240,7 @@ COMMENT ON COLUMN buildings.building_use.end_lifespan IS
 -- The lifecycle table stores the relationship between buildings when one
 -- building is split into two buildings or two buildings are merged into one
 -- building. This will generally occur when a building outline was erroneously
--- captured encompassing two buildings, which later becomes clear with 
+-- captured encompassing two buildings, which later becomes clear with
 -- additional aerial imagery.
 CREATE TABLE IF NOT EXISTS buildings.lifecycle (
       lifecycle_id serial PRIMARY KEY

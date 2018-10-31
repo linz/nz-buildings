@@ -5,6 +5,7 @@
 -- buildings_insert (insert new entry into buildings table)
     -- params: None
     -- return: new building_id
+
 -- buildings_update_end_lifespan (update the end lifespan attr of building to now)
     -- params: integer[], building_ids
     -- return: number of outlines updated
