@@ -33,33 +33,10 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="grpb_production">
-     <property name="font">
-      <font>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
+    <widget class="QCheckBox" name="cb_production">
+     <property name="text">
+      <string>Production Outline Layers</string>
      </property>
-     <property name="styleSheet">
-      <string notr="true">QGroupBox {
-    border: 1px solid #D8D4D3;
-    border-radius: 9px;
-    margin-top: 0.5em;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 10px;
-    padding: 0 3px 0 3px;
-}</string>
-     </property>
-     <property name="title">
-      <string>Production Layers</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout"/>
     </widget>
    </item>
    <item>

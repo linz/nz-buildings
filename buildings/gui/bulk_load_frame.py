@@ -61,8 +61,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
-        self.grpb_bulk_load.setCheckable(False)
-        self.grpb_bulk_load.setChecked(True)
+        self.cb_bulk_load.hide()
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -85,7 +84,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
             self.display_current_bl_not_compared()
-            self.grpb_bulk_load.setCheckable(True)
+            self.cb_bulk_load.show()
+            self.cb_bulk_load.setChecked(True)
 
         # if all datasets are processed
         else:
@@ -110,7 +110,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
                 self.display_not_published()
-                self.grpb_bulk_load.setCheckable(True)
+                self.cb_bulk_load.show()
+                self.cb_bulk_load.setChecked(True)
 
             # No current dataset is being worked on
             else:
@@ -149,7 +150,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-        self.grpb_bulk_load.clicked.connect(self.grpb_bulk_load_clicked)
+        self.cb_bulk_load.clicked.connect(self.cb_bulk_load_clicked)
 
     def confirmation_dialog_box(self, button_text):
         return QMessageBox(QMessageBox.Question, button_text.upper(), 'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
@@ -319,7 +320,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
     @pyqtSlot(bool)
-    def grpb_bulk_load_clicked(self, checked):
+    def cb_bulk_load_clicked(self, checked):
         group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
         if checked:
             group.setVisible(Qt.Checked)
@@ -343,7 +344,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
-            self.grpb_bulk_load.setCheckable(True)
+            self.cb_bulk_load.show()
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -595,7 +596,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
-            self.grpb_bulk_load.setCheckable(False)
+            self.cb_bulk_load.hide()
 
     @pyqtSlot()
     def exit_clicked(self):

@@ -133,6 +133,13 @@
         </layout>
        </item>
        <item>
+        <widget class="QCheckBox" name="cb_bulk_load">
+         <property name="text">
+          <string>Bulk Load Outline Layers</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="grpb_bulk_load">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -169,7 +176,7 @@ QGroupBox::title {
           <bool>true</bool>
          </property>
          <property name="checkable">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="1">
