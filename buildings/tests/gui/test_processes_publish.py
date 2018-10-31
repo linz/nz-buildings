@@ -18,7 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QMessageBox
 from qgis.utils import plugins
 
 from buildings.utilities import database as db
@@ -56,6 +57,8 @@ class ProcessPublish(unittest.TestCase):
 
     def test_load_building_outlines(self):
         """Publish loads outlines to buildings schema"""
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
         sql = 'SELECT count(*) FROM buildings.building_outlines;'
         result = db._execute(sql)
@@ -69,6 +72,8 @@ class ProcessPublish(unittest.TestCase):
 
     def test_gui_on_publish_clicked(self):
         """Publish GUI changes"""
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
         self.assertEqual(self.bulk_load_frame.current_dataset, None)
         self.assertFalse(self.bulk_load_frame.btn_publish.isEnabled())
@@ -88,6 +93,9 @@ class ProcessPublish(unittest.TestCase):
         """Check outlines that are deleted during QA the outlines are not added to building_outlines layer"""
         sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE bulk_load_outline_id = 2025 OR bulk_load_outline_id = 2030 OR bulk_load_outline_id = 2026 OR bulk_load_outline_id = 2027 OR bulk_load_outline_id = 2028 OR bulk_load_outline_id = 2029;'
         db._execute(sql)
+
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
         sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1031;'
         result = db._execute(sql)
@@ -103,6 +111,9 @@ class ProcessPublish(unittest.TestCase):
         """Check removed outlines that are tagged as 'not removed' are not deleted from building outlines layer"""
         sql = 'UPDATE buildings_bulk_load.removed SET qa_status_id = 5 WHERE building_outline_id = 1004;'
         db._execute(sql)
+
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
         sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1004;'
         result = db._execute(sql)
