@@ -8,7 +8,9 @@ from qgis.core import QgsFeatureRequest, QgsGeometry, QgsMapLayerRegistry
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import select_statements as select
+from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import buildings_common_select_statements as common_select
+from buildings.sql import buildings_reference_select_statements as reference_select
 
 
 class BulkLoadChanges:
@@ -29,19 +31,19 @@ class BulkLoadChanges:
         """
         # bulk load status
         if self.bulk_load_frame.rad_edit.isChecked():
-            result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
+            result = self.bulk_load_frame.db._execute(bulk_load_select.bulk_load_status_value)
             ls = result.fetchall()
             for item in ls:
                 self.bulk_load_frame.cmb_status.addItem(item[0])
 
         # populate capture method combobox
-        result = self.bulk_load_frame.db._execute(select.capture_method_value)
+        result = self.bulk_load_frame.db._execute(common_select.capture_method_value)
         ls = result.fetchall()
         for item in ls:
             self.bulk_load_frame.cmb_capture_method_2.addItem(item[0])
 
         # populate capture source group
-        result = self.bulk_load_frame.db._execute(select.capture_source_group_value_desc_external)
+        result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
         ls = result.fetchall()
         for item in ls:
             text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
@@ -49,7 +51,7 @@ class BulkLoadChanges:
 
         # populate territorial authority combobox
         result = self.bulk_load_frame.db._execute(
-            select.territorial_authority_intersect_geom,
+            reference_select.territorial_authority_intersect_geom,
             (self.bulk_load_frame.geom,)
         )
         self.bulk_load_frame.ids_ta = []
@@ -59,7 +61,7 @@ class BulkLoadChanges:
 
         # populate suburb combobox
         result = self.bulk_load_frame.db._execute(
-            select.suburb_locality_intersect_geom,
+            reference_select.suburb_locality_intersect_geom,
             (self.bulk_load_frame.geom,)
         )
         self.bulk_load_frame.ids_suburb = []
@@ -70,7 +72,7 @@ class BulkLoadChanges:
 
         # populate town combobox
         result = self.bulk_load_frame.db._execute(
-            select.town_city_intersect_geom,
+            reference_select.town_city_intersect_geometry,
             (self.bulk_load_frame.geom,)
         )
         self.bulk_load_frame.cmb_town.addItem('')
@@ -86,7 +88,7 @@ class BulkLoadChanges:
         if self.bulk_load_frame.rad_edit.isChecked():
             text = self.bulk_load_frame.cmb_status.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.bulk_load_status_id_by_value, (text,))
+                bulk_load_select.bulk_load_status_id_by_value, (text,))
             bulk_load_status_id = result.fetchall()[0][0]
         else:
             bulk_load_status_id = None
@@ -94,7 +96,7 @@ class BulkLoadChanges:
         # capture method id
         text = self.bulk_load_frame.cmb_capture_method_2.currentText()
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value, (text,))
+            common_select.capture_method_id_by_value, (text,))
         capture_method_id = result.fetchall()[0][0]
 
         # capture source
@@ -111,16 +113,16 @@ class BulkLoadChanges:
             return
         text_ls = text.split('- ')
         result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description, (
+            common_select.capture_source_group_by_value_and_description, (
                 text_ls[0], text_ls[1]
             ))
         data = result.fetchall()[0][0]
         if text_ls[2] == 'None':
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+                common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
         else:
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
                     data, text_ls[2]
                 ))
         capture_source_id = result.fetchall()[0][0]
@@ -236,7 +238,7 @@ class AddBulkLoad(BulkLoadChanges):
 
         # insert into added table
         result = self.bulk_load_frame.db._execute(
-            select.dataset_processed_date_by_datasetID, (
+            bulk_load_select.supplied_dataset_processed_date_by_dataset_id, (
                 self.bulk_load_frame.current_dataset, )
         )
         processed_date = result.fetchall()[0][0]
@@ -405,7 +407,7 @@ class EditBulkLoad(BulkLoadChanges):
                     sql, (self.bulk_load_frame.geoms[key], key))
 
                 result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_method_ID_by_value,
+                    common_select.capture_method_id_by_value,
                     ('Trace Orthophotography',)
                 )
                 capture_method_id = result.fetchall()[0][0]
@@ -506,7 +508,7 @@ class EditBulkLoad(BulkLoadChanges):
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         result = self.bulk_load_frame.db._execute(
-            select.bulk_load_outline_shape_by_id, (qgsfId,))
+            bulk_load_select.bulk_load_outline_shape_by_id, (qgsfId,))
         result = result.fetchall()[0][0]
         if self.bulk_load_frame.geom == result:
             if qgsfId in self.bulk_load_frame.geoms.keys():
@@ -527,7 +529,7 @@ class EditBulkLoad(BulkLoadChanges):
             else:
                 # capture method
                 result = self.bulk_load_frame.db._execute(
-                    select.capture_method_value_by_bulk_outlineID, (
+                    common_select.capture_method_value_by_bulk_outline_id, (
                         self.bulk_load_frame.bulk_load_outline_id,
                     ))
                 result = result.fetchall()[0][0]
@@ -619,7 +621,7 @@ class EditBulkLoad(BulkLoadChanges):
         """
         # bulk load status
         result = self.bulk_load_frame.db._execute(
-            select.bulk_load_status_value_by_outlineID, (
+            bulk_load_select.bulk_load_status_value_by_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -628,7 +630,7 @@ class EditBulkLoad(BulkLoadChanges):
 
         # capture method
         result = self.bulk_load_frame.db._execute(
-            select.capture_method_value_by_bulk_outlineID, (
+            common_select.capture_method_value_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -637,10 +639,10 @@ class EditBulkLoad(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            select.capture_source_group_value_desc_external)
+            common_select.capture_source_group_value_description_external)
         ls = result.fetchall()
         result = self.bulk_load_frame.db._execute(
-            select.capture_source_group_value_desc_external_by_bulk_outlineID, (
+            common_select.capture_source_group_value_description_external_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0]
@@ -653,7 +655,7 @@ class EditBulkLoad(BulkLoadChanges):
 
         # suburb
         result = self.bulk_load_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_bulk_outlineID, (
+            reference_select.suburb_locality_suburb_4th_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -662,7 +664,7 @@ class EditBulkLoad(BulkLoadChanges):
 
         # town city
         result = self.bulk_load_frame.db._execute(
-            select.town_city_name_by_bulk_outlineID, (
+            reference_select.town_city_name_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()
@@ -674,7 +676,7 @@ class EditBulkLoad(BulkLoadChanges):
 
         # territorial Authority
         result = self.bulk_load_frame.db._execute(
-            select.territorial_authority_name_by_bulk_outline_id, (
+            reference_select.territorial_authority_name_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -686,15 +688,15 @@ class EditBulkLoad(BulkLoadChanges):
             called to check can mark outline for deletion
         """
         added_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_added_outlines, (
+            bulk_load_select.added_outlines_by_dataset_id, (
                 self.bulk_load_frame.current_dataset,))
         added_outlines = added_outlines.fetchall()
         matched_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_matched_outlines, (
+            bulk_load_select.matched_outlines_by_dataset_id, (
                 self.bulk_load_frame.current_dataset,))
         matched_outlines = matched_outlines.fetchall()
         related_outlines = self.bulk_load_frame.db.execute_no_commit(
-            select.current_related_outlines, (
+            bulk_load_select.related_outlines_by_dataset_id, (
                 self.bulk_load_frame.current_dataset,))
         related_outlines = related_outlines.fetchall()
         if len(self.bulk_load_frame.ids) > 0:

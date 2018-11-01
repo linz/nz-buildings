@@ -12,7 +12,8 @@ from qgis.utils import iface
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import select_statements as select
+from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import buildings_common_select_statements as common_select
 from buildings.utilities import database as db, layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -59,7 +60,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
 
         # Find current supplied dataset
-        result = self.db._execute(select.dataset_count_processed_date_is_null)
+        result = self.db._execute(bulk_load_select.supplied_dataset_count_processed_date_is_null)
         result = result.fetchall()[0][0]
         # if there is an unprocessed dataset
         if result > 1:
@@ -74,7 +75,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.display_dataset_error()
 
         elif result == 1:
-            p_result = self.db._execute(select.dataset_processed_date_is_null)
+            p_result = self.db._execute(bulk_load_select.supplied_dataset_processed_date_is_null)
             self.current_dataset = p_result.fetchall()[0][0]
             self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
@@ -82,7 +83,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         # if all datasets are processed
         else:
-            result2 = self.db._execute(select.dataset_count_transfer_date_is_null)
+            result2 = self.db._execute(bulk_load_select.supplied_dataset_count_transfer_date_is_null)
             result2 = result2.fetchall()[0][0]
 
             # if there is a processed but not transferred dataset
@@ -98,7 +99,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.display_dataset_error()
 
             elif result2 == 1:
-                t_result = self.db._execute(select.dataset_transfer_date_is_null)
+                t_result = self.db._execute(bulk_load_select.supplied_dataset_transfer_date_is_null)
                 self.current_dataset = t_result.fetchall()[0][0]
                 self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
@@ -221,7 +222,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_reset.setDisabled(1)
         self.btn_edit_cancel.setDisabled(1)
 
-        sql = select.capture_source_area_name_by_supplied_dataset
+        sql = common_select.capture_source_area_name_by_supplied_dataset
         area_id = self.db._execute(sql, (self.current_dataset,))
         area_id = area_id.fetchall()
         if area_id is not None:
@@ -244,7 +245,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.display_data_exists()
         self.btn_compare_outlines.setEnabled(1)
-        sql = select.capture_source_area_name_by_supplied_dataset
+        sql = common_select.capture_source_area_name_by_supplied_dataset
         area_id = self.db._execute(sql, (self.current_dataset,))
         if area_id is not None:
             self.area_id = area_id.fetchall()
@@ -306,7 +307,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         bulk_load.bulk_load(self, commit_status)
         # find if adding was sucessful
-        result = self.db._execute(select.dataset_count_both_dates_are_null)
+        result = self.db._execute(bulk_load_select.supplied_dataset_count_both_dates_are_null)
         result = result.fetchall()[0][0]
         # if bulk loading completed without errors
         if result == 1:
@@ -504,7 +505,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             Box automatic completion
         """
 
-        reasons = self.db._execute(select.reason_description_value)
+        reasons = self.db._execute(bulk_load_select.deletion_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
         self.completer = QCompleter(reason_list)

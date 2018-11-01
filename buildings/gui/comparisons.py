@@ -2,7 +2,8 @@
 
 from PyQt4.QtCore import pyqtSlot
 
-from buildings.sql import select_statements as select
+from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import buildings_select_statements as buildings_select
 
 
 @pyqtSlot(bool)
@@ -14,7 +15,7 @@ def compare_outlines(self, commit_status):
     result = self.db.execute_no_commit(sql, (self.area_id,))
     hull = result.fetchall()[0][0]
 
-    result = self.db.execute_no_commit(select.building_outlines, (hull,))
+    result = self.db.execute_no_commit(buildings_select.building_outlines, (hull,))
     results = result.fetchall()
 
     if len(results) == 0:
@@ -36,12 +37,12 @@ def compare_outlines(self, commit_status):
         # intersecting outlines exist
         for ls in results:
             life_span_check = self.db.execute_no_commit(
-                select.building_outlines_end_lifespan_by_id, (ls[0],))
+                buildings_select.building_outlines_end_lifespan_by_id, (ls[0],))
             life_span_check = life_span_check.fetchall()[0][0]
             if life_span_check is None:
                 # If the outline is still 'active'
                 result = self.db.execute_no_commit(
-                    select.existing_subset_extracts_by_building_outlineID, (ls[0],))
+                    bulk_load_select.existing_subset_extracts_by_building_outline_id, (ls[0],))
                 result = result.fetchall()
                 if len(result) == 0:
                     # insert new outline into existing subset extracts
