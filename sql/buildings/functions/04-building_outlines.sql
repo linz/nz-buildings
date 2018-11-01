@@ -23,7 +23,7 @@
     -- return: integer count number of outlines updated
 
 -- building_outlines_update_end_lifespan (update the end lifespan attr of an outline)
-    -- params: interger[]
+    -- params: integer[]
     -- return: count of outlines updated
 
 -- building outlines_update_shape (update the geometry of specified outline)
@@ -172,7 +172,7 @@ COMMENT ON FUNCTION buildings.building_outlines_update_capture_method(integer, i
 
 
 -- building_outlines_update_end_lifespan (update the end lifespan attr of an outline)
-    -- params: interger[]
+    -- params: integer[]
     -- return: count of outlines updated
 CREATE OR REPLACE FUNCTION buildings.building_outlines_update_end_lifespan(integer[])
     RETURNS integer AS

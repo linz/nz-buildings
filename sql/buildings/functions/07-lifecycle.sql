@@ -1,5 +1,5 @@
 --------------------------------------------
--- buildings.lifecyle
+-- buildings.lifecycle
 
 -- Functions:
 -- lifecycle_add_record (add new record to lifecycle table)

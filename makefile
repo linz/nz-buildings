@@ -23,6 +23,7 @@ SQLSCRIPTS = \
   sql/buildings/02-default-values.sql \
   sql/buildings_bulk_load/02-default-values.sql \
   sql/buildings_lds/02-default-values.sql \
+  sql/buildings_bulk_load/03-alter_relationships_create_view.sql \
   sql/01-buildings_version.sql \
   sql/buildings_reference/functions/01-suburb_locality.sql \
   sql/buildings_reference/functions/02-town_city.sql \
@@ -50,8 +51,7 @@ SQLSCRIPTS = \
   sql/buildings_bulk_load/functions/11-transferred.sql \
   sql/buildings_bulk_load/functions/12-deletion_description.sql \
   sql/buildings_bulk_load/functions/13-supplied_outlines.sql \
-  sql/buildings_bulk_load/functions/14-alter_relationships_create_view.sql \
-  sql/buildings_bulk_load/functions/15-compare_buildings.sql \
+  sql/buildings_bulk_load/functions/14-compare_buildings.sql \
   sql/buildings_lds/functions/01-nz_building_outlines.sql \
   sql/buildings_lds/functions/02-nz_building_outlines_full_history.sql \
   sql/buildings_lds/functions/03-nz_building_outlines_lifecycle.sql \

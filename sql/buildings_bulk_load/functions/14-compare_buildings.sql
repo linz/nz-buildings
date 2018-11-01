@@ -1,6 +1,6 @@
 ------------------------------------------------------------
 -- Script to compare all new (most recent bulk load) outlines to the
--- existing outlines that intersect with the new outlines's capture source
+-- existing outlines that intersect with the new outlines' capture source
 -- area. The outlines are sorted into four categories:
 
 -- added: new outlines not intersecting with any existing

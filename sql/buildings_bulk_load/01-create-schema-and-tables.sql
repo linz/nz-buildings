@@ -14,7 +14,7 @@
 -- related_groups
 -- related
 -- matched
--- tranferred
+-- transferred
 -- deletion_description
 
 ------------------------------------------------------------------------------
@@ -401,7 +401,7 @@ COMMENT ON COLUMN buildings_bulk_load.matched.qa_status_id IS
 
 -- Transferred
 -- This table holds the building_outline_id that was created for each
--- bulk loaded building outline tranferred to production.
+-- bulk loaded building outline transferred to production.
 CREATE TABLE IF NOT EXISTS buildings_bulk_load.transferred (
       bulk_load_outline_id integer PRIMARY KEY REFERENCES buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id)
     , new_building_outline_id integer NOT NULL REFERENCES buildings.building_outlines (building_outline_id)
@@ -413,7 +413,7 @@ CREATE INDEX idx_transferred_new_building_outline_id
 
 COMMENT ON TABLE buildings_bulk_load.transferred IS
 'This table holds the building_outline_id that was created for each '
-'bulk loaded building outline tranferred to production.';
+'bulk loaded building outline transferred to production.';
 
 COMMENT ON COLUMN buildings_bulk_load.transferred.bulk_load_outline_id IS
 'Unique identifier for the transferred table and foreign key to the '
