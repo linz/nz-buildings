@@ -4,6 +4,7 @@ from PyQt4.QtCore import pyqtSlot
 
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_select_statements as buildings_select
+from buildings.sql import buildings_reference_select_statements as reference_select
 
 
 @pyqtSlot(bool)
@@ -11,7 +12,7 @@ def compare_outlines(self, commit_status):
     """Method called to compare outlines of current unprocessed dataset."""
 
     self.db.open_cursor()
-    sql = 'SELECT shape FROM buildings_reference.capture_source_area WHERE area_title = %s;'
+    sql = reference_select.capture_source_area_shape_by_title
     result = self.db.execute_no_commit(sql, (self.area_id,))
     hull = result.fetchall()[0][0]
 
@@ -21,12 +22,7 @@ def compare_outlines(self, commit_status):
     if len(results) == 0:
         # No intersecting outlines
         # add all incoming outlines to added table
-        sql = '''
-            INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
-            SELECT blo.bulk_load_outline_id, 1
-            FROM buildings_bulk_load.bulk_load_outlines blo
-            WHERE blo.bulk_load_status_id !=3
-              AND blo.supplied_dataset_id = %s;'''
+        sql = 'SELECT buildings_bulk_load.added_insert_all_bulk_loaded_outlines(%s);'
         self.db.execute_no_commit(sql, (self.current_dataset,))
 
         # update processed date

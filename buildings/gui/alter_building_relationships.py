@@ -953,10 +953,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_new_added_outlines(self):
         # added
-        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
+        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s, %s);'
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
-            self.db.execute_no_commit(sql_insert_added, (id_bulk,))
+            self.db.execute_no_commit(sql_insert_added, (id_bulk, 2))
 
     def insert_new_removed_outlines(self):
         # removed
@@ -1096,28 +1096,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
-        sql_update_related = """UPDATE buildings_bulk_load.related
-                                SET qa_status_id = %s
-                                WHERE related_group_id in(
-                                    SELECT related_group_id
-                                    FROM buildings_bulk_load.related
-                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s
-                                )
-                                """
+        sql_update_related = 'SELECT buildings_bulk_load.related_update_qa_status_id(%s, %s, %s);'
         self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_matched(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in matched table"""
-        sql_update_matched = """UPDATE buildings_bulk_load.matched
-                                SET qa_status_id = %s
-                                WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+        sql_update_matched = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s));'
         self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_removed(self, id_existing, qa_status_id):
         """Updates qa_status_id in removed table"""
-        sql_update_removed = """UPDATE buildings_bulk_load.removed
-                                SET qa_status_id = %s
-                                WHERE building_outline_id = %s;"""
+        sql_update_removed = 'SELECT buildings_bulk_load.removed_update_qa_status_id(%s, %s);'
         self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
 
     def select_row_in_tbl_matched(self, id_existing, id_bulk):

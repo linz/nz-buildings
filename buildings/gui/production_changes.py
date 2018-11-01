@@ -9,6 +9,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import buildings_common_select_statements as common_select
 from buildings.sql import buildings_select_statements as buildings_select
 from buildings.sql import buildings_reference_select_statements as reference_select
+from buildings.sql import general_select_statements as general_select
 
 
 class ProductionChanges:
@@ -269,7 +270,7 @@ class AddProduction(ProductionChanges):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
@@ -438,7 +439,7 @@ class EditProduction(ProductionChanges):
         """
         # get new feature geom and convert to correct format
         wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         result = self.production_frame.db._execute(
@@ -497,7 +498,7 @@ class EditProduction(ProductionChanges):
         building_geom = building_feat.geometry()
         # convert to correct format
         wkt = building_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
 

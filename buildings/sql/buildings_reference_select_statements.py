@@ -101,3 +101,9 @@ SELECT csa.external_area_polygon_id, csa.area_title
 FROM buildings_reference.capture_source_area csa
 ORDER BY csa.area_title;
 """
+
+capture_source_area_shape_by_title = """
+SELECT shape
+FROM buildings_reference.capture_source_area
+WHERE area_title = %s;
+"""

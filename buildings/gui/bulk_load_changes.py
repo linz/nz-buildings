@@ -11,6 +11,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_common_select_statements as common_select
 from buildings.sql import buildings_reference_select_statements as reference_select
+from buildings.sql import general_select_statements as general_select
 
 
 class BulkLoadChanges:
@@ -244,9 +245,9 @@ class AddBulkLoad(BulkLoadChanges):
         processed_date = result.fetchall()[0][0]
 
         if processed_date:
-            sql = 'INSERT INTO buildings_bulk_load.added(bulk_load_outline_id, qa_status_id) VALUES(%s, 1);'
+            sql = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s, %s);'
             self.bulk_load_frame.db.execute_no_commit(
-                sql, (self.bulk_load_frame.outline_id,))
+                sql, (self.bulk_load_frame.outline_id, 1))
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
@@ -295,7 +296,7 @@ class AddBulkLoad(BulkLoadChanges):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
@@ -504,7 +505,7 @@ class EditBulkLoad(BulkLoadChanges):
         """
         # get new feature geom and convert to correct format
         wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         result = self.bulk_load_frame.db._execute(
@@ -566,7 +567,7 @@ class EditBulkLoad(BulkLoadChanges):
         bulk_load_geom = bulk_load_feat.geometry()
         # convert to correct format
         wkt = bulk_load_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
 
@@ -596,7 +597,7 @@ class EditBulkLoad(BulkLoadChanges):
         elif len(feats) == 1:
             deleted = False
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
-                sql = 'SELECT bulk_load_status_id from buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
+                sql = bulk_load_select.bulk_load_status_id_by_outline_id
                 result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:

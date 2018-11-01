@@ -122,6 +122,12 @@ WHERE blo.bulk_load_status_id = bls.bulk_load_status_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+bulk_load_status_id_by_outline_id = """
+SELECT bulk_load_status_id
+FROM buildings_bulk_load.bulk_load_outlines
+WHERE bulk_load_outline_id = %s;
+"""
+
 bulk_load_status_id_by_value = """
 SELECT bulk_load_status_id
 FROM buildings_bulk_load.bulk_load_status bls
