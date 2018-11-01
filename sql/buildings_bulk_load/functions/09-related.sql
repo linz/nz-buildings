@@ -27,6 +27,10 @@
     -- params: integer supplied_dataset_id
     -- return: integer[] distinct bulk_load_outline_ids
 
+-- related_update_qa_status_id (update qa status of related outlines)
+    -- params: integer qa_status_id, integer existing_id, integer bulk_load_outline_id
+    -- return: count of outlines updated
+
 --------------------------------------------
 
 -- Functions
@@ -144,3 +148,30 @@ $$ LANGUAGE sql;
 
 COMMENT ON FUNCTION buildings_bulk_load.related_select_by_dataset(integer) IS
 'Select bulk_load_outline_id in related table';
+
+
+-- related_update_qa_status_id (update qa status of related outlines)
+    -- params: integer qa_status_id, integer existing_id, integer bulk_load_outline_id
+    -- return: count of outlines updated
+CREATE OR REPLACE FUNCTION buildings_bulk_load.related_update_qa_status_id(integer, integer, integer)
+    RETURNS integer AS
+
+$$
+    WITH related_update AS (
+        UPDATE buildings_bulk_load.related
+        SET qa_status_id = $1
+        WHERE related_group_id in(
+            SELECT related_group_id
+            FROM buildings_bulk_load.related
+            WHERE building_outline_id = $2 AND bulk_load_outline_id = $3
+        )
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM related_update;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.related_update_qa_status_id(integer, integer, integer) IS
+'Update qa status of related outlines'
+
+

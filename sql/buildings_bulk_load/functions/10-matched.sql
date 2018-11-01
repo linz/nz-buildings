@@ -23,6 +23,10 @@
     -- params: integer supplied_dataset_id
     -- return: integer[] bulk_load_outline_ids
 
+-- matched_update_qa_status_id (update qa status of matched outlines)
+    -- params: integer qa_status, integer bulk_load_outline_id, integer building_outline_id
+    -- return: count of outlines updated
+
 --------------------------------------------
 
 -- Functions
@@ -115,3 +119,23 @@ $$ LANGUAGE sql;
 
 COMMENT ON FUNCTION buildings_bulk_load.matched_select_by_dataset(integer) IS
 'Select bulk_load_outline_id in matched table';
+
+
+-- matched_update_qa_status_id (update qa status of matched outlines)
+    -- params: integer qa_status, integer bulk_load_outline_id, integer building_outline_id
+    -- return: count of outlines updated
+CREATE OR REPLACE FUNCTION buildings_bulk_load.matched_update_qa_status_id(integer, integer, integer)
+    RETURNS integer AS
+$$
+    WITH matched_update AS (
+        UPDATE buildings_bulk_load.matched
+        SET qa_status_id = $1
+        WHERE building_outline_id = $2 AND bulk_load_outline_id = $3
+    RETURNING *
+    )
+    SELECT count(*)::integer FROM matched_update;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.matched_update_qa_status_id(integer, integer, integer) IS
+'Update qa status of matched outlines'

@@ -100,3 +100,23 @@ LANGUAGE sql;
 
 COMMENT ON FUNCTION buildings_bulk_load.removed_insert_building_outlines(integer) IS
 'Insert new building_outline entry into removed table';
+
+
+-- removed_update_qa_status_id (update qa status of removed outlines)
+    -- params: integer qa_status, integer building_outline_id
+    -- return: count of outlines updated
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_update_qa_status_id(integer, integer)
+    RETURNS integer AS
+$$
+    WITH removed_update AS (
+        UPDATE buildings_bulk_load.removed
+        SET qa_status_id = $1
+        WHERE building_outline_id = $2
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM removed_update;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.removed_update_qa_status_id(integer, integer) IS
+'Update qa status of removed outlines'

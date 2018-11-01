@@ -8,7 +8,7 @@
     -- return: bulk_load_outline_id that was deleted
 
 -- added_insert_bulk_load_outlines (insert bulk load outline into added table)
-    -- params: integer bulk_load_outline_id
+    -- params: integer bulk_load_outline_id, integer qa_status_id
     -- return: bulk_load_outline_id added
 
 -- added_select_by_dataset (select from added by dataset)
@@ -37,20 +37,42 @@ COMMENT ON FUNCTION buildings_bulk_load.added_delete_bulk_load_outlines(integer)
 'Delete outline from added table by bulk_load_outline_id';
 
 
+-- added_insert_all_bulk_loaded_outlines (Insert all new outlines to into added table)
+    -- params: integer supplied_dataset_id
+    -- return: number of outlines added to added table
+CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert_all_bulk_loaded_outlines(integer)
+RETURNS integer AS
+$$
+    WITH add_bulk AS (
+        INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
+        SELECT blo.bulk_load_outline_id, 1
+        FROM buildings_bulk_load.bulk_load_outlines blo
+        WHERE blo.bulk_load_status_id !=3
+        AND blo.supplied_dataset_id = $1
+        RETURNING *
+        )
+    SELECT count(*)::integer FROM add_bulk;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.added_insert_all_bulk_loaded_outlines(integer) IS
+'Insert all new outlines to into added table';
+
+
 -- added_insert_bulk_load_outlines (insert bulk load outline into added table)
-    -- params: integer bulk_load_outline_id
+    -- params: integer bulk_load_outline_id, integer qa_status_id
     -- return: bulk_load_outline_id added
-CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer, integer)
 RETURNS integer AS
 $$
     INSERT INTO buildings_bulk_load.added (bulk_load_outline_id, qa_status_id)
-    VALUES ($1, 2)
+    VALUES ($1, $2)
     RETURNING added.bulk_load_outline_id;
 
 $$
 LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.added_insert_bulk_load_outlines(integer, integer) IS
 'Insert bulk load outline into added table';
 
 
