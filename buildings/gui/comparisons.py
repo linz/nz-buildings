@@ -33,7 +33,7 @@ def compare_outlines(self, commit_status):
         # intersecting outlines exist
         for ls in results:
             life_span_check = self.db.execute_no_commit(
-                buildings_select.building_outlines_end_lifespan_by_id, (ls[0],))
+                buildings_select.building_outlines_end_lifespan_by_building_outline_id, (ls[0],))
             life_span_check = life_span_check.fetchall()[0][0]
             if life_span_check is None:
                 # If the outline is still 'active'

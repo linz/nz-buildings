@@ -3,8 +3,8 @@
 General Select Statements not applicable
 to any particular schema
 
+- convert_geometry (geometry)
 ----------------------------------------------
-
 """
 
 convert_geometry = """

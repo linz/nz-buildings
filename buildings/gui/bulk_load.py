@@ -5,6 +5,7 @@ from PyQt4.QtCore import pyqtSlot
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_common_select_statements as common_select
+from buildings.sql import general_select_statements as general_select
 
 
 def populate_bulk_comboboxes(self):
@@ -230,7 +231,7 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
     for outline in layer.getFeatures():
         # outline geometry
         wkt = outline.geometry().exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.db.execute_no_commit(sql, (wkt, ))
         geom = result.fetchall()[0][0]
 
@@ -306,7 +307,7 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method,
     self.db.execute_no_commit(sql, (dataset_id, ))
     # insert into deletion_description
     results = self.db.execute_no_commit(
-        bulk_load_select.bulk_load_removed_outlines_id_by_dataset_id, (dataset_id,))
+        bulk_load_select.bulk_load_removed_outline_ids_by_dataset_id, (dataset_id,))
     bulk_loaded_ids = results.fetchall()
     for bulk_loaded_id in bulk_loaded_ids:
         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'

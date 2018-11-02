@@ -160,7 +160,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # check if organisation in buildings_bulk_load.organisation table
         result = self.db._execute(
-            bulk_load_select.organisation_id_by_value, (organisation,))
+            bulk_load_select.organisation_by_value, (organisation,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:

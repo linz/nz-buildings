@@ -768,24 +768,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog.show()
 
     def find_added_outlines(self, id_bulk):
-        result = self.db._execute(bulk_load_select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.added_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         return result.fetchone()
 
     def find_removed_outlines(self, id_existing):
-        result = self.db._execute(bulk_load_select.removed_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.removed_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         return result.fetchone()
 
     def find_matched_existing_outlines(self, id_bulk):
-        result = self.db._execute(bulk_load_select.matched_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.matched_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         return result.fetchone()
 
     def find_matched_bulk_load_outlines(self, id_existing):
-        result = self.db._execute(bulk_load_select.matched_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.matched_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         return result.fetchone()
 
     def find_related_existing_outlines(self, id_bulk):
         ids_existing, ids_bulk = [], []
-        result = self.db._execute(bulk_load_select.related_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.related_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
@@ -793,7 +793,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def find_related_bulk_load_outlines(self, id_existing):
         ids_existing, ids_bulk = [], []
-        result = self.db._execute(bulk_load_select.related_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.related_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
