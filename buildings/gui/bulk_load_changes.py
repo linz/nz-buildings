@@ -28,62 +28,64 @@ class BulkLoadChanges:
             Populate editing combox fields
         """
         # bulk load status
-        if self.bulk_load_frame.rad_edit.isChecked():
+        if self.bulk_load_frame.layout_status.isVisible():
             result = self.bulk_load_frame.db._execute(select.bulk_load_status_value)
             ls = result.fetchall()
             for item in ls:
                 self.bulk_load_frame.cmb_status.addItem(item[0])
 
-        # populate capture method combobox
-        result = self.bulk_load_frame.db._execute(select.capture_method_value)
-        ls = result.fetchall()
-        for item in ls:
-            self.bulk_load_frame.cmb_capture_method_2.addItem(item[0])
+        if self.bulk_load_frame.layout_capture_method.isVisible():
+            # populate capture method combobox
+            result = self.bulk_load_frame.db._execute(select.capture_method_value)
+            ls = result.fetchall()
+            for item in ls:
+                self.bulk_load_frame.cmb_capture_method_2.addItem(item[0])
 
-        # populate capture source group
-        result = self.bulk_load_frame.db._execute(select.capture_source_group_value_desc_external)
-        ls = result.fetchall()
-        for item in ls:
-            text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
-            self.bulk_load_frame.cmb_capture_source.addItem(text)
+        if self.bulk_load_frame.layout_general_info.isVisible():
+            # populate capture source group
+            result = self.bulk_load_frame.db._execute(select.capture_source_group_value_desc_external)
+            ls = result.fetchall()
+            for item in ls:
+                text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+                self.bulk_load_frame.cmb_capture_source.addItem(text)
 
-        # populate territorial authority combobox
-        result = self.bulk_load_frame.db._execute(
-            select.territorial_authority_intersect_geom,
-            (self.bulk_load_frame.geom,)
-        )
-        self.bulk_load_frame.ids_ta = []
-        for (id_ta, name) in result.fetchall():
-            self.bulk_load_frame.cmb_ta.addItem(name)
-            self.bulk_load_frame.ids_ta.append(id_ta)
+            # populate territorial authority combobox
+            result = self.bulk_load_frame.db._execute(
+                select.territorial_authority_intersect_geom,
+                (self.bulk_load_frame.geom,)
+            )
+            self.bulk_load_frame.ids_ta = []
+            for (id_ta, name) in result.fetchall():
+                self.bulk_load_frame.cmb_ta.addItem(name)
+                self.bulk_load_frame.ids_ta.append(id_ta)
 
-        # populate suburb combobox
-        result = self.bulk_load_frame.db._execute(
-            select.suburb_locality_intersect_geom,
-            (self.bulk_load_frame.geom,)
-        )
-        self.bulk_load_frame.ids_suburb = []
-        for (id_suburb, name) in result.fetchall():
-            if name is not None:
-                self.bulk_load_frame.cmb_suburb.addItem(name)
-                self.bulk_load_frame.ids_suburb.append(id_suburb)
+            # populate suburb combobox
+            result = self.bulk_load_frame.db._execute(
+                select.suburb_locality_intersect_geom,
+                (self.bulk_load_frame.geom,)
+            )
+            self.bulk_load_frame.ids_suburb = []
+            for (id_suburb, name) in result.fetchall():
+                if name is not None:
+                    self.bulk_load_frame.cmb_suburb.addItem(name)
+                    self.bulk_load_frame.ids_suburb.append(id_suburb)
 
-        # populate town combobox
-        result = self.bulk_load_frame.db._execute(
-            select.town_city_intersect_geom,
-            (self.bulk_load_frame.geom,)
-        )
-        self.bulk_load_frame.cmb_town.addItem('')
-        self.bulk_load_frame.ids_town = [None]
-        for (id_town, name) in result.fetchall():
-            if name is not None:
-                self.bulk_load_frame.cmb_town.addItem(name)
-                self.bulk_load_frame.ids_town.append(id_town)
+            # populate town combobox
+            result = self.bulk_load_frame.db._execute(
+                select.town_city_intersect_geom,
+                (self.bulk_load_frame.geom,)
+            )
+            self.bulk_load_frame.cmb_town.addItem('')
+            self.bulk_load_frame.ids_town = [None]
+            for (id_town, name) in result.fetchall():
+                if name is not None:
+                    self.bulk_load_frame.cmb_town.addItem(name)
+                    self.bulk_load_frame.ids_town.append(id_town)
 
     def get_comboboxes_values(self):
 
         # bulk load status
-        if self.bulk_load_frame.rad_edit.isChecked():
+        if self.bulk_load_frame.layout_status.isVisible():
             text = self.bulk_load_frame.cmb_status.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
                 select.bulk_load_status_id_by_value, (text,))
@@ -91,52 +93,47 @@ class BulkLoadChanges:
         else:
             bulk_load_status_id = None
 
-        # capture method id
-        text = self.bulk_load_frame.cmb_capture_method_2.currentText()
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_method_ID_by_value, (text,))
-        capture_method_id = result.fetchall()[0][0]
-
-        # capture source
-        text = self.bulk_load_frame.cmb_capture_source.currentText()
-        # if there are no capture source entries
-        if text == '':
-            self.bulk_load_frame.error_dialog = ErrorDialog()
-            self.bulk_load_frame.error_dialog.fill_report(
-                '\n ---------------- NO CAPTURE SOURCE ---------'
-                '------- \n\nThere are no capture source entries'
-            )
-            self.bulk_load_frame.error_dialog.show()
-            self.disable_UI_functions()
-            return
-        text_ls = text.split('- ')
-        result = self.bulk_load_frame.db.execute_no_commit(
-            select.capture_srcgrp_by_value_and_description, (
-                text_ls[0], text_ls[1]
-            ))
-        data = result.fetchall()[0][0]
-        if text_ls[2] == 'None':
+        if self.bulk_load_frame.layout_capture_method.isVisible():
+            # capture method id
+            text = self.bulk_load_frame.cmb_capture_method_2.currentText()
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+                select.capture_method_ID_by_value, (text,))
+            capture_method_id = result.fetchall()[0][0]
         else:
+            capture_method_id = None
+
+        if self.bulk_load_frame.layout_general_info.isVisible():
+            # capture source
+            text = self.bulk_load_frame.cmb_capture_source.currentText()
+            text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
-                select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
-                    data, text_ls[2]
+                select.capture_srcgrp_by_value_and_description, (
+                    text_ls[0], text_ls[1]
                 ))
-        capture_source_id = result.fetchall()[0][0]
+            data = result.fetchall()[0][0]
+            if text_ls[2] == 'None':
+                result = self.bulk_load_frame.db.execute_no_commit(
+                    select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+            else:
+                result = self.bulk_load_frame.db.execute_no_commit(
+                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                        data, text_ls[2]
+                    ))
+            capture_source_id = result.fetchall()[0][0]
 
-        # suburb
-        index = self.bulk_load_frame.cmb_suburb.currentIndex()
-        suburb = self.bulk_load_frame.ids_suburb[index]
+            # suburb
+            index = self.bulk_load_frame.cmb_suburb.currentIndex()
+            suburb = self.bulk_load_frame.ids_suburb[index]
 
-        # town
-        index = self.bulk_load_frame.cmb_town.currentIndex()
-        town = self.bulk_load_frame.ids_town[index]
+            # town
+            index = self.bulk_load_frame.cmb_town.currentIndex()
+            town = self.bulk_load_frame.ids_town[index]
 
-        # territorial Authority
-        index = self.bulk_load_frame.cmb_ta.currentIndex()
-        t_a = self.bulk_load_frame.ids_ta[index]
-
+            # territorial Authority
+            index = self.bulk_load_frame.cmb_ta.currentIndex()
+            t_a = self.bulk_load_frame.ids_ta[index]
+        else:
+            capture_source_id, suburb, town, t_a = None, None, None, None
         return bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a
 
     def enable_UI_functions(self):
@@ -144,7 +141,7 @@ class BulkLoadChanges:
             Function called when comboboxes are to be enabled
         """
         self.bulk_load_frame.cmb_status.clear()
-        if self.bulk_load_frame.rad_edit.isChecked():
+        if self.bulk_load_frame.isVisible():
             self.bulk_load_frame.cmb_status.setEnabled(1)
         self.bulk_load_frame.cmb_capture_method_2.clear()
         self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
@@ -215,6 +212,7 @@ class AddBulkLoad(BulkLoadChanges):
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
+        self.disable_UI_functions()
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
@@ -344,9 +342,9 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_suburb.setCurrentIndex(index)
 
 
-class EditBulkLoad(BulkLoadChanges):
+class EditAttribute(BulkLoadChanges):
     """
-        Class to edit outlines in buildings_bulk_load.bulk_load_outlines
+        Class to edit Attribute in buildings_bulk_load.bulk_load_outlines
         Inherits BulkLoadChanges
     """
 
@@ -354,7 +352,7 @@ class EditBulkLoad(BulkLoadChanges):
         """Constructor"""
         BulkLoadChanges.__init__(self, bulk_load_frame)
         # set editing to edit polygon
-        iface.actionNodeTool().trigger()
+        iface.actionSelect().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
         # selection actions
         iface.building_toolbar.addSeparator()
@@ -362,31 +360,19 @@ class EditBulkLoad(BulkLoadChanges):
             if sel.text() == 'Select Feature(s)':
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
-        # editing actions
-        iface.building_toolbar.addSeparator()
-        for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in [
-                'mActionNodeTool', 'mActionMoveFeature'
-            ]:
-                iface.building_toolbar.addAction(dig)
-        # advanced Actions
-        iface.building_toolbar.addSeparator()
-        for adv in iface.advancedDigitizeToolBar().actions():
-            if adv.objectName() in [
-                'mActionUndo', 'mActionRedo',
-                'mActionReshapeFeatures', 'mActionOffsetCurve'
-            ]:
-                iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
-        self.bulk_load_frame.select_changed = False
+        self.disable_UI_functions()
+
         if len(iface.activeLayer().selectedFeatures()) > 0:
-            self.select_features()
-            if self.bulk_load_frame.select_changed:
+            if self.is_correct_selections():
+                self.get_selections()
                 self.enable_UI_functions()
                 self.populate_edit_comboboxes()
                 self.select_comboboxes_value()
             else:
+                self.bulk_load_frame.ids = []
+                self.bulk_load_frame.building_outline_id = None
                 self.disable_UI_functions()
 
     @pyqtSlot(bool)
@@ -394,68 +380,48 @@ class EditBulkLoad(BulkLoadChanges):
         """
             When bulk load frame btn_edit_save clicked
         """
-        self.bulk_load_frame.btn_edit_save.setDisabled(1)
-        self.bulk_load_frame.btn_edit_reset.setDisabled(1)
         self.bulk_load_frame.db.open_cursor()
-        # if only geometries are changed
-        if self.bulk_load_frame.geom_changed:
-            for key in self.bulk_load_frame.geoms:
-                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
-                self.bulk_load_frame.db.execute_no_commit(
-                    sql, (self.bulk_load_frame.geoms[key], key))
 
-                result = self.bulk_load_frame.db.execute_no_commit(
-                    select.capture_method_ID_by_value,
-                    ('Trace Orthophotography',)
+        bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a = self.get_comboboxes_values()
+
+        # bulk load status
+        ls_relationships = {'added': [], 'matched': [], 'related': []}
+        if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+            # can only delete outlines if no relationship
+            self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
+            if len(self.bulk_load_frame.description_del) == 0:
+                self.bulk_load_frame.error_dialog = ErrorDialog()
+                self.bulk_load_frame.error_dialog.fill_report(
+                    '\n -------------------- EMPTY VALUE FIELD ------'
+                    '-------------- \n\n There are no "reason for deletion" entries '
                 )
-                capture_method_id = result.fetchall()[0][0]
-
+                self.bulk_load_frame.error_dialog.show()
+                self.disable_UI_functions()
+                return
+            ls_relationships = self.remove_compared_outlines()
+            if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
+                if len(self.bulk_load_frame.ids) > 0:
+                    for i in self.bulk_load_frame.ids:
+                        sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+                        self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
+                        # remove outline from added table
+                        sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                        self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                        sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
+                        self.bulk_load_frame.db.execute_no_commit(
+                            sql, (i, bulk_load_status_id, capture_method_id,
+                                  capture_source_id, suburb, town, t_a))
+                    self.bulk_load_frame.bulk_load_layer.removeSelection()
+        else:
+            for i in self.bulk_load_frame.ids:
+                # change attributes
+                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(
-                    'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
-                    (key, capture_method_id)
-                )
-        # if only attributes are changed
-        if self.bulk_load_frame.select_changed:
+                    sql, (i, bulk_load_status_id, capture_method_id,
+                          capture_source_id, suburb, town, t_a))
+        self.disable_UI_functions()
+        self.bulk_load_frame.completer_box()
 
-            bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a = self.get_comboboxes_values()
-
-            # bulk load status
-            ls_relationships = {'added': [], 'matched': [], 'related': []}
-            if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
-                # can only delete outlines if no relationship
-                self.bulk_load_frame.description_del = self.bulk_load_frame.le_deletion_reason.text()
-                if len(self.bulk_load_frame.description_del) == 0:
-                    self.bulk_load_frame.error_dialog = ErrorDialog()
-                    self.bulk_load_frame.error_dialog.fill_report(
-                        '\n -------------------- EMPTY VALUE FIELD ------'
-                        '-------------- \n\n There are no "reason for deletion" entries '
-                    )
-                    self.bulk_load_frame.error_dialog.show()
-                    self.disable_UI_functions()
-                    return
-                ls_relationships = self.remove_compared_outlines()
-                if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
-                    if len(self.bulk_load_frame.ids) > 0:
-                        for i in self.bulk_load_frame.ids:
-                            sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
-                            self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
-                            # remove outline from added table
-                            sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
-                            self.bulk_load_frame.db.execute_no_commit(sql, (i,))
-                            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                            self.bulk_load_frame.db.execute_no_commit(
-                                sql, (i, bulk_load_status_id, capture_method_id,
-                                      capture_source_id, suburb, town, t_a))
-                        self.bulk_load_frame.bulk_load_layer.removeSelection()
-            else:
-                for i in self.bulk_load_frame.ids:
-                    # change attributes
-                    sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
-                    self.bulk_load_frame.db.execute_no_commit(
-                        sql, (i, bulk_load_status_id, capture_method_id,
-                              capture_source_id, suburb, town, t_a))
-            self.disable_UI_functions()
-            self.bulk_load_frame.completer_box()
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
         self.bulk_load_frame.layer_registry.remove_layer(
             QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
@@ -469,10 +435,8 @@ class EditBulkLoad(BulkLoadChanges):
             path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
-        self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.ids = []
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.building_outline_id = None
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -480,59 +444,14 @@ class EditBulkLoad(BulkLoadChanges):
             When bulk load frame btn_reset_save clicked
         """
         iface.actionCancelEdits().trigger()
-        self.bulk_load_frame.geoms = {}
         self.bulk_load_frame.ids = []
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.building_outline_id = None
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionNodeTool().trigger()
+        iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
-
-    @pyqtSlot(int, QgsGeometry)
-    def feature_changed(self, qgsfId, geom):
-        """
-           Called when feature is changed
-           @param qgsfId:      Id of added feature
-           @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
-           @param geom:        geometry of added feature
-           @type  geom:        qgis.core.QgsGeometry
-        """
-        # get new feature geom and convert to correct format
-        wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
-        result = self.bulk_load_frame.db._execute(sql, (wkt,))
-        self.bulk_load_frame.geom = result.fetchall()[0][0]
-        result = self.bulk_load_frame.db._execute(
-            select.bulk_load_outline_shape_by_id, (qgsfId,))
-        result = result.fetchall()[0][0]
-        if self.bulk_load_frame.geom == result:
-            if qgsfId in self.bulk_load_frame.geoms.keys():
-                del self.bulk_load_frame.geoms[qgsfId]
-            self.bulk_load_frame.geom_changed = False
-        else:
-            self.bulk_load_frame.geoms[qgsfId] = self.bulk_load_frame.geom
-            self.bulk_load_frame.geom_changed = True
-
-        self.bulk_load_frame.btn_edit_save.setEnabled(1)
-        self.bulk_load_frame.btn_edit_reset.setEnabled(1)
-        self.bulk_load_frame.btn_edit_cancel.setEnabled(1)
-
-        if self.bulk_load_frame.select_changed:
-            if self.bulk_load_frame.geom_changed:
-                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                    self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
-            else:
-                # capture method
-                result = self.bulk_load_frame.db._execute(
-                    select.capture_method_value_by_bulk_outlineID, (
-                        self.bulk_load_frame.bulk_load_outline_id,
-                    ))
-                result = result.fetchall()[0][0]
-                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                    self.bulk_load_frame.cmb_capture_method_2.findText(result))
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
@@ -540,34 +459,23 @@ class EditBulkLoad(BulkLoadChanges):
            Called when feature is selected
         """
         # If no outlines are selected the function will return
-        self.bulk_load_frame.select_changed = False
         if len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()) == 0:
             self.bulk_load_frame.ids = []
             self.bulk_load_frame.building_outline_id = None
             self.disable_UI_functions()
             return
-        self.select_features()
-        if self.bulk_load_frame.select_changed:
+        if self.is_correct_selections():
+            self.get_selections()
             self.enable_UI_functions()
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
-            if self.bulk_load_frame.geom_changed:
-                self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
-                    self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
         else:
             self.disable_UI_functions()
 
-    def select_features(self):
-        self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
-        self.bulk_load_frame.bulk_load_outline_id = self.bulk_load_frame.ids[0]
-        bulk_load_feat = [feat for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()][0]
-        bulk_load_geom = bulk_load_feat.geometry()
-        # convert to correct format
-        wkt = bulk_load_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
-        result = self.bulk_load_frame.db._execute(sql, (wkt,))
-        self.bulk_load_frame.geom = result.fetchall()[0][0]
-
+    def is_correct_selections(self):
+        """
+            Check if the selections meet the requirement
+        """
         feats = []
         for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
             ls = []
@@ -589,7 +497,7 @@ class EditBulkLoad(BulkLoadChanges):
                 're identical.'
             )
             self.bulk_load_frame.error_dialog.show()
-            self.bulk_load_frame.select_changed = False
+            return False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
             deleted = False
@@ -599,6 +507,7 @@ class EditBulkLoad(BulkLoadChanges):
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:
                     deleted = True
+                    break
             if deleted:
                 self.bulk_load_frame.error_dialog = ErrorDialog()
                 self.bulk_load_frame.error_dialog.fill_report(
@@ -607,11 +516,23 @@ class EditBulkLoad(BulkLoadChanges):
                     ' features that have not been deleted.'
                 )
                 self.bulk_load_frame.error_dialog.show()
-                self.bulk_load_frame.ids = []
-                self.bulk_load_frame.building_outline_id = None
-                self.bulk_load_frame.select_changed = False
+                return False
             else:
-                self.bulk_load_frame.select_changed = True
+                return True
+
+    def get_selections(self):
+        """
+            Return the selection values
+        """
+        self.bulk_load_frame.ids = [feat.id() for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()]
+        self.bulk_load_frame.bulk_load_outline_id = self.bulk_load_frame.ids[0]
+        bulk_load_feat = [feat for feat in self.bulk_load_frame.bulk_load_layer.selectedFeatures()][0]
+        bulk_load_geom = bulk_load_feat.geometry()
+        # convert to correct format
+        wkt = bulk_load_geom.exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        result = self.bulk_load_frame.db._execute(sql, (wkt,))
+        self.bulk_load_frame.geom = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
         """
@@ -727,3 +648,127 @@ class EditBulkLoad(BulkLoadChanges):
                     ls_relationships['related'].append(item)
                     break
         return ls_relationships
+
+
+class EditGeometry(BulkLoadChanges):
+    """
+        Class to edit outline's geometry in buildings_bulk_load.bulk_load_outlines
+        Inherits BulkLoadChanges
+    """
+
+    def __init__(self, bulk_load_frame):
+        """Constructor"""
+        BulkLoadChanges.__init__(self, bulk_load_frame)
+        # set editing to edit polygon
+        iface.actionNodeTool().trigger()
+        selecttools = iface.attributesToolBar().findChildren(QToolButton)
+        # selection actions
+        iface.building_toolbar.addSeparator()
+        for sel in selecttools:
+            if sel.text() == 'Select Feature(s)':
+                for a in sel.actions()[0:3]:
+                    iface.building_toolbar.addAction(a)
+        # editing actions
+        iface.building_toolbar.addSeparator()
+        for dig in iface.digitizeToolBar().actions():
+            if dig.objectName() in [
+                'mActionNodeTool', 'mActionMoveFeature'
+            ]:
+                iface.building_toolbar.addAction(dig)
+        # advanced Actions
+        iface.building_toolbar.addSeparator()
+        for adv in iface.advancedDigitizeToolBar().actions():
+            if adv.objectName() in [
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
+            ]:
+                iface.building_toolbar.addAction(adv)
+        iface.building_toolbar.show()
+
+        self.disable_UI_functions()
+
+    @pyqtSlot(bool)
+    def edit_save_clicked(self, commit_status):
+        """
+            When bulk load frame btn_edit_save clicked
+        """
+        self.bulk_load_frame.db.open_cursor()
+
+        _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
+
+        for key in self.bulk_load_frame.geoms:
+            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
+            self.bulk_load_frame.db.execute_no_commit(
+                sql,
+                (self.bulk_load_frame.geoms[key], key)
+            )
+            self.bulk_load_frame.db.execute_no_commit(
+                'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
+                (key, capture_method_id)
+            )
+        self.disable_UI_functions()
+
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
+        self.bulk_load_frame.layer_registry.remove_layer(
+            QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
+        self.bulk_load_frame.bulk_load_removed = self.bulk_load_frame.layer_registry.add_postgres_layer(
+            'removed_outlines', 'bulk_load_outlines',
+            'shape', 'buildings_bulk_load', '',
+            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(
+                self.bulk_load_frame.current_dataset
+            ))
+        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
+            path + 'building_red.qml')
+        if commit_status:
+            self.bulk_load_frame.db.commit_open_cursor()
+        self.bulk_load_frame.geoms = {}
+
+    @pyqtSlot()
+    def edit_reset_clicked(self):
+        """
+            When bulk load frame btn_reset_save clicked
+        """
+        iface.actionCancelEdits().trigger()
+        self.bulk_load_frame.geoms = {}
+        # restart editing
+        iface.actionToggleEditing().trigger()
+        iface.actionNodeTool().trigger()
+        iface.activeLayer().removeSelection()
+        # reset and disable comboboxes
+        self.disable_UI_functions()
+
+    @pyqtSlot(int, QgsGeometry)
+    def geometry_changed(self, qgsfId, geom):
+        """
+           Called when feature is changed
+           @param qgsfId:      Id of added feature
+           @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
+           @param geom:        geometry of added feature
+           @type  geom:        qgis.core.QgsGeometry
+        """
+        # get new feature geom and convert to correct format
+        wkt = geom.exportToWkt()
+        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        result = self.bulk_load_frame.db._execute(sql, (wkt,))
+        self.bulk_load_frame.geom = result.fetchall()[0][0]
+        result = self.bulk_load_frame.db._execute(
+            select.bulk_load_outline_shape_by_id,
+            (qgsfId,)
+        )
+        result = result.fetchall()[0][0]
+        if self.bulk_load_frame.geom == result:
+            if qgsfId in self.bulk_load_frame.geoms.keys():
+                del self.bulk_load_frame.geoms[qgsfId]
+            self.disable_UI_functions()
+        else:
+            self.bulk_load_frame.geoms[qgsfId] = self.bulk_load_frame.geom
+            self.enable_UI_functions()
+            self.populate_edit_comboboxes()
+            self.select_comboboxes_value()
+
+    def select_comboboxes_value(self):
+        """
+            Select the correct combobox value for the geometry
+        """
+        self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
+            self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
