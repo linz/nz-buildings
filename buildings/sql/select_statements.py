@@ -414,6 +414,17 @@ AND bo.capture_source_id = cs.capture_source_id
 AND bo.building_outline_id = %s;
 """
 
+capture_source_group_value_desc_external_by_datasetID = """
+SELECT csg.value,
+       csg.description,
+       cs.external_source_id
+FROM buildings_common.capture_source_group csg
+JOIN buildings_common.capture_source cs USING (capture_source_group_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (capture_source_id)
+WHERE blo.supplied_dataset_id = %s
+LIMIT 1;
+"""
+
 # capture source
 
 capture_src_extsrcID_by_datasetID = """

@@ -320,6 +320,16 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.cmb_capture_method_2.setCurrentIndex(
             self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
 
+        # capture source
+        result = self.bulk_load_frame.db._execute(
+            select.capture_source_group_value_desc_external_by_datasetID,
+            (self.bulk_load_frame.current_dataset, )
+        )
+        result = result.fetchall()[0]
+        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
+            self.bulk_load_frame.cmb_capture_source.findText(text))
+
         # territorial authority
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
@@ -558,19 +568,13 @@ class EditAttribute(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            select.capture_source_group_value_desc_external)
-        ls = result.fetchall()
-        result = self.bulk_load_frame.db._execute(
-            select.capture_source_group_value_desc_external_by_bulk_outlineID, (
-                self.bulk_load_frame.bulk_load_outline_id,
-            ))
+            select.capture_source_group_value_desc_external_by_datasetID,
+            (self.bulk_load_frame.current_dataset, )
+        )
         result = result.fetchall()[0]
-        value_index = 0
-        for index, item in enumerate(ls):
-            if item == result:
-                value_index = index
+        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
-            value_index)
+            self.bulk_load_frame.cmb_capture_source.findText(text))
 
         # suburb
         result = self.bulk_load_frame.db._execute(
