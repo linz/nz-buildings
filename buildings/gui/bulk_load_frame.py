@@ -539,6 +539,26 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
+        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+            try:
+                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+            try:
+                self.bulk_load_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
+            except TypeError:
+                pass
+
     def completer_box(self):
         """
             Box automatic completion
