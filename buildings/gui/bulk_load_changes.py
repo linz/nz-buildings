@@ -141,8 +141,7 @@ class BulkLoadChanges:
             Function called when comboboxes are to be enabled
         """
         self.bulk_load_frame.cmb_status.clear()
-        if self.bulk_load_frame.isVisible():
-            self.bulk_load_frame.cmb_status.setEnabled(1)
+        self.bulk_load_frame.cmb_status.setEnabled(1)
         self.bulk_load_frame.cmb_capture_method_2.clear()
         self.bulk_load_frame.cmb_capture_method_2.setEnabled(1)
         self.bulk_load_frame.cmb_capture_source.clear()
@@ -480,6 +479,8 @@ class EditAttribute(BulkLoadChanges):
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
         else:
+            self.bulk_load_frame.ids = []
+            self.bulk_load_frame.building_outline_id = None
             self.disable_UI_functions()
 
     def is_correct_selections(self):
@@ -529,6 +530,7 @@ class EditAttribute(BulkLoadChanges):
                 return False
             else:
                 return True
+        return False
 
     def get_selections(self):
         """
@@ -568,9 +570,9 @@ class EditAttribute(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            select.capture_source_group_value_desc_external_by_datasetID,
-            (self.bulk_load_frame.current_dataset, )
-        )
+            select.capture_source_group_value_desc_external_by_bulk_outlineID, (
+                self.bulk_load_frame.bulk_load_outline_id,
+            ))
         result = result.fetchall()[0]
         text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
