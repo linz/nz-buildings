@@ -305,6 +305,32 @@ class AddProduction(ProductionChanges):
         self.production_frame.cmb_capture_method.setCurrentIndex(
             self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
 
+        # capture source
+        result = self.production_frame.db._execute(select.capture_source_area_intersect_geom,
+                                                   (self.production_frame.geom,))
+        result = result.fetchall()
+        if len(result) == 0:
+            iface.messageBar().pushMessage(
+                'Capture Source',
+                'The new outline overlaps with no capture source area, please manully chooce one.',
+                level=QgsMessageBar.INFO,
+                duration=10
+            )
+        elif len(result) > 1:
+            iface.messageBar().pushMessage(
+                'Capture Source',
+                'The new outline overlaps with multiple capture source areas, please manully chooce one.',
+                level=QgsMessageBar.INFO,
+                duration=10
+            )
+        else:
+            for index in range(self.production_frame.cmb_capture_source.count()):
+                text = self.production_frame.cmb_capture_source.itemText(index)
+                print int(text.split('-')[-1]), result[0][0]
+                if int(text.split('-')[-1]) == result[0][0]:
+                    break
+            self.production_frame.cmb_capture_source.setCurrentIndex(index)
+
         # territorial authority
         sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
         result = self.production_frame.db._execute(sql,

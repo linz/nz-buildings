@@ -577,3 +577,9 @@ SELECT csa.external_area_polygon_id, csa.area_title
 FROM buildings_reference.capture_source_area csa
 ORDER BY csa.area_title;
 """
+
+capture_source_area_intersect_geom = """
+SELECT csa.external_area_polygon_id
+FROM buildings_reference.capture_source_area csa
+WHERE ST_Intersects(csa.shape, %s::Geometry);
+"""
