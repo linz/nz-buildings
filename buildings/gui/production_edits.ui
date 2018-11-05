@@ -35,7 +35,7 @@
    <item>
     <widget class="QGroupBox" name="grpb">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -70,236 +70,253 @@ QGroupBox::title {
      <property name="title">
       <string>Edit Production</string>
      </property>
-     <layout class="QFormLayout" name="formLayout">
-      <property name="fieldGrowthPolicy">
-       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-      </property>
-      <item row="0" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="hzly_3">
-        <item>
-         <widget class="QRadioButton" name="rad_add">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Add Outline</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="rad_edit">
-          <property name="text">
-           <string>Edit Outline</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="line_2">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <spacer name="verticalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Vertical</enum>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lb_capture_method">
-        <property name="text">
-         <string>Capture Method:</string>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QComboBox" name="cmb_capture_method"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="lb_capture_source">
-        <property name="text">
-         <string>Capture Source:</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>10</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="cmb_capture_source"/>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="lb_lifeycle_stage">
-        <property name="font">
-         <font>
-          <weight>50</weight>
-          <bold>false</bold>
-          <kerning>true</kerning>
-         </font>
-        </property>
-        <property name="text">
-         <string>Lifecycle Stage:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="cmb_lifecycle_stage"/>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="Line" name="line">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="0">
-       <widget class="QLabel" name="lb_ta">
-        <property name="text">
-         <string>Territorial Authority: </string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QComboBox" name="cmb_ta"/>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="lb_suburb">
-        <property name="text">
-         <string>Suburb Locality:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="lb_town">
-        <property name="text">
-         <string>Town City:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QComboBox" name="cmb_town"/>
-      </item>
-      <item row="11" column="0" colspan="2">
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="12" column="0" colspan="2">
-       <layout class="QHBoxLayout" name="hzly_4">
-        <item>
-         <widget class="QPushButton" name="btn_save">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>151</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_reset">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>Reset</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn_exit_edits">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>151</width>
-            <height>27</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Exit Editing</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="13" column="0" colspan="2">
-       <widget class="QPushButton" name="btn_exit">
+      <item>
+       <widget class="QToolButton" name="tbtn_edits">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>25</height>
+          <width>330</width>
+          <height>0</height>
          </size>
         </property>
-        <property name="maximumSize">
-         <size>
-          <width>450</width>
-          <height>16777215</height>
-         </size>
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <italic>false</italic>
+          <bold>true</bold>
+          <underline>false</underline>
+          <strikeout>false</strikeout>
+         </font>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
+        </property>
+        <property name="text">
+         <string>Choose Edit Mode</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::MenuButtonPopup</enum>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>false</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="layout_capture_method" native="true">
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="1">
+          <widget class="QComboBox" name="cmb_capture_method"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lb_capture_method">
+           <property name="text">
+            <string>Capture Method:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="layout_general_info" native="true">
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="2" column="1">
+          <widget class="QComboBox" name="cmb_ta"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cmb_lifecycle_stage"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lb_ta">
+           <property name="text">
+            <string>Territorial Authority: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lb_lifeycle_stage">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+             <kerning>true</kerning>
+            </font>
+           </property>
+           <property name="text">
+            <string>Lifecycle Stage:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QComboBox" name="cmb_capture_source"/>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="cmb_suburb"/>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lb_capture_source">
+           <property name="text">
+            <string>Capture Source:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="lb_town">
+           <property name="text">
+            <string>Town City:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QComboBox" name="cmb_town"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="lb_suburb">
+           <property name="text">
+            <string>Suburb Locality:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="a" native="true">
+        <layout class="QHBoxLayout" name="hzly_4">
+         <item>
+          <widget class="QPushButton" name="btn_save">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>151</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_reset">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>150</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Reset</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_exit_edits">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>151</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Exit Editing</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btn_exit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>25</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>450</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
     font-size: 11pt;
     font-weight: bold;
 }
 </string>
-        </property>
-        <property name="text">
-         <string>Exit</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QComboBox" name="cmb_suburb"/>
-      </item>
-     </layout>
-     <zorder>lb_capture_method</zorder>
-     <zorder>cmb_capture_method</zorder>
-     <zorder>cmb_capture_source</zorder>
-     <zorder>lb_capture_source</zorder>
-     <zorder>lb_town</zorder>
-     <zorder>cmb_town</zorder>
-     <zorder>line</zorder>
-     <zorder>cmb_lifecycle_stage</zorder>
-     <zorder>lb_lifeycle_stage</zorder>
-     <zorder></zorder>
-     <zorder>btn_exit</zorder>
-     <zorder>line_2</zorder>
-     <zorder>line_3</zorder>
-     <zorder>cmb_ta</zorder>
-     <zorder>lb_ta</zorder>
-     <zorder>cmb_suburb</zorder>
-     <zorder>lb_suburb</zorder>
+     </property>
+     <property name="text">
+      <string>Exit</string>
+     </property>
     </widget>
    </item>
    <item>
