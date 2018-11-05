@@ -1,5 +1,11 @@
 ------------------------------------------------------------------------------
 -- Create buildings LDS schema and tables
+
+-- Tables:
+-- nz_building_outlines
+-- nz_building_outlines_full_history
+-- nz_building_outlines_lifecycle
+
 ------------------------------------------------------------------------------
 
 SET client_min_messages TO WARNING;
@@ -11,7 +17,7 @@ COMMENT ON SCHEMA buildings_lds IS
 'Schema that holds tables published via the LINZ Data Service.';
 
 -- NZ Building Outlines
-
+-- NZ Building Outlines contains the current depiction of building outlines.
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
       building_outline_id integer NOT NULL
     , building_id integer NOT NULL
@@ -73,7 +79,9 @@ COMMENT ON COLUMN buildings_lds.nz_building_outlines.shape IS
 'are not.';
 
 -- NZ Building Outlines : Full History
-
+-- NZ Building Outlines: Full History contains all combinations of outline /
+-- building / name / use that have existed within the building outlines
+-- system, and the dates for which that combination existed.
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines_full_history (
       extract_id serial PRIMARY KEY
     , building_outline_id integer NOT NULL
@@ -143,7 +151,11 @@ COMMENT ON COLUMN buildings_lds.nz_building_outlines_full_history.shape IS
 'are not.';
 
 -- NZ Building Outlines : Lifecycle
-
+-- The lifecycle table stores the relationship between buildings when one
+-- building is split into two buildings or two buildings are merged into one
+-- building. This will generally occur when a building outline was erroneously
+-- captured encompassing two buildings, which later becomes clear with
+-- additional aerial imagery.
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines_lifecycle (
       lifecycle_id integer NOT NULL
     , parent_building_id integer NOT NULL

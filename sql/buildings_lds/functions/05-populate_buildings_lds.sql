@@ -64,6 +64,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
+
 CREATE OR REPLACE FUNCTION buildings_lds.nz_building_outlines_full_history_insert()
 RETURNS integer AS
 $$

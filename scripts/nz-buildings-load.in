@@ -44,9 +44,9 @@ if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
     SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
 fi
 
-if test ! -f "${SCRIPTSDIR}/sql/02-buildings_schema.sql"; then
+if test ! -f "${SCRIPTSDIR}/sql/buildings/01-create-schema-and-tables.sql"; then
     cat >&2 <<EOF
-Cannot find /sql/02-buildings_schema.sql in ${SCRIPTSDIR}
+Cannot find /sql/buildings/01-create-schema-and-tables.sql in ${SCRIPTSDIR}
 Please set BUILDINGSCHEMA_SQLDIR environment variable
 EOF
     exit 1
@@ -101,25 +101,26 @@ psql_exit() {
     fi
 }
 
-# Execute all files in the reference sql dir
-for file in ${SCRIPTSDIR}/sql/reference/*.sql; do
-    echo ${file} >&2
-    psql -f ${file} $ON_ERROR_STOP
-    psql_exit
+# Execute schema and table files
+
+for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
+do
+    for file in ${SCRIPTSDIR}/sql/"$s"/*.sql; do
+        echo ${file} >&2
+        psql -f ${file} $ON_ERROR_STOP
+        psql_exit
+    done
 done
 
-# Execute all files in the main sql dir
-for file in ${SCRIPTSDIR}/sql/*.sql; do
-    echo ${file} >&2
-    psql -f ${file} $ON_ERROR_STOP
-    psql_exit
-done
+# execute function files
 
-# Execute all files in the lds sql dir
-for file in ${SCRIPTSDIR}/sql/lds/*.sql; do
-    echo ${file} >&2
-    psql -f ${file} $ON_ERROR_STOP
-    psql_exit
+for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
+do
+    for file in ${SCRIPTSDIR}/sql/"$s"/functions/*.sql; do
+        echo ${file} >&2
+        psql -f ${file} $ON_ERROR_STOP
+        psql_exit
+    done
 done
 
 # Execute files that create test data - test data remains in database

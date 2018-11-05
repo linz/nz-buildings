@@ -1,3 +1,8 @@
+------------------------------------------------------------------
+-- script to create table views for altering relationships in
+-- qgis-buildings-plugin
+------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW buildings_bulk_load.added_outlines AS
     SELECT a.bulk_load_outline_id, b.shape
     FROM buildings_bulk_load.added a

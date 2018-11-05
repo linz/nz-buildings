@@ -1,40 +1,13 @@
--- LOOKUP TABLE INSERTS
 
--- Capture Method
 
-INSERT INTO buildings_common.capture_method (value) VALUES ('Unknown');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Derived');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Derived From Cadastre');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Derived From Scanned Map');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Feature Extraction');
-INSERT INTO buildings_common.capture_method (value) VALUES ('GPS');
-INSERT INTO buildings_common.capture_method (value) VALUES ('GPS Differential');
-INSERT INTO buildings_common.capture_method (value) VALUES ('GPS Mobile');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Trace');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Stereophotography');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Orthophotography');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Trace Other Image');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Engineering Survey Data');
-INSERT INTO buildings_common.capture_method (value) VALUES ('Estimated');
-
--- Capture Source Group
-
-INSERT INTO buildings_common.capture_source_group (value, description)
-VALUES (
-	'NZ Aerial Imagery',
-	'external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/'
-);
-
--- Lifecycle Stage
-
+-- lifecycle_stage
 INSERT INTO buildings.lifecycle_stage (value) VALUES ('Current');
 INSERT INTO buildings.lifecycle_stage (value) VALUES ('Disused');
 INSERT INTO buildings.lifecycle_stage (value) VALUES ('Replaced');
 INSERT INTO buildings.lifecycle_stage (value) VALUES ('Under Construction');
 INSERT INTO buildings.lifecycle_stage (value) VALUES ('Unknown');
 
--- Use
-
+-- use
 INSERT INTO buildings.use (value) VALUES ('Abattoir');
 INSERT INTO buildings.use (value) VALUES ('Camp');
 INSERT INTO buildings.use (value) VALUES ('Cement Works');
@@ -72,21 +45,3 @@ INSERT INTO buildings.use (value) VALUES ('Synthetic Fuel Plant');
 INSERT INTO buildings.use (value) VALUES ('University');
 INSERT INTO buildings.use (value) VALUES ('Visitor Centre');
 INSERT INTO buildings.use (value) VALUES ('Water Treatment Plant');
-
--- Organisation
-
-INSERT INTO buildings_bulk_load.organisation (value) VALUES ('Ecopia');
-
--- Bulk Load Status
-
-INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Supplied');
-INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Added During QA');
-INSERT INTO buildings_bulk_load.bulk_load_status (value) VALUES ('Deleted During QA');
-
--- QA Status
-
-INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Checked');
-INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Okay');
-INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Pending');
-INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Refer to Supplier');
-INSERT INTO buildings_bulk_load.qa_status (value) VALUES ('Not Removed');
