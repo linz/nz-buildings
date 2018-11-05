@@ -696,6 +696,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_added_bulk_load, True)
             legend.setLayerVisible(self.lyr_matched_bulk_load, True)
             legend.setLayerVisible(self.lyr_related_bulk_load, True)
+            for h in self.highlight_features:
+                if h.layer() == self.lyr_bulk_load:
+                    h.setVisible(True)
         else:
             legend.setLayerVisible(self.lyr_added_bulk_load_in_edit, False)
             legend.setLayerVisible(self.lyr_matched_bulk_load_in_edit, False)
@@ -703,6 +706,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_added_bulk_load, False)
             legend.setLayerVisible(self.lyr_matched_bulk_load, False)
             legend.setLayerVisible(self.lyr_related_bulk_load, False)
+            for h in self.highlight_features:
+                if h.layer() == self.lyr_bulk_load:
+                    h.setVisible(False)
 
     @pyqtSlot()
     def cb_lyr_existing_state_changed(self):
@@ -714,6 +720,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_removed_existing, True)
             legend.setLayerVisible(self.lyr_matched_existing, True)
             legend.setLayerVisible(self.lyr_related_existing, True)
+            for h in self.highlight_features:
+                if h.layer() == self.lyr_existing:
+                    h.setVisible(True)
         else:
             legend.setLayerVisible(self.lyr_removed_existing_in_edit, False)
             legend.setLayerVisible(self.lyr_matched_existing_in_edit, False)
@@ -721,6 +730,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.setLayerVisible(self.lyr_removed_existing, False)
             legend.setLayerVisible(self.lyr_matched_existing, False)
             legend.setLayerVisible(self.lyr_related_existing, False)
+            for h in self.highlight_features:
+                if h.layer() == self.lyr_existing:
+                    h.setVisible(False)
 
     @pyqtSlot()
     def cb_autosave_state_changed(self):
