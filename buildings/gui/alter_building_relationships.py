@@ -960,7 +960,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_new_removed_outlines(self):
         # removed
-        sql_insert_removed = 'SELECT buildings_bulk_load.removed_insert_bulk_load_outlines(%s);'
+        sql_insert_removed = 'SELECT buildings_bulk_load.removed_insert_building_outlines(%s);'
         for feat in self.lyr_removed_existing_in_edit.getFeatures():
             id_existing = feat['building_outline_id']
             self.db.execute_no_commit(sql_insert_removed, (id_existing, ))

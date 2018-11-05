@@ -323,21 +323,21 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.cmb_capture_method_2.findText('Trace Orthophotography'))
 
         # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_ta.index(result.fetchall()[0][0])
         self.bulk_load_frame.cmb_ta.setCurrentIndex(index)
 
         # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.town_city_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_town.index(result.fetchall()[0][0])
         self.bulk_load_frame.cmb_town.setCurrentIndex(index)
 
         # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.suburb_locality_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_suburb.index(result.fetchall()[0][0])
