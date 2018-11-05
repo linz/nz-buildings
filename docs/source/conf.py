@@ -606,7 +606,7 @@ def setup_html_context(files_to_read):
 
     for f in files_to_read:
         sql_file_path = f
-        schema_name_search = re.search(r".*\-(.*)\_schema.*", sql_file_path)
+        schema_name_search = re.search(r".*\-(.*)\create-schema-and-tables.*", sql_file_path)
         name_key = schema_name_search.group(1)
         context_key = "schema_gen_" + name_key
         schema_out = get_schema(sql_file_path)
