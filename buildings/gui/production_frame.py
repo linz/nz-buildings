@@ -41,12 +41,16 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_status = None
         self.change_instance = None
 
-        menu = QMenu()
-        menu.addAction('Add Outline')
-        menu.addAction('Edit Attribute')
-        menu.addAction('Edit Geometry')
-        menu.setFixedWidth(300)
-        self.tbtn_edits.setMenu(menu)
+        self.menu = QMenu()
+        self.action_add_outline = QAction('Add Outline', self.menu)
+        self.action_edit_attribute = QAction('Edit Attribute', self.menu)
+        self.action_edit_geometry = QAction('Edit Geometry', self.menu)
+        self.menu.addAction(self.action_add_outline)
+        self.menu.addSeparator()
+        self.menu.addAction(self.action_edit_attribute)
+        self.menu.addAction(self.action_edit_geometry)
+        self.menu.setFixedWidth(300)
+        self.tbtn_edits.setMenu(self.menu)
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
 

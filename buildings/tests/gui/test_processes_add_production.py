@@ -48,7 +48,8 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.rad_add.click()
+        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_add_outline)
+        self.production_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""

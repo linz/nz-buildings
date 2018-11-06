@@ -239,12 +239,10 @@ class AddProduction(ProductionChanges):
 
         if commit_status:
             self.production_frame.db.commit_open_cursor()
-
+            self.production_frame.geom = None
+            self.production_frame.added_building_ids = []
         # reset and disable comboboxes
         self.disable_UI_functions()
-
-        self.production_frame.geom = None
-        self.production_frame.added_building_ids = []
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -326,7 +324,6 @@ class AddProduction(ProductionChanges):
         else:
             for index in range(self.production_frame.cmb_capture_source.count()):
                 text = self.production_frame.cmb_capture_source.itemText(index)
-                print int(text.split('-')[-1]), result[0][0]
                 if int(text.split('-')[-1]) == result[0][0]:
                     break
             self.production_frame.cmb_capture_source.setCurrentIndex(index)
@@ -406,8 +403,8 @@ class EditAttribute(ProductionChanges):
 
         if commit_status:
             self.production_frame.db.commit_open_cursor()
-        self.production_frame.ids = []
-        self.production_frame.building_outline_id = None
+            self.production_frame.ids = []
+            self.production_frame.building_outline_id = None
 
     @pyqtSlot()
     def reset_clicked(self):
@@ -611,7 +608,7 @@ class EditGeometry(ProductionChanges):
         self.disable_UI_functions()
         if commit_status:
             self.production_frame.db.commit_open_cursor()
-        self.production_frame.geoms = {}
+            self.production_frame.geoms = {}
 
     @pyqtSlot()
     def reset_clicked(self):

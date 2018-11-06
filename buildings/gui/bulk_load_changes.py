@@ -253,12 +253,10 @@ class AddBulkLoad(BulkLoadChanges):
         self.bulk_load_frame.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
-
+            self.bulk_load_frame.geom = None
+            self.bulk_load_frame.added_building_ids = []
         # reset and disable comboboxes
         self.disable_UI_functions()
-
-        self.bulk_load_frame.geom = None
-        self.bulk_load_frame.added_building_ids = []
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -444,8 +442,8 @@ class EditAttribute(BulkLoadChanges):
             path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
-        self.bulk_load_frame.ids = []
-        self.bulk_load_frame.building_outline_id = None
+            self.bulk_load_frame.ids = []
+            self.bulk_load_frame.building_outline_id = None
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -727,7 +725,7 @@ class EditGeometry(BulkLoadChanges):
             path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
-        self.bulk_load_frame.geoms = {}
+            self.bulk_load_frame.geoms = {}
 
     @pyqtSlot()
     def edit_reset_clicked(self):
