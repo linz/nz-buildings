@@ -2,9 +2,9 @@
 
 from PyQt4.QtCore import pyqtSlot
 
-from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
-from buildings.sql import buildings_select_statements as buildings_select
-from buildings.sql import buildings_reference_select_statements as reference_select
+from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_select_statements as buildings_select,
+                           buildings_reference_select_statements as reference_select)
 
 
 @pyqtSlot(bool)

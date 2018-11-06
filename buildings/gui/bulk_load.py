@@ -3,9 +3,9 @@
 from PyQt4.QtCore import pyqtSlot
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
-from buildings.sql import buildings_common_select_statements as common_select
-from buildings.sql import general_select_statements as general_select
+from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_common_select_statements as common_select,
+                           general_select_statements as general_select)
 
 
 def populate_bulk_comboboxes(self):

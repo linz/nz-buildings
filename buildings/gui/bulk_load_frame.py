@@ -12,8 +12,8 @@ from qgis.utils import iface
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
-from buildings.sql import buildings_reference_select_statements as reference_select
+from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db, layers
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(

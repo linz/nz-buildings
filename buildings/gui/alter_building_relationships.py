@@ -12,8 +12,8 @@ from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
-from buildings.utilities.multi_layer_selection import MultiLayerSelection
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(

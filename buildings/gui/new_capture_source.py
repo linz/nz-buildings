@@ -9,8 +9,8 @@ from PyQt4.QtGui import QFrame, QIcon, QColor, QToolButton, QTableWidgetItem, QH
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import buildings_common_select_statements as common_select
-from buildings.sql import buildings_reference_select_statements as reference_select
+from buildings.sql import (buildings_common_select_statements as common_select,
+                           buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db
 
 
