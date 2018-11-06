@@ -92,7 +92,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
 
-    def test_comboboxes_on_reset(self):
+    def test_reset_clicked(self):
         """Check comboboxes reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates

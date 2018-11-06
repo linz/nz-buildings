@@ -86,7 +86,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.btn_exit.isEnabled())
         self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
 
-    def test_geometries_on_reset(self):
+    def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -242,18 +242,5 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            delay=30)
         QTest.qWait(10)
 
-        self.production_frame.change_instance.save_clicked(False)
-
-        sql = """
-              SELECT method.value
-              FROM buildings.building_outlines bo
-              JOIN buildings_common.capture_method method USING (capture_method_id)
-              WHERE bo.building_outline_id = %s
-              """
-        for feat_id in self.production_frame.geoms:
-            result = db._execute(sql, (feat_id, ))
-            capture_method = result.fetchall()[0][0]
-            self.assertEqual(capture_method, 'Trace Orthophotography')
-
-        self.production_frame.geoms = {}
-        self.production_frame.db.rollback_open_cursor()
+        self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')

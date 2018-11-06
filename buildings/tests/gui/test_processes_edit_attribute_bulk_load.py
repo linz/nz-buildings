@@ -233,7 +233,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
 
-    def test_comboboxes_on_reset(self):
+    def test_reset_clicked(self):
         """Check comboboxes reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates

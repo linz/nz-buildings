@@ -20,8 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import (QgsCoordinateReferenceSystem, QgsExpression,
-                       QgsFeatureRequest, QgsPoint, QgsRectangle)
+from qgis.core import (QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle)
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -88,7 +87,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
 
-    def test_geometries_on_reset(self):
+    def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -129,7 +128,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             result = result.fetchall()[0][0]
             self.assertEqual(result, current_shape)
 
-    def test_geometries_save_clicked(self):
+    def test_save_clicked(self):
         """Check geometry is updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -239,17 +238,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
                            delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.change_instance.edit_save_clicked(False)
 
-        sql = """
-              SELECT method.value
-              FROM buildings_bulk_load.bulk_load_outlines blo
-              JOIN buildings_common.capture_method method USING (capture_method_id)
-              WHERE blo.bulk_load_outline_id = %s
-              """
-        for feat_id in self.bulk_load_frame.geoms:
-            result = db._execute(sql, (feat_id, ))
-            capture_method = result.fetchall()[0][0]
-            self.assertEqual(capture_method, 'Trace Orthophotography')
-
-        self.bulk_load_frame.db.rollback_open_cursor()
+        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')

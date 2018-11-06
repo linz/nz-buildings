@@ -100,7 +100,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         self.bulk_load_frame.db.rollback_open_cursor()
 
-    def test_reset_button(self):
+    def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
