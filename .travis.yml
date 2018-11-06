@@ -13,7 +13,7 @@ matrix:
         - pip install Sphinx sphinx_rtd_theme
         - pip install -r requirements-docs.txt
       before_script: []
-      script: sphinx-build -b html db/docs/source db/docs
+      script: sphinx-build -b html docs/source docs
       after_script: []
 
     - env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
