@@ -1101,7 +1101,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def update_qa_status_in_matched(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in matched table"""
-        sql_update_matched = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s));'
+        sql_update_matched = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s);'
         self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_removed(self, id_existing, qa_status_id):
