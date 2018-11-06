@@ -204,7 +204,8 @@ class ProcessNewEntryTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.new_entry_frame.cmb_new_type_selection.setCurrentIndex(3)
         self.new_entry_frame.le_new_entry.setText('NZ Aerial Imagery')
-        self.new_entry_frame.le_description.setText('Replace with link to LDS table...')
+        self.new_entry_frame.le_description.setText(
+            'external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/')
         self.new_entry_frame.ok_clicked(commit_status=False)
         self.assertTrue(self.new_entry_frame.error_dialog is not None)
         self.new_entry_frame.error_dialog.close()
