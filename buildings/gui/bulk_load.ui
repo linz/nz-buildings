@@ -78,8 +78,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>377</width>
-        <height>973</height>
+        <width>390</width>
+        <height>894</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -133,18 +133,19 @@
         </layout>
        </item>
        <item>
+        <widget class="QCheckBox" name="cb_bulk_load">
+         <property name="text">
+          <string>Bulk Load Outline Layers</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="grpb_bulk_load">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>359</width>
-           <height>363</height>
-          </size>
          </property>
          <property name="font">
           <font>
@@ -178,76 +179,8 @@ QGroupBox::title {
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="3" column="1">
-           <widget class="QComboBox" name="cmb_capture_src_grp">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lb_outlines">
-            <property name="text">
-             <string>Layer:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QComboBox" name="cmb_capture_method">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="rad_external_id">
-            <property name="text">
-             <string>External Id Field</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="le_data_description">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="11" column="1">
-           <widget class="QComboBox" name="cmb_organisation">
+          <item row="0" column="1">
+           <widget class="QgsMapLayerComboBox" name="ml_outlines_layer">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -285,26 +218,17 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lb_external_id">
+          <item row="4" column="0">
+           <widget class="QLabel" name="lb_external_id_2">
             <property name="text">
-             <string>External Id Field:</string>
+             <string>External Source Id :</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QgsMapLayerComboBox" name="ml_outlines_layer">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>245</width>
-              <height>16777215</height>
-             </size>
+          <item row="11" column="0">
+           <widget class="QLabel" name="lb_organisation">
+            <property name="text">
+             <string>Organisation:</string>
             </property>
            </widget>
           </item>
@@ -315,15 +239,14 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QLabel" name="lb_external_id_2">
-            <property name="text">
-             <string>External Source Id :</string>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="cmb_capture_src_grp">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QgsFieldComboBox" name="fcb_external_id">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -335,6 +258,61 @@ QGroupBox::title {
               <width>245</width>
               <height>16777215</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QComboBox" name="cmb_capture_method">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="1">
+           <widget class="QComboBox" name="cmb_organisation">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QLineEdit" name="le_data_description">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="rad_external_id">
+            <property name="text">
+             <string>External Id Field:</string>
             </property>
            </widget>
           </item>
@@ -386,10 +364,26 @@ QGroupBox::title {
             </item>
            </layout>
           </item>
-          <item row="11" column="0">
-           <widget class="QLabel" name="lb_organisation">
+          <item row="0" column="0">
+           <widget class="QLabel" name="lb_outlines">
             <property name="text">
-             <string>Organisation:</string>
+             <string>Layer:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QgsFieldComboBox" name="fcb_external_id">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>245</width>
+              <height>16777215</height>
+             </size>
             </property>
            </widget>
           </item>
@@ -397,29 +391,37 @@ QGroupBox::title {
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="l_cs_area_title">
-         <property name="font">
-          <font>
-           <kerning>true</kerning>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="l_cs_area_title">
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QLabel {
+    font-size: 11pt;
+    color: grey;
+}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QPushButton" name="btn_compare_outlines">
@@ -448,19 +450,6 @@ QGroupBox::title {
           <string>Compare Outlines</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="grpb_edits">
@@ -641,6 +630,75 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="lb_ta">
+            <property name="text">
+             <string>Territorial Authority: </string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
+           <widget class="QComboBox" name="cmb_ta">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QLabel" name="lb_suburb">
+            <property name="text">
+             <string>Suburb:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="1">
+           <widget class="QComboBox" name="cmb_suburb">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="lb_town">
+            <property name="text">
+             <string>Town/City:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="1">
+           <widget class="QComboBox" name="cmb_town">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>256</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
           <item row="14" column="0" colspan="2">
            <layout class="QHBoxLayout" name="hzly_4">
             <item>
@@ -716,75 +774,6 @@ QGroupBox::title {
              </widget>
             </item>
            </layout>
-          </item>
-          <item row="8" column="1">
-           <widget class="QComboBox" name="cmb_ta">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="8" column="0">
-           <widget class="QLabel" name="lb_ta">
-            <property name="text">
-             <string>Territorial Authority: </string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="0">
-           <widget class="QLabel" name="lb_suburb">
-            <property name="text">
-             <string>Suburb:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="9" column="1">
-           <widget class="QComboBox" name="cmb_suburb">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="1">
-           <widget class="QComboBox" name="cmb_town">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>256</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QLabel" name="lb_town">
-            <property name="text">
-             <string>Town/City:</string>
-            </property>
-           </widget>
           </item>
          </layout>
          <zorder>cmb_status</zorder>
@@ -892,14 +881,17 @@ QGroupBox::title {
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
+        <spacer name="verticalSpacer_6">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
+         </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>0</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>

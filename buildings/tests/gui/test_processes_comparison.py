@@ -19,7 +19,8 @@
 import os
 import unittest
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QMessageBox
 from qgis.core import QgsMapLayerRegistry
 from qgis.utils import iface, plugins
 
@@ -51,6 +52,9 @@ class ProcessComparison(unittest.TestCase):
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
+
+        btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'testdata/test_bulk_load_shapefile.shp')
@@ -65,6 +69,8 @@ class ProcessComparison(unittest.TestCase):
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines
+        btn_yes = self.bulk_load_frame.msgbox_bulk_load.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.bulk_load_save_clicked(False)
         self.bulk_load_frame.bulk_load_layer = layer
 
@@ -81,6 +87,8 @@ class ProcessComparison(unittest.TestCase):
 
     def test_compare(self):
         """test database on compare clicked"""
+        btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
@@ -105,6 +113,8 @@ class ProcessComparison(unittest.TestCase):
 
     def test_gui_on_compare_clicked(self):
         """Check buttons are enabled/disabled"""
+        btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
         self.assertFalse(self.dockwidget.current_frame.btn_compare_outlines.isEnabled())
         self.assertTrue(self.dockwidget.current_frame.btn_publish.isEnabled())
@@ -116,6 +126,9 @@ class ProcessComparison(unittest.TestCase):
         result = result.fetchall()[0][0]
         sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE supplied_dataset_id = %s;'
         db._execute(sql, (result,))
+
+        btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
@@ -133,6 +146,8 @@ class ProcessComparison(unittest.TestCase):
         # result = result.fetchall()
         # self.assertEqual(len(result), 44)
         # # removed
+        # # btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+        # # QTimer.singleShot(500, btn_yes.click)
         # # self.bulk_load_frame.compare_outlines_clicked(False)
         # sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         # result = db._execute(sql)
@@ -149,6 +164,9 @@ class ProcessComparison(unittest.TestCase):
         result = db._execute(sql, (result, None, 2, 1, 1, 1, 100, 1,
                                    '0103000020910800000100000005000000EA7ABCBF6AA83C414C38B255343155417C46175878A83C413A28764134315541C18607A978A83C417A865C33323155412FBBAC106BA83C417A865C3332315541EA7ABCBF6AA83C414C38B25534315541'))
         result = result.fetchall()[0][0]
+
+        btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.compare_outlines_clicked(False)
         # added
         sql = 'SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;'
