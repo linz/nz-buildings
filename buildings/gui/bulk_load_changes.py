@@ -328,21 +328,21 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.cmb_capture_source.findText(text))
 
         # territorial authority
-        sql = 'SELECT buildings.territorial_authority_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_ta.index(result.fetchall()[0][0])
         self.bulk_load_frame.cmb_ta.setCurrentIndex(index)
 
         # town locality
-        sql = 'SELECT buildings.town_city_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.town_city_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_town.index(result.fetchall()[0][0])
         self.bulk_load_frame.cmb_town.setCurrentIndex(index)
 
         # suburb locality
-        sql = 'SELECT buildings.suburb_locality_intersect_polygon(%s);'
+        sql = 'SELECT buildings_reference.suburb_locality_intersect_polygon(%s);'
         result = self.bulk_load_frame.db._execute(sql,
                                                   (self.bulk_load_frame.geom,))
         index = self.bulk_load_frame.ids_suburb.index(result.fetchall()[0][0])
@@ -439,7 +439,7 @@ class EditAttribute(BulkLoadChanges):
                 self.bulk_load_frame.current_dataset
             ))
         self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_red.qml')
+            path + 'building_removed.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
             self.bulk_load_frame.ids = []

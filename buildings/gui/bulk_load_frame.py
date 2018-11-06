@@ -6,7 +6,7 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QMenu, QMessageBox
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer
 from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -59,6 +59,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
+        self.cb_bulk_load.hide()
 
         # Find current supplied dataset
         result = self.db._execute(select.dataset_count_processed_date_is_null)
@@ -81,6 +82,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
             self.display_current_bl_not_compared()
+            self.cb_bulk_load.show()
+            self.cb_bulk_load.setChecked(True)
 
         # if all datasets are processed
         else:
@@ -105,6 +108,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
                 self.display_not_published()
+                self.cb_bulk_load.show()
+                self.cb_bulk_load.setChecked(True)
 
             # No current dataset is being worked on
             else:
@@ -156,6 +161,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
         self.btn_exit.clicked.connect(self.exit_clicked)
+
+        self.cb_bulk_load.clicked.connect(self.cb_bulk_load_clicked)
 
     def confirmation_dialog_box(self, button_text):
         return QMessageBox(QMessageBox.Question, button_text.upper(), 'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
@@ -309,7 +316,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'removed_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.current_dataset))
-        self.bulk_load_removed.loadNamedStyle(path + 'building_red.qml')
+        self.bulk_load_removed.loadNamedStyle(path + 'building_removed.qml')
         self.bulk_load_added = self.layer_registry.add_postgres_layer(
             'added_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
@@ -323,6 +330,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'loaded_datasets', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '', '')
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
+
+    @pyqtSlot(bool)
+    def cb_bulk_load_clicked(self, checked):
+        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        if checked:
+            group.setVisible(Qt.Checked)
+        else:
+            group.setVisible(Qt.Unchecked)
 
     @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
@@ -341,6 +356,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
+            self.cb_bulk_load.show()
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -628,6 +644,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
+            self.cb_bulk_load.hide()
 
     @pyqtSlot()
     def exit_clicked(self):

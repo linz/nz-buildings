@@ -4,9 +4,9 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QFrame, QMenu
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer
 from qgis.utils import iface
 
 from buildings.gui import production_changes
@@ -41,6 +41,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_status = None
         self.change_instance = None
 
+        self.cb_production.setChecked(True)
+
         self.menu = QMenu()
         self.action_add_outline = QAction('Add Outline', self.menu)
         self.action_edit_attribute = QAction('Edit Attribute', self.menu)
@@ -59,6 +61,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.tbtn_edits.clicked.connect(self.tbtn_edits_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
+        self.cb_production.clicked.connect(self.cb_production_clicked)
 
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
@@ -83,6 +86,14 @@ class ProductionFrame(QFrame, FORM_CLASS):
             'end_lifespan is NULL')
         self.building_layer.loadNamedStyle(path + 'building_blue.qml')
         iface.setActiveLayer(self.building_layer)
+
+    @pyqtSlot(bool)
+    def cb_production_clicked(self, checked):
+        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        if checked:
+            group.setVisible(Qt.Checked)
+        else:
+            group.setVisible(Qt.Unchecked)
 
     @pyqtSlot(QAction)
     def tbtn_edits_triggered(self, action):
