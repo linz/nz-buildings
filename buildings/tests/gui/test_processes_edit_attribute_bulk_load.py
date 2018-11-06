@@ -96,7 +96,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_geom_before_edit(self):
-        """UI and Canvas behave correctly when geometry is selected before editing is toggled"""
+        """UI and Canvas behave correctly when geometry is selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -136,7 +136,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_multiple_geom_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
@@ -188,7 +188,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Kelburn')
 
     def test_cannot_select_nonidentical_multiple_geoms_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()

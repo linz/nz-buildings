@@ -330,7 +330,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.production_frame.db.rollback_open_cursor()
 
     def test_select_geom_before_edit(self):
-        """UI and Canvas behave correctly when one geometry is selected before editing is toggled"""
+        """UI and Canvas behave correctly when one geometry is selected before edits button clicked"""
         self.production_frame.btn_exit_edits.click()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -370,7 +370,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_multiple_geom_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.production_frame.btn_exit_edits.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
@@ -423,7 +423,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Kelburn')
 
     def test_cannot_select_nonidentical_multiple_geoms_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.production_frame.btn_exit_edits.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
