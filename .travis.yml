@@ -2,7 +2,21 @@
 matrix:
   include:
 
-    - env: PGSQL=9.4 PGIS=2.3 PGPORT=5432
+
+matrix:
+  include:
+
+    - env: BUILD=docs
+      language: python
+      before_install: []
+      install:
+        - pip install Sphinx sphinx_rtd_theme
+        - pip install -r requirements-docs.txt
+      before_script: []
+      script: sphinx-build -b html docs/source docs
+      after_script: []
+
+    - env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
       addons:
         postgresql: 9.4
         apt:
@@ -10,7 +24,7 @@ matrix:
             - postgresql-9.4
             - postgresql-9.4-pgtap
 
-    - env: PGSQL=9.5 PGIS=2.3 PGPORT=5432
+    - env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
       addons:
         postgresql: 9.5
         apt:
@@ -18,7 +32,7 @@ matrix:
             - postgresql-9.5
             - postgresql-9.5-pgtap
 
-    - env: PGSQL=9.5 PGIS=2.4 PGPORT=5432
+    - env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
       addons:
         postgresql: 9.5
         apt:
@@ -26,7 +40,7 @@ matrix:
             - postgresql-9.5
             - postgresql-9.5-pgtap
 
-    - env: PGSQL=9.6 PGIS=2.3 PGPORT=5432
+    - env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
       addons:
         postgresql: 9.6
         apt:
@@ -34,7 +48,7 @@ matrix:
             - postgresql-9.6
             - postgresql-9.6-pgtap
 
-    - env: PGSQL=9.6 PGIS=2.4 PGPORT=5432
+    - env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
       addons:
         postgresql: 9.6
         apt:
@@ -42,7 +56,7 @@ matrix:
             - postgresql-9.6
             - postgresql-9.6-pgtap
 
-    - env: PGSQL=10 PGIS=2.4 PGPORT=5433
+    - env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
       addons:
         postgresql: 10
         apt:
