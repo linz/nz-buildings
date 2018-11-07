@@ -12,9 +12,8 @@ from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
+from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
-from buildings.sql import select_statements as select
-
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -211,7 +210,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_related_bulk_load.setSubsetString('')
 
     def setup_message_box(self):
-        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure you want to turn on auto-save?', buttons=QMessageBox.No | QMessageBox.Yes)
+        self.msgbox = QMessageBox(QMessageBox.Question, 'Auto-save', 'Are you sure you want to turn on auto-save?',
+                                  buttons=QMessageBox.No | QMessageBox.Yes)
 
     @pyqtSlot()
     def on_dockwidget_closed(self):
@@ -780,24 +780,24 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog.show()
 
     def find_added_outlines(self, id_bulk):
-        result = self.db._execute(select.added_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.added_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         return result.fetchone()
 
     def find_removed_outlines(self, id_existing):
-        result = self.db._execute(select.removed_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.removed_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         return result.fetchone()
 
     def find_matched_existing_outlines(self, id_bulk):
-        result = self.db._execute(select.matched_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.matched_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         return result.fetchone()
 
     def find_matched_bulk_load_outlines(self, id_existing):
-        result = self.db._execute(select.matched_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.matched_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         return result.fetchone()
 
     def find_related_existing_outlines(self, id_bulk):
         ids_existing, ids_bulk = [], []
-        result = self.db._execute(select.related_by_bulk_load_outlines, (id_bulk, self.current_dataset))
+        result = self.db._execute(bulk_load_select.related_by_bulk_load_outline_id_dataset_id, (id_bulk, self.current_dataset))
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
@@ -805,7 +805,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def find_related_bulk_load_outlines(self, id_existing):
         ids_existing, ids_bulk = [], []
-        result = self.db._execute(select.related_by_existing_outlines, (id_existing, self.current_dataset))
+        result = self.db._execute(bulk_load_select.related_by_existing_outline_id_dataset_id, (id_existing, self.current_dataset))
         for (id_existing, id_bulk) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
@@ -965,10 +965,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_new_added_outlines(self):
         # added
-        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s);'
+        sql_insert_added = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s, %s);'
         for feat in self.lyr_added_bulk_load_in_edit.getFeatures():
             id_bulk = feat['bulk_load_outline_id']
-            self.db.execute_no_commit(sql_insert_added, (id_bulk,))
+            self.db.execute_no_commit(sql_insert_added, (id_bulk, 2))
 
     def insert_new_removed_outlines(self):
         # removed
@@ -1040,7 +1040,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_related(self):
         """Populates tbl_relationship when cmb_relationship switches to related"""
         tbl = self.tbl_relationship
-        result = self.db._execute(select.related_by_datasetID, (self.current_dataset, ))
+        result = self.db._execute(bulk_load_select.related_by_dataset_id, (self.current_dataset, ))
         for (id_group, id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -1052,7 +1052,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
         tbl = self.tbl_relationship
-        result = self.db._execute(select.matched_by_datasetID, (self.current_dataset, ))
+        result = self.db._execute(bulk_load_select.matched_by_dataset_id, (self.current_dataset, ))
         for (id_existing, id_bulk, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -1063,7 +1063,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_removed(self):
         """Populates tbl_relationship when cmb_relationship switches to removed"""
         tbl = self.tbl_relationship
-        result = self.db._execute(select.removed_by_datasetID, (self.current_dataset, ))
+        result = self.db._execute(bulk_load_select.removed_by_dataset_id, (self.current_dataset, ))
         for (id_existing, qa_status) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -1108,28 +1108,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
-        sql_update_related = """UPDATE buildings_bulk_load.related
-                                SET qa_status_id = %s
-                                WHERE related_group_id in(
-                                    SELECT related_group_id
-                                    FROM buildings_bulk_load.related
-                                    WHERE building_outline_id = %s AND bulk_load_outline_id = %s
-                                )
-                                """
+        sql_update_related = 'SELECT buildings_bulk_load.related_update_qa_status_id(%s, %s, %s);'
         self.db.execute_no_commit(sql_update_related, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_matched(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in matched table"""
-        sql_update_matched = """UPDATE buildings_bulk_load.matched
-                                SET qa_status_id = %s
-                                WHERE building_outline_id = %s AND bulk_load_outline_id = %s;"""
+        sql_update_matched = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s);'
         self.db.execute_no_commit(sql_update_matched, (qa_status_id, id_existing, id_bulk))
 
     def update_qa_status_in_removed(self, id_existing, qa_status_id):
         """Updates qa_status_id in removed table"""
-        sql_update_removed = """UPDATE buildings_bulk_load.removed
-                                SET qa_status_id = %s
-                                WHERE building_outline_id = %s;"""
+        sql_update_removed = 'SELECT buildings_bulk_load.removed_update_qa_status_id(%s, %s);'
         self.db.execute_no_commit(sql_update_removed, (qa_status_id, id_existing))
 
     def select_row_in_tbl_matched(self, id_existing, id_bulk):
