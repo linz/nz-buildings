@@ -310,15 +310,15 @@ class AddProduction(ProductionChanges):
         if len(result) == 0:
             iface.messageBar().pushMessage(
                 'Capture Source',
-                'The new outline overlaps with no capture source area, please manully chooce one.',
-                level=QgsMessageBar.INFO,
+                'The new outline overlaps with no capture source area, please manually choose one.',
+                level=QgsMessageBar.WARNING,
                 duration=10
             )
         elif len(result) > 1:
             iface.messageBar().pushMessage(
                 'Capture Source',
-                'The new outline overlaps with multiple capture source areas, please manully chooce one.',
-                level=QgsMessageBar.INFO,
+                'The new outline overlaps with multiple capture source areas, please manually choose one.',
+                level=QgsMessageBar.WARNING,
                 duration=10
             )
         else:
