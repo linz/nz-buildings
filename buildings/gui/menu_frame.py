@@ -3,7 +3,7 @@
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtGui import QFrame, QPixmap
+from PyQt4.QtGui import QFrame
 
 
 # Get the path for the parent directory of this file.

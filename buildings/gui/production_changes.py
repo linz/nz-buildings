@@ -7,7 +7,10 @@ from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import select_statements as select
+from buildings.sql import (buildings_common_select_statements as common_select,
+                           buildings_select_statements as buildings_select,
+                           buildings_reference_select_statements as reference_select,
+                           general_select_statements as general_select)
 
 
 class ProductionChanges:
@@ -28,28 +31,28 @@ class ProductionChanges:
         """
         if self.production_frame.layout_capture_method.isVisible():
             # populate capture method combobox
-            result = self.production_frame.db._execute(select.capture_method_value)
+            result = self.production_frame.db._execute(common_select.capture_method_value)
             ls = result.fetchall()
             for item in ls:
                 self.production_frame.cmb_capture_method.addItem(item[0])
 
         if self.production_frame.layout_general_info.isVisible():
             # populate capture source group
-            result = self.production_frame.db._execute(select.capture_source_group_value_desc_external)
+            result = self.production_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
             for item in ls:
                 text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
                 self.production_frame.cmb_capture_source.addItem(text)
 
             # populate lifecycle stage combobox
-            result = self.production_frame.db._execute(select.lifecycle_stage_value)
+            result = self.production_frame.db._execute(buildings_select.lifecycle_stage_value)
             ls = result.fetchall()
             for item in ls:
                 self.production_frame.cmb_lifecycle_stage.addItem(item[0])
 
             # populate territorial authority combobox
             result = self.production_frame.db._execute(
-                select.territorial_authority_intersect_geom,
+                reference_select.territorial_authority_intersect_geom,
                 (self.production_frame.geom,)
             )
             self.production_frame.ids_ta = []
@@ -59,7 +62,7 @@ class ProductionChanges:
 
             # populate suburb combobox
             result = self.production_frame.db._execute(
-                select.suburb_locality_intersect_geom,
+                reference_select.suburb_locality_intersect_geom,
                 (self.production_frame.geom,)
             )
             self.production_frame.ids_suburb = []
@@ -70,7 +73,7 @@ class ProductionChanges:
 
             # populate town combobox
             result = self.production_frame.db._execute(
-                select.town_city_intersect_geom,
+                reference_select.town_city_intersect_geometry,
                 (self.production_frame.geom,)
             )
             self.production_frame.cmb_town.addItem('')
@@ -85,7 +88,7 @@ class ProductionChanges:
             # capture method id
             text = self.production_frame.cmb_capture_method.currentText()
             result = self.production_frame.db.execute_no_commit(
-                select.capture_method_ID_by_value, (text,))
+                common_select.capture_method_id_by_value, (text,))
             capture_method_id = result.fetchall()[0][0]
         else:
             capture_method_id = None
@@ -93,27 +96,18 @@ class ProductionChanges:
         if self.production_frame.layout_general_info.isVisible():
             # capture source
             text = self.production_frame.cmb_capture_source.currentText()
-            # if there are no capture source entries
-            if text == '':
-                self.production_frame.error_dialog = ErrorDialog()
-                self.production_frame.error_dialog.fill_report(
-                    '\n ---------------- NO CAPTURE SOURCE ---------'
-                    '------- \n\nThere are no capture source entries'
-                )
-                self.production_frame.error_dialog.show()
-                return
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
-                select.capture_srcgrp_by_value_and_description, (
+                common_select.capture_source_group_by_value_and_description, (
                     text_ls[0], text_ls[1]
                 ))
             data = result.fetchall()[0][0]
             if text_ls[2] == 'None':
                 result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrdID_is_null, (data,))
+                    common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
             else:
                 result = self.production_frame.db.execute_no_commit(
-                    select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+                    common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
                         data, text_ls[2]
                     ))
             capture_source_id = result.fetchall()[0][0]
@@ -121,7 +115,7 @@ class ProductionChanges:
             # lifecycle stage
             text = self.production_frame.cmb_lifecycle_stage.currentText()
             result = self.production_frame.db.execute_no_commit(
-                select.lifecycle_stage_ID_by_value, (text,))
+                buildings_select.lifecycle_stage_id_by_value, (text,))
             lifecycle_stage_id = result.fetchall()[0][0]
 
             # suburb
@@ -274,7 +268,7 @@ class AddProduction(ProductionChanges):
         new_geometry = new_feature.geometry()
         # convert to correct format
         wkt = new_geometry.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         # enable & populate comboboxes
@@ -304,7 +298,7 @@ class AddProduction(ProductionChanges):
             self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
 
         # capture source
-        result = self.production_frame.db._execute(select.capture_source_area_intersect_geom,
+        result = self.production_frame.db._execute(reference_select.capture_source_area_intersect_geom,
                                                    (self.production_frame.geom,))
         result = result.fetchall()
         if len(result) == 0:
@@ -493,7 +487,7 @@ class EditAttribute(ProductionChanges):
         """
         # lifeycle stage
         result = self.production_frame.db._execute(
-            select.lifecycle_stage_value_by_outlineID, (
+            buildings_select.lifecycle_stage_value_by_building_outline_id, (
                 self.production_frame.building_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -502,7 +496,7 @@ class EditAttribute(ProductionChanges):
 
         # capture method
         result = self.production_frame.db._execute(
-            select.capture_method_value_by_building_outlineID, (
+            common_select.capture_method_value_by_building_outline_id, (
                 self.production_frame.building_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -511,7 +505,7 @@ class EditAttribute(ProductionChanges):
 
         # capture source
         result = self.production_frame.db._execute(
-            select.capture_source_group_value_desc_external_by_building_outlineID,
+            common_select.capture_source_group_value_description_external_by_bulk_outline_id,
             (self.production_frame.building_outline_id,)
         )
         result = result.fetchall()[0]
@@ -521,7 +515,7 @@ class EditAttribute(ProductionChanges):
 
         # suburb
         result = self.production_frame.db._execute(
-            select.suburb_locality_suburb_4th_by_building_outlineID, (
+            reference_select.suburb_locality_suburb_4th_by_building_outline_id, (
                 self.production_frame.building_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -530,7 +524,7 @@ class EditAttribute(ProductionChanges):
 
         # town city
         result = self.production_frame.db._execute(
-            select.town_city_name_by_building_outlineID, (
+            reference_select.town_city_name_by_building_outline_id, (
                 self.production_frame.building_outline_id,
             ))
         result = result.fetchall()
@@ -542,7 +536,7 @@ class EditAttribute(ProductionChanges):
 
         # territorial Authority
         result = self.production_frame.db._execute(
-            select.territorial_authority_name_by_building_outline_id, (
+            reference_select.territorial_authority_name_by_building_outline_id, (
                 self.production_frame.building_outline_id,
             ))
         result = result.fetchall()[0][0]
@@ -639,7 +633,7 @@ class EditGeometry(ProductionChanges):
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
         result = self.production_frame.db._execute(
-            select.building_outline_shape_by_id, (qgsfId,))
+            buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,))
         result = result.fetchall()[0][0]
         if self.production_frame.geom == result:
             if qgsfId in self.production_frame.geoms.keys():
