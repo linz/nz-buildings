@@ -70,10 +70,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.dockwidget.closed.connect(self.on_dockwidget_closed)
 
-        self.btn_qa_okay.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_okay.text(), commit_status=True))
-        self.btn_qa_pending.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_pending.text(), commit_status=True))
-        self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_refer2supplier.text(), commit_status=True))
-        self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, self.btn_qa_not_checked.text(), commit_status=True))
+        self.btn_qa_okay.clicked.connect(partial(self.btn_qa_status_clicked, 'Okay', commit_status=True))
+        self.btn_qa_pending.clicked.connect(partial(self.btn_qa_status_clicked, 'Pending', commit_status=True))
+        self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, 'Refer to Supplier', commit_status=True))
+        self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Checked', commit_status=True))
         self.btn_qa_not_removed.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Removed', commit_status=True))
         self.btn_maptool.clicked.connect(self.maptool_clicked)
         self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
@@ -1082,7 +1082,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_status_id = 2
         elif qa_status == 'Pending':
             qa_status_id = 3
-        elif qa_status == 'Refer':  # 'Refer to Supplier'
+        elif qa_status == 'Refer to Supplier':
             qa_status_id = 4
         elif qa_status == 'Not Checked':
             qa_status_id = 1
