@@ -20,7 +20,7 @@
 import os
 
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QDockWidget, QListWidgetItem
+from PyQt4.QtGui import QDockWidget
 from PyQt4 import uic
 
 from buildings.settings import project

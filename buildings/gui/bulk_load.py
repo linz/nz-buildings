@@ -3,7 +3,9 @@
 from PyQt4.QtCore import pyqtSlot
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import select_statements as select
+from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_common_select_statements as common_select,
+                           general_select_statements as general_select)
 
 
 def populate_bulk_comboboxes(self):
@@ -12,28 +14,28 @@ def populate_bulk_comboboxes(self):
     """
     # organisation combobox
     self.cmb_organisation.clear()
-    result = self.db._execute(select.organisation_value)
+    result = self.db._execute(bulk_load_select.organisation_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_organisation.addItem(item[0])
 
     # capture method combobox
     self.cmb_capture_method.clear()
-    result = self.db._execute(select.capture_method_value)
+    result = self.db._execute(common_select.capture_method_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_capture_method.addItem(item[0])
 
     # capture source group
     self.cmb_capture_src_grp.clear()
-    result = self.db._execute(select.capture_srcgrp_value_description)
+    result = self.db._execute(common_select.capture_source_group_value_description)
     ls = result.fetchall()
     for item in ls:
         text = str(item[0]) + '- ' + str(item[1])
         self.cmb_capture_src_grp.addItem(text)
 
     # populates external source combobox when radiobutton is selected
-    result = self.db._execute(select.capture_source_external_sourceID)
+    result = self.db._execute(common_select.capture_source_external_source_id)
     ls = result.fetchall()
     for item in ls:
         if item[0] is not None:
@@ -53,7 +55,7 @@ def load_current_fields(self):
     """
     # capture method
     result = self.db._execute(
-        select.capture_method_value_by_datasetID, (
+        common_select.capture_method_value_by_dataset_id, (
             self.current_dataset,)
     )
     result = result.fetchall()[0][0]
@@ -62,20 +64,20 @@ def load_current_fields(self):
 
     # organisation
     result = self.db._execute(
-        select.organisation_value_by_datasetID, (self.current_dataset,))
+        bulk_load_select.organisation_value_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_organisation.setCurrentIndex(
         self.cmb_organisation.findText(result))
 
     # data description
     result = self.db._execute(
-        select.dataset_description_by_datasetID, (self.current_dataset,))
+        bulk_load_select.supplied_dataset_description_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.le_data_description.setText(result)
 
     # External Id/fields
     ex_result = self.db._execute(
-        select.capture_src_extsrcID_by_datasetID, (self.current_dataset,))
+        common_select.capture_source_external_source_id_by_dataset_id, (self.current_dataset,))
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_id.setChecked(True)
@@ -84,7 +86,7 @@ def load_current_fields(self):
 
     # capture source group
     result = self.db._execute(
-        select.capture_srcgrp_capture_srcgrpID_by_datasetID, (
+        common_select.capture_source_group_id_by_dataset_id, (
             self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_capture_src_grp.setCurrentIndex(result - 1)
@@ -147,19 +149,19 @@ def bulk_load(self, commit_status):
 
     # organisation
     text = self.cmb_organisation.currentText()
-    result = self.db._execute(select.organisation_ID_by_value, (text,))
+    result = self.db._execute(bulk_load_select.organisation_id_by_value, (text,))
     organisation = result.fetchall()[0][0]
 
     # capture method
     text = self.cmb_capture_method.currentText()
-    result = self.db._execute(select.capture_method_ID_by_value, (text,))
+    result = self.db._execute(common_select.capture_method_id_by_value, (text,))
     capture_method = result.fetchall()[0][0]
 
     # capture source group
     text = self.cmb_capture_src_grp.currentText()
     text_ls = text.split('-')
     result = self.db._execute(
-        select.capture_source_group_srcrpID_by_value, (text_ls[0],))
+        common_select.capture_source_group_id_by_value, (text_ls[0],))
     capture_source_group = result.fetchall()[0][0]
 
     # external source
@@ -229,7 +231,7 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
     for outline in layer.getFeatures():
         # outline geometry
         wkt = outline.geometry().exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.db.execute_no_commit(sql, (wkt, ))
         geom = result.fetchall()[0][0]
 
@@ -259,7 +261,7 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method,
     capture_source = None
     if len(self.cmb_external_id.currentText()) is not 0:
         result = self.db.execute_no_commit(
-            select.capture_source_ID_by_capsrcgrpID_and_externalSrcID, (
+            common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
                 capture_source_group, external_source_id,
             ))
         value = result.fetchall()
@@ -278,7 +280,7 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method,
             capture_source = value[0][0]
     else:
         result = self.db.execute_no_commit(
-            select.capture_source_ID_by_capsrcgrdID_is_null, (
+            common_select.capture_source_id_by_capture_source_group_id_is_null, (
                 capture_source_group,))
         value = result.fetchall()
         # if no related capture source exists
@@ -305,7 +307,7 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method,
     self.db.execute_no_commit(sql, (dataset_id, ))
     # insert into deletion_description
     results = self.db.execute_no_commit(
-        select.bulk_load_removed_outlines_ID_by_datasetID, (dataset_id,))
+        bulk_load_select.bulk_load_removed_outline_ids_by_dataset_id, (dataset_id,))
     bulk_loaded_ids = results.fetchall()
     for bulk_loaded_id in bulk_loaded_ids:
         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
