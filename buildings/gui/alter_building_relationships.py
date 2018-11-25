@@ -679,12 +679,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # Move to the next 'not checked'
         for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            if self.tbl_relationship.item(row, qa_column).text() == "Not Checked":
+            item = self.tbl_relationship.item(row, qa_column)
+            if item.text() == "Not Checked":
                 self.tbl_relationship.selectRow(row)
+                self.tbl_relationship.scrollToItem(item)
                 break
         if not self.tbl_relationship.selectionModel().selectedRows():
             self.tbl_relationship.selectRow(max(selected_rows))
-        self.tbl_relationship.setFocus(Qt.MouseFocusReason)
+            item = self.tbl_relationship.item(max(selected_rows), qa_column)
+            self.tbl_relationship.scrollToItem(item)
 
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
