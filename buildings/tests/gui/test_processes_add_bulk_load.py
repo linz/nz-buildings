@@ -48,7 +48,8 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.rad_add.click()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_add_outline)
+        self.bulk_load_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""
@@ -96,11 +97,10 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         self.bulk_load_frame.db.rollback_open_cursor()
 
-    def test_reset_button(self):
+    def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
@@ -169,7 +169,6 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_new_outline_insert(self):
@@ -220,7 +219,6 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         # change indexes of comboboxes
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(0)

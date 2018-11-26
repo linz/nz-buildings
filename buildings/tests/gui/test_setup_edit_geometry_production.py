@@ -38,7 +38,8 @@ class SetUpEditProduction(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.rad_edit.click()
+        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_edit_geometry)
+        self.production_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""
@@ -46,14 +47,12 @@ class SetUpEditProduction(unittest.TestCase):
 
     def test_production_gui_set_up(self):
         """ Initial set up of the frame """
+        self.assertTrue(self.production_frame.layout_capture_method.isVisible())
+        self.assertFalse(self.production_frame.layout_general_info.isVisible())
         self.assertFalse(self.production_frame.btn_save.isEnabled())
         self.assertFalse(self.production_frame.btn_reset.isEnabled())
+        self.assertTrue(self.production_frame.btn_exit_edits.isEnabled())
         self.assertFalse(self.production_frame.cmb_capture_method.isEnabled())
-        self.assertFalse(self.production_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.production_frame.cmb_ta.isEnabled())
-        self.assertFalse(self.production_frame.cmb_town.isEnabled())
-        self.assertFalse(self.production_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.production_frame.cmb_lifecycle_stage.isEnabled())
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """

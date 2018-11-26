@@ -49,53 +49,15 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_attribute)
+        self.bulk_load_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
 
-    def test_ui_on_geom_changed(self):
-        """UI and canvas behave correctly when geometry is changed"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-                           delay=30)
-        QTest.qWait(10)
-        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_status.isEnabled())
-        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
-        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
-        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
-
     def test_ui_on_geom_selected(self):
         """UI and Canvas behave correctly when geometry is selected"""
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -127,13 +89,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_geom_before_edit(self):
-        """UI and Canvas behave correctly when geometry is selected before editing is toggled"""
+        """UI and Canvas behave correctly when geometry is selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -149,12 +112,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                                       1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        iface.actionSelect().trigger()
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_attribute)
+        self.bulk_load_frame.tbtn_edits.click()
         self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -166,13 +129,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
 
         self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_multiple_geom_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
@@ -205,8 +169,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878315, 5555631)),
                          delay=50)
         QTest.qWait(100)
-        self.bulk_load_frame.rad_edit.click()
-        iface.actionSelect().trigger()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_attribute)
+        self.bulk_load_frame.tbtn_edits.click()
         self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
@@ -217,13 +181,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(), u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
+        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(),
+                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Kelburn')
 
     def test_cannot_select_nonidentical_multiple_geoms_before_edit(self):
-        """UI and Canvas behave correctly when multiple geometries are selected before editing is toggled"""
+        """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
         self.bulk_load_frame.btn_edit_cancel.click()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
@@ -256,8 +221,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878219, 5555190)),
                          delay=50)
         QTest.qWait(100)
-        self.bulk_load_frame.rad_edit.click()
-        iface.actionSelect().trigger()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_attribute)
+        self.bulk_load_frame.tbtn_edits.click()
         self.bulk_load_frame.error_dialog.close()
         self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
@@ -268,101 +233,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
 
-    def test_ui_on_geom_changed_and_selected(self):
-        """UI and Canvas behave correctly when both selections and geometry changes occur"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-                           delay=30)
-        QTest.qWait(10)
-        iface.actionSelect().trigger()
-        QTest.qWait(10)
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.qWait(10)
-
-        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_status.isEnabled())
-        self.assertFalse(self.bulk_load_frame.le_deletion_reason.isEnabled())
-        self.assertEqual(self.bulk_load_frame.le_deletion_reason.text(), '')
-        self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_status.currentText(), 'Supplied')
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
-        self.assertEqual(self.bulk_load_frame.cmb_capture_source.currentText(),
-                         u'NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/- 1')
-        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Aro Valley')
-
-    def test_geometries_on_reset(self):
-        """Check Geometries reset correctly when 'reset' called"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-                           delay=30)
-        QTest.qWait(10)
-        self.bulk_load_frame.btn_edit_reset.click()
-        layer = iface.activeLayer()
-        idx = layer.fieldNameIndex('bulk_load_outline_id')
-        for feature in layer.getFeatures():
-            current_id = feature.attributes()[idx]
-            current_shape = feature.geometry()
-            wkt = current_shape.exportToWkt()
-            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
-            result = db._execute(sql, data=(wkt, ))
-            current_shape = result.fetchall()[0][0]
-            sql = 'SELECT shape from buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
-            result = db._execute(sql, (current_id,))
-            result = result.fetchall()[0][0]
-            self.assertEqual(result, current_shape)
-
-    def test_comboboxes_on_reset(self):
+    def test_reset_clicked(self):
         """Check comboboxes reset correctly when 'reset' called"""
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -399,9 +271,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), '')
 
-    def test_attributes_save_clicked(self):
+    def test_save_clicked(self):
         """Check attributes are updated when save clicked"""
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -461,49 +332,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), '')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), '')
 
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
-        self.bulk_load_frame.db.rollback_open_cursor()
-
-    def test_geometries_save_clicked(self):
-        """Check geometry is updated when save clicked"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878132.1, 5555303.9)),
-                           delay=30)
-        QTest.qWait(10)
-        self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        for key in self.bulk_load_frame.geoms:
-            sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
-            result = db._execute(sql, (key,))
-            result = result.fetchall()[0][0]
-            self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_edit_mutiple_attributes(self):
@@ -582,64 +412,13 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), '')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), '')
 
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
-        self.bulk_load_frame.db.rollback_open_cursor()
-        iface.actionSelect().trigger()
-
-    def test_edit_multiple_geometries(self):
-        """Checks the geometries of multiple features can be edited at the same time"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878132.1, 5555303.9)),
-                           delay=30)
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878210.2, 5555275.2)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878210.2, 5555275.2)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878222.6, 5555275.2)),
-                           delay=30)
-        self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        for key in self.bulk_load_frame.geoms:
-            sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
-            result = db._execute(sql, (key,))
-            result = result.fetchall()[0][0]
-            self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_geom(self):
         """Check geom 'deleted' when save clicked
         This test protects against a regression of #59"""
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -684,9 +463,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(result, [])
         selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
         self.assertEqual(selection, 0)
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_multiple_deleted_geom(self):
@@ -696,7 +474,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
         self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
-        self.bulk_load_frame.rad_edit.click()
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
         self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
@@ -712,14 +489,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(result, [])
         selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
         self.assertEqual(selection, 0)
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails(self):
         """Check 'deleting' geom fails when save clicked"""
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -760,14 +535,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [(2031,)])
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails_reason(self):
         """Check 'delete' fail when enter none in 'reason for deletion' """
-        iface.actionSelect().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
         QTest.mouseClick(widget, Qt.RightButton,
@@ -819,9 +592,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual([(2010,)], result)
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails_multiple_selection(self):
@@ -831,7 +603,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
         self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
-        self.bulk_load_frame.rad_edit.click()
         self.bulk_load_frame.cmb_status.setCurrentIndex(self.bulk_load_frame.cmb_status.findText('Deleted During QA'))
         self.bulk_load_frame.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
@@ -854,9 +625,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         # selection
         selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
         self.assertEqual(selection, 2)
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_selection_change(self):
@@ -905,48 +675,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT capture_method_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2025;'
         result = db._execute(sql)
         self.assertNotEqual(result.fetchall()[0][0], 1)
-        self.bulk_load_frame.geoms = {}
-        self.bulk_load_frame.geom_changed = False
-        self.bulk_load_frame.select_changed = False
-        self.bulk_load_frame.db.rollback_open_cursor()
-
-    def test_capture_method_on_geometry_changed(self):
-        """Check capture method is 'Trace Orthophotography' after the geometry changes occur. #100"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton,
-                         pos=canvas_point(QgsPoint(1747651, 5428152)),
-                         delay=50)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
-                                      1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-                         delay=30)
-        QTest.mousePress(widget, Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-                         delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-                           delay=30)
-        QTest.qWait(10)
-        self.bulk_load_frame.change_instance.edit_save_clicked(False)
-
-        sql = """
-              SELECT method.value
-              FROM buildings_bulk_load.bulk_load_outlines blo
-              JOIN buildings_common.capture_method method USING (capture_method_id)
-              WHERE blo.bulk_load_outline_id = %s
-              """
-        for feat_id in self.bulk_load_frame.geoms:
-            result = db._execute(sql, (feat_id, ))
-            capture_method = result.fetchall()[0][0]
-            self.assertEqual(capture_method, 'Trace Orthophotography')
-
+        self.bulk_load_frame.ids = []
+        self.bulk_load_frame.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()

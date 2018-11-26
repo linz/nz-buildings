@@ -48,7 +48,8 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.rad_add.click()
+        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_add_outline)
+        self.production_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""
@@ -100,7 +101,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.production_frame.db.rollback_open_cursor()
 
-    def test_reset_button(self):
+    def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""
         # add geom to canvas
         widget = iface.mapCanvas().viewport()

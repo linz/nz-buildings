@@ -50,6 +50,12 @@ FROM buildings_reference.capture_source_area
 WHERE area_title = %s;
 """
 
+capture_source_area_intersect_geom = """
+SELECT csa.external_area_polygon_id
+FROM buildings_reference.capture_source_area csa
+WHERE ST_Intersects(csa.shape, %s::Geometry);
+"""
+
 # suburb locality
 
 suburb_locality_intersect_geom = """

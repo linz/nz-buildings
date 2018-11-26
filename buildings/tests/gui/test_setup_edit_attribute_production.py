@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Add Production Outline GUI setup confirm default settings
+    Tests: Edit Production Outline GUI setup confirm default settings
 
  ***************************************************************************/
 """
@@ -23,9 +23,9 @@ from qgis.core import QgsProject
 from qgis.utils import plugins
 
 
-class SetUpAddProduction(unittest.TestCase):
+class SetUpEditProduction(unittest.TestCase):
     """
-    Test Add Production Outline GUI initial
+    Test Edit Outline GUI initial
     setup confirm default settings
     """
 
@@ -38,7 +38,7 @@ class SetUpAddProduction(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_add_outline)
+        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_edit_attribute)
         self.production_frame.tbtn_edits.click()
 
     def tearDown(self):

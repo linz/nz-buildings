@@ -38,7 +38,8 @@ class SetUpEditBulkLoad(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.rad_edit.click()
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_attribute)
+        self.bulk_load_frame.tbtn_edits.click()
 
     def tearDown(self):
         """Runs after each test."""
@@ -46,8 +47,12 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
+        self.assertTrue(self.bulk_load_frame.layout_status.isVisible())
+        self.assertTrue(self.bulk_load_frame.layout_capture_method.isVisible())
+        self.assertTrue(self.bulk_load_frame.layout_general_info.isVisible())
         self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
