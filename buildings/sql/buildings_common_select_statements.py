@@ -143,6 +143,17 @@ FROM buildings_common.capture_source_group csg,
 WHERE cs.capture_source_group_id = csg.capture_source_group_id;
 """
 
+capture_source_group_value_desc_external_by_dataset_id = """
+SELECT csg.value,
+       csg.description,
+       cs.external_source_id
+FROM buildings_common.capture_source_group csg
+JOIN buildings_common.capture_source cs USING (capture_source_group_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (capture_source_id)
+WHERE blo.supplied_dataset_id = %s
+LIMIT 1;
+"""
+
 # capture source
 
 capture_source_by_group_id = """

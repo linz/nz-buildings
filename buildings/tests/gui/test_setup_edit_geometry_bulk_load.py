@@ -11,7 +11,7 @@
 #
 ################################################################################
 
-    Tests: Add New Bulk Outline GUI confirm default settings
+    Tests: Edit Bulk Load Outline GUI setup confirm default settings
 
  ***************************************************************************/
 """
@@ -23,8 +23,11 @@ from qgis.core import QgsProject
 from qgis.utils import plugins
 
 
-class SetUpBulkAddTest(unittest.TestCase):
-    """Test Add New Bulk Outline GUI processes"""
+class SetUpEditBulkLoad(unittest.TestCase):
+    """
+    Test edit bulk_load Outline GUI initial
+    setup confirm default settings
+    """
 
     def setUp(self):
         """Runs before each test."""
@@ -35,7 +38,7 @@ class SetUpBulkAddTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_add_outline)
+        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_geometry)
         self.bulk_load_frame.tbtn_edits.click()
 
     def tearDown(self):
@@ -43,21 +46,17 @@ class SetUpBulkAddTest(unittest.TestCase):
         self.bulk_load_frame.btn_exit.click()
 
     def test_bulk_load_gui_set_up(self):
-        """Buttons and comboboxes correctly enabled/disables on startup"""
+        """ Initial set up of the frame """
         self.assertFalse(self.bulk_load_frame.layout_status.isVisible())
         self.assertTrue(self.bulk_load_frame.layout_capture_method.isVisible())
-        self.assertTrue(self.bulk_load_frame.layout_general_info.isVisible())
+        self.assertFalse(self.bulk_load_frame.layout_general_info.isVisible())
         self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
         self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
 
     def test_layer_registry(self):
-        """Bulk load outlines table added to canvas when frame opened"""
+        """ Layer registry has the correct components """
         layer_bool = False
         edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
