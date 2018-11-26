@@ -251,7 +251,7 @@ class NewEntry(QFrame, FORM_CLASS):
         """
         # Check if capture source group in buildings
         # _common.capture_source_group table
-        result = self.db._execute(common_select.capture_source_group_by_value, (capture_source_group,))
+        result = self.db._execute(common_select.capture_source_group_by_value_and_description, (capture_source_group, description))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
