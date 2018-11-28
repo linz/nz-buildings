@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
-from qgis.core import QgsFeatureRequest, QgsGeometry, QgsMapLayerRegistry
+from qgis.core import QgsFeatureRequest, QgsGeometry
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -246,19 +244,12 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.db.execute_no_commit(
                 sql, (self.bulk_load_frame.outline_id, 1))
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
-        self.bulk_load_frame.layer_registry.remove_layer(
-            QgsMapLayerRegistry.instance().mapLayersByName('added_outlines')[0])
-        self.bulk_load_frame.bulk_load_added = self.bulk_load_frame.layer_registry.add_postgres_layer(
-            'added_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 2'.format(self.bulk_load_frame.current_dataset))
-        self.bulk_load_frame.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
             self.bulk_load_frame.geom = None
             self.bulk_load_frame.added_building_ids = []
         # reset and disable comboboxes
+        iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
     @pyqtSlot()
@@ -432,17 +423,6 @@ class EditAttribute(BulkLoadChanges):
         self.disable_UI_functions()
         self.bulk_load_frame.completer_box()
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
-        self.bulk_load_frame.layer_registry.remove_layer(
-            QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
-        self.bulk_load_frame.bulk_load_removed = self.bulk_load_frame.layer_registry.add_postgres_layer(
-            'removed_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(
-                self.bulk_load_frame.current_dataset
-            ))
-        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_removed.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
             self.bulk_load_frame.ids = []
@@ -715,17 +695,6 @@ class EditGeometry(BulkLoadChanges):
             )
         self.disable_UI_functions()
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'styles/')
-        self.bulk_load_frame.layer_registry.remove_layer(
-            QgsMapLayerRegistry.instance().mapLayersByName('removed_outlines')[0])
-        self.bulk_load_frame.bulk_load_removed = self.bulk_load_frame.layer_registry.add_postgres_layer(
-            'removed_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(
-                self.bulk_load_frame.current_dataset
-            ))
-        self.bulk_load_frame.bulk_load_removed.loadNamedStyle(
-            path + 'building_red.qml')
         if commit_status:
             self.bulk_load_frame.db.commit_open_cursor()
             self.bulk_load_frame.geoms = {}

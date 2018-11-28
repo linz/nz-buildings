@@ -37,8 +37,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.territorial_auth = QgsVectorLayer()
         # layer set up
         self.historic_layer = None
-        self.bulk_load_added = None
-        self.bulk_load_removed = None
         self.bulk_load_layer = None
         self.territorial_auth = None
         self.error_dialog = None
@@ -311,18 +309,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'bulk_load_outlines', 'bulk_load_outlines',
             'shape', 'buildings_bulk_load', '',
             'supplied_dataset_id = {0}'.format(self.current_dataset))
-        self.bulk_load_layer.loadNamedStyle(path + 'building_blue.qml')
+        self.bulk_load_layer.loadNamedStyle(path + 'building_editing.qml')
         iface.setActiveLayer(self.bulk_load_layer)
-        self.bulk_load_removed = self.layer_registry.add_postgres_layer(
-            'removed_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 3'.format(self.current_dataset))
-        self.bulk_load_removed.loadNamedStyle(path + 'building_removed.qml')
-        self.bulk_load_added = self.layer_registry.add_postgres_layer(
-            'added_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0} AND bulk_load_status_id = 2'.format(self.current_dataset))
-        self.bulk_load_added.loadNamedStyle(path + 'building_green.qml')
 
     def add_historic_outlines(self):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
@@ -612,8 +600,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.close_connection()
-        self.layer_registry.remove_layer(self.bulk_load_added)
-        self.layer_registry.remove_layer(self.bulk_load_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
@@ -640,8 +626,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.display_no_bulk_load()
             self.current_dataset = None
             self.lb_dataset_id.setText('None')
-            self.layer_registry.remove_layer(self.bulk_load_added)
-            self.layer_registry.remove_layer(self.bulk_load_removed)
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
@@ -663,8 +647,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
         else:
-            self.layer_registry.remove_layer(self.bulk_load_added)
-            self.layer_registry.remove_layer(self.bulk_load_removed)
             self.layer_registry.remove_layer(self.bulk_load_layer)
             if self.territorial_auth is not None:
                 self.layer_registry.remove_layer(self.territorial_auth)
