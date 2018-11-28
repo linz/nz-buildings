@@ -249,6 +249,7 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.geom = None
             self.bulk_load_frame.added_building_ids = []
         # reset and disable comboboxes
+        iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
     @pyqtSlot()

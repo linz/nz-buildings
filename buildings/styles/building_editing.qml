@@ -37,7 +37,7 @@
       <category render="true" symbol="0" value="1" label="Bulk Loaded"/>
       <category render="true" symbol="1" value="2" label="Added During QA"/>
       <category render="true" symbol="2" value="3" label="Removed During QA"/>
-      <category render="true" symbol="3" value="" label=""/>
+      <category render="true" symbol="3" value="" label="Added- to be saved"/>
     </categories>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
@@ -128,7 +128,7 @@
           <prop k="offset_map_unit_scale" v="0,0,0,0,0,0"/>
           <prop k="offset_unit" v="MM"/>
           <prop k="outline_color" v="113,255,17,255"/>
-          <prop k="outline_style" v="solid"/>
+          <prop k="outline_style" v="dash"/>
           <prop k="outline_width" v="0.75"/>
           <prop k="outline_width_unit" v="MM"/>
           <prop k="style" v="solid"/>
