@@ -77,15 +77,12 @@ class ProcessComparison(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.db.rollback_open_cursor()
+        self.bulk_load_frame.exit_clicked()
         # remove temporary layers from canvas
         layers = iface.legendInterface().layers()
         for layer in layers:
-            if 'test_bulk_load_shapefile' in str(layer.id()):
+            if 'test_bulk_load_shapefile' in str(layer.id()) or 'bulk_load_outlines' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-        self.bulk_load_frame.mlr.instance().layerWillBeRemoved.disconnect()
-        self.bulk_load_frame.layer_registry.remove_all_layers()
-        self.bulk_load_frame.mlr.instance().layerWillBeRemoved.connect(self.bulk_load_frame.dontremovefunc)
-        self.bulk_load_frame.btn_exit.click()
 
     def test_compare(self):
         """test database on compare clicked"""
