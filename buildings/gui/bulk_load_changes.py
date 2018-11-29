@@ -22,7 +22,6 @@ class BulkLoadChanges:
         # setup
         self.bulk_load_frame = bulk_load_frame
         iface.setActiveLayer(self.bulk_load_frame.bulk_load_layer)
-        iface.actionToggleEditing().trigger()
 
     def populate_edit_comboboxes(self):
         """
@@ -187,6 +186,7 @@ class AddBulkLoad(BulkLoadChanges):
     def __init__(self, bulk_load_frame):
         """Constructor"""
         BulkLoadChanges.__init__(self, bulk_load_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
         # setup toolbar
@@ -465,11 +465,8 @@ class EditAttribute(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
-        iface.actionCancelEdits().trigger()
         self.bulk_load_frame.ids = []
         self.bulk_load_frame.building_outline_id = None
-        # restart editing
-        iface.actionToggleEditing().trigger()
         iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
@@ -678,6 +675,7 @@ class EditGeometry(BulkLoadChanges):
     def __init__(self, bulk_load_frame):
         """Constructor"""
         BulkLoadChanges.__init__(self, bulk_load_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to edit polygon
         iface.actionNodeTool().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
