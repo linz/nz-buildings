@@ -297,7 +297,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.btn_save.setDisabled(1)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                           level=QgsMessageBar.CRITICAL, duration=0)
+                                           level=QgsMessageBar.CRITICAL, duration=5)
             return
 
     def insert_capture_source(self, value, external_source, commit_status):
