@@ -237,6 +237,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
         Called when edit production exit button clicked.
         """
+        self.exit_editing_clicked()
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
@@ -245,7 +246,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         Clean up and remove the edit production frame.
         """
         # reload layers
-        iface.actionCancelEdits().trigger()
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         if self.territorial_auth is not None:

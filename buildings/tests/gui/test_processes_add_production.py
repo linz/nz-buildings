@@ -236,3 +236,111 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         result2 = result2.fetchall()[0][0]
         self.assertEqual(result2, result + 1)
         self.production_frame.db.rollback_open_cursor()
+
+    def test_edit_new_outline(self):
+        """Geometry successfully saved when newly created geometry changed."""
+        sql = 'SELECT COUNT(building_outline_id) FROM buildings.building_outlines;'
+        result = db._execute(sql)
+        result = result.fetchall()[0][0]
+        # add geom
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747520, 5428152)),
+                         delay=-1)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878262, 5555314)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878262, 5555290)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555290)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.qWait(1)
+
+        iface.actionNodeTool().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.mousePress(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.mouseRelease(widget, Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878200, 5555350)),
+                           delay=-1)
+        QTest.qWait(1)
+
+        self.production_frame.change_instance.save_clicked(False)
+        sql = 'SELECT COUNT(building_outline_id) FROM buildings.building_outlines;'
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()[0][0]
+        self.assertEqual(result2, result + 1)
+        self.production_frame.db.rollback_open_cursor()
+
+    def test_edit_existing_outline_fails(self):
+        """Editing fails when the existing outlines geometry changed."""
+        # add geom
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747520, 5428152)),
+                         delay=-1)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878262, 5555314)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878262, 5555290)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555290)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878223, 5555314)),
+                         delay=-1)
+        QTest.qWait(1)
+
+        iface.actionNodeTool().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878231.71, 5555331.38)),
+                         delay=-1)
+        QTest.mousePress(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878231.71, 5555331.38)),
+                         delay=-1)
+        QTest.mouseRelease(widget, Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878250, 5555350)),
+                           delay=-1)
+        QTest.qWait(1)
+
+        self.assertTrue(self.production_frame.error_dialog.isVisible())
+        self.production_frame.error_dialog.close()
+
+        self.production_frame.btn_exit_edits.click()
+        self.production_frame.error_dialog.close()

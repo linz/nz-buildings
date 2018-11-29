@@ -641,6 +641,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Called when bulk load frame exit button clicked.
         """
+        self.edit_cancel_clicked()
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
@@ -648,7 +649,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
-        iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
         else:
