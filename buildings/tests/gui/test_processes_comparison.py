@@ -82,7 +82,9 @@ class ProcessComparison(unittest.TestCase):
         for layer in layers:
             if 'test_bulk_load_shapefile' in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+        self.bulk_load_frame.mlr.instance().layerWillBeRemoved.disconnect()
         self.bulk_load_frame.layer_registry.remove_all_layers()
+        self.bulk_load_frame.mlr.instance().layerWillBeRemoved.connect(self.bulk_load_frame.dontremovefunc)
         self.bulk_load_frame.btn_exit.click()
 
     def test_compare(self):
