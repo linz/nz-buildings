@@ -23,7 +23,6 @@ class ProductionChanges:
         # setup
         self.production_frame = production_frame
         iface.setActiveLayer(self.production_frame.building_layer)
-        iface.actionToggleEditing().trigger()
 
     def populate_edit_comboboxes(self):
         """
@@ -181,6 +180,7 @@ class AddProduction(ProductionChanges):
     def __init__(self, production_frame):
         """Constructor"""
         ProductionChanges.__init__(self, production_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
         # setup toolbar
@@ -195,14 +195,16 @@ class AddProduction(ProductionChanges):
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                'mActionAddFeature'
+                'mActionAddFeature', 'mActionNodeTool',
+                'mActionMoveFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                'mActionUndo', 'mActionRedo'
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -243,7 +245,9 @@ class AddProduction(ProductionChanges):
         """
             When production frame btn_reset clicked
         """
+        self.production_frame.building_layer.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.production_frame.building_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
@@ -288,6 +292,34 @@ class AddProduction(ProductionChanges):
             if self.production_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.production_frame.geom = None
+
+    @pyqtSlot(int, QgsGeometry)
+    def creator_geometry_changed(self, qgsfId, geom):
+        """
+           Called when feature is changed
+           @param qgsfId:      Id of added feature
+           @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
+           @param geom:        geometry of added feature
+           @type  geom:        qgis.core.QgsGeometry
+        """
+        if qgsfId in self.production_frame.added_building_ids:
+            wkt = geom.exportToWkt()
+            if not wkt:
+                self.disable_UI_functions()
+                self.production_frame.geom = None
+                return
+            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            result = self.production_frame.db._execute(sql, (wkt,))
+            self.production_frame.geom = result.fetchall()[0][0]
+        else:
+            self.production_frame.error_dialog = ErrorDialog()
+            self.production_frame.error_dialog.fill_report(
+                '\n -------------------- WRONG GEOMETRY EDITED ------'
+                '-------------- \n\nOnly current added outline can '
+                'be edited. Please go to [Edit Geometry] to edit '
+                'existing outlines.'
+            )
+            self.production_frame.error_dialog.show()
 
     def select_comboboxes_value(self):
         """
@@ -405,12 +437,10 @@ class EditAttribute(ProductionChanges):
         """
             When production frame btn_reset clicked
         """
-        iface.actionCancelEdits().trigger()
         self.production_frame.ids = []
         self.production_frame.building_outline_id = None
         # restart editing
-        iface.actionToggleEditing().trigger()
-        iface.actionNodeTool().trigger()
+        iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
@@ -553,6 +583,7 @@ class EditGeometry(ProductionChanges):
     def __init__(self, production_frame):
         """Constructor"""
         ProductionChanges.__init__(self, production_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to edit polygon
         iface.actionNodeTool().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
@@ -609,7 +640,9 @@ class EditGeometry(ProductionChanges):
         """
             When production frame btn_reset clicked
         """
+        self.production_frame.building_layer.geometryChanged.disconnect(self.geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.production_frame.building_layer.geometryChanged.connect(self.geometry_changed)
         self.production_frame.geoms = {}
         # restart editing
         iface.actionToggleEditing().trigger()

@@ -156,6 +156,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
         self.building_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.building_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        self.building_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
             'territorial_authorities', 'territorial_authority',
@@ -263,6 +264,30 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def exit_editing_clicked(self):
+
+        if isinstance(self.change_instance, production_changes.EditAttribute):
+            try:
+                self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, production_changes.EditGeometry):
+            try:
+                self.building_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, production_changes.AddProduction):
+            try:
+                self.building_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
+            except TypeError:
+                pass
+            try:
+                self.building_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
+            except TypeError:
+                pass
+            try:
+                self.building_layer.geometryChanged.disconnect(self.change_instance.creator_geometry_changed)
+            except TypeError:
+                pass
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)
@@ -283,25 +308,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_outline_id = None
         # reset editing geomtry
         self.geoms = {}
-        if isinstance(self.change_instance, production_changes.EditAttribute):
-            try:
-                self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.EditGeometry):
-            try:
-                self.building_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.AddProduction):
-            try:
-                self.building_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
-            except TypeError:
-                pass
-            try:
-                self.building_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
-            except TypeError:
-                pass
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
