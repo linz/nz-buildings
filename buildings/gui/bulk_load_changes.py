@@ -201,14 +201,16 @@ class AddBulkLoad(BulkLoadChanges):
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                'mActionAddFeature'
+                'mActionAddFeature', 'mActionNodeTool',
+                'mActionMoveFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                'mActionUndo', 'mActionRedo'
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -302,6 +304,34 @@ class AddBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.bulk_load_frame.geom = None
+
+    @pyqtSlot(int, QgsGeometry)
+    def creator_geometry_changed(self, qgsfId, geom):
+        """
+           Called when feature is changed
+           @param qgsfId:      Id of added feature
+           @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
+           @param geom:        geometry of added feature
+           @type  geom:        qgis.core.QgsGeometry
+        """
+        if qgsfId in self.bulk_load_frame.added_building_ids:
+            wkt = geom.exportToWkt()
+            if not wkt:
+                self.disable_UI_functions()
+                self.bulk_load_frame.geom = None
+                return
+            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            result = self.bulk_load_frame.db._execute(sql, (wkt,))
+            self.bulk_load_frame.geom = result.fetchall()[0][0]
+        else:
+            self.bulk_load_frame.error_dialog = ErrorDialog()
+            self.bulk_load_frame.error_dialog.fill_report(
+                '\n -------------------- WRONG GEOMETRY EDITED ------'
+                '-------------- \n\nOnly current added outline can '
+                'be edited. Please go to [Edit Geometry] to edit '
+                'existing outlines.'
+            )
+            self.bulk_load_frame.error_dialog.show()
 
     def select_comboboxes_value(self):
         """

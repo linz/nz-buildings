@@ -436,6 +436,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_cancel.clicked.connect(self.edit_cancel_clicked)
         self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        self.bulk_load_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
 
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -521,6 +522,30 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When cancel clicked
         """
+        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+            try:
+                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+            try:
+                self.bulk_load_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.creator_geometry_changed)
+            except TypeError:
+                pass
+
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
         self.btn_edit_cancel.setEnabled(False)
@@ -547,26 +572,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
-
-        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
-            try:
-                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
-            try:
-                self.bulk_load_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
-            except TypeError:
-                pass
 
     def completer_box(self):
         """
