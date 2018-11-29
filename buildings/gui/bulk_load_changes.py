@@ -259,7 +259,9 @@ class AddBulkLoad(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
@@ -734,7 +736,9 @@ class EditGeometry(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.disconnect(self.geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.connect(self.geometry_changed)
         self.bulk_load_frame.geoms = {}
         # restart editing
         iface.actionToggleEditing().trigger()
