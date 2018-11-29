@@ -6,6 +6,8 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame, QIcon, QColor, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
+from qgis.core import QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -63,6 +65,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_validate.clicked.connect(self.validate)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+
+        self.mlr = QgsMapLayerRegistry
+        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
     def populate_combobox(self):
         """
@@ -270,6 +275,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             Clean up and remove the new capture source frame.
         """
         self.db.close_connection()
+        self.mlr.instance().layerWillBeRemoved.disconnect()
         # remove capture source layer
         self.layer_registry.remove_layer(self.capture_source_area)
         # reset and hide toolbar
@@ -281,6 +287,18 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw, self.layer_registry))
+
+    @pyqtSlot(str)
+    def dontremovefunc(self, layerids):
+        # print layerids
+        if 'capture_source_area' in layerids:
+            self.cmb_capture_source_group.setDisabled(1)
+            self.btn_validate.setDisabled(1)
+            self.btn_save.setDisabled(1)
+            iface.messageBar().pushMessage("ERROR",
+                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                           level=QgsMessageBar.CRITICAL, duration=0)
+            return
 
     def insert_capture_source(self, value, external_source, commit_status):
         """

@@ -6,7 +6,8 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QFrame, QMenu
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui import production_changes
@@ -62,6 +63,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
+        self.mlr = QgsMapLayerRegistry
+        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
@@ -245,6 +248,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
         # reload layers
         iface.actionCancelEdits().trigger()
+        self.mlr.instance().layerWillBeRemoved.disconnect()
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         if self.territorial_auth is not None:
@@ -274,7 +278,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_general_info.hide()
         iface.actionCancelEdits().trigger()
         # reload layers
+        self.mlr.instance().layerWillBeRemoved.disconnect()
         self.layer_registry.remove_layer(self.territorial_auth)
+        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+
         # reset adding outlines
         self.added_building_ids = []
         self.geom = None
@@ -307,3 +314,17 @@ class ProductionFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+
+    @pyqtSlot(str)
+    def dontremovefunc(self, layerids):
+        layers = ['building_outlines', 'historic_outlines', 'territorial_authorities']
+        for layer in layers:
+            if layer in layerids:
+                self.btn_save.setDisabled(1)
+                self.btn_reset.setDisabled(1)
+                self.btn_exit_edits.setDisabled(1)
+                self.tbtn_edits.setDisabled(1)
+                iface.messageBar().pushMessage("ERROR",
+                                               "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                               level=QgsMessageBar.CRITICAL, duration=0)
+                return
