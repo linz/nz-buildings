@@ -155,7 +155,6 @@ class Buildings:
                         dw.lst_options.takeItem(row)
                 if self.layer_registry is not None:
                     self.layer_registry.clear_layer_selection()
-                    self.layer_registry.remove_all_layers()
                 dw.frames = {}
                 if dw.stk_options.count() == 2:
                     dw.stk_options.setCurrentIndex(1)
