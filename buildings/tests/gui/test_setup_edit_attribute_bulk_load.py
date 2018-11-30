@@ -63,14 +63,10 @@ class SetUpEditBulkLoad(unittest.TestCase):
     def test_layer_registry(self):
         """ Layer registry has the correct components """
         layer_bool = False
-        edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup('Building Tool Layers')
         layers = group.findLayers()
         for layer in layers:
             if layer.layer().name() == 'bulk_load_outlines':
                 layer_bool = True
-                if layer.layer().isEditable():
-                    edit_bool = True
         self.assertTrue(layer_bool)
-        self.assertTrue(edit_bool)
