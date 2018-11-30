@@ -523,12 +523,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         Clean up and remove the alter building relationships frame.
         """
         self.mlr.instance().layerWillBeRemoved.disconnect()
-
         self.reset_buttons()
         self.qa_button_set_enable(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
+        # if 'existing_subset_extracts' in [str(layer.id()) for layer in iface.legendInterface().layers()]:
         self.lyr_existing.removeSelection()
+        # if 'bulk_load_outlines' in [str(layer.id()) for layer in iface.legendInterface().layers()]:
         self.lyr_bulk_load.removeSelection()
         try:
             self.disconnect_to_error_msg()
@@ -795,7 +796,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.cb_autosave.setDisabled(1)
                 iface.messageBar().pushMessage("ERROR",
                                                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                               level=QgsMessageBar.CRITICAL, duration=0)
+                                               level=QgsMessageBar.CRITICAL, duration=5)
                 return
 
     def confirm_to_autosave(self):

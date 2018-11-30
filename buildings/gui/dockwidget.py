@@ -22,6 +22,7 @@ import os
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QDockWidget
 from PyQt4 import uic
+from qgis.core import QgsProject
 
 from buildings.settings import project
 
@@ -120,6 +121,15 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         if self.lst_options.selectedItems():
             current = self.lst_options.selectedItems()[0]
             if current.text() == 'Buildings':
+                # if isinstance(self.current_frame, self.alter_relationships):
+                    # self.current_frame.mlr.instance().layerWillBeRemoved.disconnect()
+                    # self.current_frame.layer_registry.remove_all_layers()
+                    # self.current_frame.mlr.instance().layerWillBeRemoved.connect(self.current_frame.dontremovefunc)
+                    # self.current_frame.close_frame()
+                # try:
+                #   self.current_frame.close_frame()
+                # except AttributeError:
+                #    pass
                 project.SRID = 2193
                 project.set_crs()
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
@@ -129,6 +139,11 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
     @pyqtSlot()
     def show_frame(self):
+        self.group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        if self.group is None:
+            QgsProject.instance().layerTreeRoot().insertGroup(0, "Building Tool Layers")
+            self.group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+
         if self.lst_sub_menu.selectedItems():
             current = self.lst_sub_menu.selectedItems()[0]
             # Remove the current widget and run its exit method

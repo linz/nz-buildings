@@ -141,7 +141,6 @@ class LayerRegistry(object):
         else:
             self.group = self.set_group()
         self.base_layers = {}
-        self.buildings = None
         self._layers = {}
 
         QgsMapLayerRegistry.instance().layersWillBeRemoved["QStringList"].connect(self.layer_removed)
@@ -155,7 +154,6 @@ class LayerRegistry(object):
         for layer in self.layers.values():
             layer.removeSelection()
 
-        from qgis.utils import iface
         iface.mapCanvas().refresh()
 
     def disconnect_layer_removed(self):
@@ -169,14 +167,12 @@ class LayerRegistry(object):
 
     def layer_removed(self, layers_removed):
         """Signal when layer is removed from registry"""
-        for layer_id in layers_removed:
-            if self.buildings:
-                if layer_id == self.buildings.id():
-                    self.buildings = None
-                else:
-                    self.update_layers()
-            else:
+        root = QgsProject.instance().layerTreeRoot()
+        if root.findGroup("Building Tool Layers") is not None:
+            for layer_id in layers_removed:
                 self.update_layers()
+        else:
+            self._layers = None
 
     def remove_all_layers(self):
         """Remove all layers except base_layers"""
@@ -191,12 +187,10 @@ class LayerRegistry(object):
         @param layer:     Layer instance
         @type  layer:     qgis.core.QgsVectorLayer
         """
-
-        if layer in self.layers.values():
-            layer.rollBack()
-            QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-            if layer == self.buildings:
-                self.buildings = None
+        if self.layers is not None:
+            if layer in self.layers.values():
+                layer.rollBack()
+                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def set_group(self):
         """ Sets up the QgsLayerTreeGroup for Layer Registry
@@ -212,6 +206,9 @@ class LayerRegistry(object):
             return root.findGroup("Building Tool Layers")
 
     def add_postgres_layer(self, name, db_name, geomcolumn, schema, key, sql):
+        self.group = QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
+        # if self.group is None:
+        #     self.group = self.set_group()
         try:
             layer = QgsMapLayerRegistry.instance().mapLayersByName(name)[-1]
         except IndexError:
