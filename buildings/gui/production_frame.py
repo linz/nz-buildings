@@ -148,6 +148,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.btn_reset.clicked.disconnect()
         except TypeError:
             pass
+        try:
+            self.btn_exit_edits.clicked.disconnect()
+        except Exception:
+            pass
         self.layout_capture_method.show()
         self.layout_general_info.show()
         self.change_instance = production_changes.AddProduction(self)
@@ -185,6 +189,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.btn_reset.clicked.disconnect()
         except Exception:
             pass
+        try:
+            self.btn_exit_edits.clicked.disconnect()
+        except Exception:
+            pass
         self.layout_capture_method.show()
         self.layout_general_info.show()
         self.change_instance = production_changes.EditAttribute(self)
@@ -215,6 +223,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         try:
             self.btn_reset.clicked.disconnect()
+        except Exception:
+            pass
+        try:
+            self.btn_exit_edits.clicked.disconnect()
         except Exception:
             pass
         self.layout_capture_method.show()
@@ -267,25 +279,25 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         if isinstance(self.change_instance, production_changes.EditAttribute):
             try:
-                self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                self.building_layer.selectionChanged.disconnect()
             except TypeError:
                 pass
         elif isinstance(self.change_instance, production_changes.EditGeometry):
             try:
-                self.building_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
+                self.building_layer.geometryChanged.disconnect()
             except TypeError:
                 pass
         elif isinstance(self.change_instance, production_changes.AddProduction):
             try:
-                self.building_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
+                self.building_layer.featureAdded.disconnect()
             except TypeError:
                 pass
             try:
-                self.building_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
+                self.building_layer.featureDeleted.disconnect()
             except TypeError:
                 pass
             try:
-                self.building_layer.geometryChanged.disconnect(self.change_instance.creator_geometry_changed)
+                self.building_layer.geometryChanged.disconnect()
             except TypeError:
                 pass
         # deselect both comboboxes

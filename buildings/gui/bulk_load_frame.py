@@ -424,7 +424,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.show()
@@ -465,7 +468,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.show()
         self.layout_capture_method.show()
         self.layout_general_info.show()
@@ -499,7 +505,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.hide()
@@ -524,25 +533,25 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
             try:
-                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                self.bulk_load_layer.selectionChanged.disconnect()
             except TypeError:
                 pass
         elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
             try:
-                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
+                self.bulk_load_layer.geometryChanged.disconnect()
             except TypeError:
                 pass
         elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
             try:
-                self.bulk_load_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
+                self.bulk_load_layer.featureAdded.disconnect()
             except TypeError:
                 pass
             try:
-                self.bulk_load_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
+                self.bulk_load_layer.featureDeleted.disconnect()
             except TypeError:
                 pass
             try:
-                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.creator_geometry_changed)
+                self.bulk_load_layer.geometryChanged.disconnect()
             except TypeError:
                 pass
 

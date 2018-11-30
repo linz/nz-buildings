@@ -341,6 +341,3 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
 
         self.assertTrue(self.production_frame.error_dialog.isVisible())
         self.production_frame.error_dialog.close()
-
-        self.production_frame.btn_exit_edits.click()
-        self.production_frame.error_dialog.close()

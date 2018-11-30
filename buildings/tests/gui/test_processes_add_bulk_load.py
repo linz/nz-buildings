@@ -347,6 +347,3 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
 
         self.assertTrue(self.bulk_load_frame.error_dialog.isVisible())
         self.bulk_load_frame.error_dialog.close()
-
-        self.bulk_load_frame.btn_edit_cancel.click()
-        self.bulk_load_frame.error_dialog.close()
