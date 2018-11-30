@@ -322,7 +322,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.disable_UI_functions()
                 self.bulk_load_frame.geom = None
                 return
-            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            sql = general_select.convert_geometry
             result = self.bulk_load_frame.db._execute(sql, (wkt,))
             self.bulk_load_frame.geom = result.fetchall()[0][0]
         else:
@@ -756,7 +756,7 @@ class EditGeometry(BulkLoadChanges):
         """
         # get new feature geom and convert to correct format
         wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         result = self.bulk_load_frame.db._execute(
