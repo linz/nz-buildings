@@ -158,6 +158,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # connect signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
+        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.building_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.building_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
         self.building_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
@@ -199,6 +200,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
+        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.building_layer.selectionChanged.connect(self.change_instance.selection_changed)
         # add territorial authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -235,6 +237,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
+        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.building_layer.geometryChanged.connect(self.change_instance.geometry_changed)
         # add territorial authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
