@@ -62,16 +62,10 @@ class SetUpEditProduction(unittest.TestCase):
     def test_layer_registry(self):
         """ Layer registry has the correct components """
         layer_bool = False
-        edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup('Building Tool Layers')
         layers = group.findLayers()
         names = [layer.layer().name() for layer in layers]
         if 'building_outlines' in names and 'historic_outlines' in names:
             layer_bool = True
-        for layer in layers:
-            if layer.layer().name() == 'building_outlines' and layer.layer().isEditable():
-                edit_bool = True
-
         self.assertTrue(layer_bool)
-        self.assertTrue(edit_bool)

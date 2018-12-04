@@ -22,7 +22,6 @@ class BulkLoadChanges:
         # setup
         self.bulk_load_frame = bulk_load_frame
         iface.setActiveLayer(self.bulk_load_frame.bulk_load_layer)
-        iface.actionToggleEditing().trigger()
 
     def populate_edit_comboboxes(self):
         """
@@ -187,6 +186,7 @@ class AddBulkLoad(BulkLoadChanges):
     def __init__(self, bulk_load_frame):
         """Constructor"""
         BulkLoadChanges.__init__(self, bulk_load_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to add polygon
         iface.actionAddFeature().trigger()
         # setup toolbar
@@ -201,14 +201,16 @@ class AddBulkLoad(BulkLoadChanges):
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                'mActionAddFeature'
+                'mActionAddFeature', 'mActionNodeTool',
+                'mActionMoveFeature'
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                'mActionUndo', 'mActionRedo'
+                'mActionUndo', 'mActionRedo',
+                'mActionReshapeFeatures', 'mActionOffsetCurve'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -257,7 +259,9 @@ class AddBulkLoad(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
@@ -302,6 +306,34 @@ class AddBulkLoad(BulkLoadChanges):
             if self.bulk_load_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.bulk_load_frame.geom = None
+
+    @pyqtSlot(int, QgsGeometry)
+    def creator_geometry_changed(self, qgsfId, geom):
+        """
+           Called when feature is changed
+           @param qgsfId:      Id of added feature
+           @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
+           @param geom:        geometry of added feature
+           @type  geom:        qgis.core.QgsGeometry
+        """
+        if qgsfId in self.bulk_load_frame.added_building_ids:
+            wkt = geom.exportToWkt()
+            if not wkt:
+                self.disable_UI_functions()
+                self.bulk_load_frame.geom = None
+                return
+            sql = general_select.convert_geometry
+            result = self.bulk_load_frame.db._execute(sql, (wkt,))
+            self.bulk_load_frame.geom = result.fetchall()[0][0]
+        else:
+            self.bulk_load_frame.error_dialog = ErrorDialog()
+            self.bulk_load_frame.error_dialog.fill_report(
+                '\n -------------------- WRONG GEOMETRY EDITED ------'
+                '-------------- \n\nOnly current added outline can '
+                'be edited. Please go to [Edit Geometry] to edit '
+                'existing outlines.'
+            )
+            self.bulk_load_frame.error_dialog.show()
 
     def select_comboboxes_value(self):
         """
@@ -433,11 +465,8 @@ class EditAttribute(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
-        iface.actionCancelEdits().trigger()
         self.bulk_load_frame.ids = []
         self.bulk_load_frame.building_outline_id = None
-        # restart editing
-        iface.actionToggleEditing().trigger()
         iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
@@ -646,6 +675,7 @@ class EditGeometry(BulkLoadChanges):
     def __init__(self, bulk_load_frame):
         """Constructor"""
         BulkLoadChanges.__init__(self, bulk_load_frame)
+        iface.actionToggleEditing().trigger()
         # set editing to edit polygon
         iface.actionNodeTool().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
@@ -704,7 +734,9 @@ class EditGeometry(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.disconnect(self.geometry_changed)
         iface.actionCancelEdits().trigger()
+        self.bulk_load_frame.bulk_load_layer.geometryChanged.connect(self.geometry_changed)
         self.bulk_load_frame.geoms = {}
         # restart editing
         iface.actionToggleEditing().trigger()
@@ -724,7 +756,7 @@ class EditGeometry(BulkLoadChanges):
         """
         # get new feature geom and convert to correct format
         wkt = geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
         result = self.bulk_load_frame.db._execute(
