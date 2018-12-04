@@ -424,7 +424,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.show()
@@ -436,6 +439,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_edit_cancel.clicked.connect(self.edit_cancel_clicked)
         self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        self.bulk_load_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
 
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -464,7 +468,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.show()
         self.layout_capture_method.show()
         self.layout_general_info.show()
@@ -498,7 +505,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-
+        try:
+            self.btn_edit_cancel.clicked.disconnect()
+        except TypeError:
+            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.hide()
@@ -521,6 +531,30 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When cancel clicked
         """
+        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+            try:
+                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect()
+            except TypeError:
+                pass
+        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+            try:
+                self.bulk_load_layer.featureAdded.disconnect()
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.featureDeleted.disconnect()
+            except TypeError:
+                pass
+            try:
+                self.bulk_load_layer.geometryChanged.disconnect()
+            except TypeError:
+                pass
+
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
         self.btn_edit_cancel.setEnabled(False)
@@ -547,26 +581,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
-
-        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
-            try:
-                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
-            try:
-                self.bulk_load_layer.featureAdded.disconnect(self.change_instance.creator_feature_added)
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.featureDeleted.disconnect(self.change_instance.creator_feature_deleted)
-            except TypeError:
-                pass
 
     def completer_box(self):
         """
@@ -636,6 +650,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Called when bulk load frame exit button clicked.
         """
+        self.edit_cancel_clicked()
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
@@ -643,7 +658,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
-        iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
         else:
