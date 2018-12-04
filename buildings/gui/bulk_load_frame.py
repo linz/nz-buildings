@@ -533,7 +533,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
             try:
-                self.bulk_load_layer.selectionChanged.disconnect()
+                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
             except TypeError:
                 pass
         elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
