@@ -262,6 +262,9 @@ CREATE TABLE IF NOT EXISTS buildings_reference.capture_source_area (
     , area_title varchar (250)
     , shape public.geometry(MultiPolygon, 2193)
 );
+
+SELECT setval('buildings_reference.capture_source_area_area_polygon_id_seq', coalesce((SELECT max(area_polygon_id) + 1 FROM buildings_reference.capture_source_area), 1000000), false);
+
 DROP INDEX IF EXISTS shx_capture_source_area;
 CREATE INDEX shx_capture_source_area
     ON buildings_reference.capture_source_area USING gist (shape);
