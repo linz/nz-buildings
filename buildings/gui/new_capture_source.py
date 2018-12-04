@@ -14,7 +14,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db
-
+from buildings.utilities.layers import LayerRegistry
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'new_capture_source.ui'))
@@ -27,7 +27,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
     value = ''
     external_source = ''
 
-    def __init__(self, dockwidget, layer_registry, parent=None):
+    def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(NewCaptureSource, self).__init__(parent)
         self.setupUi(self)
@@ -38,7 +38,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.populate_combobox()
 
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.error_dialog = None
 
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
@@ -66,8 +66,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
-        self.mlr = QgsMapLayerRegistry
-        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
     def populate_combobox(self):
         """
@@ -275,7 +274,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             Clean up and remove the new capture source frame.
         """
         self.db.close_connection()
-        self.mlr.instance().layerWillBeRemoved.disconnect()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
         # remove capture source layer
         self.layer_registry.remove_layer(self.capture_source_area)
         # reset and hide toolbar
@@ -286,11 +285,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(dw, self.layer_registry))
+        dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot(str)
     def dontremovefunc(self, layerids):
-        # print layerids
+        self.layer_registry.update_layers()
         if 'capture_source_area' in layerids:
             self.cmb_capture_source_group.setDisabled(1)
             self.btn_validate.setDisabled(1)

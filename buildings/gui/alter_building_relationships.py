@@ -14,6 +14,7 @@ from qgis.utils import iface
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -23,7 +24,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
-    def __init__(self, dockwidget, layer_registry, current_dataset, parent=None):
+    def __init__(self, dockwidget, current_dataset, parent=None):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
@@ -32,7 +33,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.current_dataset = current_dataset
         self.error_dialog = None
         self.highlight_features = []
@@ -94,8 +95,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
 
-        self.mlr = QgsMapLayerRegistry
-        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -516,21 +516,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         Called when alter building relationships exit button clicked.
         """
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
         self.close_frame()
 
     def close_frame(self):
         """
         Clean up and remove the alter building relationships frame.
         """
-        self.mlr.instance().layerWillBeRemoved.disconnect()
         self.reset_buttons()
         self.qa_button_set_enable(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
-        # if 'existing_subset_extracts' in [str(layer.id()) for layer in iface.legendInterface().layers()]:
-        self.lyr_existing.removeSelection()
-        # if 'bulk_load_outlines' in [str(layer.id()) for layer in iface.legendInterface().layers()]:
-        self.lyr_bulk_load.removeSelection()
+        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
+            if 'existing_subset_extracts' in val:
+                self.lyr_existing.removeSelection()
+            if 'bulk_load_outlines' in val:
+                self.lyr_bulk_load.removeSelection()
         try:
             self.disconnect_to_error_msg()
         except TypeError:
@@ -554,7 +555,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(dw, self.layer_registry))
+        dw.new_widget(BulkLoadFrame(dw))
         iface.actionPan().trigger()
 
     @pyqtSlot()
@@ -775,6 +776,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot(str)
     def dontremovefunc(self, layerids):
+        self.layer_registry.update_layers()
         layers = ['added_bulk_load_in_edit', 'removed_existing_in_edit', 'matched_existing_in_edit',
                   'matched_bulk_load_in_edit', 'related_existing_in_edit', 'related_bulk_load_in_edit',
                   'added_outlines', 'removed_outlines', 'matched_existing_outlines', 'matched_bulk_load_outlines',

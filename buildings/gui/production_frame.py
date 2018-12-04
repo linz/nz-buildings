@@ -13,6 +13,7 @@ from qgis.utils import iface
 from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
+from buildings.utilities.layers import LayerRegistry
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -21,12 +22,12 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ProductionFrame(QFrame, FORM_CLASS):
 
-    def __init__(self, dockwidget, layer_registry, parent=None):
+    def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(ProductionFrame, self).__init__(parent)
         self.setupUi(self)
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.db = db
         self.db.connect()
         self.building_layer = QgsVectorLayer()
@@ -63,8 +64,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
-        self.mlr = QgsMapLayerRegistry
-        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
@@ -248,7 +248,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
         # reload layers
         iface.actionCancelEdits().trigger()
-        self.mlr.instance().layerWillBeRemoved.disconnect()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         if self.territorial_auth is not None:
@@ -263,7 +263,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(dw, self.layer_registry))
+        dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot()
     def exit_editing_clicked(self):
@@ -278,9 +278,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_general_info.hide()
         iface.actionCancelEdits().trigger()
         # reload layers
-        self.mlr.instance().layerWillBeRemoved.disconnect()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
         self.layer_registry.remove_layer(self.territorial_auth)
-        self.mlr.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
 
         # reset adding outlines
         self.added_building_ids = []
@@ -317,6 +317,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(str)
     def dontremovefunc(self, layerids):
+        self.layer_registry.update_layers()
         layers = ['building_outlines', 'historic_outlines', 'territorial_authorities']
         for layer in layers:
             if layer in layerids:

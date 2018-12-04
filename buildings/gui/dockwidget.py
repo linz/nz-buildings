@@ -22,7 +22,6 @@ import os
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QDockWidget
 from PyQt4 import uic
-from qgis.core import QgsProject
 
 from buildings.settings import project
 
@@ -100,7 +99,6 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
         self.splitter.splitterMoved.connect(self.resize_dockwidget)
 
-        from buildings.utilities.layers import LayerRegistry
         from buildings.utilities import database as db
         from buildings.gui.new_capture_source import NewCaptureSource
         from buildings.gui.bulk_load_frame import BulkLoadFrame
@@ -108,7 +106,6 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         from buildings.gui.production_frame import ProductionFrame
         from buildings.gui.new_entry import NewEntry
 
-        self.layer_registry = LayerRegistry()
         self.db = db
         self.new_capture_source = NewCaptureSource
         self.bulk_load_frame = BulkLoadFrame
@@ -136,11 +133,6 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
     @pyqtSlot()
     def show_frame(self):
-        self.group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
-        if self.group is None:
-            QgsProject.instance().layerTreeRoot().insertGroup(0, "Building Tool Layers")
-            self.group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
-
         if self.lst_sub_menu.selectedItems():
             current = self.lst_sub_menu.selectedItems()[0]
             # Remove the current widget and run its exit method
@@ -155,13 +147,13 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             self.stk_options.removeWidget(self.stk_options.currentWidget())
 
             if current.text() == 'Capture Sources':
-                self.new_widget(self.new_capture_source(self, self.layer_registry))
+                self.new_widget(self.new_capture_source(self))
             elif current.text() == 'Bulk Load':
-                self.new_widget(self.bulk_load_frame(self, self.layer_registry))
+                self.new_widget(self.bulk_load_frame(self))
             elif current.text() == 'Edit Outlines':
-                self.new_widget(self.production_frame(self, self.layer_registry))
+                self.new_widget(self.production_frame(self))
             elif current.text() == 'Settings':
-                self.new_widget(self.new_entry(self, self.layer_registry))
+                self.new_widget(self.new_entry(self))
 
     def new_widget(self, frame):
         self.stk_options.addWidget(frame)

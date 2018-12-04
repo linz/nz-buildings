@@ -12,7 +12,6 @@ from buildings.gui.dockwidget import BuildingsDockwidget
 from buildings.gui.menu_frame import MenuFrame
 from buildings.settings.project import (get_attribute_dialog_setting,
                                         set_attribute_dialog_setting)
-from utilities.layers import LayerRegistry
 
 # Get the path for the parent directory of this file.
 __location__ = os.path.realpath(
@@ -33,7 +32,6 @@ class Buildings:
         self.plugin_dir = __location__
         self.image_dir = os.path.join(__location__, '..', 'images')
         self.menu_frame = None
-        self.layer_registry = None
 
         # declare instance attributes
         self.actions = []
@@ -153,8 +151,6 @@ class Buildings:
                 for row in range(0, (dw.lst_options.count()), 1):
                     if dw.lst_options.item(row).text() == 'Buildings':
                         dw.lst_options.takeItem(row)
-                if self.layer_registry is not None:
-                    self.layer_registry.clear_layer_selection()
                 dw.frames = {}
                 if dw.stk_options.count() == 2:
                     dw.stk_options.setCurrentIndex(1)
@@ -212,9 +208,8 @@ class Buildings:
 
             self.setup_main_toolbar()
             dw = self.dockwidget
-            self.layer_registry = LayerRegistry()
             # no base layers
-            self.menu_frame = MenuFrame(self.dockwidget, self.layer_registry)
+            self.menu_frame = MenuFrame(self.dockwidget)
             dw.insert_into_frames('menu_frame', self.menu_frame)
 
             home_dir = os.path.dirname(__file__)
@@ -262,7 +257,7 @@ class Buildings:
             dw.stk_options.setCurrentIndex(1)  # set to fourth
             dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.stk_options.setCurrentIndex(0)
-        dw.stk_options.addWidget(MenuFrame(self.dockwidget, self.layer_registry))
+        dw.stk_options.addWidget(MenuFrame(self.dockwidget))
         dw.stk_options.setCurrentIndex(1)
 
     def setup_main_toolbar(self):
@@ -286,11 +281,7 @@ class Buildings:
 
         from buildings.settings.project import set_attribute_dialog_setting
 
-        # Clear selection on all layers
-        self.layer_registry.clear_layer_selection()
-
         set_attribute_dialog_setting(self.attribute_dialog_setting)
-        self.layer_registry.remove_all_layers()
 
         # Set up toolbar
         self.setup_main_toolbar()

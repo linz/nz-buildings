@@ -23,12 +23,11 @@ class NewEntry(QFrame, FORM_CLASS):
     value = ''
     new_type = ''
 
-    def __init__(self, dockwidget, layer_registry, parent=None):
+    def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(NewEntry, self).__init__(parent)
         self.setupUi(self)
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
         self.db = db
         self.db.connect()
 
@@ -151,7 +150,7 @@ class NewEntry(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(dw, self.layer_registry))
+        dw.new_widget(MenuFrame(dw))
 
     def new_organisation(self, organisation, commit_status):
         """
