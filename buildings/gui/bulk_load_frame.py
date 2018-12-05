@@ -538,29 +538,30 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When cancel clicked
         """
-        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
-            try:
-                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
-            try:
-                self.bulk_load_layer.featureAdded.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.featureDeleted.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
+        if len(QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')) > 0:
+            if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+                try:
+                    self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+                try:
+                    self.bulk_load_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+                try:
+                    self.bulk_load_layer.featureAdded.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.bulk_load_layer.featureDeleted.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.bulk_load_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
 
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)

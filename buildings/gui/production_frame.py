@@ -284,30 +284,30 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def exit_editing_clicked(self):
-
-        if isinstance(self.change_instance, production_changes.EditAttribute):
-            try:
-                self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.EditGeometry):
-            try:
-                self.building_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.AddProduction):
-            try:
-                self.building_layer.featureAdded.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.building_layer.featureDeleted.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.building_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
+        if len(QgsMapLayerRegistry.instance().mapLayersByName('building_outlines')) > 0:
+            if isinstance(self.change_instance, production_changes.EditAttribute):
+                try:
+                    self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, production_changes.EditGeometry):
+                try:
+                    self.building_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, production_changes.AddProduction):
+                try:
+                    self.building_layer.featureAdded.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.building_layer.featureDeleted.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.building_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)
