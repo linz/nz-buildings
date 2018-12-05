@@ -435,6 +435,12 @@ class EditAttribute(BulkLoadChanges):
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.bulk_load_frame.ids) > 0:
                     for i in self.bulk_load_frame.ids:
+                        # check current status of building
+                        sql = bulk_load_select.bulk_load_status_id_by_outline_id
+                        current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                        current_status = current_status.fetchall()
+                        if current_status[0][0] == 3:
+                            self.bulk_load_frame.db.execute_no_commit(bulk_load_select.delete_deleted_description_and_id, (i,))
                         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
                         self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
                         # remove outline from added table
@@ -447,11 +453,18 @@ class EditAttribute(BulkLoadChanges):
                     self.bulk_load_frame.bulk_load_layer.removeSelection()
         else:
             for i in self.bulk_load_frame.ids:
+                # check current status of building
+                sql = bulk_load_select.bulk_load_status_id_by_outline_id
+                current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                current_status = current_status.fetchall()
+                if current_status[0][0] == 3:
+                    self.bulk_load_frame.db.execute_no_commit(bulk_load_select.delete_deleted_description_and_id, (i,))
                 # change attributes
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(
                     sql, (i, bulk_load_status_id, capture_method_id,
                           capture_source_id, suburb, town, t_a))
+            self.bulk_load_frame.bulk_load_layer.removeSelection()
         self.disable_UI_functions()
         self.bulk_load_frame.completer_box()
 
@@ -521,23 +534,28 @@ class EditAttribute(BulkLoadChanges):
             return False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
-            deleted = False
+            deleted = 0
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
                 sql = bulk_load_select.bulk_load_status_id_by_outline_id
                 result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:
-                    deleted = True
+                    deleted = deleted + 1
                     break
-            if deleted:
-                self.bulk_load_frame.error_dialog = ErrorDialog()
-                self.bulk_load_frame.error_dialog.fill_report(
-                    '\n ---- SELECTED A DELETED FEATURE ---- \n\n'
-                    'Can only edit attributes of'
-                    ' features that have not been deleted.'
-                )
-                self.bulk_load_frame.error_dialog.show()
-                return False
+            if deleted > 0:
+                if deleted == len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()):
+                    if self.bulk_load_frame.btn_compare_outlines.isEnabled():
+                        return True
+                    else:
+                        self.bulk_load_frame.error_dialog = ErrorDialog()
+                        self.bulk_load_frame.error_dialog.fill_report(
+                            '\n ---- CANNOT EDIT DELETED FEATURE ---- \n\n'
+                            'Cannot edit deleted feature after comparison has been'
+                            ' run, instead please add this feature manually.\n'
+                            'Note: Don\'t forget to update the relationship too!'
+                        )
+                        self.bulk_load_frame.error_dialog.show()
+                        return False
             else:
                 return True
         return False
