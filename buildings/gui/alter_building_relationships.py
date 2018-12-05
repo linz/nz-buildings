@@ -7,12 +7,14 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView, QIcon,
                          QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
+from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -22,7 +24,7 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class AlterRelationships(QFrame, FORM_CLASS):
 
-    def __init__(self, dockwidget, layer_registry, current_dataset, parent=None):
+    def __init__(self, dockwidget, current_dataset, parent=None):
         """Constructor."""
         super(AlterRelationships, self).__init__(parent)
         self.setupUi(self)
@@ -31,7 +33,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db.connect()
 
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.current_dataset = current_dataset
         self.error_dialog = None
         self.highlight_features = []
@@ -92,6 +94,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.cb_lyr_existing.stateChanged.connect(self.cb_lyr_existing_state_changed)
 
         self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
+
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -512,13 +516,26 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         Called when alter building relationships exit button clicked.
         """
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.close_frame()
 
     def close_frame(self):
         """
         Clean up and remove the alter building relationships frame.
         """
-        self.cancel_clicked()
+        self.reset_buttons()
+        self.qa_button_set_enable(True)
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
+            if 'existing_subset_extracts' in val:
+                self.lyr_existing.removeSelection()
+            if 'bulk_load_outlines' in val:
+                self.lyr_bulk_load.removeSelection()
+        try:
+            self.disconnect_to_error_msg()
+        except TypeError:
+            pass
 
         self.layer_registry.remove_layer(self.lyr_existing)
         self.layer_registry.remove_layer(self.lyr_bulk_load)
@@ -538,7 +555,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(BulkLoadFrame(dw, self.layer_registry))
+        dw.new_widget(BulkLoadFrame(dw))
         iface.actionPan().trigger()
 
     @pyqtSlot()
@@ -756,6 +773,35 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.autosave = False
             self.btn_save.setVisible(True)
+
+    @pyqtSlot(str)
+    def layers_removed(self, layerids):
+        self.layer_registry.update_layers()
+        layers = ['added_bulk_load_in_edit', 'removed_existing_in_edit', 'matched_existing_in_edit',
+                  'matched_bulk_load_in_edit', 'related_existing_in_edit', 'related_bulk_load_in_edit',
+                  'added_outlines', 'removed_outlines', 'matched_existing_outlines', 'matched_bulk_load_outlines',
+                  'related_existing_outlines', 'related_bulk_load_outlines', 'bulk_load_outlines', 'existing_subset_extracts']
+        for layer in layers:
+            if layer in layerids:
+                self.cmb_relationship.setDisabled(1)
+                self.btn_qa_not_checked.setDisabled(1)
+                self.btn_qa_refer2supplier.setDisabled(1)
+                self.btn_qa_pending.setDisabled(1)
+                self.btn_qa_okay.setDisabled(1)
+                self.btn_qa_not_removed.setDisabled(1)
+                self.btn_maptool.setDisabled(1)
+                self.btn_unlink.setDisabled(1)
+                self.btn_matched.setDisabled(1)
+                self.btn_related.setDisabled(1)
+                self.btn_cancel.setDisabled(1)
+                self.btn_save.setDisabled(1)
+                self.cb_autosave.setDisabled(1)
+                self.cb_lyr_bulk_load.setDisabled(1)
+                self.cb_lyr_existing.setDisabled(1)
+                iface.messageBar().pushMessage("ERROR",
+                                               "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                               level=QgsMessageBar.CRITICAL, duration=5)
+                return
 
     def confirm_to_autosave(self):
         reply = self.msgbox.exec_()

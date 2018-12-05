@@ -141,10 +141,7 @@ class LayerRegistry(object):
         else:
             self.group = self.set_group()
         self.base_layers = {}
-        self.buildings = None
         self._layers = {}
-
-        QgsMapLayerRegistry.instance().layersWillBeRemoved["QStringList"].connect(self.layer_removed)
 
     @property
     def layers(self):
@@ -155,34 +152,14 @@ class LayerRegistry(object):
         for layer in self.layers.values():
             layer.removeSelection()
 
-        from qgis.utils import iface
         iface.mapCanvas().refresh()
-
-    def disconnect_layer_removed(self):
-        """
-        Disconnects the signal when a layer is removed which
-        is used to update self._layers
-        """
-        QgsMapLayerRegistry.instance().layersWillBeRemoved["QStringList"].disconnect(
-            self.layer_removed
-        )
-
-    def layer_removed(self, layers_removed):
-        """Signal when layer is removed from registry"""
-        for layer_id in layers_removed:
-            if self.buildings:
-                if layer_id == self.buildings.id():
-                    self.buildings = None
-                else:
-                    self.update_layers()
-            else:
-                self.update_layers()
 
     def remove_all_layers(self):
         """Remove all layers except base_layers"""
         for layer in self.layers.values():
             if layer not in self.base_layers.values():
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                self.update_layers()
 
     def remove_layer(self, layer):
         """
@@ -191,12 +168,10 @@ class LayerRegistry(object):
         @param layer:     Layer instance
         @type  layer:     qgis.core.QgsVectorLayer
         """
-
         if layer in self.layers.values():
             layer.rollBack()
             QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
-            if layer == self.buildings:
-                self.buildings = None
+            self.update_layers()
 
     def set_group(self):
         """ Sets up the QgsLayerTreeGroup for Layer Registry
@@ -212,6 +187,7 @@ class LayerRegistry(object):
             return root.findGroup("Building Tool Layers")
 
     def add_postgres_layer(self, name, db_name, geomcolumn, schema, key, sql):
+        self.group = QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
         try:
             layer = QgsMapLayerRegistry.instance().mapLayersByName(name)[-1]
         except IndexError:
@@ -238,7 +214,11 @@ class LayerRegistry(object):
 
     def update_layers(self):
         """Updates self._layers if layer is removed or added to self.group"""
-        self._layers = {}
-        if self.group is not None:
-            for layer in self.group.findLayers():
-                self._layers[layer.layer().name()] = layer.layer()
+        root = QgsProject.instance().layerTreeRoot()
+        if root.findGroup("Building Tool Layers") is not None:
+            self._layers = {}
+            if self.group is not None:
+                for layer in self.group.findLayers():
+                    self._layers[layer.layer().name()] = layer.layer()
+        else:
+            self._layers = {}

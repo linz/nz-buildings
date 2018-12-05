@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from PyQt4.QtTest import QTest
-from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
+from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem, QgsMapLayerRegistry
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -347,3 +347,23 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
 
         self.assertTrue(self.bulk_load_frame.error_dialog.isVisible())
         self.bulk_load_frame.error_dialog.close()
+
+    def test_disabled_on_layer_removed(self):
+        """When key layer is removed from registry check options are disabled (#87)"""
+        layer = QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')[0]
+        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_edit_cancel.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertFalse(self.bulk_load_frame.tbtn_edits.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_alter_rel.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_publish.isEnabled())
+        self.assertFalse(self.bulk_load_frame.btn_compare_outlines.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_exit.isEnabled())
+        iface.messageBar().popWidget()

@@ -6,7 +6,8 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QMenu, QMessageBox
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -15,6 +16,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db, layers
+from buildings.utilities.layers import LayerRegistry
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -25,14 +27,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     closed = pyqtSignal()
 
-    def __init__(self, dockwidget, layer_registry, parent=None):
+    def __init__(self, dockwidget, parent=None):
         """Constructor."""
 
         super(BulkLoadFrame, self).__init__(parent)
         self.setupUi(self)
         # Frame fields
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
         # layer set up
@@ -163,8 +165,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.cb_bulk_load.clicked.connect(self.cb_bulk_load_clicked)
 
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+
     def confirmation_dialog_box(self, button_text):
-        return QMessageBox(QMessageBox.Question, button_text.upper(), 'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
+        return QMessageBox(QMessageBox.Question, button_text.upper(),
+                           'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
 
     def confirm(self, msgbox):
         reply = msgbox.exec_()
@@ -341,7 +346,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             result = result.fetchall()[0][0]
             # if bulk loading completed without errors
             if result == 1:
+                QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
                 self.layer_registry.remove_layer(self.historic_layer)
+                QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
@@ -531,29 +538,30 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When cancel clicked
         """
-        if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
-            try:
-                self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
-            try:
-                self.bulk_load_layer.featureAdded.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.featureDeleted.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.bulk_load_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
+        if len(QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')) > 0:
+            if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+                try:
+                    self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+                try:
+                    self.bulk_load_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+                try:
+                    self.bulk_load_layer.featureAdded.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.bulk_load_layer.featureDeleted.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.bulk_load_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
 
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
@@ -563,7 +571,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
         # reload layers
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.territorial_auth)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
         # hide comboboxes
         self.layout_status.hide()
         self.layout_capture_method.hide()
@@ -614,13 +624,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.close_connection()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
-            dw, self.layer_registry, self.current_dataset))
+            dw, self.current_dataset))
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
@@ -640,10 +651,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.display_no_bulk_load()
             self.current_dataset = None
             self.lb_dataset_id.setText('None')
+            QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
             self.cb_bulk_load.hide()
+            QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -658,13 +671,41 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
-        else:
+        if self.bulk_load_layer is not None:
             self.layer_registry.remove_layer(self.bulk_load_layer)
-            if self.territorial_auth is not None:
-                self.layer_registry.remove_layer(self.territorial_auth)
+        if self.territorial_auth is not None:
+            self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(dw, self.layer_registry))
+        dw.new_widget(MenuFrame(dw))
+
+    @pyqtSlot(str)
+    def layers_removed(self, layerids):
+        self.layer_registry.update_layers()
+        if 'bulk_load_outlines' in layerids or 'territorial_authorities' in layerids:
+            self.btn_edit_save.setDisabled(1)
+            self.btn_edit_reset.setDisabled(1)
+            self.btn_edit_cancel.setDisabled(1)
+            self.tbtn_edits.setDisabled(1)
+            self.btn_compare_outlines.setDisabled(1)
+            self.btn_alter_rel.setDisabled(1)
+            self.btn_publish.setDisabled(1)
+            self.cb_bulk_load.setDisabled(1)
+            iface.messageBar().pushMessage("ERROR",
+                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                           level=QgsMessageBar.CRITICAL, duration=5)
+            return
+
+        if 'loaded_datasets' in layerids:
+            iface.messageBar().pushMessage("ERROR",
+                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                           level=QgsMessageBar.CRITICAL, duration=5)
+            # disable bulk loading buttons
+            self.btn_bl_save.setDisabled(1)
+            self.btn_bl_reset.setDisabled(1)
+            return

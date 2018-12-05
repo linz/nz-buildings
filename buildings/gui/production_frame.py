@@ -6,12 +6,14 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QFrame, QMenu
-from qgis.core import QgsProject, QgsVectorLayer
+from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
+from buildings.utilities.layers import LayerRegistry
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -20,12 +22,12 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(
 
 class ProductionFrame(QFrame, FORM_CLASS):
 
-    def __init__(self, dockwidget, layer_registry, parent=None):
+    def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(ProductionFrame, self).__init__(parent)
         self.setupUi(self)
         self.dockwidget = dockwidget
-        self.layer_registry = layer_registry
+        self.layer_registry = LayerRegistry()
         self.db = db
         self.db.connect()
         self.building_layer = QgsVectorLayer()
@@ -62,6 +64,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
@@ -261,6 +264,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         Clean up and remove the edit production frame.
         """
         # reload layers
+        iface.actionCancelEdits().trigger()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         if self.territorial_auth is not None:
@@ -275,34 +280,34 @@ class ProductionFrame(QFrame, FORM_CLASS):
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(MenuFrame(dw, self.layer_registry))
+        dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot()
     def exit_editing_clicked(self):
-
-        if isinstance(self.change_instance, production_changes.EditAttribute):
-            try:
-                self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.EditGeometry):
-            try:
-                self.building_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
-        elif isinstance(self.change_instance, production_changes.AddProduction):
-            try:
-                self.building_layer.featureAdded.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.building_layer.featureDeleted.disconnect()
-            except TypeError:
-                pass
-            try:
-                self.building_layer.geometryChanged.disconnect()
-            except TypeError:
-                pass
+        if len(QgsMapLayerRegistry.instance().mapLayersByName('building_outlines')) > 0:
+            if isinstance(self.change_instance, production_changes.EditAttribute):
+                try:
+                    self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, production_changes.EditGeometry):
+                try:
+                    self.building_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, production_changes.AddProduction):
+                try:
+                    self.building_layer.featureAdded.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.building_layer.featureDeleted.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.building_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)
@@ -314,7 +319,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_general_info.hide()
         iface.actionCancelEdits().trigger()
         # reload layers
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.territorial_auth)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+
         # reset adding outlines
         self.added_building_ids = []
         self.geom = None
@@ -328,3 +336,19 @@ class ProductionFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+
+    @pyqtSlot(str)
+    def layers_removed(self, layerids):
+        self.layer_registry.update_layers()
+        layers = ['building_outlines', 'historic_outlines', 'territorial_authorities']
+        for layer in layers:
+            if layer in layerids:
+                self.btn_save.setDisabled(1)
+                self.btn_reset.setDisabled(1)
+                self.btn_exit_edits.setDisabled(1)
+                self.tbtn_edits.setDisabled(1)
+                self.cb_production.setDisabled(1)
+                iface.messageBar().pushMessage("ERROR",
+                                               "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                                               level=QgsMessageBar.CRITICAL, duration=5)
+                return
