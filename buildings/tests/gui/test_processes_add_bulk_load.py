@@ -366,3 +366,4 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertFalse(self.bulk_load_frame.btn_publish.isEnabled())
         self.assertFalse(self.bulk_load_frame.btn_compare_outlines.isEnabled())
         self.assertTrue(self.bulk_load_frame.btn_exit.isEnabled())
+        iface.messageBar().popWidget()
