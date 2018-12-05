@@ -64,7 +64,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
@@ -265,7 +265,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
         # reload layers
         iface.actionCancelEdits().trigger()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         if self.territorial_auth is not None:
@@ -319,9 +319,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_general_info.hide()
         iface.actionCancelEdits().trigger()
         # reload layers
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.territorial_auth)
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         # reset adding outlines
         self.added_building_ids = []
@@ -338,7 +338,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         iface.building_toolbar.hide()
 
     @pyqtSlot(str)
-    def dontremovefunc(self, layerids):
+    def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         layers = ['building_outlines', 'historic_outlines', 'territorial_authorities']
         for layer in layers:

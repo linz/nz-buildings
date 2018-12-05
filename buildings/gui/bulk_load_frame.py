@@ -165,7 +165,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.cb_bulk_load.clicked.connect(self.cb_bulk_load_clicked)
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def confirmation_dialog_box(self, button_text):
         return QMessageBox(QMessageBox.Question, button_text.upper(),
@@ -346,9 +346,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             result = result.fetchall()[0][0]
             # if bulk loading completed without errors
             if result == 1:
-                QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+                QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
                 self.layer_registry.remove_layer(self.historic_layer)
-                QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+                QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
@@ -571,9 +571,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
         # reload layers
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.territorial_auth)
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
         # hide comboboxes
         self.layout_status.hide()
         self.layout_capture_method.hide()
@@ -624,7 +624,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_cancel_clicked()
         self.db.close_connection()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
         if self.territorial_auth is not None:
             self.layer_registry.remove_layer(self.territorial_auth)
@@ -651,12 +651,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.display_no_bulk_load()
             self.current_dataset = None
             self.lb_dataset_id.setText('None')
-            QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+            QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
             self.cb_bulk_load.hide()
-            QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+            QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -671,7 +671,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
@@ -685,7 +685,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot(str)
-    def dontremovefunc(self, layerids):
+    def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         if 'bulk_load_outlines' in layerids or 'territorial_authorities' in layerids:
             self.btn_edit_save.setDisabled(1)

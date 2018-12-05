@@ -66,7 +66,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def populate_combobox(self):
         """
@@ -274,7 +274,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             Clean up and remove the new capture source frame.
         """
         self.db.close_connection()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         # remove capture source layer
         self.layer_registry.remove_layer(self.capture_source_area)
         # reset and hide toolbar
@@ -288,7 +288,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot(str)
-    def dontremovefunc(self, layerids):
+    def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         if 'capture_source_area' in layerids:
             self.cmb_capture_source_group.setDisabled(1)

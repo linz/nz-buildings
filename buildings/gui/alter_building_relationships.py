@@ -95,7 +95,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -516,7 +516,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         Called when alter building relationships exit button clicked.
         """
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.dontremovefunc)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.close_frame()
 
     def close_frame(self):
@@ -775,7 +775,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_save.setVisible(True)
 
     @pyqtSlot(str)
-    def dontremovefunc(self, layerids):
+    def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         layers = ['added_bulk_load_in_edit', 'removed_existing_in_edit', 'matched_existing_in_edit',
                   'matched_bulk_load_in_edit', 'related_existing_in_edit', 'related_bulk_load_in_edit',
