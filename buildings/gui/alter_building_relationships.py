@@ -796,6 +796,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.btn_cancel.setDisabled(1)
                 self.btn_save.setDisabled(1)
                 self.cb_autosave.setDisabled(1)
+                self.cb_lyr_bulk_load.setDisabled(1)
+                self.cb_lyr_existing.setDisabled(1)
                 iface.messageBar().pushMessage("ERROR",
                                                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                                level=QgsMessageBar.CRITICAL, duration=5)

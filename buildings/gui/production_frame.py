@@ -347,6 +347,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                 self.btn_reset.setDisabled(1)
                 self.btn_exit_edits.setDisabled(1)
                 self.tbtn_edits.setDisabled(1)
+                self.cb_production.setDisabled(1)
                 iface.messageBar().pushMessage("ERROR",
                                                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                                level=QgsMessageBar.CRITICAL, duration=5)

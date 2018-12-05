@@ -695,6 +695,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_compare_outlines.setDisabled(1)
             self.btn_alter_rel.setDisabled(1)
             self.btn_publish.setDisabled(1)
+            self.cb_bulk_load.setDisabled(1)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                            level=QgsMessageBar.CRITICAL, duration=5)

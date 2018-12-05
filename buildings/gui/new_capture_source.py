@@ -294,6 +294,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.cmb_capture_source_group.setDisabled(1)
             self.btn_validate.setDisabled(1)
             self.btn_save.setDisabled(1)
+            self.le_external_source_id.setDisabled(1)
+            self.tbl_capture_source_area.setDisabled(1)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                            level=QgsMessageBar.CRITICAL, duration=5)
