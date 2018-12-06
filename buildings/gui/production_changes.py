@@ -507,7 +507,7 @@ class EditAttribute(ProductionChanges):
         building_geom = building_feat.geometry()
         # convert to correct format
         wkt = building_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.production_frame.db._execute(sql, (wkt,))
         self.production_frame.geom = result.fetchall()[0][0]
 

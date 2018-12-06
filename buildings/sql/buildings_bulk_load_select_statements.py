@@ -131,6 +131,12 @@ FROM buildings_bulk_load.deletion_description
 ORDER BY description;
 """
 
+deletion_description_by_bulk_load_id = """
+SELECT description
+FROM buildings_bulk_load.deletion_description
+WHERE bulk_load_outline_id = %s;
+"""
+
 delete_deleted_description_and_id = """
 DELETE
 FROM buildings_bulk_load.deletion_description

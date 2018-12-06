@@ -535,17 +535,32 @@ class EditAttribute(BulkLoadChanges):
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
             deleted = 0
+            reasons = []
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
                 sql = bulk_load_select.bulk_load_status_id_by_outline_id
                 result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:
                     deleted = deleted + 1
-                    break
+                    sql = bulk_load_select.deletion_description_by_bulk_load_id
+                    result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
+                    reason = result.fetchall()[0][0]
+                    if reason not in reasons:
+                        reasons.append(reason)
             if deleted > 0:
                 if deleted == len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()):
                     if self.bulk_load_frame.btn_compare_outlines.isEnabled():
-                        return True
+                        if len(reasons) <= 1:
+                            return True
+                        else:
+                            self.bulk_load_frame.error_dialog = ErrorDialog()
+                            self.bulk_load_frame.error_dialog.fill_report(
+                                '\n ---- DIFFERING DELETION REASONS ---- \n\n'
+                                'Cannot edit deleted features as have differing'
+                                ' reasons for deletion. Please edit individually.\n'
+                            )
+                            self.bulk_load_frame.error_dialog.show()
+                            return False
                     else:
                         self.bulk_load_frame.error_dialog = ErrorDialog()
                         self.bulk_load_frame.error_dialog.fill_report(
@@ -570,7 +585,7 @@ class EditAttribute(BulkLoadChanges):
         bulk_load_geom = bulk_load_feat.geometry()
         # convert to correct format
         wkt = bulk_load_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
 
@@ -586,6 +601,13 @@ class EditAttribute(BulkLoadChanges):
         result = result.fetchall()[0][0]
         self.bulk_load_frame.cmb_status.setCurrentIndex(
             self.bulk_load_frame.cmb_status.findText(result))
+
+        # reason for deletion
+        if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+            reason = bulk_load_select.deletion_description_by_bulk_load_id
+            reason = self.bulk_load_frame.db._execute(reason, (self.bulk_load_frame.bulk_load_outline_id,))
+            reason = reason.fetchall()[0][0]
+            self.bulk_load_frame.le_deletion_reason.setText(reason)
 
         # capture method
         result = self.bulk_load_frame.db._execute(
