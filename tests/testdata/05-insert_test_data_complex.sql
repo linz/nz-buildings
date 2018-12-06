@@ -104,7 +104,7 @@ VALUES (1038, 10038, 5, 1001, 1, 104, 1004, 10002, '2018-02-02 09:00:00 GMT+12',
 INSERT INTO buildings_bulk_load.existing_subset_extracts
 SELECT buildings.building_outline_id, 4 AS supplied_dataset_id, buildings.shape
 FROM buildings.building_outlines buildings
-WHERE territorial_authority_id = 2;
+WHERE territorial_authority_id = 10002;
 
 -- add complex bulk load outlines to to supplied dataset 4
 INSERT INTO buildings_bulk_load.supplied_outlines (supplied_outline_id, supplied_dataset_id, shape)
