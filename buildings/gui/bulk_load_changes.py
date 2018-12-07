@@ -3,6 +3,7 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
 from qgis.core import QgsFeatureRequest, QgsGeometry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -763,6 +764,11 @@ class EditGeometry(BulkLoadChanges):
             bulk_load_select.bulk_load_outline_shape_by_id,
             (qgsfId,)
         )
+        area = geom.area()
+        if area < 10:
+            iface.messageBar().pushMessage("INFO",
+                                           "You've edited the outline to less than 10sqm, are you sure this is correct?",
+                                           level=QgsMessageBar.INFO, duration=3)
         result = result.fetchall()[0][0]
         if self.bulk_load_frame.geom == result:
             if qgsfId in self.bulk_load_frame.geoms.keys():
