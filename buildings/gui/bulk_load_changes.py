@@ -3,6 +3,7 @@
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
 from qgis.core import QgsFeatureRequest, QgsGeometry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -284,6 +285,12 @@ class AddBulkLoad(BulkLoadChanges):
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.bulk_load_frame.bulk_load_layer.getFeatures(request))
         new_geometry = new_feature.geometry()
+        # calculate area
+        area = new_geometry.area()
+        if area < 10:
+            iface.messageBar().pushMessage("INFO",
+                                           "You've drawn an outline that is less than 10sqm, are you sure this is correct?",
+                                           level=QgsMessageBar.INFO, duration=3)
         # convert to correct format
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
@@ -325,6 +332,11 @@ class AddBulkLoad(BulkLoadChanges):
             sql = general_select.convert_geometry
             result = self.bulk_load_frame.db._execute(sql, (wkt,))
             self.bulk_load_frame.geom = result.fetchall()[0][0]
+            area = geom.area()
+            if area < 10:
+                iface.messageBar().pushMessage("INFO",
+                                               "You've edited the outline that to less than 10sqm, are you sure this is correct?",
+                                               level=QgsMessageBar.INFO, duration=3)
         else:
             self.bulk_load_frame.error_dialog = ErrorDialog()
             self.bulk_load_frame.error_dialog.fill_report(
