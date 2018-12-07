@@ -14,6 +14,7 @@ from qgis.utils import iface
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import general_select_statements as general_select
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
 
@@ -682,6 +683,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
+            if qa_status_id == 5:
+                self.copy_and_match_removed_building()
 
         if commit_status:
             self.db.commit_open_cursor()
@@ -802,6 +805,44 @@ class AlterRelationships(QFrame, FORM_CLASS):
                                                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                                level=QgsMessageBar.CRITICAL, duration=5)
                 return
+
+    def copy_and_match_removed_building(self):
+        # iterate through all the selected removed buildings
+        for feature in self.lyr_existing.selectedFeatures():
+            # get geometry
+            geometry = self.db.execute_no_commit(general_select.convert_geometry, (feature.geometry().exportToWkt(),))
+            geometry = geometry.fetchall()[0][0]
+            sql = 'SELECT capture_method_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            building_outline_id = feature.attributes()[0]
+            # get capture method of existing outline
+            capture_method = self.db.execute_no_commit(sql, (building_outline_id,))
+            capture_method = capture_method.fetchall()[0][0]
+            sql = 'SELECT DISTINCT capture_source_id FROM buildings_bulk_load.bulk_load_outlines WHERE supplied_dataset_id = %s'
+            # get capture source of current dataset
+            capture_source = self.db.execute_no_commit(sql, (self.current_dataset,))
+            capture_source = capture_source.fetchall()[0][0]
+            # get suburb, town_city and territorial authority of existing outline
+            sql = 'SELECT suburb_locality_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            suburb = self.db.execute_no_commit(sql, (building_outline_id,))
+            suburb = suburb.fetchall()[0][0]
+            sql = 'SELECT town_city_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            town_city = self.db.execute_no_commit(sql, (building_outline_id,))
+            town_city = town_city.fetchall()[0][0]
+            sql = 'SELECT territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            territorial_auth = self.db.execute_no_commit(sql, (building_outline_id,))
+            territorial_auth = territorial_auth.fetchall()[0][0]
+            # insert outline into building_bulk_load.bulk_load_outlines
+            sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method, capture_source, suburb, town_city, territorial_auth, geometry))
+            bulk_load_id = bulk_load_id.fetchall()[0][0]
+            # remove existing building from removed table
+            sql = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
+            self.db.execute_no_commit(sql, (building_outline_id,))
+            # add existing and new building to matched table
+            sql = 'SELECT buildings_bulk_load.matched_insert_building_outlines(%s, %s);'
+            self.db.execute_no_commit(sql, (bulk_load_id, building_outline_id))
+        # refresh to get new outlines
+        iface.mapCanvas().refreshAllLayers()
 
     def confirm_to_autosave(self):
         reply = self.msgbox.exec_()
