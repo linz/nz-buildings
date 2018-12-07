@@ -335,7 +335,7 @@ class AddBulkLoad(BulkLoadChanges):
             area = geom.area()
             if area < 10:
                 iface.messageBar().pushMessage("INFO",
-                                               "You've edited the outline that to less than 10sqm, are you sure this is correct?",
+                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
                                                level=QgsMessageBar.INFO, duration=3)
         else:
             self.bulk_load_frame.error_dialog = ErrorDialog()
