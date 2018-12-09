@@ -6,6 +6,8 @@ from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame
+from qgis.gui import QgsMessageBar
+from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
@@ -120,19 +122,27 @@ class NewEntry(QFrame, FORM_CLASS):
         self.value = self.get_comments()
         # get type
         self.new_type = self.get_combobox_value()
+        self.status = False
         # call insert depending on type
         if self.value is not None:
             if self.new_type == 'Organisation':
-                self.new_organisation(self.value, commit_status)
+                self.status = self.new_organisation(self.value, commit_status)
+
             elif self.new_type == 'Lifecycle Stage':
-                self.new_lifecycle_stage(self.value, commit_status)
+                self.status = self.new_lifecycle_stage(self.value, commit_status)
+
             elif self.new_type == 'Capture Method':
-                self.new_capture_method(self.value, commit_status)
+                self.status = self.new_capture_method(self.value, commit_status)
+
             elif self.new_type == 'Capture Source Group':
                 self.description = self.get_description()
                 if self.description is not None:
-                    self.new_capture_source_group(
+                    self. status = self.new_capture_source_group(
                         self.value, self.description, commit_status)
+        if self.status:
+            iface.messageBar().pushMessage("SUCCESS",
+                                           "You've added a new {}!".format(self.new_type),
+                                           level=QgsMessageBar.SUCCESS, duration=1)
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -169,7 +179,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 '\n -------------------- ORGANISATION EXISTS ----'
                 '---------------- \n\n Value entered exists in table')
             self.error_dialog.show()
-            return
+            return False
         # if it isn't in the table add to table
         elif len(ls) == 0:
                 # enter but don't commit
@@ -180,6 +190,7 @@ class NewEntry(QFrame, FORM_CLASS):
             if commit_status:
                 self.db.commit_open_cursor()
             self.le_new_entry.clear()
+            return True
 
     def new_lifecycle_stage(self, lifecycle_stage, commit_status):
         """
@@ -199,7 +210,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 '------------------- \n\n Value entered exists in table'
             )
             self.error_dialog.show()
-            return
+            return False
         # if it isn't in the table add to table
         elif len(ls) == 0:
             # enter but don't commit
@@ -210,6 +221,7 @@ class NewEntry(QFrame, FORM_CLASS):
             if commit_status:
                 self.db.commit_open_cursor()
             self.le_new_entry.clear()
+            return True
 
     def new_capture_method(self, capture_method, commit_status):
         """
@@ -230,7 +242,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 '------------------ \n\n Value entered exists in table'
             )
             self.error_dialog.show()
-            return
+            return False
         # if it isn't in the table add to table
         elif len(ls) == 0:
                 # enter but don't commit
@@ -241,6 +253,7 @@ class NewEntry(QFrame, FORM_CLASS):
             if commit_status:
                 self.db.commit_open_cursor()
             self.le_new_entry.clear()
+            return True
 
     def new_capture_source_group(self, capture_source_group, description,
                                  commit_status):
@@ -261,7 +274,7 @@ class NewEntry(QFrame, FORM_CLASS):
                 '---------------- \n\n Value entered exists in table'
             )
             self.error_dialog.show()
-            return
+            return False
         elif len(ls) == 0:
             # enter but don't commit
             self.db.open_cursor()
@@ -273,3 +286,4 @@ class NewEntry(QFrame, FORM_CLASS):
                 self.db.commit_open_cursor()
             self.le_new_entry.clear()
             self.le_description.clear()
+            return True
