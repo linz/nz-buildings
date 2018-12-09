@@ -667,6 +667,11 @@ class EditGeometry(ProductionChanges):
         self.production_frame.geom = result.fetchall()[0][0]
         result = self.production_frame.db._execute(
             buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,))
+        area = geom.area()
+        if area < 10:
+            iface.messageBar().pushMessage("INFO",
+                                           "You've edited the outline to less than 10sqm, are you sure this is correct?",
+                                           level=QgsMessageBar.INFO, duration=3)
         result = result.fetchall()[0][0]
         if self.production_frame.geom == result:
             if qgsfId in self.production_frame.geoms.keys():
