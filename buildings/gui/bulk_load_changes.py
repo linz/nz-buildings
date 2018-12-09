@@ -440,7 +440,8 @@ class EditAttribute(BulkLoadChanges):
                         current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                         current_status = current_status.fetchall()
                         if current_status[0][0] == 3:
-                            self.bulk_load_frame.db.execute_no_commit(bulk_load_select.delete_deleted_description_and_id, (i,))
+                            sql = 'SELECT buildings_bulk_load.delete_deleted_description(%s);'
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
                         self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
                         # remove outline from added table
@@ -458,7 +459,8 @@ class EditAttribute(BulkLoadChanges):
                 current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                 current_status = current_status.fetchall()
                 if current_status[0][0] == 3:
-                    self.bulk_load_frame.db.execute_no_commit(bulk_load_select.delete_deleted_description_and_id, (i,))
+                    sql = 'SELECT buildings_bulk_load.delete_deleted_description(%s);'
+                    self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                 # change attributes
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(

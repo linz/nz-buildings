@@ -18,7 +18,7 @@ Bulk Load Outlines Select Statements:
   - bulk_load_status_value_by_outline_id (bulk_load_outline_id)
 
 - deletion_description
-  - delete_deleted_description_and_id (bulk_load_outline_id)
+  - deletion_description_by_bulk_load_id (bulk_load_outline_id)
   - deletion_description_value
 
 - existing_subset_extracts
@@ -125,22 +125,16 @@ AND blo.bulk_load_outline_id = %s;
 
 # deletion_description
 
-deletion_description_value = """
-SELECT DISTINCT description
-FROM buildings_bulk_load.deletion_description
-ORDER BY description;
-"""
-
 deletion_description_by_bulk_load_id = """
 SELECT description
 FROM buildings_bulk_load.deletion_description
 WHERE bulk_load_outline_id = %s;
 """
 
-delete_deleted_description_and_id = """
-DELETE
+deletion_description_value = """
+SELECT DISTINCT description
 FROM buildings_bulk_load.deletion_description
-WHERE bulk_load_outline_id = %s;
+ORDER BY description;
 """
 
 # existing subset extracts
