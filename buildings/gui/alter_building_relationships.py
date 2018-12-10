@@ -14,6 +14,7 @@ from qgis.utils import iface
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import buildings_select_statements as buildings_select
 from buildings.sql import general_select_statements as general_select
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
@@ -517,7 +518,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         Called when alter building relationships exit button clicked.
         """
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.close_frame()
 
     def close_frame(self):
@@ -528,6 +528,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.qa_button_set_enable(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
             if 'existing_subset_extracts' in val:
                 self.lyr_existing.removeSelection()
@@ -812,23 +813,23 @@ class AlterRelationships(QFrame, FORM_CLASS):
             # get geometry
             geometry = self.db.execute_no_commit(general_select.convert_geometry, (feature.geometry().exportToWkt(),))
             geometry = geometry.fetchall()[0][0]
-            sql = 'SELECT capture_method_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            sql = buildings_select.building_outlines_capture_method_id_by_building_outline_id
             building_outline_id = feature.attributes()[0]
             # get capture method of existing outline
             capture_method = self.db.execute_no_commit(sql, (building_outline_id,))
             capture_method = capture_method.fetchall()[0][0]
-            sql = 'SELECT DISTINCT capture_source_id FROM buildings_bulk_load.bulk_load_outlines WHERE supplied_dataset_id = %s'
+            sql = bulk_load_select.bulk_load_outlines_capture_source_by_supplied_dataset_id
             # get capture source of current dataset
             capture_source = self.db.execute_no_commit(sql, (self.current_dataset,))
             capture_source = capture_source.fetchall()[0][0]
             # get suburb, town_city and territorial authority of existing outline
-            sql = 'SELECT suburb_locality_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            sql = buildings_select.building_outlines_suburb_locality_id_by_building_outline_id
             suburb = self.db.execute_no_commit(sql, (building_outline_id,))
             suburb = suburb.fetchall()[0][0]
-            sql = 'SELECT town_city_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            sql = buildings_select.building_outlines_town_city_id_by_building_outline_id
             town_city = self.db.execute_no_commit(sql, (building_outline_id,))
             town_city = town_city.fetchall()[0][0]
-            sql = 'SELECT territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s'
+            sql = buildings_select.building_outlines_territorial_authority_id_by_building_outline
             territorial_auth = self.db.execute_no_commit(sql, (building_outline_id,))
             territorial_auth = territorial_auth.fetchall()[0][0]
             # insert outline into building_bulk_load.bulk_load_outlines
