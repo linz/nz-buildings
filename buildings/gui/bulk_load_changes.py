@@ -435,6 +435,13 @@ class EditAttribute(BulkLoadChanges):
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.bulk_load_frame.ids) > 0:
                     for i in self.bulk_load_frame.ids:
+                        # check current status of building
+                        sql = bulk_load_select.bulk_load_status_id_by_outline_id
+                        current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                        current_status = current_status.fetchall()
+                        if current_status[0][0] == 3:
+                            sql = 'SELECT buildings_bulk_load.delete_deleted_description(%s);'
+                            self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                         sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
                         self.bulk_load_frame.db.execute_no_commit(sql, (i, self.bulk_load_frame.description_del))
                         # remove outline from added table
@@ -447,11 +454,19 @@ class EditAttribute(BulkLoadChanges):
                     self.bulk_load_frame.bulk_load_layer.removeSelection()
         else:
             for i in self.bulk_load_frame.ids:
+                # check current status of building
+                sql = bulk_load_select.bulk_load_status_id_by_outline_id
+                current_status = self.bulk_load_frame.db.execute_no_commit(sql, (i,))
+                current_status = current_status.fetchall()
+                if current_status[0][0] == 3:
+                    sql = 'SELECT buildings_bulk_load.delete_deleted_description(%s);'
+                    self.bulk_load_frame.db.execute_no_commit(sql, (i,))
                 # change attributes
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);'
                 self.bulk_load_frame.db.execute_no_commit(
                     sql, (i, bulk_load_status_id, capture_method_id,
                           capture_source_id, suburb, town, t_a))
+            self.bulk_load_frame.bulk_load_layer.removeSelection()
         self.disable_UI_functions()
         self.bulk_load_frame.completer_box()
 
@@ -521,23 +536,43 @@ class EditAttribute(BulkLoadChanges):
             return False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
-            deleted = False
+            deleted = 0
+            reasons = []
             for feature in self.bulk_load_frame.bulk_load_layer.selectedFeatures():
                 sql = bulk_load_select.bulk_load_status_id_by_outline_id
                 result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:
-                    deleted = True
-                    break
-            if deleted:
-                self.bulk_load_frame.error_dialog = ErrorDialog()
-                self.bulk_load_frame.error_dialog.fill_report(
-                    '\n ---- SELECTED A DELETED FEATURE ---- \n\n'
-                    'Can only edit attributes of'
-                    ' features that have not been deleted.'
-                )
-                self.bulk_load_frame.error_dialog.show()
-                return False
+                    deleted = deleted + 1
+                    sql = bulk_load_select.deletion_description_by_bulk_load_id
+                    result = self.bulk_load_frame.db._execute(sql, (feature['bulk_load_outline_id'], ))
+                    reason = result.fetchall()[0][0]
+                    if reason not in reasons:
+                        reasons.append(reason)
+            if deleted > 0:
+                if deleted == len(self.bulk_load_frame.bulk_load_layer.selectedFeatures()):
+                    if self.bulk_load_frame.btn_compare_outlines.isEnabled():
+                        if len(reasons) <= 1:
+                            return True
+                        else:
+                            self.bulk_load_frame.error_dialog = ErrorDialog()
+                            self.bulk_load_frame.error_dialog.fill_report(
+                                '\n ---- DIFFERING DELETION REASONS ---- \n\n'
+                                'Cannot edit deleted features as have differing'
+                                ' reasons for deletion. Please edit individually.\n'
+                            )
+                            self.bulk_load_frame.error_dialog.show()
+                            return False
+                    else:
+                        self.bulk_load_frame.error_dialog = ErrorDialog()
+                        self.bulk_load_frame.error_dialog.fill_report(
+                            '\n ---- CANNOT EDIT DELETED FEATURE ---- \n\n'
+                            'Cannot edit deleted feature after comparison has been'
+                            ' run, instead please add this feature manually.\n'
+                            'Note: Don\'t forget to update the relationship too!'
+                        )
+                        self.bulk_load_frame.error_dialog.show()
+                        return False
             else:
                 return True
         return False
@@ -552,7 +587,7 @@ class EditAttribute(BulkLoadChanges):
         bulk_load_geom = bulk_load_feat.geometry()
         # convert to correct format
         wkt = bulk_load_geom.exportToWkt()
-        sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)'
+        sql = general_select.convert_geometry
         result = self.bulk_load_frame.db._execute(sql, (wkt,))
         self.bulk_load_frame.geom = result.fetchall()[0][0]
 
@@ -568,6 +603,13 @@ class EditAttribute(BulkLoadChanges):
         result = result.fetchall()[0][0]
         self.bulk_load_frame.cmb_status.setCurrentIndex(
             self.bulk_load_frame.cmb_status.findText(result))
+
+        # reason for deletion
+        if self.bulk_load_frame.cmb_status.currentText() == 'Deleted During QA':
+            reason = bulk_load_select.deletion_description_by_bulk_load_id
+            reason = self.bulk_load_frame.db._execute(reason, (self.bulk_load_frame.bulk_load_outline_id,))
+            reason = reason.fetchall()[0][0]
+            self.bulk_load_frame.le_deletion_reason.setText(reason)
 
         # capture method
         result = self.bulk_load_frame.db._execute(
