@@ -270,6 +270,12 @@ class AddProduction(ProductionChanges):
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.production_frame.building_layer.getFeatures(request))
         new_geometry = new_feature.geometry()
+        # calculate area
+        area = new_geometry.area()
+        if area < 10:
+            iface.messageBar().pushMessage("INFO",
+                                           "You've drawn an outline that is less than 10sqm, are you sure this is correct?",
+                                           level=QgsMessageBar.INFO, duration=3)
         # convert to correct format
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
@@ -311,6 +317,11 @@ class AddProduction(ProductionChanges):
             sql = general_select.convert_geometry
             result = self.production_frame.db._execute(sql, (wkt,))
             self.production_frame.geom = result.fetchall()[0][0]
+            area = geom.area()
+            if area < 10:
+                iface.messageBar().pushMessage("INFO",
+                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
+                                               level=QgsMessageBar.INFO, duration=3)
         else:
             self.production_frame.error_dialog = ErrorDialog()
             self.production_frame.error_dialog.fill_report(
