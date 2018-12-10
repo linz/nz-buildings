@@ -699,16 +699,17 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
         # Move to the next 'not checked'
-        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            item = self.tbl_relationship.item(row, qa_column)
-            if item.text() == "Not Checked":
-                self.tbl_relationship.selectRow(row)
+        if qa_status_id != 5:
+            for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+                item = self.tbl_relationship.item(row, qa_column)
+                if item.text() == "Not Checked":
+                    self.tbl_relationship.selectRow(row)
+                    self.tbl_relationship.scrollToItem(item)
+                    break
+            if not self.tbl_relationship.selectionModel().selectedRows():
+                self.tbl_relationship.selectRow(max(selected_rows))
+                item = self.tbl_relationship.item(max(selected_rows), qa_column)
                 self.tbl_relationship.scrollToItem(item)
-                break
-        if not self.tbl_relationship.selectionModel().selectedRows():
-            self.tbl_relationship.selectRow(max(selected_rows))
-            item = self.tbl_relationship.item(max(selected_rows), qa_column)
-            self.tbl_relationship.scrollToItem(item)
 
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
