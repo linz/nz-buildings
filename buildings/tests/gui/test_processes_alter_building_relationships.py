@@ -303,11 +303,16 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_exit.click()
 
     def test_not_removed_btn(self):
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
+        matched_initial_count = self.alter_relationships_frame.tbl_relationship.rowCount()
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
+        removed_initial_count = self.alter_relationships_frame.tbl_relationship.rowCount()
         self.alter_relationships_frame.tbl_relationship.selectRow(0)
         self.alter_relationships_frame.btn_qa_status_clicked(qa_status='Not Removed', commit_status=False)
         # check item removed from table
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), 1)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), removed_initial_count - 1)
+        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), matched_initial_count + 1)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
         self.alter_relationships_frame.btn_exit.click()
