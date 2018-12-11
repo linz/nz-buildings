@@ -4,8 +4,11 @@ Buildings Select Statements
 
 - building_outlines
     - building_outlines
+    - building_outlines_capture_method_id_by_building_outline_id (building+putline_id)
     - building_outlines_end_lifespan_by_building_outline_id (building_outline_id)
     - building_outline_shape_by_building_outline_id (building_outline_id)
+    - building_outlines_suburb_locality_id_by_building_outline_id
+    - building_outlines_town_city_id_by_building_outline_id
 
 - lifecycle_stage
     - lifecycle_stage_by_value (value)
@@ -25,6 +28,12 @@ WHERE ST_Intersects(bo.shape, %s)
 AND bo.building_outline_id NOT IN ( SELECT building_outline_id FROM buildings_bulk_load.removed );
 """
 
+building_outlines_capture_method_id_by_building_outline_id = """
+SELECT capture_method_id
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
+
 building_outlines_end_lifespan_by_building_outline_id = """
 SELECT end_lifespan
 FROM buildings.building_outlines
@@ -36,6 +45,25 @@ SELECT shape
 FROM buildings.building_outlines
 WHERE building_outline_id = %s;
 """
+
+building_outlines_suburb_locality_id_by_building_outline_id = """
+SELECT suburb_locality_id
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
+
+building_outlines_territorial_authority_id_by_building_outline = """
+SELECT territorial_authority_id
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
+
+building_outlines_town_city_id_by_building_outline_id = """
+SELECT town_city_id
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
+
 
 # lifecycle stage
 

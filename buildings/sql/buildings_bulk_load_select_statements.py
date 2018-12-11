@@ -7,6 +7,7 @@ Bulk Load Outlines Select Statements:
   - added_outlines_by_dataset_id (supplied_dataset_id)
 
 - bulk_load_outlines
+  - bulk_load_outlines_capture_source_by_supplied_dataset_id (supplied_dataset_id)
   - bulk_load_outline_ids_by_dataset_id (supplied_dataset_id)
   - bulk_load_outline_shape_by_id (bulk_load_outline_id)
   - bulk_load_removed_outline_ids_by_dataset_id (supplied_dataset_id)
@@ -76,6 +77,12 @@ WHERE bulk_load_outline_id IN (
 """
 
 # bulk load outlines
+
+bulk_load_outlines_capture_source_by_supplied_dataset_id = """
+SELECT DISTINCT capture_source_id
+FROM buildings_bulk_load.bulk_load_outlines
+WHERE supplied_dataset_id = %s;
+"""
 
 bulk_load_outline_ids_by_dataset_id = """
 SELECT bulk_load_outline_id
