@@ -263,7 +263,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         if status:
             iface.messageBar().pushMessage("SUCCESS",
                                            "You've added a new capture source!",
-                                           level=QgsMessageBar.SUCCESS, duration=1)
+                                           level=QgsMessageBar.SUCCESS, duration=3)
 
     @pyqtSlot()
     def exit_clicked(self):

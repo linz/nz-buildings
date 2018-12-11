@@ -142,7 +142,7 @@ class NewEntry(QFrame, FORM_CLASS):
         if self.status:
             iface.messageBar().pushMessage("SUCCESS",
                                            "You've added a new {}!".format(self.new_type),
-                                           level=QgsMessageBar.SUCCESS, duration=1)
+                                           level=QgsMessageBar.SUCCESS, duration=3)
 
     @pyqtSlot()
     def exit_clicked(self):
