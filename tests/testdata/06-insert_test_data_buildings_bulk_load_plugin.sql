@@ -2,7 +2,7 @@
 INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (1001, 1, '1');
 INSERT INTO buildings_common.capture_source(capture_source_id, capture_source_group_id, external_source_id) VALUES (1002, 1, '2');
 
-INSERT INTO buildings_reference.capture_source_area(area_polygon_id, external_area_polygon_id, area_title, shape) VALUES (1003, 3, 'Imagery Three', '0106000020910800000100000001030000000100000005000000937A477853AB3C41E81DBCEE843155415AA9772440AC3C41E81DBCEE843155415AA9772440AC3C41BC04A92C4E315541937A477853AB3C41BC04A92C4E315541937A477853AB3C41E81DBCEE84315541');
+INSERT INTO buildings_reference.capture_source_area(area_polygon_id, external_area_polygon_id, area_title, shape) VALUES (1003, '3', 'Imagery Three', '0106000020910800000100000001030000000100000005000000937A477853AB3C41E81DBCEE843155415AA9772440AC3C41E81DBCEE843155415AA9772440AC3C41BC04A92C4E315541937A477853AB3C41BC04A92C4E315541937A477853AB3C41E81DBCEE84315541');
 
 -- SUPPLIED DATASET ONE
 INSERT INTO buildings_bulk_load.supplied_datasets(supplied_dataset_id, description, supplier_id, processed_date, transfer_date)
