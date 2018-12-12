@@ -255,11 +255,15 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # get type
         value = self.get_combobox_value()
         # call insert function
-        self.capture_source_id = self.insert_capture_source(value, external_source, commit_status)
+        status = self.insert_capture_source(value, external_source, commit_status)
         self.le_external_source_id.clear()
         self.capture_source_area.removeSelection()
         self.tbl_capture_source_area.clearSelection()
         self.btn_save.setDisabled(1)
+        if status:
+            iface.messageBar().pushMessage("SUCCESS",
+                                           "You've added a new capture source!",
+                                           level=QgsMessageBar.SUCCESS, duration=3)
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -332,3 +336,4 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             if commit_status:
                 self.db.commit_open_cursor()
             self.le_external_source_id.clear()
+        return to_add
