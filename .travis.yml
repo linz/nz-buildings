@@ -2,10 +2,6 @@
 matrix:
   include:
 
-
-matrix:
-  include:
-
     - env: BUILD=docs
       language: python
       before_install: []
@@ -13,7 +9,7 @@ matrix:
         - pip install Sphinx sphinx_rtd_theme
         - pip install -r requirements-docs.txt
       before_script: []
-      script: sphinx-build -b html docs/source docs
+      script: sphinx-build -b html db/docs/source db/docs
       after_script: []
 
     - env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
@@ -77,4 +73,4 @@ before_script:
   - nz-buildings-load nz_buildings_travis_db --with-test-data
 
 script:
-  - pg_prove -U travis -d nz_buildings_travis_db tests/
+  - pg_prove -U travis -d nz_buildings_travis_db db/tests/
