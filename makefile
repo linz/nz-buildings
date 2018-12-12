@@ -7,7 +7,7 @@ REVISION = $(shell test -d .git && git describe --always || echo $(VERSION))
 
 SED = sed
 
-datadir = ${DESTDIR}/usr/share/nz-building-outlines
+datadir = ${DESTDIR}/usr/share/nz-buildings
 bindir = ${DESTDIR}/usr/bin
 
 # List of SQL scripts used for installation
