@@ -1,6 +1,6 @@
+# DB
+
 # Installs the SQL creation scripts and load script.
-# TODO: Create a simple rebuild-buildings $DB_NAME alias that can be used to
-# repeatedly reinstall and rebuild the nz-buildings database.
 
 VERSION = dev
 REVISION = $(shell test -d .git && git describe --always || echo $(VERSION))
@@ -110,3 +110,29 @@ check test: $(SQLSCRIPTS)
 clean:
 	# Remove the files built from .in files during install
 	rm -f $(EXTRA_CLEAN)
+
+# PLUGIN
+
+PLUGINNAME = buildings
+
+deploy:
+	@echo
+	@echo "------------------------------------------"
+	@echo "Deploying plugin to your .qgis2 directory."
+	@echo "------------------------------------------"
+	# The deploy target only works on unix like operating system where
+	# the Python plugin directory is located at:
+	# $HOME/$(QGISDIR)/python/plugins
+	rm -rf $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	cp -TRv $(PLUGINNAME) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+
+setup_test_db:
+	@echo
+	@echo "------------------------------------------"
+	@echo "Setting up schema in nz-buildings-plugin-db"
+	@echo "------------------------------------------"
+	export PGDATABASE=nz-buildings-plugin-db; \
+	dropdb --if-exists $$PGDATABASE; \
+	createdb $$PGDATABASE; \
+	nz-buildings-load nz-buildings-plugin-db --with-plugin-setup; \
+	sed -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
