@@ -4,7 +4,7 @@ DB_NAME=
 WITH_TEST_DATA=false
 WITH_PLUGIN_SETUP=false
 export PSQL=psql
-export SCRIPTSDIR=/usr/share/nz-building-outlines/
+export SCRIPTSDIR=/usr/share/nz-buildings/
 
 usage() {
     echo "Usage: $0 <database> [--with-test-data]" >&2

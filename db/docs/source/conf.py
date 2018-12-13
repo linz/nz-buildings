@@ -20,7 +20,7 @@ import sys
 from tabulate import tabulate
 
 
-SITE_URL = "http://nz-building-outlines.readthedocs.io/en/latest/"
+SITE_URL = "http://nz-buildings.readthedocs.io/en/latest/"
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
