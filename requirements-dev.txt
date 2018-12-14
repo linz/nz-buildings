@@ -1,0 +1,5 @@
+# python packages
+psycopg2
+pytest==3.0.6
+xlwt==1.2.0
+

@@ -2,10 +2,6 @@
 matrix:
   include:
 
-
-matrix:
-  include:
-
     - env: BUILD=docs
       language: python
       before_install: []
@@ -13,8 +9,36 @@ matrix:
         - pip install Sphinx sphinx_rtd_theme
         - pip install -r requirements-docs.txt
       before_script: []
-      script: sphinx-build -b html docs/source docs
+      script: sphinx-build -b html db/docs/source db/docs
       after_script: []
+
+    - env: BUILD=qgis_plugin PLUGIN_NAME=buildings DOCKER_COMPOSE_VERSION=1.7.1 QGIS_VERSION_TAG=master_2 PYTHON_EXECUTABLE=python PIP_EXECUTABLE=pip
+      language: python
+      services: docker
+      before_install:
+        # update repositories to see new packages for Docker.
+        - sudo apt-get update
+        # Install the newer docker-engine which is required for the newer docker-compose
+        - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-ce
+        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+        # Get it up and running
+        - chmod +x docker-compose
+        - sudo mv docker-compose /usr/local/bin
+        - docker-compose --version
+        - docker-compose up -d
+        - docker-compose ps
+        - sleep 10
+      install:
+        - docker-compose exec qgis-testing-environment sh -c "$PIP_EXECUTABLE install -r tests_directory/requirements-dev.txt"
+        - docker-compose exec qgis-testing-environment sh -c "mkdir -p /root/.qgis2/buildings && cp tests_directory/${PLUGIN_NAME}/tests/pg_config_test.ini /root/.qgis2/buildings/pg_config.ini"
+        - docker-compose exec qgis-testing-environment sh -c "qgis_setup.sh ${PLUGIN_NAME}"
+        - docker-compose version
+      before_script:
+        - docker-compose exec qgis-testing-environment sh -c "ln -s tests_directory /root/.qgis2/python/plugins/${PLUGIN_NAME}"
+        - until nc -z -v -w30 172.18.0.2 5432; do sleep 2; done
+        - docker-compose exec qgis-testing-environment sh -c "cd tests_directory && python install.py"
+      script:
+        - docker-compose exec qgis-testing-environment sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.test_runner.run_test_modules"
 
     - env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
       addons:
@@ -77,4 +101,4 @@ before_script:
   - nz-buildings-load nz_buildings_travis_db --with-test-data
 
 script:
-  - pg_prove -U travis -d nz_buildings_travis_db tests/
+  - pg_prove -U travis -d nz_buildings_travis_db db/tests/
