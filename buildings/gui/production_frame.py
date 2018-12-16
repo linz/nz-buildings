@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QFrame, QMenu
+from PyQt4.QtGui import QAction, QFrame, QIcon, QMenu
 from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -57,6 +57,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.tbtn_edits.setMenu(self.menu)
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
 
         # set up signals and slots
         self.tbtn_edits.triggered.connect(self.tbtn_edits_triggered)
@@ -69,6 +71,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
         self.btn_exit_edits.setDisabled(1)
+        self.btn_circle.hide()
 
     def add_outlines(self):
         """
@@ -308,6 +311,11 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     self.building_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
+                if self.change_instance.polyline:
+                    self.change_instance.polyline.reset()
+                    self.change_instance.tool.canvas_clicked.disconnect()
+                    self.change_instance.tool.mouse_moved.disconnect()
+                    iface.actionPan().trigger()
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)
@@ -336,6 +344,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+        self.btn_circle.hide()
 
     @pyqtSlot(str)
     def layers_removed(self, layerids):

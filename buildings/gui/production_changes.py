@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QToolButton
-from qgis.core import QgsFeatureRequest, QgsGeometry
-from qgis.gui import QgsMessageBar
+import math
+from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtGui import QColor, QToolButton
+from qgis.core import QgsFeature, QgsFeatureRequest, QgsGeometry, QgsPoint
+from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -11,6 +11,7 @@ from buildings.sql import (buildings_common_select_statements as common_select,
                            buildings_select_statements as buildings_select,
                            buildings_reference_select_statements as reference_select,
                            general_select_statements as general_select)
+from buildings.utilities.point_tool import PointTool
 
 
 class ProductionChanges:
@@ -210,6 +211,11 @@ class AddProduction(ProductionChanges):
         iface.building_toolbar.show()
         self.disable_UI_functions()
 
+        self.production_frame.btn_circle.setEnabled(1)
+        self.production_frame.btn_circle.clicked.connect(self.setup_circle)
+        self.production_frame.btn_circle.show()
+        self.polyline = None
+
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
         """
@@ -295,6 +301,8 @@ class AddProduction(ProductionChanges):
         """
         if qgsfId in self.production_frame.added_building_ids:
             self.production_frame.added_building_ids.remove(qgsfId)
+            if self.polyline is not None:
+                self.polyline.reset()
             if self.production_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.production_frame.geom = None
@@ -331,6 +339,54 @@ class AddProduction(ProductionChanges):
                 'existing outlines.'
             )
             self.production_frame.error_dialog.show()
+
+    @pyqtSlot()
+    def setup_circle(self):
+        # called when draw circle button is clicked
+        self.points = []
+        # set map tool to new point tool
+        self.tool = PointTool(iface.mapCanvas())
+        iface.mapCanvas().setMapTool(self.tool)
+        # create polyline to track drawing on canvas
+        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
+        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
+        self.polyline.setColor(QColor(255, 0, 0))
+        self.polyline.setWidth(1)
+        # signals for new map tool
+        self.tool.canvas_clicked.connect(self.draw_circle)
+        self.tool.mouse_moved.connect(self.update_line)
+
+    @pyqtSlot(QgsPoint)
+    def draw_circle(self, point):
+        # called when mapcanvas is clicked
+        self.points.append(point)
+        self.polyline.addPoint(point, True)
+        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
+        # if two points have been clicked (center and edge)
+        if len(self.points) == 2:
+            # calculate radius of circle
+            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
+            # number of vertices of circle
+            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
+            # create point on center location
+            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
+            # create buffer of specified distance around point
+            buffer = point.buffer(radius, nodes)
+            # add feature to building_outlines (triggering featureAdded)
+            self.feature = QgsFeature(self.production_frame.building_layer.pendingFields())
+            self.feature.setGeometry(buffer)
+            self.production_frame.building_layer.addFeature(self.feature)
+            self.production_frame.building_layer.triggerRepaint()
+            # reset points list
+            self.points = []
+
+    @pyqtSlot(QgsPoint)
+    def update_line(self, point):
+        # called when mouse moved on canvas
+        if len(self.points) == 1:
+            # if the center has been clicked have a line follow the mouse movement
+            line = [self.points[0], point]
+            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
 
     def select_comboboxes_value(self):
         """
