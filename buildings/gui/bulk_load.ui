@@ -79,7 +79,7 @@
         <x>0</x>
         <y>0</y>
         <width>377</width>
-        <height>936</height>
+        <height>971</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -562,6 +562,36 @@ QGroupBox::title {
            </widget>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="btn_circle">
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>1</width>
+                <height>10</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item>
            <widget class="QWidget" name="layout_status" native="true">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -843,6 +873,7 @@ QGroupBox::title {
          <zorder>gridWidget_3</zorder>
          <zorder>tbtn_edits</zorder>
          <zorder>verticalSpacer_5</zorder>
+         <zorder>layoutWidget</zorder>
         </widget>
        </item>
        <item>
@@ -959,12 +990,12 @@ QGroupBox::title {
   <customwidget>
    <class>QgsFieldComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgis.gui</header>
+   <header>qgsfieldcombobox.h</header>
   </customwidget>
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgis.gui</header>
+   <header>qgsmaplayercombobox.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

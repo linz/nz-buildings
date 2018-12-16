@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QMenu, QMessageBox
+from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QIcon, QMenu, QMessageBox
 from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -56,11 +56,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
+        # icon for circle button
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
         # set up confirmation message box
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
         self.cb_bulk_load.hide()
+        self.btn_circle.hide()
 
         # Find current supplied dataset
         result = self.db._execute(bulk_load_select.supplied_dataset_count_processed_date_is_null)
@@ -562,6 +566,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.bulk_load_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
+                if self.change_instance.polyline:
+                    self.change_instance.polyline.reset()
+                    self.change_instance.tool.canvas_clicked.disconnect()
+                    self.change_instance.tool.mouse_moved.disconnect()
+                    iface.actionPan().trigger()
 
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
@@ -591,6 +600,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+        self.btn_circle.hide()
 
     def completer_box(self):
         """
