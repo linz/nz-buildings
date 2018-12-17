@@ -258,7 +258,7 @@ COMMENT ON COLUMN buildings_reference.canal_polygons.external_canal_polygon_id I
 -- Capture Source Area
 CREATE TABLE IF NOT EXISTS buildings_reference.capture_source_area (
       area_polygon_id serial PRIMARY KEY
-    , external_area_polygon_id integer
+    , external_area_polygon_id varchar(250)
     , area_title varchar (250)
     , shape public.geometry(MultiPolygon, 2193)
 );
