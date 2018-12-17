@@ -215,6 +215,7 @@ class AddProduction(ProductionChanges):
         self.production_frame.btn_circle.clicked.connect(self.setup_circle)
         self.production_frame.btn_circle.show()
         self.polyline = None
+        self.tool = None
 
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):

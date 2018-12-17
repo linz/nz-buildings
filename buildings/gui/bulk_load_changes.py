@@ -221,6 +221,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.disable_UI_functions()
         self.bulk_load_frame.btn_circle.show()
         self.polyline = None
+        self.tool = None
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
