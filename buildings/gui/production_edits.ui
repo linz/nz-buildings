@@ -149,9 +149,12 @@ QGroupBox::title {
          <widget class="QPushButton" name="btn_circle">
           <property name="maximumSize">
            <size>
-            <width>40</width>
+            <width>60</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Add Circle</string>
           </property>
           <property name="text">
            <string/>

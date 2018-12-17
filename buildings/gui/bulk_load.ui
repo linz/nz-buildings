@@ -571,6 +571,9 @@ QGroupBox::title {
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Add Circle</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -873,7 +876,6 @@ QGroupBox::title {
          <zorder>gridWidget_3</zorder>
          <zorder>tbtn_edits</zorder>
          <zorder>verticalSpacer_5</zorder>
-         <zorder>layoutWidget</zorder>
         </widget>
        </item>
        <item>
@@ -990,12 +992,12 @@ QGroupBox::title {
   <customwidget>
    <class>QgsFieldComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgsfieldcombobox.h</header>
+   <header>qgis.gui</header>
   </customwidget>
   <customwidget>
    <class>QgsMapLayerComboBox</class>
    <extends>QComboBox</extends>
-   <header>qgsmaplayercombobox.h</header>
+   <header>qgis.gui</header>
   </customwidget>
  </customwidgets>
  <resources/>
