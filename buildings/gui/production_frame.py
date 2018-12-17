@@ -14,6 +14,7 @@ from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
 from buildings.utilities.layers import LayerRegistry
+from buildings.utilities.point_tool import PointTool
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -313,9 +314,11 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     pass
                 if self.change_instance.polyline:
                     self.change_instance.polyline.reset()
+                if isinstance(self.change_instance.tool, PointTool):
                     self.change_instance.tool.canvas_clicked.disconnect()
                     self.change_instance.tool.mouse_moved.disconnect()
-                    iface.actionPan().trigger()
+                    self.change_instance.tool = None
+                iface.actionPan().trigger()
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)

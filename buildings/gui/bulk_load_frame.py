@@ -17,6 +17,7 @@ from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_se
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db, layers
 from buildings.utilities.layers import LayerRegistry
+from buildings.utilities.point_tool import PointTool
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -568,9 +569,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     pass
                 if self.change_instance.polyline:
                     self.change_instance.polyline.reset()
+                if isinstance(self.change_instance.tool, PointTool):
                     self.change_instance.tool.canvas_clicked.disconnect()
                     self.change_instance.tool.mouse_moved.disconnect()
-                    iface.actionPan().trigger()
+                    self.change_instance.tool = None
+                iface.actionPan().trigger()
 
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)

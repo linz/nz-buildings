@@ -257,6 +257,7 @@ class AddProduction(ProductionChanges):
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
+        self.tool = None
         # reset and disable comboboxes
         self.disable_UI_functions()
 

@@ -259,6 +259,7 @@ class AddBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         if self.polyline:
             self.polyline.reset()
+            self.polyline = None
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -555,6 +556,7 @@ class EditAttribute(BulkLoadChanges):
         iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
+        self.tool = None
         self.disable_UI_functions()
 
     @pyqtSlot(list, list, bool)
