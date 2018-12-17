@@ -11,6 +11,7 @@ from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.gui.new_capture_source_area import NewCaptureSourceArea
 from buildings.sql import (buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db
@@ -53,7 +54,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # button
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
         self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'tick.png')))
-
+        self.btn_new_geometry.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'plus.png')))
         # set up signals and slots
         self.capture_source_id = None
         self.btn_save.setDisabled(1)
@@ -65,6 +66,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_validate.clicked.connect(self.validate)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+        self.btn_new_geometry.clicked.connect(self.add_new_geometry)
 
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
@@ -150,6 +152,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         text = self.cmb_capture_source_group.currentText()
         text_ls = text.split('-')
         return text_ls[0]
+
+    @pyqtSlot(int)
+    def add_new_geometry(self):
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        self.layer_registry.remove_layer(self.capture_source_area)
+        dw = self.dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(NewCaptureSourceArea(dw))
 
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
