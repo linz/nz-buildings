@@ -260,7 +260,6 @@ class AddBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         if self.polyline:
             self.polyline.reset()
-            self.polyline = None
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 

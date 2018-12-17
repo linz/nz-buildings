@@ -260,6 +260,9 @@ class AddProduction(ProductionChanges):
         iface.actionAddFeature().trigger()
         self.tool = None
         # reset and disable comboboxes
+        if self.polyline:
+            self.polyline.reset()
+        iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
         self.production_frame.geom = None
