@@ -104,6 +104,10 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         if (len(selection) > 1) or (len(selection) == 0):
             self.le_external_id.setDisabled(True)
             self.le_area_title.setDisabled(True)
+            iface.messageBar().pushMessage(
+                "INFO",
+                "More than one feature selected, please re-select.",
+                level=QgsMessageBar.INFO, duration=3)
         elif len(selection) == 1:
             new_geometry = selection[0].geometry()
             # error pops up if geometry type is not polygon or multipolygon
@@ -247,7 +251,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
                 self.disable_UI_functions()
                 self.geom = None
                 return
-            sql = 'SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193);'
+            sql = general_select.convert_geometry
             result = self.db._execute(sql, (wkt,))
             self.geom = result.fetchall()[0][0]
         else:
@@ -279,10 +283,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         area_title = self.le_area_title.text()
         external_id = self.le_external_id.text()
         geom = self.geom
-        sql = '''
-                INSERT INTO buildings_reference.capture_source_area(external_area_polygon_id, area_title, shape)
-                VALUES (%s, %s, %s);
-                '''
+        sql = 'SELECT buildings_reference.capture_source_area_insert(%s, %s, %s)'
         self.db.execute_no_commit(sql, (external_id, area_title, geom))
 
         self.init_table()
