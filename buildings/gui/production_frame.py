@@ -140,6 +140,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
             When add outline radio button toggled
         """
         self.geom = None
+        self.polyline = None
+        self.tool = None
         self.added_building_ids = []
         iface.actionCancelEdits().trigger()
         # reset toolbar
@@ -162,6 +164,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
         self.change_instance = production_changes.AddProduction(self)
+        # set up circle button
+        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.show()
         # connect signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
@@ -312,12 +317,12 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     self.building_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
-                if self.change_instance.polyline:
-                    self.change_instance.polyline.reset()
-                if isinstance(self.change_instance.tool, PointTool):
-                    self.change_instance.tool.canvas_clicked.disconnect()
-                    self.change_instance.tool.mouse_moved.disconnect()
-                    self.change_instance.tool = None
+                if self.polyline:
+                    self.polyline.reset()
+                if isinstance(self.tool, PointTool):
+                    self.tool.canvas_clicked.disconnect()
+                    self.tool.mouse_moved.disconnect()
+                    self.tool = None
                 iface.actionPan().trigger()
         # deselect both comboboxes
         self.btn_save.setEnabled(False)

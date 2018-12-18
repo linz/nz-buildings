@@ -422,6 +422,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         self.added_building_ids = []
         self.geom = None
+        self.polyline = None
+        self.tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -445,6 +447,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layout_general_info.show()
 
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
+        # setup circle button
+        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.show()
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
@@ -567,12 +572,12 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.bulk_load_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
-                if self.change_instance.polyline:
-                    self.change_instance.polyline.reset()
-                if isinstance(self.change_instance.tool, PointTool):
-                    self.change_instance.tool.canvas_clicked.disconnect()
-                    self.change_instance.tool.mouse_moved.disconnect()
-                    self.change_instance.tool = None
+                if self.polyline:
+                    self.polyline.reset()
+                if isinstance(self.tool, PointTool):
+                    self.tool.canvas_clicked.disconnect()
+                    self.tool.mouse_moved.disconnect()
+                    self.tool = None
                 iface.actionPan().trigger()
 
         self.btn_edit_save.setEnabled(False)

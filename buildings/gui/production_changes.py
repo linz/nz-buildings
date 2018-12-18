@@ -211,12 +211,6 @@ class AddProduction(ProductionChanges):
         iface.building_toolbar.show()
         self.disable_UI_functions()
 
-        self.production_frame.btn_circle.setEnabled(1)
-        self.production_frame.btn_circle.clicked.connect(self.setup_circle)
-        self.production_frame.btn_circle.show()
-        self.polyline = None
-        self.tool = None
-
     @pyqtSlot(bool)
     def save_clicked(self, commit_status):
         """
@@ -258,10 +252,10 @@ class AddProduction(ProductionChanges):
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
-        self.tool = None
+        self.production_frame.tool = None
         # reset and disable comboboxes
-        if self.polyline:
-            self.polyline.reset()
+        if self.production_frame.polyline:
+            self.production_frame.polyline.reset()
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -306,8 +300,8 @@ class AddProduction(ProductionChanges):
         """
         if qgsfId in self.production_frame.added_building_ids:
             self.production_frame.added_building_ids.remove(qgsfId)
-            if self.polyline is not None:
-                self.polyline.reset()
+            if self.production_frame.polyline is not None:
+                self.production_frame.polyline.reset()
             if self.production_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.production_frame.geom = None
@@ -350,23 +344,23 @@ class AddProduction(ProductionChanges):
         # called when draw circle button is clicked
         self.points = []
         # set map tool to new point tool
-        self.tool = PointTool(iface.mapCanvas())
-        iface.mapCanvas().setMapTool(self.tool)
+        self.production_frame.tool = PointTool(iface.mapCanvas())
+        iface.mapCanvas().setMapTool(self.production_frame.tool)
         # create polyline to track drawing on canvas
-        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
-        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
-        self.polyline.setColor(QColor(255, 0, 0))
-        self.polyline.setWidth(1)
+        self.production_frame.polyline = QgsRubberBand(iface.mapCanvas(), False)
+        self.production_frame.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
+        self.production_frame.polyline.setColor(QColor(255, 0, 0))
+        self.production_frame.polyline.setWidth(1)
         # signals for new map tool
-        self.tool.canvas_clicked.connect(self.draw_circle)
-        self.tool.mouse_moved.connect(self.update_line)
+        self.production_frame.tool.canvas_clicked.connect(self.draw_circle)
+        self.production_frame.tool.mouse_moved.connect(self.update_line)
 
     @pyqtSlot(QgsPoint)
     def draw_circle(self, point):
         # called when mapcanvas is clicked
         self.points.append(point)
-        self.polyline.addPoint(point, True)
-        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
+        self.production_frame.polyline.addPoint(point, True)
+        self.production_frame.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
         # if two points have been clicked (center and edge)
         if len(self.points) == 2:
             # calculate radius of circle
@@ -391,7 +385,7 @@ class AddProduction(ProductionChanges):
         if len(self.points) == 1:
             # if the center has been clicked have a line follow the mouse movement
             line = [self.points[0], point]
-            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
+            self.production_frame.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
 
     def select_comboboxes_value(self):
         """
