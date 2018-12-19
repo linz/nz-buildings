@@ -28,6 +28,7 @@ SQLSCRIPTS = \
   db/sql/buildings_reference/functions/01-suburb_locality.sql \
   db/sql/buildings_reference/functions/02-town_city.sql \
   db/sql/buildings_reference/functions/03-territorial_authority_and_territorial_authority_grid.sql \
+  db/sql/buildings_reference/functions/04-capture_source_area.sql \
   db/sql/buildings_common/functions/01-capture_method.sql \
   db/sql/buildings_common/functions/02-capture_source_group.sql \
   db/sql/buildings_common/functions/03-capture_source.sql \
