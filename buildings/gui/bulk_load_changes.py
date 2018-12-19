@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QToolButton
-from qgis.core import QgsFeatureRequest, QgsGeometry
-from qgis.gui import QgsMessageBar
+import math
+from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtGui import QColor, QToolButton
+from qgis.core import QgsFeature, QgsFeatureRequest, QgsGeometry, QgsPoint
+from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -11,6 +11,7 @@ from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_se
                            buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select,
                            general_select_statements as general_select)
+from buildings.utilities.point_tool import PointTool
 
 
 class BulkLoadChanges:
@@ -252,6 +253,8 @@ class AddBulkLoad(BulkLoadChanges):
             self.bulk_load_frame.geom = None
             self.bulk_load_frame.added_building_ids = []
         # reset and disable comboboxes
+        if self.bulk_load_frame.polyline:
+            self.bulk_load_frame.polyline.reset()
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -268,7 +271,8 @@ class AddBulkLoad(BulkLoadChanges):
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
         self.disable_UI_functions()
-
+        if self.bulk_load_frame.polyline:
+            self.bulk_load_frame.polyline.reset()
         self.bulk_load_frame.geom = None
         self.bulk_load_frame.added_building_ids = []
 
@@ -310,6 +314,8 @@ class AddBulkLoad(BulkLoadChanges):
         """
         if qgsfId in self.bulk_load_frame.added_building_ids:
             self.bulk_load_frame.added_building_ids.remove(qgsfId)
+            if self.bulk_load_frame.polyline is not None:
+                self.bulk_load_frame.polyline.reset()
             if self.bulk_load_frame.added_building_ids == []:
                 self.disable_UI_functions()
                 self.bulk_load_frame.geom = None
@@ -346,6 +352,54 @@ class AddBulkLoad(BulkLoadChanges):
                 'existing outlines.'
             )
             self.bulk_load_frame.error_dialog.show()
+
+    @pyqtSlot()
+    def setup_circle(self):
+        # called when draw circle button is clicked
+        self.points = []
+        # set map tool to new point tool
+        self.bulk_load_frame.tool = PointTool(iface.mapCanvas())
+        iface.mapCanvas().setMapTool(self.bulk_load_frame.tool)
+        # create polyline to track drawing on canvas
+        self.bulk_load_frame.polyline = QgsRubberBand(iface.mapCanvas(), False)
+        self.bulk_load_frame.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
+        self.bulk_load_frame.polyline.setColor(QColor(255, 0, 0))
+        self.bulk_load_frame.polyline.setWidth(1)
+        # signals for new map tool
+        self.bulk_load_frame.tool.canvas_clicked.connect(self.draw_circle)
+        self.bulk_load_frame.tool.mouse_moved.connect(self.update_line)
+
+    @pyqtSlot(QgsPoint)
+    def draw_circle(self, point):
+        # called when mapcanvas is clicked
+        self.points.append(point)
+        self.bulk_load_frame.polyline.addPoint(point, True)
+        self.bulk_load_frame.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
+        # if two points have been clicked (center and edge)
+        if len(self.points) == 2:
+            # calculate radius of circle
+            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
+            # number of vertices of circle
+            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
+            # create point on center location
+            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
+            # create buffer of specified distance around point
+            buffer = point.buffer(radius, nodes)
+            # add feature to bulk_load_outlines (triggering featureAdded)
+            self.feature = QgsFeature(self.bulk_load_frame.bulk_load_layer.pendingFields())
+            self.feature.setGeometry(buffer)
+            self.bulk_load_frame.bulk_load_layer.addFeature(self.feature)
+            self.bulk_load_frame.bulk_load_layer.triggerRepaint()
+            # reset points list
+            self.points = []
+
+    @pyqtSlot(QgsPoint)
+    def update_line(self, point):
+        # called when mouse moved on canvas
+        if len(self.points) == 1:
+            # if the center has been clicked have a line follow the mouse movement
+            line = [self.points[0], point]
+            self.bulk_load_frame.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
 
     def select_comboboxes_value(self):
         """
@@ -497,6 +551,7 @@ class EditAttribute(BulkLoadChanges):
         iface.actionSelect().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
+        self.bulk_load_frame.tool = None
         self.disable_UI_functions()
 
     @pyqtSlot(list, list, bool)
