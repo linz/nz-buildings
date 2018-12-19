@@ -166,7 +166,7 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         # Add one outline in both bulk_load_outlines and added table
         sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
-        result = db._execute(sql, (result, None, 2, 1, 1, 4, 400, 1,
+        result = db._execute(sql, (result, None, 2, 1, 1001, 104, 1004, 10001,
                                    '0103000020910800000100000005000000F311221BB7AA3C41046171A564315541D2712DB1CCAA3C41046171A56431554115066169CDAA3C41E20FFCA060315541751FEF95B7AA3C414353AFBF60315541F311221BB7AA3C41046171A564315541'))
         result = result.fetchall()[0][0]
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)

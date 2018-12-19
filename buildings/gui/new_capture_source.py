@@ -11,6 +11,7 @@ from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.gui.new_capture_source_area import NewCaptureSourceArea
 from buildings.sql import (buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db
@@ -53,7 +54,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # button
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
         self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'tick.png')))
-
+        self.btn_new_geometry.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'plus.png')))
         # set up signals and slots
         self.capture_source_id = None
         self.btn_save.setDisabled(1)
@@ -65,6 +66,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.btn_validate.clicked.connect(self.validate)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+        self.btn_new_geometry.clicked.connect(self.add_new_geometry)
 
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
@@ -151,6 +153,14 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         text_ls = text.split('-')
         return text_ls[0]
 
+    @pyqtSlot(int)
+    def add_new_geometry(self):
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        self.layer_registry.remove_layer(self.capture_source_area)
+        dw = self.dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(NewCaptureSourceArea(dw))
+
     @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
@@ -163,19 +173,20 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.tbl_capture_source_area.clearSelection()
         # if areas are selected
         if len(self.capture_source_area.selectedFeatures()) > 0:
-            # list of ids selected
-            self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_source_area.selectedFeatures()]
+            # list of ids and titles selected
+            self.ids_and_titles = [(str(feat["external_area_polygon_id"]), str(feat["area_title"])) for feat in self.capture_source_area.selectedFeatures()]
             # change table selection
             self.tbl_capture_source_area.clearSelection()
             rows = self.tbl_capture_source_area.rowCount()
             selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.MultiSelection)
-            for item in self.ids:
+            for (area_id, area_title) in self.ids_and_titles:
                 index = 0
                 while index < rows:
                     if index not in selected_rows:
-                        if self.tbl_capture_source_area.item(index, 0).text() == item:
-                            self.tbl_capture_source_area.selectRow(index)
+                        if self.tbl_capture_source_area.item(index, 0).text() == area_id:
+                            if self.tbl_capture_source_area.item(index, 1).text() == area_title:
+                                self.tbl_capture_source_area.selectRow(index)
                     index = index + 1
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.SingleSelection)
         # reconnect line edit signal
@@ -237,10 +248,11 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         selection = ''
         for row in self.tbl_capture_source_area.selectionModel().selectedRows():
             area_id = self.tbl_capture_source_area.item(row.row(), 0).text()
+            area_title = self.tbl_capture_source_area.item(row.row(), 1).text()
             if selection == '':
-                selection = '"external_area_polygon_id" = {}'.format(area_id)
+                selection = '"external_area_polygon_id" = \'{0}\' and "area_title" = \'{1}\''.format(area_id, area_title)
             else:
-                selection = selection + 'or "external_area_polygon_id" = {}'.format(area_id)
+                selection = selection + 'or ("external_area_polygon_id" = \'{0}\' and "area_title" = \'{1}\')'.format(area_id, area_title)
         self.capture_source_area.selectByExpression(selection)
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)

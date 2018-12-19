@@ -40,9 +40,10 @@ SQL_SCRIPTS = [
     # os.path.join("sql", "buildings_lds", "02-default-values.sql"),
     os.path.join("sql", "buildings_bulk_load", "03-alter_relationships_create_view.sql"),
     os.path.join("sql", "01-buildings_version.sql"),
-    os.path.join("sql", "buildings_reference","functions", "01-suburb_locality.sql"),
-    os.path.join("sql", "buildings_reference","functions", "02-town_city.sql"),
-    os.path.join("sql", "buildings_reference","functions", "03-territorial_authority_and_territorial_authority_grid.sql"),
+    os.path.join("sql", "buildings_reference", "functions", "01-suburb_locality.sql"),
+    os.path.join("sql", "buildings_reference", "functions", "02-town_city.sql"),
+    os.path.join("sql", "buildings_reference", "functions", "03-territorial_authority_and_territorial_authority_grid.sql"),
+    os.path.join("sql", "buildings_reference", "functions", "04-capture_source_area.sql"),
     os.path.join("sql", "buildings_common", "functions", "01-capture_method.sql"),
     os.path.join("sql", "buildings_common", "functions", "02-capture_source_group.sql"),
     os.path.join("sql", "buildings_common", "functions", "03-capture_source.sql"),
@@ -53,25 +54,25 @@ SQL_SCRIPTS = [
     # os.path.join("sql", "buildings", "functions", "05-building_name.sql"),
     # os.path.join("sql", "buildings", "functions", "06-building_use.sql"),
     os.path.join("sql", "buildings", "functions", "07-lifecycle.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "01-organisation.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "01-organisation.sql"),
     # os.path.join("sql", "buildings_bulk_load","functions", "02-bulk_load_status.sql"),
     # os.path.join("sql", "buildings_bulk_load","functions", "03-qa_status.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "04-supplied_datasets.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "05-bulk_load_outlines.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "06-existing_subset_extracts.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "07-added.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "08-removed.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "09-related.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "10-matched.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "11-transferred.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "12-deletion_description.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "13-supplied_outlines.sql"),
-    os.path.join("sql", "buildings_bulk_load","functions", "14-compare_buildings.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "04-supplied_datasets.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "05-bulk_load_outlines.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "06-existing_subset_extracts.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "07-added.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "08-removed.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "09-related.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "10-matched.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "11-transferred.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "12-deletion_description.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "13-supplied_outlines.sql"),
+    os.path.join("sql", "buildings_bulk_load", "functions", "14-compare_buildings.sql"),
     # os.path.join("sql", "buildings_lds","functions", "01-nz_building_outlines.sql"),
     # os.path.join("sql", "buildings_lds","functions", "02-nz_building_outlines_full_history.sql"),
     # os.path.join("sql", "buildings_lds","functions", "03-nz_building_outlines_lifecycle.sql"),
-    os.path.join("sql", "buildings_lds","functions", "04-load_buildings.sql"),
-    os.path.join("sql", "buildings_lds","functions", "05-populate_buildings_lds.sql"),
+    os.path.join("sql", "buildings_lds", "functions", "04-load_buildings.sql"),
+    os.path.join("sql", "buildings_lds", "functions", "05-populate_buildings_lds.sql"),
 ]
 
 BUILD_SCRIPTS = [
@@ -131,7 +132,7 @@ def db_install():
         connection.commit()
         cursor.close()
         connection.close()
-        
+
     except psycopg2.DataError, exception:
         print(exception)
         connection.rollback()

@@ -105,6 +105,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         from buildings.gui.alter_building_relationships import AlterRelationships
         from buildings.gui.production_frame import ProductionFrame
         from buildings.gui.new_entry import NewEntry
+        from buildings.gui.new_capture_source_area import NewCaptureSourceArea
 
         self.db = db
         self.new_capture_source = NewCaptureSource
@@ -112,6 +113,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.alter_relationships = AlterRelationships
         self.production_frame = ProductionFrame
         self.new_entry = NewEntry
+        self.new_capture_source_area = NewCaptureSourceArea
 
     @pyqtSlot()
     def show_selected_option(self):
@@ -119,6 +121,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             current = self.lst_options.selectedItems()[0]
             if current.text() == 'Buildings':
                 if isinstance(self.current_frame, self.alter_relationships):
+                    self.current_frame.close_frame()
+                if isinstance(self.current_frame, self.new_capture_source_area):
                     self.current_frame.close_frame()
                 try:
                     self.current_frame.close_frame()
@@ -138,6 +142,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
             # Remove the current widget and run its exit method
             # If it has no exit method, just remove the current widget
             if isinstance(self.current_frame, self.alter_relationships):
+                self.current_frame.close_frame()
+            if isinstance(self.current_frame, self.new_capture_source_area):
                 self.current_frame.close_frame()
             try:
                 self.current_frame.close_frame()

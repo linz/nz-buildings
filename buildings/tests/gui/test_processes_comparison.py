@@ -160,7 +160,7 @@ class ProcessComparison(unittest.TestCase):
         result = result.fetchall()[0][0]
         # Add one outline in both bulk_load_outlines and added table
         sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
-        result = db._execute(sql, (result, None, 2, 1, 1, 1, 100, 1,
+        result = db._execute(sql, (result, None, 2, 1, 1001, 101, 1001, 10001,
                                    '0103000020910800000100000005000000EA7ABCBF6AA83C414C38B255343155417C46175878A83C413A28764134315541C18607A978A83C417A865C33323155412FBBAC106BA83C417A865C3332315541EA7ABCBF6AA83C414C38B25534315541'))
         result = result.fetchall()[0][0]
 
