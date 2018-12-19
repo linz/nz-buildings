@@ -100,6 +100,39 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
         self.bulk_load_frame.db.rollback_open_cursor()
 
+    def test_draw_circle_option(self):
+        """Allows user to draw circle using circle button"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747520, 5428152)),
+                         delay=-1)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        self.bulk_load_frame.btn_circle.click()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878300.4, 5555365.6)),
+                         delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878301.7, 5555367.3)),
+                         delay=-1)
+        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
+        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_capture_source.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
+
     def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""
         # add geom to canvas

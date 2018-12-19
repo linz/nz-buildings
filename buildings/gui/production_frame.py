@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QFrame, QMenu
+from PyQt4.QtGui import QAction, QFrame, QIcon, QMenu
 from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -14,6 +14,7 @@ from buildings.gui import production_changes
 from buildings.utilities import database as db
 from buildings.utilities import layers
 from buildings.utilities.layers import LayerRegistry
+from buildings.utilities.point_tool import PointTool
 
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -57,6 +58,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.tbtn_edits.setMenu(self.menu)
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
 
         # set up signals and slots
         self.tbtn_edits.triggered.connect(self.tbtn_edits_triggered)
@@ -69,6 +72,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.btn_save.setDisabled(1)
         self.btn_reset.setDisabled(1)
         self.btn_exit_edits.setDisabled(1)
+        self.btn_circle.hide()
 
     def add_outlines(self):
         """
@@ -136,6 +140,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
             When add outline radio button toggled
         """
         self.geom = None
+        self.polyline = None
+        self.tool = None
         self.added_building_ids = []
         iface.actionCancelEdits().trigger()
         # reset toolbar
@@ -158,6 +164,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
         self.change_instance = production_changes.AddProduction(self)
+        # set up circle button
+        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.show()
         # connect signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
@@ -308,6 +317,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     self.building_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
+                if self.polyline:
+                    self.polyline.reset()
+                if isinstance(self.tool, PointTool):
+                    self.tool.canvas_clicked.disconnect()
+                    self.tool.mouse_moved.disconnect()
+                    self.tool = None
+                iface.actionPan().trigger()
         # deselect both comboboxes
         self.btn_save.setEnabled(False)
         self.btn_reset.setEnabled(False)
@@ -336,6 +352,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+        self.btn_circle.hide()
 
     @pyqtSlot(str)
     def layers_removed(self, layerids):

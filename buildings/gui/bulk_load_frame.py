@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QMenu, QMessageBox
+from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QIcon, QMenu, QMessageBox
 from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -17,6 +17,7 @@ from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_se
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db, layers
 from buildings.utilities.layers import LayerRegistry
+from buildings.utilities.point_tool import PointTool
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
@@ -56,11 +57,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
+        # icon for circle button
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
         # set up confirmation message box
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
         self.cb_bulk_load.hide()
+        self.btn_circle.hide()
 
         # Find current supplied dataset
         result = self.db._execute(bulk_load_select.supplied_dataset_count_processed_date_is_null)
@@ -417,6 +422,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         self.added_building_ids = []
         self.geom = None
+        self.polyline = None
+        self.tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -440,6 +447,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layout_general_info.show()
 
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
+        # setup circle button
+        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.show()
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
@@ -562,6 +572,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.bulk_load_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
+                if self.polyline:
+                    self.polyline.reset()
+                if isinstance(self.tool, PointTool):
+                    self.tool.canvas_clicked.disconnect()
+                    self.tool.mouse_moved.disconnect()
+                    self.tool = None
+                iface.actionPan().trigger()
 
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
@@ -591,6 +608,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+        self.btn_circle.hide()
 
     def completer_box(self):
         """
