@@ -315,6 +315,9 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def exit_clicked(self):
+        self.close_frame()
+
+    def close_frame(self):
         self.rb_select_from_layer.setChecked(False)
         self.mcb_selection_layer.setDisabled(True)
         self.geom = None
