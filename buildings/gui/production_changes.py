@@ -7,7 +7,8 @@ from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import (buildings_common_select_statements as common_select,
+from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_common_select_statements as common_select,
                            buildings_select_statements as buildings_select,
                            buildings_reference_select_statements as reference_select,
                            general_select_statements as general_select)
@@ -151,6 +152,7 @@ class ProductionChanges:
         self.production_frame.cmb_suburb.setEnabled(1)
         self.production_frame.btn_save.setEnabled(1)
         self.production_frame.btn_reset.setEnabled(1)
+        self.production_frame.btn_end_lifespan.setEnabled(1)
 
     def disable_UI_functions(self):
         """
@@ -170,6 +172,7 @@ class ProductionChanges:
         self.production_frame.cmb_suburb.setDisabled(1)
         self.production_frame.btn_save.setDisabled(1)
         self.production_frame.btn_reset.setDisabled(1)
+        self.production_frame.btn_end_lifespan.setDisabled(1)
 
 
 class AddProduction(ProductionChanges):
@@ -532,6 +535,96 @@ class EditAttribute(ProductionChanges):
             self.production_frame.building_outline_id = None
             self.disable_UI_functions()
 
+    @pyqtSlot()
+    def end_lifespan(self, commit_status):
+        # get the dataset id and dates of the most recent supplied dataset
+        dates = self.production_frame.db._execute(bulk_load_select.supplied_dataset_latest_id_and_dates)
+        dates = dates.fetchone()
+
+        # get list of building_ids from building_outline_ids
+        building_ids = []
+        for outline in self.production_frame.ids:
+            result = self.production_frame.db._execute(buildings_select.building_id_by_building_outline_id, (outline,))
+            building_ids.append(result.fetchone()[0])
+
+        # if the current supplied dataset is not in compare
+        if dates[1] is None and dates[2] is None or dates[1] is not None and dates[2] is not None:
+            if self.production_frame.db._open_cursor is None:
+                self.production_frame.db.open_cursor()
+            # end lifespan in use table
+            sql = 'SELECT buildings.building_use_update_end_lifespan(%s);'
+            self.production_frame.db.execute_no_commit(sql, (building_ids,))
+            # end lifespan in name table
+            sql = 'SELECT buildings.building_name_update_end_lifespan(%s);'
+            self.production_frame.db.execute_no_commit(sql, (building_ids,))
+            # end lifespan in building outlines table
+            sql = 'SELECT buildings.building_outlines_update_end_lifespan(%s);'
+            result = self.production_frame.db.execute_no_commit(sql, (self.production_frame.ids,))
+            # end lifespan in buildings table
+            sql = 'SELECT buildings.buildings_update_end_lifespan(%s);'
+            self.production_frame.db.execute_no_commit(sql, (building_ids,))
+            if commit_status:
+                self.production_frame.db.commit_open_cursor()
+                self.production_frame.ids = []
+                self.production_frame.building_outline_id = None
+                self.production_frame.building_layer.removeSelection()
+                iface.mapCanvas().refreshAllLayers()
+
+        # if current is in compare
+        elif dates[1] is not None and dates[2] is None:
+            bool_delete = True
+            for outline in self.production_frame.ids:
+                # see if outline in existing_subset_extracts
+                dataset = self.production_frame.db._execute(bulk_load_select.existing_subset_extracts_dataset_by_building_outline_id, (outline,))
+                dataset = dataset.fetchone()
+                # if the outline is in existing_subset_extracts
+                if dataset:
+                    # if the dataset the outline relates to is the current dataset
+                    if dataset[0] == dates[0]:
+                        # check if the bulk_loaded_outline is in removed table
+                        removed_count = self.production_frame.db._execute(bulk_load_select.removed_count_by_building_outline_id, (outline,))
+                        removed_count = removed_count.fetchone()
+                        if removed_count[0] == 0:
+                            # if it isn't error
+                            self.production_frame.error_dialog = ErrorDialog()
+                            self.production_frame.error_dialog.fill_report(
+                                '\n -------------------- BUILDING HAS RELATIONSHIP ------'
+                                '-------------- \n\nYou cannot delete this outline as it has'
+                                ' a relationship with a current bulk loaded outline, first remove '
+                                'this relationship and then try again.'
+                            )
+                            self.production_frame.error_dialog.show()
+                            bool_delete = False
+                            break
+            # if able to delete outlines
+            if bool_delete:
+                if self.production_frame.db._open_cursor is None:
+                    self.production_frame.db.open_cursor()
+                # end lifespan in use table
+                sql = 'SELECT buildings.building_use_update_end_lifespan(%s);'
+                self.production_frame.db.execute_no_commit(sql, (building_ids,))
+                # end lifespan in name table
+                sql = 'SELECT buildings.building_name_update_end_lifespan(%s);'
+                self.production_frame.db.execute_no_commit(sql, (building_ids,))
+                # remove outline from removed table
+                sql = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
+                self.production_frame.db.execute_no_commit(sql, (self.production_frame.ids,))
+                # remove outline from exisitng subset extracts table
+                sql = 'SELECT buildings_bulk_load.existing_subset_extracts_remove_by_building_outline_id(%s);'
+                self.production_frame.db.execute_no_commit(sql, (self.production_frame.ids,))
+                # end lifespan in building outlines table
+                sql = 'SELECT buildings.building_outlines_update_end_lifespan(%s);'
+                result = self.production_frame.db.execute_no_commit(sql, (self.production_frame.ids,))
+                # end lifespan in buildings table
+                sql = 'SELECT buildings.buildings_update_end_lifespan(%s);'
+                self.production_frame.db.execute_no_commit(sql, (building_ids,))
+                if commit_status:
+                    self.production_frame.db.commit_open_cursor()
+                    self.production_frame.ids = []
+                    self.production_frame.building_outline_id = None
+                    self.production_frame.building_layer.removeSelection()
+                    iface.mapCanvas().refreshAllLayers()
+
     def is_correct_selections(self):
         """
             Check if the selections meet the requirement
@@ -601,7 +694,7 @@ class EditAttribute(ProductionChanges):
 
         # capture source
         result = self.production_frame.db._execute(
-            common_select.capture_source_group_value_description_external_by_bulk_outline_id,
+            common_select.capture_source_group_value_description_external_by_building_outline_id,
             (self.production_frame.building_outline_id,)
         )
         result = result.fetchall()[0]

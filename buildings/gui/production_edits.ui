@@ -195,20 +195,20 @@ QGroupBox::title {
       <item>
        <widget class="QWidget" name="layout_general_info" native="true">
         <layout class="QGridLayout" name="gridLayout_4">
-         <item row="2" column="1">
+         <item row="6" column="1">
+          <widget class="QComboBox" name="cmb_town"/>
+         </item>
+         <item row="4" column="1">
           <widget class="QComboBox" name="cmb_ta"/>
          </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="cmb_lifecycle_stage"/>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="lb_ta">
+         <item row="6" column="0">
+          <widget class="QLabel" name="lb_town">
            <property name="text">
-            <string>Territorial Authority: </string>
+            <string>Town City:</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="lb_lifeycle_stage">
            <property name="font">
             <font>
@@ -222,35 +222,35 @@ QGroupBox::title {
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QComboBox" name="cmb_capture_source"/>
+         <item row="5" column="0">
+          <widget class="QLabel" name="lb_suburb">
+           <property name="text">
+            <string>Suburb Locality:</string>
+           </property>
+          </widget>
          </item>
          <item row="3" column="1">
+          <widget class="QComboBox" name="cmb_lifecycle_stage"/>
+         </item>
+         <item row="5" column="1">
           <widget class="QComboBox" name="cmb_suburb"/>
          </item>
-         <item row="0" column="0">
+         <item row="4" column="0">
+          <widget class="QLabel" name="lb_ta">
+           <property name="text">
+            <string>Territorial Authority: </string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
           <widget class="QLabel" name="lb_capture_source">
            <property name="text">
             <string>Capture Source:</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="lb_town">
-           <property name="text">
-            <string>Town City:</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="cmb_town"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="lb_suburb">
-           <property name="text">
-            <string>Suburb Locality:</string>
-           </property>
-          </widget>
+         <item row="2" column="1">
+          <widget class="QComboBox" name="cmb_capture_source"/>
          </item>
         </layout>
        </widget>
@@ -318,6 +318,51 @@ QGroupBox::title {
            </property>
            <property name="text">
             <string>Exit Editing</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="layout_end_lifespan" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="lb_or">
+           <property name="text">
+            <string>OR:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_end_lifespan">
+           <property name="minimumSize">
+            <size>
+             <width>250</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>End Lifespan</string>
            </property>
           </widget>
          </item>

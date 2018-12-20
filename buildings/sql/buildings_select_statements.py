@@ -3,6 +3,7 @@
 Buildings Select Statements
 
 - building_outlines
+    - building_id_by_building_outline_id (building_outline_id)
     - building_outlines
     - building_outlines_capture_method_id_by_building_outline_id (building+putline_id)
     - building_outlines_end_lifespan_by_building_outline_id (building_outline_id)
@@ -20,6 +21,12 @@ Buildings Select Statements
 """
 
 # building outlines
+
+building_id_by_building_outline_id = """
+SELECT building_id
+FROM buildings.building_outlines
+WHERE building_outline_id = %s;
+"""
 
 building_outlines = """
 SELECT *
