@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import math
 from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QColor, QToolButton
+from PyQt4.QtGui import QColor, QToolButton, QMessageBox
 from qgis.core import QgsFeature, QgsFeatureRequest, QgsGeometry, QgsPoint
 from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
@@ -25,6 +25,16 @@ class ProductionChanges:
         # setup
         self.production_frame = production_frame
         iface.setActiveLayer(self.production_frame.building_layer)
+
+    def confirmation_dialog_box(self, button_text):
+        return QMessageBox(QMessageBox.Question, button_text.upper(),
+                           'Are you sure you want to remove outlines? \n This action cannot be reversed.', buttons=QMessageBox.No | QMessageBox.Yes)
+
+    def confirm(self, msgbox):
+        reply = msgbox.exec_()
+        if reply == QMessageBox.Yes:
+            return True
+        return False
 
     def populate_edit_comboboxes(self):
         """
@@ -538,6 +548,9 @@ class EditAttribute(ProductionChanges):
     @pyqtSlot()
     def end_lifespan(self, commit_status):
         # get the dataset id and dates of the most recent supplied dataset
+        self.msgbox_remove = self.confirmation_dialog_box('remove')
+        if not self.confirm(self.msgbox_remove):
+            return
         dates = self.production_frame.db._execute(bulk_load_select.supplied_dataset_latest_id_and_dates)
         dates = dates.fetchone()
 
@@ -548,7 +561,10 @@ class EditAttribute(ProductionChanges):
             building_ids.append(result.fetchone()[0])
 
         # if the current supplied dataset is not in compare
-        if dates[1] is None and dates[2] is None or dates[1] is not None and dates[2] is not None:
+        is_bulk_loaded = dates[1] is None and dates[2] is None
+        is_compared = dates[1] is not None and dates[2] is None
+        is_published = dates[1] is not None and dates[2] is not None
+        if is_bulk_loaded or is_published:
             if self.production_frame.db._open_cursor is None:
                 self.production_frame.db.open_cursor()
             # end lifespan in use table
@@ -571,7 +587,7 @@ class EditAttribute(ProductionChanges):
                 iface.mapCanvas().refreshAllLayers()
 
         # if current is in compare
-        elif dates[1] is not None and dates[2] is None:
+        elif is_compared:
             bool_delete = True
             for outline in self.production_frame.ids:
                 # see if outline in existing_subset_extracts
