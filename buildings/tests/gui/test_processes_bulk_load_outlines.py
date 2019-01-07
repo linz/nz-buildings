@@ -97,7 +97,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         capture_source_group_id = result.fetchall()[0][0]
 
         sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
-        result = self.db.execute_no_commit(sql, (int(capture_source_group_id), '3'))
+        result = self.bulk_load_frame.db.execute_no_commit(sql, (int(capture_source_group_id), '3'))
 
         count = self.bulk_load_frame.cmb_capture_src_grp.count()
         for i in range(count):
