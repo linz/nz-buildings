@@ -15,10 +15,10 @@
 
  ***************************************************************************/
 """
-
 import unittest
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QMessageBox
 from PyQt4.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
@@ -467,3 +467,84 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.production_frame.cmb_ta.isEnabled())
         self.assertFalse(self.production_frame.cmb_town.isEnabled())
         self.assertFalse(self.production_frame.cmb_suburb.isEnabled())
+
+    def test_end_lifespan_of_building_pass(self):
+        """test that ending lifespan of removed building works"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878038.1, 5555312.6)),
+                         delay=30)
+
+        btn_yes = self.production_frame.change_instance.msgbox_remove.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
+        self.production_frame.change_instance.end_lifespan(False)
+
+        sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1006;'
+        result = db._execute(sql)
+        self.assertNotEqual(result.fetchone()[0], None)
+        sql = 'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 10006;'
+        result = db._execute(sql)
+        self.assertNotEqual(result.fetchone()[0], None)
+        sql = 'SELECT count(*) FROM buildings_bulk_load.existing_subset_extracts WHERE building_outline_id = 1006;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], 0)
+        sql = 'SELECT count(*) FROM buildings_bulk_load.removed WHERE building_outline_id = 1006;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], 0)
+        self.production_frame.db.rollback_open_cursor()
+        self.production_frame.ids = []
+        self.production_frame.building_outline_id = None
+        self.production_frame.building_layer.removeSelection()
+
+    def test_end_lifespan_of_building_fails(self):
+        """test that ending lifespan of related building fails"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878420.4, 5555426.8)),
+                         delay=30)
+        btn_yes = self.production_frame.change_instance.msgbox_remove.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
+        self.production_frame.change_instance.end_lifespan(False)
+        self.production_frame.error_dialog.close()
+        sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1033;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], None)
+        sql = 'SELECT end_lifespan FROM buildings.buildings WHERE building_id = 10033;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], None)
+        sql = 'SELECT count(*) FROM buildings_bulk_load.existing_subset_extracts WHERE building_outline_id = 1033;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], 1)
+        sql = 'SELECT count(*) FROM buildings_bulk_load.related WHERE building_outline_id = 1033;'
+        result = db._execute(sql)
+        self.assertEquals(result.fetchone()[0], 2)
+        self.production_frame.db.rollback_open_cursor()
+        self.production_frame.ids = []
+        self.production_frame.building_outline_id = None
+        self.production_frame.building_layer.removeSelection()

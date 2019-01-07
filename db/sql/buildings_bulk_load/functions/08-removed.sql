@@ -15,9 +15,17 @@
     -- params: integer building_outline_id
     -- return: building_outline_id removed
 
+-- removed_delete_existing_outlines (delete from removed table mulitple outlines)
+    -- params: integer[], building_outline_ids
+    -- return: number of outlines updated
+
 -- removed_insert_building_outlines (insert new building outline entry into table)
     -- params: integer building_outline_id
     -- return: building_outline_id inserted
+
+-- removed_update_qa_status_id (update qa status of removed outlines)
+    -- params: integer qa_status, integer building_outline_id
+    -- return: count of outlines updated
 
 --------------------------------------------
 
@@ -69,7 +77,7 @@ COMMENT ON FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(inte
 -- removed_delete_existing_outline (delete outline from removed table)
     -- params: integer building_outline_id
     -- return: building_outline_id removed
-CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outline(integer)
 RETURNS integer AS
 $$
 
@@ -80,9 +88,27 @@ $$
 $$
 LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outline(integer) IS
 'Delete outline from removed table by building_outline_id';
 
+-- removed_delete_existing_outlines (delete from removed table mulitple outlines)
+    -- params: integer[], building_outline_ids
+    -- return: number of outlines updated
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_removed AS (
+        DELETE FROM buildings_bulk_load.removed
+        WHERE building_outline_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_removed;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer[]) IS
+'remove list of outlines from removed table';
 
 -- removed_insert_building_outlines (insert new building outline entry into table)
     -- params: integer building_outline_id

@@ -58,6 +58,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.tbtn_edits.setMenu(self.menu)
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
+        self.layout_end_lifespan.hide()
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
         self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
 
@@ -163,6 +164,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         self.layout_capture_method.show()
         self.layout_general_info.show()
+        self.layout_end_lifespan.show()
         self.change_instance = production_changes.AddProduction(self)
         # set up circle button
         self.btn_circle.clicked.connect(self.change_instance.setup_circle)
@@ -206,13 +208,19 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.btn_exit_edits.clicked.disconnect()
         except Exception:
             pass
+        try:
+            self.btn_end_lifespan.clicked.disconnect()
+        except Exception:
+            pass
         self.layout_capture_method.show()
         self.layout_general_info.show()
+        self.layout_end_lifespan.show()
         self.change_instance = production_changes.EditAttribute(self)
         # set up signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
         self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
         self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
+        self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
         self.building_layer.selectionChanged.connect(self.change_instance.selection_changed)
         # add territorial authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
@@ -245,6 +253,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
             pass
         self.layout_capture_method.show()
         self.layout_general_info.hide()
+        self.layout_end_lifespan.hide()
         self.change_instance = production_changes.EditGeometry(self)
         # set up signals and slots
         self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
@@ -333,6 +342,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # hide comboboxes
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
+        self.layout_end_lifespan.hide()
         iface.actionCancelEdits().trigger()
         # reload layers
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)

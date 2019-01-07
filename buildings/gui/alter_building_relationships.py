@@ -838,7 +838,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method, capture_source, suburb, town_city, territorial_auth, geometry))
             bulk_load_id = bulk_load_id.fetchall()[0][0]
             # remove existing building from removed table
-            sql = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
+            sql = 'SELECT buildings_bulk_load.removed_delete_existing_outline(%s);'
             self.db.execute_no_commit(sql, (building_outline_id,))
             # add existing and new building to matched table
             sql = 'SELECT buildings_bulk_load.matched_insert_building_outlines(%s, %s);'
@@ -1039,7 +1039,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def delete_original_relationships(self):
         sql_delete_related_existing = 'SELECT buildings_bulk_load.related_delete_existing_outlines(%s);'
         sql_delete_matched_existing = 'SELECT buildings_bulk_load.matched_delete_existing_outlines(%s);'
-        sql_delete_removed = 'SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);'
+        sql_delete_removed = 'SELECT buildings_bulk_load.removed_delete_existing_outline(%s);'
         sql_delete_added = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
 
         for row in range(self.lst_existing.count()):
