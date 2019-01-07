@@ -24,6 +24,7 @@ Bulk Load Outlines Select Statements:
 
 - existing_subset_extracts
   - existing_subset_extracts_by_building_outline_id (building_outline_id)
+  - existing_subset_extracts_dataset_by_building_outline_id
 
 - matched
   - matched_by_bulk_load_outline_id_dataset_id (bulk_load_outline_id, supplied_dataset_id)
@@ -46,12 +47,14 @@ Bulk Load Outlines Select Statements:
 - removed
   - removed_by_dataset_id (supplied_dataset_id)
   - removed_by_existing_outline_id_dataset_id (building_outline_id, supplied_dataset_id)
+  - removed_count_by_building_outline_id (building_outline_id)
 
 - supplied_dataset
   - supplied_dataset_count_both_dates_are_null
   - supplied_dataset_count_processed_date_is_null
   - supplied_dataset_count_transfer_date_is_null
   - supplied_dataset_description_by_dataset_id (supplied_dataset_id)
+  - supplied_dataset_latest_id_and_dates
   - supplied_dataset_processed_date_by_dataset_id (supplied_dataset_id)
   - supplied_dataset_processed_date_is_null
   - supplied_dataset_transfer_date_is_null
@@ -148,6 +151,12 @@ ORDER BY description;
 
 existing_subset_extracts_by_building_outline_id = """
 SELECT building_outline_id
+FROM buildings_bulk_load.existing_subset_extracts
+WHERE building_outline_id = %s;
+"""
+
+existing_subset_extracts_dataset_by_building_outline_id = """
+SELECT supplied_dataset_id
 FROM buildings_bulk_load.existing_subset_extracts
 WHERE building_outline_id = %s;
 """
@@ -273,6 +282,12 @@ JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
 WHERE building_outline_id = %s AND supplied_dataset_id = %s;
 """
 
+removed_count_by_building_outline_id = """
+SELECT count(*)
+FROM buildings_bulk_load.removed
+WHERE building_outline_id = %s;
+"""
+
 # supplied dataset
 
 supplied_dataset_count_both_dates_are_null = """
@@ -298,6 +313,14 @@ supplied_dataset_description_by_dataset_id = """
 SELECT description
 FROM buildings_bulk_load.supplied_datasets sd
 WHERE sd.supplied_dataset_id = %s;
+"""
+
+supplied_dataset_latest_id_and_dates = """
+SELECT supplied_dataset_id, processed_date, transfer_date
+FROM buildings_bulk_load.supplied_datasets
+WHERE supplied_dataset_id = (SELECT
+  MAX(supplied_dataset_id)
+  FROM buildings_bulk_load.supplied_datasets);
 """
 
 supplied_dataset_processed_date_by_dataset_id = """

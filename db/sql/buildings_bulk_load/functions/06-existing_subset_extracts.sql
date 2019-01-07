@@ -8,6 +8,10 @@
             -- geometry shape
     -- return: count of rows inserted into table
 
+-- existing_subset_extracts_remove_outline (remove existing outline from table as it has been deleted)
+    -- params: integer[] building_outline_id
+    -- return: intger number of outlines removed
+
 -- existing_subset_extracts_update_supplied_dataset (update supplied dataset id of existing subset extracts outline)
     -- params: integer supplied_dataset_id, integer building_outline_id
     -- return: count of outlines added (should only be one)
@@ -69,3 +73,22 @@ $$ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_update_supplied_dataset(integer, integer) IS
 'Update supplied_dataset_id in existing_subset_extracts table';
+
+-- existing_subset_extracts_remove_outline (remove existing outline from table as it has been deleted)
+    -- params: integer[] building_outline_id
+    -- return: intger number of outlines removed
+CREATE OR REPLACE FUNCTION buildings_bulk_load.existing_subset_extracts_remove_by_building_outline_id(integer[])
+    RETURNS integer AS
+$$
+
+    WITH update_existing AS (
+        DELETE FROM buildings_bulk_load.existing_subset_extracts
+        WHERE building_outline_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_existing;
+
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION buildings_bulk_load.existing_subset_extracts_remove_by_building_outline_id(integer[]) IS
+'Remove outline from existin subset extracts table';
