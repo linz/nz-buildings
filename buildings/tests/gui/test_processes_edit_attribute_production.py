@@ -17,7 +17,8 @@
 """
 import unittest
 
-from PyQt4.QtCore import Qt
+from PyQt4.QtCore import Qt, QTimer
+from PyQt4.QtGui import QMessageBox
 from PyQt4.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
@@ -487,7 +488,10 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878038.1, 5555312.6)),
                          delay=30)
 
+        btn_yes = self.production_frame.change_instance.msgbox_remove.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.production_frame.change_instance.end_lifespan(False)
+
         sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1006;'
         result = db._execute(sql)
         self.assertNotEqual(result.fetchone()[0], None)
@@ -524,6 +528,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878420.4, 5555426.8)),
                          delay=30)
+        btn_yes = self.production_frame.change_instance.msgbox_remove.button(QMessageBox.Yes)
+        QTimer.singleShot(500, btn_yes.click)
         self.production_frame.change_instance.end_lifespan(False)
         self.production_frame.error_dialog.close()
         sql = 'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1033;'

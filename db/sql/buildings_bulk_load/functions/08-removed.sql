@@ -77,7 +77,7 @@ COMMENT ON FUNCTION buildings_bulk_load.buildings_removed_select_by_dataset(inte
 -- removed_delete_existing_outline (delete outline from removed table)
     -- params: integer building_outline_id
     -- return: building_outline_id removed
-CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer)
+CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_delete_existing_outline(integer)
 RETURNS integer AS
 $$
 
@@ -88,7 +88,7 @@ $$
 $$
 LANGUAGE sql;
 
-COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outlines(integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.removed_delete_existing_outline(integer) IS
 'Delete outline from removed table by building_outline_id';
 
 -- removed_delete_existing_outlines (delete from removed table mulitple outlines)

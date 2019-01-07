@@ -474,6 +474,7 @@ class EditAttribute(ProductionChanges):
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         iface.building_toolbar.show()
+        self.msgbox_remove = self.confirmation_dialog_box('remove')
 
         self.disable_UI_functions()
 
@@ -548,7 +549,6 @@ class EditAttribute(ProductionChanges):
     @pyqtSlot()
     def end_lifespan(self, commit_status):
         # get the dataset id and dates of the most recent supplied dataset
-        self.msgbox_remove = self.confirmation_dialog_box('remove')
         if not self.confirm(self.msgbox_remove):
             return
         dates = self.production_frame.db._execute(bulk_load_select.supplied_dataset_latest_id_and_dates)
