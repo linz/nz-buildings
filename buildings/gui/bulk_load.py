@@ -42,7 +42,7 @@ def populate_bulk_comboboxes(self):
     id_capture_src_grp = self.ids_capture_src_grp[index]
     result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
     ls = result.fetchall()
-    for item in ls:
+    for item in reversed(ls):
         self.cmb_external_id.addItem(item[0])
 
 
