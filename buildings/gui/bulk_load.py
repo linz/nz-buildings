@@ -28,25 +28,22 @@ def populate_bulk_comboboxes(self):
 
     # capture source group
     self.cmb_capture_src_grp.clear()
-    result = self.db._execute(common_select.capture_source_group_value_description)
+    self.ids_capture_src_grp = []
+    result = self.db._execute(common_select.capture_source_group_id_value_description)
     ls = result.fetchall()
-    for item in ls:
-        text = str(item[0]) + '- ' + str(item[1])
+    for (id_capture_src_grp, value, description) in ls:
+        text = str(value) + '- ' + str(description)
         self.cmb_capture_src_grp.addItem(text)
+        self.ids_capture_src_grp.append(id_capture_src_grp)
 
-    # populates external source combobox when radiobutton is selected
-    result = self.db._execute(common_select.capture_source_external_source_id)
+    # external source combobox
+    self.cmb_external_id.clear()
+    index = self.cmb_capture_src_grp.currentIndex()
+    id_capture_src_grp = self.ids_capture_src_grp[index]
+    result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
     ls = result.fetchall()
     for item in ls:
-        if item[0] is not None:
-            count = 0
-            exists = False
-            while count < self.cmb_external_id.count():
-                if self.cmb_external_id.itemText(count) == str(item[0]):
-                    exists = True
-                count = count + 1
-            if exists is False:
-                self.cmb_external_id.addItem(item[0])
+        self.cmb_external_id.addItem(item[0])
 
 
 def load_current_fields(self):

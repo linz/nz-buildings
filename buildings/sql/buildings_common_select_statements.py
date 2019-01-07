@@ -110,6 +110,11 @@ SELECT value, description
 FROM buildings_common.capture_source_group;
 """
 
+capture_source_group_id_value_description = """
+SELECT capture_source_group_id, value, description
+FROM buildings_common.capture_source_group;
+"""
+
 capture_source_group_value_description_external_by_building_outline_id = """
 SELECT csg.value,
        csg.description,

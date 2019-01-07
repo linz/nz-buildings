@@ -14,6 +14,7 @@ from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
+                           buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
 from buildings.utilities import database as db, layers
 from buildings.utilities.layers import LayerRegistry
@@ -122,6 +123,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.current_dataset = None
                 self.lb_dataset_id.setText('None')
                 self.display_no_bulk_load()
+                self.cmb_capture_src_grp.currentIndexChanged.connect(self.cmb_capture_src_grp_changed)
 
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
@@ -330,6 +332,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             'shape', 'buildings_bulk_load', '', '')
         self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
 
+    @pyqtSlot(int)
+    def cmb_capture_src_grp_changed(self, index):
+        self.cmb_external_id.clear()
+        id_capture_src_grp = self.ids_capture_src_grp[index]
+        result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
+        ls = result.fetchall()
+        for item in ls:
+            self.cmb_external_id.addItem(item[0])
+
     @pyqtSlot(bool)
     def cb_bulk_load_clicked(self, checked):
         group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
@@ -354,6 +365,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
                 self.layer_registry.remove_layer(self.historic_layer)
                 QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+                self.cmb_capture_src_grp.currentIndexChanged.disconnect(self.cmb_capture_src_grp_changed)
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
@@ -667,6 +679,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if commit_status:
                 self.db.commit_open_cursor()
             self.display_no_bulk_load()
+            self.cmb_capture_src_grp.currentIndexChanged.connect(self.cmb_capture_src_grp_changed)
             self.current_dataset = None
             self.lb_dataset_id.setText('None')
             QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
