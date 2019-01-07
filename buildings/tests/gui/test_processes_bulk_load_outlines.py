@@ -63,6 +63,8 @@ class ProcessBulkLoadTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+        # rollback changes
+        self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_external_id_radiobutton(self):
         """external source fields enable when external id radio button is enabled"""
@@ -109,9 +111,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
             elif text == 'Test value':
                 self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 1)
 
-        # rollback changes
-        self.bulk_load_frame.db.rollback_open_cursor()
-
     def test_bulk_load_save_clicked(self):
         """When save is clicked data is added to the correct tables"""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
@@ -145,7 +144,5 @@ class ProcessBulkLoadTest(unittest.TestCase):
         else:
             result = result.fetchall()[0][0]
         self.assertEqual(1, result)
-        # rollback changes
-        self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.current_dataset)
