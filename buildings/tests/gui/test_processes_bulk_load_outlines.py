@@ -75,12 +75,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.rad_external_id.click()
         # check restrictions have been removed
         self.assertTrue(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
-        # check external source id value is correctly populated
-        sql = 'SELECT COUNT(external_source_id) FROM buildings_common.capture_source;'
-        result3 = db._execute(sql)
-        result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), result3)
         # check external id combobox populated with fields of current layer
         vectorlayer = self.bulk_load_frame.ml_outlines_layer.currentLayer()
         fields = vectorlayer.pendingFields()
