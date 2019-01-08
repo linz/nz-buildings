@@ -162,11 +162,33 @@ def bulk_load(self, commit_status):
     capture_source_group = result.fetchall()[0][0]
 
     # external source
-    if len(self.cmb_external_id.currentText()) > 0:
-        external_source_id = str(self.cmb_external_id.currentText())
-    else:
-        # sets id to None
-        external_source_id = None
+
+    if self.cmb_external_id.count() == 0:
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n -------------- NO CAPTURE SOURCE ENTRY EXISTS-------'
+            '-------- \n\nPlease create capture source entries for the '
+            'capture source group first.'
+        )
+        self.error_dialog.show()
+        return
+    external_source_id = str(self.cmb_external_id.currentText())
+
+    # capture source
+    result = self.db._execute(
+        common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
+            capture_source_group, external_source_id,
+        ))
+    capture_source = result.fetchall()
+    if len(capture_source) == 0:
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n -------------------- NO CAPTURE SOURCE EXISTS------------'
+            '-------- \n\nCapture source entry is not exist, please check.'
+        )
+        self.error_dialog.show()
+        return
+    capture_source = capture_source[0][0]
 
     # if user checks radio button then does not enter a field, error
     if self.fcb_external_id.currentField() is None and self.rad_external_id.isChecked():
@@ -189,14 +211,13 @@ def bulk_load(self, commit_status):
 
     # Bulk Load Outlines
     val = insert_supplied_outlines(
-        self, self.current_dataset, bulk_load_layer, external_source_id)
+        self, self.current_dataset, bulk_load_layer)
     # if insert_bulk_load_outlines function failed
     if val is None:
         return
 
     val = insert_bulk_load_outlines(
-        self, self.current_dataset,
-        capture_method, capture_source_group, external_source_id)
+        self, self.current_dataset, capture_method, capture_source)
     # if insert_bulk_load_outlines function failed
     if val is None:
         return
@@ -217,7 +238,7 @@ def insert_supplied_dataset(self, organisation, description):
     return results.fetchall()[0][0]
 
 
-def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
+def insert_supplied_outlines(self, dataset_id, layer):
     """
         Inserts new outlines into buildings_bulk_load.supplied_outlines table
     """
@@ -249,51 +270,10 @@ def insert_supplied_outlines(self, dataset_id, layer, external_source_id):
     return 1
 
 
-def insert_bulk_load_outlines(self, dataset_id, capture_method,
-                              capture_source_group, external_source_id):
+def insert_bulk_load_outlines(self, dataset_id, capture_method, capture_source):
     """
         Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """
-    # Capture source id
-    capture_source = None
-    if len(self.cmb_external_id.currentText()) is not 0:
-        result = self.db.execute_no_commit(
-            common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
-                capture_source_group, external_source_id,
-            ))
-        value = result.fetchall()
-        # if no related capture source exists
-        if len(value) == 0:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- NO CAPTURE SOURCE EXISTS -----'
-                '--------------- \n\n No capture source with this capture '
-                'source group and external id'
-            )
-            self.error_dialog.show()
-            self.db.rollback_open_cursor()
-            return
-        else:
-            capture_source = value[0][0]
-    else:
-        result = self.db.execute_no_commit(
-            common_select.capture_source_id_by_capture_source_group_id_is_null, (
-                capture_source_group,))
-        value = result.fetchall()
-        # if no related capture source exists
-        if len(value) == 0:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- NO CAPTURE SOURCE EXISTS------------'
-                '-------- \n\nNo capture source with this capture source '
-                'group and a Null external id'
-            )
-            self.error_dialog.show()
-            self.db.rollback_open_cursor()
-            return
-        else:
-            capture_source = value[0][0]
-
     sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert_supplied(%s, 1, %s, %s);'
     self.db.execute_no_commit(
         sql, (dataset_id, capture_method, capture_source))
