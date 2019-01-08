@@ -281,7 +281,7 @@ class NewEntry(QFrame, FORM_CLASS):
             sql = 'SELECT buildings_common.capture_source_group_insert(%s, %s);'
             result = self.db.execute_no_commit(
                 sql, (capture_source_group, description))
-            self.capture_method_id = result.fetchall()[0][0]
+            self.capture_source_group_id = result.fetchall()[0][0]
             if commit_status:
                 self.db.commit_open_cursor()
             self.le_new_entry.clear()

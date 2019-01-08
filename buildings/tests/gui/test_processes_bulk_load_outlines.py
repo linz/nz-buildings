@@ -63,6 +63,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+        # rollback changes
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_external_id_radiobutton(self):
@@ -74,12 +75,6 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.rad_external_id.click()
         # check restrictions have been removed
         self.assertTrue(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
-        # check external source id value is correctly populated
-        sql = 'SELECT COUNT(external_source_id) FROM buildings_common.capture_source;'
-        result3 = db._execute(sql)
-        result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), result3)
         # check external id combobox populated with fields of current layer
         vectorlayer = self.bulk_load_frame.ml_outlines_layer.currentLayer()
         fields = vectorlayer.pendingFields()
@@ -89,6 +84,26 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.bulk_load_frame.rad_external_id.click()
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
+
+    def test_cmb_capture_src_grp_changed(self):
+        """When cmb_capture_src_grp changes cmb_external_id is re-populated"""
+        self.bulk_load_frame.db.open_cursor()
+        sql = 'SELECT buildings_common.capture_source_group_insert(%s, %s);'
+        result = self.bulk_load_frame.db.execute_no_commit(sql, ('Test value', 'Test description'))
+        capture_source_group_id = result.fetchall()[0][0]
+
+        sql = 'SELECT buildings_common.capture_source_insert(%s, %s);'
+        result = self.bulk_load_frame.db.execute_no_commit(sql, (int(capture_source_group_id), '3'))
+
+        count = self.bulk_load_frame.cmb_capture_src_grp.count()
+        for i in range(count):
+            self.bulk_load_frame.cmb_capture_src_grp.setCurrentIndex(i)
+            text = self.bulk_load_frame.cmb_capture_src_grp.currentText()
+            text = text.split('-')[0]
+            if text == 'NZ Aerial Imagery':
+                self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 2)
+            elif text == 'Test value':
+                self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 1)
 
     def test_bulk_load_save_clicked(self):
         """When save is clicked data is added to the correct tables"""
@@ -123,7 +138,5 @@ class ProcessBulkLoadTest(unittest.TestCase):
         else:
             result = result.fetchall()[0][0]
         self.assertEqual(1, result)
-        # rollback changes
-        self.bulk_load_frame.db.rollback_open_cursor()
         # check supplied dataset is added
         self.assertIsNotNone(self.bulk_load_frame.current_dataset)
