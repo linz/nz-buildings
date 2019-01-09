@@ -138,12 +138,11 @@ setup_test_db:
 	nz-buildings-load nz-buildings-plugin-db --with-plugin-setup; \
 	sed -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
 
-check_ui_headers:
+update_ui_headers:
 	@echo
 	@echo "------------------------------------------"
 	@echo "Fix/revert header lines in .ui files to qgis.gui"
 	@echo "------------------------------------------"
 	for f in ./buildings/gui/*.ui; do \
-		sed -i.bak -e 's|<header>.*</header>|<header>qgis.gui</header>|g' $$f; \
-		rm $$f.bak; \
+		sed -i -e 's|<header>.*</header>|<header>qgis.gui</header>|g' $$f; \
 	done; \
