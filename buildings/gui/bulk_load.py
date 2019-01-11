@@ -203,6 +203,15 @@ def bulk_load(self, commit_status):
 
     # bulk load Layer
     bulk_load_layer = self.ml_outlines_layer.currentLayer()
+    if bulk_load_layer.crs().authid() != 'EPSG:2193':
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n -------------------- INCORRECT CRS-------------'
+            '------- \n\nThe Coordinate Reference System is not NTZM 2000. '
+            'Please resolve and reattempt.'
+        )
+        self.error_dialog.show()
+        return
 
     # Generate new Supplied Dataset
     self.current_dataset = insert_supplied_dataset(
