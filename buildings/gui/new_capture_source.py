@@ -236,16 +236,16 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         list_result = []
         text = self.le_filter.text()
         for row in range(self.tbl_capture_source_area.rowCount()):
-            external_id = self.tbl_capture_source_area.item(row, 0).text()
+            external_source_id = self.tbl_capture_source_area.item(row, 0).text()
             area_title = self.tbl_capture_source_area.item(row, 1).text()
-            if external_id == text or text.lower() in area_title.lower():
-                list_result.append((external_id, area_title))
+            if text.lower() == external_source_id.lower() or text.lower() in area_title.lower():
+                list_result.append((external_source_id, area_title))
 
         self.tbl_capture_source_area.setRowCount(0)
-        for external_id, area_title in list_result:
+        for external_source_id, area_title in list_result:
             row_tbl = self.tbl_capture_source_area.rowCount()
             self.tbl_capture_source_area.setRowCount(row_tbl + 1)
-            self.tbl_capture_source_area.setItem(row_tbl, 0, QTableWidgetItem("%s" % external_id))
+            self.tbl_capture_source_area.setItem(row_tbl, 0, QTableWidgetItem("%s" % external_source_id))
             self.tbl_capture_source_area.setItem(row_tbl, 1, QTableWidgetItem("%s" % area_title))
         self.tbl_capture_source_area.sortItems(0)
 
