@@ -53,7 +53,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.init_table()
         # button
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        self.btn_validate.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'tick.png')))
+        self.btn_filter_add.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'filter.png')))
+        self.btn_filter_del.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'filter_del.png')))
         self.btn_new_geometry.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'plus.png')))
         # set up signals and slots
         self.capture_source_id = None
@@ -62,8 +63,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.save_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-        self.le_external_source_id.textChanged.connect(self.disable_save)
-        self.btn_validate.clicked.connect(self.validate)
+        self.btn_filter_add.clicked.connect(self.filter_add_clicked)
+        self.btn_filter_del.clicked.connect(self.filter_del_clicked)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
         self.btn_new_geometry.clicked.connect(self.add_new_geometry)
@@ -138,20 +139,45 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # set current action to select
         iface.actionSelect().trigger()
 
-    def get_comments(self):
-        """
-        Returns comment from external source id line edit
-        returns None if empty/disabled
-        """
-        return self.le_external_source_id.text()
-
-    def get_combobox_value(self):
+    def get_capture_source_group(self):
         """
             Returns capture source group from combobox
         """
         text = self.cmb_capture_source_group.currentText()
-        text_ls = text.split('-')
-        return text_ls[0]
+        if not text:
+            return None
+        text_ls = text.split('- ')
+        return text_ls[0], text_ls[1]
+
+    def get_external_source(self):
+        """
+            Returns external source from the table
+        """
+        selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+        if len(selected_rows) > 1 or len(selected_rows) == 0:
+            return None
+        external_source_id, _ = self.get_external_source_from_table(selected_rows[0])
+        return external_source_id
+
+    def get_external_source_from_table(self, row):
+        """
+            Returns external source id and value of the row
+        """
+        external_source_id = self.tbl_capture_source_area.item(row, 0).text()
+        area_title = self.tbl_capture_source_area.item(row, 1).text()
+        return external_source_id, area_title
+
+    def Update_UI(self):
+        selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
+        if len(selected_rows) == 1:
+            self.btn_save.setEnabled(True)
+            capt_src_grp_value, capt_src_grp_desc = self.get_capture_source_group()
+            external_source_id, area_title = self.get_external_source_from_table(selected_rows[0])
+            self.l_confirm.setText('Click save to insert new Capture Source:\n{}\n{}\n({}: {})'.format(
+                capt_src_grp_value, capt_src_grp_desc, external_source_id, area_title))
+        else:
+            self.btn_save.setEnabled(False)
+            self.l_confirm.clear()
 
     @pyqtSlot(int)
     def add_new_geometry(self):
@@ -168,75 +194,76 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
         # disconnect other signals
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
+        self.tbl_capture_source_area.clearSelection()
+        # list of ids and titles selected
+        ids_and_titles = [
+            (str(feat["external_area_polygon_id"]), str(feat["area_title"]))
+            for feat in self.capture_source_area.selectedFeatures()
+        ]
         # if nothing is selected clear line edit and table
-        if len(self.capture_source_area.selectedFeatures()) == 0:
-            self.tbl_capture_source_area.clearSelection()
+        if len(ids_and_titles) == 0:
+            pass
         # if areas are selected
-        if len(self.capture_source_area.selectedFeatures()) > 0:
-            # list of ids and titles selected
-            self.ids_and_titles = [(str(feat["external_area_polygon_id"]), str(feat["area_title"])) for feat in self.capture_source_area.selectedFeatures()]
+        elif len(ids_and_titles) > 0:
             # change table selection
-            self.tbl_capture_source_area.clearSelection()
             rows = self.tbl_capture_source_area.rowCount()
-            selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.MultiSelection)
-            for (area_id, area_title) in self.ids_and_titles:
+            for (area_id, area_title) in ids_and_titles:
                 index = 0
                 while index < rows:
-                    if index not in selected_rows:
-                        if self.tbl_capture_source_area.item(index, 0).text() == area_id:
-                            if self.tbl_capture_source_area.item(index, 1).text() == area_title:
-                                self.tbl_capture_source_area.selectRow(index)
+                    if self.tbl_capture_source_area.item(index, 0).text() == area_id:
+                        if self.tbl_capture_source_area.item(index, 1).text() == area_title:
+                            self.tbl_capture_source_area.selectRow(index)
                     index = index + 1
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.Update_UI()
+
         # reconnect line edit signal
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
     @pyqtSlot()
-    def disable_save(self):
+    def filter_add_clicked(self):
         """
-            Called when line edit is changed
+            Called when btn_filter_add is clicked
         """
-        # disable save btn whenever line edit is changed
-        self.btn_save.setDisabled(1)
         # disconnect other signals
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
-        # clear selection and table
+
         self.capture_source_area.removeSelection()
-        self.tbl_capture_source_area.clearSelection()
+        self.init_table()
+        list_result = []
+        text = self.le_filter.text()
+        for row in range(self.tbl_capture_source_area.rowCount()):
+            external_id = self.tbl_capture_source_area.item(row, 0).text()
+            area_title = self.tbl_capture_source_area.item(row, 1).text()
+            if external_id == text or text.lower() in area_title.lower():
+                list_result.append((external_id, area_title))
+
+        self.tbl_capture_source_area.setRowCount(0)
+        for external_id, area_title in list_result:
+            row_tbl = self.tbl_capture_source_area.rowCount()
+            self.tbl_capture_source_area.setRowCount(row_tbl + 1)
+            self.tbl_capture_source_area.setItem(row_tbl, 0, QTableWidgetItem("%s" % external_id))
+            self.tbl_capture_source_area.setItem(row_tbl, 1, QTableWidgetItem("%s" % area_title))
+        self.tbl_capture_source_area.sortItems(0)
+
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
     @pyqtSlot()
-    def validate(self):
+    def filter_del_clicked(self):
         """
-            Called when validate button is clicked
+        Called when btn_filter_del is clicked
         """
-        # disconnect other signals
-        self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.disconnect(self.tbl_item_changed)
-        text = self.le_external_source_id.text()
-        # remove selections
-        self.capture_source_area.removeSelection()
-        self.tbl_capture_source_area.clearSelection()
-        # change table seletion
-        for row in range(self.tbl_capture_source_area.rowCount()):
-            if self.tbl_capture_source_area.item(row, 0).text() == text:
-                self.tbl_capture_source_area.selectRow(row)
-        if len([row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]) > 0:
-            # select from layer
-            selection = '"external_area_polygon_id" = {}'.format(text)
-            self.capture_source_area.selectByExpression(selection)
-            self.btn_save.setEnabled(1)
-        else:
-            self.btn_save.setDisabled(1)
-        # reconnect other signals
-        self.capture_source_area.selectionChanged.connect(self.selection_changed)
+        self.init_table()
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
+        self.capture_source_area.selectionChanged.emit([], [], False)
 
-    @ pyqtSlot()
+    @pyqtSlot()
     def tbl_item_changed(self):
         """
             called when item in table is changed
@@ -245,8 +272,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_area.selectionChanged.disconnect(self.selection_changed)
         # clear layer selection
         self.capture_source_area.removeSelection()
+        selected_rows = self.tbl_capture_source_area.selectionModel().selectedRows()
         selection = ''
-        for row in self.tbl_capture_source_area.selectionModel().selectedRows():
+        for row in selected_rows:
             area_id = self.tbl_capture_source_area.item(row.row(), 0).text()
             area_title = self.tbl_capture_source_area.item(row.row(), 1).text()
             if selection == '':
@@ -254,6 +282,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             else:
                 selection = selection + 'or ("external_area_polygon_id" = \'{0}\' and "area_title" = \'{1}\')'.format(area_id, area_title)
         self.capture_source_area.selectByExpression(selection)
+
+        self.Update_UI()
+
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
 
@@ -262,20 +293,22 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
             Called when ok button clicked
         """
-        # get external source id
-        external_source = self.get_comments()
-        # get type
-        value = self.get_combobox_value()
+        value, description = self.get_capture_source_group()
+        if value is None:
+            return
+        external_source = self.get_external_source()
+        if external_source is None:
+            return
+
         # call insert function
-        status = self.insert_capture_source(value, external_source, commit_status)
-        self.le_external_source_id.clear()
-        self.capture_source_area.removeSelection()
-        self.tbl_capture_source_area.clearSelection()
+        status = self.insert_capture_source(value, description, external_source, commit_status)
         self.btn_save.setDisabled(1)
         if status:
             iface.messageBar().pushMessage("SUCCESS",
                                            "You've added a new capture source!",
                                            level=QgsMessageBar.SUCCESS, duration=3)
+            self.capture_source_area.removeSelection()
+            self.tbl_capture_source_area.clearSelection()
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -308,22 +341,22 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.layer_registry.update_layers()
         if 'capture_source_area' in layerids:
             self.cmb_capture_source_group.setDisabled(1)
-            self.btn_validate.setDisabled(1)
+            self.btn_filter_add.setDisabled(1)
             self.btn_save.setDisabled(1)
-            self.le_external_source_id.setDisabled(1)
+            self.le_filter.setDisabled(1)
             self.tbl_capture_source_area.setDisabled(1)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                            level=QgsMessageBar.CRITICAL, duration=5)
             return
 
-    def insert_capture_source(self, value, external_source, commit_status):
+    def insert_capture_source(self, value, description, external_source, commit_status):
         """
         add values to the capture_source table.
         capture_source_id is autogenerated
         """
         # find capture source group id based on capture source group value
-        result = self.db._execute(common_select.capture_source_group_by_value, (value,))
+        result = self.db._execute(common_select.capture_source_group_by_value_and_description, (value, description))
         capture_source_group_id = result.fetchall()[0][0]
 
         result = self.db._execute(common_select.capture_source_by_group_id, (capture_source_group_id,))
@@ -347,5 +380,4 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.capture_source_id = result.fetchall()[0][0]
             if commit_status:
                 self.db.commit_open_cursor()
-            self.le_external_source_id.clear()
         return to_add
