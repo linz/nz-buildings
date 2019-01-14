@@ -1,0 +1,151 @@
+# -*- coding: utf-8 -*-
+
+import os.path
+
+from PyQt4 import uic
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QFrame, QMessageBox
+
+from buildings.gui.error_dialog import ErrorDialog
+from buildings.reference_data import river_polygons_update
+from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.utilities import database as db
+
+
+FORM_CLASS, _ = uic.loadUiType(os.path.join(
+    os.path.dirname(__file__), 'reference_data.ui'))
+
+
+class UpdateReferenceData(QFrame, FORM_CLASS):
+
+    def __init__(self, dockwidget, parent=None):
+        """Constructor."""
+        super(UpdateReferenceData, self).__init__(parent)
+        self.setupUi(self)
+        self.dockwidget = dockwidget
+        self.db = db
+        self.db.connect()
+        self.error_dialog = None
+        self.message = ''
+
+        # disable all check boxes if blah
+        sql = bulk_load_select.supplied_dataset_latest_id_and_dates
+        result = self.db._execute(sql)
+        if result is None:
+            self.enable_checkboxes()
+        else:
+            result = result.fetchone()
+            process = result[1]
+            transfer = result[2]
+            if process is not None and transfer is not None:
+                self.enable_checkboxes()
+            else:
+                self.disable_checkboxes()
+
+        # disable unused check boxes (temporary measure)
+        self.chbx_suburbs.setDisabled(1)
+        self.chbx_town.setDisabled(1)
+        self.chbx_ta.setDisabled(1)
+        self.chbx_ta_grid.setDisabled(1)
+        self.chbx_capture_source_area.setDisabled(1)
+
+        # set up signals and slots
+        self.btn_exit.clicked.connect(self.exit_clicked)
+        self.btn_ok.clicked.connect(self.ok_clicked)
+
+    def close_cursor(self):
+        self.db.close_cursor()
+
+    def connect(self):
+        self.db.connect()
+
+    def enable_checkboxes(self):
+        self.le_key.setEnabled(1)
+        self.chbx_canals.setEnabled(1)
+        self.chbx_coastline_and_islands.setEnabled(1)
+        self.chbx_lagoons.setEnabled(1)
+        self.chbx_lakes.setEnabled(1)
+        self.chbx_ponds.setEnabled(1)
+        self.chbx_rivers.setEnabled(1)
+        self.chbx_swamps.setEnabled(1)
+        self.chbx_suburbs.setEnabled(1)
+        self.chbx_town.setEnabled(1)
+        self.chbx_ta.setEnabled(1)
+        self.chbx_ta_grid.setEnabled(1)
+        self.chbx_capture_source_area.setEnabled(1)
+        # clear message
+        self.lb_message.setText('')
+
+    def disable_checkboxes(self):
+        self.le_key.setDisabled(1)
+        self.chbx_canals.setDisabled(1)
+        self.chbx_coastline_and_islands.setDisabled(1)
+        self.chbx_lagoons.setDisabled(1)
+        self.chbx_lakes.setDisabled(1)
+        self.chbx_ponds.setDisabled(1)
+        self.chbx_rivers.setDisabled(1)
+        self.chbx_swamps.setDisabled(1)
+        self.chbx_suburbs.setDisabled(1)
+        self.chbx_town.setDisabled(1)
+        self.chbx_ta.setDisabled(1)
+        self.chbx_ta_grid.setDisabled(1)
+        self.chbx_capture_source_area.setDisabled(1)
+        # add message
+        self.lb_message.setText('\nNOTE: You can\'t update reference data with\n             a dataset in progress \n')
+
+    @pyqtSlot()
+    def ok_clicked(self):
+        """Called when ok btn clicked"""
+        api_key = self.le_key.text()
+        if api_key == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n------------- NO API KEY -------------'
+                '\n\nPlease enter a koordinates api key to'
+                ' update the reference data.'
+            )
+            self.error_dialog.show()
+            return
+
+        # create update log
+        sql = 'SELECT buildings_reference.reference_update_log_insert();'
+        update_id = self.db._execute(sql)
+        update_id = update_id.fetchone()
+        # canals
+
+        # rivers
+        if self.chbx_rivers.isChecked():
+            status = river_polygons_update.update_rivers(api_key)
+            if status == 'current':
+                self.message += 'The river_polygons table was up to date\n'
+            if status == 'updated':
+                self.message += 'The river_polygons table has been updated\n'
+            if status != 'error':
+                sql = 'SELECT buildings_reference.reference_update_log_update_river_boolean(%s);'
+                sql = self.db._execute(sql, (update_id[0],))
+
+        # final message box
+        self.message_box()
+        self.msgbox.exec_()
+
+    @pyqtSlot()
+    def exit_clicked(self):
+        """
+        Called when new entry exit button clicked.
+        """
+        self.close_frame()
+        self.dockwidget.lst_sub_menu.clearSelection()
+
+    def close_frame(self):
+        """
+        Clean up and remove the new entry frame.
+        """
+        self.db.close_connection()
+        from buildings.gui.menu_frame import MenuFrame
+        dw = self.dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(MenuFrame(dw))
+
+    def message_box(self):
+        self.msgbox = QMessageBox(QMessageBox.Question, 'Note', self.message,
+                                  buttons=QMessageBox.Ok)

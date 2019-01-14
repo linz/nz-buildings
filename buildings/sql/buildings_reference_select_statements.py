@@ -7,6 +7,12 @@ Buildings Reference Select Statements
     - capture_source_area_name_by_supplied_dataset (supplied_dataset_id)
     - capture_source_area_shape_by_title (area_title)
 
+- reference_update_log
+    - update_log_river_date
+
+- river_polygons
+    - river_polygon_id_by_external_id
+
 - suburb_locality
     - suburb_locality_intersect_geom (geometry)
     - suburb_locality_suburb_4th
@@ -54,6 +60,23 @@ capture_source_area_intersect_geom = """
 SELECT csa.external_area_polygon_id
 FROM buildings_reference.capture_source_area csa
 WHERE ST_Intersects(csa.shape, %s::Geometry);
+"""
+
+# referecnce update log
+
+update_log_river_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE rivers = True
+ORDER BY update_id DESC LIMIT 1;
+"""
+
+# river polygons
+
+river_polygon_id_by_external_id = """
+SELECT river_polygon_id
+FROM buildings_reference.river_polygons
+WHERE external_river_polygon_id = %s;
 """
 
 # suburb locality
