@@ -63,6 +63,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.save_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
 
+        self.cmb_capture_source_group.currentIndexChanged.connect(self.cmb_capture_source_group_changed)
         self.btn_filter_add.clicked.connect(self.filter_add_clicked)
         self.btn_filter_del.clicked.connect(self.filter_del_clicked)
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
@@ -167,7 +168,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         area_title = self.tbl_capture_source_area.item(row, 1).text()
         return external_source_id, area_title
 
-    def Update_UI(self):
+    def update_UI(self):
+        """
+        Display the capture source info and enable/disable save botton
+        """
         selected_rows = [row.row() for row in self.tbl_capture_source_area.selectionModel().selectedRows()]
         if len(selected_rows) == 1:
             self.btn_save.setEnabled(True)
@@ -178,6 +182,13 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         else:
             self.btn_save.setEnabled(False)
             self.l_confirm.clear()
+
+    @pyqtSlot()
+    def cmb_capture_source_group_changed(self):
+        """
+        Called when cmb_capture_source_group is changed
+        """
+        self.update_UI()
 
     @pyqtSlot(int)
     def add_new_geometry(self):
@@ -217,7 +228,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                     index = index + 1
             self.tbl_capture_source_area.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        self.Update_UI()
+        self.update_UI()
 
         # reconnect line edit signal
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
@@ -283,7 +294,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
                 selection = selection + 'or ("external_area_polygon_id" = \'{0}\' and "area_title" = \'{1}\')'.format(area_id, area_title)
         self.capture_source_area.selectByExpression(selection)
 
-        self.Update_UI()
+        self.update_UI()
 
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)

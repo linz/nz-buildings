@@ -75,6 +75,19 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         external_source_id = self.capture_frame.tbl_capture_source_area.item(selected_rows[0], 0).text()
         self.assertEqual(external_source_id, '1')
 
+    def test_cmb_capture_source_group_changed(self):
+        """
+        Check the l_confirm info updated when cmb_capture_source_group changed
+        """
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
+        self.capture_frame.tbl_capture_source_area.selectRow(0)
+        self.assertIn('NZ Aerial Imagery', self.capture_frame.l_confirm.text())
+
+        self.capture_frame.cmb_capture_source_group.addItem('Test group- Test')
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(1)
+        self.assertIn('Test group', self.capture_frame.l_confirm.text())
+        db.rollback_open_cursor()
+
     def test_add_valid_capture_source_with_external_id(self):
         """Valid capture source with valid external id"""
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
@@ -86,6 +99,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
         self.capture_frame.tbl_capture_source_area.selectRow(2)
         self.assertTrue(self.capture_frame.btn_save.isEnabled())
+        self.assertNotEqual(self.capture_frame.l_confirm.text(), '')
         self.capture_frame.save_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
         result2 = db._execute(sql)
