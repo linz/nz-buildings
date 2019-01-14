@@ -2,6 +2,9 @@
 --------------------------------------------------------------------
 Buildings Reference Select Statements
 
+- canal_polygons
+    -canal_polygon_id_by_external_id (external_canal_polygon_id)
+
 - capture_source_area
     - capture_source_area_id_and_name
     - capture_source_area_name_by_supplied_dataset (supplied_dataset_id)
@@ -34,6 +37,14 @@ Buildings Reference Select Statements
 --------------------------------------------------------------------
 """
 
+# canal polygons
+
+canal_polygon_id_by_external_id = """
+SELECT canal_polygon_id
+FROM buildings_reference.canal_polygons
+WHERE external_canal_polygon_id = %s;
+"""
+
 # Capture Source Area
 
 capture_source_area_id_and_name = """
@@ -62,7 +73,14 @@ FROM buildings_reference.capture_source_area csa
 WHERE ST_Intersects(csa.shape, %s::Geometry);
 """
 
-# referecnce update log
+# reference update log
+
+update_log_canal_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE canals = True
+ORDER BY update_id DESC LIMIT 1;
+"""
 
 update_log_river_date = """
 SELECT update_date
