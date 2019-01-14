@@ -55,14 +55,25 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_frame.btn_exit.click()
 
     def test_filter_bottons_clicked(self):
+        """
+        Check the table filtered when btn_filter_add clicked
+        and unfiltered when btn_filter_del clicked
+        """
         count_original = self.capture_frame.tbl_capture_source_area.rowCount()
         self.capture_frame.le_filter.setText('1')
         self.capture_frame.btn_filter_add.click()
         count_filter_on = self.capture_frame.tbl_capture_source_area.rowCount()
         self.assertEqual(count_filter_on, 1)
+        self.capture_frame.tbl_capture_source_area.selectRow(0)
         self.capture_frame.btn_filter_del.click()
         count_filter_off = self.capture_frame.tbl_capture_source_area.rowCount()
         self.assertEqual(count_filter_off, count_original)
+        # Check if the old selection is reinstated
+        selected_rows = [
+            index.row() for index in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEqual(len(selected_rows), 1)
+        external_source_id = self.capture_frame.tbl_capture_source_area.item(selected_rows[0], 0).text()
+        self.assertEqual(external_source_id, '1')
 
     def test_add_valid_capture_source_with_external_id(self):
         """Valid capture source with valid external id"""
