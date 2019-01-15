@@ -147,6 +147,13 @@ WHERE rivers = True
 ORDER BY update_id DESC LIMIT 1;
 """
 
+update_log_swamp_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE swamps = True
+ORDER BY update_id DESC LIMIT 1;
+"""
+
 # river polygons
 
 river_polygon_id_by_external_id = """
@@ -183,6 +190,14 @@ FROM buildings_reference.suburb_locality sl,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE sl.suburb_locality_id = blo.suburb_locality_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+# swamp polygons
+
+swamp_polygon_id_by_external_id = """
+SELECT swamp_polygon_id
+FROM buildings_reference.swamp_polygons
+WHERE external_swamp_polygon_id = %s;
 """
 
 # territorial Authority
