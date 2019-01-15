@@ -59,6 +59,6 @@ def update_canals(kx_api_key):
                 db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
 
         elif feature.attribute('__change__') == 'UPDATE':
-            sql = 'SELECT buildings_bulk_load.canal_polygons_update_shape_by_external_id(%s, %s)'
-            db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().extportToWkt()))
+            sql = 'SELECT buildings_reference.canal_polygons_update_shape_by_external_id(%s, %s)'
+            db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
     return 'updated'
