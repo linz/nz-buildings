@@ -219,7 +219,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 box.setEnabled(1)
 
     def message_box(self):
-        self.msgbox = QMessageBox(QMessageBox.Question, 'Note', self.message,
+        self.msgbox = QMessageBox(QMessageBox.Information, 'Note', self.message,
                                   buttons=QMessageBox.Ok)
 
     def request_error(self):
