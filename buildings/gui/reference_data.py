@@ -7,7 +7,7 @@ from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import canal_polygons_update, lagoon_polygons_update, lake_polygons_update, river_polygons_update
+from buildings.reference_data import canal_polygons_update, lagoon_polygons_update, lake_polygons_update, pond_polygons_update, river_polygons_update
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db
 
@@ -164,6 +164,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 return
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_lake_boolean(%s);'
+                sql = self.db._execute(sql, (update_id[0],))
+        # pond
+        if self.chbx_ponds.isChecked():
+            status = pond_polygons_update.update_ponds(api_key)
+            if status == 'current':
+                self.message += 'The pond_polygons table was up to date\n'
+            if status == 'updated':
+                self.message += 'The pond_polygons table has been updated\n'
+            if status == 'error':
+                self.request_error()
+                return
+            if status != 'error':
+                sql = 'SELECT buildings_reference.reference_update_log_update_pond_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # rivers
         if self.chbx_rivers.isChecked():

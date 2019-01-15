@@ -16,9 +16,14 @@ Buildings Reference Select Statements
 - lake_polygons
     - lake_polygon_id_by_external_id
 
+- pond_polygons
+    - pond_polygon_id_by_external_id
+
 - reference_update_log
     - update_log_canal_date
-    - update_log_river_date
+    - update_log_lagoon_date
+    - update_log_lake_date
+    - update_log_pond_date
     - update_log_river_date
 
 - river_polygons
@@ -97,6 +102,14 @@ FROM buildings_reference.lake_polygons
 WHERE external_lake_polygon_id = %s;
 """
 
+# pond polygons
+
+pond_polygon_id_by_external_id = """
+SELECT pond_polygon_id
+FROM buildings_reference.pond_polygons
+WHERE external_pond_polygon_id = %s;
+"""
+
 # reference update log
 
 update_log_canal_date = """
@@ -117,6 +130,13 @@ update_log_lake_date = """
 SELECT update_date
 FROM buildings_reference.reference_update_log
 WHERE lakes = True
+ORDER BY update_id DESC LIMIT 1;
+"""
+
+update_log_pond_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE ponds = True
 ORDER BY update_id DESC LIMIT 1;
 """
 
