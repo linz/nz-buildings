@@ -54,6 +54,40 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_exit.click()
 
+    def test_filter_bottons_clicked(self):
+        """
+        Check the table filtered when btn_filter_add clicked
+        and unfiltered when btn_filter_del clicked
+        """
+        count_original = self.capture_frame.tbl_capture_source_area.rowCount()
+        self.capture_frame.le_filter.setText('1')
+        self.capture_frame.btn_filter_add.click()
+        count_filter_on = self.capture_frame.tbl_capture_source_area.rowCount()
+        self.assertEqual(count_filter_on, 1)
+        self.capture_frame.tbl_capture_source_area.selectRow(0)
+        self.capture_frame.btn_filter_del.click()
+        count_filter_off = self.capture_frame.tbl_capture_source_area.rowCount()
+        self.assertEqual(count_filter_off, count_original)
+        # Check if the old selection is reinstated
+        selected_rows = [
+            index.row() for index in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
+        self.assertEqual(len(selected_rows), 1)
+        external_source_id = self.capture_frame.tbl_capture_source_area.item(selected_rows[0], 0).text()
+        self.assertEqual(external_source_id, '1')
+
+    def test_cmb_capture_source_group_changed(self):
+        """
+        Check the l_confirm info updated when cmb_capture_source_group changed
+        """
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
+        self.capture_frame.tbl_capture_source_area.selectRow(0)
+        self.assertIn('NZ Aerial Imagery', self.capture_frame.l_confirm.text())
+
+        self.capture_frame.cmb_capture_source_group.addItem('Test group- Test')
+        self.capture_frame.cmb_capture_source_group.setCurrentIndex(1)
+        self.assertIn('Test group', self.capture_frame.l_confirm.text())
+        db.rollback_open_cursor()
+
     def test_add_valid_capture_source_with_external_id(self):
         """Valid capture source with valid external id"""
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
@@ -63,9 +97,9 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         else:
             result = result.fetchall()[0][0]
         self.capture_frame.cmb_capture_source_group.setCurrentIndex(0)
-        self.capture_frame.le_external_source_id.setText('3')
-        self.capture_frame.btn_validate.click()
+        self.capture_frame.tbl_capture_source_area.selectRow(2)
         self.assertTrue(self.capture_frame.btn_save.isEnabled())
+        self.assertNotEqual(self.capture_frame.l_confirm.text(), '')
         self.capture_frame.save_clicked(commit_status=False)
         sql = 'SELECT COUNT(capture_source_id) FROM buildings_common.capture_source;'
         result2 = db._execute(sql)
@@ -101,31 +135,6 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPoint(1878996, 5555445)), delay=-1)
         rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
         self.assertEquals(len(rows), 0)
-
-    def test_adding_capture_source_by_line_edit(self):
-        """Editing external source id using the line edit"""
-        # adding by line edit one selection
-        self.capture_frame.le_external_source_id.setText('1')
-        self.capture_frame.btn_validate.click()
-        self.assertTrue(self.capture_frame.btn_save.isEnabled())
-        self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
-        self.assertEqual(len(self.ids), 1)
-        self.assertEqual(self.ids[0], '1')
-        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
-        self.assertEquals(rows[0], 0)
-        # adding by line edit two selections
-        self.capture_frame.le_external_source_id.setText('1,2')
-        self.capture_frame.btn_validate.click()
-        self.assertFalse(self.capture_frame.btn_save.isEnabled())
-        self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
-        self.assertEqual(len(self.ids), 0)
-        # clearing line edit
-        self.capture_frame.le_external_source_id.setText('1')
-        self.capture_frame.btn_validate.click()
-        self.capture_frame.le_external_source_id.setText('')
-        self.assertFalse(self.capture_frame.btn_save.isEnabled())
-        self.ids = [str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()]
-        self.assertEqual(len(self.ids), 0)
 
     def test_layer_selection_by_table_selection(self):
         """Editing external source id using the table"""
