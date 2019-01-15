@@ -29,6 +29,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.db.connect()
         self.error_dialog = None
         self.message = ''
+        self.btn_view_key.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'view_password.png')))
 
         # disable all check boxes if a curret dataset exists
         sql = bulk_load_select.supplied_dataset_latest_id_and_dates
@@ -50,7 +51,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
         self.chbx_capture_source_area.setDisabled(1)
-        self.btn_view_key.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'view_password.png')))
+        self.chbx_coastline_and_islands.setDisabled(1)
 
         # set up signals and slots
         self.btn_view_key.pressed.connect(self.view_key)
@@ -79,6 +80,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ta.setEnabled(1)
         self.chbx_ta_grid.setEnabled(1)
         self.chbx_capture_source_area.setEnabled(1)
+        self.btn_ok.setEnabled(1)
         # clear message
         self.lb_message.setText('')
 
@@ -96,6 +98,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
         self.chbx_capture_source_area.setDisabled(1)
+        self.btn_ok.setDisabled(1)
         # add message
         self.lb_message.setText('\nNOTE: You can\'t update reference data with\n             a dataset in progress \n')
 
@@ -131,78 +134,42 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # canals
         if self.chbx_canals.isChecked():
             status = canal_polygons_update.update_canals(api_key)
-            if status == 'current':
-                self.message += 'The canal_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The canal_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'canal_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_canal_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # lagoon
         if self.chbx_lagoons.isChecked():
             status = lagoon_polygons_update.update_lagoons(api_key)
-            if status == 'current':
-                self.message += 'The lagoon_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The lagoon_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'lagoon_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_lagoon_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # lake
         if self.chbx_lakes.isChecked():
             status = lake_polygons_update.update_lakes(api_key)
-            if status == 'current':
-                self.message += 'The lake_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The lake_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'lake_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_lake_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # pond
         if self.chbx_ponds.isChecked():
             status = pond_polygons_update.update_ponds(api_key)
-            if status == 'current':
-                self.message += 'The pond_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The pond_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'pond_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_pond_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # rivers
         if self.chbx_rivers.isChecked():
             status = river_polygons_update.update_rivers(api_key)
-            if status == 'current':
-                self.message += 'The river_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The river_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'river_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_river_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # swamp
         if self.chbx_swamps.isChecked():
             status = swamp_polygons_update.update_swamps(api_key)
-            if status == 'current':
-                self.message += 'The swamp_polygons table was up to date\n'
-            if status == 'updated':
-                self.message += 'The swamp_polygons table has been updated\n'
-            if status == 'error':
-                self.request_error()
-                return
+            self.update_message(status, 'swamp_polygons')
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_swamp_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
@@ -246,3 +213,12 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         )
         self.error_dialog.show()
         QApplication.restoreOverrideCursor()
+
+    def update_message(self, status, name):
+        if status == 'current':
+            self.message += 'The {} table was up to date\n'.format(name)
+        if status == 'updated':
+            self.message += 'The {} table has been updated\n'.format(name)
+        if status == 'error':
+            self.request_error()
+            return

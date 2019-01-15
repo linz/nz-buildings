@@ -108,7 +108,7 @@
        <item>
         <widget class="QLabel" name="lb_hydro">
          <property name="text">
-          <string>Hyrological Features</string>
+          <string>Topographic Features</string>
          </property>
         </widget>
        </item>
