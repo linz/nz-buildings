@@ -25,10 +25,17 @@ SQLSCRIPTS = \
   db/sql/buildings_lds/02-default-values.sql \
   db/sql/buildings_bulk_load/03-alter_relationships_create_view.sql \
   db/sql/01-buildings_version.sql \
-  db/sql/buildings_reference/functions/01-suburb_locality.sql \
-  db/sql/buildings_reference/functions/02-town_city.sql \
-  db/sql/buildings_reference/functions/03-territorial_authority_and_territorial_authority_grid.sql \
-  db/sql/buildings_reference/functions/04-capture_source_area.sql \
+  db/sql/buildings_reference/functions/01-canal_polygons.sql \
+  db/sql/buildings_reference/functions/02-capture_source_area.sql \
+  db/sql/buildings_reference/functions/03-lagoon_polygons.sql \
+  db/sql/buildings_reference/functions/04-lake_polygons.sql \
+  db/sql/buildings_reference/functions/05-pond_polygons.sql \
+  db/sql/buildings_reference/functions/06-reference_update_log.sql \
+  db/sql/buildings_reference/functions/07-river_polygons.sql \
+  db/sql/buildings_reference/functions/08-suburb_locality.sql \
+  db/sql/buildings_reference/functions/09-swamp_polygons.sql \
+  db/sql/buildings_reference/functions/10-territorial_authority_and_territorial_authority_grid.sql \
+  db/sql/buildings_reference/functions/11-town_city.sql \
   db/sql/buildings_common/functions/01-capture_method.sql \
   db/sql/buildings_common/functions/02-capture_source_group.sql \
   db/sql/buildings_common/functions/03-capture_source.sql \
