@@ -4,14 +4,14 @@ import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame, QMessageBox
+from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.reference_data import river_polygons_update, canal_polygons_update
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db
 
-
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'reference_data.ui'))
 
@@ -48,8 +48,12 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
         self.chbx_capture_source_area.setDisabled(1)
+        self.btn_view_key.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'view_password.png')))
 
         # set up signals and slots
+        self.btn_view_key.pressed.connect(self.view_key)
+        self.btn_view_key.released.connect(self.hide_key)
+        self.le_key.editingFinished.connect(self.hide_key)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_ok.clicked.connect(self.ok_clicked)
 
@@ -92,6 +96,14 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_capture_source_area.setDisabled(1)
         # add message
         self.lb_message.setText('\nNOTE: You can\'t update reference data with\n             a dataset in progress \n')
+
+    @pyqtSlot()
+    def view_key(self):
+        self.le_key.setEchoMode(QLineEdit.Normal)
+
+    @pyqtSlot()
+    def hide_key(self):
+        self.le_key.setEchoMode(QLineEdit.Password)
 
     @pyqtSlot()
     def ok_clicked(self):
