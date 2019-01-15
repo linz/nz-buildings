@@ -45,14 +45,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             else:
                 self.disable_checkboxes()
 
-        # disable unused check boxes (temporary measure)
-        self.chbx_suburbs.setDisabled(1)
-        self.chbx_town.setDisabled(1)
-        self.chbx_ta.setDisabled(1)
-        self.chbx_ta_grid.setDisabled(1)
-        self.chbx_coastline_and_islands.setDisabled(1)
-        self.grbx_admin.setDisabled(1)
-
         # set up signals and slots
         self.btn_view_key.pressed.connect(self.view_key)
         self.btn_view_key.released.connect(self.hide_key)
