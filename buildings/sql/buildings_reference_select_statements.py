@@ -10,6 +10,12 @@ Buildings Reference Select Statements
     - capture_source_area_name_by_supplied_dataset (supplied_dataset_id)
     - capture_source_area_shape_by_title (area_title)
 
+- lagoon_polygons
+    - lagoon_polygon_id_by_external_id
+
+- lake_polygons
+    - lake_polygon_id_by_external_id
+
 - reference_update_log
     - update_log_canal_date
     - update_log_river_date
@@ -83,6 +89,14 @@ FROM buildings_reference.lagoon_polygons
 WHERE external_lagoon_polygon_id = %s;
 """
 
+# lake polygons
+
+lake_polygon_id_by_external_id = """
+SELECT lake_polygon_id
+FROM buildings_reference.lake_polygons
+WHERE external_lake_polygon_id = %s;
+"""
+
 # reference update log
 
 update_log_canal_date = """
@@ -96,6 +110,13 @@ update_log_lagoon_date = """
 SELECT update_date
 FROM buildings_reference.reference_update_log
 WHERE lagoons = True
+ORDER BY update_id DESC LIMIT 1;
+"""
+
+update_log_lake_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE lakes = True
 ORDER BY update_id DESC LIMIT 1;
 """
 

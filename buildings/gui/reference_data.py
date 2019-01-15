@@ -3,11 +3,11 @@
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox
+from PyQt4.QtCore import pyqtSlot, Qt
+from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import canal_polygons_update, lagoon_polygons_update, river_polygons_update
+from buildings.reference_data import canal_polygons_update, lagoon_polygons_update, lake_polygons_update, river_polygons_update
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db
 
@@ -108,6 +108,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
     @pyqtSlot()
     def ok_clicked(self):
         """Called when ok btn clicked"""
+        # set cursor to busy
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        self.message = ''
         api_key = self.le_key.text()
         if api_key == '':
             self.error_dialog = ErrorDialog()
@@ -116,6 +119,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 '\n\nPlease enter a koordinates api key to'
                 ' update the reference data.'
             )
+            QApplication.restoreOverrideCursor()
             self.error_dialog.show()
             return
         # create update log
@@ -129,6 +133,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 self.message += 'The canal_polygons table was up to date\n'
             if status == 'updated':
                 self.message += 'The canal_polygons table has been updated\n'
+            if status == 'error':
+                self.request_error()
+                return
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_canal_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
@@ -139,8 +146,24 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 self.message += 'The lagoon_polygons table was up to date\n'
             if status == 'updated':
                 self.message += 'The lagoon_polygons table has been updated\n'
+            if status == 'error':
+                self.request_error()
+                return
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_lagoon_boolean(%s);'
+                sql = self.db._execute(sql, (update_id[0],))
+        # lake
+        if self.chbx_lakes.isChecked():
+            status = lake_polygons_update.update_lakes(api_key)
+            if status == 'current':
+                self.message += 'The lake_polygons table was up to date\n'
+            if status == 'updated':
+                self.message += 'The lake_polygons table has been updated\n'
+            if status == 'error':
+                self.request_error()
+                return
+            if status != 'error':
+                sql = 'SELECT buildings_reference.reference_update_log_update_lake_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # rivers
         if self.chbx_rivers.isChecked():
@@ -149,10 +172,15 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 self.message += 'The river_polygons table was up to date\n'
             if status == 'updated':
                 self.message += 'The river_polygons table has been updated\n'
+            if status == 'error':
+                self.request_error()
+                return
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_river_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
 
+        # restore cursor
+        QApplication.restoreOverrideCursor()
         # final message box
         self.message_box()
         self.msgbox.exec_()
@@ -178,3 +206,15 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
     def message_box(self):
         self.msgbox = QMessageBox(QMessageBox.Question, 'Note', self.message,
                                   buttons=QMessageBox.Ok)
+
+    def request_error(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n ---------------------- REQUEST ERROR ---------'
+            '----------------- \n\nSomething appears to have gone'
+            ' wrong with requesting the changeset, first please'
+            ' check you entered the correct api key if this is correct'
+            ' then please inform a developer.'
+        )
+        self.error_dialog.show()
+        QApplication.restoreOverrideCursor()
