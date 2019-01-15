@@ -11,6 +11,8 @@ Buildings Reference Select Statements
     - capture_source_area_shape_by_title (area_title)
 
 - reference_update_log
+    - update_log_canal_date
+    - update_log_river_date
     - update_log_river_date
 
 - river_polygons
@@ -73,12 +75,27 @@ FROM buildings_reference.capture_source_area csa
 WHERE ST_Intersects(csa.shape, %s::Geometry);
 """
 
+# lagoon polygons
+
+lagoon_polygon_id_by_external_id = """
+SELECT lagoon_polygon_id
+FROM buildings_reference.lagoon_polygons
+WHERE external_lagoon_polygon_id = %s;
+"""
+
 # reference update log
 
 update_log_canal_date = """
 SELECT update_date
 FROM buildings_reference.reference_update_log
 WHERE canals = True
+ORDER BY update_id DESC LIMIT 1;
+"""
+
+update_log_lagoon_date = """
+SELECT update_date
+FROM buildings_reference.reference_update_log
+WHERE lagoons = True
 ORDER BY update_id DESC LIMIT 1;
 """
 

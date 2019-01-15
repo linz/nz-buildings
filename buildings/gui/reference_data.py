@@ -7,7 +7,7 @@ from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import river_polygons_update, canal_polygons_update
+from buildings.reference_data import canal_polygons_update, lagoon_polygons_update, river_polygons_update
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db
 
@@ -28,7 +28,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.error_dialog = None
         self.message = ''
 
-        # disable all check boxes if blah
+        # disable all check boxes if a curret dataset exists
         sql = bulk_load_select.supplied_dataset_latest_id_and_dates
         result = self.db._execute(sql)
         if result is None:
@@ -131,6 +131,16 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 self.message += 'The canal_polygons table has been updated\n'
             if status != 'error':
                 sql = 'SELECT buildings_reference.reference_update_log_update_canal_boolean(%s);'
+                sql = self.db._execute(sql, (update_id[0],))
+        # lagoon
+        if self.chbx_lagoons.isChecked():
+            status = lagoon_polygons_update.update_lagoons(api_key)
+            if status == 'current':
+                self.message += 'The lagoon_polygons table was up to date\n'
+            if status == 'updated':
+                self.message += 'The lagoon_polygons table has been updated\n'
+            if status != 'error':
+                sql = 'SELECT buildings_reference.reference_update_log_update_lagoon_boolean(%s);'
                 sql = self.db._execute(sql, (update_id[0],))
         # rivers
         if self.chbx_rivers.isChecked():
