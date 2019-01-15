@@ -1,6 +1,5 @@
-# script to update rivers data
+# script to update lake data
 
-from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
 from qgis.core import QgsVectorLayer

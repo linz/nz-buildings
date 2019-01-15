@@ -1,6 +1,5 @@
 # script to update rivers data
 
-from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
 from qgis.core import QgsVectorLayer
@@ -32,15 +31,6 @@ def update_rivers(kx_api_key):
 
     if not layer.isValid():
         # something went wrong
-        error_dialog = ErrorDialog()
-        error_dialog.fill_report(
-            '\n ---------------------- REQUEST ERROR ---------'
-            '----------------- \n\nSomething appears to have gone'
-            ' wrong with requesting the changeset, first please'
-            ' check you entered the correct api key if this is correct'
-            ' then please inform a developer.'
-        )
-        error_dialog.show()
         return 'error'
 
     if layer.featureCount() == 0:
