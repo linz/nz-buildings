@@ -4,7 +4,7 @@ import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication
+from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCheckBox
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.reference_data import (canal_polygons_update, lagoon_polygons_update,
@@ -50,13 +50,15 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
-        self.chbx_capture_source_area.setDisabled(1)
         self.chbx_coastline_and_islands.setDisabled(1)
+        self.grbx_admin.setDisabled(1)
 
         # set up signals and slots
         self.btn_view_key.pressed.connect(self.view_key)
         self.btn_view_key.released.connect(self.hide_key)
         self.le_key.editingFinished.connect(self.hide_key)
+        self.grbx_topo.toggled.connect(self.check_all_topo)
+        self.grbx_admin.toggled.connect(self.check_all_admin)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_ok.clicked.connect(self.ok_clicked)
 
@@ -68,6 +70,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def enable_checkboxes(self):
         self.le_key.setEnabled(1)
+        self.grbx_topo.setEnabled(1)
+        self.grbx_admin.setEnabled(1)
         self.chbx_canals.setEnabled(1)
         self.chbx_coastline_and_islands.setEnabled(1)
         self.chbx_lagoons.setEnabled(1)
@@ -79,13 +83,14 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
         self.chbx_ta_grid.setEnabled(1)
-        self.chbx_capture_source_area.setEnabled(1)
         self.btn_ok.setEnabled(1)
         # clear message
         self.lb_message.setText('')
 
     def disable_checkboxes(self):
         self.le_key.setDisabled(1)
+        self.grbx_topo.setDisabled(1)
+        self.grbx_admin.setDisabled(1)
         self.chbx_canals.setDisabled(1)
         self.chbx_coastline_and_islands.setDisabled(1)
         self.chbx_lagoons.setDisabled(1)
@@ -97,7 +102,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
-        self.chbx_capture_source_area.setDisabled(1)
         self.btn_ok.setDisabled(1)
         # add message
         self.lb_message.setText('\nNOTE: You can\'t update reference data with\n             a dataset in progress \n')
@@ -177,6 +181,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # restore cursor
         QApplication.restoreOverrideCursor()
         # final message box
+        if self.message == '':
+            self.message = 'No layers were updated.'
         self.message_box()
         self.msgbox.exec_()
 
@@ -197,6 +203,28 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
+
+    @pyqtSlot()
+    def check_all_topo(self):
+        if self.grbx_topo.isChecked():
+            for box in self.grbx_topo.findChildren(QCheckBox):
+                box.setChecked(True)
+                box.setEnabled(1)
+        else:
+            for box in self.grbx_topo.findChildren(QCheckBox):
+                box.setChecked(False)
+                box.setEnabled(1)
+
+    @pyqtSlot()
+    def check_all_admin(self):
+        if self.grbx_admin.isChecked():
+            for box in self.grbx_admin.findChildren(QCheckBox):
+                box.setChecked(True)
+                box.setEnabled(1)
+        else:
+            for box in self.grbx_admin.findChildren(QCheckBox):
+                box.setChecked(False)
+                box.setEnabled(1)
 
     def message_box(self):
         self.msgbox = QMessageBox(QMessageBox.Question, 'Note', self.message,
@@ -220,5 +248,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         if status == 'updated':
             self.message += 'The {} table has been updated\n'.format(name)
         if status == 'error':
+            self.message += 'The request errored on the {} table\n'.format(name)
             self.request_error()
             return
