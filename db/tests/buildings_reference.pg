@@ -19,7 +19,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(51);
+SELECT plan(39);
 
 -- Schema
 SELECT has_schema('buildings_reference');
@@ -101,19 +101,7 @@ SELECT has_function('buildings_reference', 'swamp_polygons_delete_by_external_id
 SELECT has_function('buildings_reference', 'swamp_polygons_update_shape_by_external_id', 'Should have function swamp_polygons_update_shape_by_external_id in buildings_reference.');
 SELECT has_function('buildings_reference', 'swamp_polygons_insert', 'Should have function swamp_polygons_insert in buildings_reference.');
 
-SELECT has_function('buildings_reference', 'reference_update_log_insert', 'Should have function reference_update_log_insert in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_canal_boolean', 'Should have function reference_update_update_canal_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_capture_source_area_boolean', 'Should have function reference_update_log_update_capture_source_area_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_coastline_boolean', 'Should have function reference_update_log_update_coastline_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_lagoon_boolean', 'Should have function reference_update_log_update_lagoon_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_lake_boolean', 'Should have function reference_update_log_update_lake_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_pond_boolean', 'Should have function reference_update_log_update_pond_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_river_boolean', 'Should have function reference_update_log_update_river_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_suburb_locality_boolean', 'Should have function reference_update_log_update_suburb_locality_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_swamp_boolean', 'Should have function reference_update_log_update_swamp_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_territorial_authority_boolean', 'Should have function reference_update_log_update_territorial_authority_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_territorial_authority_grid_boolean', 'Should have function reference_update_log_update_territorial_authority_grid_boolean in buildings_reference.');
-SELECT has_function('buildings_reference', 'reference_update_log_update_town_city_boolean', 'Should have function reference_update_log_update_town_city_boolean in buildings_reference.');
+SELECT has_function('buildings_reference', 'reference_update_log_insert_log', 'Should have function reference_update_log_insert_log in buildings_reference.');
 
 
 -- Finish pgTAP testing

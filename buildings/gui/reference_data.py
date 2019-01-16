@@ -123,53 +123,46 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             QApplication.restoreOverrideCursor()
             self.error_dialog.show()
             return
-        # create update log
-        sql = 'SELECT buildings_reference.reference_update_log_insert();'
-        update_id = self.db._execute(sql)
-        update_id = update_id.fetchone()
+        updates = []
         # canals
         if self.chbx_canals.isChecked():
             status = canal_polygons_update.update_canals(api_key)
             self.update_message(status, 'canal_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_canal_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('canals')
         # lagoon
         if self.chbx_lagoons.isChecked():
             status = lagoon_polygons_update.update_lagoons(api_key)
             self.update_message(status, 'lagoon_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_lagoon_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('lagoons')
         # lake
         if self.chbx_lakes.isChecked():
             status = lake_polygons_update.update_lakes(api_key)
             self.update_message(status, 'lake_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_lake_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('lakes')
         # pond
         if self.chbx_ponds.isChecked():
             status = pond_polygons_update.update_ponds(api_key)
             self.update_message(status, 'pond_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_pond_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('ponds')
         # rivers
         if self.chbx_rivers.isChecked():
             status = river_polygons_update.update_rivers(api_key)
             self.update_message(status, 'river_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_river_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('rivers')
         # swamp
         if self.chbx_swamps.isChecked():
             status = swamp_polygons_update.update_swamps(api_key)
             self.update_message(status, 'swamp_polygons')
             if status != 'error':
-                sql = 'SELECT buildings_reference.reference_update_log_update_swamp_boolean(%s);'
-                sql = self.db._execute(sql, (update_id[0],))
+                updates.append('swamps')
 
+        sql = "SELECT buildings_reference.reference_update_log_insert_log(%s);"
+        self.db._execute(sql, (updates,))
         # restore cursor
         QApplication.restoreOverrideCursor()
         # final message box
