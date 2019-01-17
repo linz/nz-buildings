@@ -31,7 +31,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
         # disable all check boxes if a curret dataset exists
         sql = bulk_load_select.supplied_dataset_latest_id_and_dates
-        result = self.db._execute(sql)
+        result = self.db.execute_return(sql)
         if result is None:
             self.enable_checkboxes()
         else:
@@ -164,7 +164,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 updates.append('swamp')
 
         sql = 'SELECT buildings_reference.reference_update_log_insert_log(%s);'
-        self.db._execute(sql, (updates,))
+        self.db.execute_return(sql, (updates,))
         # restore cursor
         QApplication.restoreOverrideCursor()
         # final message box

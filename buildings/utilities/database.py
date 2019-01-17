@@ -126,6 +126,11 @@ def _execute(sql, data=None):
     return cursor
 
 
+def execute_return(sql, data=None):
+    cursor = _execute(sql, data)
+    return cursor
+
+
 def execute(sql, data=None):
     """ Execute an update or insert statement with no return
 
