@@ -2,32 +2,16 @@
 --------------------------------------------------------------------
 Buildings Reference Select Statements
 
-- canal_polygons
-    -canal_polygon_id_by_external_id (external_canal_polygon_id)
-
 - capture_source_area
     - capture_source_area_id_and_name
     - capture_source_area_name_by_supplied_dataset (supplied_dataset_id)
     - capture_source_area_shape_by_title (area_title)
 
-- lagoon_polygons
-    - lagoon_polygon_id_by_external_id
-
-- lake_polygons
-    - lake_polygon_id_by_external_id
-
-- pond_polygons
-    - pond_polygon_id_by_external_id
-
 - reference_update_log
-    - update_log_canal_date
-    - update_log_lagoon_date
-    - update_log_lake_date
-    - update_log_pond_date
-    - update_log_river_date
+    - log_select_last_update
 
-- river_polygons
-    - river_polygon_id_by_external_id
+- topo 50 layers
+    - select_polygon_id_by_external_id
 
 - suburb_locality
     - suburb_locality_intersect_geom (geometry)
@@ -48,14 +32,6 @@ Buildings Reference Select Statements
     - town_city_name_by_bulk_outline_id (bulk_load_outline_id)
 
 --------------------------------------------------------------------
-"""
-
-# canal polygons
-
-canal_polygon_id_by_external_id = """
-SELECT canal_polygon_id
-FROM buildings_reference.canal_polygons
-WHERE external_canal_polygon_id = %s;
 """
 
 # Capture Source Area
@@ -86,80 +62,21 @@ FROM buildings_reference.capture_source_area csa
 WHERE ST_Intersects(csa.shape, %s::Geometry);
 """
 
-# lagoon polygons
-
-lagoon_polygon_id_by_external_id = """
-SELECT lagoon_polygon_id
-FROM buildings_reference.lagoon_polygons
-WHERE external_lagoon_polygon_id = %s;
-"""
-
-# lake polygons
-
-lake_polygon_id_by_external_id = """
-SELECT lake_polygon_id
-FROM buildings_reference.lake_polygons
-WHERE external_lake_polygon_id = %s;
-"""
-
-# pond polygons
-
-pond_polygon_id_by_external_id = """
-SELECT pond_polygon_id
-FROM buildings_reference.pond_polygons
-WHERE external_pond_polygon_id = %s;
-"""
-
 # reference update log
 
-update_log_canal_date = """
+log_select_last_update = """
 SELECT update_date
 FROM buildings_reference.reference_update_log
-WHERE canals = True
+WHERE {} = True
 ORDER BY update_id DESC LIMIT 1;
 """
 
-update_log_lagoon_date = """
-SELECT update_date
-FROM buildings_reference.reference_update_log
-WHERE lagoons = True
-ORDER BY update_id DESC LIMIT 1;
-"""
+# topo 50 layers
 
-update_log_lake_date = """
-SELECT update_date
-FROM buildings_reference.reference_update_log
-WHERE lakes = True
-ORDER BY update_id DESC LIMIT 1;
-"""
-
-update_log_pond_date = """
-SELECT update_date
-FROM buildings_reference.reference_update_log
-WHERE ponds = True
-ORDER BY update_id DESC LIMIT 1;
-"""
-
-update_log_river_date = """
-SELECT update_date
-FROM buildings_reference.reference_update_log
-WHERE rivers = True
-ORDER BY update_id DESC LIMIT 1;
-"""
-
-update_log_swamp_date = """
-SELECT update_date
-FROM buildings_reference.reference_update_log
-WHERE swamps = True
-ORDER BY update_id DESC LIMIT 1;
-"""
-
-# river polygons
-
-river_polygon_id_by_external_id = """
-SELECT river_polygon_id
-FROM buildings_reference.river_polygons
-WHERE external_river_polygon_id = %s;
+select_polygon_id_by_external_id = """
+SELECT {0}_polygon_id
+FROM buildings_reference.{0}_polygons
+WHERE external_{0}_polygon_id = %s;
 """
 
 # suburb locality
@@ -190,14 +107,6 @@ FROM buildings_reference.suburb_locality sl,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE sl.suburb_locality_id = blo.suburb_locality_id
 AND blo.bulk_load_outline_id = %s;
-"""
-
-# swamp polygons
-
-swamp_polygon_id_by_external_id = """
-SELECT swamp_polygon_id
-FROM buildings_reference.swamp_polygons
-WHERE external_swamp_polygon_id = %s;
 """
 
 # territorial Authority

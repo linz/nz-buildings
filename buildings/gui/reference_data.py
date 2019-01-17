@@ -7,9 +7,7 @@ from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCheckBox
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import (canal_polygons_update, lagoon_polygons_update,
-                                      lake_polygons_update, pond_polygons_update,
-                                      river_polygons_update, swamp_polygons_update)
+from buildings.reference_data import topo50
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db
 
@@ -61,6 +59,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.db.connect()
 
     def enable_checkboxes(self):
+        """Enable frame"""
         self.le_key.setEnabled(1)
         self.grbx_topo.setEnabled(1)
         self.grbx_admin.setEnabled(1)
@@ -80,6 +79,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.lb_message.setText('')
 
     def disable_checkboxes(self):
+        """Disable frame (when outlines dataset in progress)"""
         self.le_key.setDisabled(1)
         self.grbx_topo.setDisabled(1)
         self.grbx_admin.setDisabled(1)
@@ -100,10 +100,12 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def view_key(self):
+        """Called when view key button pressed"""
         self.le_key.setEchoMode(QLineEdit.Normal)
 
     @pyqtSlot()
     def hide_key(self):
+        """Called when view key button released/editing of text finished"""
         self.le_key.setEchoMode(QLineEdit.Password)
 
     @pyqtSlot()
@@ -126,42 +128,42 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         updates = []
         # canals
         if self.chbx_canals.isChecked():
-            status = canal_polygons_update.update_canals(api_key)
+            status = topo50.update_topo50(api_key, 'canal')
             self.update_message(status, 'canal_polygons')
             if status != 'error':
-                updates.append('canals')
+                updates.append('canal')
         # lagoon
         if self.chbx_lagoons.isChecked():
-            status = lagoon_polygons_update.update_lagoons(api_key)
+            status = topo50.update_topo50(api_key, 'lagoon')
             self.update_message(status, 'lagoon_polygons')
             if status != 'error':
-                updates.append('lagoons')
+                updates.append('lagoon')
         # lake
         if self.chbx_lakes.isChecked():
-            status = lake_polygons_update.update_lakes(api_key)
+            status = topo50.update_topo50(api_key, 'lake')
             self.update_message(status, 'lake_polygons')
             if status != 'error':
-                updates.append('lakes')
+                updates.append('lake')
         # pond
         if self.chbx_ponds.isChecked():
-            status = pond_polygons_update.update_ponds(api_key)
+            status = topo50.update_topo50(api_key, 'pond')
             self.update_message(status, 'pond_polygons')
             if status != 'error':
-                updates.append('ponds')
+                updates.append('pond')
         # rivers
         if self.chbx_rivers.isChecked():
-            status = river_polygons_update.update_rivers(api_key)
+            status = topo50.update_topo50(api_key, 'river')
             self.update_message(status, 'river_polygons')
             if status != 'error':
-                updates.append('rivers')
+                updates.append('river')
         # swamp
         if self.chbx_swamps.isChecked():
-            status = swamp_polygons_update.update_swamps(api_key)
+            status = topo50.update_topo50(api_key, 'swamp')
             self.update_message(status, 'swamp_polygons')
             if status != 'error':
-                updates.append('swamps')
+                updates.append('swamp')
 
-        sql = "SELECT buildings_reference.reference_update_log_insert_log(%s);"
+        sql = 'SELECT buildings_reference.reference_update_log_insert_log(%s);'
         self.db._execute(sql, (updates,))
         # restore cursor
         QApplication.restoreOverrideCursor()
@@ -191,6 +193,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def check_all_topo(self):
+        """ Called when combobox to check all topo layers is toggled"""
         if self.grbx_topo.isChecked():
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(True)
@@ -202,6 +205,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def check_all_admin(self):
+        """ Called when combobox to check all admin layers is toggled"""
         if self.grbx_admin.isChecked():
             for box in self.grbx_admin.findChildren(QCheckBox):
                 box.setChecked(True)
@@ -216,6 +220,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                                   buttons=QMessageBox.Ok)
 
     def request_error(self):
+        """Called when failure to request a changeset"""
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
             '\n ---------------------- REQUEST ERROR ---------'
@@ -228,6 +233,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         QApplication.restoreOverrideCursor()
 
     def update_message(self, status, name):
+        """add to message for display at end of processing"""
         if status == 'current':
             self.message += 'The {} table was up to date\n'.format(name)
         if status == 'updated':
