@@ -52,7 +52,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         self.capture_source_area.featureDeleted.connect(self.creator_feature_deleted)
         self.capture_source_area.geometryChanged.connect(self.creator_geometry_changed)
 
-        self.rb_select_from_layer.clicked.connect(self.rb_select_from_layer_clicked)
+        self.rb_select_from_layer.toggled.connect(self.rb_select_from_layer_clicked)
 
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_reset.clicked.connect(self.reset_clicked)
@@ -67,19 +67,13 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
     def rb_select_from_layer_clicked(self, checked):
         self.l_wrong_projection.setText('')
         if checked:
+            self.mcb_selection_layer.showPopup()
             self.mcb_selection_layer.setEnabled(True)
             iface.actionSelect().trigger()
             self.mcb_selection_layer.layerChanged.connect(self.mcb_selection_layer_changed)
-            if not self.check_projection(self.mcb_selection_layer.currentLayer()):
-                self.l_wrong_projection.setText('Incorrect projection!')
-                return
-            if self.mcb_selection_layer.count() > 0:
-                self.current_layer = self.mcb_selection_layer.currentLayer()
-                iface.setActiveLayer(self.current_layer)
-                self.current_layer.selectionChanged.connect(self.current_layer_selection_changed)
         else:
             self.mcb_selection_layer.layerChanged.disconnect(self.mcb_selection_layer_changed)
-            if self.mcb_selection_layer.count() > 0:
+            if self.current_layer is not None:
                 self.current_layer.removeSelection()
                 self.current_layer.selectionChanged.disconnect(self.current_layer_selection_changed)
 
@@ -90,12 +84,15 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot(QgsMapLayer)
     def mcb_selection_layer_changed(self, current_layer):
-        self.l_wrong_projection.setText('')
         if current_layer is None:
             return
         if not self.check_projection(current_layer):
-            self.l_wrong_projection.setText('Incorrect projection!')
-            return
+            self.l_wrong_projection.setText('ERROR: Incorrect Projection')
+            self.is_wrong_projection = True
+        else:
+            self.l_wrong_projection.setText('')
+            self.is_wrong_projection = False
+
         if self.current_layer is not None:
             self.current_layer.removeSelection()
             try:
@@ -108,8 +105,14 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def current_layer_selection_changed(self):
+        if self.is_wrong_projection:
+            self.projection_error()
+            return
         selection = self.current_layer.selectedFeatures()
-        if (len(selection) > 1) or (len(selection) == 0):
+        if len(selection) == 0:
+            self.le_external_id.setDisabled(True)
+            self.le_area_title.setDisabled(True)
+        elif len(selection) > 1:
             self.le_external_id.setDisabled(True)
             self.le_area_title.setDisabled(True)
             iface.messageBar().pushMessage(
@@ -140,15 +143,18 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     def check_projection(self, layer):
         if layer.crs().authid() != 'EPSG:2193':
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n -------------------- INCORRECT CRS-------------'
-                '------- \n\nThe Coordinate Reference System is not NTZM 2000. '
-                'Please resolve and reattempt.'
-            )
-            self.error_dialog.show()
+            self.projection_error()
             return False
         return True
+
+    def projection_error(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n -------------------- INCORRECT CRS-------------'
+            '------- \n\nThe Coordinate Reference System is not NTZM 2000. '
+            'Please resolve and reattempt.'
+        )
+        self.error_dialog.show()
 
     def add_capture_source_area_layer(self):
         """
