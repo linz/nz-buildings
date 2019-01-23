@@ -2,7 +2,7 @@
 
 # Installs the SQL creation scripts and load script.
 
-VERSION = dev
+VERSION = 1.0.6
 REVISION = $(shell test -d .git && git describe --always || echo $(VERSION))
 
 SED = sed
