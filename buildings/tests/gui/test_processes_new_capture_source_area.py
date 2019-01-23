@@ -162,7 +162,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def test_select_wrong_projection(self):
-        """Check error messages by selecting from wrong prokection"""
+        """Check error messages by selecting from wrong projection"""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'testdata/test_external_area_polygon_wrong_proj.shp')
         layer = iface.addVectorLayer(path, '', 'ogr')
@@ -177,6 +177,10 @@ class ProcessCaptureSourceTest(unittest.TestCase):
             self.capture_area_frame.error_dialog.tb_error_report.toPlainText()
         )
         self.capture_area_frame.error_dialog.close()
+
+        self.capture_area_frame.rb_select_from_layer.setChecked(False)
+        # remove temporary layers from canvas
+        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def test_reset_clicked(self):
         """Check if gui is reset when reset clicked."""
