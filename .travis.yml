@@ -184,3 +184,16 @@ jobs:
       install.py"
     script:
     - docker-compose exec qgis-testing-environment sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.test_runner.run_test_modules"
+    before_deploy:
+    - zip -r ${PLUGIN_NAME}.zip $PLUGIN_NAME
+    - BODY="See [CHANGELOG.rst $TRAVIS_TAG](https://github.com/linz/nz-buildings/blob/master/CHANGELOG.rst#$(echo $TRAVIS_TAG | sed -e 's/[a-zA-Z\.]//g')) for detailed release information."
+    deploy:
+      provider: releases
+      api_key: $GITHUB_OAUTH_TOKEN
+      name: $TRAVIS_TAG
+      body: $BODY
+      file: ${PLUGIN_NAME}.zip
+      skip_cleanup: true
+      on:
+        tags: true
+        all_branches: true
