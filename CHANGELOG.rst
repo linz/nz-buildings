@@ -4,13 +4,17 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
-==========
+1.0.6
+=====
+17-01-2018
+
 
 Added
 -----
 
- * Schema definitions and lookup table inserts
+ * PostgreSQL / PostGIS schema definitions
+ * QGIS data maintenance plugin
+ * Automated documentation using sphinx / readthedocs
  * makefile and nz-buildings-load script for installation
- * Testing using pgTAP with Travis-CI configuration
+ * Testing using pgTAP (database), unittest (plugin) with Travis-CI configuration
  * CHANGELOG, LICENSE
