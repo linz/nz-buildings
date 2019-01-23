@@ -1,104 +1,186 @@
+stages:
+  - docs
+  - database
+  - plugin
 
-matrix:
+jobs:
   include:
+  - stage: docs
+    env: BUILD=docs
+    language: python
+    before_install: []
+    install:
+    - pip install Sphinx sphinx_rtd_theme
+    - pip install -r requirements-docs.txt
+    before_script: []
+    script: sphinx-build -b html db/docs/source db/docs
+    after_script: []
 
-    - env: BUILD=docs
-      language: python
-      before_install: []
-      install:
-        - pip install Sphinx sphinx_rtd_theme
-        - pip install -r requirements-docs.txt
-      before_script: []
-      script: sphinx-build -b html db/docs/source db/docs
-      after_script: []
+  - stage: database
+    env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
+    addons:
+      postgresql: 9.4
+      apt:
+        packages:
+        - postgresql-9.4
+        - postgresql-9.4-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
-    - env: BUILD=qgis_plugin PLUGIN_NAME=buildings DOCKER_COMPOSE_VERSION=1.7.1 QGIS_VERSION_TAG=master_2 PYTHON_EXECUTABLE=python PIP_EXECUTABLE=pip
-      language: python
-      services: docker
-      before_install:
-        # update repositories to see new packages for Docker.
-        - sudo apt-get update
-        # Install the newer docker-engine which is required for the newer docker-compose
-        - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-ce
-        - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-        # Get it up and running
-        - chmod +x docker-compose
-        - sudo mv docker-compose /usr/local/bin
-        - docker-compose --version
-        - docker-compose up -d
-        - docker-compose ps
-        - sleep 10
-      install:
-        - docker-compose exec qgis-testing-environment sh -c "$PIP_EXECUTABLE install -r tests_directory/requirements-dev.txt"
-        - docker-compose exec qgis-testing-environment sh -c "mkdir -p /root/.qgis2/buildings && cp tests_directory/${PLUGIN_NAME}/tests/pg_config_test.ini /root/.qgis2/buildings/pg_config.ini"
-        - docker-compose exec qgis-testing-environment sh -c "qgis_setup.sh ${PLUGIN_NAME}"
-        - docker-compose version
-      before_script:
-        - docker-compose exec qgis-testing-environment sh -c "ln -s tests_directory /root/.qgis2/python/plugins/${PLUGIN_NAME}"
-        - until nc -z -v -w30 172.18.0.2 5432; do sleep 2; done
-        - docker-compose exec qgis-testing-environment sh -c "cd tests_directory && python install.py"
-      script:
-        - docker-compose exec qgis-testing-environment sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.test_runner.run_test_modules"
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
 
-    - env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
-      addons:
-        postgresql: 9.4
-        apt:
-          packages:
-            - postgresql-9.4
-            - postgresql-9.4-pgtap
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
-    - env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
-      addons:
-        postgresql: 9.5
-        apt:
-          packages:
-            - postgresql-9.5
-            - postgresql-9.5-pgtap
+  - stage: database
+    env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
+    addons:
+      postgresql: 9.5
+      apt:
+        packages:
+        - postgresql-9.5
+        - postgresql-9.5-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
-    - env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
-      addons:
-        postgresql: 9.5
-        apt:
-          packages:
-            - postgresql-9.5
-            - postgresql-9.5-pgtap
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
 
-    - env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
-      addons:
-        postgresql: 9.6
-        apt:
-          packages:
-            - postgresql-9.6
-            - postgresql-9.6-pgtap
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
-    - env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
-      addons:
-        postgresql: 9.6
-        apt:
-          packages:
-            - postgresql-9.6
-            - postgresql-9.6-pgtap
+  - stage: database
+    env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
+    addons:
+      postgresql: 9.5
+      apt:
+        packages:
+        - postgresql-9.5
+        - postgresql-9.5-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
-    - env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
-      addons:
-        postgresql: 10
-        apt:
-          packages:
-            - postgresql-10
-            - postgresql-10-pgtap
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
-  - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
-before_script:
-  - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
-  - export PGPASSWORD=travis
-  - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-  - sudo make install
-  - nz-buildings-load nz_buildings_travis_db --with-test-data
+  - stage: database
+    env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
+    addons:
+      postgresql: 9.6
+      apt:
+        packages:
+        - postgresql-9.6
+        - postgresql-9.6-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
-script:
-  - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
+
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+
+  - stage: database
+    env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
+    addons:
+      postgresql: 9.6
+      apt:
+        packages:
+        - postgresql-9.6
+        - postgresql-9.6-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
+
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
+
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+
+  - stage: database
+    env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
+    addons:
+      postgresql: 10
+      apt:
+        packages:
+        - postgresql-10
+        - postgresql-10-pgtap
+    before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
+    - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
+
+    before_script:
+    - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
+    - export PGPASSWORD=travis
+    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - sudo make install
+    - nz-buildings-load nz_buildings_travis_db --with-test-data
+
+    script:
+    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+
+  - stage: plugin
+    env: BUILD=qgis_plugin PLUGIN_NAME=buildings DOCKER_COMPOSE_VERSION=1.7.1 QGIS_VERSION_TAG=master_2
+      PYTHON_EXECUTABLE=python PIP_EXECUTABLE=pip
+    language: python
+    services: docker
+    before_install:
+    - sudo apt-get update
+    - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-ce
+    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+      -s`-`uname -m` > docker-compose
+    - chmod +x docker-compose
+    - sudo mv docker-compose /usr/local/bin
+    - docker-compose --version
+    - docker-compose up -d
+    - docker-compose ps
+    - sleep 10
+    install:
+    - docker-compose exec qgis-testing-environment sh -c "$PIP_EXECUTABLE install
+      -r tests_directory/requirements-dev.txt"
+    - docker-compose exec qgis-testing-environment sh -c "mkdir -p /root/.qgis2/buildings
+      && cp tests_directory/${PLUGIN_NAME}/tests/pg_config_test.ini /root/.qgis2/buildings/pg_config.ini"
+    - docker-compose exec qgis-testing-environment sh -c "qgis_setup.sh ${PLUGIN_NAME}"
+    - docker-compose version
+    before_script:
+    - docker-compose exec qgis-testing-environment sh -c "ln -s tests_directory /root/.qgis2/python/plugins/${PLUGIN_NAME}"
+    - until nc -z -v -w30 172.18.0.2 5432; do sleep 2; done
+    - docker-compose exec qgis-testing-environment sh -c "cd tests_directory && python
+      install.py"
+    script:
+    - docker-compose exec qgis-testing-environment sh -c "qgis_testrunner.sh ${PLUGIN_NAME}.tests.test_runner.run_test_modules"
