@@ -120,6 +120,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         layer = iface.addVectorLayer(path, '', 'ogr')
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
+        self.capture_area_frame.mcb_selection_layer.hidePopup()
         self.capture_area_frame.mcb_selection_layer.setLayer(layer)
 
         widget = iface.mapCanvas().viewport()
@@ -156,6 +157,28 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         self.capture_area_frame.db.rollback_open_cursor()
 
+        self.capture_area_frame.rb_select_from_layer.setChecked(False)
+        # remove temporary layers from canvas
+        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+
+    def test_select_wrong_projection(self):
+        """Check error messages by selecting from wrong projection"""
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                            'testdata/test_external_area_polygon_wrong_proj.shp')
+        layer = iface.addVectorLayer(path, '', 'ogr')
+
+        self.capture_area_frame.rb_select_from_layer.setChecked(True)
+        self.capture_area_frame.mcb_selection_layer.hidePopup()
+        self.capture_area_frame.mcb_selection_layer.setLayer(layer)
+
+        self.assertNotEqual(self.capture_area_frame.l_wrong_projection.text(), '')
+        self.assertIn(
+            'INCORRECT CRS',
+            self.capture_area_frame.error_dialog.tb_error_report.toPlainText()
+        )
+        self.capture_area_frame.error_dialog.close()
+
+        self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
         QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 

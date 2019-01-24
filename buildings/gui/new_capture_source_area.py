@@ -65,17 +65,15 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def rb_select_from_layer_clicked(self, checked):
+        self.l_wrong_projection.setText('')
         if checked:
+            self.mcb_selection_layer.showPopup()
             self.mcb_selection_layer.setEnabled(True)
             iface.actionSelect().trigger()
-            if self.mcb_selection_layer.count() > 0:
-                self.current_layer = self.mcb_selection_layer.currentLayer()
-                iface.setActiveLayer(self.current_layer)
-                self.current_layer.selectionChanged.connect(self.current_layer_selection_changed)
             self.mcb_selection_layer.layerChanged.connect(self.mcb_selection_layer_changed)
         else:
             self.mcb_selection_layer.layerChanged.disconnect(self.mcb_selection_layer_changed)
-            if self.mcb_selection_layer.count() > 0:
+            if self.current_layer is not None:
                 self.current_layer.removeSelection()
                 self.current_layer.selectionChanged.disconnect(self.current_layer_selection_changed)
 
@@ -88,6 +86,13 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
     def mcb_selection_layer_changed(self, current_layer):
         if current_layer is None:
             return
+        if not self.check_projection(current_layer):
+            self.l_wrong_projection.setText('ERROR: Incorrect Projection')
+            self.is_wrong_projection = True
+        else:
+            self.l_wrong_projection.setText('')
+            self.is_wrong_projection = False
+
         if self.current_layer is not None:
             self.current_layer.removeSelection()
             try:
@@ -100,8 +105,14 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def current_layer_selection_changed(self):
+        if self.is_wrong_projection:
+            self.projection_error()
+            return
         selection = self.current_layer.selectedFeatures()
-        if (len(selection) > 1) or (len(selection) == 0):
+        if len(selection) == 0:
+            self.le_external_id.setDisabled(True)
+            self.le_area_title.setDisabled(True)
+        elif len(selection) > 1:
             self.le_external_id.setDisabled(True)
             self.le_area_title.setDisabled(True)
             iface.messageBar().pushMessage(
@@ -129,6 +140,21 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
             sql = general_select.convert_geometry
             result = self.db._execute(sql, (wkt,))
             self.geom = result.fetchall()[0][0]
+
+    def check_projection(self, layer):
+        if layer.crs().authid() != 'EPSG:2193':
+            self.projection_error()
+            return False
+        return True
+
+    def projection_error(self):
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            '\n -------------------- INCORRECT CRS-------------'
+            '------- \n\nThe Coordinate Reference System is not NTZM 2000. '
+            'Please resolve and reattempt.'
+        )
+        self.error_dialog.show()
 
     def add_capture_source_area_layer(self):
         """
@@ -305,6 +331,8 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         self.le_area_title.setDisabled(True)
         self.le_external_id.setDisabled(True)
         self.rb_select_from_layer.setChecked(False)
+        self.mcb_selection_layer.setDisabled(True)
+        self.l_wrong_projection.setText('')
 
         self.capture_source_area.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
