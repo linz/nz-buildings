@@ -153,3 +153,17 @@ update_ui_headers:
 	for f in ./buildings/gui/*.ui; do \
 		sed -i -e 's|<header>.*</header>|<header>qgis.gui</header>|g' $$f; \
 	done; \
+
+bump_version:
+	@echo
+	@echo "------------------------------------------"
+	@echo "Bump version"
+	@echo "------------------------------------------"
+	# Update version number in QGIS Plugin
+	$(SED) -i 's/^version=.*/version=$(VERSION)/g' ./buildings/metadata.txt
+	# Add today's date for latest release in CHANGELOG
+	$(SED) -i '/Unreleased/{n;n;s/.*/$(TODAY)\n/}' ./CHANGELOG.rst
+	# Replace Unreleased header with version number in CHANGELOG
+	$(SED) -i 's/Unreleased/$(VERSION)/g' ./CHANGELOG.rst
+	# Replace version number in makefile
+	$(SED) -i 's/^VERSION = .*/VERSION = $(VERSION)/g' ./makefile
