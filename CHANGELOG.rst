@@ -11,6 +11,7 @@ Added
 -----
 
  * Topographic reference datasets can now be updated via LINZ Data Service changesets
+ * Projection check for new capture source areas
 
 1.0.6
 =====
