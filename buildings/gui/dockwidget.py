@@ -106,6 +106,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         from buildings.gui.production_frame import ProductionFrame
         from buildings.gui.new_entry import NewEntry
         from buildings.gui.new_capture_source_area import NewCaptureSourceArea
+        from buildings.gui.reference_data import UpdateReferenceData
 
         self.db = db
         self.new_capture_source = NewCaptureSource
@@ -114,6 +115,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
         self.production_frame = ProductionFrame
         self.new_entry = NewEntry
         self.new_capture_source_area = NewCaptureSourceArea
+        self.reference_data = UpdateReferenceData
 
     @pyqtSlot()
     def show_selected_option(self):
@@ -160,6 +162,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                 self.new_widget(self.production_frame(self))
             elif current.text() == 'Settings':
                 self.new_widget(self.new_entry(self))
+            elif current.text() == "Reference Data":
+                self.new_widget(self.reference_data(self))
 
     def new_widget(self, frame):
         self.stk_options.addWidget(frame)

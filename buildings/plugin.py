@@ -62,7 +62,7 @@ class Buildings:
             status_tip=True,
             whats_this=None,
             parent=None):
-        """ Add a toolbar icon to the toolbar. 
+        """ Add a toolbar icon to the toolbar.
 
         @param icon_path: Path to the icon for this action. Can be a resource
         path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
@@ -238,6 +238,11 @@ class Buildings:
 
             icon_path = os.path.join(home_dir, 'icons', 'settings.png')
             item = QListWidgetItem('Settings')
+            item.setIcon(QIcon(icon_path))
+            dw.lst_sub_menu.addItem(item)
+
+            icon_path = os.path.join(home_dir, 'icons', 'reference.png')
+            item = QListWidgetItem('Reference Data')
             item.setIcon(QIcon(icon_path))
             dw.lst_sub_menu.addItem(item)
 

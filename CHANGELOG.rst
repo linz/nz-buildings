@@ -4,10 +4,17 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Added
+-----
+
+ * Topographic reference datasets can now be updated via LINZ Data Service changesets
+
 1.0.6
 =====
 17-01-2019
-
 
 Added
 -----

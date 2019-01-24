@@ -14,6 +14,7 @@
 -- lagoon polygons
 -- canal_polygons
 -- capture_source_area
+-- reference_update_log
 
 ------------------------------------------------------------------------------
 
@@ -275,3 +276,52 @@ COMMENT ON COLUMN buildings_reference.capture_source_area.external_area_polygon_
 'The id of the capture source area from the external provider.';
 COMMENT ON COLUMN buildings_reference.capture_source_area.area_title IS
 'The title/name of the capture source area provided by the external source.';
+
+
+-- Reference Update Log
+CREATE TABLE IF NOT EXISTS buildings_reference.reference_update_log (
+      update_id serial PRIMARY KEY
+    , update_date timestamp DEFAULT now()
+    , river boolean DEFAULT False
+    , lake boolean DEFAULT False
+    , pond boolean DEFAULT False
+    , swamp boolean DEFAULT False
+    , lagoon boolean DEFAULT False
+    , canal boolean DEFAULT False
+    , coastlines_and_islands boolean DEFAULT False
+    , capture_source_area boolean DEFAULT False
+    , territorial_authority boolean DEFAULT False
+    , territorial_authority_grid boolean DEFAULT False
+    , suburb_locality boolean DEFAULT False
+    , town_city boolean DEFAULT False
+);
+
+COMMENT ON TABLE buildings_reference.reference_update_log IS
+'Log of when reference tables have been updated';
+
+COMMENT ON COLUMN buildings_reference.reference_update_log.update_id IS
+'Unique identifier for the log update';
+COMMENT ON COLUMN buildings_reference.reference_update_log.update_date IS
+'Date of the reference data update';
+COMMENT ON COLUMN buildings_reference.reference_update_log.river IS
+'True if river_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.lake IS
+'True if lake_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.pond IS
+'True if pond_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.swamp IS
+'True if swamp_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.lagoon IS
+'True if lagoon_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.canal IS
+'True if canal_polygons table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.capture_source_area IS
+'True if capture_source_area table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.territorial_authority IS
+'True if territorial_authority table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.territorial_authority_grid IS
+'True if territorial_authority_grid table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.suburb_locality IS
+'True if suburb_locality table was changed/checked in this update, defaults to False if not specified.';
+COMMENT ON COLUMN buildings_reference.reference_update_log.town_city IS
+'True if town_city table was changed/checked in this update, defaults to False if not specified.';
