@@ -62,8 +62,22 @@ All of the components build upon other free and open source software. See ACKNOW
 .. _QGIS: https://qgis.org/
 .. _ACKNOWLEDGEMENTS.rst: ACKNOWLEDGEMENTS.rst
 
+Database
+========
+
+The database for the *NZ Buildings* system is a PostgreSQL database with the PostGIS database extension for handling geographic objects.
+
+Dependencies
+------------
+
+- PostgreSQL and PostGIS must be installed. Supported versions are tested on Travis-CI_ (note the environment variables that show version numbers for PostgreSQL and PostGIS).
+- For development / testing, install pgTAP_.
+
+.. _Travis-CI: https://travis-ci.com/linz/nz-buildings
+.. _pgTAP: https://pgtap.org/
+
 Installation
-============
+------------
 
 First install the project into the OS data share directory:
 
@@ -80,15 +94,33 @@ Then you can load the schema into a target database:
 NOTE: the loader script will expect to find SQL scripts under ``/usr/share/nz-buildings/sql``, if you want them found in a different directory you can set the ``BUILDINGSCHEMA_SQLDIR`` environment variable.
 
 Upgrade
-=======
+-------
 
 The ``nz-buildings-load`` script will also upgrade as it currently replaces the existing schema. All data will be lost.
 
-Testing
-=======
+Development
+-----------
 
-Testing uses ``pgTAP`` via ``pg_prove``.
+For development, creating an alias that reinstalls scripts, rebuilds a test database and re-runs tests locally is helpful. 
+
+.. code-block:: shell
+
+    alias buildingsdb='cd $DEV/nz-buildings && sudo make uninstall clean install && make check && cd -'
+
+``$DEV`` is the directory that ``nz-buildings`` has been cloned into.
+
+Testing
+-------
+
+Testing uses pgTAP_ via ``pg_prove``.
 
 .. code-block:: shell
 
     make check
+
+A database called ``nz-buildings-pgtap-db`` is created with some test data in order to run the tests.
+
+Travis-CI_ is used for continuous integration.
+
+.. _pgTAP: https://pgtap.org/
+.. _Travis-CI: https://travis-ci.com/linz/nz-buildings
