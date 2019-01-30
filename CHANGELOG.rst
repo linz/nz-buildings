@@ -13,6 +13,7 @@ Added
  * Topographic reference datasets can now be updated via LINZ Data Service changesets
  * Projection check for new capture source areas
  * bump_version command in makefile
+ * README rewritten to provide a more thorough overview of the system
 
 1.0.6
 =====
