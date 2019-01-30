@@ -30,8 +30,37 @@
 NZ Buildings
 ============
 
+The *NZ Buildings* system is used to manage New Zealand's national building outlines dataset. This dataset is published under CC-BY-4.0 `on the LINZ Data Service`_.
 
-Provides schemas and functions for the NZ Building Outlines system.
+Features
+========
+
+The Topography team at `Land Information New Zealand`_ built this system and use it to:
+
+- validate building outlines captured via feature extraction
+- assign additional attributes (capture metadata, administrative boundaries)
+- manually add, modify or delete building outlines where required
+- compare a new set of building outlines against existing building outlines and categorise matching, added, removed or related buildings
+- manage the lifecycle of building outlines across multiple data captures
+- prepare data to be published on the LINZ Data Service
+
+.. _`on the LINZ Data Service`: https://data.linz.govt.nz/layer/53413-nz-building-outlines-pilot/
+.. _`Land Information New Zealand`: https://www.linz.govt.nz/
+
+Components
+==========
+
+- A PostgreSQL_/PostGIS_ database schema for data storage
+- A QGIS_ plugin for data maintenance
+- A data dictionary hosted on readthedocs
+- ISO 19115 geospatial metadata to accompany the published datasets
+
+All of the components build upon other free and open source software. See ACKNOWLEDGEMENTS.rst_ for a summary.
+
+.. _PostgreSQL: https://www.postgresql.org/
+.. _PostGIS: https://postgis.net/
+.. _QGIS: https://qgis.org/
+.. _ACKNOWLEDGEMENTS.rst: ACKNOWLEDGEMENTS.rst
 
 Installation
 ============
