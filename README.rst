@@ -163,3 +163,13 @@ Travis-CI and the `QGIS Testing Environment`_ are used for continuous integratio
 .. _`Script Assistant`: https://plugins.qgis.org/plugins/scriptassistant/ 
 .. _`QGIS Testing Environment`: https://hub.docker.com/r/elpaso/qgis-testing-environment/
 
+Data Dictionary
+===============
+
+The `NZ Buildings Data Dictionary`_ is automatically built on every commit to ``master``.
+
+DOCUMENTATION.rst_ details the source code requirements in order create a valid data dictionary.
+
+.. _`NZ Buildings Data Dictionary`: 
+.. _DOCUMENTATION.rst: db/docs/source/DOCUMENTATION.rst
+
