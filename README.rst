@@ -173,3 +173,10 @@ DOCUMENTATION.rst_ details the source code requirements in order create a valid 
 .. _`NZ Buildings Data Dictionary`: 
 .. _DOCUMENTATION.rst: db/docs/source/DOCUMENTATION.rst
 
+License
+=======
+
+This system is under the 3-clause BSD License, except where otherwise specified.
+See the LICENSE_ file for more details.
+
+.. _LICENSE: LICENSE
