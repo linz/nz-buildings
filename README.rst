@@ -124,3 +124,42 @@ Travis-CI_ is used for continuous integration.
 
 .. _pgTAP: https://pgtap.org/
 .. _Travis-CI: https://travis-ci.com/linz/nz-buildings
+
+QGIS Plugin
+===========
+
+Dependencies
+------------
+
+- The QGIS plugin currently requires ``QGIS 2.18.x``.
+
+Installation
+------------
+
+The plugin can be installed in the local plugin folder from this repository.
+
+.. code-block:: shell
+
+    make deploy
+
+Development
+-----------
+
+Creating a symlink from the repo to the local QGIS plugin directory makes it easy to evaluate changes to QGIS plugin code.
+
+.. code-block:: 
+
+    ln -s $DEV/nz-buildings/buildings $HOME/.qgis2/python/plugins/buildings
+
+Testing
+-------
+
+Testing uses Python ``unittest`` inside a real QGIS instance.
+
+Individual test cases can be executed within QGIS by using the `Script Assistant`_ plugin, which will reload a test every time it is executed to allow ease of writing tests and checking their output.
+
+Travis-CI and the `QGIS Testing Environment`_ are used for continuous integration.
+
+.. _`Script Assistant`: https://plugins.qgis.org/plugins/scriptassistant/ 
+.. _`QGIS Testing Environment`: https://hub.docker.com/r/elpaso/qgis-testing-environment/
+
