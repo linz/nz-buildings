@@ -7,4 +7,6 @@ buildings_common/schema_and_tables 2019-01-29T04:56:22Z Daniel Silk <dsilk@linz.
 buildings/schema_and_tables 2019-01-29T06:06:05Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings schema and tables
 buildings_bulk_load/schema_and_tables 2019-01-29T06:18:38Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_bulk_load schema and tables
 buildings_lds/schema_and_tables 2019-01-29T09:48:51Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_lds schema and tables
-buildings/add_default_values 2019-01-29T21:37:34Z Daniel Silk <dsilk@linz.govt.nz> # Adds the default values for the buildings schema
+buildings_common/default_values 2019-01-31T02:05:20Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings_common schema
+buildings/default_values 2019-01-31T02:14:48Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings schema
+buildings_bulk_load/default_values 2019-01-31T02:17:07Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings_bulk_load schema
