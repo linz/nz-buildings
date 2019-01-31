@@ -95,7 +95,7 @@ CREATE INDEX shx_territorial_authority
     ON buildings_reference.territorial_authority USING gist (shape);
 
 COMMENT ON TABLE buildings_reference.territorial_authority IS
-'territorial authorities of New Zealand';
+'Territorial authorities of New Zealand';
 
 COMMENT ON COLUMN buildings_reference.territorial_authority.territorial_authority_id IS
 'Unique identifier for territorial_authority.';
@@ -106,19 +106,53 @@ COMMENT ON COLUMN buildings_reference.territorial_authority.name IS
 
 -- Territorial Authority Grid
 -- For faster spatial operations
-CREATE TABLE IF NOT EXISTS buildings_reference.territorial_authority_grid (
-      territorial_authority_grid_id serial PRIMARY KEY
-    , territorial_authority_id integer REFERENCES buildings_reference.territorial_authority (territorial_authority_id)
-    , external_territorial_authority_id integer
-    , name character varying(100)
-    , shape public.geometry(MultiPolygon, 2193)
-);
+
+CREATE MATERIALIZED VIEW buildings_reference.territorial_authority_grid AS
+WITH nzext AS (
+    select
+        ST_setSRID(CAST(ST_Extent(shape) AS geometry),
+        2193) AS geom_ext, 300 AS x_gridcount, 250 AS y_gridcount
+    FROM buildings_reference.territorial_authority
+),
+grid_dim AS (
+    SELECT
+        (ST_XMax(geom_ext) - ST_XMin(geom_ext)) / x_gridcount AS g_width,
+        ST_XMin(geom_ext) AS xmin, ST_XMax(geom_ext) AS xmax,
+        (ST_YMax(geom_ext) - ST_YMin(geom_ext)) / y_gridcount AS g_height,
+        ST_YMin(geom_ext) AS ymin, ST_YMax(geom_ext) AS ymax
+    FROM nzext
+),
+grid AS (
+    SELECT
+        ST_MakeEnvelope(
+            xmin + (x - 1) * g_width, ymin + (y - 1) * g_height,
+            xmin + x * g_width, ymin + y * g_height,
+            2193
+    ) AS grid_geom
+    FROM
+        (SELECT generate_series(1, x_gridcount) FROM nzext) AS x(x)
+        CROSS JOIN
+        (SELECT generate_series(1, y_gridcount) FROM nzext) AS y(y)
+        CROSS JOIN
+        grid_dim
+)
+SELECT
+    ROW_NUMBER() OVER(ORDER BY territorial_authority_id DESC) AS territorial_authority_grid_id,
+    territorial_authority_id AS territorial_authority_id,
+    external_territorial_authority_id AS external_territorial_authority_id,
+    name AS name,
+    st_intersection(ta.shape, grid_geom) AS shape
+
+FROM buildings_reference.territorial_authority AS ta INNER JOIN grid AS g
+ON st_intersects(ta.shape, g.grid_geom);
+
+
 DROP INDEX IF EXISTS shx_territorial_authority_grid;
 CREATE INDEX shx_territorial_authority_grid
     ON buildings_reference.territorial_authority_grid USING gist (shape);
 
-COMMENT ON TABLE buildings_reference.territorial_authority_grid IS
-'territorial_authority modified into grid to allow for faster spatial operations';
+COMMENT ON MATERIALIZED VIEW buildings_reference.territorial_authority_grid IS
+'Territorial_authority modified into grid to allow for faster spatial operations';
 
 COMMENT ON COLUMN buildings_reference.territorial_authority_grid.territorial_authority_grid_id IS
 'Unique identifier for the territorial_authority_grid.';
