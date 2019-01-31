@@ -1,5 +1,5 @@
 
-.. image:: https://raw.githubusercontent.com/linz/nz-buildings/improve-readme/media/header.png
+.. image:: media/header.png
     :alt: NZ Buildings
     :width: 100%
     :align: center
