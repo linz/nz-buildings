@@ -62,7 +62,7 @@ Structure requirements of SQL schema build files:
 
 .. code-block:: sql
 
- CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
+  CREATE TABLE IF NOT EXISTS buildings.lifecycle_stage (
 
 3. Each table's columns must be listed in the lines immediately following the CREATE TABLE IF NOT EXISTS line, and within "()" brackets and ending with a semi-colon. It's important that each column be preceeded by four spaces, and then a comma "    ,". This is to ensure parsing is not confused by the comma used in the numeric or decimal precision/scope values.
 
@@ -80,14 +80,14 @@ Structure requirements of SQL schema build files:
 
 .. code-block:: sql
 
-   COMMENT ON SCHEMA buildings IS 'The schema holds building information. ';
+  COMMENT ON SCHEMA buildings IS 'The schema holds building information. ';
 
-   COMMENT ON TABLE buildings.lifecycle_stage IS
-   'Lookup table that holds all of the lifecycle stages for a building.';
+  COMMENT ON TABLE buildings.lifecycle_stage IS
+  'Lookup table that holds all of the lifecycle stages for a building.';
 
-   COMMENT ON COLUMN buildings.buildings.begin_lifespan IS
-   'The date that the building was first captured in the system.'
-   ' This column cannot be null.';
+  COMMENT ON COLUMN buildings.buildings.begin_lifespan IS
+  'The date that the building was first captured in the system.'
+  ' This column cannot be null.';
 
 6. Avoid using commas in any comments.
 
@@ -103,13 +103,11 @@ Structure requirements of SQL schema build files:
 
 8. For table column comments which are foreign keys, they can either be written like "Foreign key to the schema.table table", or "Unique identifier for the schema.tablename table and foreign key to the schema.table table." The important part for the parsing script is the "foreign key to the " followed by "table", and the schema/table part must be separated by a period. This allows the script to correctly parse the schema and table name and link to the appropriate page containing that column reference.
 
-9. The in order for the parsing linking to work, the names of the schema must be known in advance, and rst pages setup in advance according
-to the names of the schema. This must be hard coded into the index.rst file, and appropriate links to pages setup. Therefore, the hyperlink to a table in item 8 above requires you to know the URL of the path to the appropriate schema pages in advance.
-For example, a URL anchor link to the building_outlines table in the buildings schema will look like this:
+9. The in order for the parsing linking to work, the names of the schema must be known in advance, and rst pages setup in advance according to the names of the schema. This must be hard coded into the index.rst file, and appropriate links to pages setup. Therefore, the hyperlink to a table in item 8 above requires you to know the URL of the path to the appropriate schema pages in advance. For example, a URL anchor link to the building_outlines table in the buildings schema will look like this:
 
 .. code-block::
 
-   https://building-outlines-test.readthedocs.io/en/latest/buildings_schema.html#table-name-building-outlines
+  https://building-outlines-test.readthedocs.io/en/latest/buildings_schema.html#table-name-building-outlines
 
 The above hyperlink is only shown to help understand the structure of the hyperlinks. The parsing script automatically determines the schema and table names.
 
