@@ -116,6 +116,21 @@ For example, an URL anchor link to the building_outlines table in the buildings 
 
 The above hyperlink is only shown to help understand the structure of the hyperlinks. The parsing script automatically determines the schema and table names.
 
+Creating Documentation Locally
+-----------------------------------
+
+The instructions above assume the documentation is being built and hosted on ReadTheDocs_.
+The documentation can also be built locally by installing Sphinx_ locally.
+Once installed, the documnetation can be built with:
+
+.. code-block:: shell
+
+	make html
+
+
+.. _ReadTheDocs: https://readthedocs.org
+.. _Sphinx: https://docs.readthedocs.io/en/latest/intro/getting-started-with-sphinx.html
+
 
 Creating a database diagram
 -----------------------------------
