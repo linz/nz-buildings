@@ -6,6 +6,7 @@ Purpose
 
 This document describes the requirements for properly formatting the SQL build scripts for this dataset to allow the automated parsing of these scripts by Read The Docs system and correctly generating the tables for the Building Outlines Data Dictionary.
 
+
 File Structure
 ------------------
 
@@ -23,7 +24,6 @@ File Structure
    /building_outlines/setup.py
    /building_outlines/docs/source/
    /building_outlines/docs/source/_static
-
 
 
 Files required
@@ -72,7 +72,7 @@ Structure requirements of SQL schema build files:
       building_id serial PRIMARY KEY
     , begin_lifespan timestamp NOT NULL DEFAULT now()
     , end_lifespan timestamp
-);
+  );
 
 4. Every schema, table, and column must have a comment describing it.
 
@@ -95,44 +95,41 @@ Structure requirements of SQL schema build files:
 
 .. code-block:: sql
 
-   CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
+  CREATE TABLE IF NOT EXISTS buildings_bulk_load.related (
     area_bulk_load numeric(10, 2) NOT NULL,
     area_existing numeric(20, 12) NOT NULL,
     area_overlap numeric(8, 2) NOT NULL
-    );
+  );
 
-8. For table column comments which are foreign keys, they can either be written like 
-	"Foreign key to the schema.table table",   or
-	"Unique identifier for the schema.tablename table and foreign key to the schema.table table."
-	The important part for the parsing script is the "foreign key to the " followed by "table", and the schema/table part must be separated by a period. This allows the script to correctly parse the schema and table name and link to the appropriate page containing that column reference.
+8. For table column comments which are foreign keys, they can either be written like "Foreign key to the schema.table table", or "Unique identifier for the schema.tablename table and foreign key to the schema.table table." The important part for the parsing script is the "foreign key to the " followed by "table", and the schema/table part must be separated by a period. This allows the script to correctly parse the schema and table name and link to the appropriate page containing that column reference.
 
 9. The in order for the parsing linking to work, the names of the schema must be known in advance, and rst pages setup in advance according
 to the names of the schema. This must be hard coded into the index.rst file, and appropriate links to pages setup. Therefore, the hyperlink to a table in item 8 above requires you to know the URL of the path to the appropriate schema pages in advance.
-For example, an URL anchor link to the building_outlines table in the buildings schema will look like this:
+For example, a URL anchor link to the building_outlines table in the buildings schema will look like this:
 
-.. code-block:: sql
+.. code-block::
 
    https://building-outlines-test.readthedocs.io/en/latest/buildings_schema.html#table-name-building-outlines
 
 The above hyperlink is only shown to help understand the structure of the hyperlinks. The parsing script automatically determines the schema and table names.
 
+
 Creating Documentation Locally
 -----------------------------------
 
-The instructions above assume the documentation is being built and hosted on ReadTheDocs_.
+The instructions above assume the documentation is being built and hosted on `Read the Docs`_.
 The documentation can also be built locally by installing Sphinx_ locally.
-Once installed, the documnetation can be built with:
+Once installed, the documentation can be built with:
 
 .. code-block:: shell
 
 	make html
 
-
-.. _ReadTheDocs: https://readthedocs.org
+.. _`Read the Docs`: https://readthedocs.org
 .. _Sphinx: https://docs.readthedocs.io/en/latest/intro/getting-started-with-sphinx.html
 
 
 Creating a database diagram
 -----------------------------------
 
-The database diagram was created using licensed pgModeler version 0.9.1 on Ubuntu 16.04. The buildings database was created on a local installation of postgresql. pgModeler was used to "import" the database through this local connection, and the diagram created from that import. 
+The database diagram was created using licensed pgModeler version 0.9.1 on Ubuntu 16.04. The buildings database was created on a local installation of PostgreSQL. pgModeler was used to "import" the database through this local connection, and the diagram created from that import. 
