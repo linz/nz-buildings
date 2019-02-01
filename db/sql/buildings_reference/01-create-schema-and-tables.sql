@@ -109,8 +109,8 @@ COMMENT ON COLUMN buildings_reference.territorial_authority.name IS
 
 CREATE MATERIALIZED VIEW buildings_reference.territorial_authority_grid AS
 WITH nzext AS (
-    select
-        ST_setSRID(CAST(ST_Extent(shape) AS geometry),
+    SELECT
+        ST_SetSRID(CAST(ST_Extent(shape) AS geometry),
         2193) AS geom_ext, 300 AS x_gridcount, 250 AS y_gridcount
     FROM buildings_reference.territorial_authority
 ),
