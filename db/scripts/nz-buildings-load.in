@@ -44,9 +44,9 @@ if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
     SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
 fi
 
-if test ! -f "${SCRIPTSDIR}/sql/buildings/01-create-schema-and-tables.sql"; then
+if test ! -f "${SCRIPTSDIR}/sql/deploy/buildings/schema_and_tables.sql"; then
     cat >&2 <<EOF
-Cannot find /sql/buildings/01-create-schema-and-tables.sql in ${SCRIPTSDIR}
+Cannot find /sql/deploy/buildings/schema_and_tables.sql in ${SCRIPTSDIR}
 Please set BUILDINGSCHEMA_SQLDIR environment variable
 EOF
     exit 1
@@ -81,14 +81,8 @@ done
 
 export PGDATABASE=$DB_NAME
 
-psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings_common CASCADE"
-psql -c "DROP SCHEMA IF EXISTS buildings_reference CASCADE;"
-
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
-# intarray is used in compare_buildings.sql for array sorting
+# intarray is used in compare.sql for array sorting
 psql -c "CREATE EXTENSION IF NOT EXISTS intarray SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
 
@@ -101,27 +95,10 @@ psql_exit() {
     fi
 }
 
-# Execute schema and table files
-
-for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
-do
-    for file in ${SCRIPTSDIR}/sql/"$s"/*.sql; do
-        echo ${file} >&2
-        psql -f ${file} $ON_ERROR_STOP
-        psql_exit
-    done
-done
-
-# execute function files
-
-for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
-do
-    for file in ${SCRIPTSDIR}/sql/"$s"/functions/*.sql; do
-        echo ${file} >&2
-        psql -f ${file} $ON_ERROR_STOP
-        psql_exit
-    done
-done
+cd ${SCRIPTSDIR}/sql
+sqitch deploy
+sqitch verify
+cd -
 
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
