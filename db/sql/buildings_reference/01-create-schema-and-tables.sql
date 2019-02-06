@@ -108,12 +108,14 @@ COMMENT ON COLUMN buildings_reference.territorial_authority.name IS
 -- For faster spatial operations
 
 CREATE MATERIALIZED VIEW buildings_reference.territorial_authority_grid AS
+-- Get extent of TA table and x and y grid number counts
 WITH nzext AS (
     SELECT
         ST_SetSRID(CAST(ST_Extent(shape) AS geometry),
         2193) AS geom_ext, 300 AS x_gridcount, 250 AS y_gridcount
     FROM buildings_reference.territorial_authority
 ),
+-- Get grid dimensions: x and y lengths and overall extent
 grid_dim AS (
     SELECT
         (ST_XMax(geom_ext) - ST_XMin(geom_ext)) / x_gridcount AS g_width,
@@ -122,6 +124,7 @@ grid_dim AS (
         ST_YMin(geom_ext) AS ymin, ST_YMax(geom_ext) AS ymax
     FROM nzext
 ),
+-- Divide TA extent into grid
 grid AS (
     SELECT
         ST_MakeEnvelope(
@@ -136,6 +139,7 @@ grid AS (
         CROSS JOIN
         grid_dim
 )
+-- Select TA attributes and cut grid by TA boundaries
 SELECT
     ROW_NUMBER() OVER(ORDER BY territorial_authority_id DESC) AS territorial_authority_grid_id,
     territorial_authority_id AS territorial_authority_id,
@@ -143,8 +147,8 @@ SELECT
     name AS name,
     st_intersection(ta.shape, grid_geom) AS shape
 
-FROM buildings_reference.territorial_authority AS ta INNER JOIN grid AS g
-ON st_intersects(ta.shape, g.grid_geom);
+FROM buildings_reference.territorial_authority AS ta
+JOIN grid AS g ON st_intersects(ta.shape, g.grid_geom);
 
 
 DROP INDEX IF EXISTS shx_territorial_authority_grid;

@@ -144,7 +144,7 @@ AND blo.bulk_load_outline_id = %s;
 
 # territorial authority grid
 
-refresh_view = """
+refresh_ta_grid_view = """
 REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;
 """
 
