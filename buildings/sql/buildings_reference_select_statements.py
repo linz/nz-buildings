@@ -26,7 +26,7 @@ Buildings Reference Select Statements
     - territorial_authority_name_by_bulk_outline_id (bulk_load_outline_id)
 
 - territorial_authority_grid
-    - refresh view
+    - refresh_ta_grid_view
 
 - town_city
     - town_city_intersect_geometry (geometry)
