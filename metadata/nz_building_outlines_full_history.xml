@@ -89,7 +89,7 @@
       <gmd:citation>
         <gmd:CI_Citation>
           <gmd:title>
-            <gco:CharacterString>NZ Building Outlines</gco:CharacterString>
+            <gco:CharacterString>NZ Building Outlines (Full History)</gco:CharacterString>
           </gmd:title>
           <gmd:date>
             <gmd:CI_Date>
@@ -150,7 +150,7 @@ A building outline polygon is considered to have valid geometry if;
 Please refer to the [Building Outlines Data Dictionary](https://nz-building-outlines.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-full-history) for detailed metadata and information about this layer.</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-        <gco:CharacterString>This layer provides the building outlines for mainland New Zealand.</gco:CharacterString>
+        <gco:CharacterString>This layer provides the full history for building outlines for mainland New Zealand.</gco:CharacterString>
       </gmd:purpose>
       <gmd:status>
         <gmd:MD_ProgressCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing">onGoing</gmd:MD_ProgressCode>
