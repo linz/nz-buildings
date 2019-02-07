@@ -389,6 +389,13 @@ QGroupBox::title {
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="btn_delete">
+                <property name="text">
+                 <string>Delete</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="verticalSpacer_6">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>

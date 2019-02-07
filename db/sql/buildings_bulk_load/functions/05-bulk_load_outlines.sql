@@ -26,6 +26,10 @@
             -- integer town_city_id, integer territorial_authority_id, geometry shape
     -- return: count of number of outlines updated
 
+-- bulk_load_outlines_update_bulk_load_status (Update bulk load status of bulk loaded outline)
+    -- params:
+    -- return:
+
 -- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
     -- params: integer bulk_load_outline_id, integer capture_method_id
     -- return: integer count of building outlines updated
@@ -200,6 +204,29 @@ $$ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in bulk_load_outlines table';
+
+
+-- bulk_load_outlines_update_bulk_load_status (Update bulk load status in bulk_load_outlines table)
+    -- params: integer bulk_load_outline_id, integer bulk_load_status_id
+    -- return: integer count of building outlines updated
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status(
+      p_bulk_load_outline_id integer
+    , p_bulk_load_status_id integer
+)
+    RETURNS integer AS
+$$
+    WITH update_bulk_load_status AS(
+        UPDATE buildings_bulk_load.bulk_load_outlines
+        SET bulk_load_status_id = $2
+        WHERE bulk_load_outline_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_bulk_load_status;
+
+$$ LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_bulk_load_status(integer, integer) IS
+'Update bulk load status in bulk_load_outlines table';
 
 
 -- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
