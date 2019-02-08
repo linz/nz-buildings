@@ -154,6 +154,13 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
+          <item row="6" column="0">
+           <widget class="QPushButton" name="btn_next">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

@@ -40,6 +40,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog = None
         self.highlight_features = []
         self.autosave = False
+        self.delete = False
 
         self.frame_setup()
         self.layers_setup()
@@ -53,6 +54,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
         self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'qa_not_removed.png')))
+        self.btn_next.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'next.png')))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
         self.maptool_clicked()
@@ -79,6 +81,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, 'Refer to Supplier', commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Checked', commit_status=True))
         self.btn_qa_not_removed.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Removed', commit_status=True))
+        self.btn_next.clicked.connect(self.zoom_to_next)
         self.btn_maptool.clicked.connect(self.maptool_clicked)
         self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
         self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
@@ -765,6 +768,38 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.tbl_relationship.scrollToItem(item)
 
     @pyqtSlot()
+    def zoom_to_next(self):
+        found = False
+        selected_rows = [index.row() for index in self.tbl_relationship.selectionModel().selectedRows()]
+        if not selected_rows:
+            if self.cmb_relationship.currentText() == '' or self.cmb_relationship.currentText() == 'Added Outlines':
+                return
+            else:
+                selected_rows = [-1]
+        current_text = self.cmb_relationship.currentText()
+        if current_text == 'Related Outlines':
+            qa_column = 3
+        elif current_text == 'Matched Outlines':
+            qa_column = 2
+        elif current_text == 'Removed Outlines':
+            qa_column = 1
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            item = self.tbl_relationship.item(row, qa_column)
+            if item.text() == "Not Checked":
+                found = True
+                self.tbl_relationship.selectRow(row)
+                self.tbl_relationship.scrollToItem(item)
+                break
+        if not found:
+            selected_rows = [0]
+            for row in range(max(selected_rows), self.tbl_relationship.rowCount()):
+                item = self.tbl_relationship.item(row, qa_column)
+                if item.text() == "Not Checked":
+                    self.tbl_relationship.selectRow(row)
+                    self.tbl_relationship.scrollToItem(item)
+                    break
+
+    @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
         legend = iface.legendInterface()
         if self.cb_lyr_bulk_load.isChecked():
@@ -888,7 +923,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             territorial_auth = territorial_auth.fetchall()[0][0]
             # insert outline into building_bulk_load.bulk_load_outlines
             sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method, capture_source, suburb, town_city, territorial_auth, geometry))
+            bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method,
+                                                           capture_source, suburb, town_city, territorial_auth, geometry))
             bulk_load_id = bulk_load_id.fetchall()[0][0]
             # remove existing building from removed table
             sql = 'SELECT buildings_bulk_load.removed_delete_existing_outline(%s);'
