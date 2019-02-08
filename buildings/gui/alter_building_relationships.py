@@ -59,6 +59,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.maptool_clicked()
         self.reset_buttons()
+        self.btn_next.setEnabled(False)
         self.qa_button_set_enable(False)
         self.btn_qa_not_removed.setEnabled(False)
         self.populate_cmb_relationship()
@@ -611,6 +612,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if current_text == 'Related Outlines':
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
             if self.is_empty_tbl_relationship('Related Outlines'):
                 self.qa_button_set_enable(False)
@@ -619,6 +621,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
             if self.is_empty_tbl_relationship('Matched Outlines'):
                 self.qa_button_set_enable(False)
@@ -627,6 +630,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(True)
             if self.is_empty_tbl_relationship('Removed Outlines'):
                 self.qa_button_set_enable(False)
@@ -638,12 +642,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.populate_tbl_added()
             self.btn_qa_not_removed.setEnabled(False)
             self.qa_button_set_enable(False)
+            self.btn_next.setEnabled(False)
 
         elif current_text == '':
             self.tbl_relationship.setRowCount(0)
             self.tbl_relationship.setColumnCount(0)
             self.qa_button_set_enable(False)
             self.btn_qa_not_removed.setEnabled(False)
+            self.btn_next.setEnabled(False)
 
         self.disable_tbl_editing(self.tbl_relationship)
 
@@ -772,10 +778,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         found = False
         selected_rows = [index.row() for index in self.tbl_relationship.selectionModel().selectedRows()]
         if not selected_rows:
-            if self.cmb_relationship.currentText() == '' or self.cmb_relationship.currentText() == 'Added Outlines':
-                return
-            else:
-                selected_rows = [-1]
+            selected_rows = [-1]
         current_text = self.cmb_relationship.currentText()
         if current_text == 'Related Outlines':
             qa_column = 3
