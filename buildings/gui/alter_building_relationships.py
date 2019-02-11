@@ -41,6 +41,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.highlight_features = []
         self.autosave = False
         self.delete = False
+        self.inp = QInputDialog()
 
         self.frame_setup()
         self.layers_setup()
@@ -476,11 +477,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def delete_clicked(self, commit_status=True):
-        self.reason_text, okPressed = QInputDialog.getText(self,
-                                                           'Deletion Reason',
-                                                           'You\'re about to delete an outline,'
-                                                           '\nplease enter the reason for deletion:\n',
-                                                           QLineEdit.Normal, '')
+        title = 'Deletion Reason'
+        label = 'You\'re about to delete an outline,\nplease enter the reason for deletion:\n'
+        mode = QLineEdit.Normal
+        default = 'Reason'
+        self.reason_text, okPressed = QInputDialog.getText(self.inp, title, label, mode, default)
         if okPressed and self.reason_text != '':
             self.delete = True
             self.connect_to_error_msg()
@@ -499,7 +500,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def save_clicked(self, commit_status=True):
         """
         Save result and change database
-        Called when save botton is clicked
+        Called when save button is clicked
         """
         self.db.open_cursor()
 
