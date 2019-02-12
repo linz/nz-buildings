@@ -5,7 +5,7 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView, QIcon,
-                         QListWidgetItem, QMessageBox, QTableWidgetItem, QInputDialog, QLineEdit)
+                         QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import Qt, pyqtSlot
 from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsHighlight, QgsMessageBar
@@ -207,7 +207,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_related_existing.triggerRepaint()
 
     def clear_layer_filter(self):
-        """ Returns 'null' filter for layers """
+        """Returns 'null' filter for layers """
         self.lyr_added_bulk_load_in_edit.setSubsetString('null')
         self.lyr_removed_existing_in_edit.setSubsetString('null')
         self.lyr_matched_existing_in_edit.setSubsetString('null')
@@ -417,6 +417,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
+            self.btn_delete.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.qa_button_set_enable(False)
 
@@ -451,6 +452,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         else:
             self.btn_related.setEnabled(False)
+            self.btn_delete.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.qa_button_set_enable(False)
 
@@ -478,7 +480,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def delete_clicked(self, commit_status=True):
-        self.deletion_reason = DeletionReason()
+        self.btn_matched.setEnabled(False)
+        self.btn_related.setEnabled(False)
+        self.deletion_reason = DeletionReason(self.lst_bulk.count())
         self.deletion_reason.show()
         self.deletion_reason.btn_ok.clicked.connect(partial(self.reason_given, commit_status))
         self.deletion_reason.btn_cancel.clicked.connect(self.reason_cancel)
@@ -501,6 +505,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def reason_cancel(self):
         self.deletion_reason.close()
+        self.switch_btn_match_and_related()
 
     @pyqtSlot()
     def save_clicked(self, commit_status=True):
@@ -896,6 +901,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.btn_unlink.setDisabled(1)
                 self.btn_matched.setDisabled(1)
                 self.btn_related.setDisabled(1)
+                self.btn_delete.setDisabled(1)
                 self.btn_cancel.setDisabled(1)
                 self.btn_save.setDisabled(1)
                 self.cb_autosave.setDisabled(1)
@@ -956,6 +962,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_delete.setEnabled(True)
             self.btn_matched.setEnabled(False)
             self.btn_related.setEnabled(False)
+            # self.btn_delete.setEnabled(False)
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
@@ -963,11 +970,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif self.lst_bulk.count() == 1 and self.lst_existing.count() == 1:
             self.btn_matched.setEnabled(True)
             self.btn_related.setEnabled(False)
-            self.btn_delete.setEnabled(False)
+            self.btn_delete.setEnabled(True)
         else:
             self.btn_related.setEnabled(True)
             self.btn_matched.setEnabled(False)
-            self.btn_delete.setEnabled(False)
+            self.btn_delete.setEnabled(True)
 
     def multi_relationship_selected_error_msg(self):
         self.error_dialog = ErrorDialog()
