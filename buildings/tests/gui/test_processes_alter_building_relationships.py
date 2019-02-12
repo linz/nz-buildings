@@ -121,14 +121,6 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 1)
         self.alter_relationships_frame.btn_exit.click()
 
-    def test_next_btn(self):
-        """Check that next button moved to next 'not checked' building outline in table"""
-        self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
-        self.alter_relationships_frame.tbl_relationship.selectRow(0)
-        self.alter_relationships_frame.btn_next.click()
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.selectedItems()[1].text(), '1008')
-        self.alter_relationships_frame.btn_exit.click()
-
     def test_unlink_and_save_clicked(self):
 
         sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
