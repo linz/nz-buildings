@@ -12,6 +12,7 @@ from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.gui.deletion_reason_dialog import DeletionReason
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_select_statements as buildings_select
@@ -41,7 +42,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.highlight_features = []
         self.autosave = False
         self.delete = False
-        self.inp = QInputDialog()
+        self.deletion_reason = None
 
         self.frame_setup()
         self.layers_setup()
@@ -477,24 +478,29 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def delete_clicked(self, commit_status=True):
-        title = 'Deletion Reason'
-        label = 'You\'re about to delete an outline,\nplease enter the reason for deletion:\n'
-        mode = QLineEdit.Normal
-        default = 'Reason'
-        self.reason_text, okPressed = QInputDialog.getText(self.inp, title, label, mode, default)
-        if okPressed and self.reason_text != '':
+        self.deletion_reason = DeletionReason()
+        self.deletion_reason.show()
+        self.deletion_reason.btn_ok.clicked.connect(partial(self.reason_given, commit_status))
+        self.deletion_reason.btn_cancel.clicked.connect(self.reason_cancel)
+
+    def reason_given(self, commit_status):
+        self.deletion_reason.close()
+        if self.deletion_reason.le_reason.text() != '':
             self.delete = True
+            self.reason_text = self.deletion_reason.le_reason.text()
             self.connect_to_error_msg()
             self.btn_delete.setEnabled(False)
             if self.autosave:
                 self.save_clicked(commit_status)
             else:
                 self.btn_save.setEnabled(True)
-
-        elif okPressed and self.reason_text == '':
+        else:
             iface.messageBar().pushMessage("ERROR",
                                            "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
                                            level=QgsMessageBar.WARNING, duration=5)
+
+    def reason_cancel(self):
+        self.deletion_reason.close()
 
     @pyqtSlot()
     def save_clicked(self, commit_status=True):
