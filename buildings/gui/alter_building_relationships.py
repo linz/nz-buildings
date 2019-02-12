@@ -497,7 +497,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             iface.messageBar().pushMessage("ERROR",
                                            "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
-                                           level=QgsMessageBar.WARNING, duration=5)
+                                           level=QgsMessageBar.INFO, duration=5)
 
     def reason_cancel(self):
         self.deletion_reason.close()
