@@ -26,9 +26,9 @@
             -- integer town_city_id, integer territorial_authority_id, geometry shape
     -- return: count of number of outlines updated
 
--- bulk_load_outlines_update_bulk_load_status (Update bulk load status of bulk loaded outline)
-    -- params:
-    -- return:
+-- bulk_load_outlines_update_bulk_load_status (Update bulk load status in bulk_load_outlines table)
+    -- params: integer bulk_load_outline_id, integer bulk_load_status_id
+    -- return: integer count of building outlines updated
 
 -- bulk_load_outlines_update_capture_method (Update capture method in bulk_load_outlines table)
     -- params: integer bulk_load_outline_id, integer capture_method_id

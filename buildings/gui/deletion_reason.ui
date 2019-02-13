@@ -64,7 +64,7 @@
      <item>
       <widget class="QLineEdit" name="le_reason">
        <property name="placeholderText">
-        <string>Enter Reason</string>
+        <string/>
        </property>
       </widget>
      </item>

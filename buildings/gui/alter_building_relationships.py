@@ -356,7 +356,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif has_added and has_removed:
             self.switch_btn_match_and_related()
         elif has_added and not has_removed:
-            self.enable_delete()
+            self.btn_delete.setEnabled(True)
         # select rows in tbl_relationship
         self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         if has_removed:
@@ -502,6 +502,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.messageBar().pushMessage("ERROR",
                                            "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
                                            level=QgsMessageBar.INFO, duration=5)
+            self.switch_btn_match_and_related()
 
     def reason_cancel(self):
         self.deletion_reason.close()
@@ -516,8 +517,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db.open_cursor()
 
         if self.delete:
-            selected_bulk = [feat.id() for feat in self.lyr_bulk_load.selectedFeatures()]
-            for feat_id in selected_bulk:
+            for row in range(self.lst_bulk.count()):
+                feat_id = int(self.lst_bulk.item(row).text())
                 # remove outline from added table
                 sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
                 self.db.execute_no_commit(sql, (feat_id, ))
@@ -775,10 +776,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # Move to the next 'not checked'
         if qa_status_id != 5:
             for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-                item = self.tbl_relationship.item(row, qa_column)
-                if item.text() == "Not Checked":
-                    self.tbl_relationship.selectRow(row)
-                    self.tbl_relationship.scrollToItem(item)
+                if self.scroll_to_next(row, qa_column):
                     break
             if not self.tbl_relationship.selectionModel().selectedRows():
                 self.tbl_relationship.selectRow(max(selected_rows))
@@ -799,19 +797,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Removed Outlines':
             qa_column = 1
         for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            item = self.tbl_relationship.item(row, qa_column)
-            if item.text() == "Not Checked":
+            if self.scroll_to_next(row, qa_column):
                 found = True
-                self.tbl_relationship.selectRow(row)
-                self.tbl_relationship.scrollToItem(item)
                 break
         if not found:
             selected_rows = [0]
-            for row in range(max(selected_rows), self.tbl_relationship.rowCount()):
-                item = self.tbl_relationship.item(row, qa_column)
-                if item.text() == "Not Checked":
-                    self.tbl_relationship.selectRow(row)
-                    self.tbl_relationship.scrollToItem(item)
+            for row in range(self.tbl_relationship.rowCount()):
+                if self.scroll_to_next(row, qa_column):
                     break
 
     @pyqtSlot()
@@ -956,13 +948,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if reply == QMessageBox.Yes:
             return True
         return False
-
-    def enable_delete(self):
-        if self.lst_bulk.count() >= 1 and self.lst_existing.count() == 0:
-            self.btn_delete.setEnabled(True)
-            self.btn_matched.setEnabled(False)
-            self.btn_related.setEnabled(False)
-            # self.btn_delete.setEnabled(False)
 
     def switch_btn_match_and_related(self):
         if self.lst_bulk.count() == 0 or self.lst_existing.count() == 0:
@@ -1321,6 +1306,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if extent:
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
+
+    def scroll_to_next(self, row, qa_column):
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            item = self.tbl_relationship.item(row, qa_column)
+            if item.text() == "Not Checked":
+                self.tbl_relationship.selectRow(row)
+                self.tbl_relationship.scrollToItem(item)
+                return True
+            return False
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
