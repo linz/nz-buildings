@@ -776,7 +776,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # Move to the next 'not checked'
         if qa_status_id != 5:
             for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-                if self.scroll_to_next(row, qa_column):
+                if self.scroll_to_next(row, qa_column, selected_rows):
                     break
             if not self.tbl_relationship.selectionModel().selectedRows():
                 self.tbl_relationship.selectRow(max(selected_rows))
@@ -797,13 +797,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Removed Outlines':
             qa_column = 1
         for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            if self.scroll_to_next(row, qa_column):
+            if self.scroll_to_next(row, qa_column, selected_rows):
                 found = True
                 break
         if not found:
             selected_rows = [0]
             for row in range(self.tbl_relationship.rowCount()):
-                if self.scroll_to_next(row, qa_column):
+                if self.scroll_to_next(row, qa_column, selected_rows):
                     break
 
     @pyqtSlot()
@@ -1307,7 +1307,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
 
-    def scroll_to_next(self, row, qa_column):
+    def scroll_to_next(self, row, qa_column, selected_rows):
         for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
             item = self.tbl_relationship.item(row, qa_column)
             if item.text() == "Not Checked":

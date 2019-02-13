@@ -164,7 +164,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lyr_bulk_load.select(2010)
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
@@ -190,7 +190,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lyr_bulk_load.select([2010, 2003])
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2003'))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
@@ -216,7 +217,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lyr_bulk_load.select(2010)
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.reason_given(commit_status=False)
