@@ -2,6 +2,7 @@
 ------------------------------------------------------------------------------
 -- Provide testing for buildings_bulk_load comparisons functions
 -- with real world examples of previous comparison bugs
+-- protects against the regression of 223
 ------------------------------------------------------------------------------
 
 -- Turn off echo.
