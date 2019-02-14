@@ -480,8 +480,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def delete_clicked(self, commit_status=True):
-        self.btn_matched.setEnabled(False)
-        self.btn_related.setEnabled(False)
         self.deletion_reason = DeletionReason(self.lst_bulk.count())
         self.deletion_reason.show()
         self.deletion_reason.btn_ok.clicked.connect(partial(self.reason_given, commit_status))
@@ -490,6 +488,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def reason_given(self, commit_status):
         self.deletion_reason.close()
         if self.deletion_reason.le_reason.text() != '':
+            self.btn_matched.setEnabled(False)
+            self.btn_related.setEnabled(False)
             self.delete = True
             self.reason_text = self.deletion_reason.le_reason.text()
             self.connect_to_error_msg()
@@ -502,11 +502,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.messageBar().pushMessage("ERROR",
                                            "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
                                            level=QgsMessageBar.INFO, duration=5)
-            self.switch_btn_match_and_related()
 
     def reason_cancel(self):
         self.deletion_reason.close()
-        self.switch_btn_match_and_related()
 
     @pyqtSlot()
     def save_clicked(self, commit_status=True):
