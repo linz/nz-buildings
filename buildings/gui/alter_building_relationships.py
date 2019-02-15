@@ -753,12 +753,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_bulk.append(id_bulk)
         elif current_text == 'Removed Outlines':
             qa_column = 1
+            selected_ids = []
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
+                selected_ids.append(id_existing)
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
             if qa_status_id == 5:
                 self.copy_and_match_removed_building()
+                self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Matched Outlines'))
 
         if commit_status:
             self.db.commit_open_cursor()
@@ -780,6 +783,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.tbl_relationship.selectRow(max(selected_rows))
                 item = self.tbl_relationship.item(max(selected_rows), qa_column)
                 self.tbl_relationship.scrollToItem(item)
+        elif qa_status_id == 5:
+            for row in range(self.tbl_relationship.rowCount()):
+                id_existing = int(self.tbl_relationship.item(row, 0).text())
+                if id_existing in selected_ids:
+                    self.tbl_relationship.selectRow(row)
+                    self.tbl_relationship.scrollToItem(self.tbl_relationship.item(row, qa_column))
+            if len(selected_ids) > 1:
+                self.message_bar_qa.pushMessage(
+                    'You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected')
 
     @pyqtSlot()
     def zoom_to_next(self):
