@@ -65,7 +65,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
-        self.cb_bulk_load.hide()
+        self.grpb_layers.hide()
         self.btn_circle.hide()
 
         # Find current supplied dataset
@@ -89,8 +89,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.lb_dataset_id.setText(str(self.current_dataset))
             self.add_outlines()
             self.display_current_bl_not_compared()
-            self.cb_bulk_load.show()
-            self.cb_bulk_load.setChecked(True)
+            self.grpb_layers.show()
 
         # if all datasets are processed
         else:
@@ -115,8 +114,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.lb_dataset_id.setText(str(self.current_dataset))
                 self.add_outlines()
                 self.display_not_published()
-                self.cb_bulk_load.show()
-                self.cb_bulk_load.setChecked(True)
+                self.grpb_layers.show()
 
             # No current dataset is being worked on
             else:
@@ -171,6 +169,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_exit.clicked.connect(self.exit_clicked)
 
         self.cb_bulk_load.clicked.connect(self.cb_bulk_load_clicked)
+        self.cb_removed.clicked.connect(self.cb_removed_clicked)
+        self.cb_added.clicked.connect(self.cb_added_clicked)
 
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
@@ -343,11 +343,39 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def cb_bulk_load_clicked(self, checked):
-        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
+        layer_tree_model = iface.layerTreeView().model()
+        categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
+        bulk_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Bulk Loaded']
         if checked:
-            group.setVisible(Qt.Checked)
+            bulk_category[0].setData(Qt.Checked, Qt.CheckStateRole)
         else:
-            group.setVisible(Qt.Unchecked)
+            bulk_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+
+    @pyqtSlot(bool)
+    def cb_added_clicked(self, checked):
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
+        layer_tree_model = iface.layerTreeView().model()
+        categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
+        added_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Added During QA']
+        added_edit_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Added- to be saved']
+        if checked:
+            added_category[0].setData(Qt.Checked, Qt.CheckStateRole)
+            added_edit_category[0].setData(Qt.Checked, Qt.CheckStateRole)
+        else:
+            added_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+            added_edit_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+
+    @pyqtSlot(bool)
+    def cb_removed_clicked(self, checked):
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
+        layer_tree_model = iface.layerTreeView().model()
+        categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
+        removed_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Removed During QA']
+        if checked:
+            removed_category[0].setData(Qt.Checked, Qt.CheckStateRole)
+        else:
+            removed_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
 
     @pyqtSlot(bool)
     def bulk_load_save_clicked(self, commit_status):
@@ -369,7 +397,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
-            self.cb_bulk_load.show()
+            self.grpb_layers.show()
 
     @pyqtSlot()
     def bulk_load_reset_clicked(self):
@@ -686,7 +714,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
-            self.cb_bulk_load.hide()
+            self.grpb_layers.hide()
             QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     @pyqtSlot()
@@ -727,6 +755,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_alter_rel.setDisabled(1)
             self.btn_publish.setDisabled(1)
             self.cb_bulk_load.setDisabled(1)
+            self.cb_added.setDisabled(1)
+            self.cb_removed.setDisabled(1)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                            level=QgsMessageBar.CRITICAL, duration=5)

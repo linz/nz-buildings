@@ -155,6 +155,83 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.db.rollback_open_cursor()
         self.alter_relationships_frame.btn_exit.click()
 
+    def test_delete_clicked(self):
+        """Test deletion works for one selected added outline"""
+        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        result = db._execute(sql_deleted)
+        deleted_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+
+        self.alter_relationships_frame.delete_clicked(commit_status=False)
+        self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
+        self.alter_relationships_frame.reason_given(commit_status=False)
+        self.alter_relationships_frame.save_clicked(commit_status=False)
+
+        result = db._execute(sql_deleted)
+        deleted_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        self.assertEqual(deleted_test, deleted_original + 1)
+        self.assertEqual(added_test, added_original - 1)
+
+        self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_delete_clicked_two_outlines(self):
+        """Test deletion works for multiple selected added outlines"""
+        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        result = db._execute(sql_deleted)
+        deleted_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2003'))
+
+        self.alter_relationships_frame.delete_clicked(commit_status=False)
+        self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
+        self.alter_relationships_frame.reason_given(commit_status=False)
+        self.alter_relationships_frame.save_clicked(commit_status=False)
+
+        result = db._execute(sql_deleted)
+        deleted_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        self.assertEqual(deleted_test, deleted_original + 2)
+        self.assertEqual(added_test, added_original - 2)
+
+        self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
+
+    def test_delete_clicked_fails(self):
+        """Test deletion doesn't work and gives warning when no reason is given"""
+        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
+        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        result = db._execute(sql_deleted)
+        deleted_original = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_original = result.fetchone()[0]
+
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+
+        self.alter_relationships_frame.delete_clicked(commit_status=False)
+        self.alter_relationships_frame.reason_given(commit_status=False)
+
+        result = db._execute(sql_deleted)
+        deleted_test = result.fetchone()[0]
+        result = db._execute(sql_added)
+        added_test = result.fetchone()[0]
+        self.assertEqual(deleted_test, deleted_original)
+        self.assertEqual(added_test, added_original)
+
+        self.alter_relationships_frame.db.rollback_open_cursor()
+        self.alter_relationships_frame.btn_exit.click()
+
     def test_match_and_save_clicked(self):
 
         sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
