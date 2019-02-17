@@ -154,6 +154,13 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
+          <item row="6" column="0">
+           <widget class="QPushButton" name="btn_next">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -385,6 +392,13 @@ QGroupBox::title {
                <widget class="QPushButton" name="btn_related">
                 <property name="text">
                  <string>Relate</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_delete">
+                <property name="text">
+                 <string>Delete</string>
                 </property>
                </widget>
               </item>

@@ -12,6 +12,7 @@ from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.gui.deletion_reason_dialog import DeletionReason
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_select_statements as buildings_select
@@ -40,6 +41,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog = None
         self.highlight_features = []
         self.autosave = False
+        self.delete = False
+        self.deletion_reason = None
 
         self.frame_setup()
         self.layers_setup()
@@ -53,10 +56,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
         self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'qa_not_removed.png')))
+        self.btn_next.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'next.png')))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
         self.maptool_clicked()
         self.reset_buttons()
+        self.btn_next.setEnabled(False)
         self.qa_button_set_enable(False)
         self.btn_qa_not_removed.setEnabled(False)
         self.populate_cmb_relationship()
@@ -79,10 +84,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_refer2supplier.clicked.connect(partial(self.btn_qa_status_clicked, 'Refer to Supplier', commit_status=True))
         self.btn_qa_not_checked.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Checked', commit_status=True))
         self.btn_qa_not_removed.clicked.connect(partial(self.btn_qa_status_clicked, 'Not Removed', commit_status=True))
+        self.btn_next.clicked.connect(self.zoom_to_next)
         self.btn_maptool.clicked.connect(self.maptool_clicked)
         self.btn_unlink.clicked.connect(partial(self.unlink_clicked, commit_status=True))
         self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
         self.btn_related.clicked.connect(partial(self.related_clicked, commit_status=True))
+        self.btn_delete.clicked.connect(partial(self.delete_clicked, commit_status=True))
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
@@ -200,7 +207,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.lyr_related_existing.triggerRepaint()
 
     def clear_layer_filter(self):
-        """ Returns 'null' filter for layers """
+        """Returns 'null' filter for layers """
         self.lyr_added_bulk_load_in_edit.setSubsetString('null')
         self.lyr_removed_existing_in_edit.setSubsetString('null')
         self.lyr_matched_existing_in_edit.setSubsetString('null')
@@ -226,7 +233,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def highlight_selection_changed(self):
-        """ Highlights selected features"""
+        """Highlights selected features"""
 
         # remove all highlight objects
         self.highlight_features = []
@@ -343,16 +350,21 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # error msg when more than one set of matched or related set are selected
         if has_multi_set:
             self.message_bar_edit.pushMessage('Multiple matched or related sets selected, can only unlink one at a time.')
-        # switch botton
+        # switch button
         if has_matched or has_related:
             self.btn_unlink.setEnabled(True)
         elif has_added and has_removed:
             self.switch_btn_match_and_related()
+        elif has_added and not has_removed:
+            self.btn_delete.setEnabled(True)
         # select rows in tbl_relationship
         self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         if has_removed:
             for id_existing in existing_to_lst:
                 self.select_row_in_tbl_removed(id_existing)
+        elif has_added:
+            for id_bulk in bulk_to_list:
+                self.select_row_in_tbl_added(id_bulk)
         elif has_matched:
             self.select_row_in_tbl_matched(existing_to_lst[0], bulk_to_list[0])
         elif has_related:
@@ -405,6 +417,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
+            self.btn_delete.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.qa_button_set_enable(False)
 
@@ -439,6 +452,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             pass
         else:
             self.btn_related.setEnabled(False)
+            self.btn_delete.setEnabled(False)
             self.btn_maptool.setEnabled(False)
             self.qa_button_set_enable(False)
 
@@ -465,19 +479,62 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.btn_save.setEnabled(True)
 
     @pyqtSlot()
+    def delete_clicked(self, commit_status=True):
+        self.deletion_reason = DeletionReason(self.lst_bulk.count())
+        self.deletion_reason.show()
+        self.deletion_reason.btn_ok.clicked.connect(partial(self.reason_given, commit_status))
+        self.deletion_reason.btn_cancel.clicked.connect(self.reason_cancel)
+
+    def reason_given(self, commit_status):
+        self.deletion_reason.close()
+        if self.deletion_reason.le_reason.text() != '':
+            self.btn_matched.setEnabled(False)
+            self.btn_related.setEnabled(False)
+            self.delete = True
+            self.reason_text = self.deletion_reason.le_reason.text()
+            self.connect_to_error_msg()
+            self.btn_delete.setEnabled(False)
+            if self.autosave:
+                self.save_clicked(commit_status)
+            else:
+                self.btn_save.setEnabled(True)
+        else:
+            iface.messageBar().pushMessage("ERROR",
+                                           "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
+                                           level=QgsMessageBar.INFO, duration=5)
+
+    def reason_cancel(self):
+        self.deletion_reason.close()
+
+    @pyqtSlot()
     def save_clicked(self, commit_status=True):
         """
         Save result and change database
-        Called when save botton is clicked
+        Called when save button is clicked
         """
         self.db.open_cursor()
 
-        self.delete_original_relationships()
+        if self.delete:
+            for row in range(self.lst_bulk.count()):
+                feat_id = int(self.lst_bulk.item(row).text())
+                # remove outline from added table
+                sql = 'SELECT buildings_bulk_load.added_delete_bulk_load_outlines(%s);'
+                self.db.execute_no_commit(sql, (feat_id, ))
+                # change status id
+                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_bulk_load_status(%s, %s);'
+                self.db.execute_no_commit(sql, (feat_id, 3))
+                # insert reason for deletion
+                sql = 'SELECT buildings_bulk_load.deletion_description_insert(%s, %s);'
+                self.db.execute_no_commit(sql, (feat_id, self.reason_text))
+            self.reason_text = ''
+            self.delete = False
+        else:
+            self.delete_original_relationships()
 
-        self.insert_new_added_outlines()
-        self.insert_new_removed_outlines()
-        self.insert_new_matched_outlines()
-        self.insert_new_related_outlines()
+            self.insert_new_added_outlines()
+            self.insert_new_removed_outlines()
+            self.insert_new_matched_outlines()
+            self.insert_new_related_outlines()
 
         if commit_status:
             self.db.commit_open_cursor()
@@ -566,6 +623,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if current_text == 'Related Outlines':
             self.init_tbl_relationship(['Group', 'Existing', 'Bulk Load', 'QA Status'])
             self.populate_tbl_related()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
             if self.is_empty_tbl_relationship('Related Outlines'):
                 self.qa_button_set_enable(False)
@@ -574,6 +632,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Matched Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'Bulk Load Outlines', 'QA Status'])
             self.populate_tbl_matched()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
             if self.is_empty_tbl_relationship('Matched Outlines'):
                 self.qa_button_set_enable(False)
@@ -582,17 +641,26 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif current_text == 'Removed Outlines':
             self.init_tbl_relationship(['Existing Outlines', 'QA Status'])
             self.populate_tbl_removed()
+            self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(True)
             if self.is_empty_tbl_relationship('Removed Outlines'):
                 self.qa_button_set_enable(False)
                 self.btn_qa_not_removed.setEnabled(False)
             else:
                 self.qa_button_set_enable(True)
+        elif current_text == 'Added Outlines':
+            self.init_tbl_relationship(['Added Outline Ids'])
+            self.populate_tbl_added()
+            self.btn_qa_not_removed.setEnabled(False)
+            self.qa_button_set_enable(False)
+            self.btn_next.setEnabled(False)
+
         elif current_text == '':
             self.tbl_relationship.setRowCount(0)
             self.tbl_relationship.setColumnCount(0)
             self.qa_button_set_enable(False)
             self.btn_qa_not_removed.setEnabled(False)
+            self.btn_next.setEnabled(False)
 
         self.disable_tbl_editing(self.tbl_relationship)
 
@@ -636,6 +704,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.insert_into_list(self.lst_existing, [id_existing])
             self.lyr_existing.selectByIds([id_existing])
             self.lyr_bulk_load.selectByIds([])
+        elif current_text == 'Added Outlines':
+            id_bulk = int(self.tbl_relationship.item(row, 0).text())
+            self.insert_into_list(self.lst_bulk, [id_bulk])
+            self.lyr_bulk_load.selectByIds([id_bulk])
+            self.btn_delete.setEnabled(True)
 
         self.zoom_to_feature()
         self.highlight_selection_changed()
@@ -701,15 +774,35 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # Move to the next 'not checked'
         if qa_status_id != 5:
             for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-                item = self.tbl_relationship.item(row, qa_column)
-                if item.text() == "Not Checked":
-                    self.tbl_relationship.selectRow(row)
-                    self.tbl_relationship.scrollToItem(item)
+                if self.scroll_to_next(row, qa_column, selected_rows):
                     break
             if not self.tbl_relationship.selectionModel().selectedRows():
                 self.tbl_relationship.selectRow(max(selected_rows))
                 item = self.tbl_relationship.item(max(selected_rows), qa_column)
                 self.tbl_relationship.scrollToItem(item)
+
+    @pyqtSlot()
+    def zoom_to_next(self):
+        found = False
+        selected_rows = [index.row() for index in self.tbl_relationship.selectionModel().selectedRows()]
+        if not selected_rows:
+            selected_rows = [-1]
+        current_text = self.cmb_relationship.currentText()
+        if current_text == 'Related Outlines':
+            qa_column = 3
+        elif current_text == 'Matched Outlines':
+            qa_column = 2
+        elif current_text == 'Removed Outlines':
+            qa_column = 1
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            if self.scroll_to_next(row, qa_column, selected_rows):
+                found = True
+                break
+        if not found:
+            selected_rows = [0]
+            for row in range(self.tbl_relationship.rowCount()):
+                if self.scroll_to_next(row, qa_column, selected_rows):
+                    break
 
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
@@ -798,6 +891,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.btn_unlink.setDisabled(1)
                 self.btn_matched.setDisabled(1)
                 self.btn_related.setDisabled(1)
+                self.btn_delete.setDisabled(1)
                 self.btn_cancel.setDisabled(1)
                 self.btn_save.setDisabled(1)
                 self.cb_autosave.setDisabled(1)
@@ -835,7 +929,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             territorial_auth = territorial_auth.fetchall()[0][0]
             # insert outline into building_bulk_load.bulk_load_outlines
             sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method, capture_source, suburb, town_city, territorial_auth, geometry))
+            bulk_load_id = self.db.execute_no_commit(sql, (self.current_dataset, None, 2, capture_method,
+                                                           capture_source, suburb, town_city, territorial_auth, geometry))
             bulk_load_id = bulk_load_id.fetchall()[0][0]
             # remove existing building from removed table
             sql = 'SELECT buildings_bulk_load.removed_delete_existing_outline(%s);'
@@ -858,9 +953,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         elif self.lst_bulk.count() == 1 and self.lst_existing.count() == 1:
             self.btn_matched.setEnabled(True)
             self.btn_related.setEnabled(False)
+            self.btn_delete.setEnabled(True)
         else:
             self.btn_related.setEnabled(True)
             self.btn_matched.setEnabled(False)
+            self.btn_delete.setEnabled(True)
 
     def multi_relationship_selected_error_msg(self):
         self.error_dialog = ErrorDialog()
@@ -990,6 +1087,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_unlink.setEnabled(False)
         self.btn_matched.setEnabled(False)
         self.btn_related.setEnabled(False)
+        self.btn_delete.setEnabled(False)
         self.btn_save.setEnabled(False)
         self.btn_maptool.setEnabled(True)
 
@@ -1109,7 +1207,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_cmb_relationship(self):
         """Populates cmb_relationship"""
         self.cmb_relationship.clear()
-        item_list = ['Removed Outlines', 'Matched Outlines', 'Related Outlines']
+        item_list = ['Removed Outlines', 'Matched Outlines', 'Related Outlines', 'Added Outlines']
         self.cmb_relationship.addItems([''] + item_list)
 
     def init_tbl_relationship(self, header_items):
@@ -1162,6 +1260,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_existing))
             tbl.setItem(row_tbl, 1, QTableWidgetItem('%s' % qa_status))
 
+    def populate_tbl_added(self):
+        """Populates tbl_relationship when cmb_relationship switches to added"""
+        tbl = self.tbl_relationship
+        result = self.db._execute(bulk_load_select.added_by_dataset_id, (self.current_dataset, ))
+        for (id_bulk_load) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem('%s' % id_bulk_load))
+
     def is_empty_tbl_relationship(self, relationship):
         if self.tbl_relationship.rowCount() == 0:
             self.message_bar_qa.pushMessage('%s are not available in the current dataset.' % relationship)
@@ -1197,6 +1304,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if extent:
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
+
+    def scroll_to_next(self, row, qa_column, selected_rows):
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            item = self.tbl_relationship.item(row, qa_column)
+            if item.text() == "Not Checked":
+                self.tbl_relationship.selectRow(row)
+                self.tbl_relationship.scrollToItem(item)
+                return True
+            return False
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
@@ -1242,5 +1358,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         for row in range(self.tbl_relationship.rowCount()):
             if int(tbl.item(row, 0).text()) == id_existing:
+                tbl.selectRow(row)
+                tbl.scrollToItem(tbl.item(row, 0))
+
+    def select_row_in_tbl_added(self, id_bulk):
+        tbl = self.tbl_relationship
+        index = self.cmb_relationship.findText('Added Outlines')
+        if self.cmb_relationship.currentIndex() != index:
+            self.cmb_relationship.setCurrentIndex(index)
+            self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
+        for row in range(self.tbl_relationship.rowCount()):
+            if int(tbl.item(row, 0).text()) == id_bulk:
                 tbl.selectRow(row)
                 tbl.scrollToItem(tbl.item(row, 0))

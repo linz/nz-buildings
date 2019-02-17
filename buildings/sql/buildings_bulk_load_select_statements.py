@@ -78,7 +78,13 @@ WHERE bulk_load_outline_id IN (
       FROM buildings_bulk_load.bulk_load_outlines
       WHERE supplied_dataset_id = %s);
 """
-
+added_by_dataset_id = """
+SELECT a.bulk_load_outline_id
+FROM buildings_bulk_load.added a
+JOIN buildings_bulk_load.bulk_load_outlines bulk_load USING (bulk_load_outline_id)
+WHERE bulk_load.supplied_dataset_id = %s AND bulk_load.bulk_load_status_id != 3
+ORDER BY a.bulk_load_outline_id ASC;
+"""
 # bulk load outlines
 
 bulk_load_outlines_capture_source_by_supplied_dataset_id = """
