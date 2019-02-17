@@ -776,9 +776,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # Move to the next 'not checked'
         if qa_status_id != 5:
-            for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-                if self.scroll_to_next(row, qa_column, selected_rows):
-                    break
+            self.scroll_to_next(qa_column, selected_rows)
             if not self.tbl_relationship.selectionModel().selectedRows():
                 self.tbl_relationship.selectRow(max(selected_rows))
                 item = self.tbl_relationship.item(max(selected_rows), qa_column)
@@ -806,14 +804,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_column = 2
         elif current_text == 'Removed Outlines':
             qa_column = 1
-        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            if self.scroll_to_next(row, qa_column, selected_rows):
-                found = True
-                break
+        if self.scroll_to_next(qa_column, selected_rows):
+            found = True
         if not found:
             selected_rows = [0]
             for row in range(self.tbl_relationship.rowCount()):
-                if self.scroll_to_next(row, qa_column, selected_rows):
+                item = self.tbl_relationship.item(row, qa_column)
+                if item.text() == "Not Checked":
+                    self.tbl_relationship.selectRow(row)
+                    self.tbl_relationship.scrollToItem(item)
                     break
 
     @pyqtSlot()
@@ -1317,14 +1316,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
 
-    def scroll_to_next(self, row, qa_column, selected_rows):
+    def scroll_to_next(self, qa_column, selected_rows):
         for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
             item = self.tbl_relationship.item(row, qa_column)
             if item.text() == "Not Checked":
                 self.tbl_relationship.selectRow(row)
                 self.tbl_relationship.scrollToItem(item)
                 return True
-            return False
+        return False
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
