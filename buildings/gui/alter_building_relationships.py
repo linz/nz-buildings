@@ -43,6 +43,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.autosave = False
         self.delete = False
         self.deletion_reason = None
+        self.zoom = True
 
         self.frame_setup()
         self.layers_setup()
@@ -55,7 +56,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
-        self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'qa_not_removed.png')))
+        self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'match.png')))
         self.btn_next.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'next.png')))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
@@ -710,7 +711,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.selectByIds([id_bulk])
             self.btn_delete.setEnabled(True)
 
-        self.zoom_to_feature()
+        if self.zoom:
+            self.zoom_to_feature()
         self.highlight_selection_changed()
 
         try:
@@ -753,12 +755,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 ids_bulk.append(id_bulk)
         elif current_text == 'Removed Outlines':
             qa_column = 1
+            selected_ids = []
             for row in selected_rows:
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
+                selected_ids.append(id_existing)
                 self.update_qa_status_in_removed(id_existing, qa_status_id)
                 ids_existing.append(id_existing)
             if qa_status_id == 5:
                 self.copy_and_match_removed_building()
+                self.cmb_relationship.setCurrentIndex(self.cmb_relationship.findText('Matched Outlines'))
 
         if commit_status:
             self.db.commit_open_cursor()
@@ -776,10 +781,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
             for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
                 if self.scroll_to_next(row, qa_column, selected_rows):
                     break
-            if not self.tbl_relationship.selectionModel().selectedRows():
-                self.tbl_relationship.selectRow(max(selected_rows))
-                item = self.tbl_relationship.item(max(selected_rows), qa_column)
-                self.tbl_relationship.scrollToItem(item)
+                if not self.tbl_relationship.selectionModel().selectedRows():
+                    self.tbl_relationship.selectRow(max(selected_rows))
+                    item = self.tbl_relationship.item(max(selected_rows), qa_column)
+                    self.tbl_relationship.scrollToItem(item)
+        elif qa_status_id == 5:
+            for row in range(self.tbl_relationship.rowCount()):
+                id_existing = int(self.tbl_relationship.item(row, 0).text())
+                if id_existing in selected_ids:
+                    self.zoom = False
+                    self.tbl_relationship.selectRow(row)
+                    self.tbl_relationship.scrollToItem(self.tbl_relationship.item(row, qa_column))
+                    self.zoom = True
+                    break
+            if len(selected_ids) > 1:
+                self.message_bar_edit.pushMessage(
+                    'You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected')
 
     @pyqtSlot()
     def zoom_to_next(self):
@@ -938,6 +955,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             # add existing and new building to matched table
             sql = 'SELECT buildings_bulk_load.matched_insert_building_outlines(%s, %s);'
             self.db.execute_no_commit(sql, (bulk_load_id, building_outline_id))
+            # change to not checked
+            sql = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s);'
+            self.db.execute_no_commit(sql, (1, building_outline_id, bulk_load_id))
         # refresh to get new outlines
         iface.mapCanvas().refreshAllLayers()
 
@@ -1306,13 +1326,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.mapCanvas().zoomScale(300.0)
 
     def scroll_to_next(self, row, qa_column, selected_rows):
-        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            item = self.tbl_relationship.item(row, qa_column)
-            if item.text() == "Not Checked":
-                self.tbl_relationship.selectRow(row)
-                self.tbl_relationship.scrollToItem(item)
-                return True
-            return False
+        item = self.tbl_relationship.item(row, qa_column)
+        if item.text() == "Not Checked":
+            self.tbl_relationship.selectRow(row)
+            self.tbl_relationship.scrollToItem(item)
+            return True
+        return False
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
         """Updates qa_status_id in related table"""
