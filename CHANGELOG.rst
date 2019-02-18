@@ -13,7 +13,15 @@ Added
  * Topographic reference datasets can now be updated via LINZ Data Service changesets
  * Projection check for new capture source areas
  * bump_version command in makefile
+ * Delete building outlines while in Alter Relationships workflow
+ * Move to Next building outline while in Alter Relationships workflow
+ * Ability to turn layers on and off easily based on their bulk load status during Bulk Load workflow
+
+Changed
+-------
+
  * README rewritten to provide a more thorough overview of the system
+ * Territorial Authority Grid is now a materialised view that can be automatically updated when Territorial Authority changes occur, not a table
 
 Fixed
 -----
