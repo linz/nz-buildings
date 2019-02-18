@@ -1,0 +1,118 @@
+
+------------------------------------------------------------------------------
+-- Provide testing for buildings_bulk_load comparisons functions
+-- with real world examples of previous comparison bugs
+-- protects against the regression of 223
+------------------------------------------------------------------------------
+
+-- Turn off echo.
+\set QUIET 1
+
+-- Format the output nicely.
+\pset format unaligned
+\pset tuples_only true
+\pset pager
+
+-- Revert all changes on failure.
+\set ON_ERROR_ROLLBACK 1
+\set ON_ERROR_STOP true
+
+
+BEGIN;
+
+CREATE EXTENSION IF NOT EXISTS pgtap;
+
+SELECT plan(9);
+
+--1----------------------------------------------------------
+-- Test find_added function on complex data
+
+SELECT results_eq(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(6) ORDER BY bulk_load_outline_id',
+    $$VALUES (2091), (2095)$$,
+    'Check return of buildings bulk load find_added function'
+);
+
+
+--2----------------------------------------------------------
+-- Test find_matched function on complex data
+
+SELECT results_eq(
+  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_matched(6) ORDER BY building_outline_id, bulk_load_outline_id',
+  $$VALUES (1804, 2093)$$,
+  'Check return of buildings_bulk_load find_matched function'
+);
+
+--3----------------------------------------------------------
+-- Test find_related in complex data
+
+SELECT results_eq(
+  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_related(6) ORDER BY building_outline_id, bulk_load_outline_id',
+  $$VALUES (1801, 2089), (1801, 2090),
+           (1802, 2094), (1802, 2096),
+           (1803, 2096), (1805, 2096),
+           (1806, 2092), (1806, 2094)$$,
+  'Check return of buildings_bulk_load find related function'
+);
+
+--4----------------------------------------------------------
+-- Test comparisons function inputs complex added outlines
+
+SELECT set_has(
+    'SELECT bulk_load_outline_id FROM buildings_bulk_load.added',
+    $$VALUES (2091), (2095)$$,
+    'Check added outlines after comparisons function has run'
+);
+
+--5----------------------------------------------------------
+-- Test comparisons function inputs complex matched outlines
+-- by building_outline_id
+SELECT set_has(
+  'SELECT building_outline_id FROM buildings_bulk_load.matched',
+  $$VALUES (1804)$$,
+  'Check building_outline_id of matched table after comparisons function has run'
+);
+
+--6----------------------------------------------------------
+-- Test comparsisons function inputs complex related outlines
+-- by bulk_load_outline id
+
+SELECT set_has(
+  'SELECT bulk_load_outline_id FROM buildings_bulk_load.matched',
+  $$VALUES (2093)$$,
+  'Check bulk_load_outline_ids of matched table after comparisons function has run'
+);
+
+--7----------------------------------------------------------
+-- Test comparisons function inputs complex related outlines
+-- by building_outline_id
+
+SELECT set_has(
+  'SELECT building_outline_id FROM buildings_bulk_load.related',
+  $$VALUES (1801), (1802),
+           (1803), (1805),
+           (1806)$$,
+  'Check building_outline_id of related table after comparisons function has run'
+);
+
+--8----------------------------------------------------------
+-- Test comparisons function inputs complex related outlines
+-- by bulk_load_outline_id
+
+SELECT set_has(
+  'SELECT bulk_load_outline_id FROM buildings_bulk_load.related',
+  $$VALUES (2089), (2090),
+           (2094), (2096),
+           (2092)$$,
+  'Check bulk_load_outline_id of related table after comparisons function has run'
+);
+
+--9-----------------------------------------------------------
+-- Test comparisons function does not input added outlines
+-- to related table
+
+SELECT set_hasnt(
+  'SELECT building_outline_id FROM buildings_bulk_load.related',
+  $$VALUES (2091), (2095)$$,
+  'Check bulk_load_outline_id of related table after comparisons function has run'
+);

@@ -146,6 +146,10 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/05-insert_test_data_complex.sql $ON_ERROR_STOP
     psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(4);"
+    echo ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql $ON_ERROR_STOP
+    psql_exit
+    psql -c "SELECT buildings_bulk_load.compare_building_outlines(6);"
 
 fi
 # Execute files that are needed to test the plugin - test data remains in database
