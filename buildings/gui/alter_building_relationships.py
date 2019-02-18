@@ -43,6 +43,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.autosave = False
         self.delete = False
         self.deletion_reason = None
+        self.zoom = True
 
         self.frame_setup()
         self.layers_setup()
@@ -710,7 +711,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.selectByIds([id_bulk])
             self.btn_delete.setEnabled(True)
 
-        self.zoom_to_feature()
+        if self.zoom:
+            self.zoom_to_feature()
         self.highlight_selection_changed()
 
         try:
@@ -776,17 +778,22 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # Move to the next 'not checked'
         if qa_status_id != 5:
-            self.scroll_to_next(qa_column, selected_rows)
-            if not self.tbl_relationship.selectionModel().selectedRows():
-                self.tbl_relationship.selectRow(max(selected_rows))
-                item = self.tbl_relationship.item(max(selected_rows), qa_column)
-                self.tbl_relationship.scrollToItem(item)
+            for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+                if self.scroll_to_next(row, qa_column, selected_rows):
+                    break
+                if not self.tbl_relationship.selectionModel().selectedRows():
+                    self.tbl_relationship.selectRow(max(selected_rows))
+                    item = self.tbl_relationship.item(max(selected_rows), qa_column)
+                    self.tbl_relationship.scrollToItem(item)
         elif qa_status_id == 5:
             for row in range(self.tbl_relationship.rowCount()):
                 id_existing = int(self.tbl_relationship.item(row, 0).text())
                 if id_existing in selected_ids:
+                    self.zoom = False
                     self.tbl_relationship.selectRow(row)
                     self.tbl_relationship.scrollToItem(self.tbl_relationship.item(row, qa_column))
+                    self.zoom = True
+                    break
             if len(selected_ids) > 1:
                 self.message_bar_qa.pushMessage(
                     'You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected')
@@ -804,15 +811,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
             qa_column = 2
         elif current_text == 'Removed Outlines':
             qa_column = 1
-        if self.scroll_to_next(qa_column, selected_rows):
-            found = True
+        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
+            if self.scroll_to_next(row, qa_column, selected_rows):
+                found = True
+                break
         if not found:
             selected_rows = [0]
             for row in range(self.tbl_relationship.rowCount()):
-                item = self.tbl_relationship.item(row, qa_column)
-                if item.text() == "Not Checked":
-                    self.tbl_relationship.selectRow(row)
-                    self.tbl_relationship.scrollToItem(item)
+                if self.scroll_to_next(row, qa_column, selected_rows):
                     break
 
     @pyqtSlot()
@@ -1316,13 +1322,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.mapCanvas().setExtent(extent)
             iface.mapCanvas().zoomScale(300.0)
 
-    def scroll_to_next(self, qa_column, selected_rows):
-        for row in range(max(selected_rows) + 1, self.tbl_relationship.rowCount()):
-            item = self.tbl_relationship.item(row, qa_column)
-            if item.text() == "Not Checked":
-                self.tbl_relationship.selectRow(row)
-                self.tbl_relationship.scrollToItem(item)
-                return True
+    def scroll_to_next(self, row, qa_column, selected_rows):
+        item = self.tbl_relationship.item(row, qa_column)
+        if item.text() == "Not Checked":
+            self.tbl_relationship.selectRow(row)
+            self.tbl_relationship.scrollToItem(item)
+            return True
         return False
 
     def update_qa_status_in_related(self, id_existing, id_bulk, qa_status_id):
