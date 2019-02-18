@@ -15,6 +15,11 @@ Added
  * bump_version command in makefile
  * README rewritten to provide a more thorough overview of the system
 
+Fixed
+-----
+
+ * Buildings that overlapped by less than 5% were added to the related table in some scenarios
+
 1.0.6
 =====
 17-01-2019
