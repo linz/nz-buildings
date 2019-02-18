@@ -56,7 +56,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.message_bar_qa = QgsMessageBar()
         self.layout_msg_bar_qa.addWidget(self.message_bar_qa)
 
-        self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'qa_not_removed.png')))
+        self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'match.png')))
         self.btn_next.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'next.png')))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'multi_layer_selection_tool.png')))
 
@@ -795,7 +795,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.zoom = True
                     break
             if len(selected_ids) > 1:
-                self.message_bar_qa.pushMessage(
+                self.message_bar_edit.pushMessage(
                     'You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected')
 
     @pyqtSlot()
@@ -955,6 +955,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
             # add existing and new building to matched table
             sql = 'SELECT buildings_bulk_load.matched_insert_building_outlines(%s, %s);'
             self.db.execute_no_commit(sql, (bulk_load_id, building_outline_id))
+            # change to not checked
+            sql = 'SELECT buildings_bulk_load.matched_update_qa_status_id(%s, %s, %s);'
+            self.db.execute_no_commit(sql, (1, building_outline_id, bulk_load_id))
         # refresh to get new outlines
         iface.mapCanvas().refreshAllLayers()
 
