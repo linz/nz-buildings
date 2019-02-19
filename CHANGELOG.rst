@@ -4,8 +4,9 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
+1.1.0
 ==========
+19-02-2019
 
 Added
 -----
@@ -22,6 +23,7 @@ Changed
 
  * README rewritten to provide a more thorough overview of the system
  * Territorial Authority Grid is now a materialised view that can be automatically updated when Territorial Authority changes occur, not a table
+ * Not removed button icon change and when pressed changes relationship table to select building in matched table
 
 Fixed
 -----
