@@ -17,6 +17,7 @@ Added
  * Delete building outlines while in Alter Relationships workflow
  * Move to Next building outline while in Alter Relationships workflow
  * Ability to turn layers on and off easily based on their bulk load status during Bulk Load workflow
+ * Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
 
 Changed
 -------
