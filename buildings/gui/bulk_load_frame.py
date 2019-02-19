@@ -41,6 +41,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry = LayerRegistry()
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
+        # Check dialog on publish
+        self.check_dialog = CheckDialog()
         # layer set up
         self.historic_layer = None
         self.bulk_load_layer = None
@@ -724,7 +726,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Check same ids in different tables (added/matched/related)
         """
-        self.check_dialog = CheckDialog()
         result = self.run_check()
         if not result:
             return True

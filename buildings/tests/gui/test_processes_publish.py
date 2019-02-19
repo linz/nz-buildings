@@ -27,8 +27,7 @@ from buildings.utilities import database as db
 
 class ProcessPublish(unittest.TestCase):
     """
-    Test Add Production Outline GUI initial
-    setup confirm default settings
+    Test publish process
     """
     @classmethod
     def setUpClass(cls):
@@ -91,7 +90,16 @@ class ProcessPublish(unittest.TestCase):
 
     def test_deleted_outlines_on_publish(self):
         """Check outlines that are deleted during QA the outlines are not added to building_outlines layer"""
-        sql = 'UPDATE buildings_bulk_load.bulk_load_outlines SET bulk_load_status_id = 3 WHERE bulk_load_outline_id = 2025 OR bulk_load_outline_id = 2030 OR bulk_load_outline_id = 2026 OR bulk_load_outline_id = 2027 OR bulk_load_outline_id = 2028 OR bulk_load_outline_id = 2029;'
+        sql = '''
+                UPDATE buildings_bulk_load.bulk_load_outlines
+                SET bulk_load_status_id = 3
+                WHERE bulk_load_outline_id = 2025
+                   OR bulk_load_outline_id = 2030
+                   OR bulk_load_outline_id = 2026
+                   OR bulk_load_outline_id = 2027
+                   OR bulk_load_outline_id = 2028
+                   OR bulk_load_outline_id = 2029;
+              '''
         db._execute(sql)
 
         btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
@@ -119,4 +127,19 @@ class ProcessPublish(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(result, None)
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_duplicate_ids_check_on_publish(self):
+        """Check the check dialog runs before publish clicked"""
+        sql = 'INSERT INTO buildings_bulk_load.matched VALUES (2003, 1007, 1);'
+        db._execute(sql)
+        btn_no = self.bulk_load_frame.msgbox_publish.button(QMessageBox.No)
+        QTimer.singleShot(500, btn_no.click)
+        self.bulk_load_frame.publish_clicked(False)
+        self.assertTrue(self.bulk_load_frame.check_dialog.isVisible())
+        self.assertEqual(self.bulk_load_frame.check_dialog.tbl_dup_ids.model().rowCount(), 1)
+        self.assertEqual(self.bulk_load_frame.check_dialog.tbl_dup_ids.model().item(0, 0).text(), '2003')
+        self.assertEqual(self.bulk_load_frame.check_dialog.tbl_dup_ids.model().item(0, 1).text(), 'Added')
+        self.assertEqual(self.bulk_load_frame.check_dialog.tbl_dup_ids.model().item(0, 2).text(), 'Matched')
+        self.bulk_load_frame.check_dialog.close()
         self.bulk_load_frame.db.rollback_open_cursor()

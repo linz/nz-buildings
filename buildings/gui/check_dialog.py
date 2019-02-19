@@ -2,7 +2,9 @@ import csv
 import os
 
 from PyQt4 import uic
-from PyQt4.QtGui import QDialog, QHeaderView, QStandardItemModel, QStandardItem, QAbstractItemView, QIcon, QFileDialog
+from PyQt4.QtGui import (QAbstractItemView, QDialog, QFileDialog,
+                         QHeaderView, QIcon, QStandardItem,
+                         QStandardItemModel)
 from PyQt4.QtCore import Qt, pyqtSlot
 
 from qgis.core import QgsProject
@@ -26,8 +28,8 @@ class CheckDialog(QDialog, FORM_CLASS):
 
         self.btn_browse.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'browse.png')))
         self.btn_browse.clicked.connect(self.open_browse)
-        self.le_path.textEdited.connect(self.le_path_edited)
-        self.le_filename.textEdited.connect(self.le_filename_edited)
+        self.le_path.textChanged.connect(self.le_path_text_changed)
+        self.le_filename.textChanged.connect(self.le_filename_text_changed)
         self.btn_export.clicked.connect(self.export)
 
     def init_table(self):
@@ -53,13 +55,13 @@ class CheckDialog(QDialog, FORM_CLASS):
         self.btn_export.setEnabled(path_status & name_status)
 
     @pyqtSlot()
-    def le_path_edited(self):
+    def le_path_text_changed(self):
         path_status = self.check_path()
         name_status = self.check_file_name()
         self.btn_export.setEnabled(path_status & name_status)
 
     @pyqtSlot()
-    def le_filename_edited(self):
+    def le_filename_text_changed(self):
         path_status = self.check_path()
         name_status = self.check_file_name()
         self.btn_export.setEnabled(path_status & name_status)
