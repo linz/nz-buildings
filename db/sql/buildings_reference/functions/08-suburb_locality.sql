@@ -19,6 +19,10 @@
     -- params:
     -- return: integer number of areas inserted
 
+-- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
+    -- params:
+    -- return: integer number of areas updated
+
 --------------------------------------------
 
 -- Functions
@@ -126,3 +130,29 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.suburb_locality_insert_new_areas() IS
 'Function to insert from the admin_bdys schema new areas not in the buildings_reference suburb locality table';
+
+-- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
+    -- params:
+    -- return: integer number of areas updated (should be all)
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_update_suburb_locality()
+RETURNS integer AS
+$$
+    WITH insert_suburb AS (
+        UPDATE buildings_reference.suburb_locality bsl
+        SET
+          suburb_4th = nzl.suburb_4th,
+          suburb_3rd = nzl.suburb_3rd,
+          suburb_2nd = nzl.suburb_2nd,
+          suburb_1st = nzl.suburb_1st,
+          shape = ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193)
+        FROM admin_bdys.nz_locality nzl
+        WHERE bsl.external_suburb_locality_id = nzl.id
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM insert_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.suburb_locality_update_suburb_locality() IS
+'Function to update the attributes in the buildings_reference suburb locality table from the admin_bdys schema';
