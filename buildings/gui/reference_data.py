@@ -10,7 +10,6 @@ from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCh
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.reference_data import topo50
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
-from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -162,7 +161,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # final message box
         if self.message == '':
             self.message = 'No layers were updated.'
-        self.message_box()
+        self.msgbox.setText(self.message)
         self.msgbox.exec_()
         if commit_status:
             self.db.commit_open_cursor()
@@ -210,19 +209,22 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 box.setEnabled(1)
 
     def message_box(self):
-        self.msgbox = QMessageBox(QMessageBox.Information, 'Note', self.message,
-                                  buttons=QMessageBox.Ok)
+        return QMessageBox(QMessageBox.Information, 'Note', self.message,
+                           buttons=QMessageBox.Ok)
 
     def check_api_key(self):
-        """Check API Key exists"""
-        self.error_dialog = ErrorDialog
-        self.error_dialog.fill_report(
-            '\n------------- NO API KEY -------------'
-            '\n\nPlease enter a koordinates api key to'
-            ' update the reference data.'
-        )
-        self.error_dialog.show()
-        QApplication.restoreOverrideCursor()
+        """Check API key exists"""
+        if self.api_key == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n------------- NO API KEY -------------'
+                '\n\nPlease enter a koordinates api key to'
+                ' update the reference data.'
+            )
+            QApplication.restoreOverrideCursor()
+            self.error_dialog.show()
+            QApplication.restoreOverrideCursor()
+            return
 
     def request_error(self):
         """Called when failure to request a changeset"""
@@ -254,4 +256,3 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         if status == 'error':
             self.message += 'The request errored on the {} table\n'.format(name)
             self.request_error()
-            return
