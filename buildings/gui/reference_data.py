@@ -10,6 +10,7 @@ from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCh
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.reference_data import topo50
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
+from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -80,7 +81,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setEnabled(1)
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
-        self.chbx_ta_grid.setEnabled(1)
+        self.btn_view_key.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText('')
@@ -100,7 +101,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setDisabled(1)
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
-        self.chbx_ta_grid.setDisabled(1)
         self.btn_view_key.setDisabled(1)
         self.btn_update.setDisabled(1)
         # add message
@@ -170,6 +170,21 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             # update messages and log
             self.update_message('updated', 'town_city')
             self.updates.append('town_city')
+        # territorial authority and grid
+        if self.chbx_ta.isChecked():
+            # delete removed TA areas
+            db.execute_no_commit('SELECT buildings_reference.territorial_auth_delete_areas();')
+            # Insert TA areas
+            db.execute_no_commit('SELECT buildings_reference.territorial_auth_insert_areas();')
+            # Update new TA areas
+            db.execute_no_commit('SELECT buildings_reference.territorial_auth_update_areas();')
+            # update message and log
+            self.update_message('updated', 'territorial_authority')
+            self.updates.append('territorial_authority')
+            # refresh grid
+            db.execute_no_commit(reference_select.refresh_ta_grid_view)
+            self.update_message('updated', 'territorial_authority_grid')
+            self.updates.append('territorial_authority_grid')
 
         # create log for this update
         if len(self.updates) > 0:
