@@ -12,6 +12,7 @@ from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
+from buildings.gui.check_dialog import CheckDialog
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
                            buildings_common_select_statements as common_select,
@@ -39,6 +40,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry = LayerRegistry()
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
+        # Check dialog on publish
+        self.check_dialog = CheckDialog()
         # layer set up
         self.historic_layer = None
         self.bulk_load_layer = None
@@ -696,7 +699,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When publish button clicked
         """
-
+        if not self.check_duplicate_ids():
+            return
         if self.confirm(self.msgbox_publish):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             if self.change_instance is not None:
@@ -716,6 +720,51 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             QApplication.restoreOverrideCursor()
             self.grpb_layers.hide()
             QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+
+    def check_duplicate_ids(self):
+        """
+            Check same ids in different tables (added/matched/related)
+        """
+        result = self.run_check()
+        if not result:
+            return True
+        else:
+            self.check_dialog.show()
+            self.check_dialog.set_message('FAILED: duplicate id(s) found.')
+            self.check_dialog.set_data(result)
+            return False
+
+    def run_check(self):
+        """
+            Run check and return the output data
+        """
+        result = self.db._execute(bulk_load_select.added_outlines_by_dataset_id, (self.current_dataset,))
+        added_outlines = result.fetchall()
+        result = self.db._execute(bulk_load_select.matched_outlines_by_dataset_id, (self.current_dataset,))
+        matched_outlines = result.fetchall()
+        result = self.db._execute(bulk_load_select.related_outlines_by_dataset_id, (self.current_dataset,))
+        related_outlines = result.fetchall()
+        ids_added_matched = self.find_match_ids(added_outlines, matched_outlines)
+        ids_added_related = self.find_match_ids(added_outlines, related_outlines)
+        ids_matched_related = self.find_match_ids(matched_outlines, related_outlines)
+        data = self.get_error_data(ids_added_matched, ids_added_related, ids_matched_related)
+        return data
+
+    def find_match_ids(self, ids_1, ids_2):
+        return list(set(ids_1) & set(ids_2))
+
+    def get_error_data(self, ids_added_matched, ids_added_related, ids_matched_related):
+        """
+            Return the output data
+        """
+        data = []
+        for (feat_id,) in ids_added_matched:
+            data.append((feat_id, 'Added', 'Matched'))
+        for (feat_id,) in ids_added_related:
+            data.append((feat_id, 'Added', 'Related'))
+        for (feat_id,) in ids_matched_related:
+            data.append((feat_id, 'Matched', 'Related'))
+        return data
 
     @pyqtSlot()
     def exit_clicked(self):

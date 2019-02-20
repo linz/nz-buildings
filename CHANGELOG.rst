@@ -4,6 +4,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Added
+-----
+
+* Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
+
 1.1.0
 ==========
 19-02-2019
@@ -17,6 +25,7 @@ Added
  * Delete building outlines while in Alter Relationships workflow
  * Move to Next building outline while in Alter Relationships workflow
  * Ability to turn layers on and off easily based on their bulk load status during Bulk Load workflow
+ * Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
 
 Changed
 -------
