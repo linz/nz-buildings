@@ -11,6 +11,10 @@
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
 
+-- town_city_delete_removed_areas (removed from table areas not in admin_byds)
+    -- params:
+    -- return: integer number of town_cities deleted
+
 --------------------------------------------
 
 -- Functions:
@@ -64,3 +68,27 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_town_city(integer) IS
 'Replace the town/city values with the intersection';
+
+-- update town_city table functions:
+
+-- town_city_delete_removed_areas (removed from table areas not in admin_byds)
+    -- params:
+    -- return: integer number of town_cities deleted
+CREATE OR REPLACE FUNCTION buildings_reference.town_city_delete_removed_areas()
+RETURNS integer AS
+$$
+    WITH delete_town AS (
+        DELETE FROM buildings_reference.town_city
+        WHERE external_city_id NOT
+          IN (SELECT
+            city_id
+          FROM admin_bdys.nz_locality)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM delete_town;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.town_city_delete_removed_areas() IS
+'Function to delete from the buildings_reference town city table the areas that have been removed in the admin_bdys schema';
