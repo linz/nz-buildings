@@ -4,6 +4,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Added
+-----
+
+* Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
+
 1.1.0
 ==========
 19-02-2019

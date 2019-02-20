@@ -2,7 +2,6 @@
 
 import os.path
 from functools import partial
-from time import sleep
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
