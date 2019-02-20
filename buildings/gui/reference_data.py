@@ -165,6 +165,17 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             # update messages and log
             self.update_message('updated', 'suburb_locality')
             self.updates.append('suburb_locality')
+        # town_city
+        if self.chbx_town.isChecked():
+            # delete existing areas where the external id is no longer in the town_city table
+            db.execute_no_commit('SELECT buildings_reference.town_city_delete_removed_areas();')
+            # modify all existing areas to check they are up to date
+            db.execute_no_commit('SELECT buildings_reference.town_city_insert_new_areas();')
+            # insert into table ids in nz_localities that are not in town_city
+            db.execute_no_commit('SELECT buildings_reference.town_city_update_areas();')
+            # update messages and log
+            self.update_message('updated', 'town_city')
+            self.updates.append('town_city')
 
         # create log for this update
         if len(self.updates) > 0:
