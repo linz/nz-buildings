@@ -92,3 +92,39 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_upated)
         name_updated = result.fetchone()[0]
         self.assertEqual(name_updated, 'Wellington City')
+
+    def test_territorial_authority_table_update(self):
+        """Check buildings_reference.territorial_authority table updates correctly"""
+        self.reference_frame.chbx_ta.setChecked(True)
+
+        btn_ok = self.reference_frame.msgbox.button(QMessageBox.Ok)
+        QTimer.singleShot(500, btn_ok.click)
+
+        self.reference_frame.update_clicked(commit_status=False)
+
+        # deleted TA
+        sql_removed = "SELECT count(*)::integer FROM buildings_reference.territorial_authority WHERE external_territorial_authority_id = 10002;"
+        result = db._execute(sql_removed)
+        count_removed = result.fetchone()[0]
+        self.assertEqual(count_removed, 0)
+        # added TA
+        sql_added = "SELECT count(*)::integer FROM buildings_reference.territorial_authority WHERE external_territorial_authority_id = 10003;"
+        result = db._execute(sql_added)
+        count_added = result.fetchone()[0]
+        self.assertEqual(count_added, 1)
+        # Check TA Grid view has been refreshed
+        sql_removed_grid = """
+        SELECT count(*)::integer
+        FROM buildings_reference.territorial_authority_grid
+        WHERE external_territorial_authority_id = 10002;
+        """
+        result = db._execute(sql_removed_grid)
+        count_removed_grid = result.fetchone()[0]
+        self.assertEqual(count_removed_grid, 0)
+        sql_added_grid = """
+        SELECT count(*)::integer
+        FROM buildings_reference.territorial_authority_grid
+        WHERE external_territorial_authority_id = 10003;"""
+        result = db._execute(sql_added_grid)
+        count_added_grid = result.fetchone()[0]
+        self.assertTrue(count_added_grid > 0)
