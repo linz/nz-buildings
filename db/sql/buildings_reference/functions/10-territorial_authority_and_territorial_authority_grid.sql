@@ -19,6 +19,10 @@
     -- params:
     -- return: integer count of TAs deleted
 
+-- territorial_auth_insert_areas(insert new areas from admin_bdys)
+    -- params:
+    -- return: integer count of new areas added
+
 ----------------------------------------------------------------------------------------------
 
 -- Functions
@@ -121,3 +125,28 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.territorial_auth_delete_areas() IS
 'Function to delete the attributes in the buildings_reference territorial_authority table that are not in the admin_bdys schema.';
+
+-- territorial_auth_insert_areas(insert new areas from admin_bdys)
+    -- params:
+    -- return: integer count of new areas added
+CREATE OR REPLACE FUNCTION buildings_reference.territorial_auth_insert_areas()
+RETURNS integer AS
+$$
+    WITH insert_ta AS (
+        INSERT INTO buildings_reference.territorial_authority (external_territorial_authority_id, name, shape)
+          SELECT
+            ogc_fid,
+            name,
+            ST_SetSRID(ST_Transform(shape, 2193), 2193)
+          FROM admin_bdys.territorial_authority
+          WHERE ogc_fid NOT IN (SELECT
+            external_territorial_authority_id
+          FROM buildings_reference.territorial_authority)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM insert_ta;
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.territorial_auth_insert_areas() IS
+'Function to insert new territorial authority areas into the buildings_reference.territorial_authority table.';
