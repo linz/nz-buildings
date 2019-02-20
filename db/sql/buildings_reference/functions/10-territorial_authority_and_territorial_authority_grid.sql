@@ -23,6 +23,10 @@
     -- params:
     -- return: integer count of new areas added
 
+-- territorial_auth_update_areas(update geometries based on admin_bdys)
+    -- params:
+    -- return: integer count of areas updated
+
 ----------------------------------------------------------------------------------------------
 
 -- Functions
@@ -150,3 +154,29 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.territorial_auth_insert_areas() IS
 'Function to insert new territorial authority areas into the buildings_reference.territorial_authority table.';
+
+-- territorial_auth_update_areas(update geometries based on admin_bdys)
+    -- params:
+    -- return: integer count of areas updated
+CREATE OR REPLACE FUNCTION buildings_reference.territorial_auth_update_areas()
+RETURNS integer AS
+$$
+    WITH update_ta AS (
+        UPDATE buildings_reference.territorial_authority bta
+        SET name = ata.name,
+            shape = ST_SetSRID(ST_Transform(ata.shape, 2193), 2193)
+        FROM admin_bdys.territorial_authority ata
+        WHERE bta.external_territorial_authority_id IN
+            (SELECT ogc_fid
+             FROM admin_bdys.territorial_authority ata
+             JOIN buildings_reference.territorial_authority bta ON ogc_fid = external_territorial_authority_id
+             WHERE NOT st_equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
+               OR bta.name != ata.name)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_ta;
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.territorial_auth_update_areas() IS
+'Function to update territorial_authority areas that have either name or geometry changes';
