@@ -11,6 +11,7 @@ Added
 -----
 
 * Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
+* User can update the buildings_reference.suburb_locality table using the reference frame
 
 1.1.0
 ==========
