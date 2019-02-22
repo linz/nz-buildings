@@ -121,6 +121,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.message = ''
         self.api_key = self.le_key.text()
         self.updates = []
+        # check for API key
+        for box in self.grbx_topo.findChildren(QCheckBox):
+            if box.isChecked():
+                if self.api_key == '':
+                    self.error_dialog = ErrorDialog()
+                    self.error_dialog.fill_report(
+                        '\n------------- NO API KEY -------------'
+                        '\n\nPlease enter a koordinates api key to'
+                        ' update the reference data.'
+                    )
+                    self.error_dialog.show()
+                    QApplication.restoreOverrideCursor()
+                    return
         # canals
         if self.chbx_canals.isChecked():
             self.topo_layer_processing('canal')
