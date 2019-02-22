@@ -147,6 +147,12 @@ $$
           shape = ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193)
         FROM admin_bdys.nz_locality nzl
         WHERE bsl.external_suburb_locality_id = nzl.id
+        AND (NOT ST_Equals(ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193), bsl.shape)
+          OR nzl.suburb_4th != bsl.suburb_4th
+          OR nzl.suburb_3rd != bsl.suburb_3rd
+          OR nzl.suburb_2nd != bsl.suburb_2nd
+          OR nzl.suburb_1st != bsl.suburb_1st
+        )
         RETURNING *
     )
     SELECT count(*)::integer FROM insert_suburb;

@@ -114,9 +114,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def update_clicked(self, commit_status=True):
-        """Called when ok btn clicked"""
+        """Called when update btn clicked"""
         # set cursor to busy
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        # setup
         self.message = ''
         self.api_key = self.le_key.text()
         self.updates = []
@@ -212,20 +213,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         return QMessageBox(QMessageBox.Information, 'Note', self.message,
                            buttons=QMessageBox.Ok)
 
-    def check_api_key(self):
-        """Check API key exists"""
-        if self.api_key == '':
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n------------- NO API KEY -------------'
-                '\n\nPlease enter a koordinates api key to'
-                ' update the reference data.'
-            )
-            QApplication.restoreOverrideCursor()
-            self.error_dialog.show()
-            QApplication.restoreOverrideCursor()
-            return
-
     def request_error(self):
         """Called when failure to request a changeset"""
         self.error_dialog = ErrorDialog()
@@ -241,11 +228,25 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def topo_layer_processing(self, layer):
         """Processes to run for all topo layers"""
-        self.check_api_key()
+        if not self.check_api_key() : return
         status = topo50.update_topo50(self.api_key, layer)
         self.update_message(status, '{}_polygons'.format(layer))
         if status != 'error':
             self.updates.append(layer)
+
+    def check_api_key(self):
+        # check for API key
+        if self.api_key == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n------------- NO API KEY -------------'
+                '\n\nPlease enter a koordinates api key to'
+                ' update the reference data.'
+            )
+            self.error_dialog.show()
+            QApplication.restoreOverrideCursor()
+            return False
+        return True
 
     def update_message(self, status, name):
         """add to message for display at end of processing"""
