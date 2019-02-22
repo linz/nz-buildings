@@ -153,6 +153,9 @@ $$
         GROUP BY city_id,
                  city_name) AS subquery
         WHERE buildings_reference.town_city.external_city_id = subquery.city_id
+        AND (NOT ST_Equals(ST_SetSRID(ST_Transform(subquery.shape, 2193), 2193), buildings_reference.town_city.shape)
+            OR city_name != buildings_reference.town_city.name
+        )
         RETURNING *
     )
     SELECT count(*)::integer FROM update_town;
