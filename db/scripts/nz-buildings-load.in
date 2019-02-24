@@ -101,6 +101,20 @@ psql_exit() {
     fi
 }
 
+# create test admin_bdys schema
+
+if [ "${WITH_TEST_DATA}" = true ]; then
+    psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
+    echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+fi
+
+if [ "${WITH_PLUGIN_SETUP}" = true ]; then
+    psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
+    echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+fi
+
 # Execute schema and table files
 
 for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds

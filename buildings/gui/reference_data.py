@@ -2,6 +2,7 @@
 
 import os.path
 
+from functools import partial
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
 from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCheckBox
@@ -27,6 +28,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.db.connect()
         self.error_dialog = None
         self.message = ''
+        self.msgbox = self.message_box()
         self.btn_view_key.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'view_password.png')))
 
         # disable all check boxes if a curret dataset exists
@@ -50,7 +52,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.grbx_topo.toggled.connect(self.check_all_topo)
         self.grbx_admin.toggled.connect(self.check_all_admin)
         self.btn_exit.clicked.connect(self.exit_clicked)
-        self.btn_ok.clicked.connect(self.ok_clicked)
+        self.btn_update.clicked.connect(partial(self.update_clicked, commit_status=True))
 
     def close_cursor(self):
         self.db.close_cursor()
@@ -74,7 +76,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
         self.chbx_ta_grid.setEnabled(1)
-        self.btn_ok.setEnabled(1)
+        self.btn_view_key.setEnabled(1)
+        self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText('')
 
@@ -94,7 +97,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
         self.chbx_ta_grid.setDisabled(1)
-        self.btn_ok.setDisabled(1)
+        self.btn_view_key.setDisabled(1)
+        self.btn_update.setDisabled(1)
         # add message
         self.lb_message.setText('\nNOTE: You can\'t update reference data with\n             a dataset in progress \n')
 
@@ -109,69 +113,59 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.le_key.setEchoMode(QLineEdit.Password)
 
     @pyqtSlot()
-    def ok_clicked(self):
-        """Called when ok btn clicked"""
+    def update_clicked(self, commit_status=True):
+        """Called when update btn clicked"""
         # set cursor to busy
         QApplication.setOverrideCursor(Qt.WaitCursor)
+        # setup
         self.message = ''
-        api_key = self.le_key.text()
-        if api_key == '':
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                '\n------------- NO API KEY -------------'
-                '\n\nPlease enter a koordinates api key to'
-                ' update the reference data.'
-            )
-            QApplication.restoreOverrideCursor()
-            self.error_dialog.show()
-            return
-        updates = []
+        self.api_key = self.le_key.text()
+        self.updates = []
         # canals
         if self.chbx_canals.isChecked():
-            status = topo50.update_topo50(api_key, 'canal')
-            self.update_message(status, 'canal_polygons')
-            if status != 'error':
-                updates.append('canal')
+            self.topo_layer_processing('canal')
         # lagoon
         if self.chbx_lagoons.isChecked():
-            status = topo50.update_topo50(api_key, 'lagoon')
-            self.update_message(status, 'lagoon_polygons')
-            if status != 'error':
-                updates.append('lagoon')
+            self.topo_layer_processing('lagoon')
         # lake
         if self.chbx_lakes.isChecked():
-            status = topo50.update_topo50(api_key, 'lake')
-            self.update_message(status, 'lake_polygons')
-            if status != 'error':
-                updates.append('lake')
+            self.topo_layer_processing('lake')
         # pond
         if self.chbx_ponds.isChecked():
-            status = topo50.update_topo50(api_key, 'pond')
-            self.update_message(status, 'pond_polygons')
-            if status != 'error':
-                updates.append('pond')
+            self.topo_layer_processing('pond')
         # rivers
         if self.chbx_rivers.isChecked():
-            status = topo50.update_topo50(api_key, 'river')
-            self.update_message(status, 'river_polygons')
-            if status != 'error':
-                updates.append('river')
+            self.topo_layer_processing('river')
         # swamp
         if self.chbx_swamps.isChecked():
-            status = topo50.update_topo50(api_key, 'swamp')
-            self.update_message(status, 'swamp_polygons')
-            if status != 'error':
-                updates.append('swamp')
+            self.topo_layer_processing('swamp')
+        if self.db._open_cursor is None:
+            self.db.open_cursor()
+        # suburb localities
+        if self.chbx_suburbs.isChecked():
+            # delete existing suburbs where the external id is no longer in the suburb_locality table
+            db.execute_no_commit('SELECT buildings_reference.suburb_locality_delete_removed_areas();')
+            # modify all existing areas to check they are up to date
+            db.execute_no_commit('SELECT buildings_reference.suburb_locality_insert_new_areas();')
+            # insert into table ids in nz_localities that are not in suburb_locality
+            db.execute_no_commit('SELECT buildings_reference.suburb_locality_update_suburb_locality();')
+            # update messages and log
+            self.update_message('updated', 'suburb_locality')
+            self.updates.append('suburb_locality')
 
-        sql = 'SELECT buildings_reference.reference_update_log_insert_log(%s);'
-        self.db.execute_return(sql, (updates,))
+        # create log for this update
+        if len(self.updates) > 0:
+            sql = 'SELECT buildings_reference.reference_update_log_insert_log(%s);'
+            self.db.execute_no_commit(sql, (self.updates,))
         # restore cursor
         QApplication.restoreOverrideCursor()
         # final message box
         if self.message == '':
             self.message = 'No layers were updated.'
-        self.message_box()
+        self.msgbox.setText(self.message)
         self.msgbox.exec_()
+        if commit_status:
+            self.db.commit_open_cursor()
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -216,8 +210,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 box.setEnabled(1)
 
     def message_box(self):
-        self.msgbox = QMessageBox(QMessageBox.Information, 'Note', self.message,
-                                  buttons=QMessageBox.Ok)
+        return QMessageBox(QMessageBox.Information, 'Note', self.message,
+                           buttons=QMessageBox.Ok)
 
     def request_error(self):
         """Called when failure to request a changeset"""
@@ -232,6 +226,29 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.error_dialog.show()
         QApplication.restoreOverrideCursor()
 
+    def topo_layer_processing(self, layer):
+        """Processes to run for all topo layers"""
+        if not self.check_api_key():
+            return
+        status = topo50.update_topo50(self.api_key, layer)
+        self.update_message(status, '{}_polygons'.format(layer))
+        if status != 'error':
+            self.updates.append(layer)
+
+    def check_api_key(self):
+        # check for API key
+        if self.api_key == '':
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n------------- NO API KEY -------------'
+                '\n\nPlease enter a koordinates api key to'
+                ' update the reference data.'
+            )
+            self.error_dialog.show()
+            QApplication.restoreOverrideCursor()
+            return False
+        return True
+
     def update_message(self, status, name):
         """add to message for display at end of processing"""
         if status == 'current':
@@ -241,4 +258,3 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         if status == 'error':
             self.message += 'The request errored on the {} table\n'.format(name)
             self.request_error()
-            return

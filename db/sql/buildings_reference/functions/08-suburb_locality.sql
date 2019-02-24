@@ -10,6 +10,19 @@
 -- bulk_load_outlines_update_suburb (replace suburb values with the intersection result)
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of building outlines updated
+
+-- suburb_locality_delete_removed_areas (delete suburbs that are no longer is admin_bdys)
+    -- params:
+    -- return: integer number of outlines deleted
+
+-- suburb_locality_insert_new_areas (insert new areas from admin_bdys)
+    -- params:
+    -- return: integer number of areas inserted
+
+-- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
+    -- params:
+    -- return: integer number of areas updated
+
 --------------------------------------------
 
 -- Functions
@@ -65,3 +78,87 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_suburb(integer) IS
 'Replace suburb values with the intersection result';
+
+-- update suburb_table_functions
+
+-- suburb_locality_delete_removed_areas (delete suburbs that are no longer is admin_bdys)
+    -- params:
+    -- return: integer number of outlines deleted
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_delete_removed_areas()
+RETURNS integer AS
+$$
+    WITH delete_suburb AS (
+        DELETE FROM buildings_reference.suburb_locality
+        WHERE external_suburb_locality_id NOT
+          IN (SELECT id
+          FROM admin_bdys.nz_locality)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM delete_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.suburb_locality_delete_removed_areas() IS
+'Function to delete from the buildings_reference suburb locality table the areas that have been removed in the admin_bdys schema';
+
+-- suburb_locality_insert_new_areas (insert new areas from admin_bdys)
+    -- params:
+    -- return: integer number of areas inserted
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_insert_new_areas()
+RETURNS integer AS
+$$
+    WITH insert_suburb AS (
+        INSERT INTO buildings_reference.suburb_locality (external_suburb_locality_id, suburb_4th, suburb_3rd, suburb_2nd, suburb_1st, shape)
+        SELECT
+          id,
+          suburb_4th,
+          suburb_3rd,
+          suburb_2nd,
+          suburb_1st,
+          ST_SetSRID(ST_Transform(shape, 2193), 2193)
+        FROM admin_bdys.nz_locality
+        WHERE id NOT IN (SELECT
+          external_suburb_locality_id
+        FROM buildings_reference.suburb_locality)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM insert_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.suburb_locality_insert_new_areas() IS
+'Function to insert from the admin_bdys schema new areas not in the buildings_reference suburb locality table';
+
+-- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
+    -- params:
+    -- return: integer number of areas updated (should be all)
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_update_suburb_locality()
+RETURNS integer AS
+$$
+    WITH insert_suburb AS (
+        UPDATE buildings_reference.suburb_locality bsl
+        SET
+          suburb_4th = nzl.suburb_4th,
+          suburb_3rd = nzl.suburb_3rd,
+          suburb_2nd = nzl.suburb_2nd,
+          suburb_1st = nzl.suburb_1st,
+          shape = ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193)
+        FROM admin_bdys.nz_locality nzl
+        WHERE bsl.external_suburb_locality_id = nzl.id
+        AND (NOT ST_Equals(ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193), bsl.shape)
+          OR nzl.suburb_4th != bsl.suburb_4th
+          OR nzl.suburb_3rd != bsl.suburb_3rd
+          OR nzl.suburb_2nd != bsl.suburb_2nd
+          OR nzl.suburb_1st != bsl.suburb_1st
+        )
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM insert_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.suburb_locality_update_suburb_locality() IS
+'Function to update the attributes in the buildings_reference suburb locality table from the admin_bdys schema';
