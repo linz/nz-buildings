@@ -228,7 +228,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def topo_layer_processing(self, layer):
         """Processes to run for all topo layers"""
-        if not self.check_api_key() : return
+        if not self.check_api_key():
+            return
         status = topo50.update_topo50(self.api_key, layer)
         self.update_message(status, '{}_polygons'.format(layer))
         if status != 'error':
