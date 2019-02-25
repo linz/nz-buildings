@@ -88,7 +88,7 @@ $$
     WITH delete_town AS (
         DELETE FROM buildings_reference.town_city
         WHERE external_city_id NOT
-          IN (SELECT
+          IN (SELECT DISTINCT
             city_id
           FROM admin_bdys.nz_locality)
         RETURNING *

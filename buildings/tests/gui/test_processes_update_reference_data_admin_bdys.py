@@ -88,7 +88,7 @@ class SetUpReferenceData(unittest.TestCase):
         count_added = result.fetchone()[0]
         self.assertEqual(count_added, 1)
         # updated town city
-        sql_upated = "SELECT ST_NumGeometries(shape) FROM buildings_reference.town_city WHERE external_city_id = 1001;"
+        sql_upated = "SELECT name FROM buildings_reference.town_city WHERE external_city_id = 1001;"
         result = db._execute(sql_upated)
-        count_updated = result.fetchone()[0]
-        self.assertEqual(count_updated, 2)
+        name_updated = result.fetchone()[0]
+        self.assertEqual(name_updated, 'Wellington City')

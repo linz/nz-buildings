@@ -36,12 +36,16 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         result = self.db.execute_return(sql)
         if result is None:
             self.enable_checkboxes()
+            self.le_key.setDisabled(1)
+            self.btn_view_key.setDisabled(1)
         else:
             result = result.fetchone()
             process = result[1]
             transfer = result[2]
             if process is not None and transfer is not None:
                 self.enable_checkboxes()
+                self.le_key.setDisabled(1)
+                self.btn_view_key.setDisabled(1)
             else:
                 self.disable_checkboxes()
 
@@ -52,6 +56,13 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.grbx_topo.toggled.connect(self.check_all_topo)
         self.grbx_admin.toggled.connect(self.check_all_admin)
         self.btn_exit.clicked.connect(self.exit_clicked)
+        self.chbx_canals.toggled.connect(self.chbx_clicked)
+        self.chbx_lagoons.clicked.connect(self.chbx_clicked)
+        self.chbx_lakes.clicked.connect(self.chbx_clicked)
+        self.chbx_ponds.clicked.connect(self.chbx_clicked)
+        self.chbx_rivers.clicked.connect(self.chbx_clicked)
+        self.chbx_swamps.clicked.connect(self.chbx_clicked)
+        self.chbx_coastline_and_islands.clicked.connect(self.chbx_clicked)
         self.btn_update.clicked.connect(partial(self.update_clicked, commit_status=True))
 
     def close_cursor(self):
@@ -62,7 +73,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def enable_checkboxes(self):
         """Enable frame"""
-        self.le_key.setEnabled(1)
         self.grbx_topo.setEnabled(1)
         self.grbx_admin.setEnabled(1)
         self.chbx_canals.setEnabled(1)
@@ -76,7 +86,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
         self.chbx_ta_grid.setEnabled(1)
-        self.btn_view_key.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText('')
@@ -139,6 +148,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # swamp
         if self.chbx_swamps.isChecked():
             self.topo_layer_processing('swamp')
+        # coastlines and islands (placeholder)
+        if self.chbx_coastline_and_islands.isChecked():
+            self.message += 'The coastlines and islands table must be updated manually'
         if self.db._open_cursor is None:
             self.db.open_cursor()
         # suburb localities
@@ -203,10 +215,28 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(True)
                 box.setEnabled(1)
+                self.chbx_clicked()
         else:
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(False)
                 box.setEnabled(1)
+                self.chbx_clicked()
+
+    @pyqtSlot()
+    def chbx_clicked(self):
+        """Called when topo checkboxes are checked"""
+        if not self.loop_topo_boxes():
+            self.le_key.setDisabled(1)
+            self.btn_view_key.setDisabled(1)
+
+    def loop_topo_boxes(self):
+        """loops through topo check boxes returns true if one is checked and enables api key features"""
+        for box in self.grbx_topo.findChildren(QCheckBox):
+            if box.isChecked():
+                self.le_key.setEnabled(1)
+                self.btn_view_key.setEnabled(1)
+                return True
+        return False
 
     @pyqtSlot()
     def check_all_admin(self):
