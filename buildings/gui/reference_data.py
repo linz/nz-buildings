@@ -81,7 +81,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setEnabled(1)
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
-        self.btn_view_key.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText('')
