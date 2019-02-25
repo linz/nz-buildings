@@ -79,7 +79,7 @@ setup_test_db:
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
 	nz-buildings-load nz-buildings-plugin-db --with-plugin-setup; \
-	sed -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
+	$(SED) -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
 
 update_ui_headers:
 	@echo
@@ -87,5 +87,19 @@ update_ui_headers:
 	@echo "Fix/revert header lines in .ui files to qgis.gui"
 	@echo "------------------------------------------"
 	for f in ./buildings/gui/*.ui; do \
-		sed -i -e 's|<header>.*</header>|<header>qgis.gui</header>|g' $$f; \
-	done; \
+		$(SED) -i -e 's|<header>.*</header>|<header>qgis.gui</header>|g' $$f; \
+	done;
+
+bump_version:
+	@echo
+	@echo "------------------------------------------"
+	@echo "Bump version"
+	@echo "------------------------------------------"
+	# Update version number in QGIS Plugin
+	$(SED) -i 's/^version=.*/version=$(VERSION)/g' ./buildings/metadata.txt
+	# Add today's date for latest release in CHANGELOG
+	$(SED) -i '/Unreleased/{n;n;s/.*/$(TODAY)\n/}' ./CHANGELOG.rst
+	# Replace Unreleased header with version number in CHANGELOG
+	$(SED) -i 's/Unreleased/$(VERSION)/g' ./CHANGELOG.rst
+	# Replace version number in makefile
+	$(SED) -i 's/^VERSION = .*/VERSION = $(VERSION)/g' ./makefile

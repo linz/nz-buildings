@@ -25,6 +25,9 @@ Buildings Reference Select Statements
     - territorial_authority_name_by_building_outline_id (building_outline_id)
     - territorial_authority_name_by_bulk_outline_id (bulk_load_outline_id)
 
+- territorial_authority_grid
+    - refresh_ta_grid_view
+
 - town_city
     - town_city_intersect_geometry (geometry)
     - town_city_name
@@ -137,6 +140,12 @@ FROM buildings_reference.territorial_authority ta,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE ta.territorial_authority_id = blo.territorial_authority_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+# territorial authority grid
+
+refresh_ta_grid_view = """
+REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;
 """
 
 # town city

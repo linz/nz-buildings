@@ -54,7 +54,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         """Runs after each test."""
         self.capture_frame.btn_exit.click()
 
-    def test_filter_bottons_clicked(self):
+    def test_filter_buttons_clicked(self):
         """
         Check the table filtered when btn_filter_add clicked
         and unfiltered when btn_filter_del clicked
