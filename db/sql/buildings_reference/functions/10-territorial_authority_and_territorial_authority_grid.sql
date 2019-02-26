@@ -15,6 +15,14 @@
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
 
+-- bulk_load_outlines_update_all_territorial_authorities (Replace the TA values with the intersection result)
+    -- params:
+    -- return: count(integer) number of outlines updated
+
+-- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
+    -- params:
+    -- return: count(integer) number of outlines updated
+
 -- territorial_auth_delete_areas(delete areas no long in admin_bdys)
     -- params:
     -- return: integer count of TAs deleted
@@ -106,6 +114,60 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_territorial_authority(integer) IS
 'Replace the TA values with the intersection result';
+
+-- bulk_load_outlines_update_all_territorial_authorities (Replace the TA values with the intersection result)
+    -- params:
+    -- return: count(integer) number of outlines updated
+CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities()
+RETURNS integer AS
+$$
+
+    WITH update_territorial_auth AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET territorial_authority_id = territorial_authority_intersect.territorial_authority_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.territorial_authority_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) territorial_authority_intersect
+        WHERE outlines.bulk_load_outline_id = territorial_authority_intersect.bulk_load_outline_id
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_territorial_auth;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities() IS
+'Replace the TA values with the intersection result for all buildings in bulk_load_outlines';
+
+-- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
+    -- params:
+    -- return: count(integer) number of outlines updated
+CREATE OR REPLACE FUNCTION buildings_reference.building_outlines_update_territorial_authority()
+RETURNS integer AS
+$$
+
+    WITH update_territorial_auth AS (
+        UPDATE buildings.building_outlines outlines
+        SET territorial_authority_id = territorial_authority_intersect.territorial_authority_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.territorial_authority_intersect_polygon(outlines.shape)
+                , outlines.building_outline_id
+            FROM buildings.building_outlines outlines
+        ) territorial_authority_intersect
+        WHERE outlines.building_outline_id = territorial_authority_intersect.building_outline_id
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_territorial_auth;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.building_outlines_update_territorial_authority() IS
+'Replace the TA values with the intersection result for all buildings in building_outlines';
 
 -- Update Territorial Authority table:
 
