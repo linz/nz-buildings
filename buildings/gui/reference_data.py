@@ -56,14 +56,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.grbx_topo.toggled.connect(self.check_all_topo)
         self.grbx_admin.toggled.connect(self.check_all_admin)
         self.btn_exit.clicked.connect(self.exit_clicked)
-        self.chbx_canals.toggled.connect(self.chbx_clicked)
-        self.chbx_lagoons.clicked.connect(self.chbx_clicked)
-        self.chbx_lakes.clicked.connect(self.chbx_clicked)
-        self.chbx_ponds.clicked.connect(self.chbx_clicked)
-        self.chbx_rivers.clicked.connect(self.chbx_clicked)
-        self.chbx_swamps.clicked.connect(self.chbx_clicked)
-        self.chbx_coastline_and_islands.clicked.connect(self.chbx_clicked)
         self.btn_update.clicked.connect(partial(self.update_clicked, commit_status=True))
+        for box in self.grbx_topo.findChildren(QCheckBox):
+            box.clicked.connect(self.chbx_clicked)
 
     def close_cursor(self):
         self.db.close_cursor()
