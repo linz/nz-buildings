@@ -97,7 +97,7 @@ $$
         ) territorial_authority_intersect
         WHERE outlines.bulk_load_outline_id = territorial_authority_intersect.bulk_load_outline_id
         AND outlines.supplied_dataset_id = $1
-        RETURNING $1
+        RETURNING *
     )
     SELECT count(*)::integer FROM update_territorial_auth;
 
