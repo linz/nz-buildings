@@ -155,6 +155,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             db.execute_no_commit('SELECT buildings_reference.suburb_locality_insert_new_areas();')
             # insert into table ids in nz_localities that are not in suburb_locality
             db.execute_no_commit('SELECT buildings_reference.suburb_locality_update_suburb_locality();')
+            # update bulk_load_outlines suburb values
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_suburbs();')
+            # update building_outlines suburb values
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_suburb();')
             # update messages and log
             self.update_message('updated', 'suburb_locality')
             self.updates.append('suburb_locality')
@@ -166,6 +170,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             db.execute_no_commit('SELECT buildings_reference.town_city_insert_new_areas();')
             # insert into table ids in nz_localities that are not in town_city
             db.execute_no_commit('SELECT buildings_reference.town_city_update_areas();')
+            # update bulk_load_outlines town/city values
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_town_cities();')
+            # update building outlines town/city values
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_town_city();')
             # update messages and log
             self.update_message('updated', 'town_city')
             self.updates.append('town_city')
@@ -177,6 +185,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             db.execute_no_commit('SELECT buildings_reference.territorial_auth_insert_areas();')
             # Update new TA areas
             db.execute_no_commit('SELECT buildings_reference.territorial_auth_update_areas();')
+            # update bulk_load_outlines territorial authority values
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_territorial_authorities();')
+            # update building outlines territorial authority values
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_territorial_authority();')
             # update message and log
             self.update_message('updated', 'territorial_authority')
             self.updates.append('territorial_authority')
