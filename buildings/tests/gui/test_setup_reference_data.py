@@ -54,7 +54,6 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_suburbs.isEnabled())
         self.assertFalse(self.reference_frame.chbx_town.isEnabled())
         self.assertFalse(self.reference_frame.chbx_ta.isEnabled())
-        self.assertFalse(self.reference_frame.chbx_ta_grid.isEnabled())
         self.assertFalse(self.reference_frame.btn_update.isEnabled())
         self.assertTrue(self.reference_frame.btn_exit.isEnabled())
 
@@ -75,7 +74,6 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_suburbs.isChecked())
         self.assertFalse(self.reference_frame.chbx_town.isChecked())
         self.assertFalse(self.reference_frame.chbx_ta.isChecked())
-        self.assertFalse(self.reference_frame.chbx_ta_grid.isChecked())
         self.reference_frame.grbx_topo.setChecked(False)
         self.assertFalse(self.reference_frame.chbx_canals.isChecked())
         self.assertFalse(self.reference_frame.chbx_lagoons.isChecked())
@@ -87,7 +85,6 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertTrue(self.reference_frame.chbx_suburbs.isChecked())
         self.assertTrue(self.reference_frame.chbx_town.isChecked())
         self.assertTrue(self.reference_frame.chbx_ta.isChecked())
-        self.assertTrue(self.reference_frame.chbx_ta_grid.isChecked())
         self.assertFalse(self.reference_frame.chbx_canals.isChecked())
         self.assertFalse(self.reference_frame.chbx_lagoons.isChecked())
         self.assertFalse(self.reference_frame.chbx_lakes.isChecked())
@@ -98,4 +95,3 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_suburbs.isChecked())
         self.assertFalse(self.reference_frame.chbx_town.isChecked())
         self.assertFalse(self.reference_frame.chbx_ta.isChecked())
-        self.assertFalse(self.reference_frame.chbx_ta_grid.isChecked())
