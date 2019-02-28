@@ -16,24 +16,24 @@
     -- return: count(integer) number of outlines updated
 
 -- bulk_load_outlines_update_all_territorial_authorities (Replace the TA values with the intersection result)
-    -- params:
+    -- params: integer[] list of territorial_authorities buildings must be within
     -- return: count(integer) number of outlines updated
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
-    -- params:
+    -- params: integer[] list of territorial_authorities buildings must be within
     -- return: count(integer) number of outlines updated
 
 -- territorial_auth_delete_areas(delete areas no long in admin_bdys)
     -- params:
-    -- return: integer count of TAs deleted
+    -- return: integer list of TAs deleted
 
 -- territorial_auth_insert_areas(insert new areas from admin_bdys)
     -- params:
-    -- return: integer count of new areas added
+    -- return: integer list of new areas added
 
 -- territorial_auth_update_areas(update geometries based on admin_bdys)
     -- params:
-    -- return: integer count of areas updated
+    -- return: integer list of areas updated
 
 ----------------------------------------------------------------------------------------------
 
@@ -116,9 +116,9 @@ COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_territorial_au
 'Replace the TA values with the intersection result';
 
 -- bulk_load_outlines_update_all_territorial_authorities (Replace the TA values with the intersection result)
-    -- params:
+    -- params: integer[] list of territorial_authorities buildings must be within
     -- return: count(integer) number of outlines updated
-CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities()
+CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities(integer[])
 RETURNS integer AS
 $$
 
@@ -132,6 +132,7 @@ $$
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) territorial_authority_intersect
         WHERE outlines.bulk_load_outline_id = territorial_authority_intersect.bulk_load_outline_id
+        AND territorial_authority_id = ANY($1)
         RETURNING *
     )
     SELECT count(*)::integer FROM update_territorial_auth;
@@ -139,13 +140,13 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities() IS
+COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_all_territorial_authorities(integer[]) IS
 'Replace the TA values with the intersection result for all buildings in bulk_load_outlines';
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
-    -- params:
+    -- params: integer[] list of territorial_authorities buildings must be within
     -- return: count(integer) number of outlines updated
-CREATE OR REPLACE FUNCTION buildings_reference.building_outlines_update_territorial_authority()
+CREATE OR REPLACE FUNCTION buildings_reference.building_outlines_update_territorial_authority(integer[])
 RETURNS integer AS
 $$
 
@@ -159,6 +160,7 @@ $$
             FROM buildings.building_outlines outlines
         ) territorial_authority_intersect
         WHERE outlines.building_outline_id = territorial_authority_intersect.building_outline_id
+        AND territorial_authority_id = ANY($1)
         RETURNING *
     )
     SELECT count(*)::integer FROM update_territorial_auth;
@@ -166,16 +168,16 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.building_outlines_update_territorial_authority() IS
+COMMENT ON FUNCTION buildings_reference.building_outlines_update_territorial_authority(integer[]) IS
 'Replace the TA values with the intersection result for all buildings in building_outlines';
 
 -- Update Territorial Authority table:
 
 -- territorial_auth_delete_areas(delete areas no long in admin_bdys)
     -- params:
-    -- return: integer count of TAs deleted
+    -- return: integer list of TAs deleted
 CREATE OR REPLACE FUNCTION buildings_reference.territorial_auth_delete_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH delete_ta AS (
         DELETE FROM buildings_reference.territorial_authority
@@ -184,7 +186,7 @@ $$
           FROM admin_bdys.territorial_authority)
         RETURNING *
     )
-    SELECT count(*)::integer FROM delete_ta
+    SELECT ARRAY(SELECT territorial_authority_id FROM delete_ta);
 
 $$
 LANGUAGE sql VOLATILE;
@@ -194,9 +196,9 @@ COMMENT ON FUNCTION buildings_reference.territorial_auth_delete_areas() IS
 
 -- territorial_auth_insert_areas(insert new areas from admin_bdys)
     -- params:
-    -- return: integer count of new areas added
+    -- return: integer list of new areas added
 CREATE OR REPLACE FUNCTION buildings_reference.territorial_auth_insert_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH insert_ta AS (
         INSERT INTO buildings_reference.territorial_authority (external_territorial_authority_id, name, shape)
@@ -210,7 +212,7 @@ $$
           FROM buildings_reference.territorial_authority)
         RETURNING *
     )
-    SELECT count(*)::integer FROM insert_ta;
+    SELECT ARRAY(SELECT territorial_authority_id FROM insert_ta);
 $$
 LANGUAGE sql VOLATILE;
 
@@ -219,9 +221,9 @@ COMMENT ON FUNCTION buildings_reference.territorial_auth_insert_areas() IS
 
 -- territorial_auth_update_areas(update geometries based on admin_bdys)
     -- params:
-    -- return: integer count of areas updated
+    -- return: integer list of areas updated
 CREATE OR REPLACE FUNCTION buildings_reference.territorial_auth_update_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH update_ta AS (
         UPDATE buildings_reference.territorial_authority bta
@@ -232,11 +234,11 @@ $$
             (SELECT ogc_fid
              FROM admin_bdys.territorial_authority ata
              JOIN buildings_reference.territorial_authority bta ON ogc_fid = external_territorial_authority_id
-             WHERE NOT st_equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
+             WHERE NOT ST_Equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
                OR bta.name != ata.name)
         RETURNING *
     )
-    SELECT count(*)::integer FROM update_ta;
+    SELECT ARRAY(SELECT territorial_authority_id FROM update_ta);
 $$
 LANGUAGE sql VOLATILE;
 

@@ -12,24 +12,24 @@
     -- return: count(integer) number of building outlines updated
 
 -- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
-    -- params:
+    -- params: integer[] list of suburb localities building must be within
     -- return: count(integer) number of building outlines updated
 
 -- building_outlines_update_suburb (replace suburb values with the intersection result)
-    -- params:
+    -- params: integer[] list of suburb localities building must be within
     -- return: integer count of number of building outlines updated
 
 -- suburb_locality_delete_removed_areas (delete suburbs that are no longer is admin_bdys)
     -- params:
-    -- return: integer number of outlines deleted
+    -- return: integer list of outlines deleted
 
 -- suburb_locality_insert_new_areas (insert new areas from admin_bdys)
     -- params:
-    -- return: integer number of areas inserted
+    -- return: integer list of areas inserted
 
 -- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
     -- params:
-    -- return: integer number of areas updated
+    -- return: integer list of areas updated
 
 --------------------------------------------
 
@@ -88,9 +88,9 @@ COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_suburb(integer
 'Replace suburb values with the intersection result of buildings from a supplied dataset in the bulk_load_outlines table';
 
 -- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
-    -- params:
+    -- params: integer[] list of suburb localities building must be within
     -- return: count(integer) number of building outlines updated
-CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_all_suburbs()
+CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_all_suburbs(integer[])
 RETURNS integer AS
 $$
 
@@ -104,6 +104,7 @@ $$
             FROM buildings_bulk_load.bulk_load_outlines outlines
         ) suburb_locality_intersect
         WHERE outlines.bulk_load_outline_id = suburb_locality_intersect.bulk_load_outline_id
+        AND suburb_locality_id = ANY($1)
         RETURNING *
     )
     SELECT count(*)::integer FROM update_suburb;
@@ -111,13 +112,13 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_all_suburbs() IS
+COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_all_suburbs(integer[]) IS
 'Replace suburb values with the intersection result of all buildings in the bulk_load_outlines table';
 
 -- building_outlines_update_suburb (replace suburb values with the intersection result)
-    -- params:
+    -- params: integer[] list of suburb localities building must be within
     -- return: integer count of number of building outlines updated
-CREATE OR REPLACE FUNCTION buildings_reference.building_outlines_update_suburb()
+CREATE OR REPLACE FUNCTION buildings_reference.building_outlines_update_suburb(integer[])
 RETURNS integer AS
 $$
 
@@ -131,6 +132,7 @@ $$
             FROM buildings.building_outlines outlines
           ) suburb_locality_intersect
           WHERE outlines.building_outline_id = suburb_locality_intersect.building_outline_id
+          AND suburb_locality_id = ANY($1)
           RETURNING *
       )
     SELECT count(*)::integer FROM update_suburb;
@@ -138,16 +140,16 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.building_outlines_update_suburb() IS
+COMMENT ON FUNCTION buildings_reference.building_outlines_update_suburb(integer[]) IS
 'Replace suburb values with the intersection result of buildings in the building_outlines table';
 
 -- update suburb_table_functions
 
 -- suburb_locality_delete_removed_areas (delete suburbs that are no longer is admin_bdys)
     -- params:
-    -- return: integer number of outlines deleted
+    -- return: integer list of outlines deleted
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_delete_removed_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH delete_suburb AS (
         DELETE FROM buildings_reference.suburb_locality
@@ -156,7 +158,7 @@ $$
           FROM admin_bdys.nz_locality)
         RETURNING *
     )
-    SELECT count(*)::integer FROM delete_suburb;
+    SELECT ARRAY(SELECT suburb_locality_id FROM delete_suburb);
 
 $$
 LANGUAGE sql VOLATILE;
@@ -166,9 +168,9 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_delete_removed_areas() I
 
 -- suburb_locality_insert_new_areas (insert new areas from admin_bdys)
     -- params:
-    -- return: integer number of areas inserted
+    -- return: integer list of areas inserted
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_insert_new_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH insert_suburb AS (
         INSERT INTO buildings_reference.suburb_locality (external_suburb_locality_id, suburb_4th, suburb_3rd, suburb_2nd, suburb_1st, shape)
@@ -185,7 +187,7 @@ $$
         FROM buildings_reference.suburb_locality)
         RETURNING *
     )
-    SELECT count(*)::integer FROM insert_suburb;
+    SELECT ARRAY(SELECT suburb_locality_id FROM insert_suburb);
 
 $$
 LANGUAGE sql VOLATILE;
@@ -195,11 +197,11 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_insert_new_areas() IS
 
 -- suburb_locality_update_suburb_locality (update geometries based on those in admin_bdys)
     -- params:
-    -- return: integer number of areas updated (should be all)
+    -- return: integer list of areas updated
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_update_suburb_locality()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
-    WITH insert_suburb AS (
+    WITH update_suburb AS (
         UPDATE buildings_reference.suburb_locality bsl
         SET
           suburb_4th = nzl.suburb_4th,
@@ -217,7 +219,7 @@ $$
         )
         RETURNING *
     )
-    SELECT count(*)::integer FROM insert_suburb;
+    SELECT ARRAY(SELECT suburb_locality_id FROM update_suburb);
 
 $$
 LANGUAGE sql VOLATILE;

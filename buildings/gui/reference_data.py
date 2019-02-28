@@ -149,46 +149,67 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             self.db.open_cursor()
         # suburb localities
         if self.chbx_suburbs.isChecked():
+            suburb_list = []
             # delete existing suburbs where the external id is no longer in the suburb_locality table
-            db.execute_no_commit('SELECT buildings_reference.suburb_locality_delete_removed_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.suburb_locality_delete_removed_areas();')
+            if result is not None:
+                suburb_list.extend(result.fetchone()[0])
             # modify all existing areas to check they are up to date
-            db.execute_no_commit('SELECT buildings_reference.suburb_locality_insert_new_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.suburb_locality_insert_new_areas();')
+            if result is not None:
+                suburb_list.extend(result.fetchone()[0])
             # insert into table ids in nz_localities that are not in suburb_locality
-            db.execute_no_commit('SELECT buildings_reference.suburb_locality_update_suburb_locality();')
+            result = db.execute_no_commit('SELECT buildings_reference.suburb_locality_update_suburb_locality();')
+            if result is not None:
+                suburb_list.extend(result.fetchone()[0])
             # update bulk_load_outlines suburb values
-            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_suburbs();')
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_suburbs(%s);', (suburb_list,))
             # update building_outlines suburb values
-            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_suburb();')
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_suburb(%s);', (suburb_list,))
             # update messages and log
             self.update_message('updated', 'suburb_locality')
             self.updates.append('suburb_locality')
         # town_city
         if self.chbx_town.isChecked():
+            town_list = []
             # delete existing areas where the external id is no longer in the town_city table
-            db.execute_no_commit('SELECT buildings_reference.town_city_delete_removed_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.town_city_delete_removed_areas();')
+            if result is not None:
+                town_list.extend(result.fetchone()[0])
             # modify all existing areas to check they are up to date
-            db.execute_no_commit('SELECT buildings_reference.town_city_insert_new_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.town_city_insert_new_areas();')
+            if result is not None:
+                town_list.extend(result.fetchone()[0])
             # insert into table ids in nz_localities that are not in town_city
-            db.execute_no_commit('SELECT buildings_reference.town_city_update_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.town_city_update_areas();')
+            if result is not None:
+                town_list.extend(result.fetchone()[0])
             # update bulk_load_outlines town/city values
-            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_town_cities();')
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_town_cities(%s);', (town_list,))
             # update building outlines town/city values
-            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_town_city();')
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_town_city(%s);', (town_list,))
             # update messages and log
             self.update_message('updated', 'town_city')
             self.updates.append('town_city')
         # territorial authority and grid
         if self.chbx_ta.isChecked():
+            ta_list = []
             # delete removed TA areas
-            db.execute_no_commit('SELECT buildings_reference.territorial_auth_delete_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.territorial_auth_delete_areas();')
+            if result is not None:
+                ta_list.extend(result.fetchone()[0])
             # Insert TA areas
-            db.execute_no_commit('SELECT buildings_reference.territorial_auth_insert_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.territorial_auth_insert_areas();')
+            if result is not None:
+                ta_list.extend(result.fetchone()[0])
             # Update new TA areas
-            db.execute_no_commit('SELECT buildings_reference.territorial_auth_update_areas();')
+            result = db.execute_no_commit('SELECT buildings_reference.territorial_auth_update_areas();')
+            if result is not None:
+                ta_list.extend(result.fetchone()[0])
             # update bulk_load_outlines territorial authority values
-            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_territorial_authorities();')
+            db.execute_no_commit('SELECT buildings_reference.bulk_load_outlines_update_all_territorial_authorities(%s);', (ta_list,))
             # update building outlines territorial authority values
-            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_territorial_authority();')
+            db.execute_no_commit('SELECT buildings_reference.building_outlines_update_territorial_authority(%s);', (ta_list,))
             # update message and log
             self.update_message('updated', 'territorial_authority')
             self.updates.append('territorial_authority')
