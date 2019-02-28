@@ -67,6 +67,16 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_updated)
         name_updated = result.fetchone()[0]
         self.assertEqual(name_updated, 'Kelburn North')
+        # check bulk_load_outlines
+        sql_blo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings_bulk_load.bulk_load_outlines;"
+        result = db._execute(sql_blo)
+        blo_suburb_update = result.fetchone()[0]
+        self.assertEqual(blo_suburb_update, 4)
+        # check building_outlines
+        sql_bo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings.building_outlines;"
+        result = db._execute(sql_bo)
+        bo_suburb_update = result.fetchone()[0]
+        self.assertEqual(bo_suburb_update, 4)
 
     def test_town_city_table_update(self):
         """Check buildings_reference.town_city table updates correctly."""
@@ -92,6 +102,16 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_upated)
         name_updated = result.fetchone()[0]
         self.assertEqual(name_updated, 'Wellington City')
+        # check bulk_load_outlines
+        sql_blo = "SELECT count(DISTINCT town_city_id)::integer FROM buildings_bulk_load.bulk_load_outlines;"
+        result = db._execute(sql_blo)
+        blo_town_update = result.fetchone()[0]
+        self.assertEqual(blo_town_update, 2)
+        # check building_outlines
+        sql_bo = "SELECT count(DISTINCT town_city_id)::integer FROM buildings.building_outlines;"
+        result = db._execute(sql_bo)
+        bo_town_update = result.fetchone()[0]
+        self.assertEqual(bo_town_update, 2)
 
     def test_territorial_authority_table_update(self):
         """Check buildings_reference.territorial_authority table updates correctly"""
@@ -128,3 +148,13 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_added_grid)
         count_added_grid = result.fetchone()[0]
         self.assertTrue(count_added_grid > 0)
+        # check bulk_load_outlines
+        sql_blo = "SELECT count(DISTINCT territorial_authority_id)::integer FROM buildings_bulk_load.bulk_load_outlines;"
+        result = db._execute(sql_blo)
+        blo_ta_update = result.fetchone()[0]
+        self.assertEqual(blo_ta_update, 2)
+        # check building_outlines
+        sql_bo = "SELECT count(DISTINCT territorial_authority_id)::integer FROM buildings.building_outlines;"
+        result = db._execute(sql_bo)
+        bo_ta_update = result.fetchone()[0]
+        self.assertEqual(bo_ta_update, 2)
