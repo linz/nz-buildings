@@ -7,21 +7,17 @@
     -- params: p_polygon_geometry geometry
     -- return: integer town_city_id
 
--- bulk_load_outlines_update_town_city (Replace the town/city values with the intersection)
-    -- params: integer supplied_dataset_id
-    -- return: count(integer) number of outlines updated
-
 -- town_city_delete_removed_areas (removed from table areas not in admin_byds)
     -- params:
-    -- return: integer number of town_cities deleted
+    -- return: integer list of town_cities deleted
 
 -- town_city_insert_new_areas (insert new areas from admin_bdys)
     -- params:
-    -- return: integer number of outlines inserted
+    -- return: integer list of outlines inserted
 
 -- town_city_update_areas(update geometries based on those in admin_bdys)
     -- params:
-    -- return: integer number of areas updated (will be all of them)
+    -- return: integer list of areas updated
 
 --------------------------------------------
 
@@ -49,51 +45,23 @@ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_reference.town_city_intersect_polygon(geometry) IS
 'Return id of town/city with most overlap';
 
--- bulk_load_outlines_update_town_city (Replace the town/city values with the intersection)
-    -- params: integer supplied_dataset_id
-    -- return: count(integer) number of outlines updated
-CREATE OR REPLACE FUNCTION buildings_reference.bulk_load_outlines_update_town_city(integer)
-RETURNS integer AS
-$$
-
-    WITH update_town_city AS (
-        UPDATE buildings_bulk_load.bulk_load_outlines outlines
-        SET town_city_id = town_city_intersect.town_city_intersect_polygon
-        FROM (
-            SELECT
-                  buildings_reference.town_city_intersect_polygon(outlines.shape)
-                , outlines.bulk_load_outline_id
-            FROM buildings_bulk_load.bulk_load_outlines outlines
-        ) town_city_intersect
-        WHERE outlines.bulk_load_outline_id = town_city_intersect.bulk_load_outline_id
-        AND outlines.supplied_dataset_id = $1
-        RETURNING *
-    )
-    SELECT count(*)::integer FROM update_town_city;
-
-$$
-LANGUAGE sql VOLATILE;
-
-COMMENT ON FUNCTION buildings_reference.bulk_load_outlines_update_town_city(integer) IS
-'Replace the town/city values with the intersection';
-
 -- update town_city table functions:
 
 -- town_city_delete_removed_areas (removed from table areas not in admin_byds)
     -- params:
-    -- return: integer number of town_cities deleted
+    -- return: integer list of town_cities deleted
 CREATE OR REPLACE FUNCTION buildings_reference.town_city_delete_removed_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH delete_town AS (
         DELETE FROM buildings_reference.town_city
         WHERE external_city_id NOT
-          IN (SELECT DISTINCT
-            city_id
-          FROM admin_bdys.nz_locality)
+          IN (SELECT DISTINCT city_id
+          FROM admin_bdys.nz_locality
+          WHERE city_id IS NOT NULL)
         RETURNING *
     )
-    SELECT count(*)::integer FROM delete_town;
+    SELECT ARRAY(SELECT town_city_id FROM delete_town);
 
 $$
 LANGUAGE sql VOLATILE;
@@ -103,9 +71,9 @@ COMMENT ON FUNCTION buildings_reference.town_city_delete_removed_areas() IS
 
 -- town_city_insert_new_areas (insert new areas from admin_bdys)
     -- params:
-    -- return: integer number of outlines inserted
+    -- return: integer list of outlines inserted
 CREATE OR REPLACE FUNCTION buildings_reference.town_city_insert_new_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH insert_town AS (
         INSERT INTO buildings_reference.town_city (external_city_id, name, shape)
@@ -126,7 +94,7 @@ $$
                    city_name) AS subquery
         RETURNING *
     )
-    SELECT count(*)::integer FROM insert_town;
+    SELECT ARRAY(SELECT town_city_id FROM insert_town);
 
 $$
 LANGUAGE sql VOLATILE;
@@ -136,9 +104,9 @@ COMMENT ON FUNCTION buildings_reference.town_city_insert_new_areas() IS
 
 -- town_city_update_areas(update geometries based on those in admin_bdys)
     -- params:
-    -- return: integer number of areas updated (will be all of them)
+    -- return: integer list of areas updated
 CREATE OR REPLACE FUNCTION buildings_reference.town_city_update_areas()
-RETURNS integer AS
+RETURNS integer[] AS
 $$
     WITH update_town AS (
         UPDATE buildings_reference.town_city
@@ -158,7 +126,7 @@ $$
         )
         RETURNING *
     )
-    SELECT count(*)::integer FROM update_town;
+    SELECT ARRAY(SELECT town_city_id FROM update_town);
 
 $$
 LANGUAGE sql VOLATILE;

@@ -30,6 +30,18 @@
     -- params: shape to update to geometry, integer building_outline_id
     --return: number of outlines updated (should only be one)
 
+-- building_outlines_update_suburb (replace suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: integer count of number of building outlines updated
+
+-- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
+    -- params: integer[] list of territorial_authorities buildings must be within
+    -- return: count(integer) number of outlines updated
+
+-- building_outlines_update_town_city (Replace the town/city values with the intersection result)
+    -- params: integer[] list of town_city_ids building must be within
+    -- return: count(integer) number of outlines updated
+
 --------------------------------------------
 
 -- Functions
@@ -211,3 +223,87 @@ $$ LANGUAGE sql;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_shape(geometry, integer) IS
 'Update shape in building_outlines table';
+
+-- building_outlines_update_suburb (replace suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: integer count of number of building outlines updated
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_suburb(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_suburb AS (
+        UPDATE buildings.building_outlines outlines
+        SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.suburb_locality_intersect_polygon(outlines.shape)
+                  , outlines.building_outline_id
+            FROM buildings.building_outlines outlines
+          ) suburb_locality_intersect
+          WHERE outlines.building_outline_id = suburb_locality_intersect.building_outline_id
+          AND suburb_locality_id = ANY($1)
+          RETURNING *
+      )
+    SELECT count(*)::integer FROM update_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_suburb(integer[]) IS
+'Replace suburb values with the intersection result of buildings in the building_outlines table';
+
+-- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
+    -- params: integer[] list of territorial_authorities buildings must be within
+    -- return: count(integer) number of outlines updated
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_territorial_authority(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_territorial_auth AS (
+        UPDATE buildings.building_outlines outlines
+        SET territorial_authority_id = territorial_authority_intersect.territorial_authority_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.territorial_authority_intersect_polygon(outlines.shape)
+                , outlines.building_outline_id
+            FROM buildings.building_outlines outlines
+        ) territorial_authority_intersect
+        WHERE outlines.building_outline_id = territorial_authority_intersect.building_outline_id
+        AND territorial_authority_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_territorial_auth;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_territorial_authority(integer[]) IS
+'Replace the TA values with the intersection result for all buildings in building_outlines';
+
+-- building_outlines_update_town_city (Replace the town/city values with the intersection result)
+    -- params: integer[] list of town_city_ids building must be within
+    -- return: count(integer) number of outlines updated
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_town_city(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_town_city AS (
+        UPDATE buildings.building_outlines outlines
+        SET town_city_id = town_city_intersect.town_city_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.town_city_intersect_polygon(outlines.shape)
+                , outlines.building_outline_id
+            FROM buildings.building_outlines outlines
+        ) town_city_intersect
+        WHERE outlines.building_outline_id = town_city_intersect.building_outline_id
+        AND town_city_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_town_city;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_town_city(integer[]) IS
+'Replace the town/city values with the intersection result for all buildings in buildings.building_outlines';

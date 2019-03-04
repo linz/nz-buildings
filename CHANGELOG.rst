@@ -12,6 +12,7 @@ Added
 
 * Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
 * User can update the buildings_reference.suburb_locality, buildings_reference.town_city, buildings_reference.territorial_authority and buildings_reference.territorial_authority_grid tables using the reference frame
+* bulk_load_outlines and building_outlines admin boundary ids are updated along with the boundary tables
 
 1.1.0
 ==========
