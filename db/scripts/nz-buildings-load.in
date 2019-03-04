@@ -117,7 +117,7 @@ fi
 
 # Execute schema and table files
 
-for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
+for s in buildings_common buildings_reference buildings buildings_bulk_load buildings_lds
 do
     for file in ${SCRIPTSDIR}/sql/"$s"/*.sql; do
         echo ${file} >&2
@@ -128,7 +128,7 @@ done
 
 # execute function files
 
-for s in buildings_common buildings buildings_reference buildings_bulk_load buildings_lds
+for s in buildings_common buildings_reference buildings buildings_bulk_load buildings_lds
 do
     for file in ${SCRIPTSDIR}/sql/"$s"/functions/*.sql; do
         echo ${file} >&2

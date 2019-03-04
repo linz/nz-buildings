@@ -21,8 +21,8 @@ SELECT buildings.building_outlines_insert(1000029, 5, 1001, 1, 101, NULL, 10001,
 -- existing subset extract
 SELECT buildings_bulk_load.existing_subset_extracts_insert(1000000, 3, '0103000020910800000100000005000000000000009FB33A4100000080BCB35441000000009FB33A4100000080AEB3544100000000D8B33A4100000080AEB3544100000000D8B33A4100000080BCB35441000000009FB33A4100000080BCB35441');
 -- update suburb
-SELECT buildings_reference.bulk_load_outlines_update_suburb(3);
+SELECT buildings_bulk_load.bulk_load_outlines_update_suburb(3);
 -- update town_city
-SELECT buildings_reference.bulk_load_outlines_update_town_city(3);
+SELECT buildings_bulk_load.bulk_load_outlines_update_town_city(3);
 -- update TA
-SELECT buildings_reference.bulk_load_outlines_update_territorial_authority(3);
+SELECT buildings_bulk_load.bulk_load_outlines_update_territorial_authority(3);
