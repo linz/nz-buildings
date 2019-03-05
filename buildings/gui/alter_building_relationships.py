@@ -374,6 +374,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.select_row_in_tbl_related(id_existing, id_bulk)
         self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
 
+        # Change item color in the list
+        if has_removed or has_added:
+            self.update_listitem_color(QColor('#ff2b01'), QColor('#3f9800'))
+        elif has_matched:
+            self.update_listitem_color(QColor('#00b4d4'), QColor('#00b4d4'))
+        elif has_related:
+            self.update_listitem_color(QColor('#e601ff'), QColor('#e601ff'))
+
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
@@ -1131,6 +1139,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(lst.count()):
             item = lst.item(row)
             item.setFlags(Qt.ItemIsEnabled)
+
+    def update_listitem_color(self, existing_color, bulk_color):
+        for i in range(self.lst_existing.count()):
+            self.lst_existing.item(i).setForeground(QColor(existing_color))
+        for i in range(self.lst_bulk.count()):
+            self.lst_bulk.item(i).setForeground(QColor(bulk_color))
 
     def delete_from_lyr_removed_in_edit(self, id_existing):
         filter = self.lyr_removed_existing_in_edit.subsetString()
