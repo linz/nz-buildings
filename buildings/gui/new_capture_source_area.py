@@ -334,6 +334,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         self.mcb_selection_layer.setDisabled(True)
         self.l_wrong_projection.setText('')
 
+        iface.setActiveLayer(self.capture_source_area)
         self.capture_source_area.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
         self.capture_source_area.geometryChanged.connect(self.creator_geometry_changed)
