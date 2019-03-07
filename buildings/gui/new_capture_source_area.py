@@ -122,7 +122,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         elif len(selection) == 1:
             new_geometry = selection[0].geometry()
             # error pops up if geometry type is not polygon or multipolygon
-            if new_geometry.type() not in [2, 4]:
+            if new_geometry.wkbType() not in [2, 4]:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(
                     '\n -------------------- WRONG GEOMETRY TYPE ------'
@@ -134,7 +134,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
             self.le_external_id.setEnabled(True)
             self.le_area_title.setEnabled(True)
             # convert to correct format
-            if new_geometry.type() == 2:
+            if new_geometry.wkbType() == 2:
                 new_geometry = QgsGeometry.fromMultiPolygon([new_geometry.asPolygon()])
             wkt = new_geometry.exportToWkt()
             sql = general_select.convert_geometry
@@ -237,7 +237,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         new_feature = next(self.capture_source_area.getFeatures(request))
         new_geometry = new_feature.geometry()
         # convert to correct format
-        if new_geometry.type() == 2:
+        if new_geometry.wkbType() == 2:
             new_geometry = QgsGeometry.fromMultiPolygon([new_geometry.asPolygon()])
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
@@ -270,7 +270,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
            @type  geom:        qgis.core.QgsGeometry
         """
         if qgsfId in self.added_building_ids:
-            if geom.type() == 2:
+            if geom.wkbType() == 2:
                 geom = QgsGeometry.fromMultiPolygon([geom.asPolygon()])
             wkt = geom.exportToWkt()
             if not wkt:
