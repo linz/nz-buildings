@@ -14,6 +14,11 @@ Added
 * User can update the buildings_reference.suburb_locality, buildings_reference.town_city, buildings_reference.territorial_authority and buildings_reference.territorial_authority_grid tables using the reference frame
 * bulk_load_outlines and building_outlines admin boundary ids are updated along with the boundary tables
 
+Fixed
+-----
+* Allow to add multipart polygons into capture source area
+* Toggle editing on the right layer when clicking reset button on new capture source area frame
+
 1.1.0
 ==========
 19-02-2019
