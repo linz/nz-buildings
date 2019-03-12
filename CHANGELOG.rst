@@ -15,6 +15,11 @@ Added
 * bulk_load_outlines and building_outlines admin boundary ids are updated along with the boundary tables
 * The relationship colours are shown on the list item when outlines selected
 
+Fixed
+-----
+* Allow to add multipart polygons into capture source area
+* Toggle editing on the right layer when clicking reset button on new capture source area frame
+
 1.1.0
 ==========
 19-02-2019

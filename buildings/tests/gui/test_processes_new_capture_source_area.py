@@ -109,14 +109,66 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         self.capture_area_frame.db.rollback_open_cursor()
 
-    def test_select_geometry_from_layer(self):
-        """Check new capture source area added by selecting from other layer"""
+    def test_select_singlepolygon_from_layer(self):
+        """Check new capture source area added by selecting polygon from other layer"""
         sql = 'SELECT area_polygon_id FROM buildings_reference.capture_source_area;'
         result = db._execute(sql)
         result = result.fetchall()
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
                             'testdata/test_external_area_polygon.shp')
+        layer = iface.addVectorLayer(path, '', 'ogr')
+
+        self.capture_area_frame.rb_select_from_layer.setChecked(True)
+        self.capture_area_frame.mcb_selection_layer.hidePopup()
+        self.capture_area_frame.mcb_selection_layer.setLayer(layer)
+
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
+                         delay=-1)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1877987, 5555614,
+                                      1880088, 5554738)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1877590.8, 5555370.0)),
+                         delay=-1)
+        QTest.qWait(1)
+
+        self.assertTrue(self.capture_area_frame.le_external_id.isEnabled())
+        self.assertTrue(self.capture_area_frame.le_area_title.isEnabled())
+
+        self.capture_area_frame.le_external_id.setText('Test external id')
+        self.capture_area_frame.le_area_title.setText('Test area title')
+
+        self.capture_area_frame.save_clicked(False)
+
+        result2 = db._execute(sql)
+        result2 = result2.fetchall()
+
+        self.assertEqual(len(result) + 1, len(result2))
+
+        self.capture_area_frame.db.rollback_open_cursor()
+
+        self.capture_area_frame.rb_select_from_layer.setChecked(False)
+        # remove temporary layers from canvas
+        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+
+    def test_select_multipolygon_from_layer(self):
+        """Check new capture source area added by selecting multipolygon from other layer"""
+        sql = 'SELECT area_polygon_id FROM buildings_reference.capture_source_area;'
+        result = db._execute(sql)
+        result = result.fetchall()
+
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                            'testdata/test_external_area_multipolygon.shp')
         layer = iface.addVectorLayer(path, '', 'ogr')
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
