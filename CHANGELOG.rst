@@ -7,18 +7,29 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+
+
+1.2.0
+==========
+13-03-2019
+
 Added
 -----
 
-* Create a check dialog to list any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
-* User can update the buildings_reference.suburb_locality, buildings_reference.town_city, buildings_reference.territorial_authority and buildings_reference.territorial_authority_grid tables using the reference frame
-* bulk_load_outlines and building_outlines admin boundary ids are updated along with the boundary tables
-* The relationship colours are shown on the list item when outlines selected
+* Dialog that lists any duplicate ids found in added/related/matched table when publish button clicked during Bulk Load workflow
+* Ability to update the suburb_locality, town_city, territorial_authority and territorial_authority_grid reference tables
+* bulk_load_outlines and building_outlines admin boundary ids are updated along with the reference tables
+
+Changed
+-------
+
+* IDs listed in colours that match their symbology in Alter Relationships workflow
 
 Fixed
 -----
-* Allow to add multipart polygons into capture source area
-* Toggle editing on the right layer when clicking reset button on new capture source area frame
+
+* Allow multipolygons to be added as capture source areas
+* Toggle editing on the correct layer when clicking reset button on new capture source area
 
 1.1.0
 ==========
