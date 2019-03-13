@@ -7,7 +7,7 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
-
+* Nothing - all up to date! :rocket:
 
 1.2.0
 ==========
