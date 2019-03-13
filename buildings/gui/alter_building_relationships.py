@@ -374,6 +374,14 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     self.select_row_in_tbl_related(id_existing, id_bulk)
         self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
 
+        # Change item color in the list
+        if has_removed or has_added:
+            self.update_list_item_color(QColor('#ff2b01'), QColor('#3f9800'))
+        elif has_matched:
+            self.update_list_item_color(QColor('#00b4d4'), QColor('#00b4d4'))
+        elif has_related:
+            self.update_list_item_color(QColor('#e601ff'), QColor('#e601ff'))
+
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
 
     @pyqtSlot()
@@ -688,6 +696,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             ids_existing, ids_bulk = self.find_related_existing_outlines(id_bulk)
             self.insert_into_list(self.lst_existing, ids_existing)
             self.insert_into_list(self.lst_bulk, ids_bulk)
+            self.update_list_item_color(QColor('#e601ff'), QColor('#e601ff'))
             self.lyr_existing.selectByIds(ids_existing)
             self.lyr_bulk_load.selectByIds(ids_bulk)
             self.btn_unlink.setEnabled(True)
@@ -697,17 +706,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
             id_bulk = int(self.tbl_relationship.item(row, 1).text())
             self.insert_into_list(self.lst_existing, [id_existing])
             self.insert_into_list(self.lst_bulk, [id_bulk])
+            self.update_list_item_color(QColor('#00b4d4'), QColor('#00b4d4'))
             self.lyr_existing.selectByIds([id_existing])
             self.lyr_bulk_load.selectByIds([id_bulk])
             self.btn_unlink.setEnabled(True)
         elif current_text == 'Removed Outlines':
             id_existing = int(self.tbl_relationship.item(row, 0).text())
             self.insert_into_list(self.lst_existing, [id_existing])
+            self.update_list_item_color(QColor('#ff2b01'), QColor('#3f9800'))
             self.lyr_existing.selectByIds([id_existing])
             self.lyr_bulk_load.selectByIds([])
         elif current_text == 'Added Outlines':
             id_bulk = int(self.tbl_relationship.item(row, 0).text())
             self.insert_into_list(self.lst_bulk, [id_bulk])
+            self.update_list_item_color(QColor('#ff2b01'), QColor('#3f9800'))
             self.lyr_bulk_load.selectByIds([id_bulk])
             self.btn_delete.setEnabled(True)
 
@@ -1131,6 +1143,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(lst.count()):
             item = lst.item(row)
             item.setFlags(Qt.ItemIsEnabled)
+
+    def update_list_item_color(self, existing_color, bulk_color):
+        for i in range(self.lst_existing.count()):
+            self.lst_existing.item(i).setForeground(QColor(existing_color))
+        for i in range(self.lst_bulk.count()):
+            self.lst_bulk.item(i).setForeground(QColor(bulk_color))
 
     def delete_from_lyr_removed_in_edit(self, id_existing):
         filter = self.lyr_removed_existing_in_edit.subsetString()
