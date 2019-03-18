@@ -103,6 +103,15 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.production_frame.cmb_suburb.isEnabled())
         self.assertTrue(self.production_frame.cmb_lifecycle_stage.isEnabled())
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertEqual(
+            self.production_frame.cmb_capture_source.currentText(),
+            '1- Imagery One- NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/'
+        )
+        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
+        self.assertEqual(self.production_frame.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.production_frame.cmb_suburb.currentText(), 'Newtown')
+        self.assertEqual(self.production_frame.cmb_town.currentText(), 'Wellington')
         self.production_frame.db.rollback_open_cursor()
 
     def test_draw_circle_option(self):
