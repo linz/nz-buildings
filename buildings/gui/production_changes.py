@@ -52,7 +52,7 @@ class ProductionChanges:
             result = self.production_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
             for item in ls:
-                text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+                text = '- '.join(item)
                 self.production_frame.cmb_capture_source.addItem(text)
 
             # populate lifecycle stage combobox
@@ -110,16 +110,16 @@ class ProductionChanges:
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
                 common_select.capture_source_group_by_value_and_description, (
-                    text_ls[0], text_ls[1]
+                    text_ls[2], text_ls[3]
                 ))
             data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
+            if text_ls[0] == 'None':
                 result = self.production_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
             else:
                 result = self.production_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
-                        data, text_ls[2]
+                        data, text_ls[0]
                     ))
             capture_source_id = result.fetchall()[0][0]
 
@@ -412,6 +412,7 @@ class AddProduction(ProductionChanges):
         result = self.production_frame.db._execute(reference_select.capture_source_area_intersect_geom,
                                                    (self.production_frame.geom,))
         result = result.fetchall()
+        print result[0][0]
         if len(result) == 0:
             iface.messageBar().pushMessage(
                 'Capture Source',
@@ -429,9 +430,9 @@ class AddProduction(ProductionChanges):
         else:
             for index in range(self.production_frame.cmb_capture_source.count()):
                 text = self.production_frame.cmb_capture_source.itemText(index)
-                if int(text.split('-')[-1]) == result[0][0]:
+                if text.split('-')[0] == result[0][0]:
+                    self.production_frame.cmb_capture_source.setCurrentIndex(index)
                     break
-            self.production_frame.cmb_capture_source.setCurrentIndex(index)
 
         # territorial authority
         sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'
@@ -714,7 +715,7 @@ class EditAttribute(ProductionChanges):
             (self.production_frame.building_outline_id,)
         )
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.production_frame.cmb_capture_source.setCurrentIndex(
             self.production_frame.cmb_capture_source.findText(text))
 

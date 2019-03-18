@@ -48,7 +48,7 @@ class BulkLoadChanges:
             result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
             for item in ls:
-                text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+                text = '- '.join(ls)
                 self.bulk_load_frame.cmb_capture_source.addItem(text)
 
             # populate territorial authority combobox
@@ -110,16 +110,16 @@ class BulkLoadChanges:
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
                 common_select.capture_source_group_by_value_and_description, (
-                    text_ls[0], text_ls[1]
+                    text_ls[2], text_ls[3]
                 ))
             data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
+            if text_ls[0] == 'None':
                 result = self.bulk_load_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
             else:
                 result = self.bulk_load_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
-                        data, text_ls[2]
+                        data, text_ls[0]
                     ))
             capture_source_id = result.fetchall()[0][0]
 
@@ -415,7 +415,7 @@ class AddBulkLoad(BulkLoadChanges):
             (self.bulk_load_frame.current_dataset, )
         )
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
             self.bulk_load_frame.cmb_capture_source.findText(text))
 
@@ -693,7 +693,7 @@ class EditAttribute(BulkLoadChanges):
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
             self.bulk_load_frame.cmb_capture_source.findText(text))
 

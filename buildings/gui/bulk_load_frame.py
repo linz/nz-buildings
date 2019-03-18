@@ -339,10 +339,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def cmb_capture_src_grp_changed(self, index):
         self.cmb_external_id.clear()
         id_capture_src_grp = self.ids_capture_src_grp[index]
-        result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
+        result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp, ))
         ls = result.fetchall()
-        for item in reversed(ls):
-            self.cmb_external_id.addItem(item[0])
+        for (external_id, area_title) in reversed(ls):
+            text = external_id + '- ' + area_title
+            self.cmb_external_id.addItem(text)
 
     @pyqtSlot(bool)
     def cb_bulk_load_clicked(self, checked):
