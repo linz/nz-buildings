@@ -48,7 +48,7 @@ class BulkLoadChanges:
             result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
             for item in ls:
-                text = '- '.join(ls)
+                text = '- '.join(item)
                 self.bulk_load_frame.cmb_capture_source.addItem(text)
 
             # populate territorial authority combobox
