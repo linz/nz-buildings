@@ -409,30 +409,32 @@ class AddProduction(ProductionChanges):
             self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
 
         # capture source
+        # repopulate capture source cmb
+        self.production_frame.cmb_capture_source.clear()
         result = self.production_frame.db._execute(reference_select.capture_source_area_intersect_geom,
                                                    (self.production_frame.geom,))
         result = result.fetchall()
-        print result[0][0]
         if len(result) == 0:
             iface.messageBar().pushMessage(
                 'Capture Source',
-                'The new outline overlaps with no capture source area, please manually choose one.',
+                'The new outline overlaps with no capture source area, please reset.',
                 level=QgsMessageBar.WARNING,
-                duration=10
+                duration=6
             )
         elif len(result) > 1:
             iface.messageBar().pushMessage(
                 'Capture Source',
                 'The new outline overlaps with multiple capture source areas, please manually choose one.',
-                level=QgsMessageBar.WARNING,
-                duration=10
+                level=QgsMessageBar.INFO,
+                duration=6
             )
+            for item in result:
+                text = '- '.join(item)
+                self.production_frame.cmb_capture_source.addItem(text)
+            self.production_frame.cmb_capture_source.showPopup()
         else:
-            for index in range(self.production_frame.cmb_capture_source.count()):
-                text = self.production_frame.cmb_capture_source.itemText(index)
-                if text.split('-')[0] == result[0][0]:
-                    self.production_frame.cmb_capture_source.setCurrentIndex(index)
-                    break
+            text = '- '.join(result[0])
+            self.production_frame.cmb_capture_source.addItem(text)
 
         # territorial authority
         sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'
