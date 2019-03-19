@@ -21,7 +21,7 @@ Buildings Common Select Statements:
   - capture_source_group_value_description_external_by_bulk_outline_id (bulk_load_outline_id)
 
 - Capture Source
-  - capture_source_by_group_id (capture_source_group_id)
+  - capture_source_external_id_and_area_title_by_group_id (capture_source_group_id)
   - capture_source_external_source_id
   - capture_source_external_source_id_by_dataset_id (dataset_id)
   - capture_source_id_by_capture_source_group_id_and_external_source_id (capture_source_group_id, external_source_id)
@@ -163,12 +163,6 @@ LIMIT 1;
 """
 
 # capture source
-
-# capture_source_by_group_id = """
-# SELECT external_source_id
-# FROM buildings_common.capture_source
-# WHERE buildings_common.capture_source.capture_source_group_id = %s;
-# """
 
 capture_source_external_id_and_area_title_by_group_id = """
 SELECT cs.external_source_id, csa.area_title
