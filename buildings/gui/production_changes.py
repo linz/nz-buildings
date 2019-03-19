@@ -51,9 +51,13 @@ class ProductionChanges:
             # populate capture source group
             result = self.production_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
+            text_max = ''
             for item in ls:
                 text = '- '.join(item)
                 self.production_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text_max)
 
             # populate lifecycle stage combobox
             result = self.production_frame.db._execute(buildings_select.lifecycle_stage_value)
@@ -183,6 +187,13 @@ class ProductionChanges:
         self.production_frame.btn_save.setDisabled(1)
         self.production_frame.btn_reset.setDisabled(1)
         self.production_frame.btn_end_lifespan.setDisabled(1)
+
+    def fix_truncated_dropdown(self, cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
 
 
 class AddProduction(ProductionChanges):
@@ -428,13 +439,18 @@ class AddProduction(ProductionChanges):
                 level=QgsMessageBar.INFO,
                 duration=6
             )
+            text_max = ''
             for item in result:
                 text = '- '.join(item)
                 self.production_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text_max)
             self.production_frame.cmb_capture_source.showPopup()
         else:
             text = '- '.join(result[0])
             self.production_frame.cmb_capture_source.addItem(text)
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text)
 
         # territorial authority
         sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'

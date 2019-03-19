@@ -12,6 +12,14 @@ def populate_bulk_comboboxes(self):
     """
         Populate bulk load comboboxes
     """
+
+    def fix_truncated_dropdown(cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
+
     # organisation combobox
     self.cmb_organisation.clear()
     result = self.db._execute(bulk_load_select.organisation_value)
@@ -31,10 +39,14 @@ def populate_bulk_comboboxes(self):
     self.ids_capture_src_grp = []
     result = self.db._execute(common_select.capture_source_group_id_value_description)
     ls = result.fetchall()
+    text_max = ''
     for (id_capture_src_grp, value, description) in ls:
         text = str(value) + '- ' + str(description)
         self.cmb_capture_src_grp.addItem(text)
         self.ids_capture_src_grp.append(id_capture_src_grp)
+        if len(text) > len(text_max):
+            text_max = text
+    fix_truncated_dropdown(self.cmb_capture_src_grp, text_max)
 
     # capture source area combobox
     self.cmb_cap_src_area.clear()
@@ -42,9 +54,13 @@ def populate_bulk_comboboxes(self):
     id_capture_src_grp = self.ids_capture_src_grp[index]
     result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp, ))
     ls = result.fetchall()
+    text_max = ''
     for (external_id, area_title) in reversed(ls):
         text = external_id + '- ' + area_title
         self.cmb_cap_src_area.addItem(text)
+        if len(text) > len(text_max):
+            text_max = text
+    fix_truncated_dropdown(self.cmb_cap_src_area, text_max)
 
 
 def load_current_fields(self):

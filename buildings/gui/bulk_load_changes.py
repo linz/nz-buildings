@@ -47,9 +47,13 @@ class BulkLoadChanges:
             # populate capture source group
             result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
             ls = result.fetchall()
+            text_max = ''
             for item in ls:
                 text = '- '.join(item)
                 self.bulk_load_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.bulk_load_frame.cmb_capture_source, text_max)
 
             # populate territorial authority combobox
             result = self.bulk_load_frame.db._execute(
@@ -177,6 +181,13 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
         self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
+
+    def fix_truncated_dropdown(self, cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
 
 
 class AddBulkLoad(BulkLoadChanges):
