@@ -4,10 +4,18 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
+Unreleased:rocket:
 ==========
 
-* Nothing - all up to date! :rocket:
+Changed
+-------
+
+* Display the name and id together in the capture source combo box.
+
+Fixed
+-----
+
+* Correctly populate capture source combo box when adding production outlines.
 
 1.2.0
 ==========
