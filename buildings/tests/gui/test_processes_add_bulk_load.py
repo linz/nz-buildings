@@ -102,7 +102,6 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
             self.bulk_load_frame.cmb_capture_source.currentText(),
             '1- Imagery One- NZ Aerial Imagery'
         )
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.assertEqual(self.bulk_load_frame.cmb_lifecycle_stage.currentText(), 'Current')
         self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
         self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Newtown')
