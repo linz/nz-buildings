@@ -45,7 +45,7 @@ class BulkLoadChanges:
 
         if self.bulk_load_frame.layout_general_info.isVisible():
             # populate capture source group
-            result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
+            result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_external)
             ls = result.fetchall()
             text_max = ''
             for item in ls:
@@ -113,9 +113,7 @@ class BulkLoadChanges:
             text = self.bulk_load_frame.cmb_capture_source.currentText()
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
-                common_select.capture_source_group_by_value_and_description, (
-                    text_ls[2], text_ls[3]
-                ))
+                common_select.capture_source_group_id_by_value, (text_ls[2], ))
             data = result.fetchall()[0][0]
             if text_ls[0] == 'None':
                 result = self.bulk_load_frame.db.execute_no_commit(
@@ -422,7 +420,7 @@ class AddBulkLoad(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            common_select.capture_source_group_value_desc_external_by_dataset_id,
+            common_select.capture_source_group_value_external_by_dataset_id,
             (self.bulk_load_frame.current_dataset, )
         )
         result = result.fetchall()[0]
@@ -700,7 +698,7 @@ class EditAttribute(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            common_select.capture_source_group_value_description_external_by_bulk_outline_id, (
+            common_select.capture_source_group_value_external_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0]

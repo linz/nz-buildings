@@ -49,7 +49,7 @@ class ProductionChanges:
 
         if self.production_frame.layout_general_info.isVisible():
             # populate capture source group
-            result = self.production_frame.db._execute(common_select.capture_source_group_value_description_external)
+            result = self.production_frame.db._execute(common_select.capture_source_group_value_external)
             ls = result.fetchall()
             text_max = ''
             for item in ls:
@@ -113,9 +113,7 @@ class ProductionChanges:
             text = self.production_frame.cmb_capture_source.currentText()
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
-                common_select.capture_source_group_by_value_and_description, (
-                    text_ls[2], text_ls[3]
-                ))
+                common_select.capture_source_group_id_by_value, (text_ls[2], ))
             data = result.fetchall()[0][0]
             if text_ls[0] == 'None':
                 result = self.production_frame.db.execute_no_commit(
@@ -729,7 +727,7 @@ class EditAttribute(ProductionChanges):
 
         # capture source
         result = self.production_frame.db._execute(
-            common_select.capture_source_group_value_description_external_by_building_outline_id,
+            common_select.capture_source_group_value_external_by_building_outline_id,
             (self.production_frame.building_outline_id,)
         )
         result = result.fetchall()[0]

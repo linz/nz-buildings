@@ -16,9 +16,10 @@ Buildings Common Select Statements:
   - capture_source_group_id_by_dataset_id (supplied_dataset_id)
   - capture_source_group_id_by_value (value)
   - capture_source_group_value_description
-  - capture_source_group_value_description_external
-  - capture_source_group_value_description_external_by_building_outline_id (building_outline_id)
-  - capture_source_group_value_description_external_by_bulk_outline_id (bulk_load_outline_id)
+  - capture_source_group_value_external
+  - capture_source_group_value_external_by_building_outline_id (building_outline_id)
+  - capture_source_group_value_external_by_bulk_outline_id (bulk_load_outline_id)
+  - capture_source_group_value_external_by_dataset_id (current_dataset_id)
 
 - Capture Source
   - capture_source_external_id_and_area_title_by_group_id (capture_source_group_id)
@@ -100,9 +101,10 @@ AND cs.capture_source_group_id = csg.capture_source_group_id;
 """
 
 capture_source_group_id_by_value = """
-SELECT capture_source_group_id
-FROM buildings_common.capture_source_group
-WHERE value = %s;
+SELECT csg.capture_source_group_id
+FROM buildings_common.capture_source_group csg
+JOIN buildings_common.capture_source cs USING (capture_source_group_id)
+WHERE csg.value = %s;
 """
 
 capture_source_group_value_description = """
@@ -115,11 +117,10 @@ SELECT capture_source_group_id, value, description
 FROM buildings_common.capture_source_group;
 """
 
-capture_source_group_value_description_external_by_building_outline_id = """
+capture_source_group_value_external_by_building_outline_id = """
 SELECT cs.external_source_id,
        csa.area_title,
-       csg.value,
-       csg.description
+       csg.value
 FROM buildings_common.capture_source_group csg
 JOIN buildings_common.capture_source cs USING (capture_source_group_id)
 JOIN buildings_reference.capture_source_area csa ON cs.external_source_id = csa.external_area_polygon_id
@@ -127,11 +128,10 @@ JOIN buildings.building_outlines bo USING (capture_source_id)
 WHERE bo.building_outline_id = %s;
 """
 
-capture_source_group_value_description_external_by_bulk_outline_id = """
+capture_source_group_value_external_by_bulk_outline_id = """
 SELECT cs.external_source_id,
        csa.area_title,
-       csg.value,
-       csg.description
+       csg.value
 FROM buildings_common.capture_source_group csg
 JOIN buildings_common.capture_source cs USING (capture_source_group_id)
 JOIN buildings_reference.capture_source_area csa ON cs.external_source_id = csa.external_area_polygon_id
@@ -139,21 +139,19 @@ JOIN buildings_bulk_load.bulk_load_outlines blo USING (capture_source_id)
 WHERE blo.bulk_load_outline_id = %s;
 """
 
-capture_source_group_value_description_external = """
+capture_source_group_value_external = """
 SELECT cs.external_source_id,
        csa.area_title,
-       csg.value,
-       csg.description
+       csg.value
 FROM buildings_common.capture_source_group csg
 JOIN buildings_common.capture_source cs USING (capture_source_group_id)
 JOIN buildings_reference.capture_source_area csa ON cs.external_source_id = csa.external_area_polygon_id;
 """
 
-capture_source_group_value_desc_external_by_dataset_id = """
+capture_source_group_value_external_by_dataset_id = """
 SELECT cs.external_source_id,
        csa.area_title,
-       csg.value,
-       csg.description
+       csg.value
 FROM buildings_common.capture_source_group csg
 JOIN buildings_common.capture_source cs USING (capture_source_group_id)
 JOIN buildings_reference.capture_source_area csa ON cs.external_source_id = csa.external_area_polygon_id

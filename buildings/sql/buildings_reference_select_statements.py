@@ -62,8 +62,7 @@ WHERE area_title = %s;
 capture_source_area_intersect_geom = """
 SELECT csa.external_area_polygon_id,
        csa.area_title,
-       csg.value,
-       csg.description
+       csg.value
 FROM buildings_reference.capture_source_area csa
 JOIN buildings_common.capture_source cs ON (csa.external_area_polygon_id = cs.external_source_id)
 JOIN buildings_common.capture_source_group csg USING (capture_source_group_id)
