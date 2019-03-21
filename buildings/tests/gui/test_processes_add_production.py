@@ -105,7 +105,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.assertEqual(
             self.production_frame.cmb_capture_source.currentText(),
-            '1- Imagery One- NZ Aerial Imagery- external_source_id will link to the imagery_survey_id from https://data.linz.govt.nz/layer/95677-nz-imagery-surveys/'
+            '1- Imagery One- NZ Aerial Imagery'
         )
         self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.assertEqual(self.production_frame.cmb_lifecycle_stage.currentText(), 'Current')
