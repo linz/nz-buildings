@@ -60,8 +60,8 @@ class SetUpBulkLoadTest(unittest.TestCase):
     def test_external_defaults(self):
         """External source comboboxes disabled on setup"""
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
-        self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 2)
+        self.assertTrue(self.bulk_load_frame.cmb_cap_src_area.isEnabled())
+        self.assertEqual(self.bulk_load_frame.cmb_cap_src_area.count(), 2)
 
     def test_supplied_layer_combobox(self):
         """Bulk load layer combobox contains only the layers in the qgis legend"""

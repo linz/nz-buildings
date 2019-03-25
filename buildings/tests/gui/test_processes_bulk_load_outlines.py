@@ -70,7 +70,7 @@ class ProcessBulkLoadTest(unittest.TestCase):
         """external source fields enable when external id radio button is enabled"""
         # checks on starting the restrictions are in place
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_cap_src_area.isEnabled())
         # click the radio button
         self.bulk_load_frame.rad_external_id.click()
         # check restrictions have been removed
@@ -83,10 +83,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         # check on unclicking radio button the restrictions are restablished
         self.bulk_load_frame.rad_external_id.click()
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_external_id.isEnabled())
+        self.assertTrue(self.bulk_load_frame.cmb_cap_src_area.isEnabled())
 
     def test_cmb_capture_src_grp_changed(self):
-        """When cmb_capture_src_grp changes cmb_external_id is re-populated"""
+        """When cmb_capture_src_grp changes cmb_cap_src_area is re-populated"""
         self.bulk_load_frame.db.open_cursor()
         sql = 'SELECT buildings_common.capture_source_group_insert(%s, %s);'
         result = self.bulk_load_frame.db.execute_no_commit(sql, ('Test value', 'Test description'))
@@ -101,9 +101,9 @@ class ProcessBulkLoadTest(unittest.TestCase):
             text = self.bulk_load_frame.cmb_capture_src_grp.currentText()
             text = text.split('-')[0]
             if text == 'NZ Aerial Imagery':
-                self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 2)
+                self.assertEqual(self.bulk_load_frame.cmb_cap_src_area.count(), 2)
             elif text == 'Test value':
-                self.assertEqual(self.bulk_load_frame.cmb_external_id.count(), 1)
+                self.assertEqual(self.bulk_load_frame.cmb_cap_src_area.count(), 1)
 
     def test_bulk_load_save_clicked(self):
         """When save is clicked data is added to the correct tables"""

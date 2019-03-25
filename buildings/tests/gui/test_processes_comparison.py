@@ -66,6 +66,9 @@ class ProcessComparison(unittest.TestCase):
                 self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
+        # select capture source area
+        self.bulk_load_frame.cmb_cap_src_area.setCurrentIndex(
+            self.bulk_load_frame.cmb_cap_src_area.findText('1- Imagery One'))
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
         # add outlines

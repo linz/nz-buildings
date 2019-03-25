@@ -370,9 +370,9 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         result = self.db._execute(common_select.capture_source_group_by_value_and_description, (value, description))
         capture_source_group_id = result.fetchall()[0][0]
 
-        result = self.db._execute(common_select.capture_source_by_group_id, (capture_source_group_id,))
+        result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (capture_source_group_id,))
         to_add = True
-        for (external_source_id, ) in result.fetchall():
+        for (external_source_id, area_title) in result.fetchall():
             if external_source_id == external_source:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(

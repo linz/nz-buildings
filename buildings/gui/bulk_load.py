@@ -12,6 +12,14 @@ def populate_bulk_comboboxes(self):
     """
         Populate bulk load comboboxes
     """
+
+    def fix_truncated_dropdown(cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
+
     # organisation combobox
     self.cmb_organisation.clear()
     result = self.db._execute(bulk_load_select.organisation_value)
@@ -31,19 +39,28 @@ def populate_bulk_comboboxes(self):
     self.ids_capture_src_grp = []
     result = self.db._execute(common_select.capture_source_group_id_value_description)
     ls = result.fetchall()
+    text_max = ''
     for (id_capture_src_grp, value, description) in ls:
         text = str(value) + '- ' + str(description)
         self.cmb_capture_src_grp.addItem(text)
         self.ids_capture_src_grp.append(id_capture_src_grp)
+        if len(text) > len(text_max):
+            text_max = text
+    fix_truncated_dropdown(self.cmb_capture_src_grp, text_max)
 
-    # external source combobox
-    self.cmb_external_id.clear()
+    # capture source area combobox
+    self.cmb_cap_src_area.clear()
     index = self.cmb_capture_src_grp.currentIndex()
     id_capture_src_grp = self.ids_capture_src_grp[index]
-    result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
+    result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp, ))
     ls = result.fetchall()
-    for item in reversed(ls):
-        self.cmb_external_id.addItem(item[0])
+    text_max = ''
+    for (external_id, area_title) in reversed(ls):
+        text = external_id + '- ' + area_title
+        self.cmb_cap_src_area.addItem(text)
+        if len(text) > len(text_max):
+            text_max = text
+    fix_truncated_dropdown(self.cmb_cap_src_area, text_max)
 
 
 def load_current_fields(self):
@@ -78,8 +95,8 @@ def load_current_fields(self):
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_id.setChecked(True)
-        self.cmb_external_id.setCurrentIndex(
-            self.cmb_external_id.findText(ex_result))
+        self.cmb_cap_src_area.setCurrentIndex(
+            self.cmb_cap_src_area.findText(ex_result))
 
     # capture source group
     result = self.db._execute(
@@ -161,9 +178,9 @@ def bulk_load(self, commit_status):
         common_select.capture_source_group_id_by_value, (text_ls[0],))
     capture_source_group = result.fetchall()[0][0]
 
-    # external source
+    # capture source area
 
-    if self.cmb_external_id.count() == 0:
+    if self.cmb_cap_src_area.count() == 0:
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
             '\n -------------- NO CAPTURE SOURCE ENTRY EXISTS-------'
@@ -172,7 +189,8 @@ def bulk_load(self, commit_status):
         )
         self.error_dialog.show()
         return
-    external_source_id = str(self.cmb_external_id.currentText())
+    text = str(self.cmb_cap_src_area.currentText())
+    external_source_id = text.split('- ')[0]
 
     # capture source
     result = self.db._execute(

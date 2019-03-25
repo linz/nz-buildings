@@ -68,7 +68,8 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
             idx = idx + 1
         # add description
         self.bulk_load_frame.le_data_description.setText('Test bulk load outlines')
-        self.bulk_load_frame.cmb_external_id.setCurrentIndex(self.bulk_load_frame.cmb_external_id.findText('2'))
+        self.bulk_load_frame.cmb_cap_src_area.setCurrentIndex(
+            self.bulk_load_frame.cmb_cap_src_area.findText('2- Imagery Two'))
         # add outlines
         btn_yes = self.bulk_load_frame.msgbox_bulk_load.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)

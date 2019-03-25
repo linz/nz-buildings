@@ -49,11 +49,15 @@ class ProductionChanges:
 
         if self.production_frame.layout_general_info.isVisible():
             # populate capture source group
-            result = self.production_frame.db._execute(common_select.capture_source_group_value_description_external)
+            result = self.production_frame.db._execute(common_select.capture_source_group_value_external)
             ls = result.fetchall()
+            text_max = ''
             for item in ls:
-                text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+                text = '- '.join(item)
                 self.production_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text_max)
 
             # populate lifecycle stage combobox
             result = self.production_frame.db._execute(buildings_select.lifecycle_stage_value)
@@ -109,17 +113,15 @@ class ProductionChanges:
             text = self.production_frame.cmb_capture_source.currentText()
             text_ls = text.split('- ')
             result = self.production_frame.db.execute_no_commit(
-                common_select.capture_source_group_by_value_and_description, (
-                    text_ls[0], text_ls[1]
-                ))
+                common_select.capture_source_group_id_by_value, (text_ls[2], ))
             data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
+            if text_ls[0] == 'None':
                 result = self.production_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
             else:
                 result = self.production_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
-                        data, text_ls[2]
+                        data, text_ls[0]
                     ))
             capture_source_id = result.fetchall()[0][0]
 
@@ -183,6 +185,13 @@ class ProductionChanges:
         self.production_frame.btn_save.setDisabled(1)
         self.production_frame.btn_reset.setDisabled(1)
         self.production_frame.btn_end_lifespan.setDisabled(1)
+
+    def fix_truncated_dropdown(self, cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
 
 
 class AddProduction(ProductionChanges):
@@ -409,29 +418,37 @@ class AddProduction(ProductionChanges):
             self.production_frame.cmb_capture_method.findText('Trace Orthophotography'))
 
         # capture source
+        # repopulate capture source cmb
+        self.production_frame.cmb_capture_source.clear()
         result = self.production_frame.db._execute(reference_select.capture_source_area_intersect_geom,
                                                    (self.production_frame.geom,))
         result = result.fetchall()
         if len(result) == 0:
             iface.messageBar().pushMessage(
                 'Capture Source',
-                'The new outline overlaps with no capture source area, please manually choose one.',
+                'The new outline overlaps with no capture source area, please reset.',
                 level=QgsMessageBar.WARNING,
-                duration=10
+                duration=6
             )
         elif len(result) > 1:
             iface.messageBar().pushMessage(
                 'Capture Source',
                 'The new outline overlaps with multiple capture source areas, please manually choose one.',
-                level=QgsMessageBar.WARNING,
-                duration=10
+                level=QgsMessageBar.INFO,
+                duration=6
             )
+            text_max = ''
+            for item in result:
+                text = '- '.join(item)
+                self.production_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text_max)
+            self.production_frame.cmb_capture_source.showPopup()
         else:
-            for index in range(self.production_frame.cmb_capture_source.count()):
-                text = self.production_frame.cmb_capture_source.itemText(index)
-                if int(text.split('-')[-1]) == result[0][0]:
-                    break
-            self.production_frame.cmb_capture_source.setCurrentIndex(index)
+            text = '- '.join(result[0])
+            self.production_frame.cmb_capture_source.addItem(text)
+            self.fix_truncated_dropdown(self.production_frame.cmb_capture_source, text)
 
         # territorial authority
         sql = 'SELECT buildings_reference.territorial_authority_intersect_polygon(%s);'
@@ -710,11 +727,11 @@ class EditAttribute(ProductionChanges):
 
         # capture source
         result = self.production_frame.db._execute(
-            common_select.capture_source_group_value_description_external_by_building_outline_id,
+            common_select.capture_source_group_value_external_by_building_outline_id,
             (self.production_frame.building_outline_id,)
         )
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.production_frame.cmb_capture_source.setCurrentIndex(
             self.production_frame.cmb_capture_source.findText(text))
 

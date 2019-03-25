@@ -211,7 +211,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.fcb_external_id.setDisabled(1)
         self.cmb_capture_src_grp.setEnabled(1)
         self.cmb_capture_src_grp.setCurrentIndex(0)
-        self.cmb_external_id.setEnabled(1)
+        self.cmb_cap_src_area.setEnabled(1)
         self.le_data_description.setEnabled(1)
         self.le_data_description.clear()
         self.cmb_capture_method.setEnabled(1)
@@ -248,7 +248,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_external_id.setDisabled(1)
         self.fcb_external_id.setDisabled(1)
         self.cmb_capture_src_grp.setDisabled(1)
-        self.cmb_external_id.setDisabled(1)
+        self.cmb_cap_src_area.setDisabled(1)
         self.le_data_description.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
         self.cmb_organisation.setDisabled(1)
@@ -337,12 +337,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot(int)
     def cmb_capture_src_grp_changed(self, index):
-        self.cmb_external_id.clear()
+        self.cmb_cap_src_area.clear()
         id_capture_src_grp = self.ids_capture_src_grp[index]
-        result = self.db._execute(common_select.capture_source_by_group_id, (id_capture_src_grp, ))
+        result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp, ))
         ls = result.fetchall()
-        for item in reversed(ls):
-            self.cmb_external_id.addItem(item[0])
+        for (external_id, area_title) in reversed(ls):
+            text = external_id + '- ' + area_title
+            self.cmb_cap_src_area.addItem(text)
 
     @pyqtSlot(bool)
     def cb_bulk_load_clicked(self, checked):

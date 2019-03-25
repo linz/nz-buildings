@@ -45,11 +45,15 @@ class BulkLoadChanges:
 
         if self.bulk_load_frame.layout_general_info.isVisible():
             # populate capture source group
-            result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_description_external)
+            result = self.bulk_load_frame.db._execute(common_select.capture_source_group_value_external)
             ls = result.fetchall()
+            text_max = ''
             for item in ls:
-                text = str(item[0]) + '- ' + str(item[1] + '- ' + str(item[2]))
+                text = '- '.join(item)
                 self.bulk_load_frame.cmb_capture_source.addItem(text)
+                if len(text) > len(text_max):
+                    text_max = text
+            self.fix_truncated_dropdown(self.bulk_load_frame.cmb_capture_source, text_max)
 
             # populate territorial authority combobox
             result = self.bulk_load_frame.db._execute(
@@ -109,17 +113,15 @@ class BulkLoadChanges:
             text = self.bulk_load_frame.cmb_capture_source.currentText()
             text_ls = text.split('- ')
             result = self.bulk_load_frame.db.execute_no_commit(
-                common_select.capture_source_group_by_value_and_description, (
-                    text_ls[0], text_ls[1]
-                ))
+                common_select.capture_source_group_id_by_value, (text_ls[2], ))
             data = result.fetchall()[0][0]
-            if text_ls[2] == 'None':
+            if text_ls[0] == 'None':
                 result = self.bulk_load_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_is_null, (data,))
             else:
                 result = self.bulk_load_frame.db.execute_no_commit(
                     common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (
-                        data, text_ls[2]
+                        data, text_ls[0]
                     ))
             capture_source_id = result.fetchall()[0][0]
 
@@ -177,6 +179,13 @@ class BulkLoadChanges:
         self.bulk_load_frame.cmb_suburb.setDisabled(1)
         self.bulk_load_frame.btn_edit_save.setDisabled(1)
         self.bulk_load_frame.btn_edit_reset.setDisabled(1)
+
+    def fix_truncated_dropdown(self, cmb, text):
+        """
+            Fix the trucated cmb dropdown in windows
+        """
+        w = cmb.fontMetrics().boundingRect(text).width()
+        cmb.view().setFixedWidth(w + 30)
 
 
 class AddBulkLoad(BulkLoadChanges):
@@ -411,11 +420,11 @@ class AddBulkLoad(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            common_select.capture_source_group_value_desc_external_by_dataset_id,
+            common_select.capture_source_group_value_external_by_dataset_id,
             (self.bulk_load_frame.current_dataset, )
         )
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
             self.bulk_load_frame.cmb_capture_source.findText(text))
 
@@ -689,11 +698,11 @@ class EditAttribute(BulkLoadChanges):
 
         # capture source
         result = self.bulk_load_frame.db._execute(
-            common_select.capture_source_group_value_description_external_by_bulk_outline_id, (
+            common_select.capture_source_group_value_external_by_bulk_outline_id, (
                 self.bulk_load_frame.bulk_load_outline_id,
             ))
         result = result.fetchall()[0]
-        text = str(result[0]) + '- ' + str(result[1] + '- ' + str(result[2]))
+        text = '- '.join(result)
         self.bulk_load_frame.cmb_capture_source.setCurrentIndex(
             self.bulk_load_frame.cmb_capture_source.findText(text))
 

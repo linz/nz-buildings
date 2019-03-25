@@ -98,6 +98,13 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.cmb_town.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_suburb.isEnabled())
         self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
+        self.assertEqual(
+            self.bulk_load_frame.cmb_capture_source.currentText(),
+            '1- Imagery One- NZ Aerial Imagery'
+        )
+        self.assertEqual(self.bulk_load_frame.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.bulk_load_frame.cmb_suburb.currentText(), 'Newtown')
+        self.assertEqual(self.bulk_load_frame.cmb_town.currentText(), 'Wellington')
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_draw_circle_option(self):
