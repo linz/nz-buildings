@@ -4,8 +4,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased:rocket:
+Unreleased:
 ==========
+
+* All up-to-date! :rocket:
+
+1.3.0
+==========
+26-03-2019
 
 Changed
 -------
