@@ -16,7 +16,7 @@ def compare_outlines(self, commit_status):
     result = self.db.execute_no_commit(sql, (self.area_id,))
     hull = result.fetchall()[0][0]
 
-    result = self.db.execute_no_commit(buildings_select.building_outlines, (hull,))
+    result = self.db.execute_no_commit(buildings_select.building_outlines_intersect_geometry, (hull,))
     results = result.fetchall()
 
     if len(results) == 0:

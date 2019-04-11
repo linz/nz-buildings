@@ -4,7 +4,7 @@ Buildings Select Statements
 
 - building_outlines
     - building_id_by_building_outline_id (building_outline_id)
-    - building_outlines
+    - building_outlines_intersect_geometry(geometry)
     - building_outlines_capture_method_id_by_building_outline_id (building+putline_id)
     - building_outlines_end_lifespan_by_building_outline_id (building_outline_id)
     - building_outline_shape_by_building_outline_id (building_outline_id)
@@ -28,11 +28,15 @@ FROM buildings.building_outlines
 WHERE building_outline_id = %s;
 """
 
-building_outlines = """
+building_outlines_intersect_geometry = """
 SELECT *
 FROM buildings.building_outlines bo
 WHERE ST_Intersects(bo.shape, %s)
-AND bo.building_outline_id NOT IN ( SELECT building_outline_id FROM buildings_bulk_load.removed );
+AND bo.building_outline_id NOT IN (
+    SELECT building_outline_id
+    FROM buildings_bulk_load.removed
+    WHERE qa_status_id != 5
+);
 """
 
 building_outlines_capture_method_id_by_building_outline_id = """
