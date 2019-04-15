@@ -38,8 +38,10 @@ $$
             , building_outlines.shape
         FROM buildings.building_outlines
         JOIN buildings.buildings USING (building_id)
-        LEFT JOIN buildings.building_name USING (building_id)
-        LEFT JOIN buildings.building_use USING (building_id)
+        LEFT JOIN buildings.building_name ON buildings.building_id = building_name.building_id
+        AND building_name.end_lifespan IS NULL
+        LEFT JOIN buildings.building_use ON buildings.building_id = building_use.building_id
+        AND building_use.end_lifespan IS NULL
         LEFT JOIN buildings.use USING (use_id)
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
@@ -50,8 +52,6 @@ $$
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
-        AND building_name.end_lifespan IS NULL
-        AND building_use.end_lifespan IS NULL
         ORDER BY buildings.building_id
         RETURNING *
     )
