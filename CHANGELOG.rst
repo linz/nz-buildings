@@ -7,7 +7,9 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
-* All up-to-date! :rocket:
+Fixed
+-----
+* Compare new dataset with previous dataset INCLUDING removed outlines that have "not removed" flag.
 
 1.3.0
 ==========
