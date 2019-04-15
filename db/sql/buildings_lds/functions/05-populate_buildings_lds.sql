@@ -50,7 +50,7 @@ $$
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
@@ -152,7 +152,7 @@ $$
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = bo.suburb_locality_id
-        JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
+        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = bo.territorial_authority_id
         LEFT JOIN buildings.building_name bn ON rd.building_id = bn.building_id
             AND rd.record_begin_lifespan >= bn.begin_lifespan
