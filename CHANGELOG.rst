@@ -7,8 +7,14 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Changed
+-------
+
+* Removed building_outline_id from nz_building_outlines to make it clear that building_id is the persistent id.
+
 Fixed
 -----
+
 * Compare new dataset with previous dataset INCLUDING removed outlines that have "not removed" flag.
 
 1.3.0

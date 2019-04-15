@@ -8,8 +8,7 @@ $$
 
     WITH populate_nz_building_outlines AS (
         INSERT INTO buildings_lds.nz_building_outlines (
-              building_outline_id
-            , building_id
+              building_id
             , name
             , use
             , suburb_locality
@@ -18,15 +17,13 @@ $$
             , capture_method
             , capture_source
             , external_source_id
-            , outline_begin_lifespan
             , building_begin_lifespan
             , name_begin_lifespan
             , use_begin_lifespan
             , shape
         )
         SELECT
-              building_outlines.building_outline_id
-            , building_outlines.building_id
+              building_outlines.building_id
             , building_name.building_name
             , use.value
             , suburb_locality.suburb_4th
@@ -35,7 +32,6 @@ $$
             , capture_method.value
             , capture_source_group.value
             , capture_source.external_source_id
-            , building_outlines.begin_lifespan
             , buildings.begin_lifespan
             , building_name.begin_lifespan
             , building_use.begin_lifespan
