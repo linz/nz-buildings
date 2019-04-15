@@ -19,9 +19,9 @@ Over the next decade, the LINZ Topographic Office is working towards its vision 
 Description
 ---------------------------
 
-This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Tasman, West Coast, Marlborough, Canterbury and Otago (See coverage maps for more detail).
+This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
 
-This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from remotely sensed information using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset. Each building polygon represents a building outline and this may include spaces such as decks, garages and porches. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground. 
+This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from remotely sensed information using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground. 
 
 .. figure:: _static/footprint.png
    :scale: 100 %
@@ -29,20 +29,26 @@ This dataset includes the spatial coverage of building outlines using remotely s
 
    Image 1. Example of a building outline versus a building footprint.
 
-The current Topo50 data for buildings is represented by either a `building polygon <https://data.linz.govt.nz/layer/50246-nz-building-polygons-topo-150k/>`_ or a `building point <https://data.linz.govt.nz/layer/50245-nz-building-points-topo-150k/>`_ . A building polygon is used to represent a structure that is large enough to be captured at 1:50,000 scale and has an area of 25m² or greater. The central business districts of large towns and cities is held in the LINZ building data as large building polygons. It is shown on the printed maps as black fill, and is a generalized view, not showing individual buildings, or open spaces between buildings. A building point is used to represent a building with an area too small to be captured as a polygon feature at 1:50,000 scale.
+The current Topo50 data for buildings is represented by either a `building polygon <https://data.linz.govt.nz/layer/50246-nz-building-polygons-topo-150k/>`_ or a `building point <https://data.linz.govt.nz/layer/50245-nz-building-points-topo-150k/>`_ . A building polygon is used to represent a structure that is large enough to be captured at 1:50,000 scale and has an area of 25m² or greater. The central business districts of large towns and cities is held in the LINZ building data as large building polygons. It is shown on the 1:50,000 scale printed maps as black fill, and is a generalized view, not showing individual buildings, or open spaces between buildings. A building point is used to represent a building with an area too small to be captured as a polygon feature at 1:50,000 scale.
 
-The building outlines data described here represents the outlines of individual buildings as polygons, as visible in the imagery, and not generalized for more urban areas.
+The building outlines data described here represents the outlines of individual buildings as polygons, as visible in the imagery as resolution allows, and not generalized for more urban areas as described above for building polygons.
 
-Building polygons in the building outlines data are defined by the following criteria:
+Building outlines data are defined by the following criteria:
 
-* Buildings under construction are not captured as building outlines.
-* Primary building structures are captured as separate building outline polygons from adjoining building structure polygons.
-* Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if resolution of imagery allows.
-* Permanent building structures such as sheds and greenhouses, not attached to a primary building structure, are captured as a separate building outline polygon.
+* Buildings under construction, caravans, caravan trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
+* Primary building structures are captured as separate building outline polygons from adjoining building structures, such as garages (see Image 2a)
+* Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if resolution of imagery allows.
+* Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline polygon.
 * Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
-* Adjoining commercial buildings are captured as separate building outlines when rooflines allows delineation.
-* Building outline polygons captured will be greater than 10m².
-* Water tanks are captured as building outlines when their size is at least 16.5 square metres.
+* Adjoining commercial buildings are captured as separate building outlines when rooflines allows delineation (see Image 2c).
+* Building outline polygons captured will be greater than 10m². An exception to this is in National parks, Conservation areas, and Wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
+* Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
+
+.. figure:: _static/datadictimage.png
+   :scale: 100%
+   :alt: Examples of building outlines
+
+   Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut found in a conservation area.
 
 
 Source Imagery
@@ -72,7 +78,7 @@ The NZ Building Outlines dataset is being procured and released in stages. Image
 Accuracy Specification
 ---------------------------
 
-The Building Outlines contain spatial detail reflective of the visible characteristics of building outlines as seen from the source imagery to an accuracy of 1 metre. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees.
+The Building Outlines contain spatial detail reflective of the visible characteristics of building outlines as seen from the source imagery to an accuracy of 1 metre. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees. Effort has been made to adhere to the building outline criteria described above, and future updates may include adjustments of building outlines as imagery resolution allows.
 
 
 Valid Geometry
@@ -109,13 +115,12 @@ Definitions
 | LDS               | LINZ Data Service                                                    |
 +-------------------+----------------------------------------------------------------------+
 | Building          | A structure generally permanent in nature which has been constructed |
-|                   | to meet a specific objective (e.g. housing, storage, and workplace)  |
-|                   | and less permanent structures such as caravans and other portable    |
-|                   | housing may also be represented.                                     |
+|                   | to meet a specific objective (e.g. housing, storage, and workplace). |
+|                   |                                                                      |
 +-------------------+----------------------------------------------------------------------+
 | Building Outlines | A building outline is a 2D representation of the roof outline of a   |
-|                   | building. Structures greater than or equal to 10 square meters are   |
-|                   | captured in this dataset.                                            |
+|                   | building.                                                            |
+|                   |                                                                      |
 +-------------------+----------------------------------------------------------------------+
 
 
