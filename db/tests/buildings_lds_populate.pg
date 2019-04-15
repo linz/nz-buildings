@@ -37,13 +37,13 @@ SELECT has_function('buildings_lds', 'populate_buildings_lds', 'Should have func
 -- result of building outlines in the nz_building_outlines
 
 SELECT results_eq(
-    'SELECT building_id, name, use, suburb_locality, town_city, territorial_authority, capture_method, capture_source FROM buildings_lds.nz_building_outlines WHERE building_outline_id >= 1000000 AND building_outline_id < 1100000 ORDER BY building_outline_id',
+    'SELECT building_id, name, use, suburb_locality, town_city, territorial_authority, capture_method, capture_source FROM buildings_lds.nz_building_outlines WHERE building_outline_id >= 1000000 AND building_outline_id < 1100000 ORDER BY building_id',
     $$VALUES (1000000, 1000000, NULL::varchar, NULL::varchar, 'Kelburn'::varchar, 'Wellington'::varchar, 'Wellington'::varchar, 'Feature Extraction'::varchar, 'NZ Aerial Imagery'::varchar),
-             (1000001, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (10001, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (10005, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (10003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (10002, NULL, NULL, 'Aro Valley', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
+             (1000001, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (1000002, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (1000003, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),
              (1000004, NULL, NULL, 'Kelburn', 'Wellington', 'Wellington', 'Feature Extraction', 'NZ Aerial Imagery'),

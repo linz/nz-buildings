@@ -52,7 +52,7 @@ $$
         AND buildings.end_lifespan IS NULL
         AND building_name.end_lifespan IS NULL
         AND building_use.end_lifespan IS NULL
-        ORDER BY building_outlines.building_outline_id
+        ORDER BY buildings.building_id
         RETURNING *
     )
     SELECT count(*)::integer FROM populate_nz_building_outlines;
