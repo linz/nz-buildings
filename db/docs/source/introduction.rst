@@ -44,7 +44,7 @@ Building outlines data are defined by the following criteria:
 * Building outline polygons captured will be greater than 10m². An exception to this is in National parks, Conservation areas, and Wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
 * Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
 
-.. figure:: _static/datadictimage.png
+.. figure:: _static/examples.png
    :scale: 100%
    :alt: Examples of building outlines
 
@@ -62,14 +62,14 @@ The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readt
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 2 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/53413-nz-building-outlines-pilot/>`_. Image 3 shows the upcoming coverage of building outlines available by the end of 2018. Image 4 shows the future coverage of building outlines after the next round of aerial imagery is received.
+The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/53413-nz-building-outlines-pilot/>`_. Image 4 shows the upcoming coverage of building outlines available by the end of 2018. Image 5 shows the future coverage of building outlines after the next round of aerial imagery is received.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
 | .. figure:: _static/current_building_outlines_coverage.jpg  | .. figure:: _static/upcoming_building_outlines_coverage.jpg | .. figure:: _static/future_building_outlines_coverage.jpg |
 |    :scale: 70%                                              |    :scale: 70%                                              |    :scale: 70%                                            |
 |    :alt: current building outlines coverage                 |    :alt: upcoming bulding outlines coverage                 |    :alt: future building outlines coverage                |
 |                                                             |                                                             |                                                           |
-|    Image 2: Map of current dataset coverage.                |    Image 3: Map of dataset coverage by the end of 2018.     |    Image 4: Map of dataset coverage after future round(s) |
+|    Image 3: Map of current dataset coverage.                |    Image 4: Map of dataset coverage by the end of 2018.     |    Image 5: Map of dataset coverage after future round(s) |
 |                                                             |                                                             |    of aerial imagery received.                            |
 +-------------------------------------------------------------+-------------------------------------------------------------+-----------------------------------------------------------+
 
