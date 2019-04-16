@@ -59,7 +59,6 @@ CREATE OR REPLACE FUNCTION buildings.building_outlines_insert(
     , p_suburb_locality_id integer
     , p_town_city_id integer
     , p_territorial_authority_id integer
-    , p_begin_lifespan timestamp
     , p_shape geometry
 )
 RETURNS integer AS
@@ -86,7 +85,7 @@ $$
         , p_suburb_locality_id
         , p_town_city_id
         , p_territorial_authority_id
-        , p_begin_lifespan
+        , DEFAULT
         , p_shape
     )
     RETURNING building_outline_id;
@@ -94,7 +93,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings.building_outlines_insert(integer, integer, integer, integer, integer, integer, integer, timestamp, geometry) IS
+COMMENT ON FUNCTION buildings.building_outlines_insert(integer, integer, integer, integer, integer, integer, integer, geometry) IS
 'Insert new building outline into table';
 
 
@@ -113,7 +112,6 @@ $$
           , supplied.suburb_locality_id
           , supplied.town_city_id
           , supplied.territorial_authority_id
-          , supplied.begin_lifespan
           , supplied.shape
           )
         FROM buildings_bulk_load.bulk_load_outlines supplied
