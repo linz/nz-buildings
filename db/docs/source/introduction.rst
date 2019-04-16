@@ -37,18 +37,20 @@ Building outlines data are defined by the following criteria:
 
 * Buildings under construction, caravans, caravan trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
 * Primary building structures are captured as separate building outline polygons from adjoining building structures, such as garages (see Image 2a)
-* Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if resolution of imagery allows.
-* Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline polygon.
+* Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
+* Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline.
 * Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
 * Adjoining commercial buildings are captured as separate building outlines when rooflines allows delineation (see Image 2c).
-* Building outline polygons captured will be greater than 10m². An exception to this is in National parks, Conservation areas, and Wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
+* Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
 * Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
 
 .. figure:: _static/examples.png
    :scale: 100%
    :alt: Examples of building outlines
 
-   Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut found in a conservation area.
+   Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. In this case the diameter shown in red is 9.8 meters. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut located in a conservation area.
+
+The publicly available building outlines data consists of three tables. The `NZ_Building_Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ_building_outlines_full_history <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-full-history>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ_building_outlines_lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building relationship information as changes are detected between neighboring buildings.
 
 
 Source Imagery
