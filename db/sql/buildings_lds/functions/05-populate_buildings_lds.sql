@@ -8,8 +8,7 @@ $$
 
     WITH populate_nz_building_outlines AS (
         INSERT INTO buildings_lds.nz_building_outlines (
-              building_outline_id
-            , building_id
+              building_id
             , name
             , use
             , suburb_locality
@@ -18,15 +17,13 @@ $$
             , capture_method
             , capture_source
             , external_source_id
-            , outline_begin_lifespan
             , building_begin_lifespan
             , name_begin_lifespan
             , use_begin_lifespan
             , shape
         )
         SELECT
-              building_outlines.building_outline_id
-            , building_outlines.building_id
+              building_outlines.building_id
             , building_name.building_name
             , use.value
             , suburb_locality.suburb_4th
@@ -35,28 +32,27 @@ $$
             , capture_method.value
             , capture_source_group.value
             , capture_source.external_source_id
-            , building_outlines.begin_lifespan
             , buildings.begin_lifespan
             , building_name.begin_lifespan
             , building_use.begin_lifespan
             , building_outlines.shape
         FROM buildings.building_outlines
         JOIN buildings.buildings USING (building_id)
-        LEFT JOIN buildings.building_name USING (building_id)
-        LEFT JOIN buildings.building_use USING (building_id)
+        LEFT JOIN buildings.building_name ON buildings.building_id = building_name.building_id
+        AND building_name.end_lifespan IS NULL
+        LEFT JOIN buildings.building_use ON buildings.building_id = building_use.building_id
+        AND building_use.end_lifespan IS NULL
         LEFT JOIN buildings.use USING (use_id)
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
-        AND building_name.end_lifespan IS NULL
-        AND building_use.end_lifespan IS NULL
-        ORDER BY building_outlines.building_outline_id
+        ORDER BY buildings.building_id
         RETURNING *
     )
     SELECT count(*)::integer FROM populate_nz_building_outlines;
@@ -152,7 +148,7 @@ $$
         JOIN buildings_common.capture_source USING (capture_source_id)
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = bo.suburb_locality_id
-        JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
+        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = bo.territorial_authority_id
         LEFT JOIN buildings.building_name bn ON rd.building_id = bn.building_id
             AND rd.record_begin_lifespan >= bn.begin_lifespan

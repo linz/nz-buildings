@@ -19,8 +19,7 @@ COMMENT ON SCHEMA buildings_lds IS
 -- NZ Building Outlines
 -- NZ Building Outlines contains the current depiction of building outlines.
 CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
-      building_outline_id integer NOT NULL
-    , building_id integer NOT NULL
+      building_id integer UNIQUE NOT NULL
     , name character varying(250)
     , use character varying(40)
     , suburb_locality character varying(80) NOT NULL
@@ -29,7 +28,6 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
     , capture_method character varying(250) NOT NULL
     , capture_source character varying(250) NOT NULL
     , external_source_id character varying(250)
-    , outline_begin_lifespan timestamptz NOT NULL
     , building_begin_lifespan timestamptz NOT NULL
     , name_begin_lifespan timestamptz
     , use_begin_lifespan timestamptz
@@ -39,9 +37,6 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines (
 COMMENT ON TABLE buildings_lds.nz_building_outlines IS
 'NZ Building Outlines contains the current depiction of building outlines.';
 
-COMMENT ON COLUMN buildings_lds.nz_building_outlines.building_outline_id IS
-'Unique identifier for the building outline. The building outline id is unique '
-'to one representation of a building.';
 COMMENT ON COLUMN buildings_lds.nz_building_outlines.building_id IS
 'Unique identifier for a building. The building id is persistant for the same '
 'building across all of the building outlines that represent it.';
@@ -65,8 +60,6 @@ COMMENT ON COLUMN buildings_lds.nz_building_outlines.capture_source IS
 COMMENT ON COLUMN buildings_lds.nz_building_outlines.external_source_id IS
 'An externally managed identifier that relates the building outline to its '
 'source.';
-COMMENT ON COLUMN buildings_lds.nz_building_outlines.outline_begin_lifespan IS
-'The date that the building outline was added to the system.';
 COMMENT ON COLUMN buildings_lds.nz_building_outlines.building_begin_lifespan IS
 'The date that the building was added to the system.';
 COMMENT ON COLUMN buildings_lds.nz_building_outlines.name_begin_lifespan IS
