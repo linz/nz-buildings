@@ -247,7 +247,7 @@ class AddProduction(ProductionChanges):
         result = self.production_frame.db.execute_no_commit(sql)
         building_id = result.fetchall()[0][0]
         # insert into building_outlines table
-        sql = 'SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, now()::timestamp, %s);'
+        sql = 'SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);'
         result = self.production_frame.db.execute_no_commit(
             sql, (building_id, capture_method_id,
                   capture_source_id, lifecycle_stage_id,
