@@ -3,7 +3,7 @@
 <!-- Built from ANZLIC MET Template ISO 19139 2009-02-18 -->
 <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://www.isotc211.org/2005/gmd/gmd.xsd http://www.opengis.net/gml http://www.isotc211.org/2005/gml/gml.xsd http://www.w3.org/1999/xlink http://www.isotc211.org/2005/xlink/xlinks.xsd">
   <gmd:fileIdentifier>
-    <gco:CharacterString>82FE09B0-7A6B-4B55-AD31-BA2DCFB23768</gco:CharacterString>
+    <gco:CharacterString>ED6455C1-6BE8-4620-8BA8-EF14A193992A</gco:CharacterString>
   </gmd:fileIdentifier>
   <gmd:language>
     <gco:CharacterString>eng</gco:CharacterString>
@@ -106,20 +106,20 @@
       <gmd:abstract>
         <gco:CharacterString>
 
-This dataset consists of polygon outlines representing buildings within mainland New Zealand. A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and orthogonalise a building roof outline. Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset. Each building polygon represents a building roof outline and this may include structures such as garages and large sheds.
+This dataset consists of relationship table about polygon outlines representing buildings within mainland New Zealand. A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and orthogonalise a building roof outline. This dataset does not include building outline geometry, but instead provides the linkages in building outline id's from different aerial imagery sets in the [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-full-history) dataset when representations of building outlines change from single outlines split into multiple outlines, and from multiple outlines merged as single outlines.
 
-This dataset contains the full history of all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery. Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. As new aerial imagery becomes available, this dataset will be updated with new building outlines derived from this imagery.
+As new aerial imagery becomes available, this dataset will be updated with changes in builiding id relationships.
 
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
-This NZ Building Outlines Full History dataset contains all of the building outlines derived from multiple aerial imagery years in each region. 
+This dataset is closely related to the [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-full-history) dataset which contains all combinations of building outlines from multiple years of imagery that have existed since the inception of the outlines system, and the dates when each building outline existed in the associated aerial imagery.
 
-The related [NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines) dataset contains only building outlines derived from the latest LINZ aerial imagery in each region.
+Also related is the [NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines) dataset contains only building outlines derived from the latest LINZ aerial imagery in each region.
 
-Also related is the [NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-lifecycle) dataset, which stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. These kinds of changes can occur when new aerial imagery contains resolutions which allow better building outline delineation from nearby buildings.</gco:CharacterString>
+</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-        <gco:CharacterString>This layer provides the full history for building outlines for mainland New Zealand.</gco:CharacterString>
+        <gco:CharacterString>This layer provides building id relationship information for the NZ Building Outlines Full History dataset for mainland New Zealand.</gco:CharacterString>
       </gmd:purpose>
       <gmd:status>
         <gmd:MD_ProgressCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing">onGoing</gmd:MD_ProgressCode>
@@ -287,32 +287,9 @@ For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributi
         <gmd:LI_Lineage>
           <gmd:statement>
             <gco:CharacterString>
-**Source imagery**
-Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the external_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+This dataset does not include building outline geometry, but does include building id relationships of boulding outlines found in the [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-full-history) dataset.
 
-The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
-**Accuracy Specification:**
-The Building Outlines contain spatial detail reflective of the visible characteristics of building outlines as seen from the source aerial imagery. The building outlines were created by an both an automated and manual method of feature extraction. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees.
-
-**The following criteria were used for capturing buildings as building outlines:**
-• Buildings under construction, caravans, caravan trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
-• Primary building structures are captured as separate building outline polygons when the roofs are separate from nearby building roof structures.
-• Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
-• Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outlines.
-• Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
-• Adjoining commercial buildings are captured as separate building outlines when rooflines allows delineation.
-• Hay bales and silage are not captured as building outlines.
-• Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations
-• Water tanks are captured as building outlines when their area is at least 16.5 square metres (or 4.5 meters in diameter).      
-
-**Valid Geometry:**    
-A building outline polygon is considered to have valid geometry if;
-• It does not overlap with other building outline polygons;
-• It does not contain any spikes along edges;
-• It does not contain lines that are intersected with each other;
-• It can contain polygons with interior rings (holes);
-• It does not contain polygons with multiple exterior rings;
           </gco:CharacterString>
           </gmd:statement>
         </gmd:LI_Lineage>
