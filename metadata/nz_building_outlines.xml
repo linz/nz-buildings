@@ -105,15 +105,27 @@
       </gmd:citation>
       <gmd:abstract>
         <gco:CharacterString>
-This dataset consists of polygon outlines representing buildings within mainland New Zealand. A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and orthogonalise a building roof outline. Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset. Each building polygon represents a building roof outline and this may include structures such as garages and large sheds.
+This dataset provides current outlines of buildings within mainland New Zealand captured from teh latest aerial imagery.
 
-This dataset represents the most recent set of building outlines which have been determined from the most recent LINZ aerial imagery available in each region of the country and available on the LINZ Data Service. Current coverage includes areas in Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. As new aerial imagery becomes available, this dataset will be updated with new building outlines derived from this new imagery. Since aerial imagery is flown only every few years in each region of the country, building outlines only reflect those buildings observed at the date of this aerial imagery capture, and may not reflect buildings constructed after this time period.  
+A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.
+
+Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
+
+**Data vintage**
+
+This dataset shows the most recent set of building outlines extracted from the most recent LINZ aerial imagery available on the LINZ Data Service.
+
+Current coverage includes areas in Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
+
+Since aerial imagery is flown only every few years in each region of the country, building outlines only reflect those buildings observed at the date of this aerial imagery capture, and may not reflect buildings constructed after this time period.  
 
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
-This NZ Building Outlines dataset represents only building outlines derived from the latest aerial imagery in each region. 
-The related [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-full-history) dataset contains all combinations of building outlines from multiple years of imagery that have existed since the inception of the outlines system, and the dates when each building outline existed in the associated aerial imagery.
-Also related is the [NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines-lifecycle) dataset, which stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. These kinds of changes can occur when new aerial imagery contains resolutions which allow better building outline delineation from nearby buildings.
+**More building outlines data**
+
+[NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
+
+[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/xxxxx) - is related to the dataset above and stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline.
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
