@@ -35,7 +35,7 @@ The building outlines data described here represents the outlines of individual 
 
 Building outlines data are defined by the following criteria:
 
-* Buildings under construction, caravans, caravan trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
+* Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
 * Primary building structures are captured as separate building outline polygons from adjoining building structures, such as garages (see Image 2a)
 * Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
 * Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline.
