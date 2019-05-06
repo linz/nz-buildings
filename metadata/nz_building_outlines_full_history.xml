@@ -94,10 +94,20 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-04</gco:Date>
+                <gco:Date>2019-05-07</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2019-05-07</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
               </gmd:dateType>
             </gmd:CI_Date>
           </gmd:date>
@@ -119,10 +129,12 @@ Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Wha
 
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
-**More building outlines data**
+**Related  building outlines data**
+
 [NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/xxxxx) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines Full History dataset.
 
-[NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx) - provides current building outlines only derived from the latest LINZ aerial imagery.</gco:CharacterString>
+[NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx) - provides current building outlines only derived from the latest LINZ aerial imagery.
+</gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
         <gco:CharacterString>This layer provides the full history for building outlines for mainland New Zealand.</gco:CharacterString>

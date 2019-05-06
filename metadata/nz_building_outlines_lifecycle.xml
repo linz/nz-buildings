@@ -19,7 +19,6 @@
   </gmd:hierarchyLevelName>
   <gmd:contact>
     <gmd:CI_ResponsibleParty>
-	
 	<gmd:individualName gco:nilReason="withheld"><gco:CharacterString></gco:CharacterString></gmd:individualName>
 	<gmd:organisationName><gco:CharacterString>LINZ - Land Information New Zealand</gco:CharacterString></gmd:organisationName>
 	<gmd:positionName><gco:CharacterString>Location Data Analyst</gco:CharacterString></gmd:positionName>
@@ -53,7 +52,6 @@
           </gmd:address>
         </gmd:CI_Contact>
       </gmd:contactInfo>
-	
 <gmd:role><gmd:CI_RoleCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode></gmd:role></gmd:CI_ResponsibleParty>
 </gmd:contact>
   <gmd:dateStamp>
@@ -75,7 +73,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-05-01</gco:Date>
+                <gco:Date>2019-05-07</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -85,7 +83,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-05-03</gco:Date>
+                <gco:Date>2019-05-07</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -96,7 +94,7 @@
       </gmd:citation>
       <gmd:abstract>
         <gco:CharacterString>
-This dataset provides the relationships between building outlines within mainland New Zealand when buildings are split or merged.
+This table provides the relationships between building outlines within mainland New Zealand when buildings are split or merged.
 
 A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.
 
@@ -106,7 +104,8 @@ This dataset does not include building outline geometry, but provides the linkag
 This dataset will be updated with changes in building id relationships as new aerial imagery becomes available.
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
-More building outlines data
+**Related building outlines data**
+
 [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx) - directly related to this dataset, it contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset.
 
 [NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx) - provides current building outlines only derived from the latest LINZ aerial imagery.
@@ -114,7 +113,7 @@ More building outlines data
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-        <gco:CharacterString>This layer provides building id relationship information for the NZ Building Outlines Full History dataset for mainland New Zealand.</gco:CharacterString>
+        <gco:CharacterString>This table provides building id relationship information for the NZ Building Outlines Full History dataset for mainland New Zealand.</gco:CharacterString>
       </gmd:purpose>
       <gmd:resourceMaintenance>
         <gmd:MD_MaintenanceInformation>

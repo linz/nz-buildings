@@ -94,10 +94,20 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-04</gco:Date>
+                <gco:Date>2019-05-07</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date>2019-05-07</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
               </gmd:dateType>
             </gmd:CI_Date>
           </gmd:date>
@@ -105,11 +115,11 @@
       </gmd:citation>
       <gmd:abstract>
         <gco:CharacterString>
-This dataset provides current outlines of buildings within mainland New Zealand captured from teh latest aerial imagery.
+This dataset provides current outlines of buildings within mainland New Zealand captured from the latest aerial imagery.
 
 A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.
 
-Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
+Building outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
 
 **Data vintage**
 
@@ -121,7 +131,7 @@ Since aerial imagery is flown only every few years in each region of the country
 
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
-**More building outlines data**
+**Related building outlines data**
 
 [NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
 
@@ -164,9 +174,7 @@ Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings
       <gmd:resourceConstraints>
         <gmd:MD_LegalConstraints>
           <gmd:useLimitation>
-            <gco:CharacterString>Copyright of this work is owned by Land Information New Zealand
-
-© LINZ</gco:CharacterString>
+            <gco:CharacterString>Copyright of this work is owned by Land Information New Zealand© LINZ</gco:CharacterString>
           </gmd:useLimitation>
           <gmd:useConstraints>
             <gmd:MD_RestrictionCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_RestrictionCode" codeListValue="copyright">copyright</gmd:MD_RestrictionCode>
@@ -238,7 +246,8 @@ For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributi
                             <gco:Date>2009-03-31</gco:Date>
                           </gmd:date>
                           <gmd:dateType>
-                            <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                            <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication
+                            </gmd:CI_DateTypeCode>
                           </gmd:dateType>
                         </gmd:CI_Date>
                       </gmd:date>
