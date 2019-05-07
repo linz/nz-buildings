@@ -311,7 +311,7 @@ Resolution of the aerial imagery used for building outline capture ranges from 5
 The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
 **Accuracy Specification:**
-The Building Outlines contain spatial detail reflective of the visible characteristics of building outlines as seen from the source aerial imagery. The building outlines were created by an both an automated and manual method of feature extraction. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees.
+The Building Outlines contain spatial detail reflective of the visible characteristics of building outlines as seen from the source aerial imagery. The building outlines were created by both an automated and manual method of feature extraction. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees.
 
 **The following criteria were used for capturing buildings as building outlines:**
 • Buildings under construction, caravans, caravan trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
@@ -319,7 +319,7 @@ The Building Outlines contain spatial detail reflective of the visible character
 • Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
 • Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outlines.
 • Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
-• Adjoining commercial buildings are captured as separate building outlines when rooflines allows delineation.
+• Adjoining commercial buildings are captured as separate building outlines when rooflines allow delineation.
 • Hay bales and silage are not captured as building outlines.
 • Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations
 • Water tanks are captured as building outlines when their area is at least 16.5 square metres (or 4.5 meters in diameter).      
@@ -328,6 +328,7 @@ The Building Outlines contain spatial detail reflective of the visible character
 A building outline polygon is considered to have valid geometry if;
 • It does not overlap with other building outline polygons;
 • It does not contain any spikes along edges;
+* It does not contain duplicate nodes;
 • It does not contain lines that are intersected with each other;
 • It can contain polygons with interior rings (holes);
 • It does not contain polygons with multiple exterior rings;
