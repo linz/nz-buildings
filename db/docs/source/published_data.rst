@@ -14,8 +14,6 @@ To assist you in understanding these datasets, the structure and details of the 
 
 To enable changes between updates to be recorded and then queried using using LDS `changesets <https://www.linz.govt.nz/data/linz-data-service/guides-and-documentation/how-to-use-the-changeset-generator>`_, every table has a primary key. Primary keys in tables are shown by a field name with bold font.
 
-This data model has been designed to manage building data with multiple representations, allowing for future enhancements in building data management. Not all of this data is currently populated and data capture for these new fields will occur over time.
-
 
 
 Schema: {{ schema_gen_buildings_lds["name"] }}
