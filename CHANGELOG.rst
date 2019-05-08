@@ -11,6 +11,7 @@ Changed
 -------
 
 * Removed building_outline_id from nz_building_outlines to make it clear that building_id is the persistent id.
+* Updated metadata and data dictionary text and images in preparation for go-live.
 
 Fixed
 -----
