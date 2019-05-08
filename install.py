@@ -76,7 +76,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "buildings_bulk_load", "functions", "13-supplied_outlines.sql"),
     os.path.join("sql", "buildings_bulk_load", "functions", "14-compare_buildings.sql"),
     # os.path.join("sql", "buildings_lds","functions", "01-nz_building_outlines.sql"),
-    # os.path.join("sql", "buildings_lds","functions", "02-nz_building_outlines_full_history.sql"),
+    # os.path.join("sql", "buildings_lds","functions", "02-nz_building_outlines_all_sources.sql"),
     # os.path.join("sql", "buildings_lds","functions", "03-nz_building_outlines_lifecycle.sql"),
     os.path.join("sql", "buildings_lds", "functions", "04-load_buildings.sql"),
     os.path.join("sql", "buildings_lds", "functions", "05-populate_buildings_lds.sql"),

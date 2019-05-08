@@ -3,7 +3,7 @@
 
 -- Tables:
 -- nz_building_outlines
--- nz_building_outlines_full_history
+-- nz_building_outlines_all_sources
 -- nz_building_outlines_lifecycle
 
 ------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS buildings_lds.nz_building_outlines_all_sources (
 );
 
 COMMENT ON TABLE buildings_lds.nz_building_outlines_all_sources IS
-'NZ Building Outlines: Full History contains all combinations of outline / '
+'NZ Building Outlines: All Sources contains all combinations of outline / '
 'building / name / use that have existed within the building outlines '
 'system, and the dates for which that combination existed. ';
 
@@ -185,9 +185,9 @@ COMMENT ON TABLE buildings_lds.nz_building_outlines_lifecycle IS
 COMMENT ON COLUMN buildings_lds.nz_building_outlines_lifecycle.lifecycle_id IS
 'Unique identifier for a lifecycle.';
 COMMENT ON COLUMN buildings_lds.nz_building_outlines_lifecycle.parent_building_id IS
-'Foreign key to the buildings_lds.nz_building_outlines_full_history table. All '
+'Foreign key to the buildings_lds.nz_building_outlines_all_sources table. All '
 'records stored as parent buildings will have a date in building_end_lifespan.';
 COMMENT ON COLUMN buildings_lds.nz_building_outlines_lifecycle.building_id IS
-'Foreign key to the buildings_lds.nz_building_outlines_full_history table. '
+'Foreign key to the buildings_lds.nz_building_outlines_all_sources table. '
 'This is the child in the relationship - (one of) the building(s) that '
 'replaced the parent building.' ;
