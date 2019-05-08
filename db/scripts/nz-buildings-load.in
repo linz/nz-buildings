@@ -107,12 +107,18 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
     echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    psql -c "DROP SCHEMA IF EXISTS aerial_lds CASCADE;"
+    echo ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql $ON_ERROR_STOP
 fi
 
 if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
     echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    psql -c "DROP SCHEMA IF EXISTS aerial_lds CASCADE;"
+    echo ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql $ON_ERROR_STOP
 fi
 
 # Execute schema and table files
