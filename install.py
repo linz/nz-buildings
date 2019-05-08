@@ -124,6 +124,10 @@ def db_install():
         script = os.path.join(__location__, "db", "tests", "testdata", "09-create_test_admin_bdys_schema.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
+        
+        script = os.path.join(__location__, "db", "tests", "testdata", "10-create_test_aerial_schema.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
 
         for script in SQL_SCRIPTS:
             script = os.path.join(__location__, "db", script)
