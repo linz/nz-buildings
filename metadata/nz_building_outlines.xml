@@ -133,9 +133,9 @@ Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings
 
 **Related building outlines data**
 
-[NZ Building Outlines Full History] (https://data.linz.govt.nz/layer/xxxxx) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
+[NZ Building Outlines All Sources] (https://data.linz.govt.nz/layer/101292) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
 
-[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/xxxxx) - is related to the dataset above and stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline.
+[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/101291) - is related to the dataset above and stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline.
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
@@ -308,7 +308,7 @@ For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributi
           <gmd:statement>
             <gco:CharacterString>
 **Source imagery**
-Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the external_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the capture_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
 The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 

@@ -6,7 +6,7 @@ Introduction
 Purpose
 -----------------------------
 
-This document provides detailed metadata (data dictionary) for the NZ Building Outlines data published on the LINZ Data Service. Https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines
+This document provides detailed metadata (data dictionary) for the NZ Building Outlines data published on the LINZ Data Service: https://data.linz.govt.nz/layer/101290
 
 Background
 ----------------------------
@@ -51,13 +51,13 @@ Building outlines data are defined by the following criteria:
 
    Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. In this case the diameter shown in red is 9.8 meters. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut located in a conservation area.
 
-The publicly available building outlines data consists of three tables. The `NZ_Building_Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ_building_outlines_full_history <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-full-history>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ_building_outlines_lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building relationship information as changes are detected between neighbouring buildings.
+The publicly available building outlines data consists of three tables. The `NZ Building Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ Building Outlines All Sources <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-all-sources>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ Building Outlines Lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building_id relationship information buildings that are split or merged.
 
 
 Source Imagery
 ---------------------------
 
-The source imagery is linked via the ``external_source_id`` attribute of building outlines to the ``imagery_survey_id`` of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+The source imagery is linked via the ``capture_source_id`` attribute of building outlines to the ``imagery_survey_id`` of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
 The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html 
 
@@ -65,7 +65,7 @@ The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readt
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines/>`_. Image 4 shows the additional coverage of building outlines available by the end of 2019 in blue.
+The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 4 shows the additional coverage of building outlines available by the end of 2019 in blue.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+
 | .. figure:: _static/April_2019_coverage_map.png             | .. figure:: _static/2019_coverage_map.png                   |
