@@ -463,6 +463,11 @@ def get_columns(table_str, file_content, this_table_columns):
             "extra": "bold",
             "columns": [column_name_str, "integer", "32", " ", " ", "No"]
         },
+        "integer_unique_not_null": {
+            "regex": r"(.*)\sinteger\sUNIQUE\s.*",
+            "extra": "bold",
+            "columns": [column_name_str, "integer", "32", " ", " ", "No"]
+        },
         "primary_key_integer_not_null": {
             "regex": r"(.*)\sinteger(?=.*?(NOT NULL))(?=.*?(PRIMARY KEY))",
             "extra": "bold",
