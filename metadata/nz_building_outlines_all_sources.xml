@@ -122,18 +122,19 @@ A building outline is a 2D representation of the roof outline of a building whic
 
 Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
 
-Data vintage
+**Data vintage**
+          
 This dataset contains all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
 
 Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
 
-Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
+Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
 **Related  building outlines data**
 
-[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/101291) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines (All Sources) dataset.
+[NZ Building Outlines Lifecycle](https://data.linz.govt.nz/table/101291) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines (All Sources) dataset.
 
-[NZ Building Outlines] (https://data.linz.govt.nz/layer/101290) - provides current building outlines only, derived from the latest LINZ aerial imagery.
+[NZ Building Outlines](https://data.linz.govt.nz/layer/101290) - provides current building outlines only, derived from the latest LINZ aerial imagery.
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
