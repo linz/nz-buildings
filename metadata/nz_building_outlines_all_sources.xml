@@ -131,7 +131,7 @@ Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings
 
 **Related  building outlines data**
 
-[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/101291) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines All Sources dataset.
+[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/101291) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines (All Sources) dataset.
 
 [NZ Building Outlines] (https://data.linz.govt.nz/layer/101290) - provides current building outlines only, derived from the latest LINZ aerial imagery.
 </gco:CharacterString>

@@ -99,21 +99,21 @@ This table provides the relationships between building outlines within mainland 
 A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.
 
 Data vintage
-This dataset does not include building outline geometry, but provides the linkages between building_id's from different aerial imagery sources in the [NZ Building Outlines All Sources] (https://data.linz.govt.nz/layer/101292) dataset when building outlines change from single outlines split into multiple outlines, and from multiple outlines merged as single outlines.
+This dataset does not include building outline geometry, but provides the linkages between building_id's from different aerial imagery sources in the [NZ Building Outlines (All Sources)] (https://data.linz.govt.nz/layer/101292) dataset when building outlines change from single outlines split into multiple outlines, and from multiple outlines merged as single outlines.
 
 This dataset will be updated with changes in building_id relationships as new aerial imagery becomes available.
 Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
 **Related building outlines data**
 
-[NZ Building Outlines All Sources] (https://data.linz.govt.nz/layer/101292) - directly related to this dataset, it contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset.
+[NZ Building Outlines (All Sources)] (https://data.linz.govt.nz/layer/101292) - directly related to this dataset, it contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset.
 
 [NZ Building Outlines] (https://data.linz.govt.nz/layer/101290) - provides current building outlines only derived from the latest LINZ aerial imagery.
 
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-        <gco:CharacterString>This table provides building_id relationship information for the NZ Building Outlines All Sources dataset for mainland New Zealand.</gco:CharacterString>
+        <gco:CharacterString>This table provides building_id relationship information for the NZ Building Outlines (All Sources) dataset for mainland New Zealand.</gco:CharacterString>
       </gmd:purpose>
       <gmd:resourceMaintenance>
         <gmd:MD_MaintenanceInformation>
@@ -174,7 +174,7 @@ Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings
       <gmd:lineage>
         <gmd:LI_Lineage>
           <gmd:statement>
-            <gco:CharacterString>This dataset does not include building outline geometry, but does include building_id relationships of building outlines found in the [NZ Building Outlines All Sources] (https://data.linz.govt.nz/layer/101292) dataset.
+            <gco:CharacterString>This dataset does not include building outline geometry, but does include building_id relationships of building outlines found in the [NZ Building Outlines (All Sources)] (https://data.linz.govt.nz/layer/101292) dataset.
             </gco:CharacterString>
           </gmd:statement>
         </gmd:LI_Lineage>
