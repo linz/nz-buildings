@@ -15,26 +15,28 @@ $$
             , town_city
             , territorial_authority
             , capture_method
-            , capture_source
-            , external_source_id
-            , building_begin_lifespan
-            , name_begin_lifespan
-            , use_begin_lifespan
+            , capture_source_group
+            , capture_source_id
+            , capture_source_name
+            , capture_source_from
+            , capture_source_to
+            , last_modified
             , shape
         )
         SELECT
-              building_outlines.building_id
-            , building_name.building_name
-            , use.value
-            , suburb_locality.suburb_4th
-            , town_city.name
-            , territorial_authority.name
-            , capture_method.value
-            , capture_source_group.value
-            , capture_source.external_source_id
-            , buildings.begin_lifespan
-            , building_name.begin_lifespan
-            , building_use.begin_lifespan
+              buildings.building_id
+            , COALESCE(building_name.building_name, '') AS name
+            , COALESCE(use.value, 'Unknown') AS use
+            , suburb_locality.suburb_4th AS suburb_locality
+            , COALESCE(town_city.name, '') AS town_city
+            , territorial_authority.name AS territorial_authority
+            , capture_method.value AS capture_method
+            , capture_source_group.value AS capture_source_group
+            , LEFT(capture_source.external_source_id, 4)::integer AS capture_source_id
+            , nz_imagery_surveys.name AS capture_source_name
+            , nz_imagery_surveys.flown_from AS capture_source_from
+            , nz_imagery_surveys.flown_to AS capture_source_to
+            , building_outlines.begin_lifespan::date AS last_modified
             , building_outlines.shape
         FROM buildings.building_outlines
         JOIN buildings.buildings USING (building_id)
@@ -46,6 +48,7 @@ $$
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
+        JOIN aerial_lds.nz_imagery_surveys ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_surveys.imagery_survey_id
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
         LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
@@ -61,12 +64,12 @@ $$
 LANGUAGE sql VOLATILE;
 
 
-CREATE OR REPLACE FUNCTION buildings_lds.nz_building_outlines_full_history_insert()
+CREATE OR REPLACE FUNCTION buildings_lds.nz_building_outlines_all_sources_insert()
 RETURNS integer AS
 $$
 
-    WITH populate_nz_building_outlines_full_history AS (
-        INSERT INTO buildings_lds.nz_building_outlines_full_history (
+    WITH populate_nz_building_outlines_all_sources AS (
+        INSERT INTO buildings_lds.nz_building_outlines_all_sources (
               building_outline_id
             , building_id
             , name
@@ -75,92 +78,107 @@ $$
             , town_city
             , territorial_authority
             , capture_method
-            , capture_source
-            , external_source_id
-            , building_lifecycle
-            , record_begin_lifespan
-            , record_end_lifespan
+            , capture_source_group
+            , capture_source_id
+            , capture_source_name
+            , capture_source_from
+            , capture_source_to
+            , building_outline_lifecycle
+            , begin_lifespan
+            , end_lifespan
+            , last_modified
             , shape
         )
-        WITH events AS (
-            SELECT building_id, begin_lifespan AS change
-            FROM buildings.buildings
-            UNION
-            SELECT building_id, end_lifespan AS change
-            FROM buildings.buildings
-            UNION
-            SELECT building_id, begin_lifespan AS change
+        WITH transfer_dates AS (
+            SELECT DISTINCT transfer_date
+            FROM buildings_bulk_load.supplied_datasets
+        )
+        , deleted_in_production AS (
+            SELECT building_outlines.building_outline_id, supplied_datasets.processed_date, supplied_datasets.transfer_date, building_outlines.begin_lifespan, building_outlines.end_lifespan
             FROM buildings.building_outlines
+            JOIN buildings_bulk_load.transferred ON building_outlines.building_outline_id = transferred.new_building_outline_id
+            JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+            JOIN buildings_bulk_load.supplied_datasets USING (supplied_dataset_id)
+            WHERE building_outlines.end_lifespan IS NOT NULL
+            AND building_outlines.end_lifespan NOT IN (
+                SELECT transfer_date
+                FROM transfer_dates
+            )
+        )
+        , removed AS (
+            SELECT b1.building_outline_id
+            FROM buildings.building_outlines b1
+            LEFT JOIN buildings.building_outlines b2 ON b1.building_id = b2.building_id AND b1.building_outline_id != b2.building_outline_id AND b2.end_lifespan IS NULL
+            LEFT JOIN buildings.lifecycle l ON b1.building_id = l.parent_building_id
+            LEFT JOIN deleted_in_production d ON b1.building_outline_id = d.building_outline_id
+            WHERE b1.end_lifespan IS NOT NULL
+            AND b2.building_outline_id IS NULL
+            AND l.parent_building_id IS NULL
+            AND d.building_outline_id IS NULL
+        )
+        , replaced AS (
+            SELECT b1.building_outline_id
+            FROM buildings.building_outlines b1
+            JOIN buildings.building_outlines b2 ON b1.building_id = b2.building_id AND b1.building_outline_id != b2.building_outline_id AND b1.end_lifespan = b2.begin_lifespan AND b2.end_lifespan IS NULL
+            WHERE b1.end_lifespan IS NOT NULL
+        )
+        , recombined AS (
+            SELECT b.building_outline_id
+            FROM buildings.building_outlines b
+            JOIN buildings.lifecycle l ON b.building_id = l.parent_building_id
+            WHERE b.end_lifespan IS NOT NULL
+        )
+        , building_outline_lifecycle AS (
+            SELECT building_outline_id, 'Removed' AS status
+            FROM removed
             UNION
-            SELECT building_id, end_lifespan AS change
-            FROM buildings.building_outlines
+            SELECT building_outline_id, 'Replaced' AS status
+            FROM replaced
             UNION
-            SELECT building_id, begin_lifespan AS change
-            FROM buildings.building_name
-            UNION
-            SELECT building_id, end_lifespan AS change
-            FROM buildings.building_name
-            UNION
-            SELECT building_id, begin_lifespan AS change
-            FROM buildings.building_use
-            UNION
-            SELECT building_id, end_lifespan AS change
-            FROM buildings.building_use
-            ORDER BY 1, 2
-        ), unique_events AS (
-            SELECT
-                  row_number() OVER() AS change_id
-                , *
-            FROM events
-        ), record_dates AS (
-            SELECT
-                  a.building_id
-                , a.change AS record_begin_lifespan
-                , b.change AS record_end_lifespan
-            FROM unique_events a
-            JOIN unique_events b USING (building_id)
-            WHERE (a.change_id + 1) = b.change_id
+            SELECT building_outline_id, 'Recombined' AS status
+            FROM recombined
         )
         SELECT
-              bo.building_outline_id
-            , rd.building_id
-            , bn.building_name
-            , u.value
-            , suburb_locality.suburb_4th
-            , town_city.name
-            , territorial_authority.name
-            , capture_method.value
-            , capture_source_group.value
-            , capture_source.external_source_id
-            , lifecycle_stage.value
-            , rd.record_begin_lifespan
-            , rd.record_end_lifespan
-            , bo.shape
-        FROM record_dates rd
-        JOIN buildings.buildings b ON rd.building_id = b.building_id
-            AND rd.record_begin_lifespan >= b.begin_lifespan
-            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(b.end_lifespan, now())
-        JOIN buildings.building_outlines bo ON rd.building_id = bo.building_id
-            AND rd.record_begin_lifespan >= bo.begin_lifespan
-            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bo.end_lifespan, now())
+              building_outlines.building_outline_id
+            , buildings.building_id
+            , COALESCE(building_name.building_name, '') AS name
+            , COALESCE(use.value, 'Unknown') AS use
+            , suburb_locality.suburb_4th AS suburb_locality
+            , COALESCE(town_city.name, '') AS town_city
+            , territorial_authority.name AS territorial_authority
+            , capture_method.value AS capture_method
+            , capture_source_group.value AS capture_source_group
+            , LEFT(capture_source.external_source_id, 4)::integer AS capture_source_id
+            , nz_imagery_surveys.name AS capture_source_name
+            , nz_imagery_surveys.flown_from AS capture_source_from
+            , nz_imagery_surveys.flown_to AS capture_source_to
+            , COALESCE(building_outline_lifecycle.status, 'Current') AS building_outline_lifecycle
+            , building_outlines.begin_lifespan::date AS begin_lifespan
+            , building_outlines.end_lifespan::date AS end_lifespan
+            , GREATEST(COALESCE(building_outlines.end_lifespan, '1900-01-01 00:00:00'), building_outlines.begin_lifespan)::date AS last_modified
+            , building_outlines.shape
+        FROM buildings.building_outlines
+        JOIN buildings.buildings USING (building_id)
+        LEFT JOIN buildings.building_name ON buildings.building_id = building_name.building_id
+        AND building_name.end_lifespan IS NULL
+        LEFT JOIN buildings.building_use ON buildings.building_id = building_use.building_id
+        AND building_use.end_lifespan IS NULL
+        LEFT JOIN buildings.use USING (use_id)
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
+        JOIN aerial_lds.nz_imagery_surveys ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_surveys.imagery_survey_id
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
-        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = bo.suburb_locality_id
-        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = bo.town_city_id
-        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = bo.territorial_authority_id
-        LEFT JOIN buildings.building_name bn ON rd.building_id = bn.building_id
-            AND rd.record_begin_lifespan >= bn.begin_lifespan
-            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bn.end_lifespan, now())
-        LEFT JOIN buildings.building_use bu ON rd.building_id = bu.building_id
-            AND rd.record_begin_lifespan >= bu.begin_lifespan
-            AND COALESCE(rd.record_end_lifespan, now()) <= COALESCE(bu.end_lifespan, now())
-        LEFT JOIN buildings.use u USING (use_id)
-        ORDER BY bo.building_outline_id, rd.record_begin_lifespan
+        JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
+        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
+        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
+        LEFT JOIN deleted_in_production USING (building_outline_id)
+        LEFT JOIN building_outline_lifecycle USING (building_outline_id)
+        WHERE deleted_in_production.building_outline_id IS NULL
+        ORDER BY building_outlines.building_outline_id
         RETURNING *
-    )
-    SELECT count(*)::integer FROM populate_nz_building_outlines_full_history;
+        )
+    SELECT count(*)::integer FROM populate_nz_building_outlines_all_sources;
 
 $$
 LANGUAGE sql VOLATILE;
@@ -195,12 +213,12 @@ RETURNS TABLE(
 $$
 
     TRUNCATE buildings_lds.nz_building_outlines;
-    TRUNCATE buildings_lds.nz_building_outlines_full_history;
+    TRUNCATE buildings_lds.nz_building_outlines_all_sources;
     TRUNCATE buildings_lds.nz_building_outlines_lifecycle;
 
     VALUES
           ('nz_building_outlines' , buildings_lds.nz_building_outlines_insert())
-        , ('nz_building_outlines_full_history' , buildings_lds.nz_building_outlines_full_history_insert())
+        , ('nz_building_outlines_all_sources' , buildings_lds.nz_building_outlines_all_sources_insert())
         , ('nz_building_outlines_lifecycle' , buildings_lds.nz_building_outlines_lifecycle_insert())
     ;
 

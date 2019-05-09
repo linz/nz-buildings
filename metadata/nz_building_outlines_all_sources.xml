@@ -89,7 +89,7 @@
       <gmd:citation>
         <gmd:CI_Citation>
           <gmd:title>
-            <gco:CharacterString>NZ Building Outlines (Full History)</gco:CharacterString>
+            <gco:CharacterString>NZ Building Outlines (All Sources)</gco:CharacterString>
           </gmd:title>
           <gmd:date>
             <gmd:CI_Date>
@@ -116,14 +116,14 @@
       <gmd:abstract>
         <gco:CharacterString>
 
-This dataset provides a full history of all building outlines within mainland New Zealand extracted from multiple years of aerial imagery, allowing you to see change over time.
+This dataset provides building outlines within mainland New Zealand extracted from multiple years of aerial imagery, allowing you to see change over time, or restrict the dataset to building outlines that match a specific aerial imagery source.
 
 A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.
 
 Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
 
 Data vintage
-This dataset contains the full history of all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
+This dataset contains all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
 
 Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
 
@@ -131,13 +131,13 @@ Please refer to the [NZ Building Outlines Data Dictionary] (https://nz-buildings
 
 **Related  building outlines data**
 
-[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/xxxxx) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines Full History dataset.
+[NZ Building Outlines Lifecycle] (https://data.linz.govt.nz/table/101291) – stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline. Use this in conjunction with the NZ Building Outlines (All Sources) dataset.
 
-[NZ Building Outlines] (https://data.linz.govt.nz/layer/xxxxx) - provides current building outlines only derived from the latest LINZ aerial imagery.
+[NZ Building Outlines] (https://data.linz.govt.nz/layer/101290) - provides current building outlines only, derived from the latest LINZ aerial imagery.
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
-        <gco:CharacterString>This layer provides the full history for building outlines for mainland New Zealand.</gco:CharacterString>
+        <gco:CharacterString>This layer provides building outlines related to all aerial imagery sources for mainland New Zealand.</gco:CharacterString>
       </gmd:purpose>
       <gmd:status>
         <gmd:MD_ProgressCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing">onGoing</gmd:MD_ProgressCode>
@@ -306,7 +306,7 @@ For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributi
           <gmd:statement>
             <gco:CharacterString>
 **Source imagery**
-Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the external_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the capture_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
 The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 

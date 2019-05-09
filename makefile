@@ -61,7 +61,7 @@ SQLSCRIPTS = \
   db/sql/buildings_bulk_load/functions/13-supplied_outlines.sql \
   db/sql/buildings_bulk_load/functions/14-compare_buildings.sql \
   db/sql/buildings_lds/functions/01-nz_building_outlines.sql \
-  db/sql/buildings_lds/functions/02-nz_building_outlines_full_history.sql \
+  db/sql/buildings_lds/functions/02-nz_building_outlines_all_sources.sql \
   db/sql/buildings_lds/functions/03-nz_building_outlines_lifecycle.sql \
   db/sql/buildings_lds/functions/04-load_buildings.sql \
   db/sql/buildings_lds/functions/05-populate_buildings_lds.sql \

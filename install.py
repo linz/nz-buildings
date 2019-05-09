@@ -76,7 +76,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "buildings_bulk_load", "functions", "13-supplied_outlines.sql"),
     os.path.join("sql", "buildings_bulk_load", "functions", "14-compare_buildings.sql"),
     # os.path.join("sql", "buildings_lds","functions", "01-nz_building_outlines.sql"),
-    # os.path.join("sql", "buildings_lds","functions", "02-nz_building_outlines_full_history.sql"),
+    # os.path.join("sql", "buildings_lds","functions", "02-nz_building_outlines_all_sources.sql"),
     # os.path.join("sql", "buildings_lds","functions", "03-nz_building_outlines_lifecycle.sql"),
     os.path.join("sql", "buildings_lds", "functions", "04-load_buildings.sql"),
     os.path.join("sql", "buildings_lds", "functions", "05-populate_buildings_lds.sql"),
@@ -122,6 +122,10 @@ def db_install():
         cursor.execute("SET client_min_messages TO WARNING;")
 
         script = os.path.join(__location__, "db", "tests", "testdata", "09-create_test_admin_bdys_schema.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
+        
+        script = os.path.join(__location__, "db", "tests", "testdata", "10-create_test_aerial_schema.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
 

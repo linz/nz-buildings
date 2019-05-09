@@ -56,7 +56,7 @@ COMMENT ON COLUMN buildings_common.capture_source_group.value IS
 COMMENT ON COLUMN buildings_common.capture_source_group.description IS
 'The description of the capture source group e.g. external_source_id for this '
 'group links to the primary key of the NZ Imagery Surveys layer, available '
-'on LINZ Data Service at: https://data.linz.govt.nz/layer/nnnnn.';
+'on LINZ Data Service at: https://data.linz.govt.nz/layer/95677.';
 
 
 -- Capture Source
