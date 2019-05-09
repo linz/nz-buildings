@@ -7,7 +7,7 @@
 ****
 
 .. image:: https://img.shields.io/badge/building%20outlines-2,709,928-green.svg
-    :target: https://data.linz.govt.nz/layer/101292
+    :target: https://data.linz.govt.nz/layer/101290
     :alt: Current Building Outlines Feature Count
 
 .. image:: https://api.travis-ci.com/linz/nz-buildings.svg?branch=master
@@ -44,7 +44,7 @@ The Topography team at `Land Information New Zealand`_ built this system and use
 - manage the lifecycle of building outlines across multiple data captures
 - prepare data to be published on the LINZ Data Service
 
-.. _`on the LINZ Data Service`: https://data.linz.govt.nz/layer/101292
+.. _`on the LINZ Data Service`: https://data.linz.govt.nz/layer/101290
 .. _`Land Information New Zealand`: https://www.linz.govt.nz/
 
 Components
