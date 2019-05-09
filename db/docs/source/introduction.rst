@@ -49,7 +49,7 @@ Building outlines data are defined by the following criteria:
    :scale: 70%
    :alt: Examples of building outlines
 
-   Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. In this case the diameter shown in red is 9.8 meters. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut located in a conservation area.
+   Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 4.5 meter diameter threshold. In this case the diameter shown in red is 7.2 meters. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut located in a conservation area.
 
 The publicly available building outlines data consists of three tables. The `NZ Building Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ Building Outlines All Sources <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-all-sources>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ Building Outlines Lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building_id relationship information buildings that are split or merged.
 
