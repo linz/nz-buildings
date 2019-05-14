@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os.path
 from functools import partial
+import math
+import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QIcon, QMenu, QMessageBox
-from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -467,7 +468,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.added_building_ids = []
         self.geom = None
         self.polyline = None
-        self.tool = None
+        self.circle_tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -492,7 +493,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
         # setup circle button
-        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.clicked.connect(self.setup_circle)
         self.btn_circle.show()
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
@@ -618,10 +619,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     pass
                 if self.polyline:
                     self.polyline.reset()
-                if isinstance(self.tool, PointTool):
-                    self.tool.canvas_clicked.disconnect()
-                    self.tool.mouse_moved.disconnect()
-                    self.tool = None
+                if isinstance(self.circle_tool, PointTool):
+                    self.circle_tool.canvas_clicked.disconnect()
+                    self.circle_tool.mouse_moved.disconnect()
+                    self.circle_tool.deactivate()
                 iface.actionPan().trigger()
 
         self.btn_edit_save.setEnabled(False)
@@ -639,6 +640,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layout_status.hide()
         self.layout_capture_method.hide()
         self.layout_general_info.hide()
+        # remove instance
+        self.change_instance = None
         # reset adding outlines
         self.added_building_ids = []
         self.geom = None
@@ -654,11 +657,64 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.building_toolbar.hide()
         self.btn_circle.hide()
 
+    @pyqtSlot()
+    def setup_circle(self):
+        """
+            called when draw circle button is clicked
+        """
+        self.points = []
+        # set map tool to new point tool
+        self.circle_tool = PointTool(iface.mapCanvas())
+        iface.mapCanvas().setMapTool(self.circle_tool)
+        # create polyline to track drawing on canvas
+        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
+        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
+        self.polyline.setColor(QColor(255, 0, 0))
+        self.polyline.setWidth(1)
+        # signals for new map tool
+        self.circle_tool.canvas_clicked.connect(self.draw_circle)
+        self.circle_tool.mouse_moved.connect(self.update_line)
+
+    @pyqtSlot(QgsPoint)
+    def draw_circle(self, point):
+        """
+            called when mapcanvas is clicked
+        """
+        self.points.append(point)
+        self.polyline.addPoint(point, True)
+        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
+        # if two points have been clicked (center and edge)
+        if len(self.points) == 2:
+            # calculate radius of circle
+            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
+            # number of vertices of circle
+            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
+            # create point on center location
+            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
+            # create buffer of specified distance around point
+            buffer = point.buffer(radius, nodes)
+            # add feature to bulk_load_outlines (triggering featureAdded)
+            self.feature = QgsFeature(self.bulk_load_layer.pendingFields())
+            self.feature.setGeometry(buffer)
+            self.bulk_load_layer.addFeature(self.feature)
+            self.bulk_load_layer.triggerRepaint()
+            # reset points list
+            self.points = []
+
+    @pyqtSlot(QgsPoint)
+    def update_line(self, point):
+        """
+            called when mouse moved on canvas
+        """
+        if len(self.points) == 1:
+            # if the center has been clicked have a line follow the mouse movement
+            line = [self.points[0], point]
+            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
+
     def completer_box(self):
         """
             Box automatic completion
         """
-
         reasons = self.db._execute(bulk_load_select.deletion_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
