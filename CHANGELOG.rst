@@ -20,6 +20,7 @@ Fixed
 
 * Compare new dataset with previous dataset INCLUDING removed outlines that have "not removed" flag.
 * Use the current time as the begin_lifespan of building outlines when creating them rather than the date of bulk loading
+* Warning messages for when multiple buildings are added at once
 
 1.3.0
 ==========
