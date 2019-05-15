@@ -21,8 +21,9 @@ class BulkLoadChanges:
         """Constructor."""
         # setup
         self.edit_dialog = edit_dialog
-        self.bulk_load_frame = self.edit_dialog.bulk_load_frame
-        iface.setActiveLayer(self.bulk_load_frame.bulk_load_layer)
+        self.error_dialog = None
+        self.parent_frame = self.edit_dialog.parent_frame
+        iface.setActiveLayer(self.parent_frame.bulk_load_layer)
 
     def populate_edit_comboboxes(self):
         """
@@ -157,7 +158,6 @@ class BulkLoadChanges:
         self.edit_dialog.cmb_suburb.setEnabled(1)
         self.edit_dialog.btn_edit_save.setEnabled(1)
         self.edit_dialog.btn_edit_reset.setEnabled(1)
-        self.edit_dialog.btn_edit_cancel.setEnabled(1)
 
     def disable_UI_functions(self):
         """
@@ -238,7 +238,7 @@ class AddBulkLoad(BulkLoadChanges):
         # insert into bulk_load_outlines table
         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
         result = self.edit_dialog.db.execute_no_commit(
-            sql, (self.bulk_load_frame.current_dataset, capture_method_id,
+            sql, (self.edit_dialog.current_dataset, capture_method_id,
                   capture_source_id, suburb, town, t_a,
                   self.edit_dialog.geom)
         )
@@ -247,7 +247,7 @@ class AddBulkLoad(BulkLoadChanges):
         # insert into added table
         result = self.edit_dialog.db._execute(
             bulk_load_select.supplied_dataset_processed_date_by_dataset_id, (
-                self.bulk_load_frame.current_dataset, )
+                self.edit_dialog.current_dataset, )
         )
         processed_date = result.fetchall()[0][0]
 
@@ -261,8 +261,8 @@ class AddBulkLoad(BulkLoadChanges):
             self.edit_dialog.geom = None
             self.edit_dialog.added_building_ids = []
         # reset and disable comboboxes
-        if self.bulk_load_frame.polyline:
-            self.bulk_load_frame.polyline.reset()
+        if self.parent_frame.polyline:
+            self.parent_frame.polyline.reset()
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -279,8 +279,8 @@ class AddBulkLoad(BulkLoadChanges):
         iface.actionAddFeature().trigger()
         # reset and disable comboboxes
         self.disable_UI_functions()
-        if self.bulk_load_frame.polyline:
-            self.bulk_load_frame.polyline.reset()
+        if self.parent_frame.polyline:
+            self.parent_frame.polyline.reset()
         self.edit_dialog.geom = None
         self.edit_dialog.added_building_ids = []
 
@@ -322,8 +322,8 @@ class AddBulkLoad(BulkLoadChanges):
         """
         if qgsfId in self.edit_dialog.added_building_ids:
             self.edit_dialog.added_building_ids.remove(qgsfId)
-            if self.bulk_load_frame.polyline is not None:
-                self.bulk_load_frame.polyline.reset()
+            if self.parent_frame.polyline is not None:
+                self.parent_frame.polyline.reset()
             if self.edit_dialog.added_building_ids == []:
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
@@ -352,14 +352,14 @@ class AddBulkLoad(BulkLoadChanges):
                                                "You've edited the outline to less than 10sqm, are you sure this is correct?",
                                                level=QgsMessageBar.INFO, duration=3)
         else:
-            self.bulk_load_frame.error_dialog = ErrorDialog()
-            self.bulk_load_frame.error_dialog.fill_report(
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
                 '\n -------------------- WRONG GEOMETRY EDITED ------'
                 '-------------- \n\nOnly current added outline can '
                 'be edited. Please go to [Edit Geometry] to edit '
                 'existing outlines.'
             )
-            self.bulk_load_frame.error_dialog.show()
+            self.error_dialog.show()
 
     def select_comboboxes_value(self):
         """
@@ -372,7 +372,7 @@ class AddBulkLoad(BulkLoadChanges):
         # capture source
         result = self.edit_dialog.db._execute(
             common_select.capture_source_group_value_external_by_dataset_id,
-            (self.bulk_load_frame.current_dataset, )
+            (self.edit_dialog.current_dataset, )
         )
         result = result.fetchall()[0]
         text = '- '.join(result)
@@ -449,12 +449,12 @@ class EditAttribute(BulkLoadChanges):
             # can only delete outlines if no relationship
             self.edit_dialog.description_del = self.edit_dialog.le_deletion_reason.text()
             if len(self.edit_dialog.description_del) == 0:
-                self.bulk_load_frame.error_dialog = ErrorDialog()
-                self.bulk_load_frame.error_dialog.fill_report(
+                self.error_dialog = ErrorDialog()
+                self.error_dialog.fill_report(
                     '\n -------------------- EMPTY VALUE FIELD ------'
                     '-------------- \n\n There are no "reason for deletion" entries '
                 )
-                self.bulk_load_frame.error_dialog.show()
+                self.error_dialog.show()
                 self.disable_UI_functions()
                 return
             ls_relationships = self.remove_compared_outlines()
@@ -552,14 +552,14 @@ class EditAttribute(BulkLoadChanges):
                 feats.append(ls)
         # if selected features have different attributes (not allowed)
         if len(feats) > 1:
-            self.bulk_load_frame.error_dialog = ErrorDialog()
-            self.bulk_load_frame.error_dialog.fill_report(
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
                 '\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC'
                 'TED ---- \n\n Can only edit attributes of mul'
                 'tiple features when all existing attributes a'
                 're identical.'
             )
-            self.bulk_load_frame.error_dialog.show()
+            self.error_dialog.show()
             return False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
@@ -578,27 +578,27 @@ class EditAttribute(BulkLoadChanges):
                         reasons.append(reason)
             if deleted > 0:
                 if deleted == len(self.edit_dialog.bulk_load_layer.selectedFeatures()):
-                    if self.bulk_load_frame.btn_compare_outlines.isEnabled():
+                    if self.parent_frame.btn_compare_outlines.isEnabled():
                         if len(reasons) <= 1:
                             return True
                         else:
-                            self.bulk_load_frame.error_dialog = ErrorDialog()
-                            self.bulk_load_frame.error_dialog.fill_report(
+                            self.error_dialog = ErrorDialog()
+                            self.error_dialog.fill_report(
                                 '\n ---- DIFFERING DELETION REASONS ---- \n\n'
                                 'Cannot edit deleted features as have differing'
                                 ' reasons for deletion. Please edit individually.\n'
                             )
-                            self.bulk_load_frame.error_dialog.show()
+                            self.error_dialog.show()
                             return False
                     else:
-                        self.bulk_load_frame.error_dialog = ErrorDialog()
-                        self.bulk_load_frame.error_dialog.fill_report(
+                        self.error_dialog = ErrorDialog()
+                        self.error_dialog.fill_report(
                             '\n ---- CANNOT EDIT DELETED FEATURE ---- \n\n'
                             'Cannot edit deleted feature after comparison has been'
                             ' run, instead please add this feature manually.\n'
                             'Note: Don\'t forget to update the relationship too!'
                         )
-                        self.bulk_load_frame.error_dialog.show()
+                        self.error_dialog.show()
                         return False
             else:
                 return True
@@ -693,15 +693,15 @@ class EditAttribute(BulkLoadChanges):
         """
         added_outlines = self.edit_dialog.db.execute_no_commit(
             bulk_load_select.added_outlines_by_dataset_id, (
-                self.bulk_load_frame.current_dataset,))
+                self.edit_dialog.current_dataset,))
         added_outlines = added_outlines.fetchall()
         matched_outlines = self.edit_dialog.db.execute_no_commit(
             bulk_load_select.matched_outlines_by_dataset_id, (
-                self.bulk_load_frame.current_dataset,))
+                self.edit_dialog.current_dataset,))
         matched_outlines = matched_outlines.fetchall()
         related_outlines = self.edit_dialog.db.execute_no_commit(
             bulk_load_select.related_outlines_by_dataset_id, (
-                self.bulk_load_frame.current_dataset,))
+                self.edit_dialog.current_dataset,))
         related_outlines = related_outlines.fetchall()
         if len(self.edit_dialog.ids) > 0:
             # if there is more than one feature to update
@@ -712,24 +712,24 @@ class EditAttribute(BulkLoadChanges):
                     ls_relationships['added'].append(item)
                 # matched
                 if (item, ) in matched_outlines:
-                    self.bulk_load_frame.error_dialog = ErrorDialog()
-                    self.bulk_load_frame.error_dialog.fill_report(
+                    self.error_dialog = ErrorDialog()
+                    self.error_dialog.fill_report(
                         '\n --------------- RELATIONSHIP EXISTS ---------'
                         '-------\n\nCan only mark for deletion outline if'
                         ' no relationship exists'
                     )
-                    self.bulk_load_frame.error_dialog.show()
+                    self.error_dialog.show()
                     ls_relationships['matched'].append(item)
                     break
                 # related
                 if (item, ) in related_outlines:
-                    self.bulk_load_frame.error_dialog = ErrorDialog()
-                    self.bulk_load_frame.error_dialog.fill_report(
+                    self.error_dialog = ErrorDialog()
+                    self.error_dialog.fill_report(
                         '\n ------------------- RELATIONSHIP EXISTS ---------'
                         '---------- \n\nCan only mark for deletion outline if'
                         ' no relationship exists'
                     )
-                    self.bulk_load_frame.error_dialog.show()
+                    self.error_dialog.show()
                     ls_relationships['related'].append(item)
                     break
         return ls_relationships

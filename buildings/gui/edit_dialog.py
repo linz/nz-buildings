@@ -7,7 +7,6 @@ from PyQt4 import uic
 from PyQt4.QtGui import QCompleter, QDialog
 from PyQt4.QtCore import Qt, pyqtSlot
 
-from qgis.core import QgsMapLayerRegistry
 from qgis.utils import iface
 
 from buildings.gui import bulk_load_changes
@@ -20,16 +19,30 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'edit_dia
 
 class EditDialog(QDialog, FORM_CLASS):
 
-    def __init__(self, bulk_load_frame, parent=None):
+    def __init__(self, parent_frame, parent=None):
         super(EditDialog, self).__init__(parent)
         self.setupUi(self)
         self.setWindowModality(Qt.NonModal)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
-        self.bulk_load_frame = bulk_load_frame
-        self.layer_registry = self.bulk_load_frame.layer_registry
-        self.bulk_load_layer = self.bulk_load_frame.bulk_load_layer
-        self.db = self.bulk_load_frame.db
+
+        self.parent_frame = parent_frame
+        self.layer_registry = self.parent_frame.layer_registry
+        self.bulk_load_layer = self.parent_frame.bulk_load_layer
+        self.current_dataset = self.parent_frame.current_dataset
+        self.db = self.parent_frame.db
         self.territorial_auth = None
+
+        self.init_dialog()
+
+        # Bulk loadings & editing fields
+        self.added_building_ids = []
+        self.geom = None
+        self.ids = []
+        self.geoms = {}
+        self.bulk_load_outline_id = None
+
+        # processing class instances
+        self.change_instance = None
 
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
@@ -39,11 +52,22 @@ class EditDialog(QDialog, FORM_CLASS):
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
 
     def init_dialog(self):
-        pass
+        self.layout_status.show()
+        self.layout_capture_method.show()
+        self.layout_general_info.show()
+        self.cmb_status.setDisabled(1)
+        self.le_deletion_reason.setDisabled(1)
+        self.cmb_capture_method.setDisabled(1)
+        self.cmb_capture_source.setDisabled(1)
+        self.cmb_ta.setDisabled(1)
+        self.cmb_town.setDisabled(1)
+        self.cmb_suburb.setDisabled(1)
+        self.btn_edit_save.setDisabled(1)
+        self.btn_edit_reset.setDisabled(1)
 
     # connect dialog closed signal to exit editing
     def closeEvent(self, event):
-        self.exit_editing_clicked()
+        self.close_dialog()
         event.accept()
 
     def add_outline(self):
@@ -65,22 +89,14 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        try:
-            self.btn_edit_cancel.clicked.disconnect()
-        except TypeError:
-            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.show()
 
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
-        # # setup circle button
-        # self.btn_circle.clicked.connect(self.change_instance.setup_circle)
-        # self.btn_circle.show()
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.exit_editing_clicked)
         self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
         self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
         self.bulk_load_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
@@ -107,10 +123,6 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        try:
-            self.btn_edit_cancel.clicked.disconnect()
-        except TypeError:
-            pass
         self.layout_status.show()
         self.layout_capture_method.show()
         self.layout_general_info.show()
@@ -119,7 +131,6 @@ class EditDialog(QDialog, FORM_CLASS):
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.exit_editing_clicked)
         self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
 
         self.add_territorial_auth()
@@ -140,10 +151,6 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        try:
-            self.btn_edit_cancel.clicked.disconnect()
-        except TypeError:
-            pass
         self.layout_status.hide()
         self.layout_capture_method.show()
         self.layout_general_info.hide()
@@ -152,32 +159,25 @@ class EditDialog(QDialog, FORM_CLASS):
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.btn_edit_cancel.clicked.connect(self.exit_editing_clicked)
         self.bulk_load_layer.geometryChanged.connect(self.change_instance.geometry_changed)
 
         self.add_territorial_auth()
 
-    @pyqtSlot()
-    def exit_editing_clicked(self):
+    def close_dialog(self):
         """
-            When cancel clicked
+            When 'x' is clicked
         """
         self.btn_edit_save.setEnabled(False)
         self.btn_edit_reset.setEnabled(False)
-        self.btn_edit_cancel.setEnabled(False)
 
-        # remove instance
         self.change_instance = None
-        # reset adding outlines
         self.added_building_ids = []
         self.geom = None
-        # reset editing attribute
         self.ids = []
         self.building_outline_id = None
-        # reset editing geomtry
         self.geoms = {}
 
-        self.bulk_load_frame.edit_cancel_clicked()
+        self.parent_frame.edit_cancel_clicked()
 
     def add_territorial_auth(self):
         # add territorial Authority layer

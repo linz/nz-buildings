@@ -6,7 +6,7 @@ import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QCompleter, QFrame, QIcon, QMenu, QMessageBox
+from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMenu, QMessageBox
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
@@ -19,7 +19,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
                            buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
-from buildings.utilities import database as db, layers
+from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
@@ -42,22 +42,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.layer_registry = LayerRegistry()
         self.bulk_load_layer = QgsVectorLayer()
         self.territorial_auth = QgsVectorLayer()
-        # Check dialog on publish
+        # Set up pop-up dialog
         self.check_dialog = CheckDialog()
+        self.error_dialog = None
+        self.edit_dialog = None
+        # bulk load changes instance
+        self.change_instance = None
         # layer set up
         self.historic_layer = None
         self.bulk_load_layer = None
         self.territorial_auth = None
-        self.error_dialog = None
-        # Bulk loadings & editing fields
-        self.added_building_ids = []
-        self.geom = None
-        self.ids = []
-        self.geoms = {}
-        self.bulk_load_outline_id = None
-        self.edit_status = None
-        # processing class instances
-        self.change_instance = None
         # database setup
         self.db = db
         db.connect()
@@ -132,11 +126,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.display_no_bulk_load()
                 self.cmb_capture_src_grp.currentIndexChanged.connect(self.cmb_capture_src_grp_changed)
 
-        # # initiate le_deletion_reason
-        # self.le_deletion_reason.setMaxLength(250)
-        # self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
-        # self.completer_box()
-
         # initiate le_data_description
         self.le_data_description.setMaxLength(250)
         self.le_data_description.setPlaceholderText('Data Description')
@@ -151,9 +140,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.menu.addAction(self.action_edit_geometry)
         self.menu.setFixedWidth(300)
         self.tbtn_edits.setMenu(self.menu)
-        self.layout_status.hide()
-        self.layout_capture_method.hide()
-        self.layout_general_info.hide()
 
         self.tbtn_edits.triggered.connect(self.tbtn_edits_triggered)
         self.tbtn_edits.clicked.connect(self.tbtn_edits_clicked)
@@ -169,9 +155,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.btn_compare_outlines.clicked.connect(
             partial(self.compare_outlines_clicked, True))
-
-        # self.cmb_status.currentIndexChanged.connect(
-        #     self.enable_le_deletion_reason)
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
@@ -262,16 +245,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_bl_reset.hide()
 
         self.grpb_edits.show()
-        # self.cmb_status.setDisabled(1)
-        # self.le_deletion_reason.setDisabled(1)
-        # self.cmb_capture_method_2.setDisabled(1)
-        # self.cmb_capture_source.setDisabled(1)
-        # self.cmb_ta.setDisabled(1)
-        # self.cmb_town.setDisabled(1)
-        # self.cmb_suburb.setDisabled(1)
-        # self.btn_edit_save.setDisabled(1)
-        # self.btn_edit_reset.setDisabled(1)
-        # self.btn_edit_cancel.setDisabled(1)
 
         sql = reference_select.capture_source_area_name_by_supplied_dataset
         area_id = self.db._execute(sql, (self.current_dataset,))
@@ -458,8 +431,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     def enter_edit_mode(self, text):
 
-        self.btn_edit_reset.setEnabled(True)
-        self.btn_edit_cancel.setEnabled(True)
+        # self.btn_edit_reset.setEnabled(True) # has been moved to edit_dialog
         self.tbtn_edits.setEnabled(False)
         self.tbtn_edits.setStyleSheet('QToolButton {color: green;}')
         if text == 'Add Outline':
@@ -473,57 +445,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When add outline radio button toggled
         """
-        # Edit dialog
         self.edit_dialog.add_outline()
         self.edit_dialog.show()
         self.change_instance = self.edit_dialog.get_change_instance()
 
         self.circle_tool = None
         self.polyline = None
-
-        # self.added_building_ids = []
-        # self.geom = None
-        # iface.actionCancelEdits().trigger()
-        # # reset toolbar
-        # for action in iface.building_toolbar.actions():
-        #     if action.objectName() not in ['mActionPan']:
-        #         iface.building_toolbar.removeAction(action)
-        # # set change instance to added class
-        # try:
-        #     self.btn_edit_save.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_reset.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_cancel.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # self.layout_status.hide()
-        # self.layout_capture_method.show()
-        # self.layout_general_info.show()
-
-        # self.change_instance = bulk_load_changes.AddBulkLoad(self)
-        # setup circle button
         self.btn_circle.clicked.connect(self.setup_circle)
         self.btn_circle.show()
-        # # connect signals and slots
-        # self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
-        # self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        # self.btn_edit_cancel.clicked.connect(self.edit_cancel_clicked)
-        # self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
-        # self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
-        # self.bulk_load_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
-
-        # # add territorial Authority layer
-        # self.territorial_auth = self.layer_registry.add_postgres_layer(
-        #     'territorial_authorities', 'territorial_authority',
-        #     'shape', 'buildings_reference', '', ''
-        # )
-        # layers.style_layer(
-        #     self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def canvas_edit_attribute(self):
         """
@@ -532,42 +461,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_dialog.edit_attribute()
         self.edit_dialog.show()
         self.change_instance = self.edit_dialog.get_change_instance()
-        # self.ids = []
-        # self.building_outline_id = None
-        # iface.actionCancelEdits().trigger()
-        # # reset toolbar
-        # for action in iface.building_toolbar.actions():
-        #     if action.objectName() not in ['mActionPan']:
-        #         iface.building_toolbar.removeAction(action)
-        # try:
-        #     self.btn_edit_save.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_reset.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_cancel.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # self.layout_status.show()
-        # self.layout_capture_method.show()
-        # self.layout_general_info.show()
-
-        # self.change_instance = bulk_load_changes.EditAttribute(self)
-        # # set up signals and slots
-        # self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
-        # self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        # self.btn_edit_cancel.clicked.connect(self.edit_cancel_clicked)
-        # self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
-
-        # self.territorial_auth = self.layer_registry.add_postgres_layer(
-        #     'territorial_authorities', 'territorial_authority',
-        #     'shape', 'buildings_reference', '', ''
-        # )
-        # layers.style_layer(self.territorial_auth,
-        #                    {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def canvas_edit_geometry(self):
         """
@@ -576,40 +469,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_dialog.edit_geometry()
         self.edit_dialog.show()
         self.change_instance = self.edit_dialog.get_change_instance()
-        # self.geoms = {}
-        # iface.actionCancelEdits().trigger()
-        # # reset toolbar
-        # for action in iface.building_toolbar.actions():
-        #     if action.objectName() not in ['mActionPan']:
-        #         iface.building_toolbar.removeAction(action)
-        # try:
-        #     self.btn_edit_save.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_reset.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # try:
-        #     self.btn_edit_cancel.clicked.disconnect()
-        # except TypeError:
-        #     pass
-        # self.layout_status.hide()
-        # self.layout_capture_method.show()
-        # self.layout_general_info.hide()
-
-        # self.change_instance = bulk_load_changes.EditGeometry(self)
-        # # set up signals and slots
-        # self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
-        # self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        # self.btn_edit_cancel.clicked.connect(self.edit_cancel_clicked)
-        # self.bulk_load_layer.geometryChanged.connect(self.change_instance.geometry_changed)
-        # self.territorial_auth = self.layer_registry.add_postgres_layer(
-        #     'territorial_authorities', 'territorial_authority',
-        #     'shape', 'buildings_reference', '', ''
-        # )
-        # layers.style_layer(self.territorial_auth,
-        #                    {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def edit_cancel_clicked(self):
         """
@@ -647,9 +506,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.circle_tool.deactivate()
                 iface.actionPan().trigger()
 
-        # self.btn_edit_save.setEnabled(False)
-        # self.btn_edit_reset.setEnabled(False)
-        # self.btn_edit_cancel.setEnabled(False)
         self.tbtn_edits.setEnabled(True)
         self.tbtn_edits.setStyleSheet('QToolButton {color: black;}')
 
@@ -659,25 +515,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_dialog.remove_territorial_auth()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
-        # # reload layers
-        # QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        # self.layer_registry.remove_layer(self.territorial_auth)
-        # QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
-        # # hide comboboxes
-        # self.layout_status.hide()
-        # self.layout_capture_method.hide()
-        # self.layout_general_info.hide()
-        # # remove instance
-        # self.change_instance = None
-        # # reset adding outlines
-        # self.added_building_ids = []
-        # self.geom = None
-        # # reset editing attribute
-        # self.ids = []
-        # self.building_outline_id = None
-        # # reset editing geomtry
-        # self.geoms = {}
-        # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
@@ -685,6 +522,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_circle.hide()
 
         self.edit_dialog.close()
+        self.change_instance = None
 
     @pyqtSlot()
     def setup_circle(self):
@@ -739,28 +577,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             # if the center has been clicked have a line follow the mouse movement
             line = [self.points[0], point]
             self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
-
-    # def completer_box(self):
-    #     """
-    #         Box automatic completion
-    #     """
-    #     reasons = self.db._execute(bulk_load_select.deletion_description_value)
-    #     reason_list = [row[0] for row in reasons.fetchall()]
-    #     # Fill the search box
-    #     self.completer = QCompleter(reason_list)
-    #     self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
-    #     self.completer.setCaseSensitivity(Qt.CaseInsensitive)
-    #     self.le_deletion_reason.setCompleter(self.completer)
-
-    # @pyqtSlot()
-    # def enable_le_deletion_reason(self):
-    #     if self.cmb_status.currentText() == 'Deleted During QA':
-    #         self.le_deletion_reason.setEnabled(1)
-    #         self.le_deletion_reason.setFocus()
-    #         self.le_deletion_reason.selectAll()
-    #     else:
-    #         self.le_deletion_reason.setDisabled(1)
-    #         self.le_deletion_reason.clear()
 
     @pyqtSlot()
     def alter_relationships_clicked(self):
@@ -880,9 +696,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         if 'bulk_load_outlines' in layerids or 'territorial_authorities' in layerids:
-            self.btn_edit_save.setDisabled(1)
-            self.btn_edit_reset.setDisabled(1)
-            self.btn_edit_cancel.setDisabled(1)
             self.tbtn_edits.setDisabled(1)
             self.btn_compare_outlines.setDisabled(1)
             self.btn_alter_rel.setDisabled(1)

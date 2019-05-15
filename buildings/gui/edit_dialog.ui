@@ -249,13 +249,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QPushButton" name="btn_edit_cancel">
-         <property name="text">
-          <string>Exit Editing</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
