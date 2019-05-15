@@ -78,8 +78,12 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
+            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
                 iface.building_toolbar.removeAction(action)
+            if action.text() == 'Add Outline':
+                action.setDisabled(True)
+            else:
+                action.setEnabled(True)
         # set change instance to added class
         try:
             self.btn_edit_save.clicked.disconnect()
@@ -94,6 +98,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_general_info.show()
 
         self.change_instance = bulk_load_changes.AddBulkLoad(self)
+
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
@@ -113,8 +118,12 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
+            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
                 iface.building_toolbar.removeAction(action)
+            if action.text() in ['Edit Attributes']:
+                action.setDisabled(True)
+            else:
+                action.setEnabled(True)
         try:
             self.btn_edit_save.clicked.disconnect()
         except TypeError:
@@ -141,8 +150,12 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
+            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
                 iface.building_toolbar.removeAction(action)
+            if action.text() == 'Edit Geometry':
+                action.setDisabled(True)
+            else:
+                action.setEnabled(True)
         try:
             self.btn_edit_save.clicked.disconnect()
         except TypeError:
@@ -178,6 +191,11 @@ class EditDialog(QDialog, FORM_CLASS):
         self.geoms = {}
 
         self.parent_frame.edit_cancel_clicked()
+        for action in iface.building_toolbar.actions():
+            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+                iface.building_toolbar.removeAction(action)
+            else:
+                action.setEnabled(True)
 
     def add_territorial_auth(self):
         # add territorial Authority layer

@@ -5,7 +5,7 @@ import math
 import os.path
 
 from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
 from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMenu, QMessageBox
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar, QgsRubberBand
@@ -23,6 +23,7 @@ from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'bulk_load.ui'))
 
@@ -57,15 +58,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         db.connect()
         # selection colour
         iface.mapCanvas().setSelectionColor(QColor('Yellow'))
-        # icon for circle button
-        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        self.btn_circle.setIcon(QIcon(os.path.join(__location__, '..', 'icons', 'circle.png')))
         # set up confirmation message box
         self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
         self.msgbox_compare = self.confirmation_dialog_box('compare')
         self.msgbox_publish = self.confirmation_dialog_box('publish')
         self.grpb_layers.hide()
-        self.btn_circle.hide()
 
         # Find current supplied dataset
         result = self.db._execute(bulk_load_select.supplied_dataset_count_processed_date_is_null)
@@ -130,20 +127,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.le_data_description.setMaxLength(250)
         self.le_data_description.setPlaceholderText('Data Description')
 
-        self.menu = QMenu()
-        self.action_add_outline = QAction('Add Outline', self.menu)
-        self.action_edit_attribute = QAction('Edit Attribute', self.menu)
-        self.action_edit_geometry = QAction('Edit Geometry', self.menu)
-        self.menu.addAction(self.action_add_outline)
-        self.menu.addSeparator()
-        self.menu.addAction(self.action_edit_attribute)
-        self.menu.addAction(self.action_edit_geometry)
-        self.menu.setFixedWidth(300)
-        self.tbtn_edits.setMenu(self.menu)
-
-        self.tbtn_edits.triggered.connect(self.tbtn_edits_triggered)
-        self.tbtn_edits.clicked.connect(self.tbtn_edits_clicked)
-
         # set up signals and slots
         self.rad_external_id.toggled.connect(
             partial(bulk_load.enable_external_bulk, self))
@@ -176,6 +159,40 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             return True
         return False
 
+    def setup_toolbar(self):
+
+        if 'Add Outline' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "plus.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.add_action = QAction(icon, "Add Outline", iface.building_toolbar)
+            iface.registerMainWindowAction(self.add_action, "Ctrl+1")
+            self.add_action.triggered.connect(self.canvas_add_outline)
+            iface.building_toolbar.addAction(self.add_action)
+
+        if 'Edit Geometry' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "edit_geometry.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.edit_geom_action = QAction(icon, "Edit Geometry", iface.building_toolbar)
+            iface.registerMainWindowAction(self.edit_geom_action, "Ctrl+2")
+            self.edit_geom_action.triggered.connect(self.canvas_edit_geometry)
+            iface.building_toolbar.addAction(self.edit_geom_action)
+
+        if 'Edit Attributes' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "edit_attributes.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.edit_attrs_action = QAction(icon, "Edit Attributes", iface.building_toolbar)
+            iface.registerMainWindowAction(self.edit_attrs_action, "Ctrl+3")
+            self.edit_attrs_action.triggered.connect(self.canvas_edit_attribute)
+            iface.building_toolbar.addAction(self.edit_attrs_action)
+
+        iface.building_toolbar.show()
+
     def display_dataset_error(self):
         """UI Display when there are multiple supplied datasets."""
 
@@ -183,7 +200,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.lb_dataset_id.setText('None')
 
         self.grpb_bulk_load.hide()
-        self.grpb_edits.hide()
+        iface.building_toolbar.hide()
 
         self.btn_compare_outlines.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
@@ -213,8 +230,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.current_dataset = None
         self.lb_dataset_id.setText('None')
 
-        self.grpb_edits.hide()
-
         self.btn_compare_outlines.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
@@ -222,6 +237,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.add_historic_outlines()
 
         self.l_cs_area_title.setText('')
+
+        iface.building_toolbar.hide()
 
     def display_data_exists(self):
         """
@@ -244,10 +261,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_bl_save.hide()
         self.btn_bl_reset.hide()
 
-        self.grpb_edits.show()
-
         sql = reference_select.capture_source_area_name_by_supplied_dataset
         area_id = self.db._execute(sql, (self.current_dataset,))
+
         area_id = area_id.fetchall()
         if area_id is not None:
             self.l_cs_area_title.setText(area_id[0][0])
@@ -261,6 +277,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.display_data_exists()
         self.btn_compare_outlines.setDisabled(1)
         self.btn_publish.setEnabled(1)
+        self.setup_toolbar()
 
     def display_current_bl_not_compared(self):
         """
@@ -290,6 +307,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             return
         self.btn_alter_rel.setDisabled(1)
         self.btn_publish.setDisabled(1)
+        self.setup_toolbar()
 
     def add_outlines(self):
         """
@@ -380,8 +398,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 self.add_outlines()
                 self.display_current_bl_not_compared()
             QApplication.restoreOverrideCursor()
-            self.grpb_layers.show()
-            # Setup edit dialog
             self.edit_dialog = EditDialog(self)
 
     @pyqtSlot()
@@ -409,38 +425,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_alter_rel.setEnabled(1)
             QApplication.restoreOverrideCursor()
 
-    @pyqtSlot(QAction)
-    def tbtn_edits_triggered(self, action):
-        """
-            When edit tool button triggered
-        """
-        self.tbtn_edits.setDefaultAction(action)
-        text = action.text()
-        self.enter_edit_mode(text)
-
-    @pyqtSlot()
-    def tbtn_edits_clicked(self):
-        """
-            When edit tool button clicked
-        """
-        text = self.tbtn_edits.text()
-        if text != 'Choose Edit Mode':
-            self.enter_edit_mode(text)
-        else:
-            self.tbtn_edits.showMenu()
-
-    def enter_edit_mode(self, text):
-
-        # self.btn_edit_reset.setEnabled(True) # has been moved to edit_dialog
-        self.tbtn_edits.setEnabled(False)
-        self.tbtn_edits.setStyleSheet('QToolButton {color: green;}')
-        if text == 'Add Outline':
-            self.canvas_add_outline()
-        elif text == 'Edit Attribute':
-            self.canvas_edit_attribute()
-        elif text == 'Edit Geometry':
-            self.canvas_edit_geometry()
-
     def canvas_add_outline(self):
         """
             When add outline radio button toggled
@@ -451,8 +435,16 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.circle_tool = None
         self.polyline = None
-        self.btn_circle.clicked.connect(self.setup_circle)
-        self.btn_circle.show()
+        # setup circle button
+        image_dir = os.path.join(__location__, '..', 'icons')
+        icon_path = os.path.join(image_dir, "circle.png")
+        icon = QIcon()
+        icon.addFile(icon_path, QSize(8, 8))
+        self.circle_action = QAction(icon, "Draw Circle", iface.building_toolbar)
+        iface.registerMainWindowAction(self.circle_action, "Ctrl+0")
+        self.circle_action.triggered.connect(self.setup_circle)
+        self.circle_action.setCheckable(True)
+        iface.building_toolbar.addAction(self.circle_action)
 
     def canvas_edit_attribute(self):
         """
@@ -506,20 +498,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.circle_tool.deactivate()
                 iface.actionPan().trigger()
 
-        self.tbtn_edits.setEnabled(True)
-        self.tbtn_edits.setStyleSheet('QToolButton {color: black;}')
-
         iface.actionCancelEdits().trigger()
 
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.edit_dialog.remove_territorial_auth()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
-                iface.building_toolbar.removeAction(action)
-        iface.building_toolbar.hide()
-        self.btn_circle.hide()
+        self.setup_toolbar()
 
         self.edit_dialog.close()
         self.change_instance = None
@@ -593,6 +578,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(AlterRelationships(
             dw, self.current_dataset))
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ['mActionPan']:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
@@ -679,6 +668,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
+        for action in iface.building_toolbar.actions():
+            if action.text() not in ['Pan Map']:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
@@ -696,7 +689,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         if 'bulk_load_outlines' in layerids or 'territorial_authorities' in layerids:
-            self.tbtn_edits.setDisabled(1)
             self.btn_compare_outlines.setDisabled(1)
             self.btn_alter_rel.setDisabled(1)
             self.btn_publish.setDisabled(1)
