@@ -291,6 +291,10 @@ class AddProduction(ProductionChanges):
            @param qgsfId:      Id of added feature
            @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
+        if self.production_frame.added_building_ids != []:
+            iface.messageBar().pushMessage("WARNING",
+                                           "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
+                                           level=QgsMessageBar.WARNING, duration=3)
         if qgsfId not in self.production_frame.added_building_ids:
             self.production_frame.added_building_ids.append(qgsfId)
         # get new feature geom

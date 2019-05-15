@@ -292,6 +292,10 @@ class AddBulkLoad(BulkLoadChanges):
            @param qgsfId:      Id of added feature
            @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
+        if self.bulk_load_frame.added_building_ids != []:
+            iface.messageBar().pushMessage("WARNING",
+                                           "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
+                                           level=QgsMessageBar.WARNING, duration=3)
         if qgsfId not in self.bulk_load_frame.added_building_ids:
             self.bulk_load_frame.added_building_ids.append(qgsfId)
         # get new feature geom
