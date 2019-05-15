@@ -167,9 +167,6 @@ class EditDialog(QDialog, FORM_CLASS):
         """
             When 'x' is clicked
         """
-        self.btn_edit_save.setEnabled(False)
-        self.btn_edit_reset.setEnabled(False)
-
         self.change_instance = None
         self.added_building_ids = []
         self.geom = None

@@ -521,7 +521,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.building_toolbar.hide()
         self.btn_circle.hide()
 
-        self.edit_dialog.close()
         self.change_instance = None
 
     @pyqtSlot()
@@ -585,7 +584,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             open alter relationships frame
         """
         if self.change_instance is not None:
-            self.edit_cancel_clicked()
+            self.edit_dialog.close()
         self.db.close_connection()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
@@ -604,7 +603,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.confirm(self.msgbox_publish):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             if self.change_instance is not None:
-                self.edit_cancel_clicked()
+                self.edit_dialog.close()
             self.db.open_cursor()
             sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
             self.db.execute_no_commit(sql, (self.current_dataset,))
@@ -671,7 +670,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Called when bulk load frame exit button clicked.
         """
-        self.edit_cancel_clicked()
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
@@ -679,6 +677,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
+        if self.change_instance is not None:
+            self.edit_dialog.close()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
