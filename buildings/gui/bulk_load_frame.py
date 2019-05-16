@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 from functools import partial
@@ -450,8 +451,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When edit outline radio button toggled
         """
-        self.edit_dialog.edit_attribute()
         self.edit_dialog.show()
+        self.edit_dialog.edit_attribute()
         self.change_instance = self.edit_dialog.get_change_instance()
 
     def canvas_edit_geometry(self):
@@ -666,9 +667,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             Clean up and remove the bulk load frame.
         """
-        for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map']:
-                iface.building_toolbar.removeAction(action)
         if self.change_instance is not None:
             self.edit_dialog.close()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
@@ -683,6 +681,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
+        for action in iface.building_toolbar.actions():
+            if action.text() not in ['Pan Map']:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
     @pyqtSlot(str)
     def layers_removed(self, layerids):
@@ -694,6 +696,13 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.cb_bulk_load.setDisabled(1)
             self.cb_added.setDisabled(1)
             self.cb_removed.setDisabled(1)
+            for action in iface.building_toolbar.actions():
+                if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+                    iface.building_toolbar.removeAction(action)
+                if action.text() in ['Add Outline', 'Edit Geometry', 'Edit Attributes']:
+                    action.setDisabled(True)
+                else:
+                    action.setEnabled(True)
             iface.messageBar().pushMessage("ERROR",
                                            "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
                                            level=QgsMessageBar.CRITICAL, duration=5)

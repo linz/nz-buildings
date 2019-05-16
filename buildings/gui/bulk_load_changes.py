@@ -422,7 +422,6 @@ class EditAttribute(BulkLoadChanges):
         iface.building_toolbar.show()
 
         self.disable_UI_functions()
-
         if len(iface.activeLayer().selectedFeatures()) > 0:
             if self.is_correct_selections():
                 self.get_selections()
