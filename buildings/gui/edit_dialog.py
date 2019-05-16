@@ -9,7 +9,7 @@ from PyQt4.QtCore import Qt, pyqtSlot
 
 from qgis.utils import iface
 
-from buildings.gui import bulk_load_changes
+from buildings.gui import bulk_load_changes, production_changes
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import layers
 
@@ -27,9 +27,16 @@ class EditDialog(QDialog, FORM_CLASS):
 
         self.parent_frame = parent_frame
         self.layer_registry = self.parent_frame.layer_registry
-        self.bulk_load_layer = self.parent_frame.bulk_load_layer
-        self.current_dataset = self.parent_frame.current_dataset
         self.db = self.parent_frame.db
+
+        self.parent_frame_name = self.parent_frame.__class__.__name__
+        if self.parent_frame_name == 'BulkLoadFrame':
+            self.editing_layer = self.parent_frame.bulk_load_layer
+            self.current_dataset = self.parent_frame.current_dataset
+        elif self.parent_frame_name == 'ProductionFrame':
+            self.editing_layer = self.parent_frame.building_layer
+            self.current_dataset = None
+
         self.territorial_auth = None
 
         self.init_dialog()
@@ -97,14 +104,17 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
 
-        self.change_instance = bulk_load_changes.AddBulkLoad(self)
+        if self.parent_frame_name == 'BulkLoadFrame':
+            self.change_instance = bulk_load_changes.AddBulkLoad(self)
+        elif self.parent_frame_name == 'ProductionFrame':
+            self.change_instance = production_changes.AddProduction(self)
 
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.bulk_load_layer.featureAdded.connect(self.change_instance.creator_feature_added)
-        self.bulk_load_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
-        self.bulk_load_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
+        self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
+        self.editing_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        self.editing_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
 
         self.add_territorial_auth()
 
@@ -136,11 +146,15 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
 
-        self.change_instance = bulk_load_changes.EditAttribute(self)
+        if self.parent_frame_name == 'BulkLoadFrame':
+            self.change_instance = bulk_load_changes.EditAttribute(self)
+        elif self.parent_frame_name == 'ProductionFrame':
+            self.change_instance = production_changes.EditAttribute(self)
+
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.bulk_load_layer.selectionChanged.connect(self.change_instance.selection_changed)
+        self.editing_layer.selectionChanged.connect(self.change_instance.selection_changed)
 
         self.add_territorial_auth()
 
@@ -168,11 +182,15 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.hide()
 
-        self.change_instance = bulk_load_changes.EditGeometry(self)
+        if self.parent_frame_name == 'BulkLoadFrame':
+            self.change_instance = bulk_load_changes.EditGeometry(self)
+        elif self.parent_frame_name == 'ProductionFrame':
+            self.change_instance = production_changes.EditGeometry(self)
+
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.bulk_load_layer.geometryChanged.connect(self.change_instance.geometry_changed)
+        self.editing_layer.geometryChanged.connect(self.change_instance.geometry_changed)
 
         self.add_territorial_auth()
 

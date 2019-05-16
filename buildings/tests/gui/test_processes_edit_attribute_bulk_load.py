@@ -465,7 +465,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
-        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 0)
         self.bulk_load_frame.edit_dialog.ids = []
         self.bulk_load_frame.edit_dialog.building_outline_id = None
@@ -475,9 +475,9 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check multiple geoms 'deleted' when save clicked
         This test protects against a regression of #59"""
         expr = QgsExpression("bulk_load_outline_id=2010 or bulk_load_outline_id =2003")
-        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        it = self.bulk_load_frame.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.edit_dialog.editing_layer.setSelectedFeatures(ids)
         self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
         self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
@@ -491,7 +491,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
-        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 0)
         self.bulk_load_frame.edit_dialog.ids = []
         self.bulk_load_frame.edit_dialog.building_outline_id = None
@@ -604,9 +604,9 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check nothing is changed when correct and incorrect outlines are deleted
         This test protects against a regression of #59"""
         expr = QgsExpression("bulk_load_outline_id=2003 or bulk_load_outline_id =2004")
-        it = self.bulk_load_frame.bulk_load_layer.getFeatures(QgsFeatureRequest(expr))
+        it = self.bulk_load_frame.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.bulk_load_frame.bulk_load_layer.setSelectedFeatures(ids)
+        self.bulk_load_frame.edit_dialog.editing_layer.setSelectedFeatures(ids)
         self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
         self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
@@ -627,7 +627,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(result, 2004)
         # selection
-        selection = len(self.bulk_load_frame.bulk_load_layer.selectedFeatures())
+        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 2)
         self.bulk_load_frame.edit_dialog.ids = []
         self.bulk_load_frame.edit_dialog.building_outline_id = None

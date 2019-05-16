@@ -23,7 +23,8 @@ class BulkLoadChanges:
         self.edit_dialog = edit_dialog
         self.error_dialog = None
         self.parent_frame = self.edit_dialog.parent_frame
-        iface.setActiveLayer(self.parent_frame.bulk_load_layer)
+        self.editing_layer = self.edit_dialog.editing_layer
+        iface.setActiveLayer(self.editing_layer)
 
     def populate_edit_comboboxes(self):
         """
@@ -271,9 +272,9 @@ class AddBulkLoad(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
-        self.edit_dialog.bulk_load_layer.geometryChanged.disconnect(self.creator_geometry_changed)
+        self.editing_layer.geometryChanged.disconnect(self.creator_geometry_changed)
         iface.actionCancelEdits().trigger()
-        self.edit_dialog.bulk_load_layer.geometryChanged.connect(self.creator_geometry_changed)
+        self.editing_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
@@ -295,7 +296,7 @@ class AddBulkLoad(BulkLoadChanges):
             self.edit_dialog.added_building_ids.append(qgsfId)
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
-        new_feature = next(self.edit_dialog.bulk_load_layer.getFeatures(request))
+        new_feature = next(self.editing_layer.getFeatures(request))
         new_geometry = new_feature.geometry()
         # calculate area
         area = new_geometry.area()
@@ -476,7 +477,7 @@ class EditAttribute(BulkLoadChanges):
                         self.edit_dialog.db.execute_no_commit(
                             sql, (i, bulk_load_status_id, capture_method_id,
                                   capture_source_id, suburb, town, t_a))
-                    self.edit_dialog.bulk_load_layer.removeSelection()
+                    self.editing_layer.removeSelection()
         else:
             for i in self.edit_dialog.ids:
                 # check current status of building
@@ -491,7 +492,7 @@ class EditAttribute(BulkLoadChanges):
                 self.edit_dialog.db.execute_no_commit(
                     sql, (i, bulk_load_status_id, capture_method_id,
                           capture_source_id, suburb, town, t_a))
-            self.edit_dialog.bulk_load_layer.removeSelection()
+            self.editing_layer.removeSelection()
         self.disable_UI_functions()
         self.edit_dialog.completer_box()
 
@@ -519,7 +520,7 @@ class EditAttribute(BulkLoadChanges):
            Called when feature is selected
         """
         # If no outlines are selected the function will return
-        if len(self.edit_dialog.bulk_load_layer.selectedFeatures()) == 0:
+        if len(self.editing_layer.selectedFeatures()) == 0:
             self.edit_dialog.ids = []
             self.edit_dialog.building_outline_id = None
             self.disable_UI_functions()
@@ -539,7 +540,7 @@ class EditAttribute(BulkLoadChanges):
             Check if the selections meet the requirement
         """
         feats = []
-        for feature in self.edit_dialog.bulk_load_layer.selectedFeatures():
+        for feature in self.editing_layer.selectedFeatures():
             ls = []
             ls.append(feature.attributes()[3])
             ls.append(feature.attributes()[4])
@@ -564,7 +565,7 @@ class EditAttribute(BulkLoadChanges):
         elif len(feats) == 1:
             deleted = 0
             reasons = []
-            for feature in self.edit_dialog.bulk_load_layer.selectedFeatures():
+            for feature in self.editing_layer.selectedFeatures():
                 sql = bulk_load_select.bulk_load_status_id_by_outline_id
                 result = self.edit_dialog.db._execute(sql, (feature['bulk_load_outline_id'], ))
                 bl_status = result.fetchall()[0][0]
@@ -576,7 +577,7 @@ class EditAttribute(BulkLoadChanges):
                     if reason not in reasons:
                         reasons.append(reason)
             if deleted > 0:
-                if deleted == len(self.edit_dialog.bulk_load_layer.selectedFeatures()):
+                if deleted == len(self.editing_layer.selectedFeatures()):
                     if self.parent_frame.btn_compare_outlines.isEnabled():
                         if len(reasons) <= 1:
                             return True
@@ -607,9 +608,9 @@ class EditAttribute(BulkLoadChanges):
         """
             Return the selection values
         """
-        self.edit_dialog.ids = [feat.id() for feat in self.edit_dialog.bulk_load_layer.selectedFeatures()]
+        self.edit_dialog.ids = [feat.id() for feat in self.editing_layer.selectedFeatures()]
         self.edit_dialog.bulk_load_outline_id = self.edit_dialog.ids[0]
-        bulk_load_feat = [feat for feat in self.edit_dialog.bulk_load_layer.selectedFeatures()][0]
+        bulk_load_feat = [feat for feat in self.editing_layer.selectedFeatures()][0]
         bulk_load_geom = bulk_load_feat.geometry()
         # convert to correct format
         wkt = bulk_load_geom.exportToWkt()
@@ -802,9 +803,9 @@ class EditGeometry(BulkLoadChanges):
         """
             When bulk load frame btn_reset_save clicked
         """
-        self.edit_dialog.bulk_load_layer.geometryChanged.disconnect(self.geometry_changed)
+        self.editing_layer.geometryChanged.disconnect(self.geometry_changed)
         iface.actionCancelEdits().trigger()
-        self.edit_dialog.bulk_load_layer.geometryChanged.connect(self.geometry_changed)
+        self.editing_layer.geometryChanged.connect(self.geometry_changed)
         self.edit_dialog.geoms = {}
         # restart editing
         iface.actionToggleEditing().trigger()
