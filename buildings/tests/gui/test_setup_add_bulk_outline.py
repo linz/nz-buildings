@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
-from qgis.utils import plugins
+from qgis.utils import plugins, iface
 
 
 class SetUpBulkAddTest(unittest.TestCase):
@@ -35,8 +35,9 @@ class SetUpBulkAddTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_add_outline)
-        self.bulk_load_frame.tbtn_edits.click()
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Add Outline':
+                action.trigger()
 
     def tearDown(self):
         """Runs after each test."""
@@ -44,17 +45,17 @@ class SetUpBulkAddTest(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """Buttons and comboboxes correctly enabled/disables on startup"""
-        self.assertFalse(self.bulk_load_frame.layout_status.isVisible())
-        self.assertTrue(self.bulk_load_frame.layout_capture_method.isVisible())
-        self.assertTrue(self.bulk_load_frame.layout_general_info.isVisible())
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_ta.isEnabled())
+        self.assertTrue(self.bulk_load_frame.edit_dialog.isVisible())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.layout_status.isVisible())
+        self.assertTrue(self.bulk_load_frame.edit_dialog.layout_capture_method.isVisible())
+        self.assertTrue(self.bulk_load_frame.edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
 
     def test_layer_registry(self):
         """Bulk load outlines table added to canvas when frame opened"""
