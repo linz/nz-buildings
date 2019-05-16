@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import os.path
 from functools import partial
+import math
+import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QAction, QFrame, QIcon, QMenu
-from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar
+from PyQt4.QtGui import QAction, QColor, QFrame, QIcon, QMenu
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
 from buildings.gui import production_changes
+from buildings.gui.edit_dialog import EditDialog
 from buildings.utilities import database as db
 from buildings.utilities import layers
 from buildings.utilities.layers import LayerRegistry
@@ -35,6 +37,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_removed = QgsVectorLayer()
         self.territorial_auth = None
         self.add_outlines()
+        # Set up edit dialog
+        self.edit_dialog = EditDialog(self)
         # editing fields
         self.added_building_ids = []
         self.geom = None
@@ -66,13 +70,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.tbtn_edits.triggered.connect(self.tbtn_edits_triggered)
         self.tbtn_edits.clicked.connect(self.tbtn_edits_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
-        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
+        self.btn_exit_edits.clicked.connect(self.edit_cancel_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
-        self.btn_save.setDisabled(1)
-        self.btn_reset.setDisabled(1)
-        self.btn_exit_edits.setDisabled(1)
+        # self.btn_edit_save.setDisabled(1)
+        # self.btn_edit_reset.setDisabled(1)
+        # self.btn_exit_edits.setDisabled(1)
         self.btn_circle.hide()
 
     def add_outlines(self):
@@ -125,8 +129,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     def enter_edit_mode(self, text):
 
-        self.btn_reset.setEnabled(True)
-        self.btn_exit_edits.setEnabled(True)
+        # self.btn_edit_reset.setEnabled(True)
+        # self.btn_exit_edits.setEnabled(True)
         self.tbtn_edits.setEnabled(False)
         self.tbtn_edits.setStyleSheet('QToolButton {color: green;}')
         if text == 'Add Outline':
@@ -140,140 +144,195 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
             When add outline radio button toggled
         """
-        self.geom = None
+        self.edit_dialog.show()
+        self.edit_dialog.add_outline()
+        self.change_instance = self.edit_dialog.get_change_instance()
+
+        # self.geom = None
         self.polyline = None
-        self.tool = None
-        self.added_building_ids = []
-        iface.actionCancelEdits().trigger()
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
-                iface.building_toolbar.removeAction(action)
-        # set change instance to added class
-        try:
-            self.btn_save.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.btn_reset.clicked.disconnect()
-        except TypeError:
-            pass
-        try:
-            self.btn_exit_edits.clicked.disconnect()
-        except Exception:
-            pass
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
-        self.layout_end_lifespan.show()
-        self.change_instance = production_changes.AddProduction(self)
+        self.circle_tool = None
+        # self.added_building_ids = []
+        # iface.actionCancelEdits().trigger()
+        # # reset toolbar
+        # for action in iface.building_toolbar.actions():
+        #     if action.objectName() not in ['mActionPan']:
+        #         iface.building_toolbar.removeAction(action)
+        # # set change instance to added class
+        # try:
+        #     self.btn_edit_save.clicked.disconnect()
+        # except TypeError:
+        #     pass
+        # try:
+        #     self.btn_edit_reset.clicked.disconnect()
+        # except TypeError:
+        #     pass
+        # try:
+        #     self.btn_exit_edits.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # self.layout_capture_method.show()
+        # self.layout_general_info.show()
+        # self.layout_end_lifespan.show()
+        # self.change_instance = production_changes.AddProduction(self)
         # set up circle button
-        self.btn_circle.clicked.connect(self.change_instance.setup_circle)
+        self.btn_circle.clicked.connect(self.setup_circle)
         self.btn_circle.show()
-        # connect signals and slots
-        self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
-        self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
-        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
-        self.building_layer.featureAdded.connect(self.change_instance.creator_feature_added)
-        self.building_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
-        self.building_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
-        # add territorial Authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        # # connect signals and slots
+        # self.btn_edit_save.clicked.connect(partial(self.change_instance.save_clicked, True))
+        # self.btn_edit_reset.clicked.connect(self.change_instance.reset_clicked)
+        # self.btn_exit_edits.clicked.connect(self.edit_cancel_clicked)
+        # self.building_layer.featureAdded.connect(self.change_instance.creator_feature_added)
+        # self.building_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
+        # self.building_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
+        # # add territorial Authority layer
+        # self.territorial_auth = self.layer_registry.add_postgres_layer(
+        #     'territorial_authorities', 'territorial_authority',
+        #     'shape', 'buildings_reference', '', ''
+        # )
+        # layers.style_layer(self.territorial_auth,
+        #                    {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def canvas_edit_attribute(self):
         """
             When edit outline radio button toggled
         """
-        self.geoms = {}
-        self.ids = []
-        iface.actionCancelEdits().trigger()
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
-                iface.building_toolbar.removeAction(action)
-        # set change instance to edit class
-        try:
-            self.btn_save.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            self.btn_reset.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            self.btn_exit_edits.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            self.btn_end_lifespan.clicked.disconnect()
-        except Exception:
-            pass
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
-        self.layout_end_lifespan.show()
-        self.change_instance = production_changes.EditAttribute(self)
-        # set up signals and slots
-        self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
-        self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
-        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
-        self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
-        self.building_layer.selectionChanged.connect(self.change_instance.selection_changed)
-        # add territorial authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        self.edit_dialog.show()
+        self.edit_dialog.edit_attribute()
+        self.change_instance = self.edit_dialog.get_change_instance()
+        # iface.actionCancelEdits().trigger()
+        # # reset toolbar
+        # for action in iface.building_toolbar.actions():
+        #     if action.objectName() not in ['mActionPan']:
+        #         iface.building_toolbar.removeAction(action)
+        # # set change instance to edit class
+        # try:
+        #     self.btn_edit_save.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # try:
+        #     self.btn_edit_reset.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # try:
+        #     self.btn_exit_edits.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # try:
+        #     self.btn_end_lifespan.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # self.layout_capture_method.show()
+        # self.layout_general_info.show()
+        # self.layout_end_lifespan.show()
+        # self.change_instance = production_changes.EditAttribute(self)
+        # # set up signals and slots
+        # self.btn_edit_save.clicked.connect(partial(self.change_instance.save_clicked, True))
+        # self.btn_edit_reset.clicked.connect(self.change_instance.reset_clicked)
+        # self.btn_exit_edits.clicked.connect(self.edit_cancel_clicked)
+        # self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
+        # self.building_layer.selectionChanged.connect(self.change_instance.selection_changed)
+        # # add territorial authority layer
+        # self.territorial_auth = self.layer_registry.add_postgres_layer(
+        #     'territorial_authorities', 'territorial_authority',
+        #     'shape', 'buildings_reference', '', ''
+        # )
+        # layers.style_layer(self.territorial_auth,
+        #                    {1: ['204,121,95', '0.3', 'dash', '5;2']})
 
     def canvas_edit_geometry(self):
-        self.geoms = {}
-        self.ids = []
-        iface.actionCancelEdits().trigger()
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
-                iface.building_toolbar.removeAction(action)
-        # set change instance to edit class
-        try:
-            self.btn_save.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            self.btn_reset.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            self.btn_exit_edits.clicked.disconnect()
-        except Exception:
-            pass
-        self.layout_capture_method.show()
-        self.layout_general_info.hide()
-        self.layout_end_lifespan.hide()
-        self.change_instance = production_changes.EditGeometry(self)
-        # set up signals and slots
-        self.btn_save.clicked.connect(partial(self.change_instance.save_clicked, True))
-        self.btn_reset.clicked.connect(self.change_instance.reset_clicked)
-        self.btn_exit_edits.clicked.connect(self.exit_editing_clicked)
-        self.building_layer.geometryChanged.connect(self.change_instance.geometry_changed)
-        # add territorial authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
-        )
-        layers.style_layer(self.territorial_auth,
-                           {1: ['204,121,95', '0.3', 'dash', '5;2']})
+        self.edit_dialog.edit_geometry()
+        self.edit_dialog.show()
+        self.change_instance = self.edit_dialog.get_change_instance()
+
+        # iface.actionCancelEdits().trigger()
+        # # reset toolbar
+        # for action in iface.building_toolbar.actions():
+        #     if action.objectName() not in ['mActionPan']:
+        #         iface.building_toolbar.removeAction(action)
+        # # set change instance to edit class
+        # try:
+        #     self.btn_edit_save.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # try:
+        #     self.btn_edit_reset.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # try:
+        #     self.btn_exit_edits.clicked.disconnect()
+        # except Exception:
+        #     pass
+        # self.layout_capture_method.show()
+        # self.layout_general_info.hide()
+        # self.layout_end_lifespan.hide()
+        # self.change_instance = production_changes.EditGeometry(self)
+        # # set up signals and slots
+        # self.btn_edit_save.clicked.connect(partial(self.change_instance.save_clicked, True))
+        # self.btn_edit_reset.clicked.connect(self.change_instance.reset_clicked)
+        # self.btn_exit_edits.clicked.connect(self.edit_cancel_clicked)
+        # self.building_layer.geometryChanged.connect(self.change_instance.geometry_changed)
+        # # add territorial authority layer
+        # self.territorial_auth = self.layer_registry.add_postgres_layer(
+        #     'territorial_authorities', 'territorial_authority',
+        #     'shape', 'buildings_reference', '', ''
+        # )
+        # layers.style_layer(self.territorial_auth,
+        #                    {1: ['204,121,95', '0.3', 'dash', '5;2']})
+
+    @pyqtSlot()
+    def setup_circle(self):
+        # called when draw circle button is clicked
+        self.points = []
+        # set map tool to new point tool
+        self.circle_tool = PointTool(iface.mapCanvas())
+        iface.mapCanvas().setMapTool(self.circle_tool)
+        # create polyline to track drawing on canvas
+        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
+        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
+        self.polyline.setColor(QColor(255, 0, 0))
+        self.polyline.setWidth(1)
+        # signals for new map tool
+        self.circle_tool.canvas_clicked.connect(self.draw_circle)
+        self.circle_tool.mouse_moved.connect(self.update_line)
+
+    @pyqtSlot(QgsPoint)
+    def draw_circle(self, point):
+        # called when mapcanvas is clicked
+        self.points.append(point)
+        self.polyline.addPoint(point, True)
+        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
+        # if two points have been clicked (center and edge)
+        if len(self.points) == 2:
+            # calculate radius of circle
+            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
+            # number of vertices of circle
+            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
+            # create point on center location
+            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
+            # create buffer of specified distance around point
+            buffer = point.buffer(radius, nodes)
+            # add feature to building_outlines (triggering featureAdded)
+            self.feature = QgsFeature(self.building_layer.pendingFields())
+            self.feature.setGeometry(buffer)
+            self.building_layer.addFeature(self.feature)
+            self.building_layer.triggerRepaint()
+            # reset points list
+            self.points = []
+
+    @pyqtSlot(QgsPoint)
+    def update_line(self, point):
+        # called when mouse moved on canvas
+        if len(self.points) == 1:
+            # if the center has been clicked have a line follow the mouse movement
+            line = [self.points[0], point]
+            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
 
     @pyqtSlot()
     def exit_clicked(self):
         """
         Called when edit production exit button clicked.
         """
-        self.exit_editing_clicked()
+        self.edit_cancel_clicked()
         self.close_frame()
         self.dockwidget.lst_sub_menu.clearSelection()
 
@@ -301,7 +360,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot()
-    def exit_editing_clicked(self):
+    def edit_cancel_clicked(self):
         if len(QgsMapLayerRegistry.instance().mapLayersByName('building_outlines')) > 0:
             if isinstance(self.change_instance, production_changes.EditAttribute):
                 try:
@@ -328,41 +387,24 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     pass
                 if self.polyline:
                     self.polyline.reset()
-                if isinstance(self.tool, PointTool):
-                    self.tool.canvas_clicked.disconnect()
-                    self.tool.mouse_moved.disconnect()
-                    self.tool = None
+                if isinstance(self.circle_tool, PointTool):
+                    self.circle_tool.canvas_clicked.disconnect()
+                    self.circle_tool.mouse_moved.disconnect()
+                    self.circle_tool.deactivate()
                 iface.actionPan().trigger()
-        # deselect both comboboxes
-        self.btn_save.setEnabled(False)
-        self.btn_reset.setEnabled(False)
-        self.btn_exit_edits.setEnabled(False)
+
         self.tbtn_edits.setEnabled(True)
         self.tbtn_edits.setStyleSheet('QToolButton {color: black;}')
-        # hide comboboxes
-        self.layout_capture_method.hide()
-        self.layout_general_info.hide()
-        self.layout_end_lifespan.hide()
+
         iface.actionCancelEdits().trigger()
         # reload layers
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        self.layer_registry.remove_layer(self.territorial_auth)
+        self.edit_dialog.remove_territorial_auth()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
-        # reset adding outlines
-        self.added_building_ids = []
-        self.geom = None
-        # reset editing attribute
-        self.ids = []
-        self.building_outline_id = None
-        # reset editing geomtry
-        self.geoms = {}
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
-                iface.building_toolbar.removeAction(action)
-        iface.building_toolbar.hide()
         self.btn_circle.hide()
+
+        self.change_instance = None
 
     @pyqtSlot(str)
     def layers_removed(self, layerids):
@@ -370,9 +412,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         layers = ['building_outlines', 'historic_outlines', 'territorial_authorities']
         for layer in layers:
             if layer in layerids:
-                self.btn_save.setDisabled(1)
-                self.btn_reset.setDisabled(1)
-                self.btn_exit_edits.setDisabled(1)
+                # self.btn_edit_save.setDisabled(1)
+                # self.btn_edit_reset.setDisabled(1)
+                # self.btn_exit_edits.setDisabled(1)
                 self.tbtn_edits.setDisabled(1)
                 self.cb_production.setDisabled(1)
                 iface.messageBar().pushMessage("ERROR",
