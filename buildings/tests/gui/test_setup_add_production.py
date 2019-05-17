@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
-from qgis.utils import plugins
+from qgis.utils import plugins, iface
 
 
 class SetUpAddProduction(unittest.TestCase):
@@ -38,8 +38,10 @@ class SetUpAddProduction(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_add_outline)
-        self.production_frame.tbtn_edits.click()
+        self.edit_dialog = self.production_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Add Outline':
+                action.trigger()
 
     def tearDown(self):
         """Runs after each test."""
@@ -47,17 +49,20 @@ class SetUpAddProduction(unittest.TestCase):
 
     def test_production_gui_set_up(self):
         """ Initial set up of the frame """
-        self.assertTrue(self.production_frame.layout_capture_method.isVisible())
-        self.assertTrue(self.production_frame.layout_general_info.isVisible())
-        self.assertFalse(self.production_frame.btn_save.isEnabled())
-        self.assertFalse(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_exit_edits.isEnabled())
-        self.assertFalse(self.production_frame.cmb_capture_method.isEnabled())
-        self.assertFalse(self.production_frame.cmb_capture_source.isEnabled())
-        self.assertFalse(self.production_frame.cmb_ta.isEnabled())
-        self.assertFalse(self.production_frame.cmb_town.isEnabled())
-        self.assertFalse(self.production_frame.cmb_suburb.isEnabled())
-        self.assertFalse(self.production_frame.cmb_lifecycle_stage.isEnabled())
+        self.assertTrue(self.edit_dialog.isVisible())
+        self.assertFalse(self.edit_dialog.layout_status.isVisible())
+        self.assertTrue(self.edit_dialog.layout_capture_method.isVisible())
+        self.assertTrue(self.edit_dialog.layout_lifecycle_stage.isVisible())
+        self.assertTrue(self.edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(self.edit_dialog.layout_end_lifespan.isVisible())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """

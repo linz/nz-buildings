@@ -1,9 +1,9 @@
-# -*- coding: utf-8 -*-
-import math
-from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QColor, QToolButton, QMessageBox
-from qgis.core import QgsFeature, QgsFeatureRequest, QgsGeometry, QgsPoint
-from qgis.gui import QgsMessageBar, QgsRubberBand
+# -*- coding: utf-8 -*-\
+
+from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtGui import QToolButton, QMessageBox
+from qgis.core import QgsFeatureRequest, QgsGeometry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -12,7 +12,6 @@ from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_se
                            buildings_select_statements as buildings_select,
                            buildings_reference_select_statements as reference_select,
                            general_select_statements as general_select)
-from buildings.utilities.point_tool import PointTool
 
 
 class ProductionChanges:

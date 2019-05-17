@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from functools import partial
 import math
 import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot, Qt, QSize
-from PyQt4.QtGui import QAction, QColor, QFrame, QIcon, QMenu
+from PyQt4.QtGui import QAction, QColor, QFrame, QIcon
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
@@ -14,7 +13,6 @@ from qgis.utils import iface
 from buildings.gui import production_changes
 from buildings.gui.edit_dialog import EditDialog
 from buildings.utilities import database as db
-from buildings.utilities import layers
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
@@ -182,10 +180,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
             # create buffer of specified distance around point
             buffer = point.buffer(radius, nodes)
             # add feature to bulk_load_outlines (triggering featureAdded)
-            self.feature = QgsFeature(self.bulk_load_layer.pendingFields())
+            self.feature = QgsFeature(self.building_layer.pendingFields())
             self.feature.setGeometry(buffer)
-            self.bulk_load_layer.addFeature(self.feature)
-            self.bulk_load_layer.triggerRepaint()
+            self.building_layer.addFeature(self.feature)
+            self.building_layer.triggerRepaint()
             # reset points list
             self.points = []
 
