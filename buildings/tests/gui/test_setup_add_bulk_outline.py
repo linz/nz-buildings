@@ -46,19 +46,19 @@ class SetUpBulkAddTest(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """Buttons and comboboxes correctly enabled/disables on startup"""
-        self.assertTrue(self.bulk_load_frame.edit_dialog.isVisible())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.layout_status.isVisible())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.layout_capture_method.isVisible())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.layout_lifecycle_stage.isVisible())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.layout_general_info.isVisible())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.layout_end_lifespan.isVisible())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.isVisible())
+        self.assertFalse(self.edit_dialog.layout_status.isVisible())
+        self.assertTrue(self.edit_dialog.layout_capture_method.isVisible())
+        self.assertFalse(self.edit_dialog.layout_lifecycle_stage.isVisible())
+        self.assertTrue(self.edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(self.edit_dialog.layout_end_lifespan.isVisible())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_ta.isEnabled())
 
     def test_layer_registry(self):
         """Bulk load outlines table added to canvas when frame opened"""
