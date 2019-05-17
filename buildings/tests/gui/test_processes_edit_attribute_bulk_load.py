@@ -49,6 +49,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
+        self.edit_dialog = self.bulk_load_frame.edit_dialog
         for action in iface.building_toolbar.actions():
             if action.text() == 'Edit Attributes':
                 action.trigger()
@@ -77,24 +78,24 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
                          delay=30)
         QTest.qWait(10)
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_status.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.le_deletion_reason.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.le_deletion_reason.text(), '')
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_status.isEnabled())
+        self.assertFalse(self.edit_dialog.le_deletion_reason.isEnabled())
+        self.assertEqual(self.edit_dialog.le_deletion_reason.text(), '')
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), 'Supplied')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_source.currentText(),
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), 'Supplied')
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
+        self.assertEqual(self.edit_dialog.cmb_capture_source.currentText(),
                          u'1- Imagery One- NZ Aerial Imagery')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), 'Aro Valley')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_geom_before_edit(self):
         """UI and Canvas behave correctly when geometry is selected before edits button clicked"""
@@ -120,22 +121,22 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         for action in iface.building_toolbar.actions():
             if action.text() == 'Edit Attributes':
                 action.trigger()
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_status.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_status.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), 'Supplied')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_source.currentText(),
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), 'Supplied')
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
+        self.assertEqual(self.edit_dialog.cmb_capture_source.currentText(),
                          u'1- Imagery One- NZ Aerial Imagery')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), 'Aro Valley')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), 'Aro Valley')
 
     def test_select_multiple_geom_before_edit(self):
         """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
@@ -174,25 +175,25 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         for action in iface.building_toolbar.actions():
             if action.text() == 'Edit Attributes':
                 action.trigger()
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_status.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), 'Supplied')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_source.currentText(),
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_status.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), 'Supplied')
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Feature Extraction')
+        self.assertEqual(self.edit_dialog.cmb_capture_source.currentText(),
                          u'1- Imagery One- NZ Aerial Imagery')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), 'Kelburn')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), 'Kelburn')
 
     def test_cannot_select_nonidentical_multiple_geoms_before_edit(self):
         """UI and Canvas behave correctly when multiple geometries are selected before edits button clicked"""
-        self.bulk_load_frame.edit_dialog.close()
+        self.edit_dialog.close()
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -228,14 +229,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             if action.text() == 'Edit Attributes':
                 action.trigger()
         self.bulk_load_frame.change_instance.error_dialog.close()
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_status.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_status.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_suburb.isEnabled())
 
     def test_reset_clicked(self):
         """Check comboboxes reset correctly when 'reset' called"""
@@ -257,23 +258,23 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.btn_edit_reset.click()
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_source.currentText(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_status.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.le_deletion_reason.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.le_deletion_reason.text(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), '')
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), '')
+        self.edit_dialog.btn_edit_reset.click()
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), '')
+        self.assertFalse(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_source.currentText(), '')
+        self.assertFalse(self.edit_dialog.cmb_status.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), '')
+        self.assertFalse(self.edit_dialog.le_deletion_reason.isEnabled())
+        self.assertEqual(self.edit_dialog.le_deletion_reason.text(), '')
+        self.assertFalse(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), '')
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), '')
+        self.assertFalse(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), '')
 
     def test_save_clicked(self):
         """Check attributes are updated when save clicked"""
@@ -295,14 +296,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Added During QA'))
-        self.bulk_load_frame.edit_dialog.cmb_capture_method.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_capture_method.findText('Unknown'))
-        self.bulk_load_frame.edit_dialog.cmb_ta.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_ta.findText('Manawatu-Whanganui'))
-        self.bulk_load_frame.edit_dialog.cmb_town.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_town.findText('Palmerston North'))
-        self.bulk_load_frame.edit_dialog.cmb_suburb.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_suburb.findText('Hokowhitu'))
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Added During QA'))
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText('Unknown'))
+        self.edit_dialog.cmb_ta.setCurrentIndex(self.edit_dialog.cmb_ta.findText('Manawatu-Whanganui'))
+        self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText('Palmerston North'))
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText('Hokowhitu'))
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
-        result = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
         # status
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
@@ -330,11 +331,11 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         territorial_authority = territorial_authority.fetchall()[0][0]
         self.assertEqual('Manawatu-Whanganui', territorial_authority)
 
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), '')
 
         self.bulk_load_frame.ids = []
         self.bulk_load_frame.building_outline_id = None
@@ -373,13 +374,13 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878315, 5555631)),
                          delay=50)
         QTest.qWait(100)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Added During QA'))
-        self.bulk_load_frame.edit_dialog.cmb_capture_method.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_capture_method.findText('Unknown'))
-        self.bulk_load_frame.edit_dialog.cmb_ta.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_ta.findText('Manawatu-Whanganui'))
-        self.bulk_load_frame.edit_dialog.cmb_town.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_town.findText('Palmerston North'))
-        self.bulk_load_frame.edit_dialog.cmb_suburb.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_suburb.findText('Hokowhitu'))
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Added During QA'))
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText('Unknown'))
+        self.edit_dialog.cmb_ta.setCurrentIndex(self.edit_dialog.cmb_ta.findText('Manawatu-Whanganui'))
+        self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText('Palmerston North'))
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText('Hokowhitu'))
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        for i in self.bulk_load_frame.edit_dialog.ids:
+        for i in self.edit_dialog.ids:
             sql = 'SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
             result = db._execute(sql, (i,))
             result = result.fetchall()[0]
@@ -410,14 +411,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             self.assertEqual('Manawatu-Whanganui', territorial_authority)
             self.assertEqual(len(self.bulk_load_frame.ids), 6)
 
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_status.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), '')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_status.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), '')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), '')
 
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_geom(self):
@@ -441,14 +442,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.assertTrue(self.bulk_load_frame.edit_dialog.le_deletion_reason.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.le_deletion_reason.text(), '')
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.assertTrue(self.edit_dialog.le_deletion_reason.isEnabled())
+        self.assertEqual(self.edit_dialog.le_deletion_reason.text(), '')
+        self.edit_dialog.le_deletion_reason.setText('Reason for deletion')
 
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
-        result = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
         # status
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
@@ -457,7 +458,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual('Deleted During QA', status)
         # deletion description
         sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
-        reason = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        reason = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         reason = reason.fetchall()[0][0]
         self.assertEqual('Reason for deletion', reason)
         # added
@@ -465,21 +466,21 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
-        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
+        selection = len(self.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 0)
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_multiple_deleted_geom(self):
         """Check multiple geoms 'deleted' when save clicked
         This test protects against a regression of #59"""
         expr = QgsExpression("bulk_load_outline_id=2010 or bulk_load_outline_id =2003")
-        it = self.bulk_load_frame.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
+        it = self.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.bulk_load_frame.edit_dialog.editing_layer.setSelectedFeatures(ids)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
+        self.edit_dialog.editing_layer.setSelectedFeatures(ids)
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2010 OR bulk_load_outline_id = 2003;'
         result = db._execute(sql)
@@ -491,10 +492,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [])
-        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
+        selection = len(self.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 0)
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails(self):
@@ -517,12 +518,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878090.9, 5555322.0)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.change_instance.error_dialog.close()
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
-        result = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
         # status
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
@@ -531,7 +532,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual('Supplied', status)
         # deletion description
         sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
-        reason = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        reason = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         reason = reason.fetchall()
         self.assertEqual([], reason)
         # added
@@ -539,8 +540,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(result, [(2031,)])
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails_reason(self):
@@ -563,23 +564,23 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                          pos=canvas_point(QgsPoint(1878228.6, 5555334.9)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
 
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
                          delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.assertTrue(self.bulk_load_frame.edit_dialog.le_deletion_reason.isEnabled())
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('')
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.assertTrue(self.edit_dialog.le_deletion_reason.isEnabled())
+        self.edit_dialog.le_deletion_reason.setText('')
 
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.change_instance.error_dialog.close()
 
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
-        result = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
         # status
         sql = 'SELECT value FROM buildings_bulk_load.bulk_load_status WHERE bulk_load_status_id = %s;'
@@ -588,7 +589,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual('Supplied', status)
         # deletion description
         sql = 'SELECT description FROM buildings_bulk_load.deletion_description WHERE bulk_load_outline_id = %s;'
-        reason = db._execute(sql, (self.bulk_load_frame.edit_dialog.bulk_load_outline_id,))
+        reason = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         reason = reason.fetchall()
         self.assertEqual([], reason)
         # added
@@ -596,19 +597,19 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual([(2010,)], result)
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_deleted_fails_multiple_selection(self):
         """Check nothing is changed when correct and incorrect outlines are deleted
         This test protects against a regression of #59"""
         expr = QgsExpression("bulk_load_outline_id=2003 or bulk_load_outline_id =2004")
-        it = self.bulk_load_frame.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
+        it = self.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.bulk_load_frame.edit_dialog.editing_layer.setSelectedFeatures(ids)
-        self.bulk_load_frame.edit_dialog.cmb_status.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_status.findText('Deleted During QA'))
-        self.bulk_load_frame.edit_dialog.le_deletion_reason.setText('Reason for deletion')
+        self.edit_dialog.editing_layer.setSelectedFeatures(ids)
+        self.edit_dialog.cmb_status.setCurrentIndex(self.edit_dialog.cmb_status.findText('Deleted During QA'))
+        self.edit_dialog.le_deletion_reason.setText('Reason for deletion')
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         self.bulk_load_frame.change_instance.error_dialog.close()
         sql = 'SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2003 OR bulk_load_outline_id = 2004;'
@@ -627,10 +628,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         result = result.fetchall()[0][0]
         self.assertEqual(result, 2004)
         # selection
-        selection = len(self.bulk_load_frame.edit_dialog.editing_layer.selectedFeatures())
+        selection = len(self.edit_dialog.editing_layer.selectedFeatures())
         self.assertEqual(selection, 2)
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_selection_change(self):
@@ -671,7 +672,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878202.1, 5555618.9)),
                          delay=50)
-        self.bulk_load_frame.edit_dialog.cmb_capture_method.setCurrentIndex(self.bulk_load_frame.edit_dialog.cmb_capture_method.findText('Unknown'))
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText('Unknown'))
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         sql = 'SELECT capture_method_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2027;'
         result = db._execute(sql)
@@ -679,6 +680,6 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sql = 'SELECT capture_method_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2025;'
         result = db._execute(sql)
         self.assertNotEqual(result.fetchall()[0][0], 1)
-        self.bulk_load_frame.edit_dialog.ids = []
-        self.bulk_load_frame.edit_dialog.building_outline_id = None
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
         self.bulk_load_frame.db.rollback_open_cursor()

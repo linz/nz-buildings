@@ -48,6 +48,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
+        self.edit_dialog = self.bulk_load_frame.edit_dialog
         for action in iface.building_toolbar.actions():
             if action.text() == 'Add Outline':
                 action.trigger()
@@ -90,21 +91,21 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
         self.assertEqual(
-            self.bulk_load_frame.edit_dialog.cmb_capture_source.currentText(),
+            self.edit_dialog.cmb_capture_source.currentText(),
             '1- Imagery One- NZ Aerial Imagery'
         )
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentText(), 'Wellington')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentText(), 'Newtown')
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), 'Wellington')
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), 'Newtown')
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), 'Wellington')
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_draw_circle_option(self):
@@ -132,14 +133,14 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton,
                          pos=canvas_point(QgsPoint(1878301.7, 5555367.3)),
                          delay=-1)
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
 
     def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""
@@ -175,39 +176,39 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
 
         # change indexes of comboboxes
-        self.bulk_load_frame.edit_dialog.cmb_capture_method.setCurrentIndex(1)
-        self.bulk_load_frame.edit_dialog.cmb_capture_source.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.cmb_ta.setCurrentIndex(1)
-        self.bulk_load_frame.edit_dialog.cmb_town.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.cmb_suburb.setCurrentIndex(1)
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(1)
+        self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
+        self.edit_dialog.cmb_ta.setCurrentIndex(1)
+        self.edit_dialog.cmb_town.setCurrentIndex(0)
+        self.edit_dialog.cmb_suburb.setCurrentIndex(1)
         # click reset button
-        self.bulk_load_frame.edit_dialog.btn_edit_reset.click()
+        self.edit_dialog.btn_edit_reset.click()
         # check geom removed from canvas
-        self.assertEqual(len(self.bulk_load_frame.edit_dialog.added_building_ids), 0)
+        self.assertEqual(len(self.edit_dialog.added_building_ids), 0)
         # check comboxbox indexes reset to 0
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentIndex(), -1)
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_source.currentIndex(), -1)
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_ta.currentIndex(), -1)
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_town.currentIndex(), -1)
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_suburb.currentIndex(), -1)
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentIndex(), -1)
+        self.assertEqual(self.edit_dialog.cmb_capture_source.currentIndex(), -1)
+        self.assertEqual(self.edit_dialog.cmb_ta.currentIndex(), -1)
+        self.assertEqual(self.edit_dialog.cmb_town.currentIndex(), -1)
+        self.assertEqual(self.edit_dialog.cmb_suburb.currentIndex(), -1)
         # check comboboxes disabled
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertFalse(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_suburb.isEnabled())
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_new_outline_insert(self):
@@ -250,20 +251,20 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
                          delay=-1)
         QTest.qWait(1)
         # tests
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_capture_source.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_town.isEnabled())
-        self.assertTrue(self.bulk_load_frame.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.bulk_load_frame.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
         # change indexes of comboboxes
-        self.bulk_load_frame.edit_dialog.cmb_capture_source.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.cmb_ta.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.cmb_town.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.cmb_suburb.setCurrentIndex(0)
-        self.bulk_load_frame.edit_dialog.change_instance.edit_save_clicked(False)
+        self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
+        self.edit_dialog.cmb_ta.setCurrentIndex(0)
+        self.edit_dialog.cmb_town.setCurrentIndex(0)
+        self.edit_dialog.cmb_suburb.setCurrentIndex(0)
+        self.edit_dialog.change_instance.edit_save_clicked(False)
         sql = 'SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines;'
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
