@@ -34,8 +34,8 @@
   </edittypes>
   <renderer-v2 forceraster="0" symbollevels="0" type="RuleRenderer" enableorderby="0">
     <rules key="{84ec70f0-b0da-473a-a290-2ea75ff5fd40}">
-      <rule filter=" &quot;supplied_dataset_id&quot; IS NOT NULL" key="{0822da2b-38b0-44df-94b7-e676c7a4b2d0}" symbol="0"/>
-      <rule description="In Edit" filter="ELSE" key="{5512ea9c-f572-4341-ae61-9190c7e9029b}" symbol="1" label="Added In Edit"/>
+      <rule filter=" &quot;supplied_dataset_id&quot; IS NOT NULL AND &quot;bulkload_status_id&quot; != 3" key="{0822da2b-38b0-44df-94b7-e676c7a4b2d0}" symbol="0"/>
+      <rule description="In Edit" filter=" &quot;supplied_dataset_id&quot; IS NULL AND &quot;bulkload_status_id&quot; != 3" key="{5512ea9c-f572-4341-ae61-9190c7e9029b}" symbol="1" label="Added In Edit"/>
     </rules>
     <symbols>
       <symbol alpha="1" clip_to_extent="1" type="fill" name="0">
