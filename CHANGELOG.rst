@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Added
+-----
+* buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
+
 Changed
 -------
 
