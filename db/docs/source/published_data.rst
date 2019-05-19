@@ -5,7 +5,7 @@ Published Data
 ================================
 
 The data described below represents building outlines data openly available on the LINZ Data Service (LDS):
-https://data.linz.govt.nz/layer/xxxxx-nz-building-outlines/
+https://data.linz.govt.nz/layer/101290-nz-building-outlines/
 
 Data Model
 --------------------------------

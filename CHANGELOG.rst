@@ -14,6 +14,7 @@ Changed
 * Account for UNIQUE constraints for data dictionary column parsing
 * Updated metadata and data dictionary text and images in preparation for go-live.
 * Published views of data adjusted based on user feedback.
+* Updated URL links
 
 Fixed
 -----
