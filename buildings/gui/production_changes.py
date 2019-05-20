@@ -275,7 +275,6 @@ class AddProduction(ProductionChanges):
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionAddFeature().trigger()
-        self.edit_dialog.tool = None
         # reset and disable comboboxes
         if self.parent_frame.polyline:
             self.parent_frame.polyline.reset()

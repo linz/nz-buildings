@@ -32,8 +32,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.db = db
         self.db.connect()
         self.building_layer = QgsVectorLayer()
-        self.building_removed = QgsVectorLayer()
-        self.territorial_auth = None
         self.add_outlines()
         # Set up edit dialog
         self.edit_dialog = EditDialog(self)
@@ -118,8 +116,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_dialog.add_outline()
         self.change_instance = self.edit_dialog.get_change_instance()
 
-        self.circle_tool = None
-        self.polyline = None
         image_dir = os.path.join(__location__, '..', 'icons')
         icon_path = os.path.join(image_dir, "circle.png")
         icon = QIcon()
@@ -139,6 +135,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.change_instance = self.edit_dialog.get_change_instance()
 
     def canvas_edit_geometry(self):
+        """
+            When edit geometry radio button toggled
+        """
         self.edit_dialog.edit_geometry()
         self.edit_dialog.show()
         self.change_instance = self.edit_dialog.get_change_instance()
@@ -215,9 +214,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
-        if self.territorial_auth is not None:
-            self.layer_registry.remove_layer(self.territorial_auth)
-
         # reset toolbar
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
