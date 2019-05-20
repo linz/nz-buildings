@@ -116,6 +116,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_dialog.add_outline()
         self.change_instance = self.edit_dialog.get_change_instance()
 
+        self.circle_tool = None
+        self.polyline = None
         image_dir = os.path.join(__location__, '..', 'icons')
         icon_path = os.path.join(image_dir, "circle.png")
         icon = QIcon()
