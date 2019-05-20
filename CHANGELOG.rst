@@ -14,6 +14,7 @@ Changed
 * Account for UNIQUE constraints for data dictionary column parsing
 * Updated metadata and data dictionary text and images in preparation for go-live.
 * Published views of data adjusted based on user feedback.
+* Updated URL links
 * Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 
 Fixed
@@ -21,6 +22,7 @@ Fixed
 
 * Compare new dataset with previous dataset INCLUDING removed outlines that have "not removed" flag.
 * Use the current time as the begin_lifespan of building outlines when creating them rather than the date of bulk loading
+* Warning messages for when multiple buildings are added at once
 
 1.3.0
 ==========
