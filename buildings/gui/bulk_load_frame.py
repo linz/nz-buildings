@@ -11,7 +11,7 @@ from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
-from buildings.gui import bulk_load, bulk_load_changes, circle_tool, comparisons
+from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.check_dialog import CheckDialog
 from buildings.gui.edit_dialog import EditDialog
@@ -19,6 +19,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
                            buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
+from buildings.utilities import circle_tool
 from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
