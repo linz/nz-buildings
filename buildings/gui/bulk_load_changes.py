@@ -279,7 +279,9 @@ class AddBulkLoad(BulkLoadChanges):
         self.editing_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionAddFeature().trigger()
+        if not self.parent_frame.circle_action.isChecked():
+            iface.actionAddFeature().trigger()
+
         # reset and disable comboboxes
         self.disable_UI_functions()
         if self.parent_frame.polyline:

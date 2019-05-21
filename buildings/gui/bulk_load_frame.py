@@ -448,7 +448,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         iface.building_toolbar.addAction(self.circle_action)
 
     def circle_tool_clicked(self):
-        circle_tool.setup_circle(self)
+        if self.circle_action.isChecked():
+            circle_tool.setup_circle(self)
+        else:
+            iface.actionAddFeature().trigger()
 
     def canvas_edit_attribute(self):
         """
