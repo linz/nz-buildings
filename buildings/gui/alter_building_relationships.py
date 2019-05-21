@@ -7,7 +7,7 @@ from PyQt4 import uic
 from PyQt4.QtGui import (QAbstractItemView, QAction, QColor, QFrame, QHeaderView, QIcon,
                          QListWidgetItem, QMessageBox, QTableWidgetItem)
 from PyQt4.QtCore import QSize, Qt, pyqtSlot
-from qgis.core import QgsMapLayerRegistry, QgsVectorLayer
+from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
@@ -41,7 +41,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.dockwidget = dockwidget
         self.layer_registry = LayerRegistry()
-        self.lyr_bulk_load = QgsVectorLayer()
         self.current_dataset = current_dataset
         self.error_dialog = None
         self.highlight_features = []
@@ -1461,11 +1460,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 tbl.scrollToItem(tbl.item(row, 0))
 
     def canvas_add_outline(self):
-        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
-            if 'existing_subset_extracts' in val:
-                self.lyr_existing.removeSelection()
-            if 'bulk_load_outlines' in val:
-                self.lyr_bulk_load.removeSelection()
+        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.removeSelection()
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -1493,9 +1489,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
             When edit geometry radio button toggled
         """
-        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
-            if 'existing_subset_extracts' in val:
-                self.lyr_existing.removeSelection()
+        self.lyr_existing.removeSelection()
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -1508,9 +1502,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """
             When edit outline radio button toggled
         """
-        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
-            if 'existing_subset_extracts' in val:
-                self.lyr_existing.removeSelection()
+        self.lyr_existing.removeSelection()
 
         self.lst_existing.clear()
         self.lst_bulk.clear()
@@ -1569,8 +1561,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if 'bulk_load_outlines' in val:
                 self.lyr_bulk_load.removeSelection()
 
-        self.lst_existing.clear()
-        self.lst_bulk.clear()
         self.tbl_relationship.clearSelection()
 
         self.btn_maptool.click()
