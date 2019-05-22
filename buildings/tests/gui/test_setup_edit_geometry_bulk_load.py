@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
-from qgis.utils import plugins
+from qgis.utils import plugins, iface
 
 
 class SetUpEditBulkLoad(unittest.TestCase):
@@ -38,8 +38,10 @@ class SetUpEditBulkLoad(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_geometry)
-        self.bulk_load_frame.tbtn_edits.click()
+        self.edit_dialog = self.bulk_load_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Edit Geometry':
+                action.trigger()
 
     def tearDown(self):
         """Runs after each test."""
@@ -47,13 +49,13 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def test_bulk_load_gui_set_up(self):
         """ Initial set up of the frame """
-        self.assertFalse(self.bulk_load_frame.layout_status.isVisible())
-        self.assertTrue(self.bulk_load_frame.layout_capture_method.isVisible())
-        self.assertFalse(self.bulk_load_frame.layout_general_info.isVisible())
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.assertFalse(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
+        self.assertTrue(self.edit_dialog.isVisible())
+        self.assertFalse(self.edit_dialog.layout_status.isVisible())
+        self.assertTrue(self.edit_dialog.layout_capture_method.isVisible())
+        self.assertFalse(self.edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """

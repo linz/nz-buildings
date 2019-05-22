@@ -48,8 +48,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Bulk Load', Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
-        self.bulk_load_frame.tbtn_edits.setDefaultAction(self.bulk_load_frame.action_edit_geometry)
-        self.bulk_load_frame.tbtn_edits.click()
+        self.edit_dialog = self.bulk_load_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Edit Geometry':
+                action.trigger()
 
     def tearDown(self):
         """Runs after each test."""
@@ -81,11 +83,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
                            delay=30)
         QTest.qWait(10)
-        self.assertTrue(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
 
     def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
@@ -113,7 +114,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
                            delay=30)
         QTest.qWait(10)
-        self.bulk_load_frame.btn_edit_reset.click()
+        self.edit_dialog.btn_edit_reset.click()
         layer = iface.activeLayer()
         idx = layer.fieldNameIndex('bulk_load_outline_id')
         for feature in layer.getFeatures():
@@ -155,15 +156,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        for key in self.bulk_load_frame.geoms:
+        for key in self.bulk_load_frame.edit_dialog.geoms:
             sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
-            self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.bulk_load_frame.geoms = {}
+            self.assertEqual(result, self.edit_dialog.geoms[key])
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.edit_dialog.geoms = {}
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_edit_multiple_geometries(self):
@@ -201,15 +201,14 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878222.6, 5555275.2)),
                            delay=30)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        for key in self.bulk_load_frame.geoms:
+        for key in self.bulk_load_frame.edit_dialog.geoms:
             sql = 'SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
-            self.assertEqual(result, self.bulk_load_frame.geoms[key])
-        self.assertFalse(self.bulk_load_frame.btn_edit_save.isEnabled())
-        self.assertFalse(self.bulk_load_frame.btn_edit_reset.isEnabled())
-        self.assertTrue(self.bulk_load_frame.btn_edit_cancel.isEnabled())
-        self.bulk_load_frame.geoms = {}
+            self.assertEqual(result, self.edit_dialog.geoms[key])
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.edit_dialog.geoms = {}
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_capture_method_on_geometry_changed(self):
@@ -239,5 +238,5 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
                            delay=30)
         QTest.qWait(10)
 
-        self.assertTrue(self.bulk_load_frame.cmb_capture_method_2.isEnabled())
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method_2.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
