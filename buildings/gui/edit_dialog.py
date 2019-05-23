@@ -62,20 +62,23 @@ class EditDialog(QDialog, FORM_CLASS):
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
 
     def init_dialog(self):
-        self.layout_status.show()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
+        self.layout_status.hide()
+        self.layout_capture_method.hide()
+        self.layout_lifecycle_stage.hide()
+        self.layout_general_info.hide()
+        self.layout_end_lifespan.hide()
         self.cmb_status.setDisabled(1)
         self.le_deletion_reason.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
+        self.cmb_lifecycle_stage.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
+        self.btn_end_lifespan.setDisabled(1)
 
-    # connect dialog closed signal to exit editing
     def closeEvent(self, event):
         self.close_dialog()
         event.accept()
@@ -84,7 +87,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.setWindowTitle("Add Outline")
         self.added_building_ids = []
         self.geom = None
-        self.tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -103,14 +105,21 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.hide()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
 
         if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.AddBulkLoad(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.AddProduction(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.show()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
 
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
@@ -145,14 +154,27 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.show()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
 
         if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditAttribute(self)
+            self.layout_status.show()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditAttribute(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.show()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.show()
+
+            try:
+                self.btn_end_lifespan.clicked.disconnect()
+            except Exception:
+                pass
+            self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
 
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
@@ -181,14 +203,21 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.hide()
-        self.layout_capture_method.show()
-        self.layout_general_info.hide()
 
         if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditGeometry(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.hide()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditGeometry(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.hide()
+            self.layout_end_lifespan.hide()
 
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))

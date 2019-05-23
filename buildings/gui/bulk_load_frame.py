@@ -7,7 +7,7 @@ import os.path
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
 from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMessageBox
-from qgis.core import QgsProject, QgsVectorLayer, QgsMapLayerRegistry
+from qgis.core import QgsProject, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
@@ -42,8 +42,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # Frame fields
         self.dockwidget = dockwidget
         self.layer_registry = LayerRegistry()
-        self.bulk_load_layer = QgsVectorLayer()
-        self.territorial_auth = QgsVectorLayer()
         # Set up pop-up dialog
         self.check_dialog = CheckDialog()
         self.error_dialog = None
@@ -53,7 +51,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # layer set up
         self.historic_layer = None
         self.bulk_load_layer = None
-        self.territorial_auth = None
         # database setup
         self.db = db
         db.connect()
@@ -628,8 +625,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.historic_layer)
         if self.bulk_load_layer is not None:
             self.layer_registry.remove_layer(self.bulk_load_layer)
-        if self.territorial_auth is not None:
-            self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())

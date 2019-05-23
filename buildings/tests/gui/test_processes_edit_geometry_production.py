@@ -48,8 +48,10 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         sub_menu.setCurrentItem(sub_menu.findItems(
             'Edit Outlines', Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
-        self.production_frame.tbtn_edits.setDefaultAction(self.production_frame.action_edit_geometry)
-        self.production_frame.tbtn_edits.click()
+        self.edit_dialog = self.production_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Edit Geometry':
+                action.trigger()
 
     def tearDown(self):
         """Runs after each test."""
@@ -81,10 +83,9 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
                            delay=30)
         QTest.qWait(10)
-        self.assertTrue(self.production_frame.btn_save.isEnabled())
-        self.assertTrue(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_exit.isEnabled())
-        self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
 
     def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
@@ -112,7 +113,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878211.4, 5555304.6)),
                            delay=30)
         QTest.qWait(10)
-        self.production_frame.btn_reset.click()
+        self.edit_dialog.btn_edit_reset.click()
         layer = iface.activeLayer()
         idx = layer.fieldNameIndex('building_outline_id')
         for feature in layer.getFeatures():
@@ -154,18 +155,17 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            delay=30)
         QTest.qWait(10)
 
-        self.production_frame.change_instance.save_clicked(False)
+        self.edit_dialog.change_instance.edit_save_clicked(False)
 
-        for key in self.production_frame.geoms:
+        for key in self.edit_dialog.geoms:
             sql = 'SELECT shape FROM buildings.building_outlines WHERE building_outline_id = %s'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
-            self.assertEqual(result, self.production_frame.geoms[key])
-        self.assertFalse(self.production_frame.btn_save.isEnabled())
-        self.assertFalse(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_exit.isEnabled())
-        self.production_frame.geoms = {}
-        self.production_frame.db.rollback_open_cursor()
+            self.assertEqual(result, self.edit_dialog.geoms[key])
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.edit_dialog.geoms = {}
+        self.edit_dialog.db.rollback_open_cursor()
 
     def test_edit_multiple_geometries(self):
         """Checks the geometries of multiple features can be edited at the same time"""
@@ -202,18 +202,17 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            pos=canvas_point(QgsPoint(1878222.6, 5555275.2)),
                            delay=30)
 
-        self.production_frame.change_instance.save_clicked(False)
+        self.edit_dialog.change_instance.edit_save_clicked(False)
 
-        for key in self.production_frame.geoms:
+        for key in self.edit_dialog.geoms:
             sql = 'SELECT shape FROM buildings.building_outlines WHERE building_outline_id = %s;'
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
-            self.assertEqual(result, self.production_frame.geoms[key])
-        self.assertFalse(self.production_frame.btn_save.isEnabled())
-        self.assertFalse(self.production_frame.btn_reset.isEnabled())
-        self.assertTrue(self.production_frame.btn_exit.isEnabled())
-        self.production_frame.geoms = {}
-        self.production_frame.db.rollback_open_cursor()
+            self.assertEqual(result, self.edit_dialog.geoms[key])
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.edit_dialog.geoms = {}
+        self.edit_dialog.db.rollback_open_cursor()
 
     def test_capture_method_on_geometry_changed(self):
         """Check capture method is 'Trace Orthophotography' after the geometry changes occur. #100"""
@@ -242,5 +241,5 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
                            delay=30)
         QTest.qWait(10)
 
-        self.assertTrue(self.production_frame.cmb_capture_method.isEnabled())
-        self.assertEqual(self.production_frame.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')

@@ -58,6 +58,11 @@ def draw_circle(self, point):
             self.feature.setGeometry(buffer)
             self.lyr_bulk_load.addFeature(self.feature)
             self.lyr_bulk_load.triggerRepaint()
+        elif self.__class__.__name__ == 'ProductionFrame':
+            self.feature = QgsFeature(self.building_layer.pendingFields())
+            self.feature.setGeometry(buffer)
+            self.building_layer.addFeature(self.feature)
+            self.building_layer.triggerRepaint()
         # reset points list
         self.points = []
 

@@ -20,6 +20,7 @@ Changed
 * Published views of data adjusted based on user feedback.
 * Updated URL links
 * Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
+* Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 
 Fixed
 -----
