@@ -70,14 +70,15 @@ class EditDialog(QDialog, FORM_CLASS):
         self.cmb_status.setDisabled(1)
         self.le_deletion_reason.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
+        self.cmb_lifecycle_stage.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
+        self.btn_end_lifespan.setDisabled(1)
 
-    # connect dialog closed signal to exit editing
     def closeEvent(self, event):
         self.close_dialog()
         event.accept()
@@ -86,7 +87,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.setWindowTitle("Add Outline")
         self.added_building_ids = []
         self.geom = None
-        self.tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
