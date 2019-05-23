@@ -4,21 +4,25 @@ import os.path
 from functools import partial
 
 from PyQt4 import uic
-from PyQt4.QtGui import (QAbstractItemView, QColor, QFrame, QHeaderView, QIcon,
+from PyQt4.QtGui import (QAbstractItemView, QAction, QColor, QFrame, QHeaderView, QIcon,
                          QListWidgetItem, QMessageBox, QTableWidgetItem)
-from PyQt4.QtCore import Qt, pyqtSlot
+from PyQt4.QtCore import QSize, Qt, pyqtSlot
 from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
+from buildings.gui import bulk_load_changes
 from buildings.gui.error_dialog import ErrorDialog
+from buildings.gui.edit_dialog import EditDialog
 from buildings.gui.deletion_reason_dialog import DeletionReason
 from buildings.utilities import database as db
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_select_statements as buildings_select
 from buildings.sql import general_select_statements as general_select
+from buildings.utilities import circle_tool
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.multi_layer_selection import MultiLayerSelection
+from buildings.utilities.point_tool import PointTool
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
@@ -47,6 +51,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.frame_setup()
         self.layers_setup()
+        self.edit_dialog = EditDialog(self)
+        self.change_instance = None
+        self.toolbar_setup()
         self.connect_signals()
 
     def frame_setup(self):
@@ -75,6 +82,40 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.repaint_view()
         self.clear_layer_filter()
         iface.setActiveLayer(self.lyr_bulk_load)
+
+    def toolbar_setup(self):
+
+        if 'Add Outline' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "plus.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.add_action = QAction(icon, "Add Outline", iface.building_toolbar)
+            iface.registerMainWindowAction(self.add_action, "Ctrl+1")
+            self.add_action.triggered.connect(self.canvas_add_outline)
+            iface.building_toolbar.addAction(self.add_action)
+
+        if 'Edit Geometry' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "edit_geometry.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.edit_geom_action = QAction(icon, "Edit Geometry", iface.building_toolbar)
+            iface.registerMainWindowAction(self.edit_geom_action, "Ctrl+2")
+            self.edit_geom_action.triggered.connect(self.canvas_edit_geometry)
+            iface.building_toolbar.addAction(self.edit_geom_action)
+
+        if 'Edit Attributes' not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, '..', 'icons')
+            icon_path = os.path.join(image_dir, "edit_attributes.png")
+            icon = QIcon()
+            icon.addFile(icon_path, QSize(8, 8))
+            self.edit_attrs_action = QAction(icon, "Edit Attributes", iface.building_toolbar)
+            iface.registerMainWindowAction(self.edit_attrs_action, "Ctrl+3")
+            self.edit_attrs_action.triggered.connect(self.canvas_edit_attribute)
+            iface.building_toolbar.addAction(self.edit_attrs_action)
+
+            iface.building_toolbar.show()
 
     def connect_signals(self):
 
@@ -124,7 +165,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             'buildings_bulk_load', 'bulk_load_outline_id',
             'supplied_dataset_id = {0}'.format(self.current_dataset)
         )
-        self.lyr_bulk_load.loadNamedStyle(path + 'building_transparent.qml')
+        self.lyr_bulk_load.loadNamedStyle(path + 'buildings_bulk_load_alter_rel.qml')
 
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
             'related_bulk_load_outlines', 'related_bulk_load_outlines',
@@ -594,6 +635,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.qa_button_set_enable(True)
         self.lst_existing.clear()
         self.lst_bulk.clear()
+
+        if self.change_instance is not None:
+            self.edit_dialog.close()
+
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
             if 'existing_subset_extracts' in val:
@@ -619,6 +664,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.lyr_matched_bulk_load_in_edit)
         self.layer_registry.remove_layer(self.lyr_related_existing_in_edit)
         self.layer_registry.remove_layer(self.lyr_related_bulk_load_in_edit)
+
+        for action in iface.building_toolbar.actions():
+            if action.text() not in ['Pan Map']:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
         from buildings.gui.bulk_load_frame import BulkLoadFrame
         dw = self.dockwidget
@@ -1408,3 +1458,111 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if int(tbl.item(row, 0).text()) == id_bulk:
                 tbl.selectRow(row)
                 tbl.scrollToItem(tbl.item(row, 0))
+
+    def canvas_add_outline(self):
+        self.lyr_existing.removeSelection()
+        self.lyr_bulk_load.removeSelection()
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+        self.tbl_relationship.clearSelection()
+
+        self.edit_dialog.add_outline()
+        self.edit_dialog.show()
+        self.change_instance = self.edit_dialog.get_change_instance()
+
+        self.circle_tool = None
+        self.polyline = None
+
+        # setup circle button
+        image_dir = os.path.join(__location__, '..', 'icons')
+        icon_path = os.path.join(image_dir, "circle.png")
+        icon = QIcon()
+        icon.addFile(icon_path, QSize(8, 8))
+        self.circle_action = QAction(icon, "Draw Circle", iface.building_toolbar)
+        iface.registerMainWindowAction(self.circle_action, "Ctrl+0")
+        self.circle_action.triggered.connect(self.circle_tool_clicked)
+        self.circle_action.setCheckable(True)
+        iface.building_toolbar.addAction(self.circle_action)
+
+    def canvas_edit_geometry(self):
+        """
+            When edit geometry radio button toggled
+        """
+        self.lyr_existing.removeSelection()
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+
+        self.edit_dialog.edit_geometry()
+        self.edit_dialog.show()
+        self.change_instance = self.edit_dialog.get_change_instance()
+
+    def canvas_edit_attribute(self):
+        """
+            When edit outline radio button toggled
+        """
+        self.lyr_existing.removeSelection()
+
+        self.lst_existing.clear()
+        self.lst_bulk.clear()
+
+        self.edit_dialog.show()
+        self.edit_dialog.edit_attribute()
+        self.change_instance = self.edit_dialog.get_change_instance()
+
+    def circle_tool_clicked(self):
+        circle_tool.setup_circle(self)
+
+    def edit_cancel_clicked(self):
+        if len(QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')) > 0:
+            if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
+                try:
+                    self.lyr_bulk_load.selectionChanged.disconnect(self.change_instance.selection_changed)
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
+                try:
+                    self.lyr_bulk_load.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+            elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
+                try:
+                    self.lyr_bulk_load.featureAdded.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.lyr_bulk_load.featureDeleted.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.lyr_bulk_load.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+                if self.polyline:
+                    self.polyline.reset()
+                if isinstance(self.circle_tool, PointTool):
+                    self.circle_tool.canvas_clicked.disconnect()
+                    self.circle_tool.mouse_moved.disconnect()
+                    self.circle_tool.deactivate()
+                iface.actionPan().trigger()
+
+        iface.actionCancelEdits().trigger()
+
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        self.edit_dialog.remove_territorial_auth()
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+
+        self.toolbar_setup()
+
+        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
+            if 'existing_subset_extracts' in val:
+                self.lyr_existing.removeSelection()
+            if 'bulk_load_outlines' in val:
+                self.lyr_bulk_load.removeSelection()
+
+        self.tbl_relationship.clearSelection()
+
+        self.btn_maptool.click()
+
+        self.change_instance = None

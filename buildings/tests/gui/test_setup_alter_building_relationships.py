@@ -20,7 +20,7 @@ import unittest
 
 from PyQt4.QtCore import Qt
 from qgis.core import QgsProject
-from qgis.utils import plugins
+from qgis.utils import plugins, iface
 
 
 class SetUpAlterRelationshipsTest(unittest.TestCase):
@@ -84,3 +84,62 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
 
         self.assertEqual(len([layer for layer in layers]), len(layer_name))
         self.assertTrue(layer_bool)
+
+    def test_has_toolbar(self):
+        self.assertTrue(iface.building_toolbar.isVisible())
+        actions = [action.text() for action in iface.building_toolbar.actions()]
+        self.assertEquals(', '.join(actions), 'Pan Map, Add Outline, Edit Geometry, Edit Attributes')
+
+    def test_add_outline(self):
+        edit_dialog = self.alter_relationships_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Add Outline':
+                action.trigger()
+        # edit dialog name is add outline
+        self.assertTrue(edit_dialog.isVisible())
+        self.assertEquals(edit_dialog.windowTitle(), 'Add Outline')
+        self.assertFalse(edit_dialog.layout_status.isVisible())
+        self.assertTrue(edit_dialog.layout_capture_method.isVisible())
+        self.assertTrue(edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(edit_dialog.cmb_ta.isEnabled())
+
+    def test_edit_geometry(self):
+        edit_dialog = self.alter_relationships_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Edit Geometry':
+                action.trigger()
+        # edit dialog name is Edit Geometry
+        self.assertTrue(edit_dialog.isVisible())
+        self.assertEquals(edit_dialog.windowTitle(), 'Edit Geometry')
+        self.assertFalse(edit_dialog.layout_status.isVisible())
+        self.assertTrue(edit_dialog.layout_capture_method.isVisible())
+        self.assertFalse(edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(edit_dialog.cmb_capture_method.isEnabled())
+
+    def test_edit_attribute(self):
+        edit_dialog = self.alter_relationships_frame.edit_dialog
+        for action in iface.building_toolbar.actions():
+            if action.text() == 'Edit Attributes':
+                action.trigger()
+        # edit dialog name is Edit Attributes
+        self.assertTrue(edit_dialog.isVisible())
+        self.assertEquals(edit_dialog.windowTitle(), 'Edit Attribute')
+        self.assertTrue(edit_dialog.layout_status.isVisible())
+        self.assertTrue(edit_dialog.layout_capture_method.isVisible())
+        self.assertTrue(edit_dialog.layout_general_info.isVisible())
+        self.assertFalse(edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(edit_dialog.cmb_capture_method.isEnabled())
+        self.assertFalse(edit_dialog.cmb_capture_source.isEnabled())
+        self.assertFalse(edit_dialog.cmb_ta.isEnabled())
+        self.assertFalse(edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(edit_dialog.cmb_suburb.isEnabled())
+        self.assertFalse(edit_dialog.cmb_status.isEnabled())

@@ -264,6 +264,8 @@ class AddBulkLoad(BulkLoadChanges):
         # reset and disable comboboxes
         if self.parent_frame.polyline:
             self.parent_frame.polyline.reset()
+        if self.parent_frame.__class__.__name__ == 'AlterRelationships':
+            self.parent_frame.repaint_view()
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -277,7 +279,9 @@ class AddBulkLoad(BulkLoadChanges):
         self.editing_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionAddFeature().trigger()
+        if not self.parent_frame.circle_action.isChecked():
+            iface.actionAddFeature().trigger()
+
         # reset and disable comboboxes
         self.disable_UI_functions()
         if self.parent_frame.polyline:
@@ -796,6 +800,8 @@ class EditGeometry(BulkLoadChanges):
                 'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
                 (key, capture_method_id)
             )
+        if self.parent_frame.__class__.__name__ == 'AlterRelationships':
+            self.parent_frame.repaint_view()
         self.disable_UI_functions()
 
         if commit_status:

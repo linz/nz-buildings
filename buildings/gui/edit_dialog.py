@@ -33,6 +33,9 @@ class EditDialog(QDialog, FORM_CLASS):
         if self.parent_frame_name == 'BulkLoadFrame':
             self.editing_layer = self.parent_frame.bulk_load_layer
             self.current_dataset = self.parent_frame.current_dataset
+        elif self.parent_frame_name == 'AlterRelationships':
+            self.editing_layer = self.parent_frame.lyr_bulk_load
+            self.current_dataset = self.parent_frame.current_dataset
         elif self.parent_frame_name == 'ProductionFrame':
             self.editing_layer = self.parent_frame.building_layer
             self.current_dataset = None
@@ -104,7 +107,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.AddBulkLoad(self)
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.AddProduction(self)
@@ -146,7 +149,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.show()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditAttribute(self)
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditAttribute(self)
@@ -182,7 +185,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.layout_capture_method.show()
         self.layout_general_info.hide()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditGeometry(self)
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditGeometry(self)
