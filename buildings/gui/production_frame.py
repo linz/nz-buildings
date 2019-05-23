@@ -12,6 +12,7 @@ from qgis.utils import iface
 
 from buildings.gui import production_changes
 from buildings.gui.edit_dialog import EditDialog
+from buildings.utilities import circle_tool
 from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
@@ -118,15 +119,22 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         self.circle_tool = None
         self.polyline = None
+        # setup circle button
         image_dir = os.path.join(__location__, '..', 'icons')
         icon_path = os.path.join(image_dir, "circle.png")
         icon = QIcon()
         icon.addFile(icon_path, QSize(8, 8))
         self.circle_action = QAction(icon, "Draw Circle", iface.building_toolbar)
         iface.registerMainWindowAction(self.circle_action, "Ctrl+0")
-        self.circle_action.triggered.connect(self.setup_circle)
+        self.circle_action.triggered.connect(self.circle_tool_clicked)
         self.circle_action.setCheckable(True)
         iface.building_toolbar.addAction(self.circle_action)
+
+    def circle_tool_clicked(self):
+        if self.circle_action.isChecked():
+            circle_tool.setup_circle(self)
+        else:
+            iface.actionAddFeature().trigger()
 
     def canvas_edit_attribute(self):
         """
@@ -143,60 +151,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_dialog.edit_geometry()
         self.edit_dialog.show()
         self.change_instance = self.edit_dialog.get_change_instance()
-
-    @pyqtSlot()
-    def setup_circle(self):
-        """
-            called when draw circle button is clicked
-        """
-        self.points = []
-        # set map tool to new point tool
-        self.circle_tool = PointTool(iface.mapCanvas())
-        iface.mapCanvas().setMapTool(self.circle_tool)
-        # create polyline to track drawing on canvas
-        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
-        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
-        self.polyline.setColor(QColor(255, 0, 0))
-        self.polyline.setWidth(1)
-        # signals for new map tool
-        self.circle_tool.canvas_clicked.connect(self.draw_circle)
-        self.circle_tool.mouse_moved.connect(self.update_line)
-
-    @pyqtSlot(QgsPoint)
-    def draw_circle(self, point):
-        """
-            called when mapcanvas is clicked
-        """
-        self.points.append(point)
-        self.polyline.addPoint(point, True)
-        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
-        # if two points have been clicked (center and edge)
-        if len(self.points) == 2:
-            # calculate radius of circle
-            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
-            # number of vertices of circle
-            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
-            # create point on center location
-            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
-            # create buffer of specified distance around point
-            buffer = point.buffer(radius, nodes)
-            # add feature to bulk_load_outlines (triggering featureAdded)
-            self.feature = QgsFeature(self.building_layer.pendingFields())
-            self.feature.setGeometry(buffer)
-            self.building_layer.addFeature(self.feature)
-            self.building_layer.triggerRepaint()
-            # reset points list
-            self.points = []
-
-    @pyqtSlot(QgsPoint)
-    def update_line(self, point):
-        """
-            called when mouse moved on canvas
-        """
-        if len(self.points) == 1:
-            # if the center has been clicked have a line follow the mouse movement
-            line = [self.points[0], point]
-            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
 
     @pyqtSlot()
     def exit_clicked(self):
