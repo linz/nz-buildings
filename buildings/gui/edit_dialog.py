@@ -33,6 +33,9 @@ class EditDialog(QDialog, FORM_CLASS):
         if self.parent_frame_name == 'BulkLoadFrame':
             self.editing_layer = self.parent_frame.bulk_load_layer
             self.current_dataset = self.parent_frame.current_dataset
+        elif self.parent_frame_name == 'AlterRelationships':
+            self.editing_layer = self.parent_frame.lyr_bulk_load
+            self.current_dataset = self.parent_frame.current_dataset
         elif self.parent_frame_name == 'ProductionFrame':
             self.editing_layer = self.parent_frame.building_layer
             self.current_dataset = None
@@ -103,7 +106,7 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.AddBulkLoad(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
@@ -152,7 +155,7 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditAttribute(self)
             self.layout_status.show()
             self.layout_capture_method.show()
@@ -201,7 +204,7 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditGeometry(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
