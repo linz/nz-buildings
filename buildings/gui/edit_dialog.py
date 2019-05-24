@@ -4,7 +4,7 @@ from functools import partial
 import os
 
 from PyQt4 import uic
-from PyQt4.QtGui import QCompleter, QDialog
+from PyQt4.QtGui import QAbstractItemView, QCompleter, QDialog
 from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from qgis.utils import iface, isPluginLoaded, plugins
@@ -330,6 +330,11 @@ class EditDialog(QDialog, FORM_CLASS):
             buildings_error_inspector = plugins['liqa'].building_outline_error_inspector
             try:
                 error_attribute_table = buildings_error_inspector.error_inspector.tbl_error_attr
+                selected_rows = error_attribute_table.selected_rows()
                 error_attribute_table._repopulate()
+                error_attribute_table.setSelectionMode(QAbstractItemView.MultiSelection)
+                for row in selected_rows:
+                    error_attribute_table.selectRow(row)
+                error_attribute_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
             except AttributeError:
                 pass
