@@ -322,6 +322,9 @@ class AddBulkLoad(BulkLoadChanges):
         self.populate_edit_comboboxes()
         self.select_comboboxes_value()
 
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
+
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
@@ -861,6 +864,9 @@ class EditGeometry(BulkLoadChanges):
             self.enable_UI_functions()
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
 
     def select_comboboxes_value(self):
         """
