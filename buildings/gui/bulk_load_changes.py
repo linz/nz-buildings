@@ -468,6 +468,8 @@ class EditAttribute(BulkLoadChanges):
             ls_relationships = self.remove_compared_outlines()
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.edit_dialog.ids) > 0:
+                    # Send signal to LIQA through edit dialog
+                    self.edit_dialog.delete_outline_saved.emit(self.edit_dialog.ids, self.edit_dialog.description_del)
                     for i in self.edit_dialog.ids:
                         # check current status of building
                         sql = bulk_load_select.bulk_load_status_id_by_outline_id
@@ -789,6 +791,8 @@ class EditGeometry(BulkLoadChanges):
         self.edit_dialog.db.open_cursor()
 
         _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
+
+        self.edit_dialog.edit_geometry_saved.emit(self.edit_dialog.geoms.keys())
 
         for key in self.edit_dialog.geoms:
             sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
