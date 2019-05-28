@@ -879,13 +879,15 @@ class EditGeometry(BulkLoadChanges):
         """
         # get new feature geom and convert to correct format
         result = self.edit_dialog.db._execute(bulk_load_select.bulk_load_status_id_by_outline_id, (qgsfId,))
-        if result.fetchone()[0] == 3:
-            iface.messageBar().pushMessage("INFO",
-                                           "You cannot edit the geometry of a removed outline.",
-                                           level=QgsMessageBar.INFO, duration=3)
-            self.disable_UI_functions()
-            self.edit_dialog.btn_edit_reset.setEnabled(1)
-            return
+        result = result.fetchone()
+        if result is not None:
+            if result[0] == 3:
+                iface.messageBar().pushMessage("INFO",
+                                               "You cannot edit the geometry of a removed outline.",
+                                               level=QgsMessageBar.INFO, duration=3)
+                self.disable_UI_functions()
+                self.edit_dialog.btn_edit_reset.setEnabled(1)
+                return
         wkt = geom.exportToWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
