@@ -322,6 +322,9 @@ class AddBulkLoad(BulkLoadChanges):
         self.populate_edit_comboboxes()
         self.select_comboboxes_value()
 
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
+
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
@@ -468,6 +471,8 @@ class EditAttribute(BulkLoadChanges):
             ls_relationships = self.remove_compared_outlines()
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.edit_dialog.ids) > 0:
+                    # Send signal to LIQA through edit dialog
+                    self.edit_dialog.delete_outline_saved.emit(self.edit_dialog.ids, self.edit_dialog.description_del)
                     for i in self.edit_dialog.ids:
                         # check current status of building
                         sql = bulk_load_select.bulk_load_status_id_by_outline_id
@@ -792,6 +797,8 @@ class EditGeometry(BulkLoadChanges):
 
         _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
 
+        self.edit_dialog.edit_geometry_saved.emit(self.edit_dialog.geoms.keys())
+
         if len(self.edit_dialog.split_geoms) > 0:
             capture_source_id = self.new_attrs[5]
             suburb = self.new_attrs[6]
@@ -911,6 +918,9 @@ class EditGeometry(BulkLoadChanges):
                 self.enable_UI_functions()
                 self.populate_edit_comboboxes()
                 self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
