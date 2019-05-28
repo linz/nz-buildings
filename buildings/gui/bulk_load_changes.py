@@ -786,7 +786,7 @@ class EditGeometry(BulkLoadChanges):
         iface.building_toolbar.show()
 
         self.disable_UI_functions()
-        self.new_attrs = []
+        self.new_attrs = {}
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
@@ -800,17 +800,14 @@ class EditGeometry(BulkLoadChanges):
         self.edit_dialog.edit_geometry_saved.emit(self.edit_dialog.geoms.keys())
 
         if len(self.edit_dialog.split_geoms) > 0:
-            capture_source_id = self.new_attrs[5]
-            suburb = self.new_attrs[6]
-            town = self.new_attrs[7]
-            t_a = self.new_attrs[8]
 
             # insert into bulk_load_outlines table
-            for geom in self.edit_dialog.split_geoms:
+            for qgsfId, geom in self.edit_dialog.split_geoms.items():
+                attributes = self.new_attrs[qgsfId]
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
                 result = self.edit_dialog.db.execute_no_commit(
                     sql, (self.edit_dialog.current_dataset, capture_method_id,
-                          capture_source_id, suburb, town, t_a,
+                          attributes[5], attributes[6], attributes[7], attributes[8],
                           geom)
                 )
                 self.edit_dialog.outline_id = result.fetchall()[0][0]
@@ -845,7 +842,8 @@ class EditGeometry(BulkLoadChanges):
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
-            self.edit_dialog.split_geoms = []
+            self.edit_dialog.split_geoms = {}
+            self.new_attrs = {}
             self.edit_dialog.added_building_ids = []
             iface.actionCancelEdits().trigger()
             iface.actionToggleEditing().trigger()
@@ -859,7 +857,8 @@ class EditGeometry(BulkLoadChanges):
         iface.actionCancelEdits().trigger()
         self.editing_layer.geometryChanged.connect(self.geometry_changed)
         self.edit_dialog.geoms = {}
-        self.edit_dialog.split_geoms = []
+        self.edit_dialog.split_geoms = {}
+        self.new_attrs = {}
         self.edit_dialog.added_building_ids = []
         # restart editing
         iface.actionToggleEditing().trigger()
@@ -931,8 +930,8 @@ class EditGeometry(BulkLoadChanges):
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.editing_layer.getFeatures(request))
-        self.new_attrs = new_feature.attributes()
-        if not self.new_attrs[5]:
+        self.new_attrs[qgsfId] = new_feature.attributes()
+        if not self.new_attrs[qgsfId][5]:
             iface.messageBar().pushMessage("INFO",
                                            "You've added a new feature, this can't be done in edit geometry, please switch to add outline.",
                                            level=QgsMessageBar.INFO, duration=5)
@@ -951,7 +950,7 @@ class EditGeometry(BulkLoadChanges):
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
-        self.edit_dialog.split_geoms.append(result.fetchall()[0][0])
+        self.edit_dialog.split_geoms[qgsfId] = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
         """
