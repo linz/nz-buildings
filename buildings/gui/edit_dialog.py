@@ -4,10 +4,10 @@ from functools import partial
 import os
 
 from PyQt4 import uic
-from PyQt4.QtGui import QCompleter, QDialog
-from PyQt4.QtCore import Qt, pyqtSlot
+from PyQt4.QtGui import QAbstractItemView, QCompleter, QDialog
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
 
-from qgis.utils import iface
+from qgis.utils import iface, isPluginLoaded, plugins
 
 from buildings.gui import bulk_load_changes, production_changes
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
@@ -18,6 +18,9 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'edit_dia
 
 
 class EditDialog(QDialog, FORM_CLASS):
+
+    edit_geometry_saved = pyqtSignal(list)
+    delete_outline_saved = pyqtSignal(list, str)
 
     def __init__(self, parent_frame, parent=None):
         super(EditDialog, self).__init__(parent)
@@ -33,6 +36,9 @@ class EditDialog(QDialog, FORM_CLASS):
         if self.parent_frame_name == 'BulkLoadFrame':
             self.editing_layer = self.parent_frame.bulk_load_layer
             self.current_dataset = self.parent_frame.current_dataset
+            # Update qa layers
+            self.edit_geometry_saved.connect(self.liqa_on_edit_geometry_saved)
+            self.delete_outline_saved.connect(self.liqa_on_delete_outline_saved)
         elif self.parent_frame_name == 'AlterRelationships':
             self.editing_layer = self.parent_frame.lyr_bulk_load
             self.current_dataset = self.parent_frame.current_dataset
@@ -281,3 +287,55 @@ class EditDialog(QDialog, FORM_CLASS):
         else:
             self.le_deletion_reason.setDisabled(1)
             self.le_deletion_reason.clear()
+
+    @pyqtSlot(list)
+    def liqa_on_edit_geometry_saved(self, ids):
+        for qa_lyr in self.find_qa_layer():
+            bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
+            for feat_id in ids:
+                if feat_id in bulk_load_ids.values():
+                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
+                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Geometry edited')
+        self.repopulate_error_attribute_table()
+
+    @pyqtSlot(list, str)
+    def liqa_on_delete_outline_saved(self, ids, del_reason):
+        for qa_lyr in self.find_qa_layer():
+            bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
+            for feat_id in ids:
+                if feat_id in bulk_load_ids.values():
+                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
+                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Deleted- {}'.format(del_reason))
+        self.repopulate_error_attribute_table()
+
+    def find_qa_layer(self):
+        for layer in iface.legendInterface().layers():
+            if layer.name().startswith('qa_'):
+                yield layer
+
+    def get_bulk_load_ids(self, qa_layer):
+        bulk_load_ids = {}
+        for feat in qa_layer.getFeatures():
+            bulk_load_ids[feat.id()] = feat['bulk_load_']
+        return bulk_load_ids
+
+    def update_qa_layer_attribute(self, qa_lyr, qa_id, error_status, comment):
+        qa_lyr.startEditing()
+        qa_lyr.changeAttributeValue(qa_id, 1, error_status, True)
+        qa_lyr.changeAttributeValue(qa_id, 2, comment, True)
+        qa_lyr.commitChanges()
+
+    def repopulate_error_attribute_table(self):
+        if isPluginLoaded('liqa'):
+            buildings_error_inspector = plugins['liqa'].building_outline_error_inspector
+            try:
+                error_attribute_table = buildings_error_inspector.error_inspector.tbl_error_attr
+                if error_attribute_table.isVisible():
+                    selected_rows = error_attribute_table.selected_rows()
+                    error_attribute_table._repopulate()
+                    error_attribute_table.setSelectionMode(QAbstractItemView.MultiSelection)
+                    for row in selected_rows:
+                        error_attribute_table.selectRow(row)
+                    error_attribute_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
+            except AttributeError:
+                pass
