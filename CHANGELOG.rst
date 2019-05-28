@@ -22,6 +22,7 @@ Changed
 * Updated URL links
 * Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 * Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
+* Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
 
 Fixed
 -----
