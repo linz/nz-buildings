@@ -902,9 +902,13 @@ class EditGeometry(BulkLoadChanges):
                                            level=QgsMessageBar.INFO, duration=3)
         result = result.fetchall()
         if len(result) == 0:
-            iface.messageBar().pushMessage("INFO",
-                                           "You've tried to split the same feature twice, you must save the changes to the db between splitting the same feature.",
-                                           level=QgsMessageBar.INFO, duration=5)
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n -------- CANNOT SPLIT A NEWLY ADDED FEATURE ---'
+                '----- \n\nYou\'ve tried to split an outline that has just been created by split '
+                'you must first save this new outline to the db before splitting it again.'
+            )
+            self.error_dialog.show()
             self.disable_UI_functions()
             self.edit_dialog.btn_edit_reset.setEnabled(1)
             return
@@ -932,9 +936,14 @@ class EditGeometry(BulkLoadChanges):
         new_feature = next(self.editing_layer.getFeatures(request))
         self.new_attrs[qgsfId] = new_feature.attributes()
         if not self.new_attrs[qgsfId][5]:
-            iface.messageBar().pushMessage("INFO",
-                                           "You've added a new feature, this can't be done in edit geometry, please switch to add outline.",
-                                           level=QgsMessageBar.INFO, duration=5)
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n -------------------- CANNOT ADD NEW FEATURE ------'
+                '-------------- \n\nYou\'ve added a new feature, '
+                'this can\'t be done in edit geometry, '
+                'please switch to add outline.'
+            )
+            self.error_dialog.show()
             self.disable_UI_functions()
             self.edit_dialog.btn_edit_reset.setEnabled(1)
             return
