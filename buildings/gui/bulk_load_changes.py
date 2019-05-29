@@ -804,12 +804,11 @@ class EditGeometry(BulkLoadChanges):
             # insert into bulk_load_outlines table
             for qgsfId, geom in self.edit_dialog.split_geoms.items():
                 attributes = self.new_attrs[qgsfId]
+                if not attributes[7]:
+                    attributes[7] = None
                 sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
                 result = self.edit_dialog.db.execute_no_commit(
-                    sql, (self.edit_dialog.current_dataset, capture_method_id,
-                          attributes[5], attributes[6], attributes[7], attributes[8],
-                          geom)
-                )
+                    sql, (self.edit_dialog.current_dataset, capture_method_id, attributes[5], attributes[6], attributes[7], attributes[8], geom))
                 self.edit_dialog.outline_id = result.fetchall()[0][0]
 
                 # insert into added table
