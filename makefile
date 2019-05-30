@@ -100,6 +100,8 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp -R db/sql/* ${datadir}/sql
 	mkdir -p ${datadir}/tests/testdata
 	cp db/tests/testdata/*.sql ${datadir}/tests/testdata
+	mkdir -p ${datadir}/tests/testdata/db
+	cp db/tests/testdata/db/*.sql ${datadir}/tests/testdata/db
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
