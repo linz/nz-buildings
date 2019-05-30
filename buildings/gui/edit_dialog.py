@@ -56,6 +56,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.ids = []
         self.geoms = {}
         self.bulk_load_outline_id = None
+        self.split_geoms = {}
 
         # processing class instances
         self.change_instance = None
@@ -66,6 +67,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.completer_box()
 
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
+        self.rejected.connect(self.close_dialog)
 
     def init_dialog(self):
         self.layout_status.hide()
@@ -84,10 +86,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
         self.btn_end_lifespan.setDisabled(1)
-
-    def closeEvent(self, event):
-        self.close_dialog()
-        event.accept()
 
     def add_outline(self):
         self.setWindowTitle("Add Outline")
@@ -229,6 +227,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.editing_layer.geometryChanged.connect(self.change_instance.geometry_changed)
+        self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
 
         self.add_territorial_auth()
 
@@ -242,6 +241,8 @@ class EditDialog(QDialog, FORM_CLASS):
         self.ids = []
         self.building_outline_id = None
         self.geoms = {}
+        self.split_geoms = {}
+        self.added_building_ids = []
 
         self.parent_frame.edit_cancel_clicked()
         for action in iface.building_toolbar.actions():

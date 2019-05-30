@@ -831,6 +831,10 @@ class EditGeometry(ProductionChanges):
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
 
+    @pyqtSlot(int)
+    def creator_feature_added(self, qgsfId):
+        pass  # Future Enhancement
+
     def select_comboboxes_value(self):
         """
             Select the correct combobox value for the geometry

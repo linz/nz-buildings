@@ -240,3 +240,90 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
 
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+
+    def test_split_geometry_once(self):
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        iface.actionSplitFeatures().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878180.46, 5555329.35)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        sql = "SELECT Count(*)::integer FROM buildings_bulk_load.bulk_load_outlines;"
+        pre_save = db._execute(sql)
+        pre_save = pre_save.fetchone()[0]
+        self.bulk_load_frame.change_instance.edit_save_clicked(False)
+        post_save = db._execute(sql)
+        post_save = post_save.fetchone()[0]
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(pre_save, post_save - 1)
+        self.bulk_load_frame.edit_dialog.geoms = {}
+        self.bulk_load_frame.edit_dialog.split_geoms = []
+        self.bulk_load_frame.edit_dialog.added_building_ids = []
+        self.bulk_load_frame.db.rollback_open_cursor()
+
+    def test_fail_on_split_geometry_twice(self):
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        iface.actionSplitFeatures().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878180.46, 5555329.35)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878171.96, 5555339.46)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
+                         delay=30)
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        iface.messageBar().popWidget()

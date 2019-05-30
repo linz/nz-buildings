@@ -481,6 +481,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     self.bulk_load_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
+                try:
+                    self.bulk_load_layer.featureAdded.disconnect()
+                except TypeError:
+                    pass
             elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
                 try:
                     self.bulk_load_layer.featureAdded.disconnect()
