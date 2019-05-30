@@ -903,9 +903,9 @@ class EditGeometry(BulkLoadChanges):
         if len(result) == 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                '\n -------- CANNOT SPLIT A NEWLY ADDED FEATURE ---'
-                '----- \n\nYou\'ve tried to split an outline that has just been created by split '
-                'you must first save this new outline to the db before splitting it again.'
+                '\n --- CANNOT SPLIT/EDIT A NEWLY ADDED FEATURE ---'
+                '\n\nYou\'ve tried to split/edit an outline that has just been created. '
+                'You must first save this new outline to the db before splitting/editing it again.'
             )
             self.error_dialog.show()
             self.disable_UI_functions()
