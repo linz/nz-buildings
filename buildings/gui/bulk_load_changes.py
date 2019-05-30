@@ -853,9 +853,7 @@ class EditGeometry(BulkLoadChanges):
             self.edit_dialog.geoms = {}
             self.edit_dialog.split_geoms = {}
             self.new_attrs = {}
-            iface.actionCancelEdits().trigger()
-            iface.actionToggleEditing().trigger()
-            iface.actionNodeTool().trigger()
+            self.edit_dialog.editing_layer.triggerRepaint()
 
     @pyqtSlot()
     def edit_reset_clicked(self):
