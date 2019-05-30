@@ -121,6 +121,9 @@ clean:
 	# Remove the files built from .in files during install
 	rm -f $(EXTRA_CLEAN)
 
+dump_db_schema:
+	./db/scripts/dump_db_data.sh
+
 # PLUGIN
 
 PLUGINNAME = buildings
