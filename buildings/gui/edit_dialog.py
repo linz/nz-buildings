@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from collections import OrderedDict
 from functools import partial
 import os
 
@@ -51,7 +51,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.init_dialog()
 
         # Bulk loadings & editing fields
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
         self.ids = []
         self.geoms = {}
@@ -89,7 +89,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
     def add_outline(self):
         self.setWindowTitle("Add Outline")
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
@@ -236,7 +236,7 @@ class EditDialog(QDialog, FORM_CLASS):
             When 'x' is clicked
         """
         self.change_instance = None
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
         self.ids = []
         self.building_outline_id = None

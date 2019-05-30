@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-\
+from collections import OrderedDict
 
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton, QMessageBox
@@ -260,7 +261,7 @@ class AddProduction(ProductionChanges):
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geom = None
-            self.edit_dialog.added_building_ids = []
+            self.edit_dialog.added_geoms = OrderedDict()
         # reset and disable comboboxes
         self.disable_UI_functions()
 
@@ -282,7 +283,7 @@ class AddProduction(ProductionChanges):
         self.disable_UI_functions()
 
         self.edit_dialog.geom = None
-        self.edit_dialog.added_building_ids = []
+        self.edit_dialog.added_geoms = OrderedDict()
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -291,12 +292,10 @@ class AddProduction(ProductionChanges):
            @param qgsfId:      Id of added feature
            @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if self.edit_dialog.added_building_ids != []:
+        if self.edit_dialog.added_geoms != {}:
             iface.messageBar().pushMessage("WARNING",
                                            "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
                                            level=QgsMessageBar.WARNING, duration=3)
-        if qgsfId not in self.edit_dialog.added_building_ids:
-            self.edit_dialog.added_building_ids.append(qgsfId)
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.editing_layer.getFeatures(request))
@@ -311,11 +310,19 @@ class AddProduction(ProductionChanges):
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
-        self.edit_dialog.geom = result.fetchall()[0][0]
+        geom = result.fetchall()[0][0]
+
+        if qgsfId not in self.edit_dialog.added_geoms.keys():
+            self.edit_dialog.added_geoms[qgsfId] = geom
+            self.edit_dialog.geom = geom
+
         # enable & populate comboboxes
         self.enable_UI_functions()
         self.populate_edit_comboboxes()
         self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -324,13 +331,16 @@ class AddProduction(ProductionChanges):
             @param qgsfId:      Id of deleted feature
             @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if qgsfId in self.edit_dialog.added_building_ids:
-            self.edit_dialog.added_building_ids.remove(qgsfId)
+        if qgsfId in self.edit_dialog.added_geoms.keys():
+            del self.edit_dialog.added_geoms[qgsfId]
             if self.parent_frame.polyline is not None:
                 self.parent_frame.polyline.reset()
-            if self.edit_dialog.added_building_ids == []:
+            if self.edit_dialog.added_geoms == {}:
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
+            else:
+                self.edit_dialog.geom = self.edit_dialog.added_geoms.values()[-1]
+                self.select_comboboxes_value()
 
     @pyqtSlot(int, QgsGeometry)
     def creator_geometry_changed(self, qgsfId, geom):
@@ -341,7 +351,12 @@ class AddProduction(ProductionChanges):
            @param geom:        geometry of added feature
            @type  geom:        qgis.core.QgsGeometry
         """
-        if qgsfId in self.edit_dialog.added_building_ids:
+        if qgsfId in self.edit_dialog.added_geoms.keys():
+            area = geom.area()
+            if area < 10:
+                iface.messageBar().pushMessage("INFO",
+                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
+                                               level=QgsMessageBar.INFO, duration=3)
             wkt = geom.exportToWkt()
             if not wkt:
                 self.disable_UI_functions()
@@ -349,12 +364,10 @@ class AddProduction(ProductionChanges):
                 return
             sql = general_select.convert_geometry
             result = self.edit_dialog.db._execute(sql, (wkt,))
-            self.edit_dialog.geom = result.fetchall()[0][0]
-            area = geom.area()
-            if area < 10:
-                iface.messageBar().pushMessage("INFO",
-                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                                               level=QgsMessageBar.INFO, duration=3)
+            geom = result.fetchall()[0][0]
+            self.edit_dialog.added_geoms[qgsfId] = geom
+            if qgsfId == self.edit_dialog.added_geoms.keys()[-1]:
+                self.edit_dialog.geom = geom
         else:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
@@ -830,6 +843,9 @@ class EditGeometry(ProductionChanges):
             self.enable_UI_functions()
             self.populate_edit_comboboxes()
             self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):

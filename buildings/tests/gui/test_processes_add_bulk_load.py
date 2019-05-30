@@ -194,7 +194,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # click reset button
         self.edit_dialog.btn_edit_reset.click()
         # check geom removed from canvas
-        self.assertEqual(len(self.edit_dialog.added_building_ids), 0)
+        self.assertEqual(len(self.edit_dialog.added_geoms.keys()), 0)
         # check comboxbox indexes reset to 0
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentIndex(), -1)
         self.assertEqual(self.edit_dialog.cmb_capture_source.currentIndex(), -1)
