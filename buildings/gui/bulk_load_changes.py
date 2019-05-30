@@ -855,6 +855,7 @@ class EditGeometry(BulkLoadChanges):
             self.new_attrs = {}
             iface.actionCancelEdits().trigger()
             iface.actionToggleEditing().trigger()
+            iface.actionNodeTool().trigger()
 
     @pyqtSlot()
     def edit_reset_clicked(self):
