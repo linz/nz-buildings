@@ -853,7 +853,6 @@ class EditGeometry(BulkLoadChanges):
             self.edit_dialog.geoms = {}
             self.edit_dialog.split_geoms = {}
             self.new_attrs = {}
-            self.edit_dialog.added_building_ids = []
             iface.actionCancelEdits().trigger()
             iface.actionToggleEditing().trigger()
 
@@ -868,7 +867,6 @@ class EditGeometry(BulkLoadChanges):
         self.edit_dialog.geoms = {}
         self.edit_dialog.split_geoms = {}
         self.new_attrs = {}
-        self.edit_dialog.added_building_ids = []
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionNodeTool().trigger()
@@ -938,8 +936,6 @@ class EditGeometry(BulkLoadChanges):
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
-        if qgsfId not in self.edit_dialog.added_building_ids:
-            self.edit_dialog.added_building_ids.append(qgsfId)
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.editing_layer.getFeatures(request))
