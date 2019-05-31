@@ -125,7 +125,7 @@ clean:
 
 dump_db_schema:
 	# dump nz-buildings-plugin-db to test data schema files
-	./db/scripts/dump_db_data.sh
+	./db/scripts/dump_db_schema.sh
 
 # PLUGIN
 
