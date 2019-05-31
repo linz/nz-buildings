@@ -102,6 +102,8 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp db/tests/testdata/*.sql ${datadir}/tests/testdata
 	mkdir -p ${datadir}/tests/testdata/db
 	cp db/tests/testdata/db/*.sql ${datadir}/tests/testdata/db
+	mkdir -p ${datadir}/tests/testdata/plugin
+	cp db/tests/testdata/plugin/*.sql ${datadir}/tests/testdata/plugin
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
