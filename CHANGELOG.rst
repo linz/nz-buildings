@@ -23,6 +23,8 @@ Changed
 * Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 * Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 * Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
+* Database test data is now stored in schema specific sql files
+* Any edits made to the database outside of the code can be automatically added to/changed in the code using make dump_db_schema
 
 Fixed
 -----
