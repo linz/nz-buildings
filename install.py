@@ -121,11 +121,19 @@ def db_install():
         cursor.execute("CREATE EXTENSION IF NOT EXISTS intarray SCHEMA public;")
         cursor.execute("SET client_min_messages TO WARNING;")
 
-        script = os.path.join(__location__, "db", "tests", "testdata", "09-create_test_admin_bdys_schema.sql")
+        script = os.path.join(__location__, "db", "tests", "testdata", "create_test_admin_bdys_schema.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
-        
-        script = os.path.join(__location__, "db", "tests", "testdata", "10-create_test_aerial_schema.sql")
+
+        script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "admin_bdys.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
+
+        script = os.path.join(__location__, "db", "tests", "testdata", "create_test_aerial_schema.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
+
+        script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "aerial_lds.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
 
