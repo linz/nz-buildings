@@ -124,7 +124,8 @@ clean:
 	rm -f $(EXTRA_CLEAN)
 
 dump_db_schema:
-	# dump nz-buildings-plugin-db to test data schema files
+	# dump nz-buildings-pgtap-db to test data schema files
+	chmod +x db/scripts/dump_db_schema.sh
 	./db/scripts/dump_db_schema.sh
 
 # PLUGIN
