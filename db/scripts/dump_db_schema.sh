@@ -1,18 +1,17 @@
 #!/bin/bash
 
 export SCRIPTSDIR=/usr/share/nz-buildings/
-export DATADIR=$HOME/dev/nz-buildings
 
 # dump all the schema
-pg_dump --column-inserts --data-only --schema=admin_bdys nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/admin_bdys.sql
-pg_dump --column-inserts --data-only --schema=aerial_lds nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/aerial_lds.sql
-pg_dump --column-inserts --data-only --schema=buildings nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/buildings.sql
-pg_dump --column-inserts --data-only --schema=buildings_common nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/buildings_common.sql
-pg_dump --column-inserts --data-only --schema=buildings_bulk_load nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/buildings_bulk_load.sql
-pg_dump --column-inserts --data-only --schema=buildings_reference nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/buildings_reference.sql
-pg_dump --column-inserts --data-only --schema=buildings_lds nz-buildings-pgtap-db > ${DATADIR}/db/tests/testdata/db/buildings_lds.sql
+pg_dump --column-inserts --data-only --schema=admin_bdys nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/admin_bdys.sql
+pg_dump --column-inserts --data-only --schema=aerial_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/aerial_lds.sql
+pg_dump --column-inserts --data-only --schema=buildings nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings.sql
+pg_dump --column-inserts --data-only --schema=buildings_common nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_common.sql
+pg_dump --column-inserts --data-only --schema=buildings_bulk_load nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_bulk_load.sql
+pg_dump --column-inserts --data-only --schema=buildings_reference nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_reference.sql
+pg_dump --column-inserts --data-only --schema=buildings_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_lds.sql
 
-for file in ${DATADIR}/db/tests/testdata/db/*.sql; do
+for file in ${PWD}/db/tests/testdata/db/*.sql; do
     echo ${file} >&2
     # remove lines that start with SET
     sed -i '/^SET/ d' ${file}
@@ -42,4 +41,4 @@ for file in ${DATADIR}/db/tests/testdata/db/*.sql; do
 done
 
 # copy tables over to usr/share folder location
-sudo cp ${DATADIR}/db/tests/testdata/db/*.sql ${SCRIPTSDIR}/tests/testdata/db
+sudo cp ${PWD}/db/tests/testdata/db/*.sql ${SCRIPTSDIR}/tests/testdata/db
