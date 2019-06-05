@@ -189,6 +189,8 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_bulk_load.sql $ON_ERROR_STOP
     echo ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql $ON_ERROR_STOP
 
 fi
 
