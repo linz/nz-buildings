@@ -17,7 +17,7 @@
 
 BEGIN;
 
-\ir ./testdata/07-insert_test_data_publish_lds.sql
+\ir ./testdata/insert_test_data_publish_lds.sql
 
 SELECT buildings_lds.populate_buildings_lds();
 

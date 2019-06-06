@@ -100,6 +100,10 @@ install: $(SQLSCRIPTS) $(SCRIPTS_built)
 	cp -R db/sql/* ${datadir}/sql
 	mkdir -p ${datadir}/tests/testdata
 	cp db/tests/testdata/*.sql ${datadir}/tests/testdata
+	mkdir -p ${datadir}/tests/testdata/db
+	cp db/tests/testdata/db/*.sql ${datadir}/tests/testdata/db
+	mkdir -p ${datadir}/tests/testdata/plugin
+	cp db/tests/testdata/plugin/*.sql ${datadir}/tests/testdata/plugin
 	mkdir -p ${bindir}
 	cp $(SCRIPTS_built) ${bindir}
 
@@ -118,6 +122,11 @@ check test: $(SQLSCRIPTS)
 clean:
 	# Remove the files built from .in files during install
 	rm -f $(EXTRA_CLEAN)
+
+dump_db_schema:
+	# dump nz-buildings-pgtap-db to test data schema files
+	chmod +x db/scripts/dump_db_schema.sh
+	./db/scripts/dump_db_schema.sh
 
 # PLUGIN
 
