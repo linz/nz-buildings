@@ -297,7 +297,6 @@ class EditDialog(QDialog, FORM_CLASS):
                 if feat_id in bulk_load_ids.values():
                     qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
                     self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Geometry edited')
-        self.repopulate_error_attribute_table()
 
     @pyqtSlot(list, str)
     def liqa_on_delete_outline_saved(self, ids, del_reason):
@@ -307,7 +306,6 @@ class EditDialog(QDialog, FORM_CLASS):
                 if feat_id in bulk_load_ids.values():
                     qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
                     self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Deleted- {}'.format(del_reason))
-        self.repopulate_error_attribute_table()
 
     def find_qa_layer(self):
         for layer in iface.legendInterface().layers():
@@ -325,18 +323,3 @@ class EditDialog(QDialog, FORM_CLASS):
         qa_lyr.changeAttributeValue(qa_id, 1, error_status, True)
         qa_lyr.changeAttributeValue(qa_id, 2, comment, True)
         qa_lyr.commitChanges()
-
-    def repopulate_error_attribute_table(self):
-        if isPluginLoaded('liqa'):
-            buildings_error_inspector = plugins['liqa'].building_outline_error_inspector
-            try:
-                error_attribute_table = buildings_error_inspector.error_inspector.tbl_error_attr
-                if error_attribute_table.isVisible():
-                    selected_rows = error_attribute_table.selected_rows()
-                    error_attribute_table._repopulate()
-                    error_attribute_table.setSelectionMode(QAbstractItemView.MultiSelection)
-                    for row in selected_rows:
-                        error_attribute_table.selectRow(row)
-                    error_attribute_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            except AttributeError:
-                pass
