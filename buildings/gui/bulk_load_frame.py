@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 from functools import partial
-import math
 import os.path
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMenu, QMessageBox
-from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar, QgsRubberBand
+from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMessageBox
+from qgis.core import QgsProject, QgsMapLayerRegistry
+from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -20,6 +19,7 @@ from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
                            buildings_common_select_statements as common_select,
                            buildings_reference_select_statements as reference_select)
+from buildings.utilities import circle_tool
 from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
@@ -42,8 +42,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # Frame fields
         self.dockwidget = dockwidget
         self.layer_registry = LayerRegistry()
-        self.bulk_load_layer = QgsVectorLayer()
-        self.territorial_auth = QgsVectorLayer()
         # Set up pop-up dialog
         self.check_dialog = CheckDialog()
         self.error_dialog = None
@@ -53,7 +51,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         # layer set up
         self.historic_layer = None
         self.bulk_load_layer = None
-        self.territorial_auth = None
         # database setup
         self.db = db
         db.connect()
@@ -443,9 +440,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         icon.addFile(icon_path, QSize(8, 8))
         self.circle_action = QAction(icon, "Draw Circle", iface.building_toolbar)
         iface.registerMainWindowAction(self.circle_action, "Ctrl+0")
-        self.circle_action.triggered.connect(self.setup_circle)
+        self.circle_action.triggered.connect(self.circle_tool_clicked)
         self.circle_action.setCheckable(True)
         iface.building_toolbar.addAction(self.circle_action)
+
+    def circle_tool_clicked(self):
+        if self.circle_action.isChecked():
+            circle_tool.setup_circle(self)
+        else:
+            iface.actionAddFeature().trigger()
 
     def canvas_edit_attribute(self):
         """
@@ -476,6 +479,10 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
                 try:
                     self.bulk_load_layer.geometryChanged.disconnect()
+                except TypeError:
+                    pass
+                try:
+                    self.bulk_load_layer.featureAdded.disconnect()
                 except TypeError:
                     pass
             elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
@@ -510,78 +517,25 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.change_instance = None
 
     @pyqtSlot()
-    def setup_circle(self):
-        """
-            called when draw circle button is clicked
-        """
-        self.points = []
-        # set map tool to new point tool
-        self.circle_tool = PointTool(iface.mapCanvas())
-        iface.mapCanvas().setMapTool(self.circle_tool)
-        # create polyline to track drawing on canvas
-        self.polyline = QgsRubberBand(iface.mapCanvas(), False)
-        self.polyline.setLineStyle(Qt.PenStyle(Qt.DotLine))
-        self.polyline.setColor(QColor(255, 0, 0))
-        self.polyline.setWidth(1)
-        # signals for new map tool
-        self.circle_tool.canvas_clicked.connect(self.draw_circle)
-        self.circle_tool.mouse_moved.connect(self.update_line)
-
-    @pyqtSlot(QgsPoint)
-    def draw_circle(self, point):
-        """
-            called when mapcanvas is clicked
-        """
-        self.points.append(point)
-        self.polyline.addPoint(point, True)
-        self.polyline.setToGeometry(QgsGeometry.fromPolyline(self.points), None)
-        # if two points have been clicked (center and edge)
-        if len(self.points) == 2:
-            # calculate radius of circle
-            radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
-            # number of vertices of circle
-            nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
-            # create point on center location
-            point = QgsGeometry.fromPoint(QgsPoint(self.points[0]))
-            # create buffer of specified distance around point
-            buffer = point.buffer(radius, nodes)
-            # add feature to bulk_load_outlines (triggering featureAdded)
-            self.feature = QgsFeature(self.bulk_load_layer.pendingFields())
-            self.feature.setGeometry(buffer)
-            self.bulk_load_layer.addFeature(self.feature)
-            self.bulk_load_layer.triggerRepaint()
-            # reset points list
-            self.points = []
-
-    @pyqtSlot(QgsPoint)
-    def update_line(self, point):
-        """
-            called when mouse moved on canvas
-        """
-        if len(self.points) == 1:
-            # if the center has been clicked have a line follow the mouse movement
-            line = [self.points[0], point]
-            self.polyline.setToGeometry(QgsGeometry.fromPolyline(line), None)
-
-    @pyqtSlot()
     def alter_relationships_clicked(self):
         """
             When alter relationships button clicked
             open alter relationships frame
         """
+
         if self.change_instance is not None:
             self.edit_dialog.close()
         self.db.close_connection()
         QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
-        dw = self.dockwidget
-        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(AlterRelationships(
-            dw, self.current_dataset))
         for action in iface.building_toolbar.actions():
             if action.objectName() not in ['mActionPan']:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
+        dw = self.dockwidget
+        dw.stk_options.removeWidget(dw.stk_options.currentWidget())
+        dw.new_widget(AlterRelationships(
+            dw, self.current_dataset))
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
@@ -675,8 +629,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.layer_registry.remove_layer(self.historic_layer)
         if self.bulk_load_layer is not None:
             self.layer_registry.remove_layer(self.bulk_load_layer)
-        if self.territorial_auth is not None:
-            self.layer_registry.remove_layer(self.territorial_auth)
         from buildings.gui.menu_frame import MenuFrame
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())

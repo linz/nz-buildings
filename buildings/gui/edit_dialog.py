@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-
+from collections import OrderedDict
 from functools import partial
 import os
 
 from PyQt4 import uic
-from PyQt4.QtGui import QCompleter, QDialog
-from PyQt4.QtCore import Qt, pyqtSlot
+from PyQt4.QtGui import QAbstractItemView, QCompleter, QDialog
+from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
 
-from qgis.utils import iface
+from qgis.utils import iface, isPluginLoaded, plugins
 
 from buildings.gui import bulk_load_changes, production_changes
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
@@ -18,6 +18,9 @@ FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'edit_dia
 
 
 class EditDialog(QDialog, FORM_CLASS):
+
+    edit_geometry_saved = pyqtSignal(list)
+    delete_outline_saved = pyqtSignal(list, str)
 
     def __init__(self, parent_frame, parent=None):
         super(EditDialog, self).__init__(parent)
@@ -33,6 +36,12 @@ class EditDialog(QDialog, FORM_CLASS):
         if self.parent_frame_name == 'BulkLoadFrame':
             self.editing_layer = self.parent_frame.bulk_load_layer
             self.current_dataset = self.parent_frame.current_dataset
+            # Update qa layers
+            self.edit_geometry_saved.connect(self.liqa_on_edit_geometry_saved)
+            self.delete_outline_saved.connect(self.liqa_on_delete_outline_saved)
+        elif self.parent_frame_name == 'AlterRelationships':
+            self.editing_layer = self.parent_frame.lyr_bulk_load
+            self.current_dataset = self.parent_frame.current_dataset
         elif self.parent_frame_name == 'ProductionFrame':
             self.editing_layer = self.parent_frame.building_layer
             self.current_dataset = None
@@ -42,11 +51,12 @@ class EditDialog(QDialog, FORM_CLASS):
         self.init_dialog()
 
         # Bulk loadings & editing fields
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
         self.ids = []
         self.geoms = {}
         self.bulk_load_outline_id = None
+        self.split_geoms = {}
 
         # processing class instances
         self.change_instance = None
@@ -57,31 +67,30 @@ class EditDialog(QDialog, FORM_CLASS):
         self.completer_box()
 
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
+        self.rejected.connect(self.close_dialog)
 
     def init_dialog(self):
-        self.layout_status.show()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
+        self.layout_status.hide()
+        self.layout_capture_method.hide()
+        self.layout_lifecycle_stage.hide()
+        self.layout_general_info.hide()
+        self.layout_end_lifespan.hide()
         self.cmb_status.setDisabled(1)
         self.le_deletion_reason.setDisabled(1)
         self.cmb_capture_method.setDisabled(1)
+        self.cmb_lifecycle_stage.setDisabled(1)
         self.cmb_capture_source.setDisabled(1)
         self.cmb_ta.setDisabled(1)
         self.cmb_town.setDisabled(1)
         self.cmb_suburb.setDisabled(1)
         self.btn_edit_save.setDisabled(1)
         self.btn_edit_reset.setDisabled(1)
-
-    # connect dialog closed signal to exit editing
-    def closeEvent(self, event):
-        self.close_dialog()
-        event.accept()
+        self.btn_end_lifespan.setDisabled(1)
 
     def add_outline(self):
         self.setWindowTitle("Add Outline")
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
-        self.tool = None
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
@@ -100,14 +109,21 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.hide()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.AddBulkLoad(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.AddProduction(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.show()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
 
         # connect signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
@@ -142,14 +158,27 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.show()
-        self.layout_capture_method.show()
-        self.layout_general_info.show()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditAttribute(self)
+            self.layout_status.show()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditAttribute(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.show()
+            self.layout_general_info.show()
+            self.layout_end_lifespan.show()
+
+            try:
+                self.btn_end_lifespan.clicked.disconnect()
+            except Exception:
+                pass
+            self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
 
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
@@ -178,19 +207,27 @@ class EditDialog(QDialog, FORM_CLASS):
             self.btn_edit_reset.clicked.disconnect()
         except TypeError:
             pass
-        self.layout_status.hide()
-        self.layout_capture_method.show()
-        self.layout_general_info.hide()
 
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
             self.change_instance = bulk_load_changes.EditGeometry(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.hide()
+            self.layout_end_lifespan.hide()
         elif self.parent_frame_name == 'ProductionFrame':
             self.change_instance = production_changes.EditGeometry(self)
+            self.layout_status.hide()
+            self.layout_capture_method.show()
+            self.layout_lifecycle_stage.hide()
+            self.layout_general_info.hide()
+            self.layout_end_lifespan.hide()
 
         # set up signals and slots
         self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.editing_layer.geometryChanged.connect(self.change_instance.geometry_changed)
+        self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
 
         self.add_territorial_auth()
 
@@ -199,11 +236,13 @@ class EditDialog(QDialog, FORM_CLASS):
             When 'x' is clicked
         """
         self.change_instance = None
-        self.added_building_ids = []
+        self.added_geoms = OrderedDict()
         self.geom = None
         self.ids = []
         self.building_outline_id = None
         self.geoms = {}
+        self.split_geoms = {}
+        self.added_building_ids = []
 
         self.parent_frame.edit_cancel_clicked()
         for action in iface.building_toolbar.actions():
@@ -249,3 +288,38 @@ class EditDialog(QDialog, FORM_CLASS):
         else:
             self.le_deletion_reason.setDisabled(1)
             self.le_deletion_reason.clear()
+
+    @pyqtSlot(list)
+    def liqa_on_edit_geometry_saved(self, ids):
+        for qa_lyr in self.find_qa_layer():
+            bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
+            for feat_id in ids:
+                if feat_id in bulk_load_ids.values():
+                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
+                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Geometry edited')
+
+    @pyqtSlot(list, str)
+    def liqa_on_delete_outline_saved(self, ids, del_reason):
+        for qa_lyr in self.find_qa_layer():
+            bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
+            for feat_id in ids:
+                if feat_id in bulk_load_ids.values():
+                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
+                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Deleted- {}'.format(del_reason))
+
+    def find_qa_layer(self):
+        for layer in iface.legendInterface().layers():
+            if layer.name().startswith('qa_'):
+                yield layer
+
+    def get_bulk_load_ids(self, qa_layer):
+        bulk_load_ids = {}
+        for feat in qa_layer.getFeatures():
+            bulk_load_ids[feat.id()] = feat['bulk_load_']
+        return bulk_load_ids
+
+    def update_qa_layer_attribute(self, qa_lyr, qa_id, error_status, comment):
+        qa_lyr.startEditing()
+        qa_lyr.changeAttributeValue(qa_id, 1, error_status, True)
+        qa_lyr.changeAttributeValue(qa_id, 2, comment, True)
+        qa_lyr.commitChanges()

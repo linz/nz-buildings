@@ -97,22 +97,56 @@ psql_exit() {
 
 # create test admin_bdys schema
 
+
 if [ "${WITH_TEST_DATA}" = true ]; then
     psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
-    echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/create_test_admin_bdys_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/admin_bdys.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/admin_bdys.sql $ON_ERROR_STOP
     psql -c "DROP SCHEMA IF EXISTS aerial_lds CASCADE;"
-    echo ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/create_test_aerial_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/create_test_aerial_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/aerial_lds.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/aerial_lds.sql $ON_ERROR_STOP
+
+    # Execute schema and table files
+    for s in buildings_common buildings_reference buildings buildings_lds
+    do
+        for file in ${SCRIPTSDIR}/sql/"$s"/01*.sql; do
+            echo ${file} >&2
+            psql -f ${file} $ON_ERROR_STOP
+            psql_exit
+        done
+    done
+
+    echo ${SCRIPTSDIR}/sql/buildings_bulk_load/01-create-schema-and-tables.sql; >&2
+    psql -f ${SCRIPTSDIR}/sql/buildings_bulk_load/01-create-schema-and-tables.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/sql/buildings_bulk_load/03-alter_relationships_create_view.sql; >&2
+    psql -f ${SCRIPTSDIR}/sql/buildings_bulk_load/03-alter_relationships_create_view.sql $ON_ERROR_STOP
 fi
 
 if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     psql -c "DROP SCHEMA IF EXISTS admin_bdys CASCADE;"
-    echo ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/09-create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/create_test_admin_bdys_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/create_test_admin_bdys_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/admin_bdys.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/admin_bdys.sql $ON_ERROR_STOP
     psql -c "DROP SCHEMA IF EXISTS aerial_lds CASCADE;"
-    echo ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/create_test_aerial_schema.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/create_test_aerial_schema.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/aerial_lds.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/aerial_lds.sql $ON_ERROR_STOP
+
+    # Execute schema and table files
+    for s in buildings_common buildings_reference buildings buildings_bulk_load buildings_lds
+    do
+        for file in ${SCRIPTSDIR}/sql/"$s"/*.sql; do
+            echo ${file} >&2
+            psql -f ${file} $ON_ERROR_STOP
+            psql_exit
+        done
+    done
 fi
 
 # Deploy buildings using sqitch and then verify deployment
@@ -123,27 +157,21 @@ cd -
 
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
-    # Execute all files in the test data sql dir
-    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql $ON_ERROR_STOP
-    echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql $ON_ERROR_STOP
-    psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
-    psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
-    psql -c "SELECT buildings_lds.populate_buildings_lds();"
-    echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql $ON_ERROR_STOP
-    psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
-    echo ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql $ON_ERROR_STOP
-    echo ${SCRIPTSDIR}/tests/testdata/05-insert_test_data_complex.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/05-insert_test_data_complex.sql $ON_ERROR_STOP
-    psql -c "SELECT buildings_bulk_load.compare_building_outlines(4);"
-    echo ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql $ON_ERROR_STOP
-    psql -c "SELECT buildings_bulk_load.compare_building_outlines(6);"
+    echo ${SCRIPTSDIR}/tests/testdata/db/buildings_reference.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_reference.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/buildings_common.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_common.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/buildings.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/buildings_bulk_load.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_bulk_load.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql $ON_ERROR_STOP
 
 fi
+
 # Execute files that are needed to test the plugin - test data remains in database
 if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     # Execute all files in the test data sql dir

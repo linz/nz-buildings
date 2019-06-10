@@ -109,11 +109,19 @@ def db_install():
         cursor.execute("CREATE EXTENSION IF NOT EXISTS intarray SCHEMA public;")
         cursor.execute("SET client_min_messages TO WARNING;")
 
-        script = os.path.join(__location__, "db", "tests", "testdata", "09-create_test_admin_bdys_schema.sql")
+        script = os.path.join(__location__, "db", "tests", "testdata", "create_test_admin_bdys_schema.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
 
-        script = os.path.join(__location__, "db", "tests", "testdata", "10-create_test_aerial_schema.sql")
+        script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "admin_bdys.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
+
+        script = os.path.join(__location__, "db", "tests", "testdata", "create_test_aerial_schema.sql")
+        cursor.execute(open(script, "r").read())
+        print("DB_INSTALL: {} Loaded".format(script))
+
+        script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "aerial_lds.sql")
         cursor.execute(open(script, "r").read())
         print("DB_INSTALL: {} Loaded".format(script))
 
@@ -123,39 +131,25 @@ def db_install():
             print("DB_INSTALL: {} Loaded".format(script))
 
         if build == "db":
-            script = os.path.join(__location__, "db", "tests", "testdata", "01-insert_test_data_reference.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings_reference.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "02-insert_test_data_buildings_bulk_load.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings_common.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            cursor.execute("SELECT buildings_bulk_load.compare_building_outlines(1);")
-            cursor.execute("SELECT buildings_bulk_load.load_building_outlines(1);")
-            cursor.execute("SELECT buildings_lds.populate_buildings_lds();")
-
-            script = os.path.join(__location__, "db", "tests", "testdata", "03-insert_test_data_second_dataset.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            cursor.execute("SELECT buildings_bulk_load.compare_building_outlines(2);")
-
-            script = os.path.join(__location__, "db", "tests", "testdata", "04-insert_test_data_functions.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings_bulk_load.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "05-insert_test_data_complex.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings_lds.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
-
-            cursor.execute("SELECT buildings_bulk_load.compare_building_outlines(4);")
-
-            script = os.path.join(__location__, "db", "tests", "testdata", "08-insert_test_data_related_checks.sql")
-            cursor.execute(open(script, "r").read())
-            print("DB_INSTALL: {} Loaded".format(script))
-
-            cursor.execute("SELECT buildings_bulk_load.compare_building_outlines(6);")
 
         else:
             script = os.path.join(__location__, "db", "tests", "testdata", "01-insert_test_data_reference.sql")

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
+
 from PyQt4.QtCore import pyqtSlot
 from PyQt4.QtGui import QToolButton
 from qgis.core import QgsFeatureRequest, QgsGeometry
@@ -240,10 +242,9 @@ class AddBulkLoad(BulkLoadChanges):
         sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
         result = self.edit_dialog.db.execute_no_commit(
             sql, (self.edit_dialog.current_dataset, capture_method_id,
-                  capture_source_id, suburb, town, t_a,
-                  self.edit_dialog.geom)
+                  capture_source_id, suburb, town, t_a, self.edit_dialog.geom)
         )
-        self.edit_dialog.outline_id = result.fetchall()[0][0]
+        outline_id = result.fetchall()[0][0]
 
         # insert into added table
         result = self.edit_dialog.db._execute(
@@ -255,15 +256,17 @@ class AddBulkLoad(BulkLoadChanges):
         if processed_date:
             sql = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s, %s);'
             self.edit_dialog.db.execute_no_commit(
-                sql, (self.edit_dialog.outline_id, 1))
+                sql, (outline_id, 1))
 
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geom = None
-            self.edit_dialog.added_building_ids = []
+            self.edit_dialog.added_geoms = OrderedDict()
         # reset and disable comboboxes
         if self.parent_frame.polyline:
             self.parent_frame.polyline.reset()
+        if self.parent_frame.__class__.__name__ == 'AlterRelationships':
+            self.parent_frame.repaint_view()
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
@@ -277,13 +280,15 @@ class AddBulkLoad(BulkLoadChanges):
         self.editing_layer.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionAddFeature().trigger()
+        if not self.parent_frame.circle_action.isChecked():
+            iface.actionAddFeature().trigger()
+
         # reset and disable comboboxes
         self.disable_UI_functions()
         if self.parent_frame.polyline:
             self.parent_frame.polyline.reset()
         self.edit_dialog.geom = None
-        self.edit_dialog.added_building_ids = []
+        self.edit_dialog.added_geoms = OrderedDict()
 
     @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
@@ -292,12 +297,10 @@ class AddBulkLoad(BulkLoadChanges):
            @param qgsfId:      Id of added feature
            @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if self.edit_dialog.added_building_ids != []:
+        if self.edit_dialog.added_geoms != {}:
             iface.messageBar().pushMessage("WARNING",
                                            "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
                                            level=QgsMessageBar.WARNING, duration=3)
-        if qgsfId not in self.edit_dialog.added_building_ids:
-            self.edit_dialog.added_building_ids.append(qgsfId)
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
         new_feature = next(self.editing_layer.getFeatures(request))
@@ -312,11 +315,19 @@ class AddBulkLoad(BulkLoadChanges):
         wkt = new_geometry.exportToWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
-        self.edit_dialog.geom = result.fetchall()[0][0]
+        geom = result.fetchall()[0][0]
+
+        if qgsfId not in self.edit_dialog.added_geoms.keys():
+            self.edit_dialog.added_geoms[qgsfId] = geom
+            self.edit_dialog.geom = geom
+
         # enable & populate comboboxes
         self.enable_UI_functions()
         self.populate_edit_comboboxes()
         self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
 
     @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
@@ -325,13 +336,16 @@ class AddBulkLoad(BulkLoadChanges):
             @param qgsfId:      Id of deleted feature
             @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if qgsfId in self.edit_dialog.added_building_ids:
-            self.edit_dialog.added_building_ids.remove(qgsfId)
+        if qgsfId in self.edit_dialog.added_geoms.keys():
+            del self.edit_dialog.added_geoms[qgsfId]
             if self.parent_frame.polyline is not None:
                 self.parent_frame.polyline.reset()
-            if self.edit_dialog.added_building_ids == []:
+            if self.edit_dialog.added_geoms == {}:
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
+            else:
+                self.edit_dialog.geom = self.edit_dialog.added_geoms.values()[-1]
+                self.select_comboboxes_value()
 
     @pyqtSlot(int, QgsGeometry)
     def creator_geometry_changed(self, qgsfId, geom):
@@ -342,7 +356,12 @@ class AddBulkLoad(BulkLoadChanges):
            @param geom:        geometry of added feature
            @type  geom:        qgis.core.QgsGeometry
         """
-        if qgsfId in self.edit_dialog.added_building_ids:
+        if qgsfId in self.edit_dialog.added_geoms.keys():
+            area = geom.area()
+            if area < 10:
+                iface.messageBar().pushMessage("INFO",
+                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
+                                               level=QgsMessageBar.INFO, duration=3)
             wkt = geom.exportToWkt()
             if not wkt:
                 self.disable_UI_functions()
@@ -350,12 +369,10 @@ class AddBulkLoad(BulkLoadChanges):
                 return
             sql = general_select.convert_geometry
             result = self.edit_dialog.db._execute(sql, (wkt,))
-            self.edit_dialog.geom = result.fetchall()[0][0]
-            area = geom.area()
-            if area < 10:
-                iface.messageBar().pushMessage("INFO",
-                                               "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                                               level=QgsMessageBar.INFO, duration=3)
+            geom = result.fetchall()[0][0]
+            self.edit_dialog.added_geoms[qgsfId] = geom
+            if qgsfId == self.edit_dialog.added_geoms.keys()[-1]:
+                self.edit_dialog.geom = geom
         else:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
@@ -464,6 +481,8 @@ class EditAttribute(BulkLoadChanges):
             ls_relationships = self.remove_compared_outlines()
             if len(ls_relationships['matched']) == 0 and len(ls_relationships['related']) == 0:
                 if len(self.edit_dialog.ids) > 0:
+                    # Send signal to LIQA through edit dialog
+                    self.edit_dialog.delete_outline_saved.emit(self.edit_dialog.ids, self.edit_dialog.description_del)
                     for i in self.edit_dialog.ids:
                         # check current status of building
                         sql = bulk_load_select.bulk_load_status_id_by_outline_id
@@ -770,12 +789,14 @@ class EditGeometry(BulkLoadChanges):
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
                 'mActionUndo', 'mActionRedo',
-                'mActionReshapeFeatures', 'mActionOffsetCurve'
+                'mActionReshapeFeatures', 'mActionOffsetCurve',
+                'mActionSplitFeatures'
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
         self.disable_UI_functions()
+        self.new_attrs = {}
 
     @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
@@ -785,6 +806,32 @@ class EditGeometry(BulkLoadChanges):
         self.edit_dialog.db.open_cursor()
 
         _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
+
+        self.edit_dialog.edit_geometry_saved.emit(self.edit_dialog.geoms.keys())
+
+        if len(self.edit_dialog.split_geoms) > 0:
+
+            # insert into bulk_load_outlines table
+            for qgsfId, geom in self.edit_dialog.split_geoms.items():
+                attributes = self.new_attrs[qgsfId]
+                if not attributes[7]:
+                    attributes[7] = None
+                sql = 'SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, NULL, 2, %s, %s, %s, %s, %s, %s);'
+                result = self.edit_dialog.db.execute_no_commit(
+                    sql, (self.edit_dialog.current_dataset, capture_method_id, attributes[5], attributes[6], attributes[7], attributes[8], geom))
+                self.edit_dialog.outline_id = result.fetchall()[0][0]
+
+                # insert into added table
+                result = self.edit_dialog.db._execute(
+                    bulk_load_select.supplied_dataset_processed_date_by_dataset_id, (
+                        self.edit_dialog.current_dataset, )
+                )
+                processed_date = result.fetchall()[0][0]
+
+                if processed_date:
+                    sql = 'SELECT buildings_bulk_load.added_insert_bulk_load_outlines(%s, %s);'
+                    self.edit_dialog.db.execute_no_commit(
+                        sql, (self.edit_dialog.outline_id, 1))
 
         for key in self.edit_dialog.geoms:
             sql = 'SELECT buildings_bulk_load.bulk_load_outlines_update_shape(%s, %s);'
@@ -796,11 +843,17 @@ class EditGeometry(BulkLoadChanges):
                 'SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)',
                 (key, capture_method_id)
             )
+        if self.parent_frame.__class__.__name__ == 'AlterRelationships':
+            self.parent_frame.repaint_view()
+
         self.disable_UI_functions()
 
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
+            self.edit_dialog.split_geoms = {}
+            self.new_attrs = {}
+            self.edit_dialog.editing_layer.triggerRepaint()
 
     @pyqtSlot()
     def edit_reset_clicked(self):
@@ -811,6 +864,8 @@ class EditGeometry(BulkLoadChanges):
         iface.actionCancelEdits().trigger()
         self.editing_layer.geometryChanged.connect(self.geometry_changed)
         self.edit_dialog.geoms = {}
+        self.edit_dialog.split_geoms = {}
+        self.new_attrs = {}
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionNodeTool().trigger()
@@ -828,6 +883,16 @@ class EditGeometry(BulkLoadChanges):
            @type  geom:        qgis.core.QgsGeometry
         """
         # get new feature geom and convert to correct format
+        result = self.edit_dialog.db._execute(bulk_load_select.bulk_load_status_id_by_outline_id, (qgsfId,))
+        result = result.fetchone()
+        if result is not None:
+            if result[0] == 3:
+                iface.messageBar().pushMessage("INFO",
+                                               "You cannot edit the geometry of a removed outline.",
+                                               level=QgsMessageBar.INFO, duration=3)
+                self.disable_UI_functions()
+                self.edit_dialog.btn_edit_reset.setEnabled(1)
+                return
         wkt = geom.exportToWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
@@ -841,16 +906,64 @@ class EditGeometry(BulkLoadChanges):
             iface.messageBar().pushMessage("INFO",
                                            "You've edited the outline to less than 10sqm, are you sure this is correct?",
                                            level=QgsMessageBar.INFO, duration=3)
-        result = result.fetchall()[0][0]
-        if self.edit_dialog.geom == result:
-            if qgsfId in self.edit_dialog.geoms.keys():
-                del self.edit_dialog.geoms[qgsfId]
+        result = result.fetchall()
+        if len(result) == 0:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n --- CANNOT SPLIT/EDIT A NEWLY ADDED FEATURE ---'
+                '\n\nYou\'ve tried to split/edit an outline that has just been created. '
+                'You must first save this new outline to the db before splitting/editing it again.'
+            )
+            self.error_dialog.show()
             self.disable_UI_functions()
+            self.edit_dialog.btn_edit_reset.setEnabled(1)
+            return
         else:
-            self.edit_dialog.geoms[qgsfId] = self.edit_dialog.geom
-            self.enable_UI_functions()
-            self.populate_edit_comboboxes()
-            self.select_comboboxes_value()
+            result = result[0][0]
+            if self.edit_dialog.geom == result:
+                if qgsfId in self.edit_dialog.geoms.keys():
+                    del self.edit_dialog.geoms[qgsfId]
+                self.disable_UI_functions()
+            else:
+                self.edit_dialog.geoms[qgsfId] = self.edit_dialog.geom
+                self.enable_UI_functions()
+                self.populate_edit_comboboxes()
+                self.select_comboboxes_value()
+
+        self.edit_dialog.activateWindow()
+        self.edit_dialog.btn_edit_save.setDefault(True)
+
+    @pyqtSlot(int)
+    def creator_feature_added(self, qgsfId):
+        # get new feature geom
+        request = QgsFeatureRequest().setFilterFid(qgsfId)
+        new_feature = next(self.editing_layer.getFeatures(request))
+        self.new_attrs[qgsfId] = new_feature.attributes()
+        if not self.new_attrs[qgsfId][5]:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                '\n -------------------- CANNOT ADD NEW FEATURE ------'
+                '-------------- \n\nYou\'ve added a new feature, '
+                'this can\'t be done in edit geometry, '
+                'please switch to add outline.'
+            )
+            self.error_dialog.show()
+            self.disable_UI_functions()
+            self.edit_dialog.btn_edit_reset.setEnabled(1)
+            return
+        new_geometry = new_feature.geometry()
+        # calculate area
+        area = new_geometry.area()
+        if area < 10:
+            iface.messageBar().pushMessage("INFO",
+                                           "You've created an outline that is less than 10sqm, are you sure this is correct?",
+                                           level=QgsMessageBar.INFO, duration=3)
+
+        # convert to correct format
+        wkt = new_geometry.exportToWkt()
+        sql = general_select.convert_geometry
+        result = self.edit_dialog.db._execute(sql, (wkt,))
+        self.edit_dialog.split_geoms[qgsfId] = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
         """
