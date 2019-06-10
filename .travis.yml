@@ -19,6 +19,8 @@ jobs:
 
   - stage: database
     env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
+    language: python
+    python: 2.7
     addons:
       postgresql: 9.4
       apt:
@@ -30,18 +32,22 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+    
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
+    language: python
+    python: 2.7
     addons:
       postgresql: 9.5
       apt:
@@ -53,18 +59,22 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+    
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
+    language: python
+    python: 2.7
     addons:
       postgresql: 9.5
       apt:
@@ -76,18 +86,22 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+    
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
+    language: python
+    python: 2.7
     addons:
       postgresql: 9.6
       apt:
@@ -99,18 +113,22 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
+    language: python
+    python: 2.7
     addons:
       postgresql: 9.6
       apt:
@@ -122,18 +140,22 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
+    language: python
+    python: 2.7
     addons:
       postgresql: 10
       apt:
@@ -145,12 +167,14 @@ jobs:
     - sudo apt-get install libtap-parser-sourcehandler-pgtap-perl
     - sudo apt-get install -y postgresql-${PGSQL}-postgis-${PGIS}
 
+    install:
+    - pip install psycopg2
+    
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
     - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
-    - sudo make install
-    - nz-buildings-load nz_buildings_travis_db --with-test-data
+    - python install.py
 
     script:
     - pg_prove -U travis -d nz_buildings_travis_db db/tests/
