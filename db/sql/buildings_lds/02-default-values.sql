@@ -1,1 +1,0 @@
--- There are no default values for the building_lds schema

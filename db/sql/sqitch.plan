@@ -1,0 +1,47 @@
+%syntax-version=1.0.0
+%project=nz-buildings
+%uri=https://github.com/linz/nz-buildings/
+
+buildings_reference/schema_and_tables 2019-05-22T23:46:12Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_reference schema and tables.
+buildings_common/schema_and_tables 2019-05-23T00:14:15Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_common schema and tables.
+buildings/schema_and_tables 2019-05-23T00:15:56Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings schema and tables.
+buildings_bulk_load/schema_and_tables 2019-05-23T01:40:32Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_bulk_load schema and tables.
+buildings_lds/schema_and_tables 2019-05-23T01:43:15Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings_lds schema and tables.
+buildings_common/default_values 2019-05-23T01:50:00Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings_common schema.
+buildings/default_values 2019-05-23T01:52:52Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings schema.
+buildings_bulk_load/default_values 2019-05-23T01:54:58Z Daniel Silk <dsilk@linz.govt.nz> # Add default values for buildings_bulk_load schema.
+buildings_bulk_load/create_view_alter_relationships 2019-05-23T02:13:43Z Daniel Silk <dsilk@linz.govt.nz> # Create views to support altering relationships during bulk load.
+buildings_reference/functions/canal_polygons 2019-05-23T02:18:07Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with canal polygons.
+buildings_reference/functions/capture_source_area 2019-05-23T02:21:34Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with capture source areas.
+buildings_reference/functions/lagoon_polygons 2019-05-23T02:26:05Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with lagoon polygons.
+buildings_reference/functions/lake_polygons 2019-05-23T02:27:19Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with lake polygons.
+buildings_reference/functions/pond_polygons 2019-05-23T02:29:16Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with pond polygons.
+buildings_reference/functions/river_polygons 2019-05-23T02:37:45Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with river polygons.
+buildings_reference/functions/swamp_polygons 2019-05-23T02:39:35Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with swamp polygons.
+buildings_reference/functions/suburb_locality 2019-05-23T19:32:18Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with suburbs and localities.
+buildings_reference/functions/town_city 2019-05-24T03:00:08Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with towns and cities.
+buildings_reference/functions/territorial_authority 2019-05-24T03:04:06Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with territorial authorities.
+buildings_reference/functions/reference_update_log 2019-05-24T03:08:23Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with reference update log.
+buildings_common/functions/capture_method 2019-05-24T03:12:48Z Daniel Silk <dsilk@linz.govt.nz> # Add captuer_method functions.
+buildings_common/functions/capture_source_group 2019-05-24T03:20:24Z Daniel Silk <dsilk@linz.govt.nz> # Add capture_source_group functions.
+buildings_common/functions/capture_source 2019-05-24T03:22:50Z Daniel Silk <dsilk@linz.govt.nz> # Add capture_source functions.
+buildings/functions/lifecycle_stage 2019-05-24T03:24:13Z Daniel Silk <dsilk@linz.govt.nz> # Add lifecycle_stage functions.
+buildings/functions/buildings 2019-05-24T03:25:42Z Daniel Silk <dsilk@linz.govt.nz> # Add buildings functions.
+buildings/functions/building_outlines 2019-05-24T03:26:57Z Daniel Silk <dsilk@linz.govt.nz> # Add building_outlines functions.
+buildings/functions/building_name 2019-05-24T03:49:58Z Daniel Silk <dsilk@linz.govt.nz> # Add building_name functions.
+buildings/functions/building_use 2019-05-24T04:23:08Z Daniel Silk <dsilk@linz.govt.nz> # Add building_use functions.
+buildings/functions/lifecycle 2019-05-24T04:25:34Z Daniel Silk <dsilk@linz.govt.nz> # Add lifecycle functions.
+buildings_bulk_load/functions/organisation 2019-05-24T04:27:39Z Daniel Silk <dsilk@linz.govt.nz> # Add organisation functions.
+buildings_bulk_load/functions/supplied_datasets 2019-05-24T04:30:37Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_datasets functions.
+buildings_bulk_load/functions/bulk_load_outlines 2019-05-24T04:33:54Z Daniel Silk <dsilk@linz.govt.nz> # Add bulk_load_outlines functions.
+buildings_bulk_load/functions/existing_subset_extracts 2019-05-24T04:40:29Z Daniel Silk <dsilk@linz.govt.nz> # Add existing_subset_extracts functions.
+buildings_bulk_load/functions/added 2019-05-24T04:43:10Z Daniel Silk <dsilk@linz.govt.nz> # Add added functions.
+buildings_bulk_load/functions/removed 2019-05-24T04:45:51Z Daniel Silk <dsilk@linz.govt.nz> # Add removed functions.
+buildings_bulk_load/functions/related 2019-05-24T04:51:15Z Daniel Silk <dsilk@linz.govt.nz> # Add related functions.
+buildings_bulk_load/functions/matched 2019-05-24T05:04:34Z Daniel Silk <dsilk@linz.govt.nz> # Add matched functions.
+buildings_bulk_load/functions/transferred 2019-05-24T05:07:23Z Daniel Silk <dsilk@linz.govt.nz> # Add transferred functions.
+buildings_bulk_load/functions/deletion_description 2019-05-24T05:10:12Z Daniel Silk <dsilk@linz.govt.nz> # Add deletion_description functions.
+buildings_bulk_load/functions/supplied_outlines 2019-05-24T05:13:32Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_outlines functions.
+buildings_bulk_load/functions/compare 2019-05-24T05:15:36Z Daniel Silk <dsilk@linz.govt.nz> # Add functions to support comparisons between building outlines.
+buildings_bulk_load/functions/load_to_production 2019-05-24T05:18:24Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for loading building outline bulk load data into production.
+buildings_lds/functions/populate_buildings_lds 2019-05-24T05:21:05Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for populating the LDS schema.
