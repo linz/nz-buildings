@@ -26,7 +26,7 @@ SITE_URL = "http://nz-buildings.readthedocs.io/en/latest/"
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../sql'))
+sys.path.insert(0, os.path.abspath('../../sql/deploy'))
 
 # -- General configuration ------------------------------------------------
 
@@ -594,7 +594,7 @@ def get_filenames():
     Read the path and file names of all of the SQL schema files in the /SQL folder
     including subfolders
     """
-    filenames = glob2.glob("../../sql/**/*")
+    filenames = glob2.glob("../../sql/deploy/**/*")
     schema_filenames = list(filenames)
     for name in filenames:
         if "schema" not in name:
