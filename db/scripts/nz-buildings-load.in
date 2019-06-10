@@ -44,9 +44,9 @@ if test -n "${BUILDINGSCHEMA_SQLDIR}"; then
     SCRIPTSDIR=${BUILDINGSCHEMA_SQLDIR}
 fi
 
-if test ! -f "${SCRIPTSDIR}/sql/buildings/01-create-schema-and-tables.sql"; then
+if test ! -f "${SCRIPTSDIR}/sql/deploy/buildings/schema_and_tables.sql"; then
     cat >&2 <<EOF
-Cannot find /sql/buildings/01-create-schema-and-tables.sql in ${SCRIPTSDIR}
+Cannot find ${SCRIPTSDIR}/sql/deploy/buildings/schema_and_tables.sql
 Please set BUILDINGSCHEMA_SQLDIR environment variable
 EOF
     exit 1
@@ -81,14 +81,8 @@ done
 
 export PGDATABASE=$DB_NAME
 
-psql -c "DROP SCHEMA IF EXISTS buildings_lds CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings_bulk_load CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings CASCADE;"
-psql -c "DROP SCHEMA IF EXISTS buildings_common CASCADE"
-psql -c "DROP SCHEMA IF EXISTS buildings_reference CASCADE;"
-
 psql -c "CREATE EXTENSION IF NOT EXISTS postgis SCHEMA public;"
-# intarray is used in compare_buildings.sql for array sorting
+# intarray is used in compare.sql for array sorting
 psql -c "CREATE EXTENSION IF NOT EXISTS intarray SCHEMA public;"
 psql -c "SET client_min_messages TO WARNING;"
 
@@ -121,54 +115,32 @@ if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/10-create_test_aerial_schema.sql $ON_ERROR_STOP
 fi
 
-# Execute schema and table files
-
-for s in buildings_common buildings_reference buildings buildings_bulk_load buildings_lds
-do
-    for file in ${SCRIPTSDIR}/sql/"$s"/*.sql; do
-        echo ${file} >&2
-        psql -f ${file} $ON_ERROR_STOP
-        psql_exit
-    done
-done
-
-# execute function files
-
-for s in buildings_common buildings_reference buildings buildings_bulk_load buildings_lds
-do
-    for file in ${SCRIPTSDIR}/sql/"$s"/functions/*.sql; do
-        echo ${file} >&2
-        psql -f ${file} $ON_ERROR_STOP
-        psql_exit
-    done
-done
+# Deploy buildings using sqitch and then verify deployment
+cd ${SCRIPTSDIR}/sql
+../../sqitch deploy
+../../sqitch verify
+cd -
 
 # Execute files that create test data - test data remains in database
 if [ "${WITH_TEST_DATA}" = true ]; then
     # Execute all files in the test data sql dir
     echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql $ON_ERROR_STOP
-    psql_exit
     echo ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/02-insert_test_data_buildings_bulk_load.sql $ON_ERROR_STOP
-    psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(1);"
     psql -c "SELECT buildings_bulk_load.load_building_outlines(1);"
     psql -c "SELECT buildings_lds.populate_buildings_lds();"
     echo ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/03-insert_test_data_second_dataset.sql $ON_ERROR_STOP
-    psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
     echo ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/04-insert_test_data_functions.sql $ON_ERROR_STOP
-    psql_exit
     echo ${SCRIPTSDIR}/tests/testdata/05-insert_test_data_complex.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/05-insert_test_data_complex.sql $ON_ERROR_STOP
-    psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(4);"
     echo ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/08-insert_test_data_related_checks.sql $ON_ERROR_STOP
-    psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(6);"
 
 fi
@@ -177,10 +149,8 @@ if [ "${WITH_PLUGIN_SETUP}" = true ]; then
     # Execute all files in the test data sql dir
     echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql $ON_ERROR_STOP
-    psql_exit
     echo ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql $ON_ERROR_STOP
-    psql_exit
     psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
 
 fi
