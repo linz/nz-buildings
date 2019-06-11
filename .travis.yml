@@ -38,11 +38,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
@@ -65,11 +65,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
@@ -92,11 +92,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
@@ -119,11 +119,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
@@ -146,11 +146,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: database
     env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
@@ -173,11 +173,11 @@ jobs:
     before_script:
     - psql -c "ALTER USER travis WITH PASSWORD 'travis';"
     - export PGPASSWORD=travis
-    - psql -U travis -c 'CREATE DATABASE nz_buildings_travis_db;'
+    - psql -U travis -c 'CREATE DATABASE nz-buildings-pgtap-db;'
     - python install.py
 
     script:
-    - pg_prove -U travis -d nz_buildings_travis_db db/tests/
+    - pg_prove -U travis -d nz-buildings-pgtap-db db/tests/
 
   - stage: plugin
     env: BUILD=qgis_plugin PLUGIN_NAME=buildings DOCKER_COMPOSE_VERSION=1.7.1 QGIS_VERSION_TAG=master_2

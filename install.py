@@ -18,7 +18,7 @@ build = os.getenv("BUILD")
 if build == "db":
     _host = "localhost"
     _port = os.getenv("PGPORT")
-    _dbname = "nz_buildings_travis_db"
+    _dbname = "nz-buildings-pgtap-db"
     _user = "travis"
     _pw = "travis"
 else:
@@ -148,6 +148,10 @@ def db_install():
             print("DB_INSTALL: {} Loaded".format(script))
 
             script = os.path.join(__location__, "db", "tests", "testdata", "db", "buildings_lds.sql")
+            cursor.execute(open(script, "r").read())
+            print("DB_INSTALL: {} Loaded".format(script))
+
+            script = os.path.join(__location__, "db", "tests", "testdata", "update_sequences_pgtap_db.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
