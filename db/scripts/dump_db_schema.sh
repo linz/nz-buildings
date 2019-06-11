@@ -5,9 +5,9 @@ export SCRIPTSDIR=/usr/share/nz-buildings/
 # dump all the schema
 pg_dump --column-inserts --data-only --schema=admin_bdys nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/admin_bdys.sql
 pg_dump --column-inserts --data-only --schema=aerial_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/aerial_lds.sql
-pg_dump --column-inserts --data-only --schema=buildings nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings.sql
-pg_dump --column-inserts --data-only --schema=buildings_common nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_common.sql
-pg_dump --column-inserts --data-only --schema=buildings_bulk_load nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_bulk_load.sql
+pg_dump --column-inserts --data-only --schema=buildings --exclude-table-data=buildings.lifecycle_stage --exclude-table-data=buildings.use nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings.sql
+pg_dump --column-inserts --data-only --schema=buildings_common --exclude-table-data=buildings_common.capture_method --exclude-table-data=buildings_common.capture_source_group nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_common.sql
+pg_dump --column-inserts --data-only --schema=buildings_bulk_load --exclude-table-data=buildings_bulk_load.organisation --exclude-table-data=buildings_bulk_load.bulk_load_status --exclude-table-data=buildings_bulk_load.qa_status nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_bulk_load.sql
 pg_dump --column-inserts --data-only --schema=buildings_reference nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_reference.sql
 pg_dump --column-inserts --data-only --schema=buildings_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_lds.sql
 
