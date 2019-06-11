@@ -33,7 +33,7 @@ db/scripts/nz-buildings-load: db/scripts/nz-buildings-load.in
 # Allow nz-buildings-load to be executed from anywhere
 install: $(SCRIPTS_built)
 	mkdir -p ${datadir}/sql
-	cd db/sql && ../../sqitch bundle --dest-dir /usr/share/nz-buildings/sql && cd -
+	cd db/sql && sqitch bundle --dest-dir /usr/share/nz-buildings/sql && cd -
 	mkdir -p ${datadir}/tests/testdata
 	cp db/tests/testdata/*.sql ${datadir}/tests/testdata
 	mkdir -p ${datadir}/tests/testdata/db
