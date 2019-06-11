@@ -45,3 +45,4 @@ buildings_bulk_load/functions/supplied_outlines 2019-05-24T05:13:32Z Daniel Silk
 buildings_bulk_load/functions/compare 2019-05-24T05:15:36Z Daniel Silk <dsilk@linz.govt.nz> # Add functions to support comparisons between building outlines.
 buildings_bulk_load/functions/load_to_production 2019-05-24T05:18:24Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for loading building outline bulk load data into production.
 buildings_lds/functions/populate_buildings_lds 2019-05-24T05:21:05Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for populating the LDS schema.
+@v1.4.0-dev1 2019-06-11T23:42:21Z Daniel Silk <dsilk@linz.govt.nz> # Tag v1.4.0-dev1.
