@@ -124,15 +124,6 @@ INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALU
 -- buildings.building_name
 
 
--- buildings.lifecycle_stage
-
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (1, 'Current');
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (2, 'Disused');
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (3, 'Replaced');
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (4, 'Under Construction');
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (5, 'Unknown');
-INSERT INTO buildings.lifecycle_stage (lifecycle_stage_id, value) VALUES (6, 'Test Lifecycle Stage');
-
 -- buildings.building_outlines
 
 INSERT INTO buildings.building_outlines (building_outline_id, building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, end_lifespan, shape) VALUES (1004, 10004, 5, 1001, 1, 101, 1001, 10001, '2017-01-01 09:00:00', '2019-05-30 14:50:00.066082', '01030000209108000001000000050000005DC36E06CCA83C419A9BB14021315541E5C6C1B5D1A83C41999BB14021315541FEC80ACDD1A83C4187E4447D1D315541D1459921CCA83C415924547B1D3155415DC36E06CCA83C419A9BB14021315541');
@@ -258,46 +249,6 @@ INSERT INTO buildings.building_outlines (building_outline_id, building_id, captu
 INSERT INTO buildings.building_outlines (building_outline_id, building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, end_lifespan, shape) VALUES (1804, 18004, 5, 1001, 1, 104, 1004, 10002, '2018-02-02 09:00:00', NULL, '0103000020910800000100000005000000E98381D8F8AA3C41D5454CAF233155414D22583BFCAA3C41502FCC1E24315541FA7EB05905AB3C41A0968BB01F31554195E0D9F601AB3C4125AD0B411F315541E98381D8F8AA3C41D5454CAF23315541');
 INSERT INTO buildings.building_outlines (building_outline_id, building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, end_lifespan, shape) VALUES (1805, 18005, 5, 1001, 1, 104, 1004, 10002, '2018-02-02 09:00:00', NULL, '010300002091080000010000000500000070C9E46B0DAB3C4137D4856322315541D0EAC83211AB3C41C79978D722315541F0A829AF13AB3C4131B0CC8B213155418F8745E80FAB3C41A1EAD9172131554170C9E46B0DAB3C4137D4856322315541');
 INSERT INTO buildings.building_outlines (building_outline_id, building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, end_lifespan, shape) VALUES (1806, 18006, 5, 1001, 1, 104, 1004, 10002, '2018-02-02 09:00:00', NULL, '01030000209108000001000000050000003E34AD6B01AB3C41CB4ED2131F3155419411572906AB3C419A016DAD1F315541C6EDCAA00BAB3C418C8E56FA1C3155416C1021E306AB3C41BDDBBB601C3155413E34AD6B01AB3C41CB4ED2131F315541');
-
--- buildings.use
-
-INSERT INTO buildings.use (use_id, value) VALUES (1, 'Abattoir');
-INSERT INTO buildings.use (use_id, value) VALUES (2, 'Camp');
-INSERT INTO buildings.use (use_id, value) VALUES (3, 'Cement Works');
-INSERT INTO buildings.use (use_id, value) VALUES (4, 'Church');
-INSERT INTO buildings.use (use_id, value) VALUES (5, 'Energy Facility');
-INSERT INTO buildings.use (use_id, value) VALUES (6, 'Factory');
-INSERT INTO buildings.use (use_id, value) VALUES (7, 'Fertilizer Works');
-INSERT INTO buildings.use (use_id, value) VALUES (8, 'Fire Lookout');
-INSERT INTO buildings.use (use_id, value) VALUES (9, 'Forest Headquarters');
-INSERT INTO buildings.use (use_id, value) VALUES (10, 'Gas Compound');
-INSERT INTO buildings.use (use_id, value) VALUES (11, 'Greenhouse');
-INSERT INTO buildings.use (use_id, value) VALUES (12, 'Gun Club');
-INSERT INTO buildings.use (use_id, value) VALUES (13, 'Gun Emplacement');
-INSERT INTO buildings.use (use_id, value) VALUES (14, 'Hall');
-INSERT INTO buildings.use (use_id, value) VALUES (15, 'Homestead');
-INSERT INTO buildings.use (use_id, value) VALUES (16, 'Hospital');
-INSERT INTO buildings.use (use_id, value) VALUES (17, 'Hut');
-INSERT INTO buildings.use (use_id, value) VALUES (18, 'Lodge');
-INSERT INTO buildings.use (use_id, value) VALUES (19, 'Marae');
-INSERT INTO buildings.use (use_id, value) VALUES (20, 'Methanol Plant');
-INSERT INTO buildings.use (use_id, value) VALUES (21, 'Mill');
-INSERT INTO buildings.use (use_id, value) VALUES (22, 'Natural Gas Plant');
-INSERT INTO buildings.use (use_id, value) VALUES (23, 'Observatory');
-INSERT INTO buildings.use (use_id, value) VALUES (24, 'Power Generation');
-INSERT INTO buildings.use (use_id, value) VALUES (25, 'Prison');
-INSERT INTO buildings.use (use_id, value) VALUES (26, 'Salt Works');
-INSERT INTO buildings.use (use_id, value) VALUES (27, 'School');
-INSERT INTO buildings.use (use_id, value) VALUES (28, 'Shelter');
-INSERT INTO buildings.use (use_id, value) VALUES (29, 'Shingle Works');
-INSERT INTO buildings.use (use_id, value) VALUES (30, 'Silo');
-INSERT INTO buildings.use (use_id, value) VALUES (31, 'Stamping Battery');
-INSERT INTO buildings.use (use_id, value) VALUES (32, 'Substation');
-INSERT INTO buildings.use (use_id, value) VALUES (33, 'Surf Club');
-INSERT INTO buildings.use (use_id, value) VALUES (34, 'Synthetic Fuel Plant');
-INSERT INTO buildings.use (use_id, value) VALUES (35, 'University');
-INSERT INTO buildings.use (use_id, value) VALUES (36, 'Visitor Centre');
-INSERT INTO buildings.use (use_id, value) VALUES (37, 'Water Treatment Plant');
 
 -- buildings.building_use
 

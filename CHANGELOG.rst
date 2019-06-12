@@ -9,8 +9,32 @@ Unreleased
 
 Added
 -----
-* buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
+
+* Buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
 * Update the error status and comment in the QA layer if bulk load outline edited (edit-geometry and delete-outline only)
+
+Changed
+-------
+
+* Database migrations now managed by sqitch
+* Database schema split into deploy/; revert/ and verify/ added
+* Database test data is now stored in schema specific sql files
+* Any edits made to the database outside of the code can be automatically added to/changed in the code using make dump_db_schema
+* Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
+* Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
+* Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
+* Updated URL links
+
+Fixed
+-----
+
+* Warning messages for when multiple buildings are added at once
+* Users can correctly remove added outlines or revert changes when adding multiple outlines with 'add outline' functionality.
+* Remove functionality repopulate_error_attribute_table to LIQA plugin.
+
+1.4.0
+==========
+10-05-2019
 
 Changed
 -------
@@ -19,21 +43,12 @@ Changed
 * Account for UNIQUE constraints for data dictionary column parsing
 * Updated metadata and data dictionary text and images in preparation for go-live.
 * Published views of data adjusted based on user feedback.
-* Updated URL links
-* Changed editing functionality in bulk load to work through the buildings toolbar and use a popup dialog rather than be held in the frame
-* Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
-* Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
-* Database test data is now stored in schema specific sql files
-* Any edits made to the database outside of the code can be automatically added to/changed in the code using make dump_db_schema
 
 Fixed
 -----
 
 * Compare new dataset with previous dataset INCLUDING removed outlines that have "not removed" flag.
 * Use the current time as the begin_lifespan of building outlines when creating them rather than the date of bulk loading
-* Warning messages for when multiple buildings are added at once
-* Users can correctly remove added outlines or revert changes when adding multiple outlines with 'add outline' functionality.
-* Remove functionality repopulate_error_attribute_table to LIQA plugin.
 
 1.3.0
 ==========

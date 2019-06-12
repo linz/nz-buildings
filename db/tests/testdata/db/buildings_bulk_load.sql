@@ -1,15 +1,4 @@
 
--- buildings_bulk_load.bulk_load_status
-
-INSERT INTO buildings_bulk_load.bulk_load_status (bulk_load_status_id, value) VALUES (1, 'Supplied');
-INSERT INTO buildings_bulk_load.bulk_load_status (bulk_load_status_id, value) VALUES (2, 'Added During QA');
-INSERT INTO buildings_bulk_load.bulk_load_status (bulk_load_status_id, value) VALUES (3, 'Deleted During QA');
-
--- buildings_bulk_load.organisation
-
-INSERT INTO buildings_bulk_load.organisation (organisation_id, value) VALUES (1, 'Ecopia');
-INSERT INTO buildings_bulk_load.organisation (organisation_id, value) VALUES (2, 'Test Organisation');
-
 -- buildings_bulk_load.supplied_datasets
 
 INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (1, 'Test Data', 1, '2019-05-30 14:49:59.962246', '2019-05-30 14:50:00.066082');
@@ -119,14 +108,6 @@ INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, suppli
 INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES (2094, 6, NULL, 1, 5, 1001, 104, 1004, 10002, '2019-05-30 14:50:01.504054', '010300002091080000010000000700000095425EC402AB3C419988B44F243155415910BF8F0BAB3C412D5658D01F315541AAC2309A0FAB3C4109E653BF1D31554140A5DF3B0AAB3C416A535E171D3155410555BE0105AB3C41210DB1C31F315541B3380D66FDAA3C4157F2BEA72331554195425EC402AB3C419988B44F24315541');
 INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES (2095, 6, NULL, 1, 5, 1001, 104, 1004, 10002, '2019-05-30 14:50:01.504054', '0103000020910800000100000005000000E9CCD47619AB3C414272E374203155413F928CEB28AB3C412B6FE86419315541092C4C501DAB3C41C85F80CE173155415E9994DB0DAB3C41215B7BDE1E315541E9CCD47619AB3C414272E37420315541');
 INSERT INTO buildings_bulk_load.bulk_load_outlines (bulk_load_outline_id, supplied_dataset_id, external_outline_id, bulk_load_status_id, capture_method_id, capture_source_id, suburb_locality_id, town_city_id, territorial_authority_id, begin_lifespan, shape) VALUES (2096, 6, NULL, 1, 5, 1001, 104, 1004, 10002, '2019-05-30 14:50:01.504054', '01030000209108000001000000090000005910BF8F0BAB3C412D5658D01F31554195425EC402AB3C419988B44F24315541EFD8D78907AB3C41763DFCE424315541A4D8A7890CAB3C41377A7C5622315541A2B646C610AB3C41037B0ADB2231554186078DEC12AB3C412F11A1C1213155412FBC426A0FAB3C41F1B1D853213155411C488D0F11AB3C41D5A9657C203155415910BF8F0BAB3C412D5658D01F315541');
-
--- buildings_bulk_load.qa_status
-
-INSERT INTO buildings_bulk_load.qa_status (qa_status_id, value) VALUES (1, 'Not Checked');
-INSERT INTO buildings_bulk_load.qa_status (qa_status_id, value) VALUES (2, 'Okay');
-INSERT INTO buildings_bulk_load.qa_status (qa_status_id, value) VALUES (3, 'Pending');
-INSERT INTO buildings_bulk_load.qa_status (qa_status_id, value) VALUES (4, 'Refer to Supplier');
-INSERT INTO buildings_bulk_load.qa_status (qa_status_id, value) VALUES (5, 'Not Removed');
 
 -- buildings_bulk_load.added
 
