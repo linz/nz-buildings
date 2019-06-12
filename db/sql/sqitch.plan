@@ -22,7 +22,7 @@ buildings_reference/functions/suburb_locality 2019-05-23T19:32:18Z Daniel Silk <
 buildings_reference/functions/town_city 2019-05-24T03:00:08Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with towns and cities.
 buildings_reference/functions/territorial_authority 2019-05-24T03:04:06Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with territorial authorities.
 buildings_reference/functions/reference_update_log 2019-05-24T03:08:23Z Daniel Silk <dsilk@linz.govt.nz> # Add functions for interacting with reference update log.
-buildings_common/functions/capture_method 2019-05-24T03:12:48Z Daniel Silk <dsilk@linz.govt.nz> # Add captuer_method functions.
+buildings_common/functions/capture_method 2019-05-24T03:12:48Z Daniel Silk <dsilk@linz.govt.nz> # Add capture_method functions.
 buildings_common/functions/capture_source_group 2019-05-24T03:20:24Z Daniel Silk <dsilk@linz.govt.nz> # Add capture_source_group functions.
 buildings_common/functions/capture_source 2019-05-24T03:22:50Z Daniel Silk <dsilk@linz.govt.nz> # Add capture_source functions.
 buildings/functions/lifecycle_stage 2019-05-24T03:24:13Z Daniel Silk <dsilk@linz.govt.nz> # Add lifecycle_stage functions.
