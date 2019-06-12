@@ -32,14 +32,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.suburb_locality', 'suburb_locality_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.suburb_locality', 'suburb_locality_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"suburb_locality" and column "suburb_locality_id" is missing sequence '
-        'named "suburb_locality_suburb_locality_id_seq"';
+        '"suburb_locality" and column "suburb_locality_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -68,14 +66,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.town_city', 'town_city_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.town_city', 'town_city_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"town_city" and column "town_city_id" is missing sequence named '
-        '"town_city_town_city_id_seq"';
+        '"town_city" and column "town_city_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -105,14 +101,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.territorial_authority', 'territorial_authority_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.territorial_authority', 'territorial_authority_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"territorial_authority" and column "territorial_authority_id" is '
-        'missing sequence named "territorial_authority_territorial_authority_id_seq"';
+        '"territorial_authority" and column "territorial_authority_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -150,14 +144,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.coastlines_and_islands', 'coastline_and_island_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.coastlines_and_islands', 'coastline_and_island_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"coastlines_and_islands" and column "coastline_and_island_id" is '
-        'missing sequence named "coastlines_and_islands_coastline_and_island_id_seq"';
+        '"coastlines_and_islands" and column "coastline_and_island_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -186,14 +178,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.lake_polygons', 'lake_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.lake_polygons', 'lake_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"lake_polygons" and column "lake_polygon_id" is missing sequence '
-        'named "lake_polygons_lake_polygon_id_seq"';
+        '"lake_polygons" and column "lake_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -222,14 +212,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.pond_polygons', 'pond_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.pond_polygons', 'pond_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"pond_polygons" and column "pond_polygon_id" is missing sequence '
-        'named "pond_polygons_pond_polygon_id_seq"';
+        '"pond_polygons" and column "pond_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -258,14 +246,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.swamp_polygons', 'swamp_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.swamp_polygons', 'swamp_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"swamp_polygons" and column "swamp_polygon_id" is missing sequence '
-        'named "swamp_polygons_swamp_polygon_id_seq"';
+        '"swamp_polygons" and column "swamp_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -294,14 +280,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.lagoon_polygons', 'lagoon_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.lagoon_polygons', 'lagoon_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"lagoon_polygons" and column "lagoon_polygon_id" is missing sequence '
-        'named "lagoon_polygons_lagoon_polygon_id_seq"';
+        '"lagoon_polygons" and column "lagoon_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -330,18 +314,15 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.canal_polygons', 'canal_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.canal_polygons', 'canal_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"canal_polygons" and column "canal_polygon_id" is missing sequence '
-        'named "canal_polygons_canal_polygon_id_seq"';
+        '"canal_polygons" and column "canal_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
-
 
 SELECT
       area_polygon_id
@@ -368,14 +349,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.capture_source_area', 'area_polygon_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.capture_source_area', 'area_polygon_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"capture_source_area" and column "area_polygon_id" is missing '
-        'sequence named "capture_source_area_area_polygon_id_seq"';
+        '"capture_source_area" and column "area_polygon_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -400,17 +379,14 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_reference.reference_update_log', 'update_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_reference.reference_update_log', 'update_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_reference" table '
-        '"reference_update_log" and column "area_polygon_id" is missing '
-        'sequence named "reference_update_log_update_id_seq"';
+        '"reference_update_log" and column "update_id" is missing a sequence';
     END IF;
 END;
 $$;
-
 
 ROLLBACK;

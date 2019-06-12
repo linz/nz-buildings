@@ -12,14 +12,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_common.capture_method', 'capture_method_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_common.capture_method', 'capture_method_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_common" table '
-        '"capture_method" and column "capture_method_id" is missing sequence '
-        'named "capture_method_capture_method_id_seq"';
+        '"capture_method" and column "capture_method_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -33,14 +31,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_common.capture_source_group', 'capture_source_group_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_common.capture_source_group', 'capture_source_group_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_common" table '
-        '"capture_source_group" and column "capture_source_group_id" is '
-        'missing sequence named "capture_source_group_capture_source_group_id_seq"';
+        '"capture_source_group" and column "capture_source_group_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -69,17 +65,14 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_common.capture_source', 'capture_source_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_common.capture_source', 'capture_source_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_common" table '
-        '"capture_source" and column "capture_source_id" is missing sequence '
-        'named "capture_source_capture_source_id_seq"';
+        '"capture_source" and column "capture_source_id" is missing a sequence';
     END IF;
 END;
 $$;
-
 
 ROLLBACK;

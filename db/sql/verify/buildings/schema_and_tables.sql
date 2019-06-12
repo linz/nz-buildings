@@ -12,14 +12,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.lifecycle_stage', 'lifecycle_stage_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.lifecycle_stage', 'lifecycle_stage_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"lifecycle_stage" and column "lifecycle_stage_id" is missing sequence '
-        'named "lifecycle_stage_lifecycle_stage_id_seq"';
+        '"lifecycle_stage" and column "lifecycle_stage_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -32,13 +30,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.use', 'use_id');
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table "use" and '
-        'column "use_id" is missing sequence named "use_use_id_seq"';
+    SELECT pg_get_serial_sequence('buildings.use', 'use_id') INTO seqname;
+    IF seqname IS NULL THEN
+        RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
+        '"use" and column "use_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -52,17 +49,16 @@ WHERE FALSE;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.buildings', 'building_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.buildings', 'building_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"buildings" and column "building_id" is missing sequence named '
-        '"buildings_building_id_seq"';
+        '"buildings" and column "building_id" is missing a sequence';
     ELSE
-        SELECT nextval('buildings.buildings_building_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
             RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with table '
             '"buildings" and column "building_id" has a low sequence value';
         END IF;
@@ -99,7 +95,6 @@ BEGIN
     END IF;
 END;
 $$;
-
 
 DO $$
 BEGIN
@@ -163,20 +158,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.building_outlines', 'building_outline_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.building_outlines', 'building_outline_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"building_outlines" and column "building_outline_id" is missing '
-        'sequence named "building_outlines_building_outline_id_seq"';
+        '"building_outlines" and column "building_outline_id" is missing a sequence';
     ELSE
-        SELECT nextval('buildings.building_outlines_building_outline_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
             RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with table '
-            '"building_outlines" and column "building_outline_id" has a low '
-            'sequence value';
+            '"building_outlines" and column "building_outline_id" has a low sequence value';
         END IF;
     END IF;
 END;
@@ -208,20 +201,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.building_name', 'building_name_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.building_name', 'building_name_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"building_name" and column "building_name_id" is missing sequence '
-        'named "building_name_building_name_id_seq"';
+        '"building_name" and column "building_name_id" is missing a sequence';
     ELSE
-        SELECT nextval('buildings.building_name_building_name_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
             RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with table '
-            '"building_name" and column "building_name_id" has a low sequence '
-            'value';
+            '"building_name" and column "building_name_id" has a low sequence value';
         END IF;
     END IF;
 END;
@@ -268,20 +259,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.building_use', 'building_use_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.building_use', 'building_use_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"building_use" and column "building_use_id" is missing sequence named '
-        '"building_use_building_use_id_seq"';
+        '"building_use" and column "building_use_id" is missing a sequence';
     ELSE
-        SELECT nextval('buildings.building_use_building_use_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
             RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with table '
-            '"building_use" and column "building_use_id" has a low sequence '
-            'value';
+            '"building_use" and column "building_use_id" has a low sequence value';
         END IF;
     END IF;
 END;
@@ -326,20 +315,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings.lifecycle', 'lifecycle_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings.lifecycle', 'lifecycle_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings" table '
-        '"lifecycle" and column "lifecycle_id" is missing sequence named '
-        '"lifecycle_lifecycle_id_seq"';
+        '"lifecycle" and column "lifecycle_id" is missing a sequence';
     ELSE
-        SELECT nextval('buildings.lifecycle_lifecycle_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
-            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with '
-            'table "lifecycle" and column "lifecycle_id" has a low sequence '
-            'value';
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
+            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings" with table '
+            '"lifecycle" and column "building_use_id" has a low sequence value';
         END IF;
     END IF;
 END;
