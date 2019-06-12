@@ -12,14 +12,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.organisation', 'organisation_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.organisation', 'organisation_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"organisation" and column "organisation_id" is missing sequence named '
-        '"organisation_organisation_id_seq"';
+        '"organisation" and column "organisation_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -32,14 +30,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.bulk_load_status', 'bulk_load_status_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.bulk_load_status', 'bulk_load_status_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"bulk_load_status" and column "bulk_load_status_id" is missing '
-        'sequence named "bulk_load_status_bulk_load_status_id_seq"';
+        '"bulk_load_status" and column "bulk_load_status_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -52,14 +48,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.qa_status', 'qa_status_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.qa_status', 'qa_status_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"qa_status" and column "qa_status_id" is missing sequence named '
-        '"qa_status_qa_status_id_seq"';
+        '"qa_status" and column "qa_status_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -90,14 +84,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.supplied_datasets', 'supplied_dataset_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.supplied_datasets', 'supplied_dataset_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"supplied_datasets" and column "supplied_dataset_id" is missing '
-        'sequence named "supplied_datasets_supplied_dataset_id_seq"';
+        '"supplied_datasets" and column "supplied_dataset_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -143,20 +135,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.supplied_outlines', 'supplied_outline_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.supplied_outlines', 'supplied_outline_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"supplied_outlines" and column "supplied_outline_id" is missing '
-        'sequence named "supplied_outlines_supplied_outline_id_seq"';
+        '"supplied_outlines" and column "supplied_outline_id" is missing a sequence';
     ELSE
-    SELECT nextval('buildings_bulk_load.supplied_outlines_supplied_outline_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
-            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings_bulk_load" '
-            'with table "supplied_outlines" and column "supplied_outline_id" '
-            'has a low sequence value';
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
+            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings_bulk_load" with table '
+            '"supplied_outlines" and column "supplied_outline_id" has a low sequence value';
         END IF;
     END IF;
 END;
@@ -254,20 +244,18 @@ $$;
 
 DO $$
 DECLARE
+    seqname text;
     seqval integer;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.bulk_load_outlines', 'bulk_load_outline_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.bulk_load_outlines', 'bulk_load_outline_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"bulk_load_outlines" and column "bulk_load_outline_id" is missing '
-        'sequence named "bulk_load_outlines_bulk_load_outline_id_seq"';
+        '"bulk_load_outlines" and column "bulk_load_outline_id" is missing a sequence';
     ELSE
-    SELECT nextval('buildings_bulk_load.bulk_load_outlines_bulk_load_outline_id_seq') INTO seqval;
-        IF seqval < 999999 THEN
-            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings_bulk_load" '
-            'with table "bulk_load_outlines" and column "bulk_load_outline_id" '
-            'has a low sequence value';
+        SELECT nextval(seqname) INTO seqval;
+        IF seqval < 1000000 THEN
+            RAISE EXCEPTION 'LOW SEQUENCE VALUE: Schema "buildings_bulk_load" with table '
+            '"bulk_load_outlines" and column "bulk_load_outline_id" has a low sequence value';
         END IF;
     END IF;
 END;
@@ -359,14 +347,12 @@ WHERE FALSE;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.related_groups', 'related_group_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.related_groups', 'related_group_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"related_groups" and column "related_group_id" is missing sequence '
-        'named "related_groups_related_group_id_seq"';
+        '"related_groups" and column "related_group_id" is missing a sequence';
     END IF;
 END;
 $$;
@@ -442,14 +428,12 @@ $$;
 
 DO $$
 DECLARE
-    seqval integer;
+    seqname text;
 BEGIN
-    PERFORM TRUE
-    FROM pg_get_serial_sequence('buildings_bulk_load.related', 'related_id');
-    IF NOT FOUND THEN
+    SELECT pg_get_serial_sequence('buildings_bulk_load.related', 'related_id') INTO seqname;
+    IF seqname IS NULL THEN
         RAISE EXCEPTION 'MISSING SEQUENCE: Schema "buildings_bulk_load" table '
-        '"related" and column "related_id" is missing sequence named '
-        '"related_related_id_seq"';
+        '"related" and column "related_id" is missing a sequence';
     END IF;
 END;
 $$;
