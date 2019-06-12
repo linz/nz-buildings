@@ -48,3 +48,4 @@ buildings_lds/functions/populate_buildings_lds 2019-05-24T05:21:05Z Daniel Silk 
 @v1.4.0-dev1 2019-06-11T23:42:21Z Daniel Silk <dsilk@linz.govt.nz> # Tag v1.4.0-dev1.
 
 buildings/add-modified-date 2019-06-12T23:18:56Z Megan Davidson <mdavidson@linz.govt.nz> # Add last_modified date column to buildings.building_outlines.
+buildings/functions/building_outlines [buildings/functions/building_outlines@v1.4.0-dev1] 2019-06-12T23:22:46Z Megan Davidson <mdavidson@linz.govt.nz> # Add new functions to buildings schema for building_outlines table.

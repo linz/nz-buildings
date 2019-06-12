@@ -20,8 +20,4 @@ SELECT has_function_privilege('buildings.building_outlines_update_territorial_au
 
 SELECT has_function_privilege('buildings.building_outlines_update_town_city(integer[])', 'execute');
 
-SELECT has_function_privilege('buildings.building_outlines_update_modified_date(integer)', 'execute');
-
-SELECT has_function_privilege('buildings.building_outlines_update_modified_date_by_building_id(integer)', 'execute');
-
 ROLLBACK;
