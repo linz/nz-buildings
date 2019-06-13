@@ -390,7 +390,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             # if bulk loading completed without errors
             if result == 1:
                 # RCA the bulk load
-                result = self.db._execute(bulk_load_select.supplied_dataset_rca_db)
+                if commit_status:
+                    self.db._execute(bulk_load_select.supplied_dataset_rca_db)
                 QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
                 self.layer_registry.remove_layer(self.historic_layer)
                 QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
