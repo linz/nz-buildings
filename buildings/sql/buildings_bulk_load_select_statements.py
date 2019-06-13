@@ -401,6 +401,3 @@ ANALYZE buildings_bulk_load.organisation;
 ANALYZE buildings_bulk_load.deletion_description;
 ANALYZE buildings_bulk_load.bulk_load_status;
 """
-supplied_dataset_rca_db2 = """
-REINDEX INDEX buildings_bulk_load.shx_bulk_load_outlines;
-"""
