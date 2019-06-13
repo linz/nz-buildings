@@ -553,3 +553,45 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.ids = []
         self.edit_dialog.building_outline_id = None
         self.edit_dialog.editing_layer.removeSelection()
+
+    def test_modified_date_on_save(self):
+        """Check modified date is updated when save clicked"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
+                         delay=30)
+        QTest.qWait(10)
+        self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(self.edit_dialog.cmb_lifecycle_stage.findText('Replaced'))
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText('Unknown'))
+        self.edit_dialog.cmb_ta.setCurrentIndex(self.edit_dialog.cmb_ta.findText('Manawatu-Whanganui'))
+        self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText('Palmerston North'))
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText('Hokowhitu'))
+
+        self.edit_dialog.change_instance.edit_save_clicked(False)
+        sql = 'SELECT now()::timestamp;'
+        result = db._execute(sql)
+        time = result.fetchall()[0]
+
+        # building_outline modified date
+        sql = 'SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = %s;'
+        result = db._execute(sql, (self.edit_dialog.building_outline_id,))
+        bo_modified_date = result.fetchall()[0]
+
+        self.assertEqual(bo_modified_date, time)
+
+        self.edit_dialog.ids = []
+        self.edit_dialog.building_outline_id = None
+        self.edit_dialog.db.rollback_open_cursor()
