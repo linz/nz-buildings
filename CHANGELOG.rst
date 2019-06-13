@@ -12,6 +12,7 @@ Added
 
 * Buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
 * Update the error status and comment in the QA layer if bulk load outline edited (edit-geometry and delete-outline only)
+* last_modified date column to buildings.building_outlines to track edits
 
 Changed
 -------
@@ -24,6 +25,7 @@ Changed
 * Changed editing functionality in production to work through the buildings toolbar and use a popup dialog rather than be held in the frame
 * Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
 * Updated URL links
+* last_modified date of buildings_lds tables are now the most recent of three columns (begin_lifespan, end_lifespan and last_modified) from buildings.building_outlines
 
 Fixed
 -----
