@@ -349,11 +349,9 @@ WHERE transfer_date is NULL;
 """
 
 supplied_dataset_rca_db = """
-REINDEX TABLE buildings_bulk_load.added;
 CLUSTER buildings_bulk_load.added USING idx_added_qa_status_id;
 ANALYZE buildings_bulk_load.added;
 
-REINDEX TABLE buildings_bulk_load.bulk_load_outlines;
 CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_bulk_load_status_id;
 CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_capture_method_id;
 CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_capture_source_id;
@@ -361,37 +359,30 @@ CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_supp
 CLUSTER buildings_bulk_load.bulk_load_outlines USING shx_bulk_load_outlines;
 ANALYZE buildings_bulk_load.bulk_load_outlines;
 
-REINDEX TABLE buildings_bulk_load.existing_subset_extracts;
 CLUSTER buildings_bulk_load.existing_subset_extracts USING idx_existing_subset_extracts_supplied_dataset_id;
 CLUSTER buildings_bulk_load.existing_subset_extracts USING shx_existing_subset_extracts;
 ANALYZE buildings_bulk_load.existing_subset_extracts;
 
-REINDEX TABLE buildings_bulk_load.matched;
 CLUSTER buildings_bulk_load.matched USING idx_matched_building_outline_id;
 CLUSTER buildings_bulk_load.matched USING idx_matched_qa_status_id;
 ANALYZE buildings_bulk_load.matched;
 
-REINDEX TABLE buildings_bulk_load.related;
 CLUSTER buildings_bulk_load.related USING idx_related_building_outline_id;
 CLUSTER buildings_bulk_load.related USING idx_related_bulk_load_outline_id;
 CLUSTER buildings_bulk_load.related USING idx_related_qa_status_id;
 CLUSTER buildings_bulk_load.related USING idx_related_related_group_id;
 ANALYZE buildings_bulk_load.related;
 
-REINDEX TABLE buildings_bulk_load.removed;
 CLUSTER buildings_bulk_load.removed USING idx_removed_qa_status_id;
 ANALYZE buildings_bulk_load.removed;
 
-REINDEX TABLE buildings_bulk_load.supplied_datasets;
 CLUSTER buildings_bulk_load.supplied_datasets USING idx_supplied_datasets_supplier_id;
 ANALYZE buildings_bulk_load.supplied_datasets;
 
-REINDEX TABLE buildings_bulk_load.supplied_outlines;
 CLUSTER buildings_bulk_load.supplied_outlines USING idx_supplied_outlines_supplied_dataset_id;
 CLUSTER buildings_bulk_load.supplied_outlines USING shx_supplied_outlines;
 ANALYZE buildings_bulk_load.supplied_outlines;
 
-REINDEX TABLE buildings_bulk_load.transferred;
 CLUSTER buildings_bulk_load.transferred USING idx_transferred_new_building_outline_id;
 ANALYZE buildings_bulk_load.transferred;
 
