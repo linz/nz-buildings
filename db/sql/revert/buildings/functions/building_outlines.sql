@@ -1,4 +1,4 @@
--- Revert nz-buildings:buildings/functions/building_outlines to v1.0.4
+-- Revert nz-buildings:buildings/functions/building_outlines to v1.4.0
 
 BEGIN;
 
