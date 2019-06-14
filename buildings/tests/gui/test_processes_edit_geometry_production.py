@@ -243,3 +243,44 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), 'Trace Orthophotography')
+
+    def test_modified_date_update_on_save(self):
+        """Check modified_date is updated when save clicked"""
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton,
+                         pos=canvas_point(QgsPoint(1747651, 5428152)),
+                         delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0,
+                                      1878345.0, 5555374.0)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        QTest.mouseClick(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878151.0, 5555311.9)),
+                         delay=30)
+        QTest.mousePress(widget, Qt.LeftButton,
+                         pos=canvas_point(QgsPoint(1878151.0, 5555311.9)),
+                         delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton,
+                           pos=canvas_point(QgsPoint(1878132.1, 5555303.9)),
+                           delay=30)
+        QTest.qWait(10)
+
+        self.edit_dialog.change_instance.edit_save_clicked(False)
+        sql = 'SELECT now()::timestamp;'
+        result = db._execute(sql)
+        time = result.fetchall()[0]
+
+        for key in self.edit_dialog.geoms:
+            sql = 'SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = %s'
+            result = db._execute(sql, (key,))
+            bo_modified_date = result.fetchall()[0]
+            self.assertEqual(bo_modified_date, time)
+
+        self.edit_dialog.geoms = {}
+        self.edit_dialog.db.rollback_open_cursor()

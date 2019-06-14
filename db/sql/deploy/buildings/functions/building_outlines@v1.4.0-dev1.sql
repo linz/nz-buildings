@@ -1,4 +1,4 @@
--- Revert nz-buildings:buildings/functions/building_outlines to v1.4.0
+-- Deploy nz-buildings:buildings/functions/building_outlines to pg
 
 BEGIN;
 
@@ -326,9 +326,5 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_town_city(integer[]) IS
 'Replace the town/city values with the intersection result for all buildings in buildings.building_outlines';
-
-DROP FUNCTION buildings.building_outlines_update_modified_date(integer);
-
-DROP FUNCTION buildings.building_outlines_update_modified_date_by_building_id(integer);
 
 COMMIT;

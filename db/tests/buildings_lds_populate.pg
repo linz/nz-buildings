@@ -23,7 +23,7 @@ SELECT buildings_lds.populate_buildings_lds();
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(5);
+SELECT plan(7);
 
 --1----------------------------------------------------------
 -- Check functions exist
@@ -151,7 +151,21 @@ SELECT results_eq(
     'Check building outlines in buildings_lds.nz_building_outlines table after populate_buildings_lds function has run'
 );
 
---------------------------------------------------------
+--3------------------------------------------------------
+
+-- modified date correctly handled
+
+SELECT results_eq(
+      'SELECT last_modified FROM buildings_lds.nz_building_outlines WHERE building_id = 1000000',
+      $$VALUES ('2019-06-11'::date)$$,
+      'Check building outlines modified date in building_lds_nz_building_outlines table after populate_buildings_lds function has run'
+);
+
+SELECT results_eq(
+      'SELECT last_modified FROM buildings_lds.nz_building_outlines_all_sources WHERE building_outline_id = 1000000',
+      $$VALUES ('2019-06-11'::date)$$,
+      'Check building outlines modified date in building_lds_nz_building_outlines_all_sources table after populate_buildings_lds function has run'
+);
 
 -- Finish pgTAP testing
 SELECT * FROM finish();

@@ -491,6 +491,8 @@ class EditAttribute(ProductionChanges):
                     sql, (i, capture_method_id,
                           capture_source_id, lifecycle_stage_id,
                           suburb, town, t_a))
+                sql = 'SELECT buildings.building_outlines_update_modified_date(%s);'
+                self.edit_dialog.db.execute_no_commit(sql, (i,))
         self.disable_UI_functions()
 
         if commit_status:
@@ -791,6 +793,8 @@ class EditGeometry(ProductionChanges):
                 'SELECT buildings.building_outlines_update_capture_method(%s, %s)',
                 (key, capture_method_id)
             )
+            sql = 'SELECT buildings.building_outlines_update_modified_date(%s);'
+            self.edit_dialog.db.execute_no_commit(sql, (key,))
         self.disable_UI_functions()
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
