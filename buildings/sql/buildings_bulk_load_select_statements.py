@@ -349,46 +349,45 @@ WHERE transfer_date is NULL;
 """
 
 supplied_dataset_rca_db = """
-CLUSTER buildings_bulk_load.added USING idx_added_qa_status_id;
+CLUSTER buildings_bulk_load.added USING added_pkey;
 ANALYZE buildings_bulk_load.added;
 
-CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_bulk_load_status_id;
-CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_capture_method_id;
-CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_capture_source_id;
-CLUSTER buildings_bulk_load.bulk_load_outlines USING idx_bulk_load_outlines_supplied_dataset_id;
-CLUSTER buildings_bulk_load.bulk_load_outlines USING shx_bulk_load_outlines;
+CLUSTER buildings_bulk_load.bulk_load_outlines USING bulk_load_outlines_pkey;
 ANALYZE buildings_bulk_load.bulk_load_outlines;
 
-CLUSTER buildings_bulk_load.existing_subset_extracts USING idx_existing_subset_extracts_supplied_dataset_id;
-CLUSTER buildings_bulk_load.existing_subset_extracts USING shx_existing_subset_extracts;
+CLUSTER buildings_bulk_load.existing_subset_extracts USING existing_subset_extracts_pkey;
 ANALYZE buildings_bulk_load.existing_subset_extracts;
 
-CLUSTER buildings_bulk_load.matched USING idx_matched_building_outline_id;
-CLUSTER buildings_bulk_load.matched USING idx_matched_qa_status_id;
+CLUSTER buildings_bulk_load.matched USING matched_pkey;
 ANALYZE buildings_bulk_load.matched;
 
-CLUSTER buildings_bulk_load.related USING idx_related_building_outline_id;
-CLUSTER buildings_bulk_load.related USING idx_related_bulk_load_outline_id;
-CLUSTER buildings_bulk_load.related USING idx_related_qa_status_id;
-CLUSTER buildings_bulk_load.related USING idx_related_related_group_id;
+CLUSTER buildings_bulk_load.related USING related_pkey;
 ANALYZE buildings_bulk_load.related;
 
-CLUSTER buildings_bulk_load.removed USING idx_removed_qa_status_id;
+CLUSTER buildings_bulk_load.removed USING removed_pkey;
 ANALYZE buildings_bulk_load.removed;
 
-CLUSTER buildings_bulk_load.supplied_datasets USING idx_supplied_datasets_supplier_id;
+CLUSTER buildings_bulk_load.supplied_datasets USING supplied_datasets_pkey;
 ANALYZE buildings_bulk_load.supplied_datasets;
 
-CLUSTER buildings_bulk_load.supplied_outlines USING idx_supplied_outlines_supplied_dataset_id;
-CLUSTER buildings_bulk_load.supplied_outlines USING shx_supplied_outlines;
+CLUSTER buildings_bulk_load.supplied_outlines USING supplied_outlines_pkey;
 ANALYZE buildings_bulk_load.supplied_outlines;
 
-CLUSTER buildings_bulk_load.transferred USING idx_transferred_new_building_outline_id;
+CLUSTER buildings_bulk_load.transferred USING transferred_pkey;
 ANALYZE buildings_bulk_load.transferred;
 
+CLUSTER buildings_bulk_load.related_groups USING related_groups_pkey;
 ANALYZE buildings_bulk_load.related_groups;
+
+CLUSTER buildings_bulk_load.qa_status USING qa_status_pkey;
 ANALYZE buildings_bulk_load.qa_status;
+
+CLUSTER buildings_bulk_load.organisation USING organisation_pkey;
 ANALYZE buildings_bulk_load.organisation;
+
+CLUSTER buildings_bulk_load.deletion_description USING deletion_description_pkey;
 ANALYZE buildings_bulk_load.deletion_description;
+
+CLUSTER buildings_bulk_load.bulk_load_status USING bulk_load_status_pkey;
 ANALYZE buildings_bulk_load.bulk_load_status;
 """
