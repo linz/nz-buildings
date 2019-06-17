@@ -3,7 +3,7 @@
 export SCRIPTSDIR=/usr/share/nz-buildings/
 
 while  true; do
-    read -p 'PLUGIN [plugin] or DATABSE [db] schema dump?:' dump
+    read -p 'PLUGIN [plugin] or DATABASE [db] schema dump?:' dump
     case "$dump" in
         "plugin")
             echo "Dumping Plugin Test Schema"
