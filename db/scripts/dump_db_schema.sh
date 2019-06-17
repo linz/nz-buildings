@@ -2,16 +2,34 @@
 
 export SCRIPTSDIR=/usr/share/nz-buildings/
 
-# dump all the schema
-pg_dump --column-inserts --data-only --schema=admin_bdys nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/admin_bdys.sql
-pg_dump --column-inserts --data-only --schema=aerial_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/aerial_lds.sql
-pg_dump --column-inserts --data-only --schema=buildings --exclude-table-data=buildings.lifecycle_stage --exclude-table-data=buildings.use nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings.sql
-pg_dump --column-inserts --data-only --schema=buildings_common --exclude-table-data=buildings_common.capture_method --exclude-table-data=buildings_common.capture_source_group nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_common.sql
-pg_dump --column-inserts --data-only --schema=buildings_bulk_load --exclude-table-data=buildings_bulk_load.organisation --exclude-table-data=buildings_bulk_load.bulk_load_status --exclude-table-data=buildings_bulk_load.qa_status nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_bulk_load.sql
-pg_dump --column-inserts --data-only --schema=buildings_reference nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_reference.sql
-pg_dump --column-inserts --data-only --schema=buildings_lds nz-buildings-pgtap-db > ${PWD}/db/tests/testdata/db/buildings_lds.sql
+while  true; do
+    read -p 'PLUGIN [plugin] or DATABSE [db] schema dump?:' dump
+    case "$dump" in
+        "plugin")
+            echo "Dumping Plugin Test Schema"
+            database_name="nz-buildings-plugin-db"
+            break
+            ;;
+        "db")
+            echo "Dumping Database Test Schema"
+            database_name="nz-buildings-pgtap-db"
+            break
+            ;;
+        *)
+            echo "Invalid Input" >&2
+    esac
+done
 
-for file in ${PWD}/db/tests/testdata/db/*.sql; do
+pg_dump --column-inserts --data-only --schema=admin_bdys ${database_name} > ${PWD}/db/tests/testdata/${dump}/admin_bdys.sql
+pg_dump --column-inserts --data-only --schema=aerial_lds ${database_name} > ${PWD}/db/tests/testdata/${dump}/aerial_lds.sql
+pg_dump --column-inserts --data-only --schema=buildings --exclude-table-data=buildings.lifecycle_stage --exclude-table-data=buildings.use ${database_name} > ${PWD}/db/tests/testdata/${dump}/buildings.sql
+pg_dump --column-inserts --data-only --schema=buildings_common --exclude-table-data=buildings_common.capture_method --exclude-table-data=buildings_common.capture_source_group ${database_name} > ${PWD}/db/tests/testdata/${dump}/buildings_common.sql
+pg_dump --column-inserts --data-only --schema=buildings_bulk_load --exclude-table-data=buildings_bulk_load.organisation --exclude-table-data=buildings_bulk_load.bulk_load_status --exclude-table-data=buildings_bulk_load.qa_status ${database_name} > ${PWD}/db/tests/testdata/${dump}/buildings_bulk_load.sql
+pg_dump --column-inserts --data-only --schema=buildings_reference ${database_name} > ${PWD}/db/tests/testdata/${dump}/buildings_reference.sql
+pg_dump --column-inserts --data-only --schema=buildings_lds ${database_name} > ${PWD}/db/tests/testdata/${dump}/buildings_lds.sql
+
+echo "Cleaning and Copying dumped files:"
+for file in ${PWD}/db/tests/testdata/${dump}/*.sql; do
     echo ${file} >&2
     # remove lines that start with SET
     sed -i '/^SET/ d' ${file}
@@ -41,4 +59,4 @@ for file in ${PWD}/db/tests/testdata/db/*.sql; do
 done
 
 # copy tables over to usr/share folder location
-sudo cp ${PWD}/db/tests/testdata/db/*.sql ${SCRIPTSDIR}/tests/testdata/db
+sudo cp ${PWD}/db/tests/testdata/${dump}/*.sql ${SCRIPTSDIR}/tests/testdata/${dump}
