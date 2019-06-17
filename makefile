@@ -112,5 +112,5 @@ bump_version:
 
 dump_schema:
 	# dump nz-buildings-pgtap-db to test data schema files
-	chmod +x db/scripts/dump_db_schema.sh
-	./db/scripts/dump_db_schema.sh
+	chmod +x db/scripts/dump_schema.sh
+	./db/scripts/dump_schema.sh
