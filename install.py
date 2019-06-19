@@ -177,9 +177,10 @@ def db_install():
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_lds.sql")
-            cursor.execute(open(script, "r").read())
-            print("DB_INSTALL: {} Loaded".format(script))
+            # test data file is currently empty so this script cannot be run
+            # script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_lds.sql")
+            # cursor.execute(open(script, "r").read())
+            # print("DB_INSTALL: {} Loaded".format(script))
 
             script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "update_sequences.sql")
             cursor.execute(open(script, "r").read())
