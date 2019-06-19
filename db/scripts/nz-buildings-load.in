@@ -127,18 +127,24 @@ if [ "${WITH_TEST_DATA}" = true ]; then
     psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_bulk_load.sql $ON_ERROR_STOP
     echo ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql >&2
     psql -f ${SCRIPTSDIR}/tests/testdata/db/buildings_lds.sql $ON_ERROR_STOP
-    echo ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/update_sequences_pgtap_db.sql $ON_ERROR_STOP
-
+    echo ${SCRIPTSDIR}/tests/testdata/db/update_sequences.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/db/update_sequences.sql $ON_ERROR_STOP
+    psql -c "REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;"
 fi
 
-# Execute files that are needed to test the plugin - test data remains in database
-if [ "${WITH_PLUGIN_SETUP}" = true ]; then
-    # Execute all files in the test data sql dir
-    echo ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/01-insert_test_data_reference.sql $ON_ERROR_STOP
-    echo ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql >&2
-    psql -f ${SCRIPTSDIR}/tests/testdata/06-insert_test_data_buildings_bulk_load_plugin.sql $ON_ERROR_STOP
-    psql -c "SELECT buildings_bulk_load.compare_building_outlines(2);"
 
+if [ "${WITH_PLUGIN_SETUP}" = true ]; then
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/buildings_reference.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/buildings_reference.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/buildings_common.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/buildings_common.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/buildings.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/buildings.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/buildings_bulk_load.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/buildings_bulk_load.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/buildings_lds.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/buildings_lds.sql $ON_ERROR_STOP
+    echo ${SCRIPTSDIR}/tests/testdata/plugin/update_sequences.sql >&2
+    psql -f ${SCRIPTSDIR}/tests/testdata/plugin/update_sequences.sql $ON_ERROR_STOP
+    psql -c "REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;"
 fi
