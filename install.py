@@ -153,20 +153,40 @@ def db_install():
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "update_sequences_pgtap_db.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "db", "update_sequences.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
+
+            cursor.execute("REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;")
+            print("REFRESH MATERIALIZED VIEW")
 
         else:
-            script = os.path.join(__location__, "db", "tests", "testdata", "01-insert_test_data_reference.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_reference.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "06-insert_test_data_buildings_bulk_load_plugin.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_common.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 
-            cursor.execute("SELECT buildings_bulk_load.compare_building_outlines(2);")
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings.sql")
+            cursor.execute(open(script, "r").read())
+            print("DB_INSTALL: {} Loaded".format(script))
+
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_bulk_load.sql")
+            cursor.execute(open(script, "r").read())
+            print("DB_INSTALL: {} Loaded".format(script))
+
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "buildings_lds.sql")
+            cursor.execute(open(script, "r").read())
+            print("DB_INSTALL: {} Loaded".format(script))
+
+            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "update_sequences.sql")
+            cursor.execute(open(script, "r").read())
+            print("DB_INSTALL: {} Loaded".format(script))
+
+            cursor.execute("REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;")
+            print("REFRESH MATERIALIZED VIEW")
 
         connection.commit()
         cursor.close()
