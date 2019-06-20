@@ -50,3 +50,4 @@ buildings_lds/functions/populate_buildings_lds 2019-05-24T05:21:05Z Daniel Silk 
 buildings/add_modified_date 2019-06-12T23:18:56Z Megan Davidson <mdavidson@linz.govt.nz> # Add last_modified date column to buildings.building_outlines.
 buildings/functions/building_outlines [buildings/functions/building_outlines@v1.4.0-dev1] 2019-06-12T23:22:46Z Megan Davidson <mdavidson@linz.govt.nz> # Add new functions to buildings schema for building_outlines table.
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v1.4.0-dev1] 2019-06-12T23:43:39Z Megan Davidson <mdavidson@linz.govt.nz> # Update function to alter last_modified date using new column in building_outlines.
+buildings_reference/huts_and_protected_areas 2019-06-19T02:57:16Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Adds tables for huts shelters and bivouacs and protected areas

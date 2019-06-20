@@ -75,6 +75,30 @@ SELECT has_index(
     'Should have spatial index on the shape column of the canal_polygons table.'
 );
 
+SELECT has_table('buildings_reference, 'hut_points', 'Should have hut_points table in the buildings_reference_schema.');
+SELECT has_index(
+    'buildings_reference', 'hut_points', 'shx_hut_points', 'shape',
+    'Should have spatial index on the shape column of the hut_points table.'
+);
+
+SELECT has_table('buildings_reference, 'shelter_points', 'Should have shelter_points table in the buildings_reference_schema.');
+SELECT has_index(
+    'buildings_reference', 'shelter_points', 'shx_shelter_points', 'shape',
+    'Should have spatial index on the shape column of the shelter_points table.'
+);
+
+SELECT has_table('buildings_reference, 'bivouac_points', 'Should have bivouac_points table in the buildings_reference_schema.');
+SELECT has_index(
+    'buildings_reference', 'bivouac_points', 'shx_bivouac_points', 'shape',
+    'Should have spatial index on the shape column of the bivouac_points table.'
+);
+
+SELECT has_table('buildings_reference, 'protected_areas', 'Should have protected_areas table in the buildings_reference_schema.');
+SELECT has_index(
+    'buildings_reference', 'protected_areas', 'shx_protected_areas', 'shape',
+    'Should have spatial index on the shape column of the protected_areas table.'
+);
+
 SELECT has_table('buildings_reference', 'reference_update_log', 'Should have reference_update_log table in the buildings_reference schema.');
 
 SELECT has_function('buildings_reference', 'canal_polygons_delete_by_external_id', 'Should have function canal_polygons_delete_by_external_id in buildings_reference.');
