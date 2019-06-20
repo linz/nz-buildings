@@ -2,12 +2,12 @@
 -- buildings_bulk_load.supplied_datasets
 
 INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (1, 'Test Data', 1, '2019-05-30 14:49:59.962246', '2019-05-30 14:50:00.066082');
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (2, 'Test Data Two', 1, '2019-05-30 14:50:00.310358', NULL);
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (3, 'Test Dataset', 1, NULL, NULL);
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (5, 'Test Complex Data Two', 1, NULL, NULL);
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (4, 'Test Complex Data', 1, '2019-05-30 14:50:01.363019', NULL);
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (7, 'Test Related Two', 1, NULL, NULL);
-INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (6, 'Test Related', 1, '2019-05-30 14:50:01.538171', NULL);
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (2, 'Test Data Two', 1, '2019-05-30 14:50:00.310358', '2019-05-30 14:51:00.310358');
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (3, 'Test Dataset', 1, '2019-05-30 14:52:00.310358', '2019-05-30 14:53:00.310358');
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (5, 'Test Complex Data Two', 1, '2019-05-30 14:54:00.310358', '2019-05-30 14:55:00.310358');
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (4, 'Test Complex Data', 1, '2019-05-30 14:56:01.363019', '2019-05-30 14:56:00.310358');
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (7, 'Test Related Two', 1, '2019-05-30 14:57:00.310358', '2019-05-30 14:58:00.310358');
+INSERT INTO buildings_bulk_load.supplied_datasets (supplied_dataset_id, description, supplier_id, processed_date, transfer_date) VALUES (6, 'Test Related', 1, '2019-05-30 14:59:01.538171', NULL);
 
 -- buildings_bulk_load.bulk_load_outlines
 
