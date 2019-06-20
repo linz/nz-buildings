@@ -44,7 +44,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_bulk_load", "schema_and_tables.sql"),
     os.path.join("sql", "deploy", "buildings_lds", "schema_and_tables.sql"),
     os.path.join("sql", "deploy", "buildings", "add_modified_date.sql"),
-    os.path.join("sql", "deploy", "buildings", "huts_and_protected_areas.sql")
+    os.path.join("sql", "deploy", "buildings", "huts_and_protected_areas.sql"),
     # Default Values
     os.path.join("sql", "deploy", "buildings_common", "default_values.sql"),
     os.path.join("sql", "deploy", "buildings", "default_values.sql"),
