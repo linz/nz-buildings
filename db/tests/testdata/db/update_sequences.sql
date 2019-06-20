@@ -30,12 +30,17 @@ BEGIN
       SELECT sequences.sequence_name
       FROM information_schema.sequences
     ) THEN
-
-      -- Update the sequence based on the max value from that table + 1
-      EXECUTE 'SELECT setval(
+      IF ''||schema_name||'.'||table_name||'' IN ('buildings.buildings', 'buildings.building_outlines', 'buildings.building_name', 'buildings.building_use', 'buildings.lifecycle', 'buildings_bulk_load.supplied_outlines', 'buildings_bulk_load.bulk_load_outlines') THEN
+        EXECUTE 'SELECT setval(
                  '''||schema_name||'.'||table_name||'_'||primary_key_column||'_seq'',
-                 (SELECT max('||primary_key_column||') FROM '||schema_name||'.'||table_name||')
-               )';
+                 GREATEST((SELECT max('||primary_key_column||') FROM '||schema_name||'.'||table_name||')+1, 1000000), false)';
+      ELSE
+        -- Update the sequence based on the max value from that table + 1
+        EXECUTE 'SELECT setval(
+                   '''||schema_name||'.'||table_name||'_'||primary_key_column||'_seq'',
+                   (SELECT max('||primary_key_column||') FROM '||schema_name||'.'||table_name||')+1
+                 )';
+      END IF;
 
     END IF;
 
