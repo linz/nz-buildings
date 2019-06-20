@@ -36,9 +36,6 @@ BEGIN
                  '''||schema_name||'.'||table_name||'_'||primary_key_column||'_seq'',
                  (SELECT max('||primary_key_column||') FROM '||schema_name||'.'||table_name||')
                )';
-      -- RAISE NOTICE 'Schema: %' schema_name;
-      -- RAISE NOTICE 'Table: %' table_name;
-      -- RAISE NOTICE 'Column: %' primary_key_column;
 
     END IF;
 
