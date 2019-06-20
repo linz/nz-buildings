@@ -30,32 +30,34 @@ pg_dump --column-inserts --data-only --schema=buildings_lds ${database_name} > $
 
 echo "Cleaning and Copying dumped files:"
 for file in ${PWD}/db/tests/testdata/${dump}/*.sql; do
-    echo ${file} >&2
-    # remove lines that start with SET
-    sed -i '/^SET/ d' ${file}
-    # remove lines that start with SELECT
-    sed -i '/^SELECT/ d' ${file}
-    # remove all lines that are solely '--'
-    sed -i '/--$/ d' ${file}
-    # remove all comments not about table data
-    sed -i '/--/ {/TABLE DATA/! d}' ${file}
-    # remove all empty lines
-    sed -i '/^$/ d' ${file}
-    # insert one empty line above all remaining comments
-    sed -i '/^--/ i \\' ${file}
-    # append one empty line after all remaining comments
-    sed -i '/^--/ a \\' ${file}
-    # loop through file and reformat data table description comments
-    while read line; do
-        if [[ $line == *"--"* ]]; then
-            table_name=${line##*Data for Name: }
-            table_name=${table_name%%; Type*}
-            schema_name=${line##*Schema: }
-            schema_name=${schema_name%%; Owner*}
-            table_name="-- $schema_name.$table_name"
-            sed -i 's/'"${line}"'/'"${table_name}"'/g' ${file}
-        fi
-    done < ${file}
+    if [ "${file}" != "/home/mdavidson/dev/nz-buildings/db/tests/testdata/db/update_sequences.sql" ]; then
+        echo ${file} >&2
+        # remove lines that start with SET
+        sed -i '/^SET/ d' ${file}
+        # remove lines that start with SELECT
+        sed -i '/^SELECT/ d' ${file}
+        # remove all lines that are solely '--'
+        sed -i '/--$/ d' ${file}
+        # remove all comments not about table data
+        sed -i '/--/ {/TABLE DATA/! d}' ${file}
+        # remove all empty lines
+        sed -i '/^$/ d' ${file}
+        # insert one empty line above all remaining comments
+        sed -i '/^--/ i \\' ${file}
+        # append one empty line after all remaining comments
+        sed -i '/^--/ a \\' ${file}
+        # loop through file and reformat data table description comments
+        while read line; do
+            if [[ $line == *"--"* ]]; then
+                table_name=${line##*Data for Name: }
+                table_name=${table_name%%; Type*}
+                schema_name=${line##*Schema: }
+                schema_name=${schema_name%%; Owner*}
+                table_name="-- $schema_name.$table_name"
+                sed -i 's/'"${line}"'/'"${table_name}"'/g' ${file}
+            fi
+        done < ${file}
+    fi
 done
 
 # copy tables over to usr/share folder location
