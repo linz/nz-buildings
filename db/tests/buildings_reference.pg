@@ -19,7 +19,7 @@ BEGIN;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-SELECT plan(39);
+SELECT plan(59);
 
 -- Schema
 SELECT has_schema('buildings_reference');
