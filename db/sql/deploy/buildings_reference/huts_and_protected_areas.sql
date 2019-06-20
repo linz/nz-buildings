@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.hut_points (
     , shape public.geometry(Point, 2193)
 );
 
-CREATE INDEX shx_hut_points_id
+CREATE INDEX shx_hut_points
     ON buildings_reference.hut_points USING gist (shape);
 
 COMMENT ON TABLE buildings_reference.hut_points IS
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.shelter_points (
     , shape public.geometry(Point, 2193)
 );
 
-CREATE INDEX shx_shelter_points_id
+CREATE INDEX shx_shelter_points
     ON buildings_reference.shelter_points USING gist (shape);
 
 COMMENT ON TABLE buildings_reference.shelter_points IS
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.bivouac_points (
     , shape public.geometry(Point, 2193)
 );
 
-CREATE INDEX shx_bivouac_points_id
+CREATE INDEX shx_bivouac_points
     ON buildings_reference.bivouac_points USING gist (shape);
 
 COMMENT ON TABLE buildings_reference.bivouac_points IS
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.protected_areas (
     , shape public.geometry(Polygon, 2193)
 );
 
-CREATE INDEX shx_protected_areas_id
+CREATE INDEX shx_protected_areas
     ON buildings_reference.protected_areas USING gist (shape);
 
 COMMENT ON TABLE buildings_reference.protected_areas IS
