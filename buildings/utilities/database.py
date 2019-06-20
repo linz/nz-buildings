@@ -158,14 +158,12 @@ def execute_no_commit(sql, data=None):
     except psycopg2.DatabaseError as error:
         _conn.rollback()
         buildings_warning("Database Error", str(error), "critical")
-
         return None
     except psycopg2.InterfaceError as error:
         # Raise the error
         cursor.close()
         _conn.rollback()
         buildings_warning("Interface Error", str(error), "critical")
-
         return None
 
     return cursor

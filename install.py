@@ -182,7 +182,7 @@ def db_install():
             # cursor.execute(open(script, "r").read())
             # print("DB_INSTALL: {} Loaded".format(script))
 
-            script = os.path.join(__location__, "db", "tests", "testdata", "plugin", "update_sequences.sql")
+            script = os.path.join(__location__, "db", "tests", "testdata", "update_sequences_plugin_travis.sql")
             cursor.execute(open(script, "r").read())
             print("DB_INSTALL: {} Loaded".format(script))
 

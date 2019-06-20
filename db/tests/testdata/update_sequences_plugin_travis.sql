@@ -12,7 +12,7 @@ BEGIN
   FOR schema_name, table_name IN (
     SELECT tables.table_schema, tables.table_name
     FROM information_schema.tables
-    WHERE table_catalog='nz-buildings-plugin-db'
+    WHERE table_catalog='travis_ci_test'
   ) LOOP
 
     -- Get the primary key column for each table
@@ -36,6 +36,9 @@ BEGIN
                  '''||schema_name||'.'||table_name||'_'||primary_key_column||'_seq'',
                  (SELECT max('||primary_key_column||') FROM '||schema_name||'.'||table_name||')
                )';
+      -- RAISE NOTICE 'Schema: %' schema_name;
+      -- RAISE NOTICE 'Table: %' table_name;
+      -- RAISE NOTICE 'Column: %' primary_key_column;
 
     END IF;
 
