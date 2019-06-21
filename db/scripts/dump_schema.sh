@@ -30,7 +30,7 @@ pg_dump --column-inserts --data-only --schema=buildings_lds ${database_name} > $
 
 echo "Cleaning and Copying dumped files:"
 for file in ${PWD}/db/tests/testdata/${dump}/*.sql; do
-    if [ "${file}" != "/home/mdavidson/dev/nz-buildings/db/tests/testdata/db/update_sequences.sql" ]; then
+    if [ "${file}" != "/home/mdavidson/dev/nz-buildings/db/tests/testdata/${dump}/update_sequences.sql" ]; then
         echo ${file} >&2
         # remove lines that start with SET
         sed -i '/^SET/ d' ${file}
