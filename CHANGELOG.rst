@@ -13,6 +13,7 @@ Added
 * Buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
 * Update the error status and comment in the QA layer if bulk load outline edited (edit-geometry and delete-outline only)
 * last_modified date column to buildings.building_outlines to track edits
+* Database and Plugin test data can be updated using the makefile command 'make dump_schema'
 
 Changed
 -------
@@ -26,6 +27,7 @@ Changed
 * Updated plugin editing functionality to allow the user to use the qgis split features tool and save the changes to the database
 * Updated URL links
 * last_modified date of buildings_lds tables are now the most recent of three columns (begin_lifespan, end_lifespan and last_modified) from buildings.building_outlines
+* Plugin test data is now stored in schema specific sql files
 
 Fixed
 -----
