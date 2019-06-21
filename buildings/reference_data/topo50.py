@@ -4,8 +4,19 @@ from buildings.sql import buildings_reference_select_statements as reference_sel
 from buildings.utilities import database as db
 from qgis.core import QgsVectorLayer
 
-LDS_LAYER_IDS = {'canal': 50251, 'lagoon': 50292, 'lake': 50293, 'pond': 50310, 'river': 50328, 'swamp': 50359}
-URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url=\'https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}\' version=\'auto\' table="" sql='
+LDS_LAYER_IDS = {
+      'canal_polygons': 50251
+    , 'lagoon_polygons': 50292
+    , 'lake_polygons': 50293
+    , 'pond_polygons': 50310
+    , 'river_polygons': 50328
+    , 'swamp_polygons': 50359
+    , 'hut_points': 50245
+    , 'shelter_points': 50245
+    , 'bivouac_points': 50239
+    , 'protected_areas': 53564
+}
+URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url=\'https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}\' version=\'auto\' table="" sql='
 
 
 def last_update(dataset):
@@ -39,7 +50,13 @@ def update_topo50(kx_api_key, dataset):
     # current date
     to_var = current_date()
 
-    layer = QgsVectorLayer(URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var), "canal_changeset", "WFS")
+    cql_filter = ''
+    if dataset == 'hut_points':
+        cql_filter = "&cql_filter=bldg_use='hut'"
+    elif dataset == 'shelter_points':
+        cql_filter = "&cql_filter=bldg_use='shelter'"
+
+    layer = QgsVectorLayer(URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var, cql_filter), "changeset", "WFS")
 
     if not layer.isValid():
         # something went wrong
@@ -50,17 +67,17 @@ def update_topo50(kx_api_key, dataset):
 
     for feature in layer.getFeatures():
         if feature.attribute('__change__') == 'DELETE':
-            sql = 'SELECT buildings_reference.{}_polygons_delete_by_external_id(%s)'.format(dataset)
+            sql = 'SELECT buildings_reference.{}_delete_by_external_id(%s)'.format(dataset)
             db.execute(sql, (feature.attribute('t50_fid'),))
 
         elif feature.attribute('__change__') == 'INSERT':
             result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(dataset), (feature.attribute('t50_fid'),))
             result = result.fetchone()
             if result is None:
-                sql = 'SELECT buildings_reference.{}_polygons_insert(%s, %s)'.format(dataset)
+                sql = 'SELECT buildings_reference.{}_insert(%s, %s)'.format(dataset)
                 db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
 
         elif feature.attribute('__change__') == 'UPDATE':
-            sql = 'SELECT buildings_reference.{}_polygons_update_shape_by_external_id(%s, %s)'.format(dataset)
+            sql = 'SELECT buildings_reference.{}_update_shape_by_external_id(%s, %s)'.format(dataset)
             db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
     return 'updated'
