@@ -13,6 +13,7 @@ Added
 * Buildings toolbar and bulk load adding/editing functionality added to the alter relationships frame
 * Update the error status and comment in the QA layer if bulk load outline edited (edit-geometry and delete-outline only)
 * last_modified date column to buildings.building_outlines to track edits
+* Added huts, shelters, bivouacs, and protected areas to the buildings reference schema
 
 Changed
 -------
