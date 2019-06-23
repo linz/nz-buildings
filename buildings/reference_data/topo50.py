@@ -16,7 +16,8 @@ LDS_LAYER_IDS = {
     , 'bivouac_points': 50239
     , 'protected_areas': 53564
 }
-URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url=\'https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}\' version=\'auto\' table="" sql='
+
+URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url="https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}"'
 
 
 def last_update(dataset):
@@ -52,9 +53,9 @@ def update_topo50(kx_api_key, dataset):
 
     cql_filter = ''
     if dataset == 'hut_points':
-        cql_filter = "&cql_filter=bldg_use='hut'"
+        cql_filter = '&cql_filter=bldg_use=\'hut\''
     elif dataset == 'shelter_points':
-        cql_filter = "&cql_filter=bldg_use='shelter'"
+        cql_filter = '&cql_filter=bldg_use=\'shelter\''
 
     layer = QgsVectorLayer(URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var, cql_filter), "changeset", "WFS")
 
