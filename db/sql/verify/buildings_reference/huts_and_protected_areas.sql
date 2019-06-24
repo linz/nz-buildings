@@ -118,5 +118,3 @@ FROM buildings_reference.reference_update_log
 WHERE FALSE;
 
 ROLLBACK;
-
-

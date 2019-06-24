@@ -4,10 +4,10 @@ BEGIN;
 
 -- Drop columns from building_reference_log.
 
-ALTER TABLE buildings_reference.reference_update_log DROP protected_areas;
-ALTER TABLE buildings_reference.reference_update_log DROP bivouacs;
-ALTER TABLE buildings_reference.reference_update_log DROP shelters;
-ALTER TABLE buildings_reference.reference_update_log DROP huts;
+ALTER TABLE buildings_reference.reference_update_log DROP COLUMN protected_areas;
+ALTER TABLE buildings_reference.reference_update_log DROP COLUMN bivouacs;
+ALTER TABLE buildings_reference.reference_update_log DROP COLUMN shelters;
+ALTER TABLE buildings_reference.reference_update_log DROP COLUMN huts;
 
 -- Drop huts, shelters, bivouacs and protected areas tables
 
