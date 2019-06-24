@@ -326,4 +326,4 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
-        iface.messageBar().popWidget()
+        self.bulk_load_frame.change_instance.error_dialog.close()
