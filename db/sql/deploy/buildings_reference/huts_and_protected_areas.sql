@@ -103,9 +103,9 @@ COMMENT ON COLUMN buildings_reference.protected_areas_polygons.name IS
 
 -- Add columns to Update Reference Log table
 
-ALTER TABLE buildings_reference.reference_update_log ADD huts boolean DEFAULT False;
-ALTER TABLE buildings_reference.reference_update_log ADD shelters boolean DEFAULT False;
-ALTER TABLE buildings_reference.reference_update_log ADD bivouacs boolean DEFAULT False;
+ALTER TABLE buildings_reference.reference_update_log ADD hut boolean DEFAULT False;
+ALTER TABLE buildings_reference.reference_update_log ADD shelter boolean DEFAULT False;
+ALTER TABLE buildings_reference.reference_update_log ADD bivouac boolean DEFAULT False;
 ALTER TABLE buildings_reference.reference_update_log ADD protected_areas boolean DEFAULT False;
 
 COMMIT;

@@ -21,8 +21,14 @@ URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' 
 
 
 def last_update(dataset):
+    column_name = dataset
+    if 'polygon' in column_name:
+        column_name.replace('_polygons', '')
+    elif 'point' in column_name:
+        column_name.replace('_points', '')
+
     # get last update of layer date from log
-    from_var = db.execute_return(reference_select.log_select_last_update.format(dataset))
+    from_var = db.execute_return(reference_select.log_select_last_update.format(column_name))
     from_var = from_var.fetchone()
     if from_var is None:
         # default to beginning of 2018

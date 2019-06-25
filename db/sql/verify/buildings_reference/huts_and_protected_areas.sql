@@ -101,15 +101,15 @@ BEGIN
 END;
 $$;
 
-SELECT huts
+SELECT hut
 FROM buildings_reference.reference_update_log
 WHERE FALSE;
 
-SELECT shelters
+SELECT shelter
 FROM buildings_reference.reference_update_log
 WHERE FALSE;
 
-SELECT bivouacs
+SELECT bivouac
 FROM buildings_reference.reference_update_log
 WHERE FALSE;
 
