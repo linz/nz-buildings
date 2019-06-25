@@ -9,7 +9,7 @@ BEGIN;
 -- hut_points
 -- shelter_points
 -- bivouac_points
--- protected_areas
+-- protected_areas_polygons
 -- Add columns to Update Reference Log table
 
 
@@ -18,7 +18,7 @@ BEGIN;
 CREATE TABLE IF NOT EXISTS buildings_reference.hut_points (
       hut_points_id serial PRIMARY KEY
     , external_hut_points_id integer
-    , name character varying(100)
+    , name character varying(254)
     , shape public.geometry(Point, 2193)
 );
 
@@ -40,7 +40,7 @@ COMMENT ON COLUMN buildings_reference.hut_points.name IS
 CREATE TABLE IF NOT EXISTS buildings_reference.shelter_points (
       shelter_points_id serial PRIMARY KEY
     , external_shelter_points_id integer
-    , name character varying(100)
+    , name character varying(254)
     , shape public.geometry(Point, 2193)
 );
 
@@ -62,7 +62,7 @@ COMMENT ON COLUMN buildings_reference.shelter_points.name IS
 CREATE TABLE IF NOT EXISTS buildings_reference.bivouac_points (
       bivouac_points_id serial PRIMARY KEY
     , external_bivouac_points_id integer
-    , name character varying(100)
+    , name character varying(254)
     , shape public.geometry(Point, 2193)
 );
 
@@ -81,24 +81,24 @@ COMMENT ON COLUMN buildings_reference.bivouac_points.name IS
 
 -- Add protected areas table
 
-CREATE TABLE IF NOT EXISTS buildings_reference.protected_areas (
-      protected_areas_id serial PRIMARY KEY
-    , external_protected_areas_id integer
-    , name character varying(100)
+CREATE TABLE IF NOT EXISTS buildings_reference.protected_areas_polygons (
+      protected_areas_polygon_id serial PRIMARY KEY
+    , external_protected_areas_polygon_id integer
+    , name character varying(254)
     , shape public.geometry(Polygon, 2193)
 );
 
-CREATE INDEX shx_protected_areas
-    ON buildings_reference.protected_areas USING gist (shape);
+CREATE INDEX shx_protected_areas_polygons
+    ON buildings_reference.protected_areas_polygons USING gist (shape);
 
-COMMENT ON TABLE buildings_reference.protected_areas IS
+COMMENT ON TABLE buildings_reference.protected_areas_polygons IS
 'https://data.linz.govt.nz/layer/53564-protected-areas/';
 
-COMMENT ON COLUMN buildings_reference.protected_areas.protected_areas_id IS
+COMMENT ON COLUMN buildings_reference.protected_areas_polygons.protected_areas_polygon_id IS
 'Unique identifier for the protected areas polygons.';
-COMMENT ON COLUMN buildings_reference.protected_areas.external_protected_areas_id IS
+COMMENT ON COLUMN buildings_reference.protected_areas_polygons.external_protected_areas_polygon_id IS
 'The id of the protected areas from the external provider.';
-COMMENT ON COLUMN buildings_reference.protected_areas.name IS
+COMMENT ON COLUMN buildings_reference.protected_areas_polygons.name IS
 'Name of the protected areas.';
 
 -- Add columns to Update Reference Log table

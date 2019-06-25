@@ -5,7 +5,7 @@ BEGIN;
 -- verify hut_points table
 -- verify shelter points table
 -- verify bivouac points table
--- verify protected areas table
+-- verify protected areas polygons table
 -- verify columns added to reference_update_log table
 
 SELECT
@@ -79,11 +79,11 @@ END;
 $$;
 
 SELECT
-      protected_areas_id
-    , external_protected_areas_id
+      protected_areas_polygon_id
+    , external_protected_areas_polygon_id
     , name
     , shape
-FROM buildings_reference.protected_areas
+FROM buildings_reference.protected_areas_polygons
 WHERE FALSE;
 
 DO $$
@@ -91,12 +91,12 @@ BEGIN
     PERFORM TRUE
     FROM pg_indexes
     WHERE schemaname = 'buildings_reference'
-    AND tablename = 'protected_areas'
-    AND indexdef LIKE '%shx_protected_areas%';
+    AND tablename = 'protected_areas_polygons'
+    AND indexdef LIKE '%shx_protected_areas_polygons%';
     IF NOT FOUND THEN
         RAISE EXCEPTION 'MISSING INDEX: Schema "buildings_reference", table '
-        '"protected_areas", column "shape" has a missing index '
-        'named "shx_protected_areas"';
+        '"protected_areas_polygons", column "shape" has a missing index '
+        'named "shx_protected_areas_polygons"';
     END IF;
 END;
 $$;

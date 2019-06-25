@@ -14,7 +14,7 @@ LDS_LAYER_IDS = {
     , 'hut_points': 50245
     , 'shelter_points': 50245
     , 'bivouac_points': 50239
-    , 'protected_areas': 53564
+    , 'protected_areas_polygons': 53564
 }
 
 URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url="https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}"'
@@ -57,6 +57,10 @@ def update_topo50(kx_api_key, dataset):
     elif dataset == 'shelter_points':
         cql_filter = '&cql_filter=bldg_use=\'shelter\''
 
+    external_id = 't50_fid'
+    if dataset == 'protected_areas_polygons':
+        external_id = 'napalis_id'
+
     layer = QgsVectorLayer(URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var, cql_filter), "changeset", "WFS")
 
     if not layer.isValid():
@@ -69,16 +73,18 @@ def update_topo50(kx_api_key, dataset):
     for feature in layer.getFeatures():
         if feature.attribute('__change__') == 'DELETE':
             sql = 'SELECT buildings_reference.{}_delete_by_external_id(%s)'.format(dataset)
-            db.execute(sql, (feature.attribute('t50_fid'),))
+            db.execute(sql, (feature.attribute(external_id),))
 
         elif feature.attribute('__change__') == 'INSERT':
-            result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(dataset), (feature.attribute('t50_fid'),))
+            print feature.attribute(external_id)
+            result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(dataset), (feature.attribute(external_id),))
             result = result.fetchone()
             if result is None:
                 sql = 'SELECT buildings_reference.{}_insert(%s, %s)'.format(dataset)
-                db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
+                db.execute(sql, (feature.attribute(external_id), feature.geometry().exportToWkt()))
 
         elif feature.attribute('__change__') == 'UPDATE':
             sql = 'SELECT buildings_reference.{}_update_shape_by_external_id(%s, %s)'.format(dataset)
-            db.execute(sql, (feature.attribute('t50_fid'), feature.geometry().exportToWkt()))
+            db.execute(sql, (feature.attribute(external_id), feature.geometry().exportToWkt()))
     return 'updated'
+

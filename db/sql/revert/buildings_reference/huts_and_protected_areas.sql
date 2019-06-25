@@ -11,7 +11,7 @@ ALTER TABLE buildings_reference.reference_update_log DROP COLUMN huts;
 
 -- Drop huts, shelters, bivouacs and protected areas tables
 
-DROP TABLE buildings_reference.protected_areas CASCADE;
+DROP TABLE buildings_reference.protected_areas_polygons CASCADE;
 DROP TABLE buildings_reference.bivouac_points CASCADE;
 DROP TABLE buildings_reference.shelter_points CASCADE;
 DROP TABLE buildings_reference.hut_points CASCADE;

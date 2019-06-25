@@ -157,7 +157,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         if self.chbx_bivouacs.isChecked():
             self.topo_layer_processing('bivouac_points')
         if self.chbx_protected_areas.isChecked():
-            self.topo_layer_processing('protected_areas')    
+            self.topo_layer_processing('protected_areas_polygons')
         # coastlines and islands (placeholder)
         if self.chbx_coastline_and_islands.isChecked():
             self.message += 'The coastlines and islands table must be updated manually'
