@@ -20,12 +20,7 @@ LDS_LAYER_IDS = {
 URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url="https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}"'
 
 
-def last_update(dataset):
-    column_name = dataset
-    if 'polygon' in column_name:
-        column_name.replace('_polygons', '')
-    elif 'point' in column_name:
-        column_name.replace('_points', '')
+def last_update(column_name):
 
     # get last update of layer date from log
     from_var = db.execute_return(reference_select.log_select_last_update.format(column_name))
@@ -57,6 +52,13 @@ def update_topo50(kx_api_key, dataset):
     # current date
     to_var = current_date()
 
+    if 'polygon' in dataset:
+        column_name = dataset.replace('_polygons', '')
+    elif 'point' in dataset:
+        column_name = dataset.replace('_points', '')
+    else:
+        column_name = dataset
+
     cql_filter = ''
     if dataset == 'hut_points':
         cql_filter = '&cql_filter=bldg_use=\'hut\''
@@ -83,7 +85,7 @@ def update_topo50(kx_api_key, dataset):
 
         elif feature.attribute('__change__') == 'INSERT':
             print feature.attribute(external_id)
-            result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(dataset), (feature.attribute(external_id),))
+            result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(column_name), (feature.attribute(external_id),))
             result = result.fetchone()
             if result is None:
                 sql = 'SELECT buildings_reference.{}_insert(%s, %s)'.format(dataset)
