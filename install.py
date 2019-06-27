@@ -44,6 +44,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_bulk_load", "schema_and_tables.sql"),
     os.path.join("sql", "deploy", "buildings_lds", "schema_and_tables.sql"),
     os.path.join("sql", "deploy", "buildings", "add_modified_date.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "huts_and_protected_areas.sql"),
     # Default Values
     os.path.join("sql", "deploy", "buildings_common", "default_values.sql"),
     os.path.join("sql", "deploy", "buildings", "default_values.sql"),
@@ -85,6 +86,10 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_bulk_load", "functions", "compare.sql"),
     os.path.join("sql", "deploy", "buildings_bulk_load", "functions", "load_to_production.sql"),
     os.path.join("sql", "deploy", "buildings_lds", "functions", "populate_buildings_lds.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "bivouac_points.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "hut_points.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "protected_area_polygons.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "shelter_points.sql")
 
 ]
 

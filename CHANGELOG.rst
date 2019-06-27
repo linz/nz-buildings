@@ -14,6 +14,7 @@ Added
 * Update the error status and comment in the QA layer if bulk load outline edited (edit-geometry and delete-outline only)
 * last_modified date column to buildings.building_outlines to track edits
 * Database and Plugin test data can be updated using the makefile command 'make dump_schema'
+* Added huts, shelters, bivouacs, and protected areas to the buildings reference schema
 
 Changed
 -------

@@ -78,6 +78,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ponds.setEnabled(1)
         self.chbx_rivers.setEnabled(1)
         self.chbx_swamps.setEnabled(1)
+        self.chbx_huts.setEnabled(1)
+        self.chbx_shelters.setEnabled(1)
+        self.chbx_bivouacs.setEnabled(1)
+        self.chbx_protected_areas.setEnabled(1)
         self.chbx_suburbs.setEnabled(1)
         self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
@@ -97,6 +101,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_ponds.setDisabled(1)
         self.chbx_rivers.setDisabled(1)
         self.chbx_swamps.setDisabled(1)
+        self.chbx_huts.setDisabled(1)
+        self.chbx_shelters.setDisabled(1)
+        self.chbx_bivouacs.setDisabled(1)
+        self.chbx_protected_areas.setDisabled(1)
         self.chbx_suburbs.setDisabled(1)
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
@@ -126,22 +134,34 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.updates = []
         # canals
         if self.chbx_canals.isChecked():
-            self.topo_layer_processing('canal')
+            self.topo_layer_processing('canal_polygons')
         # lagoon
         if self.chbx_lagoons.isChecked():
-            self.topo_layer_processing('lagoon')
+            self.topo_layer_processing('lagoon_polygons')
         # lake
         if self.chbx_lakes.isChecked():
-            self.topo_layer_processing('lake')
+            self.topo_layer_processing('lake_polygons')
         # pond
         if self.chbx_ponds.isChecked():
-            self.topo_layer_processing('pond')
+            self.topo_layer_processing('pond_polygons')
         # rivers
         if self.chbx_rivers.isChecked():
-            self.topo_layer_processing('river')
+            self.topo_layer_processing('river_polygons')
         # swamp
         if self.chbx_swamps.isChecked():
-            self.topo_layer_processing('swamp')
+            self.topo_layer_processing('swamp_polygons')
+        # huts
+        if self.chbx_huts.isChecked():
+            self.topo_layer_processing('hut_points')
+        # shelters
+        if self.chbx_shelters.isChecked():
+            self.topo_layer_processing('shelter_points')
+        # bivouacs
+        if self.chbx_bivouacs.isChecked():
+            self.topo_layer_processing('bivouac_points')
+        # protected areas
+        if self.chbx_protected_areas.isChecked():
+            self.topo_layer_processing('protected_areas_polygons')
         # coastlines and islands (placeholder)
         if self.chbx_coastline_and_islands.isChecked():
             self.message += 'The coastlines and islands table must be updated manually'

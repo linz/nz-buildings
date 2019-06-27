@@ -16,7 +16,7 @@ BEGIN;
 -- pond polygons
 -- swamp polygons
 -- lagoon polygons
--- canal_polygons
+-- canal
 -- capture_source_area
 -- reference_update_log
 
@@ -356,17 +356,17 @@ COMMENT ON COLUMN buildings_reference.reference_update_log.update_id IS
 COMMENT ON COLUMN buildings_reference.reference_update_log.update_date IS
 'Date of the reference data update';
 COMMENT ON COLUMN buildings_reference.reference_update_log.river IS
-'True if river_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if river table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.lake IS
-'True if lake_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if lake table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.pond IS
-'True if pond_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if pond table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.swamp IS
-'True if swamp_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if swamp table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.lagoon IS
-'True if lagoon_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if lagoon table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.canal IS
-'True if canal_polygons table was changed/checked in this update, defaults to False if not specified.';
+'True if canal table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.capture_source_area IS
 'True if capture_source_area table was changed/checked in this update, defaults to False if not specified.';
 COMMENT ON COLUMN buildings_reference.reference_update_log.territorial_authority IS
