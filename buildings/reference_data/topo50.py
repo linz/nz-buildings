@@ -5,16 +5,16 @@ from buildings.utilities import database as db
 from qgis.core import QgsVectorLayer
 
 LDS_LAYER_IDS = {
-      'canal_polygons': 50251
-    , 'lagoon_polygons': 50292
-    , 'lake_polygons': 50293
-    , 'pond_polygons': 50310
-    , 'river_polygons': 50328
-    , 'swamp_polygons': 50359
-    , 'hut_points': 50245
-    , 'shelter_points': 50245
-    , 'bivouac_points': 50239
-    , 'protected_areas_polygons': 53564
+    'canal_polygons': 50251,
+    'lagoon_polygons': 50292,
+    'lake_polygons': 50293,
+    'pond_polygons': 50310,
+    'river_polygons': 50328,
+    'swamp_polygons': 50359,
+    'hut_points': 50245,
+    'shelter_points': 50245,
+    'bivouac_points': 50239,
+    'protected_areas_polygons': 53564,
 }
 
 URI = 'srsname=\'EPSG:2193\' typename=\'data.linz.govt.nz:layer-{0}-changeset\' url="https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}"'
@@ -46,7 +46,6 @@ def current_date():
 
 def update_topo50(kx_api_key, dataset):
 
-    print "dataset is: ", dataset
     # Get name of column in reference log table
     if 'polygon' in dataset:
         column_name = dataset.replace('_polygons', '')
@@ -86,9 +85,9 @@ def update_topo50(kx_api_key, dataset):
             db.execute(sql, (feature.attribute(external_id),))
 
         elif feature.attribute('__change__') == 'INSERT':
-            print feature.attribute(external_id)
             if 'polygon' in dataset:
-                result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(column_name), (feature.attribute(external_id),))
+                result = db.execute_return(
+                    reference_select.select_polygon_id_by_external_id.format(column_name), (feature.attribute(external_id),))
             elif 'point' in dataset:
                 result = db.execute_return(reference_select.select_point_id_by_external_id.format(column_name), (feature.attribute(external_id),))
             result = result.fetchone()
@@ -100,4 +99,3 @@ def update_topo50(kx_api_key, dataset):
             sql = 'SELECT buildings_reference.{}_update_shape_by_external_id(%s, %s)'.format(dataset)
             db.execute(sql, (feature.attribute(external_id), feature.geometry().exportToWkt()))
     return 'updated'
-

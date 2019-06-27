@@ -150,12 +150,16 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # swamp
         if self.chbx_swamps.isChecked():
             self.topo_layer_processing('swamp_polygons')
+        # huts
         if self.chbx_huts.isChecked():
             self.topo_layer_processing('hut_points')
+        # shelters
         if self.chbx_shelters.isChecked():
             self.topo_layer_processing('shelter_points')
+        # bivouacs
         if self.chbx_bivouacs.isChecked():
             self.topo_layer_processing('bivouac_points')
+        # protected areas
         if self.chbx_protected_areas.isChecked():
             self.topo_layer_processing('protected_areas_polygons')
         # coastlines and islands (placeholder)
