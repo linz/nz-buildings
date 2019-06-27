@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS buildings_reference.protected_areas_polygons (
       protected_areas_polygon_id serial PRIMARY KEY
     , external_protected_areas_polygon_id integer
     , name character varying(254)
-    , shape public.geometry(Polygon, 2193)
+    , shape public.geometry(MultiPolygon, 2193)
 );
 
 CREATE INDEX shx_protected_areas_polygons

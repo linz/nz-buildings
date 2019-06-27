@@ -86,6 +86,14 @@ FROM buildings_reference.{0}_polygons
 WHERE external_{0}_polygon_id = %s;
 """
 
+# topo 50 layers - points
+
+select_point_id_by_external_id = """
+SELECT {0}_points_id
+FROM buildings_reference.{0}_points
+WHERE external_{0}_points_id = %s;
+"""
+
 # suburb locality
 
 suburb_locality_intersect_geom = """

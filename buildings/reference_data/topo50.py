@@ -46,18 +46,20 @@ def current_date():
 
 def update_topo50(kx_api_key, dataset):
 
-    # get last update of layer date from log
-    from_var = last_update(dataset)
-
-    # current date
-    to_var = current_date()
-
+    print "dataset is: ", dataset
+    # Get name of column in reference log table
     if 'polygon' in dataset:
         column_name = dataset.replace('_polygons', '')
     elif 'point' in dataset:
         column_name = dataset.replace('_points', '')
     else:
         column_name = dataset
+
+    # get last update of layer date from log
+    from_var = last_update(column_name)
+
+    # current date
+    to_var = current_date()
 
     cql_filter = ''
     if dataset == 'hut_points':
@@ -85,7 +87,10 @@ def update_topo50(kx_api_key, dataset):
 
         elif feature.attribute('__change__') == 'INSERT':
             print feature.attribute(external_id)
-            result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(column_name), (feature.attribute(external_id),))
+            if 'polygon' in dataset:
+                result = db.execute_return(reference_select.select_polygon_id_by_external_id.format(column_name), (feature.attribute(external_id),))
+            elif 'point' in dataset:
+                result = db.execute_return(reference_select.select_point_id_by_external_id.format(column_name), (feature.attribute(external_id),))
             result = result.fetchone()
             if result is None:
                 sql = 'SELECT buildings_reference.{}_insert(%s, %s)'.format(dataset)
