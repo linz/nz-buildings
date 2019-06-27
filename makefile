@@ -59,11 +59,6 @@ clean:
 	# Remove the files built from .in files during install
 	rm -f $(EXTRA_CLEAN)
 
-dump_db_schema:
-	# dump nz-buildings-pgtap-db to test data schema files
-	chmod +x db/scripts/dump_db_schema.sh
-	./db/scripts/dump_db_schema.sh
-
 # PLUGIN
 
 PLUGINNAME = buildings
@@ -112,3 +107,10 @@ bump_version:
 	$(SED) -i 's/Unreleased/$(VERSION)/g' ./CHANGELOG.rst
 	# Replace version number in makefile
 	$(SED) -i 's/^VERSION = .*/VERSION = $(VERSION)/g' ./makefile
+
+# BOTH DATABASE AND PLUGIN
+
+dump_schema:
+	# dump nz-buildings-pgtap-db to test data schema files
+	chmod +x db/scripts/dump_schema.sh
+	./db/scripts/dump_schema.sh
