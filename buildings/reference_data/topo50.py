@@ -65,6 +65,8 @@ def update_topo50(kx_api_key, dataset):
         cql_filter = '&cql_filter=bldg_use=\'hut\''
     elif dataset == 'shelter_points':
         cql_filter = '&cql_filter=bldg_use=\'shelter\''
+    elif dataset == 'protected_areas_polygons':
+        cql_filter = '&cql_filter=type = \'Conservation Area\' OR type = \'National Park\' OR type =\'Wildlife Area\''
 
     external_id = 't50_fid'
     if dataset == 'protected_areas_polygons':
