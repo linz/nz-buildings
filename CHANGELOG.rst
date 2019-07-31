@@ -36,6 +36,7 @@ Fixed
 * Warning messages for when multiple buildings are added at once
 * Users can correctly remove added outlines or revert changes when adding multiple outlines with 'add outline' functionality.
 * Remove functionality repopulate_error_attribute_table to LIQA plugin.
+* Add dist:Trusty in travis-ci config so travis-ci can run in the right build.
 
 1.4.0
 ==========
