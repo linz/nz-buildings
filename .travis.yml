@@ -9,6 +9,7 @@ jobs:
     env: BUILD=docs
     language: python
     python: 2.7
+    dist: trusty
     before_install: []
     install:
     - pip install Sphinx sphinx_rtd_theme
@@ -190,6 +191,7 @@ jobs:
       PYTHON_EXECUTABLE=python PIP_EXECUTABLE=pip
     language: python
     python: 2.7
+    dist: trusty
     services: docker
     before_install:
     - sudo apt-get update
