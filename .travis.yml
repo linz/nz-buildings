@@ -21,6 +21,7 @@ jobs:
     env: BUILD=db PGSQL=9.4 PGIS=2.3 PGPORT=5432
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 9.4
       apt:
@@ -48,6 +49,7 @@ jobs:
     env: BUILD=db PGSQL=9.5 PGIS=2.3 PGPORT=5432
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 9.5
       apt:
@@ -75,6 +77,7 @@ jobs:
     env: BUILD=db PGSQL=9.5 PGIS=2.4 PGPORT=5432
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 9.5
       apt:
@@ -102,6 +105,7 @@ jobs:
     env: BUILD=db PGSQL=9.6 PGIS=2.3 PGPORT=5432
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 9.6
       apt:
@@ -129,6 +133,7 @@ jobs:
     env: BUILD=db PGSQL=9.6 PGIS=2.4 PGPORT=5432
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 9.6
       apt:
@@ -156,6 +161,7 @@ jobs:
     env: BUILD=db PGSQL=10 PGIS=2.4 PGPORT=5433
     language: python
     python: 2.7
+    dist: trusty
     addons:
       postgresql: 10
       apt:
