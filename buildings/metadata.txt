@@ -2,7 +2,7 @@
 name=Buildings
 description=This plugin is used to maintain New Zealand topographic buildings datasets
 about=This plugin is used to maintain New Zealand topographic buildings datasets
-version=dev
+version=2.0.0
 
 qgisMinimumVersion=2.18
 
