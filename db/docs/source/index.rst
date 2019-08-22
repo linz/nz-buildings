@@ -1,5 +1,5 @@
 NZ Buildings Data Dictionary
-=========================
+==================================
 
 Table of Contents:
 

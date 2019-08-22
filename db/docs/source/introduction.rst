@@ -12,7 +12,7 @@ Background
 ----------------------------
 
 
-Building outlines have been identified as a dataset of national importance. They influence a multitude of decisions made across New Zealand at both the national and regional levels. It is therefore critical to have a consistent and dynamic dataset available. In 2016 LINZ conducted a pilot project to capture building outlines over three regions of New Zealand (Canterbury, Hawke’s Bay and Waikato). A survey was sent out to assess users’ opinion and determine the usefulness and suitability of the data for their purposes. The majority of the respondents (90%) to the survey agreed that the data is useful for their organisation. Many commented that the data is better than existing data, it is fit for purpose, and has become invaluable when enriched with other datasets. LINZ will continue to procure building outlines aligning with aerial imagery capture. This building outline dataset will provide a foundation for various stakeholders to map risk modelling, environmental assessment, urban development, resilience planning in addition to the visualization and physical location of buildings. 
+Building outlines have been identified as a dataset of national importance. They influence a multitude of decisions made across New Zealand at both the national and regional levels. It is therefore critical to have a consistent and dynamic dataset available. In 2016 LINZ conducted a pilot project to capture building outlines over three regions of New Zealand (Canterbury, Hawke’s Bay and Waikato). A survey was sent out to assess users’ opinion and determine the usefulness and suitability of the data for their purposes. The majority of the respondents (90%) to the survey agreed that the data is useful for their organisation. Many commented that the data is better than existing data, it is fit for purpose, and has become invaluable when enriched with other datasets. LINZ will continue to procure building outlines aligning with aerial imagery capture. This building outline dataset will provide a foundation for various stakeholders to map risk modelling, environmental assessment, urban development, resilience planning in addition to the visualization and physical location of buildings.
 Over the next decade, the LINZ Topography Team is working towards its vision of recognising the way location information can help unlock new patterns and knowledge, particularly when it is combined with other types of information. One of our `strategic goals <https://www.linz.govt.nz/about-linz/publications/strategy/topographic-strategy-2015>`_ is to improve national scale datasets and maximize their opportunities for reuse by a variety of national and regional stakeholders.
 
 The current Topo50 data for buildings is represented by either a `building polygon <https://data.linz.govt.nz/layer/50246-nz-building-polygons-topo-150k/>`_ or a `building point <https://data.linz.govt.nz/layer/50245-nz-building-points-topo-150k/>`_ . A building polygon is used to represent a structure that is large enough to be captured at 1:50,000 scale and has an area of 625m² or greater. The central business districts of large towns and cities is held in the LINZ building data as large building polygons. It is shown on the 1:50,000 scale printed maps as black fill, and is a generalized view, not showing individual buildings, or open spaces between buildings. A building point is used to represent a building with an area too small to be captured as a polygon feature at 1:50,000 scale.
@@ -23,9 +23,9 @@ The NZ Building Outlines data described below represents the outlines of individ
 Description
 ---------------------------
 
-This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
+This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Taranaki, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
 
-This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from aerial imagery using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground. 
+This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from aerial imagery using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground.
 
 .. figure:: _static/footprint.png
    :scale: 100 %
@@ -59,16 +59,16 @@ Source Imagery
 
 The source imagery is linked via the ``capture_source_id`` attribute of building outlines to the ``imagery_survey_id`` of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
-The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html 
+The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
 
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 4 shows the additional coverage of building outlines available by the end of 2019 in blue.
+The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 4 shows the additional coverage of building outlines available by the end of 2019 in blue.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+
-| .. figure:: _static/April_2019_coverage_map.png             | .. figure:: _static/2019_coverage_map.png                   |
+| .. figure:: _static/August_2019_coverage_map.png            | .. figure:: _static/2019_coverage_map2.png                  |
 |    :scale: 50%                                              |    :scale: 50%                                              |
 |    :alt: current building outlines coverage                 |    :alt: upcoming building outlines coverage                |
 |                                                             |                                                             |
@@ -99,7 +99,7 @@ A building outline polygon is considered to have valid geometry if:
 Formats
 ---------------------------
 
-Textual data uses UTF-8 character encoding. 
+Textual data uses UTF-8 character encoding.
 
 The source geometry of all spatial data uses NZGD2000 / New Zealand Transverse Mercator 2000 (EPSG 2193) as the spatial reference system.
 
