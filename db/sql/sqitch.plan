@@ -55,3 +55,6 @@ buildings_reference/functions/hut_points 2019-06-20T03:06:41Z Jan Ducnuigeen <jd
 buildings_reference/functions/shelter_points 2019-06-20T03:37:13Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add function for interacting with shelter_points
 buildings_reference/functions/bivouac_points 2019-06-20T04:04:21Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add function for interacting with bivouac_points
 buildings_reference/functions/protected_area_polygons 2019-06-20T19:43:21Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add function for interacting with protected area polygons
+@v2.0.0-dev1 2019-08-22T03:43:17Z Chen Yingting <ychen@linz.govt.nz> # Tag v2.0.0-dev1
+
+buildings_reference/functions/change_reference_name_col_insert 2019-08-30T01:40:37Z Chen Yingting <ychen@linz.govt.nz> # Alter the functions to allow updates or inserts on reference name column

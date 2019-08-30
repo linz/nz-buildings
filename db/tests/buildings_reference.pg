@@ -128,19 +128,19 @@ SELECT has_function('buildings_reference', 'swamp_polygons_insert', 'Should have
 SELECT has_function('buildings_reference', 'reference_update_log_insert_log', 'Should have function reference_update_log_insert_log in buildings_reference.');
 
 SELECT has_function('buildings_reference', 'hut_points_delete_by_external_id', 'Should have function hut_points_delete_by_external_id in buildings_reference.');
-SELECT has_function('buildings_reference', 'hut_points_update_shape_by_external_id', 'Should have function hut_points_update_shape_by_external_id in buildings_reference.');
+SELECT has_function('buildings_reference', 'hut_points_update_by_external_id', 'Should have function hut_points_update_by_external_id in buildings_reference.');
 SELECT has_function('buildings_reference', 'hut_points_insert', 'Should have function hut_points_insert in buildings_reference.');
 
 SELECT has_function('buildings_reference', 'shelter_points_delete_by_external_id', 'Should have function shelter_points_delete_by_external_id in buildings_reference.');
-SELECT has_function('buildings_reference', 'shelter_points_update_shape_by_external_id', 'Should have function shelter_points_update_shape_by_external_id in buildings_reference.');
+SELECT has_function('buildings_reference', 'shelter_points_update_by_external_id', 'Should have function shelter_points_update_by_external_id in buildings_reference.');
 SELECT has_function('buildings_reference', 'shelter_points_insert', 'Should have function shelter_points_insert in buildings_reference.');
 
 SELECT has_function('buildings_reference', 'bivouac_points_delete_by_external_id', 'Should have function bivouac_points_delete_by_external_id in buildings_reference.');
-SELECT has_function('buildings_reference', 'bivouac_points_update_shape_by_external_id', 'Should have function bivouac_points_update_shape_by_external_id in buildings_reference.');
+SELECT has_function('buildings_reference', 'bivouac_points_update_by_external_id', 'Should have function bivouac_points_update_by_external_id in buildings_reference.');
 SELECT has_function('buildings_reference', 'bivouac_points_insert', 'Should have function bivouac_points_insert in buildings_reference.');
 
 SELECT has_function('buildings_reference', 'protected_areas_polygons_delete_by_external_id', 'Should have function protected_areas_polygons_delete_by_external_id in buildings_reference.');
-SELECT has_function('buildings_reference', 'protected_areas_polygons_update_shape_by_external_id', 'Should have function protected_areas_polygons_update_shape_by_external_id in buildings_reference.');
+SELECT has_function('buildings_reference', 'protected_areas_polygons_update_by_external_id', 'Should have function protected_areas_polygons_update_by_external_id in buildings_reference.');
 SELECT has_function('buildings_reference', 'protected_areas_polygons_insert', 'Should have function protected_areas_polygons_insert in buildings_reference.');
 
 -- Finish pgTAP testing
