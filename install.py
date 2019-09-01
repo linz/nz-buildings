@@ -89,7 +89,8 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_reference", "functions", "bivouac_points.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "hut_points.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "protected_area_polygons.sql"),
-    os.path.join("sql", "deploy", "buildings_reference", "functions", "shelter_points.sql")
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "shelter_points.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "change_reference_name_col_insert.sql")
 
 ]
 
