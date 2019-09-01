@@ -111,8 +111,7 @@ fi
 
 # Deploy buildings using sqitch and then verify deployment
 cd ${SCRIPTSDIR}/sql
-sqitch deploy
-sqitch verify
+sqitch deploy --verify
 cd -
 
 # Execute files that create test data - test data remains in database
