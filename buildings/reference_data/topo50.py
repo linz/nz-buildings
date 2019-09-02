@@ -94,10 +94,19 @@ def update_topo50(kx_api_key, dataset):
                 result = db.execute_return(reference_select.select_point_id_by_external_id.format(column_name), (feature.attribute(external_id),))
             result = result.fetchone()
             if result is None:
-                sql = 'SELECT buildings_reference.{}_insert(%s, %s)'.format(dataset)
-                db.execute(sql, (feature.attribute(external_id), feature.geometry().exportToWkt()))
+                sql = 'SELECT buildings_reference.{}_insert(%s, %s, %s)'.format(dataset)
+                db.execute(sql, (feature.attribute(external_id), correct_name_format(feature['name']), feature.geometry().exportToWkt()))
 
         elif feature.attribute('__change__') == 'UPDATE':
-            sql = 'SELECT buildings_reference.{}_update_shape_by_external_id(%s, %s)'.format(dataset)
-            db.execute(sql, (feature.attribute(external_id), feature.geometry().exportToWkt()))
+            sql = 'SELECT buildings_reference.{}_update_by_external_id(%s, %s, %s)'.format(dataset)
+            db.execute(sql, (feature.attribute(external_id), correct_name_format(feature['name']), feature.geometry().exportToWkt()))
     return 'updated'
+
+
+def correct_name_format(name):
+    if name:
+        if "'" in name:
+            name = "{}".format(name.replace("'", "''"))
+    else:
+        name = ''
+    return str(name)

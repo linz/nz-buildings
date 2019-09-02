@@ -4,6 +4,16 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Fixed
+-----
+
+* Include name in the update or insert functions for reference data (hut, shelter, bivouac and protected area).
+* Fix sqitch deployment to 'sqitch deploy --verify'
+
+
 2.0.0
 ==========
 02-08-2019
