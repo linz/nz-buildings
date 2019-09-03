@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2019-04-17</gco:Date>
+    <gco:Date>2019-08-23</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-05-07</gco:Date>
+                <gco:Date>2019-08-23</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2019-05-07</gco:Date>
+                <gco:Date>2019-08-23</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -123,10 +123,10 @@ A building outline is a 2D representation of the roof outline of a building whic
 Building roof outlines observed in aerial imagery larger than or equal to 10 square meters are captured in this dataset, and may include structures such as garages and large sheds.
 
 **Data vintage**
-          
+
 This dataset contains all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
 
-Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
+Coverage areas include Northland, Auckland, Waikato, Hawke’s Bay, Manawatu-Whanganui, Wellington, Taranaki, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
 
 Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
@@ -323,9 +323,9 @@ The Building Outlines contain spatial detail reflective of the visible character
 • Adjoining commercial buildings are captured as separate building outlines when rooflines allow delineation.
 • Hay bales and silage are not captured as building outlines.
 • Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations
-• Water tanks are captured as building outlines when their area is at least 16.5 square metres (or 4.5 meters in diameter).      
+• Water tanks are captured as building outlines when their area is at least 16.5 square metres (or 4.5 meters in diameter).
 
-**Valid Geometry:**    
+**Valid Geometry:**
 A building outline polygon is considered to have valid geometry if;
 • It does not overlap with other building outline polygons;
 • It does not contain any spikes along edges;
