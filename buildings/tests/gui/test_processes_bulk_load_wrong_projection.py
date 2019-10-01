@@ -42,17 +42,16 @@ class ProcessWrongProjectionTest(unittest.TestCase):
         # remove temporary layers from canvas
         layers = iface.legendInterface().layers()
         for layer in layers:
-            if 'test_wrong_projection' in str(layer.id()):
+            if "test_wrong_projection" in str(layer.id()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Bulk Load', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Bulk Load", Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
 
@@ -68,25 +67,32 @@ class ProcessWrongProjectionTest(unittest.TestCase):
 
     def test_bulk_load_wrong_projection(self):
         """When save is clicked data is added to the correct tables"""
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'testdata/test_wrong_projection.shp')
-        iface.addVectorLayer(path, '', 'ogr')
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "testdata/test_wrong_projection.shp",
+        )
+        iface.addVectorLayer(path, "", "ogr")
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == 'test_wrong_projection':
-                self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
+            if (
+                self.bulk_load_frame.ml_outlines_layer.layer(idx).name()
+                == "test_wrong_projection"
+            ):
+                self.bulk_load_frame.ml_outlines_layer.setLayer(
+                    self.bulk_load_frame.ml_outlines_layer.layer(idx)
+                )
                 break
             idx = idx + 1
         # add description
-        self.bulk_load_frame.le_data_description.setText('Test wrong projection')
+        self.bulk_load_frame.le_data_description.setText("Test wrong projection")
         # add outlines
         btn_yes = self.bulk_load_frame.msgbox_bulk_load.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.bulk_load_save_clicked(False)
 
         self.assertIn(
-            'INCORRECT CRS',
-            self.bulk_load_frame.error_dialog.tb_error_report.toPlainText()
+            "INCORRECT CRS",
+            self.bulk_load_frame.error_dialog.tb_error_report.toPlainText(),
         )
         self.bulk_load_frame.error_dialog.close()

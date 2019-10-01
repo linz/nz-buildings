@@ -27,13 +27,16 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
 
         self.rubber_band.reset(QGis.Polygon)
 
-        self.cursor = QCursor(QPixmap(os.path.join(__location__, '..', 'icons', 'cursor.png')))
+        self.cursor = QCursor(
+            QPixmap(os.path.join(__location__, "..", "icons", "cursor.png"))
+        )
 
     def activate(self):
         self.canvas.setCursor(self.cursor)
 
     def flags(self):
         from qgis.gui import QgsMapTool
+
         return QgsMapTool.Transient
 
     def canvasPressEvent(self, event):
@@ -57,16 +60,18 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         self.end_point = self.toMapCoordinates(event.pos())
 
         layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName(
-            'bulk_load_outlines')
+            "bulk_load_outlines"
+        )
         layer_existing = QgsMapLayerRegistry.instance().mapLayersByName(
-            'existing_subset_extracts')
-        layers = [layer for layer in layer_bulk] \
-            + [layer for layer in layer_existing]
+            "existing_subset_extracts"
+        )
+        layers = [layer for layer in layer_bulk] + [layer for layer in layer_existing]
 
         if self.rectangle() is not None:
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(
-                    layer, self.rectangle())
+                    layer, self.rectangle()
+                )
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
                     layer.select(layer_rect, True)
                 else:
@@ -77,7 +82,8 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             rect = QgsRectangle(p.x() - w, p.y() - w, p.x() + w, p.y() + w)
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(
-                    layer, rect)
+                    layer, rect
+                )
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
                     layer.select(layer_rect, True)
                 else:
@@ -91,8 +97,10 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         """Create the rectangle formed via click and drag"""
         if self.start_point is None or self.end_point is None:
             return None
-        elif self.start_point.x() == self.end_point.x() or \
-                self.start_point.y() == self.end_point.y():
+        elif (
+            self.start_point.x() == self.end_point.x()
+            or self.start_point.y() == self.end_point.y()
+        ):
             return None
         return QgsRectangle(self.start_point, self.end_point)
 
@@ -100,8 +108,10 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         """
         Handles the click + drag selection rectangle shown on the map canvas.
         """
-        if self.start_point.x() == self.end_point.x() or \
-                self.start_point.y() == self.end_point.y():
+        if (
+            self.start_point.x() == self.end_point.x()
+            or self.start_point.y() == self.end_point.y()
+        ):
             # Prevent creation of invalid rectangle.
             return
         self.rubber_band.reset(QGis.Polygon)

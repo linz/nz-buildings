@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 ################################################################################
@@ -37,11 +36,7 @@ _open_cursor = None
 
 try:
     _conn = psycopg2.connect(
-        host=_host,
-        port=_port,
-        database=_dbname,
-        user=_user,
-        password=_pw
+        host=_host, port=_port, database=_dbname, user=_user, password=_pw
     )
 except psycopg2.DatabaseError as error:
     _conn = None
@@ -73,11 +68,7 @@ def connect():
     global _conn
     try:
         _conn = psycopg2.connect(
-            host=_host,
-            port=_port,
-            database=_dbname,
-            user=_user,
-            password=_pw
+            host=_host, port=_port, database=_dbname, user=_user, password=_pw
         )
     except psycopg2.DatabaseError as error:
         _conn = None

@@ -31,16 +31,15 @@ class SetUpEditProduction(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Edit Outlines', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Edit Outlines", Qt.MatchExactly)[0])
         self.production_frame = self.dockwidget.current_frame
         self.edit_dialog = self.production_frame.edit_dialog
         for action in iface.building_toolbar.actions():
-            if action.text() == 'Edit Attributes':
+            if action.text() == "Edit Attributes":
                 action.trigger()
 
     def tearDown(self):
@@ -68,9 +67,9 @@ class SetUpEditProduction(unittest.TestCase):
         """ Layer registry has the correct components """
         layer_bool = False
         root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup('Building Tool Layers')
+        group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
         names = [layer.layer().name() for layer in layers]
-        if 'building_outlines' in names and 'historic_outlines' in names:
+        if "building_outlines" in names and "historic_outlines" in names:
             layer_bool = True
         self.assertTrue(layer_bool)

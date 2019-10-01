@@ -28,6 +28,7 @@ class ProcessesCheckDialog(unittest.TestCase):
     """
     Test check dialog process
     """
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -51,15 +52,15 @@ class ProcessesCheckDialog(unittest.TestCase):
     def test_btn_export_clicked(self):
         """Check file exported to the directory when bth_export clicked"""
         model = QStandardItemModel(1, 3)
-        model.setHorizontalHeaderItem(0, QStandardItem('Duplicate Id'))
-        model.setHorizontalHeaderItem(1, QStandardItem('Table'))
-        model.setHorizontalHeaderItem(2, QStandardItem('Table'))
-        model.setData(model.index(0, 0), '2003')
-        model.setData(model.index(0, 1), 'Added')
-        model.setData(model.index(0, 2), 'Matched')
+        model.setHorizontalHeaderItem(0, QStandardItem("Duplicate Id"))
+        model.setHorizontalHeaderItem(1, QStandardItem("Table"))
+        model.setHorizontalHeaderItem(2, QStandardItem("Table"))
+        model.setData(model.index(0, 0), "2003")
+        model.setData(model.index(0, 1), "Added")
+        model.setData(model.index(0, 2), "Matched")
         self.check_dialog.tbl_dup_ids.setModel(model)
-        save_path = os.path.expanduser('~')
-        save_filename = 'Test_duplicate_check_output'
+        save_path = os.path.expanduser("~")
+        save_filename = "Test_duplicate_check_output"
         self.check_dialog.le_path.setText(save_path)
         self.check_dialog.le_filename.setText(save_filename)
         self.check_dialog.btn_export.click()

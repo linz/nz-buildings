@@ -9,4 +9,5 @@ def classFactory(iface):
     """
 
     from .plugin import Buildings
+
     return Buildings(iface)

@@ -30,6 +30,7 @@ from buildings.utilities import database as db
 
 class ProcessAlterRelationshipsTest(unittest.TestCase):
     """Test Alter Building Relationships GUI processing"""
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -42,12 +43,11 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Bulk Load', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Bulk Load", Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.btn_alter_rel.click()
         self.alter_relationships_frame = self.dockwidget.current_frame
@@ -62,21 +62,24 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         target_crs.createFromUserInput(selectedcrs)
         canvas = iface.mapCanvas()
         canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14,
-                                      1878449.89, 5555644.95)
+        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14, 1878449.89, 5555644.95)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mousePress(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
-                         delay=-1)
-        QTest.mouseRelease(widget,
-                           Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
-                           delay=-1)
+        QTest.mousePress(
+            widget,
+            Qt.LeftButton,
+            pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
+            delay=-1,
+        )
+        QTest.mouseRelease(
+            widget,
+            Qt.LeftButton,
+            pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
+            delay=-1,
+        )
         QTest.qWait(1)
         count_lst_existing = self.alter_relationships_frame.lst_existing.count()
         count_lst_bulk = self.alter_relationships_frame.lst_bulk.count()
@@ -87,9 +90,15 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(id_existing, 1006)
         self.assertEqual(id_bulk, 2010)
 
-        selected = self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()
+        selected = (
+            self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()
+        )
         self.assertEqual(len(selected), 1)
-        id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(selected[0].row(), 0).text())
+        id_tbl = int(
+            self.alter_relationships_frame.tbl_relationship.item(
+                selected[0].row(), 0
+            ).text()
+        )
         self.assertEqual(id_tbl, 1006)
 
         self.alter_relationships_frame.btn_exit.click()
@@ -102,20 +111,23 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         target_crs.createFromUserInput(selectedcrs)
         canvas = iface.mapCanvas()
         canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14,
-                                      1878449.89, 5555644.95)
+        zoom_rectangle = QgsRectangle(1878028.94, 5555123.14, 1878449.89, 5555644.95)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mousePress(widget,
-                         Qt.LeftButton,
-                         pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
-                         delay=-1)
-        QTest.mouseRelease(widget,
-                           Qt.LeftButton,
-                           pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
-                           delay=-1)
+        QTest.mousePress(
+            widget,
+            Qt.LeftButton,
+            pos=canvas_point(QgsPoint(1878033.23, 5555351.12)),
+            delay=-1,
+        )
+        QTest.mouseRelease(
+            widget,
+            Qt.LeftButton,
+            pos=canvas_point(QgsPoint(1878045.70, 5555324.07)),
+            delay=-1,
+        )
         QTest.qWait(1)
         self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 1)
         self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 1)
@@ -123,9 +135,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_unlink_and_save_clicked(self):
 
-        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
-        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        sql_matched = "SELECT count(*)::integer FROM buildings_bulk_load.matched"
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added"
+        sql_removed = "SELECT count(*)::integer FROM buildings_bulk_load.removed"
         result = db._execute(sql_matched)
         matched_original = result.fetchone()[0]
         result = db._execute(sql_added)
@@ -133,8 +145,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_removed)
         removed_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem("1001"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2031"))
         self.alter_relationships_frame.btn_unlink.setEnabled(True)
         self.alter_relationships_frame.btn_unlink.click()
         self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
@@ -157,17 +169,19 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_delete_clicked(self):
         """Test deletion works for one selected added outline"""
-        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        sql_deleted = (
+            "SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;"
+        )
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added;"
         result = db._execute(sql_deleted)
         deleted_original = result.fetchone()[0]
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2010"))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
-        self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
+        self.alter_relationships_frame.deletion_reason.le_reason.setText("Reason Given")
         self.alter_relationships_frame.reason_given(commit_status=False)
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
@@ -183,18 +197,20 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_delete_clicked_two_outlines(self):
         """Test deletion works for multiple selected added outlines"""
-        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        sql_deleted = (
+            "SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;"
+        )
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added;"
         result = db._execute(sql_deleted)
         deleted_original = result.fetchone()[0]
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2003'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2010"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2003"))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
-        self.alter_relationships_frame.deletion_reason.le_reason.setText('Reason Given')
+        self.alter_relationships_frame.deletion_reason.le_reason.setText("Reason Given")
         self.alter_relationships_frame.reason_given(commit_status=False)
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
@@ -210,14 +226,16 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_delete_clicked_fails(self):
         """Test deletion doesn't work and gives warning when no reason is given"""
-        sql_deleted = 'SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added;'
+        sql_deleted = (
+            "SELECT count(*)::integer FROM buildings_bulk_load.deletion_description;"
+        )
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added;"
         result = db._execute(sql_deleted)
         deleted_original = result.fetchone()[0]
         result = db._execute(sql_added)
         added_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2010"))
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.reason_given(commit_status=False)
@@ -234,9 +252,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_match_and_save_clicked(self):
 
-        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
-        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        sql_matched = "SELECT count(*)::integer FROM buildings_bulk_load.matched"
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added"
+        sql_removed = "SELECT count(*)::integer FROM buildings_bulk_load.removed"
         result = db._execute(sql_matched)
         matched_original = result.fetchone()[0]
         result = db._execute(sql_added)
@@ -244,8 +262,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_removed)
         removed_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1006'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem("1006"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2010"))
         self.alter_relationships_frame.btn_matched.setEnabled(True)
         self.alter_relationships_frame.btn_matched.click()
         self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
@@ -267,9 +285,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_exit.click()
 
     def test_related_and_save_clicked(self):
-        sql_related = 'SELECT count(*)::integer FROM buildings_bulk_load.related'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
-        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        sql_related = "SELECT count(*)::integer FROM buildings_bulk_load.related"
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added"
+        sql_removed = "SELECT count(*)::integer FROM buildings_bulk_load.removed"
         result = db._execute(sql_related)
         related_original = result.fetchone()[0]
         result = db._execute(sql_added)
@@ -277,9 +295,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_removed)
         removed_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1006'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2010'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2003'))
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem("1006"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2010"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2003"))
         self.alter_relationships_frame.btn_related.setEnabled(True)
         self.alter_relationships_frame.btn_related.click()
         self.assertTrue(self.alter_relationships_frame.btn_save.isEnabled())
@@ -301,8 +319,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.btn_exit.click()
 
     def test_cancel_clicked(self):
-        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem("1001"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2031"))
         self.alter_relationships_frame.btn_unlink.setEnabled(True)
         self.alter_relationships_frame.btn_unlink.click()
         self.alter_relationships_frame.btn_cancel.click()
@@ -318,35 +336,55 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_exit_clicked(self):
         self.alter_relationships_frame.btn_exit.click()
-        self.assertNotEqual(self.alter_relationships_frame, self.dockwidget.current_frame)
+        self.assertNotEqual(
+            self.alter_relationships_frame, self.dockwidget.current_frame
+        )
 
     def test_cmb_relationship_current_index_changed(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 2)
-        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1004)
+        self.assertEqual(
+            self.alter_relationships_frame.tbl_relationship.columnCount(), 2
+        )
+        self.assertEqual(
+            int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1004
+        )
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
-        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(
+            self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled()
+        )
         self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
 
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 3)
-        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1001)
+        self.assertEqual(
+            self.alter_relationships_frame.tbl_relationship.columnCount(), 3
+        )
+        self.assertEqual(
+            int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1001
+        )
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
-        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(
+            self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled()
+        )
         self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
 
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
-        self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1)
+        self.assertEqual(
+            self.alter_relationships_frame.tbl_relationship.columnCount(), 4
+        )
+        self.assertEqual(
+            int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1
+        )
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
-        self.assertTrue(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
+        self.assertTrue(
+            self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled()
+        )
         self.assertTrue(self.alter_relationships_frame.btn_qa_pending.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_qa_okay.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
@@ -356,8 +394,13 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def test_tbl_relationship_item_selection_changed(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
         self.alter_relationships_frame.tbl_relationship.selectRow(0)
-        selected_id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text())
-        selected_id_lyr = [feat.id() for feat in self.alter_relationships_frame.lyr_existing.selectedFeatures()]
+        selected_id_tbl = int(
+            self.alter_relationships_frame.tbl_relationship.item(0, 0).text()
+        )
+        selected_id_lyr = [
+            feat.id()
+            for feat in self.alter_relationships_frame.lyr_existing.selectedFeatures()
+        ]
         self.assertEqual(selected_id_lyr, [selected_id_tbl])
         id_lst = int(self.alter_relationships_frame.lst_existing.item(0).text())
         self.assertEqual(id_lst, selected_id_tbl)
@@ -367,21 +410,31 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def test_btn_qa_status_clicked(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
         self.alter_relationships_frame.tbl_relationship.selectRow(0)
-        selected_id_tbl = int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text())
-        self.alter_relationships_frame.btn_qa_status_clicked(qa_status='Okay', commit_status=False)
-        sql = 'SELECT qa_status_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s' % selected_id_tbl
+        selected_id_tbl = int(
+            self.alter_relationships_frame.tbl_relationship.item(0, 0).text()
+        )
+        self.alter_relationships_frame.btn_qa_status_clicked(
+            qa_status="Okay", commit_status=False
+        )
+        sql = (
+            "SELECT qa_status_id FROM buildings_bulk_load.removed WHERE building_outline_id = %s"
+            % selected_id_tbl
+        )
         result = db._execute(sql)
         qa_status_id = result.fetchone()[0]
         self.assertEqual(qa_status_id, 2)
-        selected_row = [index.row() for index in self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()]
+        selected_row = [
+            index.row()
+            for index in self.alter_relationships_frame.tbl_relationship.selectionModel().selectedRows()
+        ]
         self.assertEqual(selected_row, [1])
 
         self.alter_relationships_frame.db.rollback_open_cursor()
         self.alter_relationships_frame.btn_exit.click()
 
     def test_not_removed_btn(self):
-        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed;'
-        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched;'
+        sql_removed = "SELECT count(*)::integer FROM buildings_bulk_load.removed;"
+        sql_matched = "SELECT count(*)::integer FROM buildings_bulk_load.matched;"
         result = db._execute(sql_removed)
         removed_original = result.fetchone()[0]
         result = db._execute(sql_matched)
@@ -389,7 +442,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
         self.alter_relationships_frame.tbl_relationship.selectRow(0)
-        self.alter_relationships_frame.btn_qa_status_clicked(qa_status='Not Removed', commit_status=False)
+        self.alter_relationships_frame.btn_qa_status_clicked(
+            qa_status="Not Removed", commit_status=False
+        )
 
         # check relationship changed in db
         result = db._execute(sql_removed)
@@ -400,7 +455,10 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(matched_original, matched_test - 1)
 
         # check tbl_relationship changed from removed to matched
-        self.assertEqual('Matched Outlines', self.alter_relationships_frame.cmb_relationship.currentText())
+        self.assertEqual(
+            "Matched Outlines",
+            self.alter_relationships_frame.cmb_relationship.currentText(),
+        )
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), 5)
 
         self.alter_relationships_frame.db.rollback_open_cursor()
@@ -409,24 +467,60 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
     def test_cb_lyr_bulk_load_state_changed(self):
         self.alter_relationships_frame.cb_lyr_bulk_load.setChecked(False)
         legend = iface.legendInterface()
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load))
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_added_bulk_load_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_matched_bulk_load_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_related_bulk_load_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_added_bulk_load)
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_bulk_load)
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_related_bulk_load)
+        )
 
         self.alter_relationships_frame.btn_exit.click()
 
     def test_cb_lyr_existing_state_changed(self):
         self.alter_relationships_frame.cb_lyr_existing.setChecked(False)
         legend = iface.legendInterface()
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing_in_edit))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing))
-        self.assertFalse(legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing))
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_removed_existing_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_matched_existing_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(
+                self.alter_relationships_frame.lyr_related_existing_in_edit
+            )
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_removed_existing)
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_matched_existing)
+        )
+        self.assertFalse(
+            legend.isLayerVisible(self.alter_relationships_frame.lyr_related_existing)
+        )
 
         self.alter_relationships_frame.btn_exit.click()
 
@@ -438,9 +532,9 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.assertFalse(self.alter_relationships_frame.btn_save.isVisible())
 
-        sql_matched = 'SELECT count(*)::integer FROM buildings_bulk_load.matched'
-        sql_added = 'SELECT count(*)::integer FROM buildings_bulk_load.added'
-        sql_removed = 'SELECT count(*)::integer FROM buildings_bulk_load.removed'
+        sql_matched = "SELECT count(*)::integer FROM buildings_bulk_load.matched"
+        sql_added = "SELECT count(*)::integer FROM buildings_bulk_load.added"
+        sql_removed = "SELECT count(*)::integer FROM buildings_bulk_load.removed"
         result = db._execute(sql_matched)
         matched_original = result.fetchone()[0]
         result = db._execute(sql_added)
@@ -448,8 +542,8 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         result = db._execute(sql_removed)
         removed_original = result.fetchone()[0]
 
-        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem('1001'))
-        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem('2031'))
+        self.alter_relationships_frame.lst_existing.addItem(QListWidgetItem("1001"))
+        self.alter_relationships_frame.lst_bulk.addItem(QListWidgetItem("2031"))
         self.alter_relationships_frame.unlink_clicked(commit_status=False)
 
         result = db._execute(sql_matched)

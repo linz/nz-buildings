@@ -28,7 +28,7 @@ class SetUpOptionsTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
 
@@ -39,25 +39,27 @@ class SetUpOptionsTest(unittest.TestCase):
     def test_option_menu(self):
         """Buildings option menu item exists"""
         self.assertIsInstance(
-            self.dockwidget.lst_options.findItems('Buildings', Qt.MatchExactly)[0],
+            self.dockwidget.lst_options.findItems("Buildings", Qt.MatchExactly)[0],
             QListWidgetItem,
         )
 
     def test_sub_option_menu(self):
         """Sub menu options exist"""
         self.assertIsInstance(
-            self.dockwidget.lst_sub_menu.findItems('Capture Sources', Qt.MatchExactly)[0],
+            self.dockwidget.lst_sub_menu.findItems("Capture Sources", Qt.MatchExactly)[
+                0
+            ],
             QListWidgetItem,
         )
         self.assertIsInstance(
-            self.dockwidget.lst_sub_menu.findItems('Bulk Load', Qt.MatchExactly)[0],
+            self.dockwidget.lst_sub_menu.findItems("Bulk Load", Qt.MatchExactly)[0],
             QListWidgetItem,
         )
         self.assertIsInstance(
-            self.dockwidget.lst_sub_menu.findItems('Edit Outlines', Qt.MatchExactly)[0],
+            self.dockwidget.lst_sub_menu.findItems("Edit Outlines", Qt.MatchExactly)[0],
             QListWidgetItem,
         )
         self.assertIsInstance(
-            self.dockwidget.lst_sub_menu.findItems('Settings', Qt.MatchExactly)[0],
+            self.dockwidget.lst_sub_menu.findItems("Settings", Qt.MatchExactly)[0],
             QListWidgetItem,
         )

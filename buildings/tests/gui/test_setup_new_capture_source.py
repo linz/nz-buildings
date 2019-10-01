@@ -27,6 +27,7 @@ from buildings.utilities import database as db
 
 class SetUpCaptureSourceTest(unittest.TestCase):
     """Test New Capture Source GUI initial setup confirm default settings"""
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -39,12 +40,13 @@ class SetUpCaptureSourceTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Capture Sources', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(
+            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
+        )
         self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -53,19 +55,18 @@ class SetUpCaptureSourceTest(unittest.TestCase):
 
     def test_capture_source_dropdowns(self):
         """Number of options in dropdown = number of entries in table"""
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
         result = db._execute(sql)
         result = result.fetchall()[0][0]
-        self.assertEqual(self.capture_frame.cmb_capture_source_group.count(),
-                         result)
+        self.assertEqual(self.capture_frame.cmb_capture_source_group.count(), result)
 
     def test_capture_source_area_layer_registry(self):
         """Capture source area layer is added to layer registry"""
         layer_bool = True
         root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup('Building Tool Layers')
+        group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
-        layer_name = ['capture_source_area']
+        layer_name = ["capture_source_area"]
         for layer in layers:
             if layer.layer().name() not in layer_name:
                 layer_bool = False

@@ -40,7 +40,10 @@ def draw_circle(self, point):
     # if two points have been clicked (center and edge)
     if len(self.points) == 2:
         # calculate radius of circle
-        radius = math.sqrt((self.points[1][0] - self.points[0][0])**2 + (self.points[1][1] - self.points[0][1])**2)
+        radius = math.sqrt(
+            (self.points[1][0] - self.points[0][0]) ** 2
+            + (self.points[1][1] - self.points[0][1]) ** 2
+        )
         # number of vertices of circle
         nodes = (round(math.pi / math.acos((radius - 0.001) / radius))) / 10
         # create point on center location
@@ -48,17 +51,17 @@ def draw_circle(self, point):
         # create buffer of specified distance around point
         buffer = point.buffer(radius, nodes)
         # add feature to bulk_load_outlines (triggering featureAdded)
-        if self.__class__.__name__ == 'BulkLoadFrame':
+        if self.__class__.__name__ == "BulkLoadFrame":
             self.feature = QgsFeature(self.bulk_load_layer.pendingFields())
             self.feature.setGeometry(buffer)
             self.bulk_load_layer.addFeature(self.feature)
             self.bulk_load_layer.triggerRepaint()
-        elif self.__class__.__name__ == 'AlterRelationships':
+        elif self.__class__.__name__ == "AlterRelationships":
             self.feature = QgsFeature(self.lyr_bulk_load.pendingFields())
             self.feature.setGeometry(buffer)
             self.lyr_bulk_load.addFeature(self.feature)
             self.lyr_bulk_load.triggerRepaint()
-        elif self.__class__.__name__ == 'ProductionFrame':
+        elif self.__class__.__name__ == "ProductionFrame":
             self.feature = QgsFeature(self.building_layer.pendingFields())
             self.feature.setGeometry(buffer)
             self.building_layer.addFeature(self.feature)

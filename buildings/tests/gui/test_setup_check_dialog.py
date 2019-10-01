@@ -25,6 +25,7 @@ class SetUpCheckDialog(unittest.TestCase):
     """
     Test check dialog process
     """
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -48,5 +49,5 @@ class SetUpCheckDialog(unittest.TestCase):
         self.assertEqual(self.check_dialog.tbl_dup_ids.model(), None)
         self.assertTrue(self.check_dialog.btn_browse.isEnabled())
         self.assertFalse(self.check_dialog.btn_export.isEnabled())
-        self.assertEqual(self.check_dialog.le_path.text(), '')
-        self.assertNotEqual(self.check_dialog.le_filename.text(), '')
+        self.assertEqual(self.check_dialog.le_path.text(), "")
+        self.assertNotEqual(self.check_dialog.le_filename.text(), "")

@@ -5,23 +5,37 @@ from functools import partial
 
 from PyQt4 import uic
 from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
-from qgis.core import QGis, QgsFeatureRequest, QgsGeometry, QgsMapLayer, QgsMapLayerRegistry
+from PyQt4.QtGui import (
+    QFrame,
+    QToolButton,
+    QTableWidgetItem,
+    QHeaderView,
+    QAbstractItemView,
+)
+from qgis.core import (
+    QGis,
+    QgsFeatureRequest,
+    QgsGeometry,
+    QgsMapLayer,
+    QgsMapLayerRegistry,
+)
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import (buildings_reference_select_statements as reference_select,
-                           general_select_statements as general_select)
+from buildings.sql import (
+    buildings_reference_select_statements as reference_select,
+    general_select_statements as general_select,
+)
 from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'new_capture_source_area.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "new_capture_source_area.ui")
+)
 
 
 class NewCaptureSourceArea(QFrame, FORM_CLASS):
-
     def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(NewCaptureSourceArea, self).__init__(parent)
@@ -65,17 +79,23 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
 
     @pyqtSlot(bool)
     def rb_select_from_layer_clicked(self, checked):
-        self.l_wrong_projection.setText('')
+        self.l_wrong_projection.setText("")
         if checked:
             self.mcb_selection_layer.showPopup()
             self.mcb_selection_layer.setEnabled(True)
             iface.actionSelect().trigger()
-            self.mcb_selection_layer.layerChanged.connect(self.mcb_selection_layer_changed)
+            self.mcb_selection_layer.layerChanged.connect(
+                self.mcb_selection_layer_changed
+            )
         else:
-            self.mcb_selection_layer.layerChanged.disconnect(self.mcb_selection_layer_changed)
+            self.mcb_selection_layer.layerChanged.disconnect(
+                self.mcb_selection_layer_changed
+            )
             if self.current_layer is not None:
                 self.current_layer.removeSelection()
-                self.current_layer.selectionChanged.disconnect(self.current_layer_selection_changed)
+                self.current_layer.selectionChanged.disconnect(
+                    self.current_layer_selection_changed
+                )
 
             self.mcb_selection_layer.setDisabled(True)
             iface.actionAddFeature().trigger()
@@ -87,21 +107,25 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         if current_layer is None:
             return
         if not self.check_projection(current_layer):
-            self.l_wrong_projection.setText('ERROR: Incorrect Projection')
+            self.l_wrong_projection.setText("ERROR: Incorrect Projection")
             self.is_wrong_projection = True
         else:
-            self.l_wrong_projection.setText('')
+            self.l_wrong_projection.setText("")
             self.is_wrong_projection = False
 
         if self.current_layer is not None:
             self.current_layer.removeSelection()
             try:
-                self.current_layer.selectionChanged.disconnect(self.current_layer_selection_changed)
+                self.current_layer.selectionChanged.disconnect(
+                    self.current_layer_selection_changed
+                )
             except TypeError:
                 pass
         self.current_layer = current_layer
         iface.setActiveLayer(current_layer)
-        self.current_layer.selectionChanged.connect(self.current_layer_selection_changed)
+        self.current_layer.selectionChanged.connect(
+            self.current_layer_selection_changed
+        )
 
     @pyqtSlot()
     def current_layer_selection_changed(self):
@@ -118,16 +142,18 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
             iface.messageBar().pushMessage(
                 "INFO",
                 "More than one feature selected, please re-select.",
-                level=QgsMessageBar.INFO, duration=3)
+                level=QgsMessageBar.INFO,
+                duration=3,
+            )
         elif len(selection) == 1:
             new_geometry = selection[0].geometry()
             # error pops up if geometry type is not polygon or multipolygon
             if new_geometry.wkbType() not in [QGis.WKBPolygon, QGis.WKBMultiPolygon]:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(
-                    '\n -------------------- WRONG GEOMETRY TYPE ------'
-                    '-------------- \n\nInserted capture source area '
-                    'should be either polygon or multipolygon.'
+                    "\n -------------------- WRONG GEOMETRY TYPE ------"
+                    "-------------- \n\nInserted capture source area "
+                    "should be either polygon or multipolygon."
                 )
                 self.error_dialog.show()
                 return
@@ -142,7 +168,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
             self.geom = result.fetchall()[0][0]
 
     def check_projection(self, layer):
-        if layer.crs().authid() != 'EPSG:2193':
+        if layer.crs().authid() != "EPSG:2193":
             self.projection_error()
             return False
         return True
@@ -150,9 +176,9 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
     def projection_error(self):
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
-            '\n -------------------- INCORRECT CRS-------------'
-            '------- \n\nThe Coordinate Reference System is not NTZM 2000. '
-            'Please resolve and reattempt.'
+            "\n -------------------- INCORRECT CRS-------------"
+            "------- \n\nThe Coordinate Reference System is not NTZM 2000. "
+            "Please resolve and reattempt."
         )
         self.error_dialog.show()
 
@@ -160,14 +186,18 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         """
             Called on opening of frame to add capture source area layer
         """
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'styles/')
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
         # add layer
         self.capture_source_area = self.layer_registry.add_postgres_layer(
-            'capture_source_area', 'capture_source_area',
-            'shape', 'buildings_reference', '', '')
+            "capture_source_area",
+            "capture_source_area",
+            "shape",
+            "buildings_reference",
+            "",
+            "",
+        )
         # set style
-        self.capture_source_area.loadNamedStyle(path + 'capture_source.qml')
+        self.capture_source_area.loadNamedStyle(path + "capture_source.qml")
         # make capture source area the active layer
         iface.setActiveLayer(self.capture_source_area)
 
@@ -178,8 +208,8 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         tbl = self.tbl_capture_source_area
         tbl.setRowCount(0)
         tbl.setColumnCount(2)
-        tbl.setHorizontalHeaderItem(0, QTableWidgetItem('Id'))
-        tbl.setHorizontalHeaderItem(1, QTableWidgetItem('Area Title'))
+        tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Id"))
+        tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Area Title"))
         tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -202,23 +232,26 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         # selection actions
         iface.building_toolbar.addSeparator()
         for sel in selecttools:
-            if sel.text() == 'Select Feature(s)':
+            if sel.text() == "Select Feature(s)":
                 for a in sel.actions()[0:3]:
                     iface.building_toolbar.addAction(a)
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
             if dig.objectName() in [
-                'mActionAddFeature', 'mActionNodeTool',
-                'mActionMoveFeature'
+                "mActionAddFeature",
+                "mActionNodeTool",
+                "mActionMoveFeature",
             ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                'mActionUndo', 'mActionRedo',
-                'mActionReshapeFeatures', 'mActionOffsetCurve'
+                "mActionUndo",
+                "mActionRedo",
+                "mActionReshapeFeatures",
+                "mActionOffsetCurve",
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -283,23 +316,23 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         else:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                '\n -------------------- WRONG GEOMETRY EDITED ------'
-                '-------------- \n\nOnly current added outline can '
-                'be edited. Please go to [Edit Geometry] to edit '
-                'existing outlines.'
+                "\n -------------------- WRONG GEOMETRY EDITED ------"
+                "-------------- \n\nOnly current added outline can "
+                "be edited. Please go to [Edit Geometry] to edit "
+                "existing outlines."
             )
             self.error_dialog.show()
 
     @pyqtSlot()
     def save_clicked(self, commit_status):
 
-        if self.le_area_title.text() == '' or self.le_external_id.text() == '':
+        if self.le_area_title.text() == "" or self.le_external_id.text() == "":
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                '\n -------------------- Empty Area Title ------'
-                '-------------- \n\nPlease add the title and '
-                'external id for the newly created capture '
-                'source area.'
+                "\n -------------------- Empty Area Title ------"
+                "-------------- \n\nPlease add the title and "
+                "external id for the newly created capture "
+                "source area."
             )
             self.error_dialog.show()
             return
@@ -309,7 +342,7 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         area_title = self.le_area_title.text()
         external_id = self.le_external_id.text()
         geom = self.geom
-        sql = 'SELECT buildings_reference.capture_source_area_insert(%s, %s, %s)'
+        sql = "SELECT buildings_reference.capture_source_area_insert(%s, %s, %s)"
         self.db.execute_no_commit(sql, (external_id, area_title, geom))
 
         self.init_table()
@@ -332,10 +365,12 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         self.le_external_id.setDisabled(True)
         self.rb_select_from_layer.setChecked(False)
         self.mcb_selection_layer.setDisabled(True)
-        self.l_wrong_projection.setText('')
+        self.l_wrong_projection.setText("")
 
         iface.setActiveLayer(self.capture_source_area)
-        self.capture_source_area.geometryChanged.disconnect(self.creator_geometry_changed)
+        self.capture_source_area.geometryChanged.disconnect(
+            self.creator_geometry_changed
+        )
         iface.actionCancelEdits().trigger()
         self.capture_source_area.geometryChanged.connect(self.creator_geometry_changed)
         # restart editing
@@ -352,9 +387,12 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
         self.geom = None
         self.added_building_ids = []
         self.current_layer = None
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(
+            self.layers_removed
+        )
         self.layer_registry.remove_layer(self.capture_source_area)
         from buildings.gui.new_capture_source import NewCaptureSource
+
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSource(dw))
@@ -362,13 +400,16 @@ class NewCaptureSourceArea(QFrame, FORM_CLASS):
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        if 'capture_source_area' in layerids:
+        if "capture_source_area" in layerids:
             self.le_area_title.setDisabled(1)
             self.le_external_id.setDisabled(1)
             self.btn_save.setDisabled(1)
             self.btn_reset.setDisabled(1)
             self.tbl_capture_source_area.setDisabled(1)
-            iface.messageBar().pushMessage("ERROR",
-                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                           level=QgsMessageBar.CRITICAL, duration=5)
+            iface.messageBar().pushMessage(
+                "ERROR",
+                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                level=QgsMessageBar.CRITICAL,
+                duration=5,
+            )
             return

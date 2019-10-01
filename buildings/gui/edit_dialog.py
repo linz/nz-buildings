@@ -14,7 +14,9 @@ from buildings.sql import buildings_bulk_load_select_statements as bulk_load_sel
 from buildings.utilities import layers
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'edit_dialog.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "edit_dialog.ui")
+)
 
 
 class EditDialog(QDialog, FORM_CLASS):
@@ -33,16 +35,16 @@ class EditDialog(QDialog, FORM_CLASS):
         self.db = self.parent_frame.db
 
         self.parent_frame_name = self.parent_frame.__class__.__name__
-        if self.parent_frame_name == 'BulkLoadFrame':
+        if self.parent_frame_name == "BulkLoadFrame":
             self.editing_layer = self.parent_frame.bulk_load_layer
             self.current_dataset = self.parent_frame.current_dataset
             # Update qa layers
             self.edit_geometry_saved.connect(self.liqa_on_edit_geometry_saved)
             self.delete_outline_saved.connect(self.liqa_on_delete_outline_saved)
-        elif self.parent_frame_name == 'AlterRelationships':
+        elif self.parent_frame_name == "AlterRelationships":
             self.editing_layer = self.parent_frame.lyr_bulk_load
             self.current_dataset = self.parent_frame.current_dataset
-        elif self.parent_frame_name == 'ProductionFrame':
+        elif self.parent_frame_name == "ProductionFrame":
             self.editing_layer = self.parent_frame.building_layer
             self.current_dataset = None
 
@@ -63,7 +65,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
         # initiate le_deletion_reason
         self.le_deletion_reason.setMaxLength(250)
-        self.le_deletion_reason.setPlaceholderText('Reason for Deletion')
+        self.le_deletion_reason.setPlaceholderText("Reason for Deletion")
         self.completer_box()
 
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
@@ -94,9 +96,14 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+            if action.text() not in [
+                "Pan Map",
+                "Add Outline",
+                "Edit Geometry",
+                "Edit Attributes",
+            ]:
                 iface.building_toolbar.removeAction(action)
-            if action.text() == 'Add Outline':
+            if action.text() == "Add Outline":
                 action.setDisabled(True)
             else:
                 action.setEnabled(True)
@@ -110,14 +117,17 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
+        if (
+            self.parent_frame_name == "BulkLoadFrame"
+            or self.parent_frame_name == "AlterRelationships"
+        ):
             self.change_instance = bulk_load_changes.AddBulkLoad(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
             self.layout_lifecycle_stage.hide()
             self.layout_general_info.show()
             self.layout_end_lifespan.hide()
-        elif self.parent_frame_name == 'ProductionFrame':
+        elif self.parent_frame_name == "ProductionFrame":
             self.change_instance = production_changes.AddProduction(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
@@ -126,11 +136,19 @@ class EditDialog(QDialog, FORM_CLASS):
             self.layout_end_lifespan.hide()
 
         # connect signals and slots
-        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
+        self.btn_edit_save.clicked.connect(
+            partial(self.change_instance.edit_save_clicked, True)
+        )
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
-        self.editing_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
-        self.editing_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
+        self.editing_layer.featureAdded.connect(
+            self.change_instance.creator_feature_added
+        )
+        self.editing_layer.featureDeleted.connect(
+            self.change_instance.creator_feature_deleted
+        )
+        self.editing_layer.geometryChanged.connect(
+            self.change_instance.creator_geometry_changed
+        )
 
         self.add_territorial_auth()
 
@@ -144,9 +162,14 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+            if action.text() not in [
+                "Pan Map",
+                "Add Outline",
+                "Edit Geometry",
+                "Edit Attributes",
+            ]:
                 iface.building_toolbar.removeAction(action)
-            if action.text() in ['Edit Attributes']:
+            if action.text() in ["Edit Attributes"]:
                 action.setDisabled(True)
             else:
                 action.setEnabled(True)
@@ -159,14 +182,17 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
+        if (
+            self.parent_frame_name == "BulkLoadFrame"
+            or self.parent_frame_name == "AlterRelationships"
+        ):
             self.change_instance = bulk_load_changes.EditAttribute(self)
             self.layout_status.show()
             self.layout_capture_method.show()
             self.layout_lifecycle_stage.hide()
             self.layout_general_info.show()
             self.layout_end_lifespan.hide()
-        elif self.parent_frame_name == 'ProductionFrame':
+        elif self.parent_frame_name == "ProductionFrame":
             self.change_instance = production_changes.EditAttribute(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
@@ -178,12 +204,18 @@ class EditDialog(QDialog, FORM_CLASS):
                 self.btn_end_lifespan.clicked.disconnect()
             except Exception:
                 pass
-            self.btn_end_lifespan.clicked.connect(partial(self.change_instance.end_lifespan, True))
+            self.btn_end_lifespan.clicked.connect(
+                partial(self.change_instance.end_lifespan, True)
+            )
 
         # set up signals and slots
-        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
+        self.btn_edit_save.clicked.connect(
+            partial(self.change_instance.edit_save_clicked, True)
+        )
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.editing_layer.selectionChanged.connect(self.change_instance.selection_changed)
+        self.editing_layer.selectionChanged.connect(
+            self.change_instance.selection_changed
+        )
 
         self.add_territorial_auth()
 
@@ -193,9 +225,14 @@ class EditDialog(QDialog, FORM_CLASS):
         iface.actionCancelEdits().trigger()
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+            if action.text() not in [
+                "Pan Map",
+                "Add Outline",
+                "Edit Geometry",
+                "Edit Attributes",
+            ]:
                 iface.building_toolbar.removeAction(action)
-            if action.text() == 'Edit Geometry':
+            if action.text() == "Edit Geometry":
                 action.setDisabled(True)
             else:
                 action.setEnabled(True)
@@ -208,14 +245,17 @@ class EditDialog(QDialog, FORM_CLASS):
         except TypeError:
             pass
 
-        if self.parent_frame_name == 'BulkLoadFrame' or self.parent_frame_name == 'AlterRelationships':
+        if (
+            self.parent_frame_name == "BulkLoadFrame"
+            or self.parent_frame_name == "AlterRelationships"
+        ):
             self.change_instance = bulk_load_changes.EditGeometry(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
             self.layout_lifecycle_stage.hide()
             self.layout_general_info.hide()
             self.layout_end_lifespan.hide()
-        elif self.parent_frame_name == 'ProductionFrame':
+        elif self.parent_frame_name == "ProductionFrame":
             self.change_instance = production_changes.EditGeometry(self)
             self.layout_status.hide()
             self.layout_capture_method.show()
@@ -224,10 +264,16 @@ class EditDialog(QDialog, FORM_CLASS):
             self.layout_end_lifespan.hide()
 
         # set up signals and slots
-        self.btn_edit_save.clicked.connect(partial(self.change_instance.edit_save_clicked, True))
+        self.btn_edit_save.clicked.connect(
+            partial(self.change_instance.edit_save_clicked, True)
+        )
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
-        self.editing_layer.geometryChanged.connect(self.change_instance.geometry_changed)
-        self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
+        self.editing_layer.geometryChanged.connect(
+            self.change_instance.geometry_changed
+        )
+        self.editing_layer.featureAdded.connect(
+            self.change_instance.creator_feature_added
+        )
 
         self.add_territorial_auth()
 
@@ -246,7 +292,12 @@ class EditDialog(QDialog, FORM_CLASS):
 
         self.parent_frame.edit_cancel_clicked()
         for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+            if action.text() not in [
+                "Pan Map",
+                "Add Outline",
+                "Edit Geometry",
+                "Edit Attributes",
+            ]:
                 iface.building_toolbar.removeAction(action)
             else:
                 action.setEnabled(True)
@@ -254,11 +305,16 @@ class EditDialog(QDialog, FORM_CLASS):
     def add_territorial_auth(self):
         # add territorial Authority layer
         self.territorial_auth = self.layer_registry.add_postgres_layer(
-            'territorial_authorities', 'territorial_authority',
-            'shape', 'buildings_reference', '', ''
+            "territorial_authorities",
+            "territorial_authority",
+            "shape",
+            "buildings_reference",
+            "",
+            "",
         )
         layers.style_layer(
-            self.territorial_auth, {1: ['204,121,95', '0.3', 'dash', '5;2']})
+            self.territorial_auth, {1: ["204,121,95", "0.3", "dash", "5;2"]}
+        )
 
     def remove_territorial_auth(self):
         if self.territorial_auth is not None:
@@ -281,7 +337,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
     @pyqtSlot()
     def enable_le_deletion_reason(self):
-        if self.cmb_status.currentText() == 'Deleted During QA':
+        if self.cmb_status.currentText() == "Deleted During QA":
             self.le_deletion_reason.setEnabled(1)
             self.le_deletion_reason.setFocus()
             self.le_deletion_reason.selectAll()
@@ -295,8 +351,12 @@ class EditDialog(QDialog, FORM_CLASS):
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
                 if feat_id in bulk_load_ids.values():
-                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
-                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Geometry edited')
+                    qa_feat_id = bulk_load_ids.keys()[
+                        bulk_load_ids.values().index(feat_id)
+                    ]
+                    self.update_qa_layer_attribute(
+                        qa_lyr, qa_feat_id, "Fixed", "Geometry edited"
+                    )
 
     @pyqtSlot(list, str)
     def liqa_on_delete_outline_saved(self, ids, del_reason):
@@ -304,18 +364,22 @@ class EditDialog(QDialog, FORM_CLASS):
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
                 if feat_id in bulk_load_ids.values():
-                    qa_feat_id = bulk_load_ids.keys()[bulk_load_ids.values().index(feat_id)]
-                    self.update_qa_layer_attribute(qa_lyr, qa_feat_id, 'Fixed', 'Deleted- {}'.format(del_reason))
+                    qa_feat_id = bulk_load_ids.keys()[
+                        bulk_load_ids.values().index(feat_id)
+                    ]
+                    self.update_qa_layer_attribute(
+                        qa_lyr, qa_feat_id, "Fixed", "Deleted- {}".format(del_reason)
+                    )
 
     def find_qa_layer(self):
         for layer in iface.legendInterface().layers():
-            if layer.name().startswith('qa_'):
+            if layer.name().startswith("qa_"):
                 yield layer
 
     def get_bulk_load_ids(self, qa_layer):
         bulk_load_ids = {}
         for feat in qa_layer.getFeatures():
-            bulk_load_ids[feat.id()] = feat['bulk_load_']
+            bulk_load_ids[feat.id()] = feat["bulk_load_"]
         return bulk_load_ids
 
     def update_qa_layer_attribute(self, qa_lyr, qa_id, error_status, comment):

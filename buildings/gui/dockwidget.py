@@ -25,8 +25,9 @@ from PyQt4 import uic
 
 from buildings.settings import project
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'dockwidget_base.ui'))
+FORM_CLASS, _ = uic.loadUiType(
+    os.path.join(os.path.dirname(__file__), "dockwidget_base.ui")
+)
 
 
 class BuildingsDockwidget(QDockWidget, FORM_CLASS):
@@ -121,7 +122,7 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
     def show_selected_option(self):
         if self.lst_options.selectedItems():
             current = self.lst_options.selectedItems()[0]
-            if current.text() == 'Buildings':
+            if current.text() == "Buildings":
                 if isinstance(self.current_frame, self.alter_relationships):
                     self.current_frame.close_frame()
                 if isinstance(self.current_frame, self.new_capture_source_area):
@@ -133,8 +134,8 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
                 project.SRID = 2193
                 project.set_crs()
                 self.stk_options.removeWidget(self.stk_options.currentWidget())
-                self.stk_options.addWidget(self.frames['menu_frame'])
-                self.current_frame = self.frames['menu_frame']
+                self.stk_options.addWidget(self.frames["menu_frame"])
+                self.current_frame = self.frames["menu_frame"]
             self.lst_sub_menu.clearSelection()
 
     @pyqtSlot()
@@ -154,13 +155,13 @@ class BuildingsDockwidget(QDockWidget, FORM_CLASS):
 
             self.stk_options.removeWidget(self.stk_options.currentWidget())
 
-            if current.text() == 'Capture Sources':
+            if current.text() == "Capture Sources":
                 self.new_widget(self.new_capture_source(self))
-            elif current.text() == 'Bulk Load':
+            elif current.text() == "Bulk Load":
                 self.new_widget(self.bulk_load_frame(self))
-            elif current.text() == 'Edit Outlines':
+            elif current.text() == "Edit Outlines":
                 self.new_widget(self.production_frame(self))
-            elif current.text() == 'Settings':
+            elif current.text() == "Settings":
                 self.new_widget(self.new_entry(self))
             elif current.text() == "Reference Data":
                 self.new_widget(self.reference_data(self))

@@ -28,12 +28,13 @@ class SetUpReferenceData(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Reference Data', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(
+            sub_menu.findItems("Reference Data", Qt.MatchExactly)[0]
+        )
         self.reference_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -59,7 +60,7 @@ class SetUpReferenceData(unittest.TestCase):
 
     def test_lineedit_key(self):
         """Check line edit is in password mode to hide key"""
-        self.reference_frame.le_key.setText('testing')
+        self.reference_frame.le_key.setText("testing")
         self.assertEqual(self.reference_frame.le_key.echoMode(), QLineEdit.Password)
 
     def test_groupbx_check(self):
