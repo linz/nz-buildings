@@ -1,0 +1,25 @@
+./buildings/settings/project.py::16: Found dialog -> ['(class QgsAttributeDialog) was removed - just use the object directly.', '(class QgsProjectionSelectionWidget) has been removed']
+./buildings/settings/project.py::26: Found dialog -> ['(class QgsAttributeDialog) was removed - just use the object directly.', '(class QgsProjectionSelectionWidget) has been removed']
+./buildings/settings/project.py::43: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/settings/project.py::46: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/settings/project.py::49: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+
+
+*******************************************************************************
+Found 5 API2 usages
+
+Files with API2 usages:
+./buildings/settings/project.py -> 5 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

@@ -1,0 +1,61 @@
+./buildings/gui/bulk_load_changes.py::37: Found fields -> ['(class QgsFeature) no longer returns a pointer, but instead a QgsFields value.', '(class QgsSymbolRenderContext) now returns a QgsFields value, not a pointer.']
+./buildings/gui/bulk_load_changes.py::40: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::48: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::55: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::75: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::76: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::85: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::86: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::87: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::96: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::97: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::98: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/gui/bulk_load_changes.py::104: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::113: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::123: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/gui/bulk_load_changes.py::169: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::171: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::173: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::175: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::177: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::179: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::188: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::190: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::192: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::195: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::197: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::199: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_changes.py::230: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::234: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::243: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::301: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/gui/bulk_load_changes.py::352: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/bulk_load_changes.py::405: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/bulk_load_changes.py::481: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::715: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/bulk_load_changes.py::865: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::869: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::874: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_changes.py::998: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/bulk_load_changes.py::1019: Found save -> ['(class QgsFeatureRendererV2) expects QgsReadWriteContext reference as the last argument']
+./buildings/gui/bulk_load_changes.py::1070: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+
+
+*******************************************************************************
+Found 41 API2 usages
+
+Files with API2 usages:
+./buildings/gui/bulk_load_changes.py -> 41 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

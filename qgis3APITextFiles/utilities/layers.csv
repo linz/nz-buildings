@@ -1,0 +1,79 @@
+./buildings/utilities/layers.py::5: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::7: Found QgsSymbolLayerV2Registry -> ['==Renamed to== QgsSymbolLayerRegistry']
+./buildings/utilities/layers.py::8: Found QgsSymbolV2 -> ['==Renamed to== QgsSymbol']
+./buildings/utilities/layers.py::9: Found QgsSingleSymbolRendererV2 -> ['==Renamed to== QgsSingleSymbolRenderer']
+./buildings/utilities/layers.py::18: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::20: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::22: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::27: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::33: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::35: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::37: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::38: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::42: Found QgsSymbolLayerV2Registry -> ['==Renamed to== QgsSymbolLayerRegistry']
+./buildings/utilities/layers.py::43: Found QgsSymbolV2 -> ['==Renamed to== QgsSymbol']
+./buildings/utilities/layers.py::45: Found geometryType -> ['(class QgsVectorDataProvider) has been renamed to wkbType() to be in line with QgsVectorLayer']
+./buildings/utilities/layers.py::79: Found QgsSingleSymbolRendererV2 -> ['==Renamed to== QgsSingleSymbolRenderer']
+./buildings/utilities/layers.py::80: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::81: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::85: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::87: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::88: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::90: Found QgsSymbolV2 -> ['==Renamed to== QgsSymbol']
+./buildings/utilities/layers.py::106: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::108: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::109: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::111: Found QgsSymbolV2 -> ['==Renamed to== QgsSymbol']
+./buildings/utilities/layers.py::133: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/utilities/layers.py::151: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/utilities/layers.py::160: Found property -> ['==Renamed method to== cost']
+./buildings/utilities/layers.py::161: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/utilities/layers.py::165: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/utilities/layers.py::166: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::167: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::169: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/utilities/layers.py::172: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/utilities/layers.py::173: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::174: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::175: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::178: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::180: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::182: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/utilities/layers.py::183: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::185: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::186: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::187: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::196: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/utilities/layers.py::203: Found name -> ['(class QgsSimpleMarkerSymbolLayer) and setName() have been removed. Use shape() and setShape() instead.']
+./buildings/utilities/layers.py::205: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/utilities/layers.py::208: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::211: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::212: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/utilities/layers.py::213: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::215: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::228: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/utilities/layers.py::229: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/utilities/layers.py::236: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::237: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/utilities/layers.py::241: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/utilities/layers.py::242: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+
+
+*******************************************************************************
+Found 59 API2 usages
+
+Files with API2 usages:
+./buildings/utilities/layers.py -> 59 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

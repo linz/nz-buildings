@@ -1,0 +1,88 @@
+./buildings/tests/gui/test_setup_alter_building_relationships.py::35: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::75: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::77: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::94: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::95: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::98: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::102: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::103: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::105: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::110: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::114: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::116: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::117: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::118: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::129: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::133: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::135: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::136: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::137: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::144: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::148: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::150: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::151: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::152: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+
+
+*******************************************************************************
+Found 24 API2 usages
+
+Files with API2 usages:
+./buildings/tests/gui/test_setup_alter_building_relationships.py -> 24 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+
+./buildings/tests/gui/test_setup_alter_building_relationships.py::35: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::75: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::77: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::94: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::95: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::98: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::102: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::103: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::105: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::110: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::114: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::116: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::117: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::118: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::129: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::133: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::135: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::136: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::137: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::144: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::148: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::150: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::151: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_setup_alter_building_relationships.py::152: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+
+
+*******************************************************************************
+Found 24 API2 usages
+
+Files with API2 usages:
+./buildings/tests/gui/test_setup_alter_building_relationships.py -> 24 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

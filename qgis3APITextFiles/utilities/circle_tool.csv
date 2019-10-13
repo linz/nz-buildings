@@ -1,0 +1,36 @@
+./buildings/utilities/circle_tool.py::6: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/circle_tool.py::16: Found draw -> ['(class QgsMapLayer) has been removed. Use createMapRenderer() method for rendering of layers.', '(class QgsRasterDataProvider) has been removed from the interface as it was not used anywhere.']
+./buildings/utilities/circle_tool.py::20: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/utilities/circle_tool.py::21: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/utilities/circle_tool.py::23: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/utilities/circle_tool.py::32: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/circle_tool.py::39: Found fromPolyline -> ['(class QgsGeometry) now requires a list of QgsPoint objects, instead of QgsPointXY 2d points. A new method fromPolylineXY was']
+./buildings/utilities/circle_tool.py::50: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/circle_tool.py::55: Found pendingFields -> ['(class QgsVectorLayer) was dropped. Use fields() instead.']
+./buildings/utilities/circle_tool.py::57: Found addFeature -> ['(class QgsVectorLayer) no longer accepts an alsoUpdateExtent boolean - this extra argument has been ignored for some time']
+./buildings/utilities/circle_tool.py::60: Found pendingFields -> ['(class QgsVectorLayer) was dropped. Use fields() instead.']
+./buildings/utilities/circle_tool.py::62: Found addFeature -> ['(class QgsVectorLayer) no longer accepts an alsoUpdateExtent boolean - this extra argument has been ignored for some time']
+./buildings/utilities/circle_tool.py::65: Found pendingFields -> ['(class QgsVectorLayer) was dropped. Use fields() instead.']
+./buildings/utilities/circle_tool.py::67: Found addFeature -> ['(class QgsVectorLayer) no longer accepts an alsoUpdateExtent boolean - this extra argument has been ignored for some time']
+./buildings/utilities/circle_tool.py::73: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/circle_tool.py::81: Found fromPolyline -> ['(class QgsGeometry) now requires a list of QgsPoint objects, instead of QgsPointXY 2d points. A new method fromPolylineXY was']
+
+
+*******************************************************************************
+Found 16 API2 usages
+
+Files with API2 usages:
+./buildings/utilities/circle_tool.py -> 16 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

@@ -1,0 +1,50 @@
+./buildings/gui/bulk_load_frame.py::11: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::27: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/gui/bulk_load_frame.py::60: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/gui/bulk_load_frame.py::162: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::181: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::193: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::207: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::248: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_frame.py::353: Found loadNamedStyle -> ['(class QgsVectorLayer): theResultFlag argument is correctly declared as output argument']
+./buildings/gui/bulk_load_frame.py::366: Found loadNamedStyle -> ['(class QgsVectorLayer): theResultFlag argument is correctly declared as output argument']
+./buildings/gui/bulk_load_frame.py::370: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_frame.py::384: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/gui/bulk_load_frame.py::399: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/gui/bulk_load_frame.py::419: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/gui/bulk_load_frame.py::434: Found save -> ['(class QgsFeatureRendererV2) expects QgsReadWriteContext reference as the last argument']
+./buildings/gui/bulk_load_frame.py::446: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::450: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::469: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load_frame.py::534: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::576: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::580: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::596: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::600: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::630: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::637: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::708: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/bulk_load_frame.py::721: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::736: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/bulk_load_frame.py::750: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/gui/bulk_load_frame.py::759: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+
+
+*******************************************************************************
+Found 30 API2 usages
+
+Files with API2 usages:
+./buildings/gui/bulk_load_frame.py -> 30 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

@@ -1,0 +1,27 @@
+./buildings/tests/gui/test_setup_new_capture_source.py::44: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_setup_new_capture_source.py::64: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_new_capture_source.py::66: Found instance -> ['(class QgsAuthManager) was removed in favor of QgsApplication::authManager() that returns an instance of the Auth Manager']
+./buildings/tests/gui/test_setup_new_capture_source.py::68: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/tests/gui/test_setup_new_capture_source.py::70: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_new_capture_source.py::71: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/tests/gui/test_setup_new_capture_source.py::74: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+
+
+*******************************************************************************
+Found 7 API2 usages
+
+Files with API2 usages:
+./buildings/tests/gui/test_setup_new_capture_source.py -> 7 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

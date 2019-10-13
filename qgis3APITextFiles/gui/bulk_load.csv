@@ -1,0 +1,31 @@
+./buildings/gui/bulk_load.py::27: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load.py::34: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load.py::41: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load.py::55: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/bulk_load.py::74: Found fields -> ['(class QgsFeature) no longer returns a pointer, but instead a QgsFields value.', '(class QgsSymbolRenderContext) now returns a QgsFields value, not a pointer.']
+./buildings/gui/bulk_load.py::194: Found create -> ['(class QgsSvgSelectorWidget) has been removed - use ordinary constructor instead.']
+./buildings/gui/bulk_load.py::231: Found crs -> ['(class QgsMapLayer) now returns a QgsCoordinateReferenceSystem object, not a reference. This change has no effect for PyQGIS code.']
+./buildings/gui/bulk_load.py::273: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/gui/bulk_load.py::281: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/gui/bulk_load.py::283: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/bulk_load.py::327: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+
+
+*******************************************************************************
+Found 11 API2 usages
+
+Files with API2 usages:
+./buildings/gui/bulk_load.py -> 11 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

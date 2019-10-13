@@ -1,0 +1,48 @@
+./buildings/gui/new_capture_source_area.py::11: Found QGis -> ['==Renamed== to Qgis']
+./buildings/gui/new_capture_source_area.py::15: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/new_capture_source_area.py::26: Found layers -> ['(class QgsMapSettings) and setLayers() now work with list of layers instead of layer IDs']
+./buildings/gui/new_capture_source_area.py::70: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/new_capture_source_area.py::139: Found select -> ['(class QgsVectorLayer) replaced by selectByRect()']
+./buildings/gui/new_capture_source_area.py::146: Found QGis -> ['==Renamed== to Qgis']
+./buildings/gui/new_capture_source_area.py::158: Found QGis -> ['==Renamed== to Qgis']
+./buildings/gui/new_capture_source_area.py::159: Found fromMultiPolygon -> ['(class QgsGeometry) was renamed to fromMultiPolygonXY()']
+./buildings/gui/new_capture_source_area.py::160: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/new_capture_source_area.py::165: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/gui/new_capture_source_area.py::166: Found crs -> ['(class QgsMapLayer) now returns a QgsCoordinateReferenceSystem object, not a reference. This change has no effect for PyQGIS code.']
+./buildings/gui/new_capture_source_area.py::182: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+./buildings/gui/new_capture_source_area.py::195: Found loadNamedStyle -> ['(class QgsVectorLayer): theResultFlag argument is correctly declared as output argument']
+./buildings/gui/new_capture_source_area.py::209: Found setVisible -> ['(class QgsLayerTreeGroup) is replaced by QgsLayerTreeNode::setItemVisibilityChecked()', '(class QgsLayerTreeLayer) is replaced by QgsLayerTreeNode::setItemVisibilityChecked()']
+./buildings/gui/new_capture_source_area.py::231: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/new_capture_source_area.py::235: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/new_capture_source_area.py::244: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/gui/new_capture_source_area.py::268: Found QGis -> ['==Renamed== to Qgis']
+./buildings/gui/new_capture_source_area.py::269: Found fromMultiPolygon -> ['(class QgsGeometry) was renamed to fromMultiPolygonXY()']
+./buildings/gui/new_capture_source_area.py::270: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/new_capture_source_area.py::301: Found QGis -> ['==Renamed== to Qgis']
+./buildings/gui/new_capture_source_area.py::302: Found fromMultiPolygon -> ['(class QgsGeometry) was renamed to fromMultiPolygonXY()']
+./buildings/gui/new_capture_source_area.py::303: Found exportToWkt -> ['(class QgsGeometry) was renamed to asWkt()']
+./buildings/gui/new_capture_source_area.py::344: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/new_capture_source_area.py::345: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/new_capture_source_area.py::358: Found clear -> ['(class QgsMapCanvas) has been removed. Use refresh() instead.']
+./buildings/gui/new_capture_source_area.py::385: Found QgsMapLayerRegistry -> ['==Removed==  Its functionality has been moved to QgsProject.']
+./buildings/gui/new_capture_source_area.py::406: Found layer -> ['(class QgsPalLabeling) was removed. If direct access to QgsPalLayerSettings is necessary, use QgsPalLayerSettings::fromLayer()']
+
+
+*******************************************************************************
+Found 28 API2 usages
+
+Files with API2 usages:
+./buildings/gui/new_capture_source_area.py -> 28 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

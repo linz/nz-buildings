@@ -1,0 +1,27 @@
+./buildings/utilities/point_tool.py::2: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/point_tool.py::8: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/point_tool.py::9: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/point_tool.py::20: Found canvasPressEvent -> ['(class QgsAdvancedDigitizingDockWidget), canvasReleaseEvent(), canvasMoveEvent() were removed. Handling of events is done in QgsMapToolAdvancedDigitizing.']
+./buildings/utilities/point_tool.py::26: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/utilities/point_tool.py::28: Found canvasMoveEvent -> ['(class QgsAdvancedDigitizingDockWidget) were removed. Handling of events is done in QgsMapToolAdvancedDigitizing.']
+./buildings/utilities/point_tool.py::34: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+
+
+*******************************************************************************
+Found 7 API2 usages
+
+Files with API2 usages:
+./buildings/utilities/point_tool.py -> 7 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+

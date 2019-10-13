@@ -1,0 +1,36 @@
+./buildings/tests/gui/test_processes_alter_building_relationships.py::24: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::47: Found actions -> ['(class QgsDataItem) now requires a new QWidget parent argument. Subclasses should ensure that returned items have been']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::63: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::64: Found setDestinationCrs -> ['(class QgsTracer) now requires a QgsCoordinateTransformContext argument.']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::69: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::70: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::74: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::80: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::112: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::113: Found setDestinationCrs -> ['(class QgsTracer) now requires a QgsCoordinateTransformContext argument.']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::117: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::118: Found mapCanvas -> ['(class QgsLayerPropertiesWidget) have been removed in favor of setContext()/context()', '(class QgsRendererWidget) have been removed in favor of setContext()/context()', '(class QgsRendererRulePropsWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolLayerWidget) have been removed in favor of setContext()/context()', '(class QgsSymbolSelectorDialog) have been removed in favor of setContext()/context()', '(class QgsSymbolsListWidget) have been removed in favor of setContext()/context()']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::122: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::128: Found QgsPoint -> ['==Renamed to== QgsPointXY']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::533: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+./buildings/tests/gui/test_processes_alter_building_relationships.py::562: Found isVisible -> ['(class QgsLayerTreeGroup) is moved to QgsLayerTreeNode', '(class QgsLayerTreeLayer) is moved to QgsLayerTreeNode']
+
+
+*******************************************************************************
+Found 16 API2 usages
+
+Files with API2 usages:
+./buildings/tests/gui/test_processes_alter_building_relationships.py -> 16 usages found
+
+
+###############################################################################
+NOTE:
+This tool is based on a machine parsing of 
+https://qgis.org/api/api_break.html so the result are as good as the 
+information there. Also, being a simple parser, it just give an hint were to
+look at. It is by no means a complete tool to find all the
+possible API incompatibility.
+
+Methods are matched just based on their names and not on their classes, 
+so there might be various false positives.
+
