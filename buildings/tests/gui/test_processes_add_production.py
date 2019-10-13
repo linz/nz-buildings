@@ -19,8 +19,8 @@
 import os
 import unittest
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtTest import QTest
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtTest import QTest
 from qgis.core import QgsRectangle, QgsPoint, QgsCoordinateReferenceSystem
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
@@ -254,7 +254,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         # click reset button
         self.edit_dialog.btn_edit_reset.click()
         # check geom removed from canvas
-        self.assertEqual(len(self.edit_dialog.added_geoms.keys()), 0)
+        self.assertEqual(len(list(self.edit_dialog.added_geoms.keys())), 0)
         # check comboxbox indexes reset to 0
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentIndex(), -1)
         self.assertEqual(self.edit_dialog.cmb_capture_source.currentIndex(), -1)

@@ -1,6 +1,7 @@
+from builtins import str
 # -*- coding: utf-8 -*-
 
-from PyQt4.QtCore import pyqtSlot
+from qgis.PyQt.QtCore import pyqtSlot
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (

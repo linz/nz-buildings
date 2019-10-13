@@ -3,9 +3,9 @@
 import os.path
 from functools import partial
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QFrame
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtWidgets import QFrame
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 

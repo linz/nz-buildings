@@ -1,8 +1,8 @@
 import os
 
-from PyQt4 import uic
-from PyQt4.QtGui import QCompleter, QDialog
-from PyQt4.QtCore import Qt
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QCompleter, QDialog
+from qgis.PyQt.QtCore import Qt
 
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.utilities import database as db

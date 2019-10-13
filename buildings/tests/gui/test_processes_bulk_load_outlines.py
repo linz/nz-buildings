@@ -15,12 +15,14 @@
 
  ***************************************************************************/
 """
+from builtins import str
+from builtins import range
 
 import os
 import unittest
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QMessageBox
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.core import QgsMapLayerRegistry
 from qgis.utils import iface, plugins
 

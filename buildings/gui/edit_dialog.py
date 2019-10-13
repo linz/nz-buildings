@@ -3,9 +3,9 @@ from collections import OrderedDict
 from functools import partial
 import os
 
-from PyQt4 import uic
-from PyQt4.QtGui import QAbstractItemView, QCompleter, QDialog
-from PyQt4.QtCore import Qt, pyqtSignal, pyqtSlot
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QAbstractItemView, QCompleter, QDialog
+from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from qgis.utils import iface, isPluginLoaded, plugins
 
@@ -350,9 +350,9 @@ class EditDialog(QDialog, FORM_CLASS):
         for qa_lyr in self.find_qa_layer():
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
-                if feat_id in bulk_load_ids.values():
-                    qa_feat_id = bulk_load_ids.keys()[
-                        bulk_load_ids.values().index(feat_id)
+                if feat_id in list(bulk_load_ids.values()):
+                    qa_feat_id = list(bulk_load_ids.keys())[
+                        list(bulk_load_ids.values()).index(feat_id)
                     ]
                     self.update_qa_layer_attribute(
                         qa_lyr, qa_feat_id, "Fixed", "Geometry edited"
@@ -363,9 +363,9 @@ class EditDialog(QDialog, FORM_CLASS):
         for qa_lyr in self.find_qa_layer():
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
-                if feat_id in bulk_load_ids.values():
-                    qa_feat_id = bulk_load_ids.keys()[
-                        bulk_load_ids.values().index(feat_id)
+                if feat_id in list(bulk_load_ids.values()):
+                    qa_feat_id = list(bulk_load_ids.keys())[
+                        list(bulk_load_ids.values()).index(feat_id)
                     ]
                     self.update_qa_layer_attribute(
                         qa_lyr, qa_feat_id, "Fixed", "Deleted- {}".format(del_reason)

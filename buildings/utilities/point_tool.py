@@ -1,4 +1,4 @@
-from PyQt4.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.core import QgsPoint
 from qgis.gui import QgsMapToolEmitPoint
 

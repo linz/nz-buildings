@@ -1,11 +1,13 @@
+from builtins import str
 # -*- coding: utf-8 -*-
 
 from functools import partial
 import os.path
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMessageBox
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
+from qgis.PyQt.QtWidgets import QAction, QApplication, QFrame, QMessageBox
+from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.core import QgsProject, QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface

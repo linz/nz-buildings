@@ -1,8 +1,8 @@
 from functools import partial
 import math
 
-from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QColor
+from qgis.PyQt.QtCore import pyqtSlot, Qt
+from qgis.PyQt.QtGui import QColor
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint
 from qgis.gui import QgsRubberBand
 from qgis.utils import iface

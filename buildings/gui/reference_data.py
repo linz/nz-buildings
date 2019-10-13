@@ -3,9 +3,10 @@
 import os.path
 
 from functools import partial
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot, Qt
-from PyQt4.QtGui import QFrame, QIcon, QLineEdit, QMessageBox, QApplication, QCheckBox
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot, Qt
+from qgis.PyQt.QtWidgets import QFrame, QLineEdit, QMessageBox, QApplication, QCheckBox
+from qgis.PyQt.QtGui import QIcon
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.reference_data import topo50

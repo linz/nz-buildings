@@ -1,17 +1,12 @@
+from builtins import str
+from builtins import range
 import csv
 import os
 
-from PyQt4 import uic
-from PyQt4.QtGui import (
-    QAbstractItemView,
-    QDialog,
-    QFileDialog,
-    QHeaderView,
-    QIcon,
-    QStandardItem,
-    QStandardItemModel,
-)
-from PyQt4.QtCore import Qt, pyqtSlot
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QAbstractItemView, QDialog, QFileDialog, QHeaderView
+from qgis.PyQt.QtGui import QIcon, QStandardItem, QStandardItemModel
+from qgis.PyQt.QtCore import Qt, pyqtSlot
 
 from qgis.core import QgsProject
 from qgis.gui import QgsMessageBar

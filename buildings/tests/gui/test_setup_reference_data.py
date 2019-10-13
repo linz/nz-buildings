@@ -18,8 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QLineEdit
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QLineEdit
 from qgis.utils import plugins
 
 

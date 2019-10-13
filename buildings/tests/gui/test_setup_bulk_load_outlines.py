@@ -18,8 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QMessageBox
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.utils import plugins, iface
 
 from buildings.utilities import database as db

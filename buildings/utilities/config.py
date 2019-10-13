@@ -2,7 +2,7 @@
 
 """This module converts .ini files to Python objects."""
 
-import ConfigParser
+import configparser
 import os
 
 
@@ -22,7 +22,7 @@ def read_config_file(file_path):
     ConfigParser() object"""
     config_parser = None
     if os.path.isfile(file_path):
-        config_parser = ConfigParser.ConfigParser()
+        config_parser = configparser.configparser()
         config_parser.read(file_path)
     else:
         raise IOError("Config file not found.")

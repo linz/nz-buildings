@@ -19,7 +19,7 @@
 import os
 import unittest
 
-from PyQt4.QtGui import QStandardItem, QStandardItemModel
+from qgis.PyQt.QtGui import QStandardItem, QStandardItemModel
 
 from buildings.gui.check_dialog import CheckDialog
 

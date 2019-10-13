@@ -17,9 +17,9 @@
 """
 import unittest
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QMessageBox
-from PyQt4.QtTest import QTest
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface

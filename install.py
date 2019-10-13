@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from __future__ import print_function
 import sys
 import os
 import psycopg2
@@ -199,7 +200,7 @@ def db_install():
         cursor.close()
         connection.close()
 
-    except psycopg2.DataError, exception:
+    except psycopg2.DataError as exception:
         print(exception)
         connection.rollback()
         connection.close()

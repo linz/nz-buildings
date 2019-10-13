@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4.QtCore import pyqtSlot
+from qgis.PyQt.QtCore import pyqtSlot
 
 from buildings.sql import (
     buildings_bulk_load_select_statements as bulk_load_select,

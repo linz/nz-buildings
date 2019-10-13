@@ -1,3 +1,4 @@
+from builtins import str
 # script to update canal data
 
 from buildings.sql import buildings_reference_select_statements as reference_select

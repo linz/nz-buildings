@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+from builtins import object
 from qgis.core import (
     QgsVectorLayer,
     QgsMapLayerRegistry,
@@ -7,7 +9,7 @@ from qgis.core import (
     QgsSingleSymbolRendererV2,
 )
 from qgis.utils import iface
-import database as db
+from . import database as db
 
 URI = db.set_uri()
 
@@ -41,7 +43,7 @@ def style_layer(layer, attr_dict):
     symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
     symbol.deleteSymbolLayer(0)
     if layer.geometryType() == 2:
-        for key, attr in attr_dict.iteritems():
+        for key, attr in attr_dict.items():
             lineMeta = registry.symbolLayerMetadata("SimpleLine")
             # Line layer
             lineLayer = lineMeta.createSymbolLayer(
@@ -55,7 +57,7 @@ def style_layer(layer, attr_dict):
             )
             symbol.appendSymbolLayer(lineLayer)
     else:
-        for key, attributes in attr_dict.iteritems():
+        for key, attributes in attr_dict.items():
             if key == 1:
                 for attr in attributes:
                     create_line_layer(
@@ -161,15 +163,15 @@ class LayerRegistry(object):
 
     def clear_layer_selection(self):
         """Clear selection on the list of layers"""
-        for layer in self.layers.values():
+        for layer in list(self.layers.values()):
             layer.removeSelection()
 
         iface.mapCanvas().refresh()
 
     def remove_all_layers(self):
         """Remove all layers except base_layers"""
-        for layer in self.layers.values():
-            if layer not in self.base_layers.values():
+        for layer in list(self.layers.values()):
+            if layer not in list(self.base_layers.values()):
                 QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
                 self.update_layers()
 
@@ -180,7 +182,7 @@ class LayerRegistry(object):
         @param layer:     Layer instance
         @type  layer:     qgis.core.QgsVectorLayer
         """
-        if layer in self.layers.values():
+        if layer in list(self.layers.values()):
             layer.rollBack()
             QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
             self.update_layers()

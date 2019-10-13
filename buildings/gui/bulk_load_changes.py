@@ -1,8 +1,10 @@
+from builtins import next
+from builtins import object
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QToolButton
+from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtWidgets import QToolButton
 from qgis.core import QgsFeatureRequest, QgsGeometry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -16,7 +18,7 @@ from buildings.sql import (
 )
 
 
-class BulkLoadChanges:
+class BulkLoadChanges(object):
     """
         Parent class of bulk Load changes (editing and adding outlines)
     """
@@ -352,7 +354,7 @@ class AddBulkLoad(BulkLoadChanges):
         result = self.edit_dialog.db._execute(sql, (wkt,))
         geom = result.fetchall()[0][0]
 
-        if qgsfId not in self.edit_dialog.added_geoms.keys():
+        if qgsfId not in list(self.edit_dialog.added_geoms.keys()):
             self.edit_dialog.added_geoms[qgsfId] = geom
             self.edit_dialog.geom = geom
 
@@ -371,7 +373,7 @@ class AddBulkLoad(BulkLoadChanges):
             @param qgsfId:      Id of deleted feature
             @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if qgsfId in self.edit_dialog.added_geoms.keys():
+        if qgsfId in list(self.edit_dialog.added_geoms.keys()):
             del self.edit_dialog.added_geoms[qgsfId]
             if self.parent_frame.polyline is not None:
                 self.parent_frame.polyline.reset()
@@ -379,7 +381,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
             else:
-                self.edit_dialog.geom = self.edit_dialog.added_geoms.values()[-1]
+                self.edit_dialog.geom = list(self.edit_dialog.added_geoms.values())[-1]
                 self.select_comboboxes_value()
 
     @pyqtSlot(int, QgsGeometry)
@@ -391,7 +393,7 @@ class AddBulkLoad(BulkLoadChanges):
            @param geom:        geometry of added feature
            @type  geom:        qgis.core.QgsGeometry
         """
-        if qgsfId in self.edit_dialog.added_geoms.keys():
+        if qgsfId in list(self.edit_dialog.added_geoms.keys()):
             area = geom.area()
             if area < 10:
                 iface.messageBar().pushMessage(
@@ -409,7 +411,7 @@ class AddBulkLoad(BulkLoadChanges):
             result = self.edit_dialog.db._execute(sql, (wkt,))
             geom = result.fetchall()[0][0]
             self.edit_dialog.added_geoms[qgsfId] = geom
-            if qgsfId == self.edit_dialog.added_geoms.keys()[-1]:
+            if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
                 self.edit_dialog.geom = geom
         else:
             self.error_dialog = ErrorDialog()
@@ -892,12 +894,12 @@ class EditGeometry(BulkLoadChanges):
 
         _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
 
-        self.edit_dialog.edit_geometry_saved.emit(self.edit_dialog.geoms.keys())
+        self.edit_dialog.edit_geometry_saved.emit(list(self.edit_dialog.geoms.keys()))
 
         if len(self.edit_dialog.split_geoms) > 0:
 
             # insert into bulk_load_outlines table
-            for qgsfId, geom in self.edit_dialog.split_geoms.items():
+            for qgsfId, geom in list(self.edit_dialog.split_geoms.items()):
                 attributes = self.new_attrs[qgsfId]
                 if not attributes[7]:
                     attributes[7] = None
@@ -1023,7 +1025,7 @@ class EditGeometry(BulkLoadChanges):
         else:
             result = result[0][0]
             if self.edit_dialog.geom == result:
-                if qgsfId in self.edit_dialog.geoms.keys():
+                if qgsfId in list(self.edit_dialog.geoms.keys()):
                     del self.edit_dialog.geoms[qgsfId]
                 self.disable_UI_functions()
             else:

@@ -15,13 +15,14 @@
 
  ***************************************************************************/
 """
+from builtins import str
 
 import unittest
 
 from qgis.utils import iface, plugins
 from qgis.gui import QgsMapTool
-from PyQt4.QtCore import Qt
-from PyQt4.QtTest import QTest
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtTest import QTest
 from qgis.core import QgsCoordinateReferenceSystem, QgsPoint
 
 from buildings.utilities import database as db

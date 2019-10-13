@@ -3,9 +3,10 @@
 import math
 import os.path
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot, Qt, QSize
-from PyQt4.QtGui import QAction, QColor, QFrame, QIcon
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize
+from qgis.PyQt.QtWidgets import QAction, QFrame
+from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.core import (
     QgsFeature,
     QgsGeometry,

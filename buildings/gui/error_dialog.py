@@ -2,9 +2,9 @@
 
 import os
 
-from PyQt4 import uic
-from PyQt4.QtGui import QDialog
-from PyQt4.QtCore import Qt
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.QtCore import Qt
 
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "error_dialog.ui")

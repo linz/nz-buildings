@@ -2,8 +2,8 @@
 
 import os.path
 
-from PyQt4 import uic
-from PyQt4.QtGui import QFrame
+from qgis.PyQt import uic
+from qgis.PyQt.QtWidgets import QFrame
 
 from buildings.utilities.layers import LayerRegistry
 

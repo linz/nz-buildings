@@ -1,19 +1,14 @@
+from builtins import str
+from builtins import range
 # -*- coding: utf-8 -*-
 
 import os.path
 from functools import partial
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import (
-    QFrame,
-    QIcon,
-    QColor,
-    QToolButton,
-    QTableWidgetItem,
-    QHeaderView,
-    QAbstractItemView,
-)
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtWidgets import QFrame, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
+from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.core import QgsMapLayerRegistry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface

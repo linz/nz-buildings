@@ -2,8 +2,9 @@
 
 import os
 
-from PyQt4.QtCore import Qt, pyqtSignal
-from PyQt4.QtGui import QApplication, QCursor, QPixmap
+from qgis.PyQt.QtCore import Qt, pyqtSignal
+from qgis.PyQt.QtWidgets import QApplication
+from qgis.PyQt.QtGui import QCursor, QPixmap
 from qgis.core import QgsRectangle, QgsMapLayerRegistry, QgsPoint
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.utils import QGis

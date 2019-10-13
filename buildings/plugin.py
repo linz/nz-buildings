@@ -1,9 +1,12 @@
+from builtins import range
+from builtins import object
 # -*- coding: utf-8 -*-
 
 import os
 
-from PyQt4.QtCore import QCoreApplication, Qt
-from PyQt4.QtGui import QAction, QDockWidget, QIcon, QListWidgetItem, QMenu, QToolBar
+from qgis.PyQt.QtCore import QCoreApplication, Qt
+from qgis.PyQt.QtWidgets import QAction, QDockWidget, QListWidgetItem, QMenu, QToolBar
+from qgis.PyQt.QtGui import QIcon
 from qgis.core import QgsCoordinateReferenceSystem
 from qgis.utils import iface, plugins
 
@@ -18,7 +21,7 @@ from buildings.settings.project import (
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
-class Buildings:
+class Buildings(object):
     """QGIS Plugin Implementation."""
 
     stop = False

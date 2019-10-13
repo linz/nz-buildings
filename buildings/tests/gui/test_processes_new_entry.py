@@ -18,7 +18,7 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 from qgis.utils import plugins
 
 from buildings.utilities import database as db

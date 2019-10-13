@@ -18,8 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
-from PyQt4.QtGui import QListWidgetItem
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import QListWidgetItem
 from qgis.utils import plugins
 
 

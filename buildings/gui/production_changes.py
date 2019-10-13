@@ -1,8 +1,10 @@
+from builtins import next
+from builtins import object
 # -*- coding: utf-8 -*-\
 from collections import OrderedDict
 
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import QToolButton, QMessageBox
+from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
 from qgis.core import QgsFeatureRequest, QgsGeometry
 from qgis.gui import QgsMessageBar
 from qgis.utils import iface
@@ -17,7 +19,7 @@ from buildings.sql import (
 )
 
 
-class ProductionChanges:
+class ProductionChanges(object):
     """
         Parent class of Production changes (editing and adding outlines)
     """
@@ -359,7 +361,7 @@ class AddProduction(ProductionChanges):
         result = self.edit_dialog.db._execute(sql, (wkt,))
         geom = result.fetchall()[0][0]
 
-        if qgsfId not in self.edit_dialog.added_geoms.keys():
+        if qgsfId not in list(self.edit_dialog.added_geoms.keys()):
             self.edit_dialog.added_geoms[qgsfId] = geom
             self.edit_dialog.geom = geom
 
@@ -378,7 +380,7 @@ class AddProduction(ProductionChanges):
             @param qgsfId:      Id of deleted feature
             @type  qgsfId:      qgis.core.QgsFeature.QgsFeatureId
         """
-        if qgsfId in self.edit_dialog.added_geoms.keys():
+        if qgsfId in list(self.edit_dialog.added_geoms.keys()):
             del self.edit_dialog.added_geoms[qgsfId]
             if self.parent_frame.polyline is not None:
                 self.parent_frame.polyline.reset()
@@ -386,7 +388,7 @@ class AddProduction(ProductionChanges):
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
             else:
-                self.edit_dialog.geom = self.edit_dialog.added_geoms.values()[-1]
+                self.edit_dialog.geom = list(self.edit_dialog.added_geoms.values())[-1]
                 self.select_comboboxes_value()
 
     @pyqtSlot(int, QgsGeometry)
@@ -398,7 +400,7 @@ class AddProduction(ProductionChanges):
            @param geom:        geometry of added feature
            @type  geom:        qgis.core.QgsGeometry
         """
-        if qgsfId in self.edit_dialog.added_geoms.keys():
+        if qgsfId in list(self.edit_dialog.added_geoms.keys()):
             area = geom.area()
             if area < 10:
                 iface.messageBar().pushMessage(
@@ -416,7 +418,7 @@ class AddProduction(ProductionChanges):
             result = self.edit_dialog.db._execute(sql, (wkt,))
             geom = result.fetchall()[0][0]
             self.edit_dialog.added_geoms[qgsfId] = geom
-            if qgsfId == self.edit_dialog.added_geoms.keys()[-1]:
+            if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
                 self.edit_dialog.geom = geom
         else:
             self.error_dialog = ErrorDialog()
@@ -926,7 +928,7 @@ class EditGeometry(ProductionChanges):
             )
         result = result.fetchall()[0][0]
         if self.edit_dialog.geom == result:
-            if qgsfId in self.edit_dialog.geoms.keys():
+            if qgsfId in list(self.edit_dialog.geoms.keys()):
                 del self.edit_dialog.geoms[qgsfId]
             self.disable_UI_functions()
         else:

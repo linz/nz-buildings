@@ -11,6 +11,8 @@
 #
 ################################################################################
 """
+from __future__ import absolute_import
+from builtins import str
 
 import os
 import psycopg2
@@ -18,7 +20,7 @@ import psycopg2
 from buildings.utilities.warnings import buildings_warning
 from qgis.core import QgsDataSourceURI, QgsApplication
 
-import config
+from . import config
 
 
 config_path = os.path.join(

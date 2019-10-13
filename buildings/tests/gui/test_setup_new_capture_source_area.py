@@ -20,7 +20,7 @@ import unittest
 
 from qgis.utils import plugins
 from qgis.core import QgsProject
-from PyQt4.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 
 from buildings.utilities import database as db
 

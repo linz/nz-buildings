@@ -1,17 +1,12 @@
+from builtins import next
 # -*- coding: utf-8 -*-
 
 import os.path
 from functools import partial
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot
-from PyQt4.QtGui import (
-    QFrame,
-    QToolButton,
-    QTableWidgetItem,
-    QHeaderView,
-    QAbstractItemView,
-)
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtWidgets import QFrame, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
 from qgis.core import (
     QGis,
     QgsFeatureRequest,

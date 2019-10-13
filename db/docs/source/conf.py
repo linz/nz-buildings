@@ -1,3 +1,4 @@
+from builtins import str
 # -*- coding: utf-8 -*-
 #
 # Building Outlines Test documentation build configuration file, created by
@@ -650,7 +651,7 @@ def get_columns(table_str, file_content, this_table_columns):
     }
 
     for column_details in columns_strip:
-        for data_type in data_types.keys():
+        for data_type in list(data_types.keys()):
             regex = data_types[data_type]["regex"]
             search = re.search(regex, column_details)
 

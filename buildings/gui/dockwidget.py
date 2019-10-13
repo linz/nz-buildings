@@ -19,9 +19,9 @@
 
 import os
 
-from PyQt4.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt4.QtGui import QDockWidget
-from PyQt4 import uic
+from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, Qt
+from qgis.PyQt.QtWidgets import QDockWidget
+from qgis.PyQt import uic
 
 from buildings.settings import project
 
