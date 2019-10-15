@@ -7,14 +7,7 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize
 from qgis.PyQt.QtWidgets import QAction, QFrame
 from qgis.PyQt.QtGui import QColor, QIcon
-from qgis.core import (
-    QgsFeature,
-    QgsGeometry,
-    QgsPoint,
-    QgsProject,
-    QgsVectorLayer,
-    QgsMapLayerRegistry,
-)
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer
 from qgis.gui import QgsMessageBar, QgsRubberBand
 from qgis.utils import iface
 
@@ -26,9 +19,7 @@ from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-FORM_CLASS, _ = uic.loadUiType(
-    os.path.join(os.path.dirname(__file__), "production_edits.ui")
-)
+FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "production_edits.ui"))
 
 
 class ProductionFrame(QFrame, FORM_CLASS):
@@ -51,15 +42,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
 
     def setup_toolbar(self):
 
-        if "Add Outline" not in (
-            action.text() for action in iface.building_toolbar.actions()
-        ):
+        if "Add Outline" not in (action.text() for action in iface.building_toolbar.actions()):
             image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "plus.png")
             icon = QIcon()
@@ -69,30 +58,22 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.add_action.triggered.connect(self.canvas_add_outline)
             iface.building_toolbar.addAction(self.add_action)
 
-        if "Edit Geometry" not in (
-            action.text() for action in iface.building_toolbar.actions()
-        ):
+        if "Edit Geometry" not in (action.text() for action in iface.building_toolbar.actions()):
             image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_geometry.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
-            self.edit_geom_action = QAction(
-                icon, "Edit Geometry", iface.building_toolbar
-            )
+            self.edit_geom_action = QAction(icon, "Edit Geometry", iface.building_toolbar)
             iface.registerMainWindowAction(self.edit_geom_action, "Ctrl+2")
             self.edit_geom_action.triggered.connect(self.canvas_edit_geometry)
             iface.building_toolbar.addAction(self.edit_geom_action)
 
-        if "Edit Attributes" not in (
-            action.text() for action in iface.building_toolbar.actions()
-        ):
+        if "Edit Attributes" not in (action.text() for action in iface.building_toolbar.actions()):
             image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_attributes.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
-            self.edit_attrs_action = QAction(
-                icon, "Edit Attributes", iface.building_toolbar
-            )
+            self.edit_attrs_action = QAction(icon, "Edit Attributes", iface.building_toolbar)
             iface.registerMainWindowAction(self.edit_attrs_action, "Ctrl+3")
             self.edit_attrs_action.triggered.connect(self.canvas_edit_attribute)
             iface.building_toolbar.addAction(self.edit_attrs_action)
@@ -106,22 +87,12 @@ class ProductionFrame(QFrame, FORM_CLASS):
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
         self.layer_registry.remove_layer(self.building_layer)
         self.building_historic = self.layer_registry.add_postgres_layer(
-            "historic_outlines",
-            "building_outlines",
-            "shape",
-            "buildings",
-            "",
-            "end_lifespan is not NULL",
+            "historic_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is not NULL"
         )
         self.building_historic.loadNamedStyle(path + "building_historic.qml")
         self.building_layer = None
         self.building_layer = self.layer_registry.add_postgres_layer(
-            "building_outlines",
-            "building_outlines",
-            "shape",
-            "buildings",
-            "",
-            "end_lifespan is NULL",
+            "building_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is NULL"
         )
         self.building_layer.loadNamedStyle(path + "building_blue.qml")
         iface.setActiveLayer(self.building_layer)
@@ -192,9 +163,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_dialog.close()
         iface.actionCancelEdits().trigger()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(
-            self.layers_removed
-        )
+        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         # reset toolbar
@@ -211,12 +180,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def edit_cancel_clicked(self):
-        if len(QgsMapLayerRegistry.instance().mapLayersByName("building_outlines")) > 0:
+        if len(QgsProject.instance().mapLayersByName("building_outlines")) > 0:
             if isinstance(self.change_instance, production_changes.EditAttribute):
                 try:
-                    self.building_layer.selectionChanged.disconnect(
-                        self.change_instance.selection_changed
-                    )
+                    self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
                 except TypeError:
                     pass
             elif isinstance(self.change_instance, production_changes.EditGeometry):
@@ -247,11 +214,9 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
         # reload layers
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(
-            self.layers_removed
-        )
+        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.edit_dialog.remove_territorial_auth()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
         self.change_instance = None
@@ -259,11 +224,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        for layer in [
-            "building_outlines",
-            "historic_outlines",
-            "territorial_authorities",
-        ]:
+        for layer in ["building_outlines", "historic_outlines", "territorial_authorities"]:
             if layer in layerids:
                 self.cb_production.setDisabled(1)
                 iface.messageBar().pushMessage(

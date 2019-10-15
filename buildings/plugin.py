@@ -1,5 +1,6 @@
 from builtins import range
 from builtins import object
+
 # -*- coding: utf-8 -*-
 
 import os
@@ -12,10 +13,7 @@ from qgis.utils import iface, plugins
 
 from buildings.gui.dockwidget import BuildingsDockwidget
 from buildings.gui.menu_frame import MenuFrame
-from buildings.settings.project import (
-    get_attribute_dialog_setting,
-    set_attribute_dialog_setting,
-)
+from buildings.settings.project import get_attribute_dialog_setting, set_attribute_dialog_setting
 
 # Get the path for the parent directory of this file.
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -119,12 +117,7 @@ class Buildings(object):
         """Initiate buildings plugin"""
         home_dir = os.path.dirname(__file__)
         icon_path = os.path.join(home_dir, "icons", "buildings_plugin.png")
-        self.add_action(
-            icon_path,
-            text=self.tr(u"Building Maintenance"),
-            callback=self.run,
-            parent=iface.mainWindow(),
-        )
+        self.add_action(icon_path, text=self.tr(u"Building Maintenance"), callback=self.run, parent=iface.mainWindow())
         try:
             dw = plugins["buildings"].dockwidget
             exists = False
@@ -162,23 +155,17 @@ class Buildings(object):
 
                     # Remove main toolbar
                     for action in self.actions:
-                        iface.removePluginMenu(
-                            self.tr(u"&Building Maintenance"), action
-                        )
+                        iface.removePluginMenu(self.tr(u"&Building Maintenance"), action)
                         iface.removeToolBarIcon(action)
                     del self.main_toolbar
 
-                    for toolbar in iface.mainWindow().findChildren(
-                        QToolBar, "Building Tools"
-                    ):
+                    for toolbar in iface.mainWindow().findChildren(QToolBar, "Building Tools"):
                         iface.mainWindow().removeToolBar(toolbar)
                         # Setting parent to None, deletes the widget completely
                         toolbar.setParent(None)
 
                         # Remove action triggering toolbar from ToolBar menu
-                        toolbar_menu = iface.mainWindow().findChildren(
-                            QMenu, "mToolbarMenu"
-                        )[0]
+                        toolbar_menu = iface.mainWindow().findChildren(QMenu, "mToolbarMenu")[0]
                         for act in toolbar_menu.actions():
                             if act.text() == u"Building Tools":
                                 toolbar_menu.removeAction(act)
@@ -193,9 +180,7 @@ class Buildings(object):
                 panel.removeAction(act)
 
         # Delete the mainWindow reference to the buildings dockwidget
-        for dock in iface.mainWindow().findChildren(
-            QDockWidget, u"BuildingsDockWidgetBase"
-        ):
+        for dock in iface.mainWindow().findChildren(QDockWidget, u"BuildingsDockWidgetBase"):
             dock.setParent(None)
 
     def run(self):
@@ -268,6 +253,7 @@ class Buildings(object):
         self.dockwidget.raise_()
 
     def on_click(self):
+        """ """
         dw = self.dockwidget
         if dw.stk_options.count() == 2:  # 4th widget is not empty
             dw.stk_options.setCurrentIndex(1)  # set to fourth
@@ -295,7 +281,7 @@ class Buildings(object):
     def on_dockwidget_closed(self):
         """Cleanup necessary items here when plugin dockwidget is closed"""
 
-        from buildings.settings.project import set_attribute_dialog_setting
+        # from buildings.settings.project import set_attribute_dialog_setting
 
         set_attribute_dialog_setting(self.attribute_dialog_setting)
 

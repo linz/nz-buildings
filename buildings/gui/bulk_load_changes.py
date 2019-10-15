@@ -3,11 +3,10 @@ from builtins import object
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
-from qgis.PyQt.QtCore import pyqtSlot
+# from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton
 from qgis.core import QgsFeatureRequest, QgsGeometry
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -251,7 +250,7 @@ class AddBulkLoad(BulkLoadChanges):
         iface.building_toolbar.show()
         self.disable_UI_functions()
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -301,7 +300,7 @@ class AddBulkLoad(BulkLoadChanges):
         iface.mapCanvas().refresh()
         self.disable_UI_functions()
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When bulk load frame btn_reset_save clicked
@@ -321,7 +320,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.edit_dialog.geom = None
         self.edit_dialog.added_geoms = OrderedDict()
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         """
            Called when feature is added
@@ -332,7 +331,7 @@ class AddBulkLoad(BulkLoadChanges):
             iface.messageBar().pushMessage(
                 "WARNING",
                 "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
-                level=QgsMessageBar.WARNING,
+                level=Qgis.Warning,
                 duration=3,
             )
         # get new feature geom
@@ -345,11 +344,11 @@ class AddBulkLoad(BulkLoadChanges):
             iface.messageBar().pushMessage(
                 "INFO",
                 "You've drawn an outline that is less than 10sqm, are you sure this is correct?",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=3,
             )
         # convert to correct format
-        wkt = new_geometry.exportToWkt()
+        wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         geom = result.fetchall()[0][0]
@@ -366,7 +365,7 @@ class AddBulkLoad(BulkLoadChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
             Called when a Feature is Deleted
@@ -384,7 +383,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.edit_dialog.geom = list(self.edit_dialog.added_geoms.values())[-1]
                 self.select_comboboxes_value()
 
-    @pyqtSlot(int, QgsGeometry)
+    # @pyqtSlot(int, QgsGeometry)
     def creator_geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -399,10 +398,10 @@ class AddBulkLoad(BulkLoadChanges):
                 iface.messageBar().pushMessage(
                     "INFO",
                     "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                    level=QgsMessageBar.INFO,
+                    level=Qgis.Info,
                     duration=3,
                 )
-            wkt = geom.exportToWkt()
+            wkt = geom.asWkt()
             if not wkt:
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
@@ -494,7 +493,7 @@ class EditAttribute(BulkLoadChanges):
                 self.edit_dialog.building_outline_id = None
                 self.disable_UI_functions()
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -594,7 +593,7 @@ class EditAttribute(BulkLoadChanges):
             self.edit_dialog.ids = []
             self.edit_dialog.building_outline_id = None
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When bulk load frame btn_reset_save clicked
@@ -607,7 +606,7 @@ class EditAttribute(BulkLoadChanges):
         self.edit_dialog.circle_tool = None
         self.disable_UI_functions()
 
-    @pyqtSlot(list, list, bool)
+    # @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
            Called when feature is selected
@@ -712,7 +711,7 @@ class EditAttribute(BulkLoadChanges):
         bulk_load_feat = [feat for feat in self.editing_layer.selectedFeatures()][0]
         bulk_load_geom = bulk_load_feat.geometry()
         # convert to correct format
-        wkt = bulk_load_geom.exportToWkt()
+        wkt = bulk_load_geom.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
@@ -856,7 +855,7 @@ class EditGeometry(BulkLoadChanges):
         BulkLoadChanges.__init__(self, edit_dialog)
         iface.actionToggleEditing().trigger()
         # set editing to edit polygon
-        iface.actionNodeTool().trigger()
+        iface.actionVertexTool().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
         # selection actions
         iface.building_toolbar.addSeparator()
@@ -885,7 +884,7 @@ class EditGeometry(BulkLoadChanges):
         self.disable_UI_functions()
         self.new_attrs = {}
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When bulk load frame btn_edit_save clicked
@@ -952,7 +951,7 @@ class EditGeometry(BulkLoadChanges):
             self.new_attrs = {}
             self.edit_dialog.editing_layer.triggerRepaint()
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When bulk load frame btn_reset_save clicked
@@ -970,7 +969,7 @@ class EditGeometry(BulkLoadChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    @pyqtSlot(int, QgsGeometry)
+    # @pyqtSlot(int, QgsGeometry)
     def geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -989,13 +988,13 @@ class EditGeometry(BulkLoadChanges):
                 iface.messageBar().pushMessage(
                     "INFO",
                     "You cannot edit the geometry of a removed outline.",
-                    level=QgsMessageBar.INFO,
+                    level=Qgis.Info,
                     duration=3,
                 )
                 self.disable_UI_functions()
                 self.edit_dialog.btn_edit_reset.setEnabled(1)
                 return
-        wkt = geom.exportToWkt()
+        wkt = geom.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
@@ -1007,7 +1006,7 @@ class EditGeometry(BulkLoadChanges):
             iface.messageBar().pushMessage(
                 "INFO",
                 "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=3,
             )
         result = result.fetchall()
@@ -1037,7 +1036,7 @@ class EditGeometry(BulkLoadChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         # get new feature geom
         request = QgsFeatureRequest().setFilterFid(qgsfId)
@@ -1062,12 +1061,12 @@ class EditGeometry(BulkLoadChanges):
             iface.messageBar().pushMessage(
                 "INFO",
                 "You've created an outline that is less than 10sqm, are you sure this is correct?",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=3,
             )
 
         # convert to correct format
-        wkt = new_geometry.exportToWkt()
+        wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         self.edit_dialog.split_geoms[qgsfId] = result.fetchall()[0][0]

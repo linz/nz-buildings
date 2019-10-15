@@ -5,9 +5,9 @@ import os
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.PyQt.QtGui import QCursor, QPixmap
-from qgis.core import QgsRectangle, QgsMapLayerRegistry, QgsPoint
+from qgis.core import QgsRectangle, QgsProject, QgsPoint
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
-from qgis.utils import QGis
+from qgis.utils import Qgis
 
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -21,16 +21,14 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
 
-        self.rubber_band = QgsRubberBand(self.canvas, QGis.Polygon)
+        self.rubber_band = QgsRubberBand(self.canvas, Qgis.Polygon)
         self.start_point = None
         self.end_point = None
         self.is_emitting_point = False
 
-        self.rubber_band.reset(QGis.Polygon)
+        self.rubber_band.reset(Qgis.Polygon)
 
-        self.cursor = QCursor(
-            QPixmap(os.path.join(__location__, "..", "icons", "cursor.png"))
-        )
+        self.cursor = QCursor(QPixmap(os.path.join(__location__, "..", "icons", "cursor.png")))
 
     def activate(self):
         self.canvas.setCursor(self.cursor)
@@ -60,19 +58,13 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         self.is_emitting_point = False
         self.end_point = self.toMapCoordinates(event.pos())
 
-        layer_bulk = QgsMapLayerRegistry.instance().mapLayersByName(
-            "bulk_load_outlines"
-        )
-        layer_existing = QgsMapLayerRegistry.instance().mapLayersByName(
-            "existing_subset_extracts"
-        )
+        layer_bulk = QgsProject.instance().mapLayersByName("bulk_load_outlines")
+        layer_existing = QgsProject.instance().mapLayersByName("existing_subset_extracts")
         layers = [layer for layer in layer_bulk] + [layer for layer in layer_existing]
 
         if self.rectangle() is not None:
             for layer in layers:
-                layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(
-                    layer, self.rectangle()
-                )
+                layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, self.rectangle())
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
                     layer.select(layer_rect, True)
                 else:
@@ -82,9 +74,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             p = self.toMapCoordinates(event.pos())
             rect = QgsRectangle(p.x() - w, p.y() - w, p.x() + w, p.y() + w)
             for layer in layers:
-                layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(
-                    layer, rect
-                )
+                layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, rect)
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
                     layer.select(layer_rect, True)
                 else:
@@ -98,10 +88,7 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         """Create the rectangle formed via click and drag"""
         if self.start_point is None or self.end_point is None:
             return None
-        elif (
-            self.start_point.x() == self.end_point.x()
-            or self.start_point.y() == self.end_point.y()
-        ):
+        elif self.start_point.x() == self.end_point.x() or self.start_point.y() == self.end_point.y():
             return None
         return QgsRectangle(self.start_point, self.end_point)
 
@@ -109,13 +96,10 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         """
         Handles the click + drag selection rectangle shown on the map canvas.
         """
-        if (
-            self.start_point.x() == self.end_point.x()
-            or self.start_point.y() == self.end_point.y()
-        ):
+        if self.start_point.x() == self.end_point.x() or self.start_point.y() == self.end_point.y():
             # Prevent creation of invalid rectangle.
             return
-        self.rubber_band.reset(QGis.Polygon)
+        self.rubber_band.reset(Qgis.Polygon)
         point1 = QgsPoint(self.start_point.x(), self.start_point.y())
         point2 = QgsPoint(self.start_point.x(), self.end_point.y())
         point3 = QgsPoint(self.end_point.x(), self.end_point.y())

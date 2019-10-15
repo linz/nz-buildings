@@ -1,13 +1,6 @@
 from __future__ import absolute_import
 from builtins import object
-from qgis.core import (
-    QgsVectorLayer,
-    QgsMapLayerRegistry,
-    QgsProject,
-    QgsSymbolLayerV2Registry,
-    QgsSymbolV2,
-    QgsSingleSymbolRendererV2,
-)
+from qgis.core import QgsApplication, QgsVectorLayer, QgsProject, QgsSymbol, QgsSingleSymbolRenderer
 from qgis.utils import iface
 from . import database as db
 
@@ -15,7 +8,7 @@ URI = db.set_uri()
 
 
 def check_layer_in_registry(layername):
-    """Checks if layer in QgsMapLayerRegistry using layer name
+    """Checks if layer in QgsProject using layer name
 
     @param layername:       Name of layer
     @type  layername:       String
@@ -24,7 +17,7 @@ def check_layer_in_registry(layername):
     """
 
     try:
-        QgsMapLayerRegistry.instance().mapLayersByName(layername)
+        QgsProject.instance().mapLayersByName(layername)
         return True
     except IndexError:
         return False
@@ -39,30 +32,22 @@ def style_layer(layer, attr_dict):
     @param attr_dict:       Dictionary of style attributes
     @type  attr_dict:       dict
     """
-    registry = QgsSymbolLayerV2Registry.instance()
-    symbol = QgsSymbolV2.defaultSymbol(layer.geometryType())
+    registry = QgsApplication.symbolLayerRegistry()
+    symbol = QgsSymbol.defaultSymbol(layer.geometryType())
     symbol.deleteSymbolLayer(0)
     if layer.geometryType() == 2:
         for key, attr in attr_dict.items():
             lineMeta = registry.symbolLayerMetadata("SimpleLine")
             # Line layer
             lineLayer = lineMeta.createSymbolLayer(
-                {
-                    "color": attr[0],
-                    "width": attr[1],
-                    "penstyle": attr[2],
-                    "use_custom_dash": "1",
-                    "customdash": attr[3],
-                }
+                {"color": attr[0], "width": attr[1], "penstyle": attr[2], "use_custom_dash": "1", "customdash": attr[3]}
             )
             symbol.appendSymbolLayer(lineLayer)
     else:
         for key, attributes in attr_dict.items():
             if key == 1:
                 for attr in attributes:
-                    create_line_layer(
-                        registry, symbol, attr[0], attr[1]  # color  # width
-                    )
+                    create_line_layer(registry, symbol, attr[0], attr[1])  # color  # width
             else:
                 for attr in attributes:
                     create_marker_layer(
@@ -76,8 +61,8 @@ def style_layer(layer, attr_dict):
                         attr[5],
                     )
     # Replace the renderer of the current layer
-    renderer = QgsSingleSymbolRendererV2(symbol)
-    layer.setRendererV2(renderer)
+    renderer = QgsSingleSymbolRenderer(symbol)
+    layer.setRenderer(renderer)
     layer.triggerRepaint()
 
 
@@ -85,30 +70,26 @@ def create_line_layer(registry, symbol, color, width):
     """Set up line layer style
 
     @param registry:     Registry for layer
-    @type  registry:     qgis.core.QgsMapLayerRegistry
+    @type  registry:     qgis.core.QgsProject
     @param symbol:       Symbol for styling
-    @type  symbol:       qgis.core.QgsSymbolV2
+    @type  symbol:       qgis.core.QgsSymbol
     @param color:    Colour of line (RGB values in a string)
     @type  color:    string
     @param width:        Width of line
     @type  width:        string
     """
     line_meta = registry.symbolLayerMetadata("SimpleLine")
-    line_layer = line_meta.createSymbolLayer(
-        {"width": width, "color": color, "penstyle": "solid"}
-    )
+    line_layer = line_meta.createSymbolLayer({"width": width, "color": color, "penstyle": "solid"})
     symbol.appendSymbolLayer(line_layer)
 
 
-def create_marker_layer(
-    registry, symbol, marker, color, outline_color, size, ptype, owidth
-):
+def create_marker_layer(registry, symbol, marker, color, outline_color, size, ptype, owidth):
     """Set up marker layer style
 
     @param registry:     Registry for layer
-    @type  registry:     qgis.core.QgsMapLayerRegistry
+    @type  registry:     qgis.core.QgsProject
     @param symbol:       Symbol for styling
-    @type  symbol:       qgis.core.QgsSymbolV2
+    @type  symbol:       qgis.core.QgsSymbol
     @param marker:       Type of marker
     @type  marker:       string
     @param color:        Colour of marker (RGB values in a string)
@@ -123,19 +104,11 @@ def create_marker_layer(
     @type  owidth:       string
     """
     marker_meta = registry.symbolLayerMetadata("MarkerLine")
-    marker_layer = marker_meta.createSymbolLayer(
-        {"color": color, "interval": "3", "placement": ptype}
-    )
+    marker_layer = marker_meta.createSymbolLayer({"color": color, "interval": "3", "placement": ptype})
     # Replace the default layer with our own SimpleMarker
     marker_layer.subSymbol().deleteSymbolLayer(0)
     amarker = registry.symbolLayerMetadata("SimpleMarker").createSymbolLayer(
-        {
-            "name": marker,
-            "color": color,
-            "color_border": outline_color,
-            "size": size,
-            "outline_width": owidth,
-        }
+        {"name": marker, "color": color, "color_border": outline_color, "size": size, "outline_width": owidth}
     )
     marker_layer.subSymbol().appendSymbolLayer(amarker)
     symbol.appendSymbolLayer(marker_layer)
@@ -172,7 +145,7 @@ class LayerRegistry(object):
         """Remove all layers except base_layers"""
         for layer in list(self.layers.values()):
             if layer not in list(self.base_layers.values()):
-                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                QgsProject.instance().removeMapLayer(layer.id())
                 self.update_layers()
 
     def remove_layer(self, layer):
@@ -184,7 +157,7 @@ class LayerRegistry(object):
         """
         if layer in list(self.layers.values()):
             layer.rollBack()
-            QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+            QgsProject.instance().removeMapLayer(layer.id())
             self.update_layers()
 
     def set_group(self):
@@ -201,27 +174,20 @@ class LayerRegistry(object):
             return root.findGroup("Building Tool Layers")
 
     def add_postgres_layer(self, name, db_name, geomcolumn, schema, key, sql):
-        self.group = (
-            QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
-        )
+        self.group = QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
         try:
-            layer = QgsMapLayerRegistry.instance().mapLayersByName(name)[-1]
+            layer = QgsProject.instance().mapLayersByName(name)[-1]
         except IndexError:
             URI.setDataSource(schema, db_name, geomcolumn, sql, key)
-            layer = QgsVectorLayer(URI.uri(), name, "postgres", False)
-            QgsMapLayerRegistry.instance().addMapLayer(layer, False)
+            layer = QgsVectorLayer(URI.uri(), name, "postgres")
+            QgsProject.instance().addMapLayer(layer, False)
             self.group.insertLayer(0, layer)
         self.update_layers()
         return layer
 
     def set_up_base_layers(self):
         territorial = self.add_postgres_layer(
-            "territorial_authority",
-            "territorial_authority",
-            "shape",
-            "buildings_reference",
-            "",
-            "",
+            "territorial_authority", "territorial_authority", "shape", "buildings_reference", "", ""
         )
         style_layer(territorial, {1: ["204,204,102", "0.3", "dash", "5;2"]})
         temp_bool = False

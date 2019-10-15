@@ -9,7 +9,7 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QAbstractItemView, QAction, QFrame, QHeaderView, QListWidgetItem, QMessageBox, QTableWidgetItem
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import QSize, Qt, pyqtSlot
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsProject
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import iface
 
@@ -190,7 +190,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.cb_autosave.stateChanged.connect(self.cb_autosave_state_changed)
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def add_building_lyrs(self):
         """ Add building layers """
@@ -764,7 +764,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_dialog.close()
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(
+        QgsProject.instance().layerWillBeRemoved.disconnect(
             self.layers_removed
         )
         for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
@@ -1819,7 +1819,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def edit_cancel_clicked(self):
         if (
-            len(QgsMapLayerRegistry.instance().mapLayersByName("bulk_load_outlines"))
+            len(QgsProject.instance().mapLayersByName("bulk_load_outlines"))
             > 0
         ):
             if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
@@ -1857,11 +1857,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(
+        QgsProject.instance().layerWillBeRemoved.disconnect(
             self.layers_removed
         )
         self.edit_dialog.remove_territorial_auth()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.toolbar_setup()
 

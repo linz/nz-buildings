@@ -13,9 +13,7 @@ from qgis.gui import QgsMessageBar
 from qgis.utils import iface
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-FORM_CLASS, _ = uic.loadUiType(
-    os.path.join(os.path.dirname(__file__), "check_dialog.ui")
-)
+FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "check_dialog.ui"))
 
 
 class CheckDialog(QDialog, FORM_CLASS):
@@ -28,9 +26,7 @@ class CheckDialog(QDialog, FORM_CLASS):
         self.btn_export.setDisabled(True)
         self.le_filename.setText("duplicate_ids_check")
 
-        self.btn_browse.setIcon(
-            QIcon(os.path.join(__location__, "..", "icons", "browse.png"))
-        )
+        self.btn_browse.setIcon(QIcon(os.path.join(__location__, "..", "icons", "browse.png")))
         self.btn_browse.clicked.connect(self.open_browse)
         self.le_path.textChanged.connect(self.le_path_text_changed)
         self.le_filename.textChanged.connect(self.le_filename_text_changed)
@@ -39,7 +35,7 @@ class CheckDialog(QDialog, FORM_CLASS):
     def init_table(self):
         """Initialise the table"""
         self.tbl_dup_ids.verticalHeader().hide()
-        self.tbl_dup_ids.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        self.tbl_dup_ids.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     @pyqtSlot()
     def open_browse(self):
@@ -48,9 +44,7 @@ class CheckDialog(QDialog, FORM_CLASS):
         if not save_path:
             save_path = os.path.expanduser("~")  # Get user's home path
 
-        out_path = QFileDialog.getExistingDirectory(
-            self, "Select Output Directory", save_path, QFileDialog.ShowDirsOnly
-        )
+        out_path = QFileDialog.getExistingDirectory(self, "Select Output Directory", save_path, QFileDialog.ShowDirsOnly)
         self.le_path.setText(out_path)
         path_status = self.check_path()
         name_status = self.check_file_name()
@@ -76,9 +70,7 @@ class CheckDialog(QDialog, FORM_CLASS):
 
         if os.path.isfile(csv_path):
             iface.messageBar().pushMessage(
-                "Failed to export csv",
-                "{} already existed.".format(csv_path),
-                level=QgsMessageBar.CRITICAL,
+                "Failed to export csv", "{} already existed.".format(csv_path), level=QgsMessageBar.CRITICAL
             )
         else:
             with open(csv_path, "wb") as csv_file:
@@ -98,9 +90,7 @@ class CheckDialog(QDialog, FORM_CLASS):
                         row_data.append(item.text())
                     writer.writerow(row_data)
             iface.messageBar().pushMessage(
-                "Saved",
-                "Error Output has been saved to {}".format(csv_path),
-                level=QgsMessageBar.SUCCESS,
+                "Saved", "Error Output has been saved to {}".format(csv_path), level=QgsMessageBar.SUCCESS
             )
 
     def check_path(self):
