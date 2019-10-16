@@ -7,12 +7,10 @@ import os.path
 from functools import partial
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QFrame, QToolButton, QTableWidgetItem, QHeaderView, QAbstractItemView
 from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.core import QgsProject
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.gui.new_capture_source_area import NewCaptureSourceArea
@@ -80,7 +78,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         """
             Called on opening of frame populate combobox with capture source group
         """
-        result = self.db._execute(common_select.capture_source_group_value_description)
+        result = self.db.execute_return(common_select.capture_source_group_value_description)
         ls = result.fetchall()
         for item in ls:
             text = str(item[0]) + "- " + str(item[1])
@@ -95,13 +93,13 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         tbl.setColumnCount(2)
         tbl.setHorizontalHeaderItem(0, QTableWidgetItem("Id"))
         tbl.setHorizontalHeaderItem(1, QTableWidgetItem("Area Title"))
-        tbl.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+        tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         tbl.verticalHeader().setVisible(False)
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)
         tbl.setSelectionMode(QAbstractItemView.SingleSelection)
         tbl.setShowGrid(True)
         sql_csa = reference_select.capture_source_area_id_and_name
-        result = self.db._execute(sql_csa)
+        result = self.db.execute_return(sql_csa)
         for (polygon_id, area_title) in result.fetchall():
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
@@ -189,14 +187,12 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             self.btn_save.setEnabled(False)
             self.l_confirm.clear()
 
-    @pyqtSlot()
     def cmb_capture_source_group_changed(self):
         """
         Called when cmb_capture_source_group is changed
         """
         self.update_UI()
 
-    @pyqtSlot(int)
     def add_new_geometry(self):
         QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.capture_source_area)
@@ -204,7 +200,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(NewCaptureSourceArea(dw))
 
-    @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
             Called when feature selection is changed
@@ -239,7 +234,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # reconnect line edit signal
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
-    @pyqtSlot()
     def filter_add_clicked(self):
         """
             Called when btn_filter_add is clicked
@@ -270,7 +264,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
 
-    @pyqtSlot()
     def filter_del_clicked(self):
         """
         Called when btn_filter_del is clicked
@@ -280,7 +273,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         self.tbl_capture_source_area.itemSelectionChanged.connect(self.tbl_item_changed)
         self.capture_source_area.selectionChanged.emit([], [], False)
 
-    @pyqtSlot()
     def tbl_item_changed(self):
         """
             called when item in table is changed
@@ -307,7 +299,6 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         # reconnect other signals
         self.capture_source_area.selectionChanged.connect(self.selection_changed)
 
-    @pyqtSlot(bool)
     def save_clicked(self, commit_status):
         """
             Called when ok button clicked
@@ -323,13 +314,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         status = self.insert_capture_source(value, description, external_source, commit_status)
         self.btn_save.setDisabled(1)
         if status:
-            iface.messageBar().pushMessage(
-                "SUCCESS", "You've added a new capture source!", level=QgsMessageBar.SUCCESS, duration=3
-            )
+            iface.messageBar().pushMessage("SUCCESS", "You've added a new capture source!", level=Qgis.Success, duration=3)
             self.capture_source_area.removeSelection()
             self.tbl_capture_source_area.clearSelection()
 
-    @pyqtSlot()
     def exit_clicked(self):
         """
             Called when new capture source exit button clicked.
@@ -356,8 +344,8 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
 
-    @pyqtSlot(str)
     def layers_removed(self, layerids):
+        """Check run when layers are removed from the canvas"""
         self.layer_registry.update_layers()
         if "capture_source_area" in layerids:
             self.cmb_capture_source_group.setDisabled(1)
@@ -368,7 +356,7 @@ class NewCaptureSource(QFrame, FORM_CLASS):
             iface.messageBar().pushMessage(
                 "ERROR",
                 "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                level=QgsMessageBar.CRITICAL,
+                level=Qgis.Critical,
                 duration=5,
             )
             return
@@ -379,10 +367,10 @@ class NewCaptureSource(QFrame, FORM_CLASS):
         capture_source_id is autogenerated
         """
         # find capture source group id based on capture source group value
-        result = self.db._execute(common_select.capture_source_group_by_value_and_description, (value, description))
+        result = self.db.execute_return(common_select.capture_source_group_by_value_and_description, (value, description))
         capture_source_group_id = result.fetchall()[0][0]
 
-        result = self.db._execute(
+        result = self.db.execute_return(
             common_select.capture_source_external_id_and_area_title_by_group_id, (capture_source_group_id,)
         )
         to_add = True
