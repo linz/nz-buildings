@@ -1,11 +1,9 @@
-from builtins import next
-from builtins import object
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
 
 # from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton
-from qgis.core import QgsFeatureRequest, QgsGeometry
+from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -18,9 +16,7 @@ from buildings.sql import (
 
 
 class BulkLoadChanges(object):
-    """
-        Parent class of bulk Load changes (editing and adding outlines)
-    """
+    """Parent class of bulk Load changes (editing and adding outlines)"""
 
     def __init__(self, edit_dialog):
         """Constructor."""
@@ -32,12 +28,10 @@ class BulkLoadChanges(object):
         iface.setActiveLayer(self.editing_layer)
 
     def populate_edit_comboboxes(self):
-        """
-            Populate editing combox fields
-        """
+        """Populate editing combox fields"""
         # bulk load status
         if self.edit_dialog.layout_status.isVisible():
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 bulk_load_select.bulk_load_status_value
             )
             ls = result.fetchall()
@@ -46,14 +40,14 @@ class BulkLoadChanges(object):
 
         if self.edit_dialog.layout_capture_method.isVisible():
             # populate capture method combobox
-            result = self.edit_dialog.db._execute(common_select.capture_method_value)
+            result = self.edit_dialog.db.execute_return(common_select.capture_method_value)
             ls = result.fetchall()
             for item in ls:
                 self.edit_dialog.cmb_capture_method.addItem(item[0])
 
         if self.edit_dialog.layout_general_info.isVisible():
             # populate capture source group
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 common_select.capture_source_group_value_external
             )
             ls = result.fetchall()
@@ -66,7 +60,7 @@ class BulkLoadChanges(object):
             self.fix_truncated_dropdown(self.edit_dialog.cmb_capture_source, text_max)
 
             # populate territorial authority combobox
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 reference_select.territorial_authority_intersect_geom,
                 (self.edit_dialog.geom,),
             )
@@ -76,7 +70,7 @@ class BulkLoadChanges(object):
                 self.edit_dialog.ids_ta.append(id_ta)
 
             # populate suburb combobox
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 reference_select.suburb_locality_intersect_geom,
                 (self.edit_dialog.geom,),
             )
@@ -87,7 +81,7 @@ class BulkLoadChanges(object):
                     self.edit_dialog.ids_suburb.append(id_suburb)
 
             # populate town combobox
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,)
             )
             self.edit_dialog.cmb_town.addItem("")
@@ -162,9 +156,7 @@ class BulkLoadChanges(object):
         )
 
     def enable_UI_functions(self):
-        """
-            Function called when comboboxes are to be enabled
-        """
+        """Function called when comboboxes are to be enabled"""
         self.edit_dialog.cmb_status.clear()
         self.edit_dialog.cmb_status.setEnabled(1)
         self.edit_dialog.cmb_capture_method.clear()
@@ -181,9 +173,7 @@ class BulkLoadChanges(object):
         self.edit_dialog.btn_edit_reset.setEnabled(1)
 
     def disable_UI_functions(self):
-        """
-            Function called when comboboxes are to be disabled
-        """
+        """Function called when comboboxes are to be disabled"""
         self.edit_dialog.cmb_status.clear()
         self.edit_dialog.cmb_status.setDisabled(1)
         self.edit_dialog.cmb_capture_method.clear()
@@ -201,18 +191,13 @@ class BulkLoadChanges(object):
         self.edit_dialog.btn_edit_reset.setDisabled(1)
 
     def fix_truncated_dropdown(self, cmb, text):
-        """
-            Fix the trucated cmb dropdown in windows
-        """
+        """Fix the truncated cmb dropdown in windows"""
         w = cmb.fontMetrics().boundingRect(text).width()
         cmb.view().setFixedWidth(w + 30)
 
 
 class AddBulkLoad(BulkLoadChanges):
-    """
-        Class to add outlines to buildings_bulk_load.bulk_load_outlines
-        Inherits BulkLoadChanges
-    """
+    """Class to add outlines to buildings_bulk_load.bulk_load_outlinesInherits BulkLoadChanges"""
 
     def __init__(self, edit_dialog):
         """Constructor"""
@@ -231,20 +216,16 @@ class AddBulkLoad(BulkLoadChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in [
-                "mActionAddFeature",
-                "mActionNodeTool",
-                "mActionMoveFeature",
-            ]:
+            if dig.objectName() in ["mActionAddFeature", "mActionNodeTool", "mActionMoveFeature"]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo",
-                "mActionRedo",
-                "mActionReshapeFeatures",
-                "mActionOffsetCurve",
+                    "mActionUndo",
+                    "mActionRedo",
+                    "mActionReshapeFeatures",
+                    "mActionOffsetCurve",
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -252,9 +233,7 @@ class AddBulkLoad(BulkLoadChanges):
 
     # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
-        """
-            When bulk load frame btn_edit_save clicked
-        """
+        """When bulk load frame btn_edit_save clicked"""
         self.edit_dialog.db.open_cursor()
 
         _, capture_method_id, capture_source_id, suburb, town, t_a = (
@@ -278,7 +257,7 @@ class AddBulkLoad(BulkLoadChanges):
         outline_id = result.fetchall()[0][0]
 
         # insert into added table
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             bulk_load_select.supplied_dataset_processed_date_by_dataset_id,
             (self.edit_dialog.current_dataset,),
         )
@@ -350,7 +329,7 @@ class AddBulkLoad(BulkLoadChanges):
         # convert to correct format
         wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         geom = result.fetchall()[0][0]
 
         if qgsfId not in list(self.edit_dialog.added_geoms.keys()):
@@ -407,7 +386,7 @@ class AddBulkLoad(BulkLoadChanges):
                 self.edit_dialog.geom = None
                 return
             sql = general_select.convert_geometry
-            result = self.edit_dialog.db._execute(sql, (wkt,))
+            result = self.edit_dialog.db.execute_return(sql, (wkt,))
             geom = result.fetchall()[0][0]
             self.edit_dialog.added_geoms[qgsfId] = geom
             if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
@@ -423,16 +402,14 @@ class AddBulkLoad(BulkLoadChanges):
             self.error_dialog.show()
 
     def select_comboboxes_value(self):
-        """
-            Select the correct combobox value for the geometry
-        """
+        """Select the correct combobox value for the geometry"""
         # capture method
         self.edit_dialog.cmb_capture_method.setCurrentIndex(
             self.edit_dialog.cmb_capture_method.findText("Trace Orthophotography")
         )
 
         # capture source
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             common_select.capture_source_group_value_external_by_dataset_id,
             (self.edit_dialog.current_dataset,),
         )
@@ -444,28 +421,25 @@ class AddBulkLoad(BulkLoadChanges):
 
         # territorial authority
         sql = "SELECT buildings_reference.territorial_authority_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_ta.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_ta.setCurrentIndex(index)
 
         # town locality
         sql = "SELECT buildings_reference.town_city_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_town.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_town.setCurrentIndex(index)
 
         # suburb locality
         sql = "SELECT buildings_reference.suburb_locality_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_suburb.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_suburb.setCurrentIndex(index)
 
 
 class EditAttribute(BulkLoadChanges):
-    """
-        Class to edit Attribute in buildings_bulk_load.bulk_load_outlines
-        Inherits BulkLoadChanges
-    """
+    """Class to edit Attribute in buildings_bulk_load.bulk_load_outlines Inherits BulkLoadChanges"""
 
     def __init__(self, edit_dialog):
         """Constructor"""
@@ -495,9 +469,7 @@ class EditAttribute(BulkLoadChanges):
 
     # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
-        """
-            When bulk load frame btn_edit_save clicked
-        """
+        """When bulk load frame btn_edit_save clicked"""
         self.edit_dialog.db.open_cursor()
 
         bulk_load_status_id, capture_method_id, capture_source_id, suburb, town, t_a = (
@@ -522,8 +494,8 @@ class EditAttribute(BulkLoadChanges):
                 return
             ls_relationships = self.remove_compared_outlines()
             if (
-                len(ls_relationships["matched"]) == 0
-                and len(ls_relationships["related"]) == 0
+                    len(ls_relationships["matched"]) == 0
+                    and len(ls_relationships["related"]) == 0
             ):
                 if len(self.edit_dialog.ids) > 0:
                     # Send signal to LIQA through edit dialog
@@ -595,9 +567,7 @@ class EditAttribute(BulkLoadChanges):
 
     # @pyqtSlot()
     def edit_reset_clicked(self):
-        """
-            When bulk load frame btn_reset_save clicked
-        """
+        """When bulk load frame btn_reset_save clicked"""
         self.edit_dialog.ids = []
         self.edit_dialog.building_outline_id = None
         iface.actionSelect().trigger()
@@ -608,9 +578,7 @@ class EditAttribute(BulkLoadChanges):
 
     # @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
-        """
-           Called when feature is selected
-        """
+        """Called when feature is selected"""
         # If no outlines are selected the function will return
         if len(self.editing_layer.selectedFeatures()) == 0:
             self.edit_dialog.ids = []
@@ -628,9 +596,7 @@ class EditAttribute(BulkLoadChanges):
             self.disable_UI_functions()
 
     def is_correct_selections(self):
-        """
-            Check if the selections meet the requirement
-        """
+        """Check if the selections meet the requirement"""
         feats = []
         for feature in self.editing_layer.selectedFeatures():
             ls = []
@@ -646,9 +612,9 @@ class EditAttribute(BulkLoadChanges):
         if len(feats) > 1:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                "\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC"
-                "TED ---- \n\n Can only edit attributes of mul"
-                "tiple features when all existing attributes a"
+                "\n ---- MULTIPLE NON IDENTICAL FEATURES SELECTED"
+                " ---- \n\n Can only edit attributes of multiple"
+                "features when all existing attributes a"
                 "re identical."
             )
             self.error_dialog.show()
@@ -659,14 +625,14 @@ class EditAttribute(BulkLoadChanges):
             reasons = []
             for feature in self.editing_layer.selectedFeatures():
                 sql = bulk_load_select.bulk_load_status_id_by_outline_id
-                result = self.edit_dialog.db._execute(
+                result = self.edit_dialog.db.execute_return(
                     sql, (feature["bulk_load_outline_id"],)
                 )
                 bl_status = result.fetchall()[0][0]
                 if bl_status == 3:
                     deleted = deleted + 1
                     sql = bulk_load_select.deletion_description_by_bulk_load_id
-                    result = self.edit_dialog.db._execute(
+                    result = self.edit_dialog.db.execute_return(
                         sql, (feature["bulk_load_outline_id"],)
                     )
                     reason = result.fetchall()[0][0]
@@ -701,9 +667,7 @@ class EditAttribute(BulkLoadChanges):
         return False
 
     def get_selections(self):
-        """
-            Return the selection values
-        """
+        """Return the selection values"""
         self.edit_dialog.ids = [
             feat.id() for feat in self.editing_layer.selectedFeatures()
         ]
@@ -713,15 +677,13 @@ class EditAttribute(BulkLoadChanges):
         # convert to correct format
         wkt = bulk_load_geom.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
-        """
-            Select the correct combobox value for the geometry
-        """
+        """Select the correct combobox value for the geometry"""
         # bulk load status
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             bulk_load_select.bulk_load_status_value_by_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -733,14 +695,14 @@ class EditAttribute(BulkLoadChanges):
         # reason for deletion
         if self.edit_dialog.cmb_status.currentText() == "Deleted During QA":
             reason = bulk_load_select.deletion_description_by_bulk_load_id
-            reason = self.edit_dialog.db._execute(
+            reason = self.edit_dialog.db.execute_return(
                 reason, (self.edit_dialog.bulk_load_outline_id,)
             )
             reason = reason.fetchall()[0][0]
             self.edit_dialog.le_deletion_reason.setText(reason)
 
         # capture method
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             common_select.capture_method_value_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -750,7 +712,7 @@ class EditAttribute(BulkLoadChanges):
         )
 
         # capture source
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             common_select.capture_source_group_value_external_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -761,7 +723,7 @@ class EditAttribute(BulkLoadChanges):
         )
 
         # suburb
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.suburb_locality_suburb_4th_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -771,7 +733,7 @@ class EditAttribute(BulkLoadChanges):
         )
 
         # town city
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.town_city_name_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -784,7 +746,7 @@ class EditAttribute(BulkLoadChanges):
             self.edit_dialog.cmb_town.setCurrentIndex(0)
 
         # territorial Authority
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.territorial_authority_name_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
@@ -794,9 +756,7 @@ class EditAttribute(BulkLoadChanges):
         )
 
     def remove_compared_outlines(self):
-        """
-            called to check can mark outline for deletion
-        """
+        """called to check can mark outline for deletion"""
         added_outlines = self.edit_dialog.db.execute_no_commit(
             bulk_load_select.added_outlines_by_dataset_id,
             (self.edit_dialog.current_dataset,),
@@ -845,10 +805,7 @@ class EditAttribute(BulkLoadChanges):
 
 
 class EditGeometry(BulkLoadChanges):
-    """
-        Class to edit outline's geometry in buildings_bulk_load.bulk_load_outlines
-        Inherits BulkLoadChanges
-    """
+    """Class to edit outline's geometry in buildings_bulk_load.bulk_load_outlines Inherits BulkLoadChanges"""
 
     def __init__(self, edit_dialog):
         """Constructor"""
@@ -872,11 +829,11 @@ class EditGeometry(BulkLoadChanges):
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                "mActionUndo",
-                "mActionRedo",
-                "mActionReshapeFeatures",
-                "mActionOffsetCurve",
-                "mActionSplitFeatures",
+                    "mActionUndo",
+                    "mActionRedo",
+                    "mActionReshapeFeatures",
+                    "mActionOffsetCurve",
+                    "mActionSplitFeatures",
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -886,9 +843,7 @@ class EditGeometry(BulkLoadChanges):
 
     # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
-        """
-            When bulk load frame btn_edit_save clicked
-        """
+        """When bulk load frame btn_edit_save clicked"""
         self.edit_dialog.db.open_cursor()
 
         _, capture_method_id, _, _, _, _ = self.get_comboboxes_values()
@@ -918,7 +873,7 @@ class EditGeometry(BulkLoadChanges):
                 self.edit_dialog.outline_id = result.fetchall()[0][0]
 
                 # insert into added table
-                result = self.edit_dialog.db._execute(
+                result = self.edit_dialog.db.execute_return(
                     bulk_load_select.supplied_dataset_processed_date_by_dataset_id,
                     (self.edit_dialog.current_dataset,),
                 )
@@ -953,9 +908,7 @@ class EditGeometry(BulkLoadChanges):
 
     # @pyqtSlot()
     def edit_reset_clicked(self):
-        """
-            When bulk load frame btn_reset_save clicked
-        """
+        """When bulk load frame btn_reset_save clicked"""
         self.editing_layer.geometryChanged.disconnect(self.geometry_changed)
         iface.actionCancelEdits().trigger()
         self.editing_layer.geometryChanged.connect(self.geometry_changed)
@@ -979,7 +932,7 @@ class EditGeometry(BulkLoadChanges):
            @type  geom:        qgis.core.QgsGeometry
         """
         # get new feature geom and convert to correct format
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             bulk_load_select.bulk_load_status_id_by_outline_id, (qgsfId,)
         )
         result = result.fetchone()
@@ -996,9 +949,9 @@ class EditGeometry(BulkLoadChanges):
                 return
         wkt = geom.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             bulk_load_select.bulk_load_outline_shape_by_id, (qgsfId,)
         )
         area = geom.area()
@@ -1068,13 +1021,11 @@ class EditGeometry(BulkLoadChanges):
         # convert to correct format
         wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         self.edit_dialog.split_geoms[qgsfId] = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
-        """
-            Select the correct combobox value for the geometry
-        """
+        """Select the correct combobox value for the geometry"""
         self.edit_dialog.cmb_capture_method.setCurrentIndex(
             self.edit_dialog.cmb_capture_method.findText("Trace Orthophotography")
         )

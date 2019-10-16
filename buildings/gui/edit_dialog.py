@@ -4,11 +4,11 @@ from functools import partial
 import os
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QAbstractItemView, QCompleter, QDialog
+from qgis.PyQt.QtWidgets import QCompleter, QDialog
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot
 
 from qgis.core import QgsProject
-from qgis.utils import iface, isPluginLoaded, plugins
+from qgis.utils import iface
 
 from buildings.gui import bulk_load_changes, production_changes
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
@@ -270,7 +270,7 @@ class EditDialog(QDialog, FORM_CLASS):
         """
             Box automatic completion
         """
-        reasons = self.db._execute(bulk_load_select.deletion_description_value)
+        reasons = self.db.execute_return(bulk_load_select.deletion_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
         self.completer = QCompleter(reason_list)

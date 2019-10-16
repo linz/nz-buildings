@@ -9,7 +9,7 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
 from qgis.PyQt.QtWidgets import QAction, QApplication, QFrame, QMessageBox
 from qgis.PyQt.QtGui import QColor, QIcon
-from qgis.core import QgsProject, QgsProject
+from qgis.core import QgsProject
 from qgis.utils import iface, Qgis
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
@@ -388,7 +388,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.confirm(self.msgbox_bulk_load):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             bulk_load.bulk_load(self, commit_status)
-            # find if adding was sucessful
+            # find if adding was successful
             result = self.db._execute(bulk_load_select.supplied_dataset_count_both_dates_are_null)
             result = result.fetchall()[0][0]
             # if bulk loading completed without errors

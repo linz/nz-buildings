@@ -26,14 +26,14 @@ def populate_bulk_comboboxes(self):
 
     # organization combobox
     self.cmb_organisation.clear()
-    result = self.db._execute(bulk_load_select.organisation_value)
+    result = self.db.execute_return(bulk_load_select.organisation_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_organisation.addItem(item[0])
 
     # capture method combobox
     self.cmb_capture_method.clear()
-    result = self.db._execute(common_select.capture_method_value)
+    result = self.db.execute_return(common_select.capture_method_value)
     ls = result.fetchall()
     for item in ls:
         self.cmb_capture_method.addItem(item[0])
@@ -41,7 +41,7 @@ def populate_bulk_comboboxes(self):
     # capture source group
     self.cmb_capture_src_grp.clear()
     self.ids_capture_src_grp = []
-    result = self.db._execute(common_select.capture_source_group_id_value_description)
+    result = self.db.execute_return(common_select.capture_source_group_id_value_description)
     ls = result.fetchall()
     text_max = ""
     for (id_capture_src_grp, value, description) in ls:
@@ -56,7 +56,7 @@ def populate_bulk_comboboxes(self):
     self.cmb_cap_src_area.clear()
     index = self.cmb_capture_src_grp.currentIndex()
     id_capture_src_grp = self.ids_capture_src_grp[index]
-    result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp,))
+    result = self.db.execute_return(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp,))
     ls = result.fetchall()
     text_max = ""
     for (external_id, area_title) in reversed(ls):
@@ -72,29 +72,29 @@ def load_current_fields(self):
         Function to load fields related to the current supplied dataset
     """
     # capture method
-    result = self.db._execute(common_select.capture_method_value_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(common_select.capture_method_value_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_capture_method.setCurrentIndex(self.cmb_capture_method.findText(result))
 
     # organisation
-    result = self.db._execute(bulk_load_select.organisation_value_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(bulk_load_select.organisation_value_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_organisation.setCurrentIndex(self.cmb_organisation.findText(result))
 
     # data description
-    result = self.db._execute(bulk_load_select.supplied_dataset_description_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(bulk_load_select.supplied_dataset_description_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.le_data_description.setText(result)
 
     # External Id/fields
-    ex_result = self.db._execute(common_select.capture_source_external_source_id_by_dataset_id, (self.current_dataset,))
+    ex_result = self.db.execute_return(common_select.capture_source_external_source_id_by_dataset_id, (self.current_dataset,))
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_id.setChecked(True)
         self.cmb_cap_src_area.setCurrentIndex(self.cmb_cap_src_area.findText(ex_result))
 
     # capture source group
-    result = self.db._execute(common_select.capture_source_group_id_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(common_select.capture_source_group_id_by_dataset_id, (self.current_dataset,))
     result = result.fetchall()[0][0]
     self.cmb_capture_src_grp.setCurrentIndex(result - 1)
 
@@ -151,18 +151,18 @@ def bulk_load(self, commit_status):
 
     # organisation
     text = self.cmb_organisation.currentText()
-    result = self.db._execute(bulk_load_select.organisation_id_by_value, (text,))
+    result = self.db.execute_return(bulk_load_select.organisation_id_by_value, (text,))
     organisation = result.fetchall()[0][0]
 
     # capture method
     text = self.cmb_capture_method.currentText()
-    result = self.db._execute(common_select.capture_method_id_by_value, (text,))
+    result = self.db.execute_return(common_select.capture_method_id_by_value, (text,))
     capture_method = result.fetchall()[0][0]
 
     # capture source group
     text = self.cmb_capture_src_grp.currentText()
     text_ls = text.split("-")
-    result = self.db._execute(common_select.capture_source_group_id_by_value, (text_ls[0],))
+    result = self.db.execute_return(common_select.capture_source_group_id_by_value, (text_ls[0],))
     capture_source_group = result.fetchall()[0][0]
 
     # capture source area
@@ -180,7 +180,7 @@ def bulk_load(self, commit_status):
     external_source_id = text.split("- ")[0]
 
     # capture source
-    result = self.db._execute(
+    result = self.db.execute_return(
         common_select.capture_source_id_by_capture_source_group_id_and_external_source_id,
         (capture_source_group, external_source_id),
     )
