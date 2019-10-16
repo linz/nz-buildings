@@ -4,9 +4,8 @@ from builtins import object
 # -*- coding: utf-8 -*-\
 from collections import OrderedDict
 
-from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
-from qgis.core import QgsFeatureRequest, QgsGeometry
+from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -33,6 +32,7 @@ class ProductionChanges(object):
         iface.setActiveLayer(self.editing_layer)
 
     def confirmation_dialog_box(self, button_text):
+        """Confirmation dialog box"""
         return QMessageBox(
             QMessageBox.Question,
             button_text.upper(),
@@ -41,25 +41,24 @@ class ProductionChanges(object):
         )
 
     def confirm(self, msgbox):
+        """confirm"""
         reply = msgbox.exec_()
         if reply == QMessageBox.Yes:
             return True
         return False
 
     def populate_edit_comboboxes(self):
-        """
-            Populate editing combox fields
-        """
+        """Populate editing combox fields"""
         if self.edit_dialog.layout_capture_method.isVisible():
             # populate capture method combobox
-            result = self.edit_dialog.db._execute(common_select.capture_method_value)
+            result = self.edit_dialog.db.execute_return(common_select.capture_method_value)
             ls = result.fetchall()
             for item in ls:
                 self.edit_dialog.cmb_capture_method.addItem(item[0])
 
         if self.edit_dialog.layout_general_info.isVisible():
             # populate capture source group
-            result = self.edit_dialog.db._execute(common_select.capture_source_group_value_external)
+            result = self.edit_dialog.db.execute_return(common_select.capture_source_group_value_external)
             ls = result.fetchall()
             text_max = ""
             for item in ls:
@@ -70,13 +69,13 @@ class ProductionChanges(object):
             self.fix_truncated_dropdown(self.edit_dialog.cmb_capture_source, text_max)
 
             # populate lifecycle stage combobox
-            result = self.edit_dialog.db._execute(buildings_select.lifecycle_stage_value)
+            result = self.edit_dialog.db.execute_return(buildings_select.lifecycle_stage_value)
             ls = result.fetchall()
             for item in ls:
                 self.edit_dialog.cmb_lifecycle_stage.addItem(item[0])
 
             # populate territorial authority combobox
-            result = self.edit_dialog.db._execute(
+            result = self.edit_dialog.db.execute_return(
                 reference_select.territorial_authority_intersect_geom, (self.edit_dialog.geom,)
             )
             self.edit_dialog.ids_ta = []
@@ -85,7 +84,9 @@ class ProductionChanges(object):
                 self.edit_dialog.ids_ta.append(id_ta)
 
             # populate suburb combobox
-            result = self.edit_dialog.db._execute(reference_select.suburb_locality_intersect_geom, (self.edit_dialog.geom,))
+            result = self.edit_dialog.db.execute_return(
+                reference_select.suburb_locality_intersect_geom, (self.edit_dialog.geom,)
+            )
             self.edit_dialog.ids_suburb = []
             for (id_suburb, name) in result.fetchall():
                 if name is not None:
@@ -93,7 +94,9 @@ class ProductionChanges(object):
                     self.edit_dialog.ids_suburb.append(id_suburb)
 
             # populate town combobox
-            result = self.edit_dialog.db._execute(reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,))
+            result = self.edit_dialog.db.execute_return(
+                reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,)
+            )
             self.edit_dialog.cmb_town.addItem("")
             self.edit_dialog.ids_town = [None]
             for (id_town, name) in result.fetchall():
@@ -102,6 +105,7 @@ class ProductionChanges(object):
                     self.edit_dialog.ids_town.append(id_town)
 
     def get_comboboxes_values(self):
+        """Returns values in comboboxes"""
         if self.edit_dialog.layout_capture_method.isVisible():
             # capture method id
             text = self.edit_dialog.cmb_capture_method.currentText()
@@ -188,7 +192,7 @@ class ProductionChanges(object):
 
     def fix_truncated_dropdown(self, cmb, text):
         """
-            Fix the trucated cmb dropdown in windows
+            Fix the truncated cmb dropdown in windows
         """
         w = cmb.fontMetrics().boundingRect(text).width()
         cmb.view().setFixedWidth(w + 30)
@@ -227,7 +231,6 @@ class AddProduction(ProductionChanges):
         iface.building_toolbar.show()
         self.disable_UI_functions()
 
-    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When building frame btn_edit_save clicked
@@ -255,8 +258,7 @@ class AddProduction(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    # @pyqtSlot(bool)
-    def edit_reset_clicked(self, bool):
+    def edit_reset_clicked(self):
         """
             When production frame btn_edit_reset clicked
         """
@@ -275,7 +277,6 @@ class AddProduction(ProductionChanges):
         self.edit_dialog.geom = None
         self.edit_dialog.added_geoms = OrderedDict()
 
-    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         """
            Called when feature is added
@@ -305,7 +306,7 @@ class AddProduction(ProductionChanges):
         # convert to correct format
         wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         geom = result.fetchall()[0][0]
 
         if qgsfId not in list(self.edit_dialog.added_geoms.keys()):
@@ -320,7 +321,6 @@ class AddProduction(ProductionChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    # @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
             Called when a Feature is Deleted
@@ -338,7 +338,6 @@ class AddProduction(ProductionChanges):
                 self.edit_dialog.geom = list(self.edit_dialog.added_geoms.values())[-1]
                 self.select_comboboxes_value()
 
-    # @pyqtSlot(int, QgsGeometry)
     def creator_geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -362,7 +361,7 @@ class AddProduction(ProductionChanges):
                 self.edit_dialog.geom = None
                 return
             sql = general_select.convert_geometry
-            result = self.edit_dialog.db._execute(sql, (wkt,))
+            result = self.edit_dialog.db.execute_return(sql, (wkt,))
             geom = result.fetchall()[0][0]
             self.edit_dialog.added_geoms[qgsfId] = geom
             if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
@@ -389,7 +388,9 @@ class AddProduction(ProductionChanges):
         # capture source
         # repopulate capture source cmb
         self.edit_dialog.cmb_capture_source.clear()
-        result = self.edit_dialog.db._execute(reference_select.capture_source_area_intersect_geom, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(
+            reference_select.capture_source_area_intersect_geom, (self.edit_dialog.geom,)
+        )
         result = result.fetchall()
         if len(result) == 0:
             iface.messageBar().pushMessage(
@@ -420,19 +421,19 @@ class AddProduction(ProductionChanges):
 
         # territorial authority
         sql = "SELECT buildings_reference.territorial_authority_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_ta.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_ta.setCurrentIndex(index)
 
         # town locality
         sql = "SELECT buildings_reference.town_city_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_town.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_town.setCurrentIndex(index)
 
         # suburb locality
         sql = "SELECT buildings_reference.suburb_locality_intersect_polygon(%s);"
-        result = self.edit_dialog.db._execute(sql, (self.edit_dialog.geom,))
+        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_suburb.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_suburb.setCurrentIndex(index)
 
@@ -471,7 +472,6 @@ class EditAttribute(ProductionChanges):
                 self.edit_dialog.building_outline_id = None
                 self.disable_UI_functions()
 
-    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When production frame btn_edit_save clicked
@@ -495,7 +495,6 @@ class EditAttribute(ProductionChanges):
             self.edit_dialog.ids = []
             self.edit_dialog.building_outline_id = None
 
-    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When production frame btn_edit_reset clicked
@@ -508,7 +507,6 @@ class EditAttribute(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    # @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
            Called when feature is selected
@@ -529,18 +527,18 @@ class EditAttribute(ProductionChanges):
             self.edit_dialog.building_outline_id = None
             self.disable_UI_functions()
 
-    # @pyqtSlot()
     def end_lifespan(self, commit_status):
+        """ end the lifespan of building"""
         # get the dataset id and dates of the most recent supplied dataset
         if not self.confirm(self.msgbox_remove):
             return
-        dates = self.edit_dialog.db._execute(bulk_load_select.supplied_dataset_latest_id_and_dates)
+        dates = self.edit_dialog.db.execute_return(bulk_load_select.supplied_dataset_latest_id_and_dates)
         dates = dates.fetchone()
 
         # get list of building_ids from building_outline_ids
         building_ids = []
         for outline in self.edit_dialog.ids:
-            result = self.edit_dialog.db._execute(buildings_select.building_id_by_building_outline_id, (outline,))
+            result = self.edit_dialog.db.execute_return(buildings_select.building_id_by_building_outline_id, (outline,))
             building_ids.append(result.fetchone()[0])
 
         # if the current supplied dataset is not in compare
@@ -574,7 +572,7 @@ class EditAttribute(ProductionChanges):
             bool_delete = True
             for outline in self.edit_dialog.ids:
                 # see if outline in existing_subset_extracts
-                dataset = self.edit_dialog.db._execute(
+                dataset = self.edit_dialog.db.execute_return(
                     bulk_load_select.existing_subset_extracts_dataset_by_building_outline_id, (outline,)
                 )
                 dataset = dataset.fetchone()
@@ -583,7 +581,7 @@ class EditAttribute(ProductionChanges):
                     # if the dataset the outline relates to is the current dataset
                     if dataset[0] == dates[0]:
                         # check if the bulk_loaded_outline is in removed table
-                        removed_count = self.edit_dialog.db._execute(
+                        removed_count = self.edit_dialog.db.execute_return(
                             bulk_load_select.removed_count_by_building_outline_id, (outline,)
                         )
                         removed_count = removed_count.fetchone()
@@ -647,9 +645,9 @@ class EditAttribute(ProductionChanges):
         if len(feats) > 1:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                "\n ---- MULTIPLE NON IDENTICAL FEATURES SELEC"
-                "TED ---- \n\n Can only edit attributes of mul"
-                "tiple features when all existing attributes a"
+                "\n ---- MULTIPLE NON IDENTICAL FEATURES SELECTED"
+                " ---- \n\n Can only edit attributes of multiple"
+                " features when all existing attributes a"
                 "re identical."
             )
             self.error_dialog.show()
@@ -670,29 +668,29 @@ class EditAttribute(ProductionChanges):
         # convert to correct format
         wkt = building_geom.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
         """
             Select the correct combobox value for the geometry
         """
-        # lifeycle stage
-        result = self.edit_dialog.db._execute(
+        # lifecycle stage
+        result = self.edit_dialog.db.execute_return(
             buildings_select.lifecycle_stage_value_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
         self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(self.edit_dialog.cmb_lifecycle_stage.findText(result))
 
         # capture method
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             common_select.capture_method_value_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
         self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText(result))
 
         # capture source
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             common_select.capture_source_group_value_external_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0]
@@ -700,14 +698,14 @@ class EditAttribute(ProductionChanges):
         self.edit_dialog.cmb_capture_source.setCurrentIndex(self.edit_dialog.cmb_capture_source.findText(text))
 
         # suburb
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.suburb_locality_suburb_4th_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
         self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText(result))
 
         # town city
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.town_city_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()
@@ -717,7 +715,7 @@ class EditAttribute(ProductionChanges):
             self.edit_dialog.cmb_town.setCurrentIndex(0)
 
         # territorial Authority
-        result = self.edit_dialog.db._execute(
+        result = self.edit_dialog.db.execute_return(
             reference_select.territorial_authority_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
@@ -757,7 +755,6 @@ class EditGeometry(ProductionChanges):
 
         self.disable_UI_functions()
 
-    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When production frame btn_edit_save clicked
@@ -780,7 +777,6 @@ class EditGeometry(ProductionChanges):
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
 
-    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When production frame btn_edit_reset clicked
@@ -796,7 +792,6 @@ class EditGeometry(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    # @pyqtSlot(int, QgsGeometry)
     def geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -808,9 +803,9 @@ class EditGeometry(ProductionChanges):
         # get new feature geom and convert to correct format
         wkt = geom.asWkt()
         sql = general_select.convert_geometry
-        result = self.edit_dialog.db._execute(sql, (wkt,))
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
-        result = self.edit_dialog.db._execute(buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,))
+        result = self.edit_dialog.db.execute_return(buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,))
         area = geom.area()
         if area < 10:
             iface.messageBar().pushMessage(
@@ -833,9 +828,9 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
-        pass  # Future Enhancement
+        """Future Enhancement"""
+        pass
 
     def select_comboboxes_value(self):
         """

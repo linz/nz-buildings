@@ -12,13 +12,13 @@ from qgis.utils import iface
 
 from buildings.gui import bulk_load_changes, production_changes
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
-from buildings.utilities import layers
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "edit_dialog.ui"))
 
 
 class EditDialog(QDialog, FORM_CLASS):
+    """ Dialog to edit building outlines"""
 
     edit_geometry_saved = pyqtSignal(list)
     delete_outline_saved = pyqtSignal(list, str)
@@ -69,6 +69,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.rejected.connect(self.close_dialog)
 
     def init_dialog(self):
+        """Constructor """
         self.layout_status.hide()
         self.layout_capture_method.hide()
         self.layout_lifecycle_stage.hide()
@@ -87,6 +88,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.btn_end_lifespan.setDisabled(1)
 
     def add_outline(self):
+        """When the user selects to add a new outline"""
         self.setWindowTitle("Add Outline")
         self.added_geoms = OrderedDict()
         self.geom = None
@@ -132,9 +134,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.editing_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
 
     def edit_attribute(self):
-        """
-            When edit outline radio button toggled
-        """
+        """When the user selects to edit a building attribute"""
         self.setWindowTitle("Edit Attribute")
         self.ids = []
         self.building_outline_id = None
@@ -183,6 +183,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.editing_layer.selectionChanged.connect(self.change_instance.selection_changed)
 
     def edit_geometry(self):
+        """"When the user selects to edit a building geometry"""
         self.setWindowTitle("Edit Geometry")
         self.geoms = {}
         iface.actionCancelEdits().trigger()
@@ -225,9 +226,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
 
     def close_dialog(self):
-        """
-            When 'x' is clicked
-        """
+        """When 'x' is clicked"""
         self.change_instance = None
         self.added_geoms = OrderedDict()
         self.geom = None
@@ -245,12 +244,11 @@ class EditDialog(QDialog, FORM_CLASS):
                 action.setEnabled(True)
 
     def get_change_instance(self):
+        """Return change instance"""
         return self.change_instance
 
     def completer_box(self):
-        """
-            Box automatic completion
-        """
+        """Box automatic completion"""
         reasons = self.db.execute_return(bulk_load_select.deletion_description_value)
         reason_list = [row[0] for row in reasons.fetchall()]
         # Fill the search box
@@ -261,6 +259,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
     @pyqtSlot()
     def enable_le_deletion_reason(self):
+        """When the user opts to delete an outline"""
         if self.cmb_status.currentText() == "Deleted During QA":
             self.le_deletion_reason.setEnabled(1)
             self.le_deletion_reason.setFocus()
@@ -271,6 +270,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
     @pyqtSlot(list)
     def liqa_on_edit_geometry_saved(self, ids):
+        """Update LIQA when geometry edited"""
         for qa_lyr in self.find_qa_layer():
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
@@ -280,6 +280,7 @@ class EditDialog(QDialog, FORM_CLASS):
 
     @pyqtSlot(list, str)
     def liqa_on_delete_outline_saved(self, ids, del_reason):
+        """Update LIQA when feature deleted"""
         for qa_lyr in self.find_qa_layer():
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
@@ -288,17 +289,20 @@ class EditDialog(QDialog, FORM_CLASS):
                     self.update_qa_layer_attribute(qa_lyr, qa_feat_id, "Fixed", "Deleted- {}".format(del_reason))
 
     def find_qa_layer(self):
+        """find qa layer"""
         for layer in QgsProject.instance().mapLayers().values():
             if layer.name().startswith("qa_"):
                 yield layer
 
     def get_bulk_load_ids(self, qa_layer):
+        """return bulk load ids"""
         bulk_load_ids = {}
         for feat in qa_layer.getFeatures():
             bulk_load_ids[feat.id()] = feat["bulk_load_"]
         return bulk_load_ids
 
     def update_qa_layer_attribute(self, qa_lyr, qa_id, error_status, comment):
+        """update qa layer attributes"""
         qa_lyr.startEditing()
         qa_lyr.changeAttributeValue(qa_id, 1, error_status, True)
         qa_lyr.changeAttributeValue(qa_id, 2, comment, True)
