@@ -6,8 +6,7 @@ from functools import partial
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QFrame
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -39,15 +38,17 @@ class NewEntry(QFrame, FORM_CLASS):
         self.lifecycle_stage_id = None
         self.capture_method_id = None
         self.capture_source_group_id = None
-        self.btn_ok.clicked.connect(partial(self.ok_clicked, commit_status=True))
+        self.btn_ok.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.le_description.setDisabled(1)
         self.cmb_new_type_selection.currentIndexChanged.connect(self.set_new_type)
 
     def close_cursor(self):
+        """close db cursor"""
         db.close_cursor()
 
     def connect(self):
+        """Connect to db"""
         db.connect()
 
     def get_comments(self):
@@ -57,16 +58,14 @@ class NewEntry(QFrame, FORM_CLASS):
         if self.le_new_entry.text() == "":
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                "\n -------------------- EMPTY VALUE FIELD ------"
-                "-------------- \n\n Null values not allowed"
+                "\n -------------------- EMPTY VALUE FIELD ------" "-------------- \n\n Null values not allowed"
             )
             self.error_dialog.show()
             return
         if len(self.le_new_entry.text()) >= 40:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                "\n -------------------- VALUE TOO LONG ---------"
-                "----------- \n\n Enter less than 40 characters"
+                "\n -------------------- VALUE TOO LONG ---------" "----------- \n\n Enter less than 40 characters"
             )
             self.error_dialog.show()
             return
@@ -84,16 +83,14 @@ class NewEntry(QFrame, FORM_CLASS):
             if self.le_description.text() == "":
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(
-                    "\n -------------------- EMPTY DESCRIPTION FIELD "
-                    "-------------------- \n\n Null values not allowed"
+                    "\n -------------------- EMPTY DESCRIPTION FIELD " "-------------------- \n\n Null values not allowed"
                 )
                 self.error_dialog.show()
                 return
             if len(self.le_description.text()) >= 40:
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(
-                    "\n -------------------- DESCRIPTION TOO LONG ---"
-                    "----------------- \n\n Enter less than 40 characters"
+                    "\n -------------------- DESCRIPTION TOO LONG ---" "----------------- \n\n Enter less than 40 characters"
                 )
                 self.error_dialog.show()
                 return
@@ -117,8 +114,8 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_description.setDisabled(1)
 
     @pyqtSlot(bool)
-    def ok_clicked(self, commit_status):
-        # get value
+    def save_clicked(self, commit_status):
+        """When save button is clicked"""
         self.value = self.get_comments()
         # get type
         self.new_type = self.get_combobox_value()
@@ -137,15 +134,10 @@ class NewEntry(QFrame, FORM_CLASS):
             elif self.new_type == "Capture Source Group":
                 self.description = self.get_description()
                 if self.description is not None:
-                    self.status = self.new_capture_source_group(
-                        self.value, self.description, commit_status
-                    )
+                    self.status = self.new_capture_source_group(self.value, self.description, commit_status)
         if self.status:
             iface.messageBar().pushMessage(
-                "SUCCESS",
-                "You've added a new {}!".format(self.new_type),
-                level=QgsMessageBar.SUCCESS,
-                duration=3,
+                "SUCCESS", "You've added a new {}!".format(self.new_type), level=Qgis.Success, duration=3
             )
 
     @pyqtSlot()
@@ -173,17 +165,14 @@ class NewEntry(QFrame, FORM_CLASS):
             value output = organisation auto generate id
         """
         # check if organisation in buildings_bulk_load.organisation table
-        result = self.db._execute(
-            bulk_load_select.organisation_by_value, (organisation,)
-        )
+        result = self.db.execute_return(bulk_load_select.organisation_by_value, (organisation,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
             self.error_dialog.fill_report(
-                "\n -------------------- ORGANISATION EXISTS ----"
-                "---------------- \n\n Value entered exists in table"
+                "\n -------------------- ORGANISATION EXISTS ----" "---------------- \n\n Value entered exists in table"
             )
             self.error_dialog.show()
             return False
@@ -205,17 +194,14 @@ class NewEntry(QFrame, FORM_CLASS):
         value = lifecycle stage auto generate id
         """
         # check if lifecycle stage in buildings.lifecycle_stage table
-        result = self.db._execute(
-            buildings_select.lifecycle_stage_by_value, (lifecycle_stage,)
-        )
+        result = self.db.execute_return(buildings_select.lifecycle_stage_by_value, (lifecycle_stage,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
             self.error_dialog.fill_report(
-                "\n -------------------- LIFECYCLE STAGE EXISTS -"
-                "------------------- \n\n Value entered exists in table"
+                "\n -------------------- LIFECYCLE STAGE EXISTS -" "------------------- \n\n Value entered exists in table"
             )
             self.error_dialog.show()
             return False
@@ -238,17 +224,14 @@ class NewEntry(QFrame, FORM_CLASS):
         """
 
         # check if capture method in buildings_common.capture_method table
-        result = self.db._execute(
-            common_select.capture_method_by_value, (capture_method,)
-        )
+        result = self.db.execute_return(common_select.capture_method_by_value, (capture_method,))
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
         if len(ls) > 0:
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
             self.error_dialog.fill_report(
-                "\n -------------------- CAPTURE METHOD EXISTS --"
-                "------------------ \n\n Value entered exists in table"
+                "\n -------------------- CAPTURE METHOD EXISTS --" "------------------ \n\n Value entered exists in table"
             )
             self.error_dialog.show()
             return False
@@ -264,18 +247,15 @@ class NewEntry(QFrame, FORM_CLASS):
             self.le_new_entry.clear()
             return True
 
-    def new_capture_source_group(
-        self, capture_source_group, description, commit_status
-    ):
+    def new_capture_source_group(self, capture_source_group, description, commit_status):
         """
         update the capture source group table
         value = capture source group autogenerate id
         """
         # Check if capture source group in buildings
         # _common.capture_source_group table
-        result = self.db._execute(
-            common_select.capture_source_group_by_value_and_description,
-            (capture_source_group, description),
+        result = self.db.execute_return(
+            common_select.capture_source_group_by_value_and_description, (capture_source_group, description)
         )
         ls = result.fetchall()
         # if it is in the table return dialog box and exit
@@ -283,8 +263,7 @@ class NewEntry(QFrame, FORM_CLASS):
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(" ")
             self.error_dialog.fill_report(
-                "\n ---------------- CAPTURE SOURCE GROUP "
-                "---------------- \n\n Value entered exists in table"
+                "\n ---------------- CAPTURE SOURCE GROUP " "---------------- \n\n Value entered exists in table"
             )
             self.error_dialog.show()
             return False
