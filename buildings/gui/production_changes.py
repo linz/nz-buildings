@@ -1,13 +1,13 @@
 from builtins import next
 from builtins import object
+
 # -*- coding: utf-8 -*-\
 from collections import OrderedDict
 
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
 from qgis.core import QgsFeatureRequest, QgsGeometry
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -59,9 +59,7 @@ class ProductionChanges(object):
 
         if self.edit_dialog.layout_general_info.isVisible():
             # populate capture source group
-            result = self.edit_dialog.db._execute(
-                common_select.capture_source_group_value_external
-            )
+            result = self.edit_dialog.db._execute(common_select.capture_source_group_value_external)
             ls = result.fetchall()
             text_max = ""
             for item in ls:
@@ -72,17 +70,14 @@ class ProductionChanges(object):
             self.fix_truncated_dropdown(self.edit_dialog.cmb_capture_source, text_max)
 
             # populate lifecycle stage combobox
-            result = self.edit_dialog.db._execute(
-                buildings_select.lifecycle_stage_value
-            )
+            result = self.edit_dialog.db._execute(buildings_select.lifecycle_stage_value)
             ls = result.fetchall()
             for item in ls:
                 self.edit_dialog.cmb_lifecycle_stage.addItem(item[0])
 
             # populate territorial authority combobox
             result = self.edit_dialog.db._execute(
-                reference_select.territorial_authority_intersect_geom,
-                (self.edit_dialog.geom,),
+                reference_select.territorial_authority_intersect_geom, (self.edit_dialog.geom,)
             )
             self.edit_dialog.ids_ta = []
             for (id_ta, name) in result.fetchall():
@@ -90,10 +85,7 @@ class ProductionChanges(object):
                 self.edit_dialog.ids_ta.append(id_ta)
 
             # populate suburb combobox
-            result = self.edit_dialog.db._execute(
-                reference_select.suburb_locality_intersect_geom,
-                (self.edit_dialog.geom,),
-            )
+            result = self.edit_dialog.db._execute(reference_select.suburb_locality_intersect_geom, (self.edit_dialog.geom,))
             self.edit_dialog.ids_suburb = []
             for (id_suburb, name) in result.fetchall():
                 if name is not None:
@@ -101,9 +93,7 @@ class ProductionChanges(object):
                     self.edit_dialog.ids_suburb.append(id_suburb)
 
             # populate town combobox
-            result = self.edit_dialog.db._execute(
-                reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,)
-            )
+            result = self.edit_dialog.db._execute(reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,))
             self.edit_dialog.cmb_town.addItem("")
             self.edit_dialog.ids_town = [None]
             for (id_town, name) in result.fetchall():
@@ -115,9 +105,7 @@ class ProductionChanges(object):
         if self.edit_dialog.layout_capture_method.isVisible():
             # capture method id
             text = self.edit_dialog.cmb_capture_method.currentText()
-            result = self.edit_dialog.db.execute_no_commit(
-                common_select.capture_method_id_by_value, (text,)
-            )
+            result = self.edit_dialog.db.execute_no_commit(common_select.capture_method_id_by_value, (text,))
             capture_method_id = result.fetchall()[0][0]
         else:
             capture_method_id = None
@@ -126,27 +114,21 @@ class ProductionChanges(object):
             # capture source
             text = self.edit_dialog.cmb_capture_source.currentText()
             text_ls = text.split("- ")
-            result = self.edit_dialog.db.execute_no_commit(
-                common_select.capture_source_group_id_by_value, (text_ls[2],)
-            )
+            result = self.edit_dialog.db.execute_no_commit(common_select.capture_source_group_id_by_value, (text_ls[2],))
             data = result.fetchall()[0][0]
             if text_ls[0] == "None":
                 result = self.edit_dialog.db.execute_no_commit(
-                    common_select.capture_source_id_by_capture_source_group_id_is_null,
-                    (data,),
+                    common_select.capture_source_id_by_capture_source_group_id_is_null, (data,)
                 )
             else:
                 result = self.edit_dialog.db.execute_no_commit(
-                    common_select.capture_source_id_by_capture_source_group_id_and_external_source_id,
-                    (data, text_ls[0]),
+                    common_select.capture_source_id_by_capture_source_group_id_and_external_source_id, (data, text_ls[0])
                 )
             capture_source_id = result.fetchall()[0][0]
 
             # lifecycle stage
             text = self.edit_dialog.cmb_lifecycle_stage.currentText()
-            result = self.edit_dialog.db.execute_no_commit(
-                buildings_select.lifecycle_stage_id_by_value, (text,)
-            )
+            result = self.edit_dialog.db.execute_no_commit(buildings_select.lifecycle_stage_id_by_value, (text,))
             lifecycle_stage_id = result.fetchall()[0][0]
 
             # suburb
@@ -161,21 +143,8 @@ class ProductionChanges(object):
             index = self.edit_dialog.cmb_ta.currentIndex()
             t_a = self.edit_dialog.ids_ta[index]
         else:
-            capture_source_id, lifecycle_stage_id, suburb, town, t_a = (
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-        return (
-            capture_method_id,
-            capture_source_id,
-            lifecycle_stage_id,
-            suburb,
-            town,
-            t_a,
-        )
+            capture_source_id, lifecycle_stage_id, suburb, town, t_a = (None, None, None, None, None)
+        return (capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a)
 
     def enable_UI_functions(self):
         """
@@ -248,56 +217,34 @@ class AddProduction(ProductionChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in [
-                "mActionAddFeature",
-                "mActionNodeTool",
-                "mActionMoveFeature",
-            ]:
+            if dig.objectName() in ["mActionAddFeature", "mActionVertexTool", "mActionMoveFeature"]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
-            if adv.objectName() in [
-                "mActionUndo",
-                "mActionRedo",
-                "mActionReshapeFeatures",
-                "mActionOffsetCurve",
-            ]:
+            if adv.objectName() in ["mActionUndo", "mActionRedo", "mActionReshapeFeatures", "mActionOffsetCurve"]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
         self.disable_UI_functions()
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When building frame btn_edit_save clicked
         """
         self.edit_dialog.db.open_cursor()
 
-        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = (
-            self.get_comboboxes_values()
-        )
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
         # insert into buildings
         sql = "SELECT buildings.buildings_insert();"
         result = self.edit_dialog.db.execute_no_commit(sql)
         building_id = result.fetchall()[0][0]
         # insert into building_outlines table
-        sql = (
-            "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);"
-        )
+        sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);"
         result = self.edit_dialog.db.execute_no_commit(
             sql,
-            (
-                building_id,
-                capture_method_id,
-                capture_source_id,
-                lifecycle_stage_id,
-                suburb,
-                town,
-                t_a,
-                self.edit_dialog.geom,
-            ),
+            (building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a, self.edit_dialog.geom),
         )
         self.edit_dialog.outline_id = result.fetchall()[0][0]
 
@@ -308,8 +255,8 @@ class AddProduction(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    @pyqtSlot()
-    def edit_reset_clicked(self):
+    # @pyqtSlot(bool)
+    def edit_reset_clicked(self, bool):
         """
             When production frame btn_edit_reset clicked
         """
@@ -328,7 +275,7 @@ class AddProduction(ProductionChanges):
         self.edit_dialog.geom = None
         self.edit_dialog.added_geoms = OrderedDict()
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         """
            Called when feature is added
@@ -339,7 +286,7 @@ class AddProduction(ProductionChanges):
             iface.messageBar().pushMessage(
                 "WARNING",
                 "You've drawn multiple outlines, only the LAST outline you've drawn will be saved.",
-                level=QgsMessageBar.WARNING,
+                level=Qgis.Warning,
                 duration=3,
             )
         # get new feature geom
@@ -352,11 +299,11 @@ class AddProduction(ProductionChanges):
             iface.messageBar().pushMessage(
                 "INFO",
                 "You've drawn an outline that is less than 10sqm, are you sure this is correct?",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=3,
             )
         # convert to correct format
-        wkt = new_geometry.exportToWkt()
+        wkt = new_geometry.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         geom = result.fetchall()[0][0]
@@ -373,7 +320,7 @@ class AddProduction(ProductionChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_deleted(self, qgsfId):
         """
             Called when a Feature is Deleted
@@ -391,7 +338,7 @@ class AddProduction(ProductionChanges):
                 self.edit_dialog.geom = list(self.edit_dialog.added_geoms.values())[-1]
                 self.select_comboboxes_value()
 
-    @pyqtSlot(int, QgsGeometry)
+    # @pyqtSlot(int, QgsGeometry)
     def creator_geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -406,10 +353,10 @@ class AddProduction(ProductionChanges):
                 iface.messageBar().pushMessage(
                     "INFO",
                     "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                    level=QgsMessageBar.INFO,
+                    level=Qgis.Info,
                     duration=3,
                 )
-            wkt = geom.exportToWkt()
+            wkt = geom.asWkt()
             if not wkt:
                 self.disable_UI_functions()
                 self.edit_dialog.geom = None
@@ -442,23 +389,20 @@ class AddProduction(ProductionChanges):
         # capture source
         # repopulate capture source cmb
         self.edit_dialog.cmb_capture_source.clear()
-        result = self.edit_dialog.db._execute(
-            reference_select.capture_source_area_intersect_geom,
-            (self.edit_dialog.geom,),
-        )
+        result = self.edit_dialog.db._execute(reference_select.capture_source_area_intersect_geom, (self.edit_dialog.geom,))
         result = result.fetchall()
         if len(result) == 0:
             iface.messageBar().pushMessage(
                 "Capture Source",
                 "The new outline overlaps with no capture source area, please reset.",
-                level=QgsMessageBar.WARNING,
+                level=Qgis.Warning,
                 duration=6,
             )
         elif len(result) > 1:
             iface.messageBar().pushMessage(
                 "Capture Source",
                 "The new outline overlaps with multiple capture source areas, please manually choose one.",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=6,
             )
             text_max = ""
@@ -527,31 +471,20 @@ class EditAttribute(ProductionChanges):
                 self.edit_dialog.building_outline_id = None
                 self.disable_UI_functions()
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When production frame btn_edit_save clicked
         """
         self.edit_dialog.db.open_cursor()
 
-        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = (
-            self.get_comboboxes_values()
-        )
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
 
         if len(self.edit_dialog.ids) > 0:
             for i in self.edit_dialog.ids:
                 sql = "SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);"
                 self.edit_dialog.db.execute_no_commit(
-                    sql,
-                    (
-                        i,
-                        capture_method_id,
-                        capture_source_id,
-                        lifecycle_stage_id,
-                        suburb,
-                        town,
-                        t_a,
-                    ),
+                    sql, (i, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a)
                 )
                 sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
                 self.edit_dialog.db.execute_no_commit(sql, (i,))
@@ -562,7 +495,7 @@ class EditAttribute(ProductionChanges):
             self.edit_dialog.ids = []
             self.edit_dialog.building_outline_id = None
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When production frame btn_edit_reset clicked
@@ -575,7 +508,7 @@ class EditAttribute(ProductionChanges):
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    @pyqtSlot(list, list, bool)
+    # @pyqtSlot(list, list, bool)
     def selection_changed(self, added, removed, cleared):
         """
            Called when feature is selected
@@ -596,22 +529,18 @@ class EditAttribute(ProductionChanges):
             self.edit_dialog.building_outline_id = None
             self.disable_UI_functions()
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def end_lifespan(self, commit_status):
         # get the dataset id and dates of the most recent supplied dataset
         if not self.confirm(self.msgbox_remove):
             return
-        dates = self.edit_dialog.db._execute(
-            bulk_load_select.supplied_dataset_latest_id_and_dates
-        )
+        dates = self.edit_dialog.db._execute(bulk_load_select.supplied_dataset_latest_id_and_dates)
         dates = dates.fetchone()
 
         # get list of building_ids from building_outline_ids
         building_ids = []
         for outline in self.edit_dialog.ids:
-            result = self.edit_dialog.db._execute(
-                buildings_select.building_id_by_building_outline_id, (outline,)
-            )
+            result = self.edit_dialog.db._execute(buildings_select.building_id_by_building_outline_id, (outline,))
             building_ids.append(result.fetchone()[0])
 
         # if the current supplied dataset is not in compare
@@ -646,8 +575,7 @@ class EditAttribute(ProductionChanges):
             for outline in self.edit_dialog.ids:
                 # see if outline in existing_subset_extracts
                 dataset = self.edit_dialog.db._execute(
-                    bulk_load_select.existing_subset_extracts_dataset_by_building_outline_id,
-                    (outline,),
+                    bulk_load_select.existing_subset_extracts_dataset_by_building_outline_id, (outline,)
                 )
                 dataset = dataset.fetchone()
                 # if the outline is in existing_subset_extracts
@@ -656,8 +584,7 @@ class EditAttribute(ProductionChanges):
                     if dataset[0] == dates[0]:
                         # check if the bulk_loaded_outline is in removed table
                         removed_count = self.edit_dialog.db._execute(
-                            bulk_load_select.removed_count_by_building_outline_id,
-                            (outline,),
+                            bulk_load_select.removed_count_by_building_outline_id, (outline,)
                         )
                         removed_count = removed_count.fetchone()
                         if removed_count[0] == 0:
@@ -685,14 +612,12 @@ class EditAttribute(ProductionChanges):
                 # remove outline from removed table
                 sql = "SELECT buildings_bulk_load.removed_delete_existing_outlines(%s);"
                 self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.ids,))
-                # remove outline from exisitng subset extracts table
+                # remove outline from existing subset extracts table
                 sql = "SELECT buildings_bulk_load.existing_subset_extracts_remove_by_building_outline_id(%s);"
                 self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.ids,))
                 # end lifespan in building outlines table
                 sql = "SELECT buildings.building_outlines_update_end_lifespan(%s);"
-                result = self.edit_dialog.db.execute_no_commit(
-                    sql, (self.edit_dialog.ids,)
-                )
+                result = self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.ids,))
                 # end lifespan in buildings table
                 sql = "SELECT buildings.buildings_update_end_lifespan(%s);"
                 self.edit_dialog.db.execute_no_commit(sql, (building_ids,))
@@ -738,16 +663,12 @@ class EditAttribute(ProductionChanges):
         """
             Return the selection values
         """
-        self.edit_dialog.ids = [
-            feat.id() for feat in self.editing_layer.selectedFeatures()
-        ]
-        self.edit_dialog.building_outline_id = [
-            feat.id() for feat in self.editing_layer.selectedFeatures()
-        ][0]
+        self.edit_dialog.ids = [feat.id() for feat in self.editing_layer.selectedFeatures()]
+        self.edit_dialog.building_outline_id = [feat.id() for feat in self.editing_layer.selectedFeatures()][0]
         building_feat = [feat for feat in self.editing_layer.selectedFeatures()][0]
         building_geom = building_feat.geometry()
         # convert to correct format
-        wkt = building_geom.exportToWkt()
+        wkt = building_geom.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
@@ -758,67 +679,49 @@ class EditAttribute(ProductionChanges):
         """
         # lifeycle stage
         result = self.edit_dialog.db._execute(
-            buildings_select.lifecycle_stage_value_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            buildings_select.lifecycle_stage_value_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
-        self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(
-            self.edit_dialog.cmb_lifecycle_stage.findText(result)
-        )
+        self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(self.edit_dialog.cmb_lifecycle_stage.findText(result))
 
         # capture method
         result = self.edit_dialog.db._execute(
-            common_select.capture_method_value_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            common_select.capture_method_value_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
-        self.edit_dialog.cmb_capture_method.setCurrentIndex(
-            self.edit_dialog.cmb_capture_method.findText(result)
-        )
+        self.edit_dialog.cmb_capture_method.setCurrentIndex(self.edit_dialog.cmb_capture_method.findText(result))
 
         # capture source
         result = self.edit_dialog.db._execute(
-            common_select.capture_source_group_value_external_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            common_select.capture_source_group_value_external_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0]
         text = "- ".join(result)
-        self.edit_dialog.cmb_capture_source.setCurrentIndex(
-            self.edit_dialog.cmb_capture_source.findText(text)
-        )
+        self.edit_dialog.cmb_capture_source.setCurrentIndex(self.edit_dialog.cmb_capture_source.findText(text))
 
         # suburb
         result = self.edit_dialog.db._execute(
-            reference_select.suburb_locality_suburb_4th_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            reference_select.suburb_locality_suburb_4th_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
-        self.edit_dialog.cmb_suburb.setCurrentIndex(
-            self.edit_dialog.cmb_suburb.findText(result)
-        )
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText(result))
 
         # town city
         result = self.edit_dialog.db._execute(
-            reference_select.town_city_name_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            reference_select.town_city_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()
         if result:
-            self.edit_dialog.cmb_town.setCurrentIndex(
-                self.edit_dialog.cmb_town.findText(result[0][0])
-            )
+            self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText(result[0][0]))
         else:
             self.edit_dialog.cmb_town.setCurrentIndex(0)
 
         # territorial Authority
         result = self.edit_dialog.db._execute(
-            reference_select.territorial_authority_name_by_building_outline_id,
-            (self.edit_dialog.building_outline_id,),
+            reference_select.territorial_authority_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
-        self.edit_dialog.cmb_ta.setCurrentIndex(
-            self.edit_dialog.cmb_ta.findText(result)
-        )
+        self.edit_dialog.cmb_ta.setCurrentIndex(self.edit_dialog.cmb_ta.findText(result))
 
 
 class EditGeometry(ProductionChanges):
@@ -832,7 +735,7 @@ class EditGeometry(ProductionChanges):
         ProductionChanges.__init__(self, edit_dialog)
         iface.actionToggleEditing().trigger()
         # set editing to edit polygon
-        iface.actionNodeTool().trigger()
+        iface.actionVertexTool().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
         # selection actions
         iface.building_toolbar.addSeparator()
@@ -843,23 +746,18 @@ class EditGeometry(ProductionChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in ["mActionNodeTool", "mActionMoveFeature"]:
+            if dig.objectName() in ["mActionVertexTool", "mActionMoveFeature"]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
-            if adv.objectName() in [
-                "mActionUndo",
-                "mActionRedo",
-                "mActionReshapeFeatures",
-                "mActionOffsetCurve",
-            ]:
+            if adv.objectName() in ["mActionUndo", "mActionRedo", "mActionReshapeFeatures", "mActionOffsetCurve"]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
         self.disable_UI_functions()
 
-    @pyqtSlot(bool)
+    # @pyqtSlot(bool)
     def edit_save_clicked(self, commit_status):
         """
             When production frame btn_edit_save clicked
@@ -870,13 +768,10 @@ class EditGeometry(ProductionChanges):
 
         for key in self.edit_dialog.geoms:
             sql = "SELECT buildings.building_outlines_update_shape(%s, %s);"
-            self.edit_dialog.db.execute_no_commit(
-                sql, (self.edit_dialog.geoms[key], key)
-            )
+            self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.geoms[key], key))
 
             self.edit_dialog.db.execute_no_commit(
-                "SELECT buildings.building_outlines_update_capture_method(%s, %s)",
-                (key, capture_method_id),
+                "SELECT buildings.building_outlines_update_capture_method(%s, %s)", (key, capture_method_id)
             )
             sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
             self.edit_dialog.db.execute_no_commit(sql, (key,))
@@ -885,7 +780,7 @@ class EditGeometry(ProductionChanges):
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
 
-    @pyqtSlot()
+    # @pyqtSlot()
     def edit_reset_clicked(self):
         """
             When production frame btn_edit_reset clicked
@@ -896,12 +791,12 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.geoms = {}
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionNodeTool().trigger()
+        iface.actionVertexTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
 
-    @pyqtSlot(int, QgsGeometry)
+    # @pyqtSlot(int, QgsGeometry)
     def geometry_changed(self, qgsfId, geom):
         """
            Called when feature is changed
@@ -911,19 +806,17 @@ class EditGeometry(ProductionChanges):
            @type  geom:        qgis.core.QgsGeometry
         """
         # get new feature geom and convert to correct format
-        wkt = geom.exportToWkt()
+        wkt = geom.asWkt()
         sql = general_select.convert_geometry
         result = self.edit_dialog.db._execute(sql, (wkt,))
         self.edit_dialog.geom = result.fetchall()[0][0]
-        result = self.edit_dialog.db._execute(
-            buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,)
-        )
+        result = self.edit_dialog.db._execute(buildings_select.building_outline_shape_by_building_outline_id, (qgsfId,))
         area = geom.area()
         if area < 10:
             iface.messageBar().pushMessage(
                 "INFO",
                 "You've edited the outline to less than 10sqm, are you sure this is correct?",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=3,
             )
         result = result.fetchall()[0][0]
@@ -940,7 +833,7 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
-    @pyqtSlot(int)
+    # @pyqtSlot(int)
     def creator_feature_added(self, qgsfId):
         pass  # Future Enhancement
 

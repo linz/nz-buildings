@@ -47,8 +47,6 @@ class EditDialog(QDialog, FORM_CLASS):
             self.editing_layer = self.parent_frame.building_layer
             self.current_dataset = None
 
-        self.territorial_auth = None
-
         self.init_dialog()
 
         # Bulk loadings & editing fields
@@ -133,8 +131,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.editing_layer.featureDeleted.connect(self.change_instance.creator_feature_deleted)
         self.editing_layer.geometryChanged.connect(self.change_instance.creator_geometry_changed)
 
-        self.add_territorial_auth()
-
     def edit_attribute(self):
         """
             When edit outline radio button toggled
@@ -186,8 +182,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.btn_edit_reset.clicked.connect(self.change_instance.edit_reset_clicked)
         self.editing_layer.selectionChanged.connect(self.change_instance.selection_changed)
 
-        self.add_territorial_auth()
-
     def edit_geometry(self):
         self.setWindowTitle("Edit Geometry")
         self.geoms = {}
@@ -230,8 +224,6 @@ class EditDialog(QDialog, FORM_CLASS):
         self.editing_layer.geometryChanged.connect(self.change_instance.geometry_changed)
         self.editing_layer.featureAdded.connect(self.change_instance.creator_feature_added)
 
-        self.add_territorial_auth()
-
     def close_dialog(self):
         """
             When 'x' is clicked
@@ -251,17 +243,6 @@ class EditDialog(QDialog, FORM_CLASS):
                 iface.building_toolbar.removeAction(action)
             else:
                 action.setEnabled(True)
-
-    def add_territorial_auth(self):
-        # add territorial Authority layer
-        self.territorial_auth = self.layer_registry.add_postgres_layer(
-            "territorial_authorities", "territorial_authority", "shape", "buildings_reference", "", ""
-        )
-        layers.style_layer(self.territorial_auth, {1: ["204,121,95", "0.3", "dash", "5;2"]})
-
-    def remove_territorial_auth(self):
-        if self.territorial_auth is not None:
-            self.layer_registry.remove_layer(self.territorial_auth)
 
     def get_change_instance(self):
         return self.change_instance

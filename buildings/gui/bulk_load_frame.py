@@ -512,10 +512,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
 
-        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        self.edit_dialog.remove_territorial_auth()
-        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
-
         self.setup_toolbar()
 
         self.change_instance = None
@@ -645,7 +641,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        if "bulk_load_outlines" in layerids or "territorial_authorities" in layerids:
+        if "bulk_load_outlines" in layerids:
             self.btn_compare_outlines.setDisabled(1)
             self.btn_alter_rel.setDisabled(1)
             self.btn_publish.setDisabled(1)

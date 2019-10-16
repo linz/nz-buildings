@@ -8,8 +8,8 @@ from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize
 from qgis.PyQt.QtWidgets import QAction, QFrame
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer
-from qgis.gui import QgsMessageBar, QgsRubberBand
-from qgis.utils import iface
+from qgis.gui import QgsRubberBand
+from qgis.utils import Qgis, iface
 
 from buildings.gui import production_changes
 from buildings.gui.edit_dialog import EditDialog
@@ -213,10 +213,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
                 iface.actionPan().trigger()
 
         iface.actionCancelEdits().trigger()
-        # reload layers
-        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        self.edit_dialog.remove_territorial_auth()
-        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
         self.change_instance = None
@@ -224,13 +220,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        for layer in ["building_outlines", "historic_outlines", "territorial_authorities"]:
+        for layer in ["building_outlines", "historic_outlines"]:
             if layer in layerids:
                 self.cb_production.setDisabled(1)
                 iface.messageBar().pushMessage(
                     "ERROR",
                     "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                    level=QgsMessageBar.CRITICAL,
+                    level=Qgis.Critical,
                     duration=5,
                 )
                 return
