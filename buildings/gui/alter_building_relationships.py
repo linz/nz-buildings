@@ -11,7 +11,7 @@ from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import QSize, Qt, pyqtSlot
 from qgis.core import QgsProject
 from qgis.gui import QgsHighlight, QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 from buildings.gui import bulk_load_changes
 from buildings.gui.error_dialog import ErrorDialog
@@ -674,7 +674,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             iface.messageBar().pushMessage(
                 "ERROR",
                 "Please ensure that you enter a reason for deletion, you cannot delete a building otherwise.",
-                level=QgsMessageBar.INFO,
+                level=Qgis.Info,
                 duration=5,
             )
 
@@ -767,7 +767,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         QgsProject.instance().layerWillBeRemoved.disconnect(
             self.layers_removed
         )
-        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
+        for val in [str(layer.id()) for layer in QgsProject.instance().layerTreeRoot().layerOrder()]:
             if "existing_subset_extracts" in val:
                 self.lyr_existing.removeSelection()
             if "bulk_load_outlines" in val:
@@ -1036,48 +1036,49 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
-        legend = iface.legendInterface()
+        legend = QgsProject.instance().layerTreeRoot()
+        print(legend)
         if self.cb_lyr_bulk_load.isChecked():
-            legend.setLayerVisible(self.lyr_added_bulk_load_in_edit, True)
-            legend.setLayerVisible(self.lyr_matched_bulk_load_in_edit, True)
-            legend.setLayerVisible(self.lyr_related_bulk_load_in_edit, True)
-            legend.setLayerVisible(self.lyr_added_bulk_load, True)
-            legend.setLayerVisible(self.lyr_matched_bulk_load, True)
-            legend.setLayerVisible(self.lyr_related_bulk_load, True)
+            legend.findLayer(self.lyr_added_bulk_load_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_matched_bulk_load_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_related_bulk_load_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_added_bulk_load.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_matched_bulk_load.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_related_bulk_load.id()).setItemVisibilityChecked(True)
             for h in self.highlight_features:
                 if h.layer() == self.lyr_bulk_load:
                     h.setVisible(True)
         else:
-            legend.setLayerVisible(self.lyr_added_bulk_load_in_edit, False)
-            legend.setLayerVisible(self.lyr_matched_bulk_load_in_edit, False)
-            legend.setLayerVisible(self.lyr_related_bulk_load_in_edit, False)
-            legend.setLayerVisible(self.lyr_added_bulk_load, False)
-            legend.setLayerVisible(self.lyr_matched_bulk_load, False)
-            legend.setLayerVisible(self.lyr_related_bulk_load, False)
+            legend.findLayer(self.lyr_added_bulk_load_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_matched_bulk_load_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_related_bulk_load_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_added_bulk_load.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_matched_bulk_load.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_related_bulk_load.id()).setItemVisibilityChecked(False)
             for h in self.highlight_features:
                 if h.layer() == self.lyr_bulk_load:
                     h.setVisible(False)
 
     @pyqtSlot()
     def cb_lyr_existing_state_changed(self):
-        legend = iface.legendInterface()
+        legend = QgsProject.instance().layerTreeRoot()
         if self.cb_lyr_existing.isChecked():
-            legend.setLayerVisible(self.lyr_removed_existing_in_edit, True)
-            legend.setLayerVisible(self.lyr_matched_existing_in_edit, True)
-            legend.setLayerVisible(self.lyr_related_existing_in_edit, True)
-            legend.setLayerVisible(self.lyr_removed_existing, True)
-            legend.setLayerVisible(self.lyr_matched_existing, True)
-            legend.setLayerVisible(self.lyr_related_existing, True)
+            legend.findLayer(self.lyr_removed_existing_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_matched_existing_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_related_existing_in_edit.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_removed_existing.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_matched_existing.id()).setItemVisibilityChecked(True)
+            legend.findLayer(self.lyr_related_existing.id()).setItemVisibilityChecked(True)
             for h in self.highlight_features:
                 if h.layer() == self.lyr_existing:
                     h.setVisible(True)
         else:
-            legend.setLayerVisible(self.lyr_removed_existing_in_edit, False)
-            legend.setLayerVisible(self.lyr_matched_existing_in_edit, False)
-            legend.setLayerVisible(self.lyr_related_existing_in_edit, False)
-            legend.setLayerVisible(self.lyr_removed_existing, False)
-            legend.setLayerVisible(self.lyr_matched_existing, False)
-            legend.setLayerVisible(self.lyr_related_existing, False)
+            legend.findLayer(self.lyr_removed_existing_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_matched_existing_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_related_existing_in_edit.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_removed_existing.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_matched_existing.id()).setItemVisibilityChecked(False)
+            legend.findLayer(self.lyr_related_existing.id()).setItemVisibilityChecked(False)
             for h in self.highlight_features:
                 if h.layer() == self.lyr_existing:
                     h.setVisible(False)
@@ -1142,7 +1143,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 iface.messageBar().pushMessage(
                     "ERROR",
                     "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                    level=QgsMessageBar.CRITICAL,
+                    level=Qgis.Critical,
                     duration=5,
                 )
                 return
@@ -1152,7 +1153,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for feature in self.lyr_existing.selectedFeatures():
             # get geometry
             geometry = self.db.execute_no_commit(
-                general_select.convert_geometry, (feature.geometry().exportToWkt(),)
+                general_select.convert_geometry, (feature.geometry().asWkt(),)
             )
             geometry = geometry.fetchall()[0][0]
             sql = (
@@ -1584,7 +1585,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for i, header_item in enumerate(header_items):
             tbl.setHorizontalHeaderItem(i, QTableWidgetItem(header_item))
 
-        tbl.horizontalHeader().setResizeMode(QHeaderView.Stretch)
+        tbl.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         tbl.verticalHeader().setVisible(False)
 
         tbl.setSelectionBehavior(QAbstractItemView.SelectRows)

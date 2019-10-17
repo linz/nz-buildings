@@ -5,7 +5,7 @@ import os
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.PyQt.QtGui import QCursor, QPixmap
-from qgis.core import QgsRectangle, QgsProject, QgsPoint
+from qgis.core import QgsRectangle, QgsProject, QgsPointXY, QgsWkbTypes
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.utils import Qgis
 
@@ -21,12 +21,12 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         self.canvas = canvas
         QgsMapToolEmitPoint.__init__(self, self.canvas)
 
-        self.rubber_band = QgsRubberBand(self.canvas, Qgis.Polygon)
+        self.rubber_band = QgsRubberBand(self.canvas, QgsWkbTypes.PolygonGeometry)
         self.start_point = None
         self.end_point = None
         self.is_emitting_point = False
 
-        self.rubber_band.reset(Qgis.Polygon)
+        self.rubber_band.reset(QgsWkbTypes.PolygonGeometry)
 
         self.cursor = QCursor(QPixmap(os.path.join(__location__, "..", "icons", "cursor.png")))
 
@@ -66,9 +66,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, self.rectangle())
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
-                    layer.select(layer_rect, True)
+                    layer.selectByRect(layer_rect, True)
                 else:
-                    layer.select(layer_rect, False)
+                    layer.selectByRect(layer_rect, False)
         else:
             w = self.canvas.mapUnitsPerPixel() * 3
             p = self.toMapCoordinates(event.pos())
@@ -76,9 +76,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, rect)
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
-                    layer.select(layer_rect, True)
+                    layer.selectByRect(layer_rect, True)
                 else:
-                    layer.select(layer_rect, False)
+                    layer.selectByRect(layer_rect, False)
         self.rubber_band.hide()
         # Signal emits every time canvas release event occurs and selection
         # could potentially have changed.
@@ -99,11 +99,11 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
         if self.start_point.x() == self.end_point.x() or self.start_point.y() == self.end_point.y():
             # Prevent creation of invalid rectangle.
             return
-        self.rubber_band.reset(Qgis.Polygon)
-        point1 = QgsPoint(self.start_point.x(), self.start_point.y())
-        point2 = QgsPoint(self.start_point.x(), self.end_point.y())
-        point3 = QgsPoint(self.end_point.x(), self.end_point.y())
-        point4 = QgsPoint(self.end_point.x(), self.start_point.y())
+        self.rubber_band.reset(QgsWkbTypes.PolygonGeometry)
+        point1 = QgsPointXY(self.start_point.x(), self.start_point.y())
+        point2 = QgsPointXY(self.start_point.x(), self.end_point.y())
+        point3 = QgsPointXY(self.end_point.x(), self.end_point.y())
+        point4 = QgsPointXY(self.end_point.x(), self.start_point.y())
         self.rubber_band.addPoint(point1, False)
         self.rubber_band.addPoint(point2, False)
         self.rubber_band.addPoint(point3, False)
