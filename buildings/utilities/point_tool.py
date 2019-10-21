@@ -1,12 +1,12 @@
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsPoint
+from qgis.core import QgsPointXY
 from qgis.gui import QgsMapToolEmitPoint
 
 
 class PointTool(QgsMapToolEmitPoint):
     # qgis maptool for drawing circle interactions
-    canvas_clicked = pyqtSignal(["QgsPoint"])
-    mouse_moved = pyqtSignal(["QgsPoint"])
+    canvas_clicked = pyqtSignal(["QgsPointXY"])
+    mouse_moved = pyqtSignal(["QgsPointXY"])
 
     def __init__(self, canvas):
         QgsMapToolEmitPoint.__init__(self, canvas)
@@ -23,7 +23,7 @@ class PointTool(QgsMapToolEmitPoint):
         y = event.pos().y()
 
         point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-        self.canvas_clicked.emit(QgsPoint(point[0], point[1]))
+        self.canvas_clicked.emit(QgsPointXY(point[0], point[1]))
 
     def canvasMoveEvent(self, event):
         # get the point where the mouse is
@@ -31,4 +31,4 @@ class PointTool(QgsMapToolEmitPoint):
         y = event.pos().y()
 
         point = self.canvas.getCoordinateTransform().toMapCoordinates(x, y)
-        self.mouse_moved.emit(QgsPoint(point[0], point[1]))
+        self.mouse_moved.emit(QgsPointXY(point[0], point[1]))
