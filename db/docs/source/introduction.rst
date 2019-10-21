@@ -68,7 +68,7 @@ Coverage Maps
 The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 4 shows the additional coverage of building outlines available by the end of 2019 in blue.
 
 +-------------------------------------------------------------+-------------------------------------------------------------+
-| .. figure:: _static/August_2019_coverage_map.png            | .. figure:: _static/2019_coverage_map2.png                  |
+| .. figure:: _static/coverage_map_current.png                | .. figure:: _static/coverage_map_future.png                 |
 |    :scale: 50%                                              |    :scale: 50%                                              |
 |    :alt: current building outlines coverage                 |    :alt: upcoming building outlines coverage                |
 |                                                             |                                                             |
