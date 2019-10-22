@@ -9,8 +9,7 @@ from qgis.PyQt.QtGui import QIcon, QStandardItem, QStandardItemModel
 from qgis.PyQt.QtCore import Qt, pyqtSlot
 
 from qgis.core import QgsProject
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import iface, Qgis
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "check_dialog.ui"))
@@ -69,11 +68,9 @@ class CheckDialog(QDialog, FORM_CLASS):
         csv_path = os.path.join(self.le_path.text(), csv_name)
 
         if os.path.isfile(csv_path):
-            iface.messageBar().pushMessage(
-                "Failed to export csv", "{} already existed.".format(csv_path), level=QgsMessageBar.CRITICAL
-            )
+            iface.messageBar().pushMessage("Failed to export csv", "{} already existed.".format(csv_path), level=Qgis.Critical)
         else:
-            with open(csv_path, "wb") as csv_file:
+            with open(csv_path, "w") as csv_file:
                 writer = csv.writer(csv_file)
                 # Add headers
                 header = []
@@ -89,9 +86,7 @@ class CheckDialog(QDialog, FORM_CLASS):
                         item = tbl_model.item(row, col)
                         row_data.append(item.text())
                     writer.writerow(row_data)
-            iface.messageBar().pushMessage(
-                "Saved", "Error Output has been saved to {}".format(csv_path), level=QgsMessageBar.SUCCESS
-            )
+            iface.messageBar().pushMessage("Saved", "Error Output has been saved to {}".format(csv_path), level=Qgis.Success)
 
     def check_path(self):
         """Check if path is valid"""
