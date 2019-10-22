@@ -20,7 +20,7 @@ import unittest
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.PyQt.QtTest import QTest
-from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
+from qgis.core import QgsCoordinateReferenceSystem, QgsPointXY, QgsRectangle
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -64,7 +64,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -78,7 +78,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -110,7 +110,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -124,7 +124,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -151,7 +151,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -165,7 +165,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
+            pos=canvas_point(QgsPointXY(1878137.41, 5555313.84)),
             delay=30,
         )
         QTest.qWait(10)
@@ -236,7 +236,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -250,31 +250,31 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878149, 5555640)),
+            pos=canvas_point(QgsPointXY(1878149, 5555640)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878203, 5555640)),
+            pos=canvas_point(QgsPointXY(1878203, 5555640)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878203, 5555384)),
+            pos=canvas_point(QgsPointXY(1878203, 5555384)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878149, 5555384)),
+            pos=canvas_point(QgsPointXY(1878149, 5555384)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878203, 5555384)),
+            pos=canvas_point(QgsPointXY(1878203, 5555384)),
             delay=50,
         )
         QTest.qWait(100)
@@ -346,7 +346,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -360,31 +360,31 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878149, 5555640)),
+            pos=canvas_point(QgsPointXY(1878149, 5555640)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878203, 5555640)),
+            pos=canvas_point(QgsPointXY(1878203, 5555640)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878203, 5555384)),
+            pos=canvas_point(QgsPointXY(1878203, 5555384)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878149, 5555384)),
+            pos=canvas_point(QgsPointXY(1878149, 5555384)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878203, 5555384)),
+            pos=canvas_point(QgsPointXY(1878203, 5555384)),
             delay=50,
         )
         QTest.qWait(100)
@@ -392,7 +392,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878202.1, 5555618.9)),
+            pos=canvas_point(QgsPointXY(1878202.1, 5555618.9)),
             delay=50,
         )
         self.edit_dialog.cmb_capture_method.setCurrentIndex(
@@ -419,7 +419,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -433,7 +433,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -470,7 +470,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -484,31 +484,31 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555631)),
+            pos=canvas_point(QgsPointXY(1878053, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555612)),
+            pos=canvas_point(QgsPointXY(1878053, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555612)),
+            pos=canvas_point(QgsPointXY(1878315, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.qWait(100)
@@ -545,7 +545,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -559,31 +559,31 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878155, 5555190)),
+            pos=canvas_point(QgsPointXY(1878155, 5555190)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878155, 5555119)),
+            pos=canvas_point(QgsPointXY(1878155, 5555119)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878219, 5555612)),
+            pos=canvas_point(QgsPointXY(1878219, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878219, 5555190)),
+            pos=canvas_point(QgsPointXY(1878219, 5555190)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878219, 5555190)),
+            pos=canvas_point(QgsPointXY(1878219, 5555190)),
             delay=50,
         )
         QTest.qWait(100)
@@ -607,7 +607,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -621,7 +621,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878038.1, 5555312.6)),
+            pos=canvas_point(QgsPointXY(1878038.1, 5555312.6)),
             delay=30,
         )
 
@@ -653,7 +653,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -667,7 +667,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878420.4, 5555426.8)),
+            pos=canvas_point(QgsPointXY(1878420.4, 5555426.8)),
             delay=30,
         )
         btn_yes = self.edit_dialog.change_instance.msgbox_remove.button(QMessageBox.Yes)
@@ -698,7 +698,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -712,7 +712,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
+            pos=canvas_point(QgsPointXY(1878137.41, 5555313.84)),
             delay=30,
         )
         QTest.qWait(10)

@@ -24,7 +24,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsExpression,
     QgsFeatureRequest,
-    QgsPoint,
+    QgsPointXY,
     QgsRectangle,
 )
 from qgis.gui import QgsMapTool
@@ -70,7 +70,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -84,7 +84,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -119,7 +119,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878035.0, 5555256.0)),
+            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -133,7 +133,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -170,7 +170,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -184,31 +184,31 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555631)),
+            pos=canvas_point(QgsPointXY(1878053, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555612)),
+            pos=canvas_point(QgsPointXY(1878053, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555612)),
+            pos=canvas_point(QgsPointXY(1878315, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.qWait(100)
@@ -244,7 +244,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -258,31 +258,31 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878155, 5555190)),
+            pos=canvas_point(QgsPointXY(1878155, 5555190)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878155, 5555119)),
+            pos=canvas_point(QgsPointXY(1878155, 5555119)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878219, 5555612)),
+            pos=canvas_point(QgsPointXY(1878219, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878219, 5555190)),
+            pos=canvas_point(QgsPointXY(1878219, 5555190)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878219, 5555190)),
+            pos=canvas_point(QgsPointXY(1878219, 5555190)),
             delay=50,
         )
         QTest.qWait(100)
@@ -306,7 +306,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -320,7 +320,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878132.1, 5555323.9)),
+            pos=canvas_point(QgsPointXY(1878132.1, 5555323.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -349,7 +349,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -363,7 +363,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878137.41, 5555313.84)),
+            pos=canvas_point(QgsPointXY(1878137.41, 5555313.84)),
             delay=30,
         )
         QTest.qWait(10)
@@ -430,7 +430,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -444,31 +444,31 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555631)),
+            pos=canvas_point(QgsPointXY(1878053, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555612)),
+            pos=canvas_point(QgsPointXY(1878053, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555612)),
+            pos=canvas_point(QgsPointXY(1878315, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.qWait(100)
@@ -537,7 +537,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -551,7 +551,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
+            pos=canvas_point(QgsPointXY(1878037.5, 5555349.2)),
             delay=30,
         )
         QTest.qWait(10)
@@ -593,7 +593,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         expr = QgsExpression("bulk_load_outline_id=2010 or bulk_load_outline_id =2003")
         it = self.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.edit_dialog.editing_layer.setSelectedFeatures(ids)
+        self.edit_dialog.editing_layer.selectByIds(ids)
         self.edit_dialog.cmb_status.setCurrentIndex(
             self.edit_dialog.cmb_status.findText("Deleted During QA")
         )
@@ -622,7 +622,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -636,7 +636,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878090.9, 5555322.0)),
+            pos=canvas_point(QgsPointXY(1878090.9, 5555322.0)),
             delay=30,
         )
         QTest.qWait(10)
@@ -675,7 +675,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -689,7 +689,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878228.6, 5555334.9)),
+            pos=canvas_point(QgsPointXY(1878228.6, 5555334.9)),
             delay=30,
         )
         QTest.qWait(10)
@@ -702,7 +702,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878037.5, 5555349.2)),
+            pos=canvas_point(QgsPointXY(1878037.5, 5555349.2)),
             delay=30,
         )
         QTest.qWait(10)
@@ -743,7 +743,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         expr = QgsExpression("bulk_load_outline_id=2003 or bulk_load_outline_id =2004")
         it = self.edit_dialog.editing_layer.getFeatures(QgsFeatureRequest(expr))
         ids = [i.id() for i in it]
-        self.edit_dialog.editing_layer.setSelectedFeatures(ids)
+        self.edit_dialog.editing_layer.selectByIds(ids)
         self.edit_dialog.cmb_status.setCurrentIndex(
             self.edit_dialog.cmb_status.findText("Deleted During QA")
         )
@@ -781,7 +781,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
+            pos=canvas_point(QgsPointXY(1747651, 5428152)),
             delay=50,
         )
         canvas = iface.mapCanvas()
@@ -795,31 +795,31 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555631)),
+            pos=canvas_point(QgsPointXY(1878053, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878053, 5555612)),
+            pos=canvas_point(QgsPointXY(1878053, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555612)),
+            pos=canvas_point(QgsPointXY(1878315, 5555612)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.mouseClick(
             widget,
             Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878315, 5555631)),
+            pos=canvas_point(QgsPointXY(1878315, 5555631)),
             delay=50,
         )
         QTest.qWait(100)
@@ -827,7 +827,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(
             widget,
             Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878202.1, 5555618.9)),
+            pos=canvas_point(QgsPointXY(1878202.1, 5555618.9)),
             delay=50,
         )
         self.edit_dialog.cmb_capture_method.setCurrentIndex(
