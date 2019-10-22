@@ -20,7 +20,7 @@ import unittest
 
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtTest import QTest
-from qgis.core import QgsCoordinateReferenceSystem, QgsPoint, QgsRectangle
+from qgis.core import QgsCoordinateReferenceSystem, QgsPointXY, QgsRectangle
 from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
@@ -61,12 +61,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """UI and canvas behave correctly when geometry is changed"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -75,42 +70,20 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
         QTest.qWait(10)
         self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertEqual(
-            self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography"
-        )
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
     def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -119,32 +92,17 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
         QTest.qWait(10)
         self.edit_dialog.btn_edit_reset.click()
         layer = iface.activeLayer()
-        idx = layer.fieldNameIndex("bulk_load_outline_id")
+        idx = layer.fields().indexFromName("bulk_load_outline_id")
         for feature in layer.getFeatures():
             current_id = feature.attributes()[idx]
             current_shape = feature.geometry()
-            wkt = current_shape.exportToWkt()
+            wkt = current_shape.asWkt()
             sql = "SELECT ST_SetSRID(ST_GeometryFromText(%s), 2193)"
             result = db._execute(sql, data=(wkt,))
             current_shape = result.fetchall()[0][0]
@@ -157,12 +115,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check geometry is updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -171,24 +124,9 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
         QTest.qWait(10)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for key in self.bulk_load_frame.edit_dialog.geoms:
@@ -205,12 +143,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Checks the geometries of multiple features can be edited at the same time"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -219,42 +152,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878210.2, 5555275.2)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878210.2, 5555275.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878222.6, 5555275.2)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878210.2, 5555275.2)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878210.2, 5555275.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878222.6, 5555275.2)), delay=30)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for key in self.bulk_load_frame.edit_dialog.geoms:
             sql = "SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;"
@@ -270,12 +173,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check capture method is 'Trace Orthophotography' after the geometry changes occur. #100"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -284,73 +182,34 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878204.8, 5555290.8)),
-            delay=30,
-        )
-        QTest.mousePress(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878205.6, 5555283.2)),
-            delay=30,
-        )
-        QTest.mouseRelease(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878215.6, 5555283.2)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
+        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
+        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
         QTest.qWait(10)
 
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertEqual(
-            self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography"
-        )
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
     def test_split_geometry_once(self):
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
         target_crs.createFromUserInput(selectedcrs)
         canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
+        zoom_rectangle = QgsRectangle(1878156.0, 5555279.0, 1878209.0, 5555304.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         iface.actionSplitFeatures().trigger()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878180.46, 5555329.35)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878162.88, 5555300.88)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
         self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertEqual(
-            self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography"
-        )
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
         sql = "SELECT Count(*)::integer FROM buildings_bulk_load.bulk_load_outlines;"
         pre_save = db._execute(sql)
         pre_save = pre_save.fetchone()[0]
@@ -369,63 +228,26 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
     def test_fail_on_split_geometry_twice(self):
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747651, 5428152)),
-            delay=50,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
         target_crs.createFromUserInput(selectedcrs)
         canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
+        zoom_rectangle = QgsRectangle(1878156.0, 5555279.0, 1878209.0, 5555304.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
         iface.actionSplitFeatures().trigger()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878180.46, 5555329.35)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878162.88, 5555300.88)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
         self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
-        self.assertEqual(
-            self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography"
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878171.96, 5555339.46)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1878185.76, 5555335.58)),
-            delay=30,
-        )
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878162.99, 5555282.70)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.78, 5555301.03)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878204.78, 5555301.03)), delay=30)
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())

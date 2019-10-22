@@ -216,7 +216,7 @@ class AddBulkLoad(BulkLoadChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in ["mActionAddFeature", "mActionNodeTool", "mActionMoveFeature"]:
+            if dig.objectName() in ["mActionAddFeature", "mActionVertexTool", "mActionMoveFeature"]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
@@ -823,7 +823,7 @@ class EditGeometry(BulkLoadChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in ["mActionNodeTool", "mActionMoveFeature"]:
+            if dig.objectName() in ["mActionVertexTool", "mActionMoveFeature"]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
@@ -917,7 +917,7 @@ class EditGeometry(BulkLoadChanges):
         self.new_attrs = {}
         # restart editing
         iface.actionToggleEditing().trigger()
-        iface.actionNodeTool().trigger()
+        iface.actionVertexTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
