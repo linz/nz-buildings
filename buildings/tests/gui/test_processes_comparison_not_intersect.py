@@ -22,7 +22,7 @@ import unittest
 
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtWidgets import QMessageBox
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsProject
 from qgis.utils import iface, plugins
 
 from buildings.utilities import database as db
@@ -57,28 +57,18 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         btn_yes = self.bulk_load_frame.msgbox_publish.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.publish_clicked(False)
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_bulk_load_shapefile2.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_bulk_load_shapefile2.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if (
-                self.bulk_load_frame.ml_outlines_layer.layer(idx).name()
-                == "test_bulk_load_shapefile2"
-            ):
-                self.bulk_load_frame.ml_outlines_layer.setLayer(
-                    self.bulk_load_frame.ml_outlines_layer.layer(idx)
-                )
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == "test_bulk_load_shapefile2":
+                self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
         # add description
         self.bulk_load_frame.le_data_description.setText("Test bulk load outlines")
-        self.bulk_load_frame.cmb_cap_src_area.setCurrentIndex(
-            self.bulk_load_frame.cmb_cap_src_area.findText("2- Imagery Two")
-        )
+        self.bulk_load_frame.cmb_cap_src_area.setCurrentIndex(self.bulk_load_frame.cmb_cap_src_area.findText("2- Imagery Two"))
         # add outlines
         btn_yes = self.bulk_load_frame.msgbox_bulk_load.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
@@ -90,12 +80,10 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         self.bulk_load_frame.db.rollback_open_cursor()
         self.bulk_load_frame.exit_clicked()
         # remove temporary layers from canvas
-        layers = iface.legendInterface().layers()
+        layers = QgsProject.instance().layerTreeRoot().layerOrder()
         for layer in layers:
-            if "test_bulk_load_shapefile" in str(
-                layer.id()
-            ) or "bulk_load_outlines" in str(layer.id()):
-                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+            if "test_bulk_load_shapefile" in str(layer.id()) or "bulk_load_outlines" in str(layer.id()):
+                QgsProject.instance().removeMapLayer(layer.id())
 
     def test_compare_added(self):
         """Check correct number of ids are determined as 'Added'"""
