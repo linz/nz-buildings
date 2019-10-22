@@ -1037,7 +1037,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
     @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
         legend = QgsProject.instance().layerTreeRoot()
-        print(legend)
         if self.cb_lyr_bulk_load.isChecked():
             legend.findLayer(self.lyr_added_bulk_load_in_edit.id()).setItemVisibilityChecked(True)
             legend.findLayer(self.lyr_matched_bulk_load_in_edit.id()).setItemVisibilityChecked(True)

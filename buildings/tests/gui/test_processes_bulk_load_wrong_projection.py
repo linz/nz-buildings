@@ -22,7 +22,7 @@ import unittest
 
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtWidgets import QMessageBox
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsProject
 from qgis.utils import iface, plugins
 
 from buildings.utilities import database as db
@@ -41,10 +41,10 @@ class ProcessWrongProjectionTest(unittest.TestCase):
         """Runs at TestCase teardown."""
         db.close_connection()
         # remove temporary layers from canvas
-        layers = iface.legendInterface().layers()
+        layers = QgsProject.instance().layerTreeRoot().layerOrder()
         for layer in layers:
             if "test_wrong_projection" in str(layer.id()):
-                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                QgsProject.instance().removeMapLayer(layer.id())
 
     def setUp(self):
         """Runs before each test."""
@@ -68,21 +68,13 @@ class ProcessWrongProjectionTest(unittest.TestCase):
 
     def test_bulk_load_wrong_projection(self):
         """When save is clicked data is added to the correct tables"""
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_wrong_projection.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_wrong_projection.shp")
         iface.addVectorLayer(path, "", "ogr")
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if (
-                self.bulk_load_frame.ml_outlines_layer.layer(idx).name()
-                == "test_wrong_projection"
-            ):
-                self.bulk_load_frame.ml_outlines_layer.setLayer(
-                    self.bulk_load_frame.ml_outlines_layer.layer(idx)
-                )
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == "test_wrong_projection":
+                self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
         # add description
@@ -92,8 +84,5 @@ class ProcessWrongProjectionTest(unittest.TestCase):
         QTimer.singleShot(500, btn_yes.click)
         self.bulk_load_frame.bulk_load_save_clicked(False)
 
-        self.assertIn(
-            "INCORRECT CRS",
-            self.bulk_load_frame.error_dialog.tb_error_report.toPlainText(),
-        )
+        self.assertIn("INCORRECT CRS", self.bulk_load_frame.error_dialog.tb_error_report.toPlainText())
         self.bulk_load_frame.error_dialog.close()
