@@ -20,6 +20,7 @@ import unittest
 
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.core import QgsProject
 from qgis.utils import plugins, iface
 
 from buildings.utilities import database as db
@@ -65,7 +66,7 @@ class SetUpBulkLoadTest(unittest.TestCase):
 
     def test_supplied_layer_combobox(self):
         """Bulk load layer combobox contains only the layers in the qgis legend"""
-        layers = iface.legendInterface().layers()
+        layers = QgsProject.instance().layerTreeRoot().layerOrder()
         self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(), len(layers))
 
     def test_data_description_default(self):
