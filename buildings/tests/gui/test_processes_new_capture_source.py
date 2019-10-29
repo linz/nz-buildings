@@ -23,7 +23,7 @@ from qgis.utils import iface, plugins
 from qgis.gui import QgsMapTool
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtTest import QTest
-from qgis.core import QgsCoordinateReferenceSystem, QgsPoint
+from qgis.core import QgsCoordinateReferenceSystem, QgsPointXY
 
 from buildings.utilities import database as db
 
@@ -47,9 +47,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(
-            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
-        )
+        sub_menu.setCurrentItem(sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0])
         self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -71,14 +69,9 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         count_filter_off = self.capture_frame.tbl_capture_source_area.rowCount()
         self.assertEqual(count_filter_off, count_original)
         # Check if the old selection is reinstated
-        selected_rows = [
-            index.row()
-            for index in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()
-        ]
+        selected_rows = [index.row() for index in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
         self.assertEqual(len(selected_rows), 1)
-        external_source_id = self.capture_frame.tbl_capture_source_area.item(
-            selected_rows[0], 0
-        ).text()
+        external_source_id = self.capture_frame.tbl_capture_source_area.item(selected_rows[0], 0).text()
         self.assertEqual(external_source_id, "1")
 
     def test_cmb_capture_source_group_changed(self):
@@ -120,12 +113,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         """Editing external source id using the capture source area layer"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1747520, 5428152)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -133,40 +121,16 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         canvas.setDestinationCrs(target_crs)
         # test selecting an area
         # external id of 1
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878185, 5555335)),
-            delay=-1,
-        )
-        rows = [
-            row.row()
-            for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()
-        ]
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878185, 5555335)), delay=-1)
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
         self.assertEquals(rows[0], 0)
         # external id of 2
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878733, 5555375)),
-            delay=-1,
-        )
-        rows = [
-            row.row()
-            for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()
-        ]
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878733, 5555375)), delay=-1)
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
         self.assertEquals(rows[0], 1)
         # check clicking outside the shapefile/deselecting removes from frame
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1878996, 5555445)),
-            delay=-1,
-        )
-        rows = [
-            row.row()
-            for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()
-        ]
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878996, 5555445)), delay=-1)
+        rows = [row.row() for row in self.capture_frame.tbl_capture_source_area.selectionModel().selectedRows()]
         self.assertEquals(len(rows), 0)
 
     def test_layer_selection_by_table_selection(self):
@@ -174,23 +138,20 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         # adding by table selection
         self.capture_frame.tbl_capture_source_area.selectRow(0)
         self.ids = [
-            str(feat["external_area_polygon_id"])
-            for feat in self.capture_frame.capture_source_area.selectedFeatures()
+            str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()
         ]
         self.assertEqual(len(self.ids), 1)
         self.assertEqual(self.ids[0], "1")
         # selected two ids in table
         self.capture_frame.tbl_capture_source_area.selectRow(1)
         self.ids = [
-            str(feat["external_area_polygon_id"])
-            for feat in self.capture_frame.capture_source_area.selectedFeatures()
+            str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()
         ]
         self.assertEqual(len(self.ids), 1)
         self.assertEqual(self.ids[0], "2")
         # deselecting everthing from table
         self.capture_frame.tbl_capture_source_area.clearSelection()
         self.ids = [
-            str(feat["external_area_polygon_id"])
-            for feat in self.capture_frame.capture_source_area.selectedFeatures()
+            str(feat["external_area_polygon_id"]) for feat in self.capture_frame.capture_source_area.selectedFeatures()
         ]
         self.assertEqual(len(self.ids), 0)

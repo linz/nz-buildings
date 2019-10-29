@@ -23,12 +23,7 @@ from qgis.utils import iface, plugins
 from qgis.gui import QgsMapTool
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtTest import QTest
-from qgis.core import (
-    QgsCoordinateReferenceSystem,
-    QgsMapLayerRegistry,
-    QgsPoint,
-    QgsRectangle,
-)
+from qgis.core import QgsCoordinateReferenceSystem, QgsProject, QgsPointXY, QgsRectangle
 
 from buildings.utilities import database as db
 
@@ -52,9 +47,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(
-            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
-        )
+        sub_menu.setCurrentItem(sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0])
         self.capture_frame = self.dockwidget.current_frame
         self.capture_frame.btn_new_geometry.click()
         self.capture_area_frame = self.dockwidget.current_frame
@@ -71,12 +64,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -85,36 +73,11 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1877987, 5555614, 1880088, 5554738)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877898.8, 5555614.9)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877896.5, 5555450.5)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877782.1, 5555450.8)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877782.1, 5555450.8)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877898.8, 5555614.9)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877896.5, 5555450.5)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877782.1, 5555450.8)), delay=-1)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877782.1, 5555450.8)), delay=-1)
         QTest.qWait(1)
 
         self.assertTrue(self.capture_area_frame.le_external_id.isEnabled())
@@ -138,10 +101,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
 
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_external_area_polygon.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_polygon.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
@@ -150,12 +110,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -164,12 +119,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1877987, 5555614, 1880088, 5554738)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877590.8, 5555370.0)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877590.8, 5555370.0)), delay=-1)
         QTest.qWait(1)
 
         self.assertTrue(self.capture_area_frame.le_external_id.isEnabled())
@@ -189,7 +139,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
-        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer.id())
 
     def test_select_multipolygon_from_layer(self):
         """Check new capture source area added by selecting multipolygon from other layer"""
@@ -197,10 +147,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
 
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_external_area_multipolygon.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_multipolygon.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
@@ -209,12 +156,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -223,12 +165,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1877987, 5555614, 1880088, 5554738)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877590.8, 5555370.0)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877590.8, 5555370.0)), delay=-1)
         QTest.qWait(1)
 
         self.assertTrue(self.capture_area_frame.le_external_id.isEnabled())
@@ -248,14 +185,11 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
-        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer.id())
 
     def test_select_wrong_projection(self):
         """Check error messages by selecting from wrong projection"""
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_external_area_polygon_wrong_proj.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_polygon_wrong_proj.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
@@ -263,26 +197,18 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_area_frame.mcb_selection_layer.setLayer(layer)
 
         self.assertNotEqual(self.capture_area_frame.l_wrong_projection.text(), "")
-        self.assertIn(
-            "INCORRECT CRS",
-            self.capture_area_frame.error_dialog.tb_error_report.toPlainText(),
-        )
+        self.assertIn("INCORRECT CRS", self.capture_area_frame.error_dialog.tb_error_report.toPlainText())
         self.capture_area_frame.error_dialog.close()
 
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
-        QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer.id())
 
     def test_reset_clicked(self):
         """Check if gui is reset when reset clicked."""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -291,36 +217,11 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1877987, 5555614, 1880088, 5554738)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877795.6, 5555615.2)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877898.8, 5555614.9)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877896.5, 5555450.5)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPoint(1877782.1, 5555450.8)),
-            delay=-1,
-        )
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPoint(1877782.1, 5555450.8)),
-            delay=-1,
-        )
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877898.8, 5555614.9)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877896.5, 5555450.5)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1877782.1, 5555450.8)), delay=-1)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877782.1, 5555450.8)), delay=-1)
         QTest.qWait(1)
 
         self.assertTrue(self.capture_area_frame.le_external_id.isEnabled())
