@@ -54,9 +54,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
         self.assertTrue(self.alter_relationships_frame.btn_cancel.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_exit.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
-        self.assertFalse(
-            self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled()
-        )
+        self.assertFalse(self.alter_relationships_frame.btn_qa_refer2supplier.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_pending.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_okay.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
@@ -64,9 +62,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
         self.assertEqual(self.alter_relationships_frame.lst_existing.count(), 0)
         self.assertEqual(self.alter_relationships_frame.lst_bulk.count(), 0)
 
-        self.assertEqual(
-            self.alter_relationships_frame.cmb_relationship.currentIndex(), 0
-        )
+        self.assertEqual(self.alter_relationships_frame.cmb_relationship.currentIndex(), 0)
         self.assertEqual(self.alter_relationships_frame.tbl_relationship.rowCount(), 0)
 
     def test_layer_registry(self):
@@ -101,9 +97,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
     def test_has_toolbar(self):
         self.assertTrue(iface.building_toolbar.isVisible())
         actions = [action.text() for action in iface.building_toolbar.actions()]
-        self.assertEquals(
-            ", ".join(actions), "Pan Map, Add Outline, Edit Geometry, Edit Attributes"
-        )
+        self.assertEquals(", ".join(actions), "Pan Map, Add Outline, Edit Geometry, Edit Attributes")
 
     def test_add_outline(self):
         edit_dialog = self.alter_relationships_frame.edit_dialog

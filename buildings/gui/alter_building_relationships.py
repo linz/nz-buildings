@@ -1,5 +1,3 @@
-from builtins import str
-from builtins import range
 # -*- coding: utf-8 -*-
 
 import os.path
@@ -8,7 +6,7 @@ from functools import partial
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QAbstractItemView, QAction, QFrame, QHeaderView, QListWidgetItem, QMessageBox, QTableWidgetItem
 from qgis.PyQt.QtGui import QColor, QIcon
-from qgis.PyQt.QtCore import QSize, Qt, pyqtSlot
+from qgis.PyQt.QtCore import QSize, Qt
 from qgis.core import QgsProject
 from qgis.gui import QgsHighlight, QgsMessageBar
 from qgis.utils import Qgis, iface
@@ -370,12 +368,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
             buttons=QMessageBox.No | QMessageBox.Yes,
         )
 
-    @pyqtSlot()
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
         self.highlight_features = []
 
-    @pyqtSlot()
     def highlight_selection_changed(self):
         """Highlights selected features"""
 
@@ -392,7 +388,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 h.setFillColor(QColor(255, 255, 255, 0))
                 self.highlight_features.append(h)
 
-    @pyqtSlot()
     def maptool_clicked(self):
         canvas = iface.mapCanvas()
         self.tool = MultiLayerSelection(canvas)
@@ -400,7 +395,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # set up signal and slot
         self.tool.multi_selection_changed.connect(self.multi_selection_changed)
 
-    @pyqtSlot()
     def multi_selection_changed(self):
 
         self.tbl_relationship.itemSelectionChanged.disconnect(
@@ -545,7 +539,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.tbl_relationship_item_selection_changed
         )
 
-    @pyqtSlot()
     def unfinished_error_msg(self):
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
@@ -554,7 +547,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
         self.error_dialog.show()
 
-    @pyqtSlot()
     def unlink_clicked(self, commit_status=True):
         """
         Unlink the buildings in the table
@@ -579,7 +571,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         else:
             self.btn_save.setEnabled(True)
 
-    @pyqtSlot()
     def matched_clicked(self, commit_status=True):
         """
         Match the buildings in the list
@@ -610,7 +601,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             else:
                 self.btn_save.setEnabled(True)
 
-    @pyqtSlot()
     def related_clicked(self, commit_status=True):
         """
         Relate the buildings in the list
@@ -648,7 +638,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             else:
                 self.btn_save.setEnabled(True)
 
-    @pyqtSlot()
     def delete_clicked(self, commit_status=True):
         self.deletion_reason = DeletionReason(self.lst_bulk.count())
         self.deletion_reason.show()
@@ -681,7 +670,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def reason_cancel(self):
         self.deletion_reason.close()
 
-    @pyqtSlot()
     def save_clicked(self, commit_status=True):
         """
         Save result and change database
@@ -728,7 +716,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.refresh_tbl_relationship()
 
-    @pyqtSlot()
     def cancel_clicked(self):
         self.reset_buttons()
         self.qa_button_set_enable(True)
@@ -745,7 +732,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.clear_layer_filter()
         iface.mapCanvas().refreshAllLayers()
 
-    @pyqtSlot()
     def exit_clicked(self):
         """
         Called when alter building relationships exit button clicked.
@@ -804,7 +790,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         dw.new_widget(BulkLoadFrame(dw))
         iface.actionPan().trigger()
 
-    @pyqtSlot()
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
@@ -853,7 +838,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         self.disable_tbl_editing(self.tbl_relationship)
 
-    @pyqtSlot()
     def tbl_relationship_item_selection_changed(self):
 
         self.lst_existing.clear()
@@ -919,7 +903,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         except TypeError:
             pass
 
-    @pyqtSlot()
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
 
         selected_rows = [
@@ -1008,7 +991,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     "You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected"
                 )
 
-    @pyqtSlot()
     def zoom_to_next(self):
         found = False
         selected_rows = [
@@ -1034,7 +1016,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if self.scroll_to_next(row, qa_column, selected_rows):
                     break
 
-    @pyqtSlot()
     def cb_lyr_bulk_load_state_changed(self):
         legend = QgsProject.instance().layerTreeRoot()
         if self.cb_lyr_bulk_load.isChecked():
@@ -1058,7 +1039,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if h.layer() == self.lyr_bulk_load:
                     h.setVisible(False)
 
-    @pyqtSlot()
     def cb_lyr_existing_state_changed(self):
         legend = QgsProject.instance().layerTreeRoot()
         if self.cb_lyr_existing.isChecked():
@@ -1082,7 +1062,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if h.layer() == self.lyr_existing:
                     h.setVisible(False)
 
-    @pyqtSlot()
     def cb_autosave_state_changed(self):
         if self.btn_save.isEnabled():
             self.unfinished_error_msg()
@@ -1102,7 +1081,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.autosave = False
             self.btn_save.setVisible(True)
 
-    @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
         layers = [
@@ -1860,12 +1838,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
         QgsProject.instance().layerWillBeRemoved.disconnect(
             self.layers_removed
         )
-        self.edit_dialog.remove_territorial_auth()
+
         QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.toolbar_setup()
 
-        for val in [str(layer.id()) for layer in iface.legendInterface().layers()]:
+        for val in [str(layer.id()) for layer in QgsProject.instance().layerTreeRoot().layerOrder()]:
             if "existing_subset_extracts" in val:
                 self.lyr_existing.removeSelection()
             if "bulk_load_outlines" in val:
