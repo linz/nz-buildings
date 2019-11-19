@@ -24,12 +24,10 @@ if build == "db":
     _pw = "travis"
 else:
     from qgis.core import QgsApplication
+
     app = QgsApplication([], True)
     QgsApplication.initQgis()
-    config_path = os.path.join(
-        QgsApplication.qgisSettingsDirPath(), "buildings", "pg_config.ini"
-    )
-
+    config_path = "/root/.local/share/QGIS/QGIS3/profiles/default/buildings/pg_config.ini"
     pg_config = config.read_config_file(config_path)
     _host = pg_config["localhost"]["host"]
     _port = pg_config["localhost"]["port"]
@@ -91,16 +89,13 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_reference", "functions", "hut_points.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "protected_area_polygons.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "shelter_points.sql"),
-    os.path.join("sql", "deploy", "buildings_reference", "functions", "change_reference_name_col_insert.sql")
-
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "change_reference_name_col_insert.sql"),
 ]
 
 
 def setup_connection():
     """ Sets up the DB Connection via psycopg2 """
-    logindetails = "host={0} port={1} dbname={2} user={3} password={4}".format(
-        _host, _port, _dbname, _user, _pw,
-    )
+    logindetails = "host={0} port={1} dbname={2} user={3} password={4}".format(_host, _port, _dbname, _user, _pw)
     if type(logindetails) == str:
         conn = psycopg2.connect(logindetails)
     return conn

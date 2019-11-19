@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 
 services:
   db:
@@ -15,12 +15,11 @@ services:
       POSTGRES_PASSWORD: postgres
 
   qgis-testing-environment:
-    image: boundlessgeo/qgis-testing-environment:${QGIS_VERSION_TAG}
+    image: ${IMAGE}:${QGIS_VERSION_TAG}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./:/tests_directory
     depends_on:
       - db
     environment:
-      DISPLAY: ':99'
-
+      DISPLAY: ":99"
