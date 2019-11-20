@@ -251,4 +251,8 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
-        self.bulk_load_frame.change_instance.error_dialog.close()
+        self.assertTrue(
+            iface.messageBar().currentItem().text(),
+            "You've tried to split/edit an outline that has just been created. You must first save this new outline to the db before splitting/editing it again.",
+        )
+        iface.messageBar().popWidget()

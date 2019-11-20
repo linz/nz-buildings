@@ -297,10 +297,13 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
 
         iface.actionVertexTool().trigger()
 
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
-        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
-        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878250, 5555350)), delay=-1)
+        # QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878225.79, 5555325.66)), delay=-1)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878233.04, 5555325.24)), delay=-1)
         QTest.qWait(1)
 
-        self.assertTrue(self.edit_dialog.change_instance.error_dialog.isVisible())
-        self.edit_dialog.change_instance.error_dialog.close()
+        self.assertTrue(
+            iface.messageBar().currentItem().text(),
+            "Only the currently added outline can be edited. Please go to edit geometry to edit existing outlines",
+        )
+        iface.messageBar().popWidget()

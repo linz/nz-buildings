@@ -85,11 +85,11 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
-        self.assertEqual(self.edit_dialog.cmb_capture_source.currentText(), "1- Imagery One- NZ Aerial Imagery")
-        self.assertEqual(self.edit_dialog.cmb_ta.currentText(), "Wellington")
-        self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), "Newtown")
-        self.assertEqual(self.edit_dialog.cmb_town.currentText(), "Wellington")
+        self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        self.assertEquals(self.edit_dialog.cmb_capture_source.currentText(), "1- Imagery One- NZ Aerial Imagery")
+        self.assertEquals(self.edit_dialog.cmb_ta.currentText(), "Wellington")
+        self.assertEquals(self.edit_dialog.cmb_suburb.currentText(), "Newtown")
+        self.assertEquals(self.edit_dialog.cmb_town.currentText(), "Wellington")
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_draw_circle_option(self):
@@ -105,9 +105,11 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
+
         for action in iface.building_toolbar.actions():
             if action.text() == "Draw Circle":
                 action.trigger()
+
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878300.4, 5555365.6)), delay=-1)
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878301.7, 5555367.3)), delay=-1)
         self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
@@ -117,7 +119,8 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+
         self.edit_dialog.close()
 
     def test_reset_clicked(self):
@@ -148,7 +151,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
         # change indexes of comboboxes
         self.edit_dialog.cmb_capture_method.setCurrentIndex(1)
@@ -159,13 +162,13 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # click reset button
         self.edit_dialog.btn_edit_reset.click()
         # check geom removed from canvas
-        self.assertEqual(len(list(self.edit_dialog.added_geoms.keys())), 0)
+        self.assertEquals(len(list(self.edit_dialog.added_geoms.keys())), 0)
         # check comboxbox indexes reset to 0
-        self.assertEqual(self.edit_dialog.cmb_capture_method.currentIndex(), -1)
-        self.assertEqual(self.edit_dialog.cmb_capture_source.currentIndex(), -1)
-        self.assertEqual(self.edit_dialog.cmb_ta.currentIndex(), -1)
-        self.assertEqual(self.edit_dialog.cmb_town.currentIndex(), -1)
-        self.assertEqual(self.edit_dialog.cmb_suburb.currentIndex(), -1)
+        self.assertEquals(self.edit_dialog.cmb_capture_method.currentIndex(), -1)
+        self.assertEquals(self.edit_dialog.cmb_capture_source.currentIndex(), -1)
+        self.assertEquals(self.edit_dialog.cmb_ta.currentIndex(), -1)
+        self.assertEquals(self.edit_dialog.cmb_town.currentIndex(), -1)
+        self.assertEquals(self.edit_dialog.cmb_suburb.currentIndex(), -1)
         # check comboboxes disabled
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
@@ -210,7 +213,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
-        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
         # change indexes of comboboxes
         self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
         self.edit_dialog.cmb_ta.setCurrentIndex(0)
@@ -220,11 +223,11 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines;"
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
-        self.assertEqual(result2, result + 1)
+        self.assertEquals(result2, result + 1)
         sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added;"
         added_result2 = db._execute(sql)
         added_result2 = added_result2.fetchall()[0][0]
-        self.assertEqual(added_result2, added_result + 1)
+        self.assertEquals(added_result2, added_result + 1)
         self.bulk_load_frame.db.rollback_open_cursor()
 
     def test_edit_new_outline(self):
@@ -264,42 +267,44 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines;"
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
-        self.assertEqual(result2, result + 1)
+        self.assertEquals(result2, result + 1)
         sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.added;"
         added_result2 = db._execute(sql)
         added_result2 = added_result2.fetchall()[0][0]
-        self.assertEqual(added_result2, added_result + 1)
+        self.assertEquals(added_result2, added_result + 1)
         self.bulk_load_frame.db.rollback_open_cursor()
 
-    def test_edit_existing_outline_fails(self):
-        """Editing fails when the existing outlines geometry changed."""
-        # add geom
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878262, 5555314)), delay=-1)
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878262, 5555290)), delay=-1)
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878223, 5555290)), delay=-1)
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878223, 5555314)), delay=-1)
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878223, 5555314)), delay=-1)
-        QTest.qWait(1)
+    # def test_edit_existing_outline_fails(self):
+    #     """Editing fails when the existing outlines geometry changed."""
+    #     # add geom
+    #     widget = iface.mapCanvas().viewport()
+    #     canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+    #     QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+    #     canvas = iface.mapCanvas()
+    #     selectedcrs = "EPSG:2193"
+    #     target_crs = QgsCoordinateReferenceSystem()
+    #     target_crs.createFromUserInput(selectedcrs)
+    #     canvas.setDestinationCrs(target_crs)
+    #     zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
+    #     canvas.setExtent(zoom_rectangle)
+    #     canvas.refresh()
+    #     QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878262, 5555314)), delay=-1)
+    #     QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878262, 5555290)), delay=-1)
+    #     QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878223, 5555290)), delay=-1)
+    #     QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878223, 5555314)), delay=-1)
+    #     QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878223, 5555314)), delay=-1)
+    #     QTest.qWait(1)
 
-        iface.actionVertexTool().trigger()
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
-        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
-        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878250, 5555350)), delay=-1)
-        QTest.qWait(10)
-
-        self.assertTrue(self.bulk_load_frame.change_instance.error_dialog.isVisible())
-        self.bulk_load_frame.change_instance.error_dialog.close()
+    #     iface.actionVertexTool().trigger()
+    #     QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
+    #     QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878231.71, 5555331.38)), delay=-1)
+    #     QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878250, 5555350)), delay=-1)
+    #     QTest.qWait(10)
+    #     self.assertTrue(
+    #         iface.messageBar().currentItem().text(),
+    #         "Only the currently added outline can be edited. Please go to edit geometry to edit existing outlines",
+    #     )
+    #     iface.messageBar().popWidget()
 
     def test_disabled_on_layer_removed(self):
         """When key layer is removed from registry check options are disabled (#87)"""

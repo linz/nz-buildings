@@ -23,7 +23,7 @@ import unittest
 
 from qgis.PyQt.QtCore import Qt, QTimer
 from qgis.PyQt.QtWidgets import QMessageBox
-from qgis.core import QgsMapLayerRegistry
+from qgis.core import QgsProject
 from qgis.utils import iface, plugins
 
 from buildings.utilities import database as db
@@ -42,10 +42,10 @@ class ProcessBulkLoadTest(unittest.TestCase):
         """Runs at TestCase teardown."""
         db.close_connection()
         # remove temporary layers from canvas
-        layers = iface.legendInterface().layers()
+        layers = QgsProject.instance().layerTreeRoot().layerOrder()
         for layer in layers:
             if "test_bulk_load_shapefile" in str(layer.id()):
-                QgsMapLayerRegistry.instance().removeMapLayer(layer.id())
+                QgsProject.instance().removeMapLayer(layer.id())
 
     def setUp(self):
         """Runs before each test."""
@@ -78,9 +78,9 @@ class ProcessBulkLoadTest(unittest.TestCase):
         self.assertTrue(self.bulk_load_frame.fcb_external_id.isEnabled())
         # check external id combobox populated with fields of current layer
         vectorlayer = self.bulk_load_frame.ml_outlines_layer.currentLayer()
-        fields = vectorlayer.pendingFields()
+        fields = vectorlayer.fields()
         self.assertEqual(self.bulk_load_frame.fcb_external_id.count(), len(fields))
-        # check on unclicking radio button the restrictions are restablished
+        # check on unclicking radio button the restrictions are reestablished
         self.bulk_load_frame.rad_external_id.click()
         self.assertFalse(self.bulk_load_frame.fcb_external_id.isEnabled())
         self.assertTrue(self.bulk_load_frame.cmb_cap_src_area.isEnabled())
@@ -89,15 +89,11 @@ class ProcessBulkLoadTest(unittest.TestCase):
         """When cmb_capture_src_grp changes cmb_cap_src_area is re-populated"""
         self.bulk_load_frame.db.open_cursor()
         sql = "SELECT buildings_common.capture_source_group_insert(%s, %s);"
-        result = self.bulk_load_frame.db.execute_no_commit(
-            sql, ("Test value", "Test description")
-        )
+        result = self.bulk_load_frame.db.execute_no_commit(sql, ("Test value", "Test description"))
         capture_source_group_id = result.fetchall()[0][0]
 
         sql = "SELECT buildings_common.capture_source_insert(%s, %s);"
-        result = self.bulk_load_frame.db.execute_no_commit(
-            sql, (int(capture_source_group_id), "3")
-        )
+        result = self.bulk_load_frame.db.execute_no_commit(sql, (int(capture_source_group_id), "3"))
 
         count = self.bulk_load_frame.cmb_capture_src_grp.count()
         for i in range(count):
@@ -111,21 +107,13 @@ class ProcessBulkLoadTest(unittest.TestCase):
 
     def test_bulk_load_save_clicked(self):
         """When save is clicked data is added to the correct tables"""
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "testdata/test_bulk_load_shapefile.shp",
-        )
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_bulk_load_shapefile.shp")
         iface.addVectorLayer(path, "", "ogr")
         count = self.bulk_load_frame.ml_outlines_layer.count()
         idx = 0
         while idx < count:
-            if (
-                self.bulk_load_frame.ml_outlines_layer.layer(idx).name()
-                == "test_bulk_load_shapefile"
-            ):
-                self.bulk_load_frame.ml_outlines_layer.setLayer(
-                    self.bulk_load_frame.ml_outlines_layer.layer(idx)
-                )
+            if self.bulk_load_frame.ml_outlines_layer.layer(idx).name() == "test_bulk_load_shapefile":
+                self.bulk_load_frame.ml_outlines_layer.setLayer(self.bulk_load_frame.ml_outlines_layer.layer(idx))
                 break
             idx = idx + 1
         # add description

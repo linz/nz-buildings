@@ -367,14 +367,13 @@ class AddProduction(ProductionChanges):
             if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
                 self.edit_dialog.geom = geom
         else:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                "\n -------------------- WRONG GEOMETRY EDITED ------"
-                "-------------- \n\nOnly current added outline can "
-                "be edited. Please go to [Edit Geometry] to edit "
-                "existing outlines."
+            iface.messageBar().pushMessage(
+                "WRONG GEOMETRY EDITIED",
+                "Only the currently added outline can be edited. Please go to edit geometry to edit existing outlines",
+                level=Qgis.Warning,
+                duration=5,
             )
-            self.error_dialog.show()
+            self.edit_dialog.btn_edit_save.setDisabled(1)
 
     def select_comboboxes_value(self):
         """

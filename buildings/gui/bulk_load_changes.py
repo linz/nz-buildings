@@ -392,14 +392,13 @@ class AddBulkLoad(BulkLoadChanges):
             if qgsfId == list(self.edit_dialog.added_geoms.keys())[-1]:
                 self.edit_dialog.geom = geom
         else:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                "\n -------------------- WRONG GEOMETRY EDITED ------"
-                "-------------- \n\nOnly current added outline can "
-                "be edited. Please go to [Edit Geometry] to edit "
-                "existing outlines."
+            iface.messageBar().pushMessage(
+                "WRONG GEOMETRY EDITIED",
+                "Only the currently added outline can be edited. Please go to edit geometry to edit existing outlines",
+                level=Qgis.Warning,
+                duration=5,
             )
-            self.error_dialog.show()
+            self.edit_dialog.btn_edit_save.setDisabled(1)
 
     def select_comboboxes_value(self):
         """Select the correct combobox value for the geometry"""
@@ -964,13 +963,13 @@ class EditGeometry(BulkLoadChanges):
             )
         result = result.fetchall()
         if len(result) == 0:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                "\n --- CANNOT SPLIT/EDIT A NEWLY ADDED FEATURE ---"
-                "\n\nYou've tried to split/edit an outline that has just been created. "
-                "You must first save this new outline to the db before splitting/editing it again."
+            iface.messageBar().pushMessage(
+                "CANNOT SPLIT/EDIT A NEWLY ADDED FEATURE",
+                "You've tried to split/edit an outline that has just been created. You must first save this new outline to the db before splitting/editing it again.",
+                level=Qgis.Warning,
+                duration=5,
             )
-            self.error_dialog.show()
+            self.edit_dialog.btn_edit_save.setDisabled(1)
             self.disable_UI_functions()
             self.edit_dialog.btn_edit_reset.setEnabled(1)
             return
