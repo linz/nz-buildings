@@ -17,7 +17,7 @@ changelog=https://github.com/linz/qgis-buildings-plugin/blob/master/CHANGELOG.rs
 tags=data maintenance, topo, buildings
 
 category=Plugins
-icon=icon.png
+icon=buildings_plugin.png
 
 experimental=True
 deprecated=False
