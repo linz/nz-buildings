@@ -122,6 +122,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
         self.edit_dialog.close()
+        self.edit_dialog.deleteLater()
 
     def test_reset_clicked(self):
         """Indexes are reset and comboxes disabled when reset is called"""

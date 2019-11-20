@@ -182,6 +182,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.deletion_reason.le_reason.setText("Reason Given")
         self.alter_relationships_frame.reason_given(commit_status=False)
+        self.alter_relationships_frame.deletion_reason.deleteLater()
         self.alter_relationships_frame.save_clicked(commit_status=False)
 
         result = db._execute(sql_deleted)
@@ -207,6 +208,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
         self.alter_relationships_frame.delete_clicked(commit_status=False)
         self.alter_relationships_frame.reason_given(commit_status=False)
+        self.alter_relationships_frame.deletion_reason.deleteLater()
 
         result = db._execute(sql_deleted)
         deleted_test = result.fetchone()[0]
