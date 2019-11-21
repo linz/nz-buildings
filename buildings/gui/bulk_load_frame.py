@@ -461,6 +461,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_dialog.show()
         self.edit_dialog.edit_attribute()
         self.change_instance = self.edit_dialog.get_change_instance()
+        self.change_instance.populate_edit_comboboxes()
 
     def canvas_edit_geometry(self):
         """
