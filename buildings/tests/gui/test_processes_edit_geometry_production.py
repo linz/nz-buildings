@@ -123,9 +123,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878151.0, 5555311.9)), delay=30)
-        QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878151.0, 5555311.9)), delay=30)
-        QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878132.1, 5555303.9)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878093.1, 5555311.6)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878092.6, 5555304.0)), delay=30)
         QTest.qWait(10)
 
         self.edit_dialog.change_instance.edit_save_clicked(False)
