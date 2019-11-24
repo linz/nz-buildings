@@ -39,7 +39,7 @@ $$
         , p_supplied_dataset_id
         , p_external_outline_id
         , now()
-        , (ST_Dump(p_shape)).geom
+        , p_shape
     )
     RETURNING supplied_outline_id;
 
