@@ -27,10 +27,7 @@ def set_attribute_dialog_setting(attribute_dialog_setting):
     back to whatever the user configuration was when the plugin is closed.
     """
 
-    QGIS_SETTINGS.setValue(
-        "/qgis/digitizing/disable_enter_attribute_values_dialog",
-        attribute_dialog_setting,
-    )
+    QGIS_SETTINGS.setValue("/qgis/digitizing/disable_enter_attribute_values_dialog", attribute_dialog_setting)
 
 
 def set_crs():
@@ -39,11 +36,6 @@ def set_crs():
     # Sets it away from prompting user
     QGIS_SETTINGS.setValue("/Projections/defaultBehaviour", "useProject")
 
-    # Enable on the fly reprojections
-    iface.mapCanvas().setCrsTransformEnabled(True)
-
     # Set project coordinate reference system to NZGD2000
-    iface.mapCanvas().setDestinationCrs(
-        QgsCoordinateReferenceSystem(SRID, QgsCoordinateReferenceSystem.PostgisCrsId)
-    )
+    iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem(SRID, QgsCoordinateReferenceSystem.PostgisCrsId))
     iface.mapCanvas().setMapUnits(2)
