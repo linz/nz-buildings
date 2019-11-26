@@ -272,6 +272,8 @@ class EditDialog(QDialog, FORM_CLASS):
     def liqa_on_edit_geometry_saved(self, ids):
         """Update LIQA when geometry edited"""
         for qa_lyr in self.find_qa_layer():
+            if not self.bulk_load_id_field_exists(qa_lyr):
+                continue
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
                 if feat_id in list(bulk_load_ids.values()):
@@ -282,11 +284,19 @@ class EditDialog(QDialog, FORM_CLASS):
     def liqa_on_delete_outline_saved(self, ids, del_reason):
         """Update LIQA when feature deleted"""
         for qa_lyr in self.find_qa_layer():
+            if not self.bulk_load_id_field_exists(qa_lyr):
+                continue
             bulk_load_ids = self.get_bulk_load_ids(qa_lyr)
             for feat_id in ids:
                 if feat_id in list(bulk_load_ids.values()):
                     qa_feat_id = list(bulk_load_ids.keys())[list(bulk_load_ids.values()).index(feat_id)]
                     self.update_qa_layer_attribute(qa_lyr, qa_feat_id, "Fixed", "Deleted- {}".format(del_reason))
+
+    def bulk_load_id_field_exists(self, qa_layer):
+        field_names = [field.name() for field in qa_layer.fields()]
+        if "bulk_load_" in field_names:
+            return True
+        return False
 
     def find_qa_layer(self):
         """find qa layer"""
