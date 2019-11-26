@@ -38,4 +38,3 @@ def set_crs():
 
     # Set project coordinate reference system to NZGD2000
     iface.mapCanvas().setDestinationCrs(QgsCoordinateReferenceSystem(SRID, QgsCoordinateReferenceSystem.PostgisCrsId))
-    iface.mapCanvas().setMapUnits(2)
