@@ -4,7 +4,7 @@ description=This plugin is used to maintain New Zealand topographic buildings da
 about=This plugin is used to maintain New Zealand topographic buildings datasets
 version=dev
 
-qgisMinimumVersion=2.18
+qgisMinimumVersion=3.0
 
 author=Megan Davidson, Daniel Silk
 email=dsilk@linz.govt.nz
@@ -17,7 +17,7 @@ changelog=https://github.com/linz/qgis-buildings-plugin/blob/master/CHANGELOG.rs
 tags=data maintenance, topo, buildings
 
 category=Plugins
-icon=icon.png
+icon=buildings_plugin.png
 
 experimental=True
 deprecated=False
