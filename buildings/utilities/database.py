@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 ################################################################################
@@ -12,19 +11,19 @@
 #
 ################################################################################
 """
+from __future__ import absolute_import
+from builtins import str
 
 import os
 import psycopg2
 
 from buildings.utilities.warnings import buildings_warning
-from qgis.core import QgsDataSourceURI, QgsApplication
+from qgis.core import QgsDataSourceUri, QgsApplication
 
-import config
+from . import config
 
 
-config_path = os.path.join(
-    QgsApplication.qgisSettingsDirPath(), "buildings", "pg_config.ini"
-)
+config_path = os.path.join(QgsApplication.qgisSettingsDirPath(), "buildings", "pg_config.ini")
 
 pg_config = config.read_config_file(config_path)
 _host = pg_config["localhost"]["host"]
@@ -36,13 +35,7 @@ _pw = pg_config["localhost"]["password"]
 _open_cursor = None
 
 try:
-    _conn = psycopg2.connect(
-        host=_host,
-        port=_port,
-        database=_dbname,
-        user=_user,
-        password=_pw
-    )
+    _conn = psycopg2.connect(host=_host, port=_port, database=_dbname, user=_user, password=_pw)
 except psycopg2.DatabaseError as error:
     _conn = None
     buildings_warning("Database Error", str(error), "critical")
@@ -72,13 +65,7 @@ def connect():
     """Connect to DB"""
     global _conn
     try:
-        _conn = psycopg2.connect(
-            host=_host,
-            port=_port,
-            database=_dbname,
-            user=_user,
-            password=_pw
-        )
+        _conn = psycopg2.connect(host=_host, port=_port, database=_dbname, user=_user, password=_pw)
     except psycopg2.DatabaseError as error:
         _conn = None
         buildings_warning("Database Error", str(error), "critical")
@@ -185,11 +172,11 @@ def close_cursor():
 
 
 def set_uri():
-    """ Creates a QgsDataSourceURI with connection
+    """ Creates a QgsDataSourceUri with connection
 
     @return:    QGIS URI object
-    @rtype:     qgis.core.QgsDataSourceURI
+    @rtype:     qgis.core.QgsDataSourceUri
     """
-    uri = QgsDataSourceURI()
+    uri = QgsDataSourceUri()
     uri.setConnection(_host, _port, _dbname, _user, _pw)
     return uri

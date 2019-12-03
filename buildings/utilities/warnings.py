@@ -15,8 +15,7 @@
 # and catch raised errors
 """
 
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.utils import Qgis, iface
 
 
 def buildings_warning(warn_text, warn_message, warn_level_text):
@@ -31,17 +30,13 @@ def buildings_warning(warn_text, warn_message, warn_level_text):
     @type warn_level_text       string
     """
     if warn_level_text == "info":
-        warn_level = QgsMessageBar.INFO
+        warn_level = Qgis.Info
         warn_duration = 5
     elif warn_level_text == "warning":
-        warn_level = QgsMessageBar.WARNING
+        warn_level = Qgis.Warning
         warn_duration = 5
     elif warn_level_text == "critical":
-        warn_level = QgsMessageBar.CRITICAL
+        warn_level = Qgis.Critical
         warn_duration = 0
 
-    iface.messageBar().pushMessage(
-        warn_text,
-        warn_message,
-        level=warn_level, duration=warn_duration
-    )
+    iface.messageBar().pushMessage(warn_text, warn_message, level=warn_level, duration=warn_duration)
