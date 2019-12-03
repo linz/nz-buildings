@@ -1,0 +1,5 @@
+[MASTER]
+extension-pkg-whitelist=PyQt5, qgis
+disable = invalid-name
+[FORMAT]
+max-line-length=127
