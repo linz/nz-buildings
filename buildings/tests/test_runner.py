@@ -1,9 +1,9 @@
-
 import os
 import sys
 import unittest
 
 __location__ = os.path.dirname(os.path.realpath(__file__))
+
 
 def run_test_modules():
     """

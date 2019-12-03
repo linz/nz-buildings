@@ -18,8 +18,9 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QMessageBox
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.core import QgsProject
 from qgis.utils import plugins, iface
 
 from buildings.utilities import database as db
@@ -27,6 +28,7 @@ from buildings.utilities import database as db
 
 class SetUpBulkLoadTest(unittest.TestCase):
     """Test Bulk Load Outlines GUI initial setup confirm default settings"""
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -39,12 +41,11 @@ class SetUpBulkLoadTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Bulk Load', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Bulk Load", Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.bulk_load_frame.db.open_cursor()
 
@@ -65,34 +66,31 @@ class SetUpBulkLoadTest(unittest.TestCase):
 
     def test_supplied_layer_combobox(self):
         """Bulk load layer combobox contains only the layers in the qgis legend"""
-        layers = iface.legendInterface().layers()
-        self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(),
-                         len(layers))
+        layers = QgsProject.instance().layerTreeRoot().layerOrder()
+        self.assertEqual(self.bulk_load_frame.ml_outlines_layer.count(), len(layers))
 
     def test_data_description_default(self):
         """Data description is enabled and empty"""
         self.assertTrue(self.bulk_load_frame.le_data_description.isEnabled())
-        self.assertEqual(self.bulk_load_frame.le_data_description.text(), '')
+        self.assertEqual(self.bulk_load_frame.le_data_description.text(), "")
 
     def test_organisation_combobox(self):
         """Organisation combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_bulk_load.organisation'
+        sql = "SELECT COUNT(value) FROM buildings_bulk_load.organisation"
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.bulk_load_frame.cmb_organisation.count(), result)
 
     def test_capture_method_combobox(self):
         """Capture method combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_method'
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_method"
         result2 = db._execute(sql)
         result2 = result2.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(),
-                         result2)
+        self.assertEqual(self.bulk_load_frame.cmb_capture_method.count(), result2)
 
     def test_capture_source_group(self):
         """Capture source group combobox same size as table"""
-        sql = 'SELECT COUNT(value) FROM buildings_common.capture_source_group'
+        sql = "SELECT COUNT(value) FROM buildings_common.capture_source_group"
         result3 = db._execute(sql)
         result3 = result3.fetchall()[0][0]
-        self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(),
-                         result3)
+        self.assertEqual(self.bulk_load_frame.cmb_capture_src_grp.count(), result3)

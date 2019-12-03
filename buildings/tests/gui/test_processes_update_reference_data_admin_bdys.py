@@ -18,8 +18,8 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt, QTimer
-from PyQt4.QtGui import QMessageBox
+from qgis.PyQt.QtCore import Qt, QTimer
+from qgis.PyQt.QtWidgets import QMessageBox
 from qgis.utils import plugins
 
 from buildings.utilities import database as db
@@ -30,12 +30,13 @@ class SetUpReferenceData(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Reference Data', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(
+            sub_menu.findItems("Reference Data", Qt.MatchExactly)[0]
+        )
         self.reference_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -66,7 +67,7 @@ class SetUpReferenceData(unittest.TestCase):
         sql_updated = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 101;"
         result = db._execute(sql_updated)
         name_updated = result.fetchone()[0]
-        self.assertEqual(name_updated, 'Kelburn North')
+        self.assertEqual(name_updated, "Kelburn North")
         # check bulk_load_outlines
         sql_blo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings_bulk_load.bulk_load_outlines;"
         result = db._execute(sql_blo)
@@ -101,7 +102,7 @@ class SetUpReferenceData(unittest.TestCase):
         sql_upated = "SELECT name FROM buildings_reference.town_city WHERE external_city_id = 1001;"
         result = db._execute(sql_upated)
         name_updated = result.fetchone()[0]
-        self.assertEqual(name_updated, 'Wellington City')
+        self.assertEqual(name_updated, "Wellington City")
         # check bulk_load_outlines
         sql_blo = "SELECT count(DISTINCT town_city_id)::integer FROM buildings_bulk_load.bulk_load_outlines;"
         result = db._execute(sql_blo)
