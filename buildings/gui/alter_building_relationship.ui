@@ -142,13 +142,20 @@ QGroupBox::title {
            </spacer>
           </item>
           <item row="3" column="0" colspan="4">
-           <widget class="QComboBox" name="cmb_relationship"/>
+           <widget class="QComboBox" name="cmb_relationship">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change to see different building relationships&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
           </item>
           <item row="1" column="0" colspan="4">
            <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
           </item>
           <item row="6" column="3">
            <widget class="QPushButton" name="btn_qa_not_removed">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not Removed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -156,6 +163,9 @@ QGroupBox::title {
           </item>
           <item row="6" column="0">
            <widget class="QPushButton" name="btn_next">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Skip to next 'Not Checked' building&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -360,6 +370,9 @@ QGroupBox::title {
               </item>
               <item>
                <widget class="QPushButton" name="btn_unlink">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove relationship between outlines&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
                 <property name="text">
                  <string>Unlink</string>
                 </property>
@@ -439,6 +452,9 @@ QGroupBox::title {
             </item>
             <item>
              <widget class="QCheckBox" name="cb_autosave">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn on to auto-save changes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
               <property name="text">
                <string>Auto-save</string>
               </property>
@@ -468,6 +484,9 @@ QGroupBox::title {
        </item>
        <item>
         <widget class="QCheckBox" name="cb_lyr_bulk_load">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn on/off bulk load layers&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="layoutDirection">
           <enum>Qt::RightToLeft</enum>
          </property>
@@ -481,6 +500,9 @@ QGroupBox::title {
        </item>
        <item>
         <widget class="QCheckBox" name="cb_lyr_existing">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;turn on/off existing layers&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="layoutDirection">
           <enum>Qt::RightToLeft</enum>
          </property>
