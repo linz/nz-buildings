@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Changed
+-------
+
+* Updated buildings plugin from QGIS2 to QGIS3
+
 Fixed
 -----
 

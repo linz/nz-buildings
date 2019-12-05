@@ -18,7 +18,7 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 from qgis.utils import plugins
 
 
@@ -27,12 +27,11 @@ class SetUpNewEntryTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Settings', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Settings", Qt.MatchExactly)[0])
         self.new_entry_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -41,16 +40,26 @@ class SetUpNewEntryTest(unittest.TestCase):
 
     def test_combobox_default(self):
         """Initial combobox text is organisation"""
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(
-                          self.new_entry_frame.cmb_new_type_selection.currentIndex()),
-                          'Organisation')
+        self.assertEquals(
+            self.new_entry_frame.cmb_new_type_selection.itemText(
+                self.new_entry_frame.cmb_new_type_selection.currentIndex()
+            ),
+            "Organisation",
+        )
 
     def test_combobox_options(self):
         """Four options in combobox"""
         self.assertEquals(self.new_entry_frame.cmb_new_type_selection.count(), 4)
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(1), 'Lifecycle Stage')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(2), 'Capture Method')
-        self.assertEquals(self.new_entry_frame.cmb_new_type_selection.itemText(3), 'Capture Source Group')
+        self.assertEquals(
+            self.new_entry_frame.cmb_new_type_selection.itemText(1), "Lifecycle Stage"
+        )
+        self.assertEquals(
+            self.new_entry_frame.cmb_new_type_selection.itemText(2), "Capture Method"
+        )
+        self.assertEquals(
+            self.new_entry_frame.cmb_new_type_selection.itemText(3),
+            "Capture Source Group",
+        )
 
     def test_value_enabled(self):
         """Line edit: value is enabled on start up"""

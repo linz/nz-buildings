@@ -58,3 +58,4 @@ buildings_reference/functions/protected_area_polygons 2019-06-20T19:43:21Z Jan D
 @v2.0.0-dev1 2019-08-22T03:43:17Z Chen Yingting <ychen@linz.govt.nz> # Tag v2.0.0-dev1
 
 buildings_reference/functions/change_reference_name_col_insert 2019-08-30T01:40:37Z Chen Yingting <ychen@linz.govt.nz> # Alter the functions to allow updates or inserts on reference name column
+buildings_bulk_load/functions/supplied_outlines_fix_shape_handling 2019-11-24T21:49:23Z Megan Davidson <mdavidson@linz.govt.nz> # update supplied_outlines_insert geometry handling for QGIS3

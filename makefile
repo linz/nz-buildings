@@ -71,8 +71,8 @@ deploy:
 	# The deploy target only works on unix like operating system where
 	# the Python plugin directory is located at:
 	# $HOME/$(QGISDIR)/python/plugins
-	rm -rf $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
-	cp -TRv $(PLUGINNAME) $(HOME)/.qgis2/python/plugins/$(PLUGINNAME)
+	rm -rf $(HOME)/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$(PLUGINNAME)
+	cp -TRv $(PLUGINNAME) $(HOME)/.local/share/QGIS/QGIS3/profiles/default/python/plugins/$(PLUGINNAME)
 
 setup_test_db:
 	@echo
@@ -83,7 +83,7 @@ setup_test_db:
 	dropdb --if-exists $$PGDATABASE; \
 	createdb $$PGDATABASE; \
 	nz-buildings-load nz-buildings-plugin-db --with-plugin-setup; \
-	$(SED) -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.qgis2/$(PLUGINNAME)/pg_config.ini
+	$(SED) -i '4s/.*/dbname=nz-buildings-plugin-db/' ~/.local/share/QGIS/QGIS3/profiles/default/$(PLUGINNAME)/pg_config.ini
 
 update_ui_headers:
 	@echo

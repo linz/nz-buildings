@@ -18,7 +18,7 @@
 
 import unittest
 
-from PyQt4.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsProject
 from qgis.utils import plugins, iface
 
@@ -31,16 +31,15 @@ class SetUpEditBulkLoad(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Bulk Load', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(sub_menu.findItems("Bulk Load", Qt.MatchExactly)[0])
         self.bulk_load_frame = self.dockwidget.current_frame
         self.edit_dialog = self.bulk_load_frame.edit_dialog
         for action in iface.building_toolbar.actions():
-            if action.text() == 'Edit Geometry':
+            if action.text() == "Edit Geometry":
                 action.trigger()
 
     def tearDown(self):
@@ -64,10 +63,10 @@ class SetUpEditBulkLoad(unittest.TestCase):
         layer_bool = False
         edit_bool = False
         root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup('Building Tool Layers')
+        group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
         for layer in layers:
-            if layer.layer().name() == 'bulk_load_outlines':
+            if layer.layer().name() == "bulk_load_outlines":
                 layer_bool = True
                 if layer.layer().isEditable():
                     edit_bool = True

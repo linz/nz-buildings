@@ -3,12 +3,13 @@
 import math
 import os.path
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSlot, Qt, QSize
-from PyQt4.QtGui import QAction, QColor, QFrame, QIcon
-from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer, QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar, QgsRubberBand
-from qgis.utils import iface
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize
+from qgis.PyQt.QtWidgets import QAction, QFrame
+from qgis.PyQt.QtGui import QColor, QIcon
+from qgis.core import QgsFeature, QgsGeometry, QgsPoint, QgsProject, QgsVectorLayer
+from qgis.gui import QgsRubberBand
+from qgis.utils import Qgis, iface
 
 from buildings.gui import production_changes
 from buildings.gui.edit_dialog import EditDialog
@@ -18,12 +19,10 @@ from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'production_edits.ui'))
+FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "production_edits.ui"))
 
 
 class ProductionFrame(QFrame, FORM_CLASS):
-
     def __init__(self, dockwidget, parent=None):
         """Constructor."""
         super(ProductionFrame, self).__init__(parent)
@@ -43,14 +42,14 @@ class ProductionFrame(QFrame, FORM_CLASS):
         # set up signals and slots
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
 
     def setup_toolbar(self):
 
-        if 'Add Outline' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Add Outline" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "plus.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -59,8 +58,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.add_action.triggered.connect(self.canvas_add_outline)
             iface.building_toolbar.addAction(self.add_action)
 
-        if 'Edit Geometry' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Edit Geometry" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_geometry.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -69,8 +68,8 @@ class ProductionFrame(QFrame, FORM_CLASS):
             self.edit_geom_action.triggered.connect(self.canvas_edit_geometry)
             iface.building_toolbar.addAction(self.edit_geom_action)
 
-        if 'Edit Attributes' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Edit Attributes" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_attributes.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -85,29 +84,26 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
             Add building outlines to canvas
         """
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'styles/')
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
         self.layer_registry.remove_layer(self.building_layer)
         self.building_historic = self.layer_registry.add_postgres_layer(
-            'historic_outlines', 'building_outlines',
-            'shape', 'buildings', '',
-            'end_lifespan is not NULL')
-        self.building_historic.loadNamedStyle(path + 'building_historic.qml')
+            "historic_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is not NULL"
+        )
+        self.building_historic.loadNamedStyle(path + "building_historic.qml")
         self.building_layer = None
         self.building_layer = self.layer_registry.add_postgres_layer(
-            'building_outlines', 'building_outlines',
-            'shape', 'buildings', '',
-            'end_lifespan is NULL')
-        self.building_layer.loadNamedStyle(path + 'building_blue.qml')
+            "building_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is NULL"
+        )
+        self.building_layer.loadNamedStyle(path + "building_blue.qml")
         iface.setActiveLayer(self.building_layer)
 
     @pyqtSlot(bool)
     def cb_production_clicked(self, checked):
-        group = QgsProject.instance().layerTreeRoot().findGroup('Building Tool Layers')
+        group = QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
         if checked:
-            group.setVisible(Qt.Checked)
+            group.setItemVisibilityCheckedRecursive(True)
         else:
-            group.setVisible(Qt.Unchecked)
+            group.setItemVisibilityCheckedRecursive(False)
 
     def canvas_add_outline(self):
         """
@@ -120,7 +116,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.circle_tool = None
         self.polyline = None
         # setup circle button
-        image_dir = os.path.join(__location__, '..', 'icons')
+        image_dir = os.path.join(__location__, "..", "icons")
         icon_path = os.path.join(image_dir, "circle.png")
         icon = QIcon()
         icon.addFile(icon_path, QSize(8, 8))
@@ -167,23 +163,24 @@ class ProductionFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_dialog.close()
         iface.actionCancelEdits().trigger()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
         # reset toolbar
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
+            if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
         from buildings.gui.menu_frame import MenuFrame
+
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
 
     @pyqtSlot()
     def edit_cancel_clicked(self):
-        if len(QgsMapLayerRegistry.instance().mapLayersByName('building_outlines')) > 0:
+        if len(QgsProject.instance().mapLayersByName("building_outlines")) > 0:
             if isinstance(self.change_instance, production_changes.EditAttribute):
                 try:
                     self.building_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
@@ -216,10 +213,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
                 iface.actionPan().trigger()
 
         iface.actionCancelEdits().trigger()
-        # reload layers
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        self.edit_dialog.remove_territorial_auth()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
         self.change_instance = None
@@ -227,10 +220,13 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        for layer in ['building_outlines', 'historic_outlines', 'territorial_authorities']:
+        for layer in ["building_outlines", "historic_outlines"]:
             if layer in layerids:
                 self.cb_production.setDisabled(1)
-                iface.messageBar().pushMessage("ERROR",
-                                               "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                               level=QgsMessageBar.CRITICAL, duration=5)
+                iface.messageBar().pushMessage(
+                    "ERROR",
+                    "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                    level=Qgis.Critical,
+                    duration=5,
+                )
                 return

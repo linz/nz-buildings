@@ -1,32 +1,34 @@
+from builtins import str
 
 # -*- coding: utf-8 -*-
 
 from functools import partial
 import os.path
 
-from PyQt4 import uic
-from PyQt4.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
-from PyQt4.QtGui import QAction, QApplication, QColor, QFrame, QIcon, QMessageBox
-from qgis.core import QgsProject, QgsMapLayerRegistry
-from qgis.gui import QgsMessageBar
-from qgis.utils import iface
+from qgis.PyQt import uic
+from qgis.PyQt.QtCore import pyqtSignal, pyqtSlot, QSize, Qt
+from qgis.PyQt.QtWidgets import QAction, QApplication, QFrame, QMessageBox
+from qgis.PyQt.QtGui import QColor, QIcon
+from qgis.core import QgsProject
+from qgis.utils import iface, Qgis
 
 from buildings.gui import bulk_load, bulk_load_changes, comparisons
 from buildings.gui.alter_building_relationships import AlterRelationships
 from buildings.gui.check_dialog import CheckDialog
 from buildings.gui.edit_dialog import EditDialog
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.sql import (buildings_bulk_load_select_statements as bulk_load_select,
-                           buildings_common_select_statements as common_select,
-                           buildings_reference_select_statements as reference_select)
+from buildings.sql import (
+    buildings_bulk_load_select_statements as bulk_load_select,
+    buildings_common_select_statements as common_select,
+    buildings_reference_select_statements as reference_select,
+)
 from buildings.utilities import circle_tool
 from buildings.utilities import database as db
 from buildings.utilities.layers import LayerRegistry
 from buildings.utilities.point_tool import PointTool
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'bulk_load.ui'))
+FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), "bulk_load.ui"))
 
 
 class BulkLoadFrame(QFrame, FORM_CLASS):
@@ -55,11 +57,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.db = db
         db.connect()
         # selection colour
-        iface.mapCanvas().setSelectionColor(QColor('Yellow'))
+        iface.mapCanvas().setSelectionColor(QColor("Yellow"))
         # set up confirmation message box
-        self.msgbox_bulk_load = self.confirmation_dialog_box('bulk load')
-        self.msgbox_compare = self.confirmation_dialog_box('compare')
-        self.msgbox_publish = self.confirmation_dialog_box('publish')
+        self.msgbox_bulk_load = self.confirmation_dialog_box("bulk load")
+        self.msgbox_compare = self.confirmation_dialog_box("compare")
+        self.msgbox_publish = self.confirmation_dialog_box("publish")
         self.grpb_layers.hide()
 
         # Find current supplied dataset
@@ -70,9 +72,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             # error
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                '\n ---------------------- DATASET ERROR ---------'
-                '----------------- \n\nThere are multiple not processed'
-                ' datasets. Please fix database tables before continuing'
+                "\n ---------------------- DATASET ERROR ---------"
+                "----------------- \n\nThere are multiple not processed"
+                " datasets. Please fix database tables before continuing"
             )
             self.error_dialog.show()
             self.display_dataset_error()
@@ -97,9 +99,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 # error
                 self.error_dialog = ErrorDialog()
                 self.error_dialog.fill_report(
-                    '\n ---------------------- DATASET ERROR ---------'
-                    '----------------- \n\nThere are multiple not transferred'
-                    ' datasets. Please fix database tables before continuing'
+                    "\n ---------------------- DATASET ERROR ---------"
+                    "----------------- \n\nThere are multiple not transferred"
+                    " datasets. Please fix database tables before continuing"
                 )
                 self.error_dialog.show()
                 self.display_dataset_error()
@@ -117,25 +119,21 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             # No current dataset is being worked on
             else:
                 self.current_dataset = None
-                self.lb_dataset_id.setText('None')
+                self.lb_dataset_id.setText("None")
                 self.display_no_bulk_load()
                 self.cmb_capture_src_grp.currentIndexChanged.connect(self.cmb_capture_src_grp_changed)
 
         # initiate le_data_description
         self.le_data_description.setMaxLength(250)
-        self.le_data_description.setPlaceholderText('Data Description')
+        self.le_data_description.setPlaceholderText("Data Description")
 
         # set up signals and slots
-        self.rad_external_id.toggled.connect(
-            partial(bulk_load.enable_external_bulk, self))
-        self.ml_outlines_layer.currentIndexChanged.connect(
-            partial(bulk_load.populate_external_fcb, self))
-        self.btn_bl_save.clicked.connect(
-            partial(self.bulk_load_save_clicked, True))
+        self.rad_external_id.toggled.connect(partial(bulk_load.enable_external_bulk, self))
+        self.ml_outlines_layer.currentIndexChanged.connect(partial(bulk_load.populate_external_fcb, self))
+        self.btn_bl_save.clicked.connect(partial(self.bulk_load_save_clicked, True))
         self.btn_bl_reset.clicked.connect(self.bulk_load_reset_clicked)
 
-        self.btn_compare_outlines.clicked.connect(
-            partial(self.compare_outlines_clicked, True))
+        self.btn_compare_outlines.clicked.connect(partial(self.compare_outlines_clicked, True))
 
         self.btn_alter_rel.clicked.connect(self.alter_relationships_clicked)
         self.btn_publish.clicked.connect(partial(self.publish_clicked, True))
@@ -145,11 +143,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.cb_removed.clicked.connect(self.cb_removed_clicked)
         self.cb_added.clicked.connect(self.cb_added_clicked)
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def confirmation_dialog_box(self, button_text):
-        return QMessageBox(QMessageBox.Question, button_text.upper(),
-                           'Are you sure you want to %s outlines?' % button_text, buttons=QMessageBox.No | QMessageBox.Yes)
+        return QMessageBox(
+            QMessageBox.Question,
+            button_text.upper(),
+            "Are you sure you want to %s outlines?" % button_text,
+            buttons=QMessageBox.No | QMessageBox.Yes,
+        )
 
     def confirm(self, msgbox):
         reply = msgbox.exec_()
@@ -159,8 +161,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
     def setup_toolbar(self):
 
-        if 'Add Outline' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Add Outline" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "plus.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -169,8 +171,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.add_action.triggered.connect(self.canvas_add_outline)
             iface.building_toolbar.addAction(self.add_action)
 
-        if 'Edit Geometry' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Edit Geometry" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_geometry.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -179,8 +181,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.edit_geom_action.triggered.connect(self.canvas_edit_geometry)
             iface.building_toolbar.addAction(self.edit_geom_action)
 
-        if 'Edit Attributes' not in (action.text() for action in iface.building_toolbar.actions()):
-            image_dir = os.path.join(__location__, '..', 'icons')
+        if "Edit Attributes" not in (action.text() for action in iface.building_toolbar.actions()):
+            image_dir = os.path.join(__location__, "..", "icons")
             icon_path = os.path.join(image_dir, "edit_attributes.png")
             icon = QIcon()
             icon.addFile(icon_path, QSize(8, 8))
@@ -195,7 +197,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """UI Display when there are multiple supplied datasets."""
 
         self.current_dataset = None
-        self.lb_dataset_id.setText('None')
+        self.lb_dataset_id.setText("None")
 
         self.grpb_bulk_load.hide()
         iface.building_toolbar.hide()
@@ -226,7 +228,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.btn_bl_reset.show()
 
         self.current_dataset = None
-        self.lb_dataset_id.setText('None')
+        self.lb_dataset_id.setText("None")
 
         self.btn_compare_outlines.setDisabled(1)
         self.btn_alter_rel.setDisabled(1)
@@ -234,7 +236,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         self.add_historic_outlines()
 
-        self.l_cs_area_title.setText('')
+        self.l_cs_area_title.setText("")
 
         iface.building_toolbar.hide()
 
@@ -266,7 +268,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if area_id is not None:
             self.l_cs_area_title.setText(area_id[0][0])
         else:
-            self.l_cs_area_title.setText('')
+            self.l_cs_area_title.setText("")
 
     def display_not_published(self):
         """
@@ -293,11 +295,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.l_cs_area_title.setText(self.area_id)
         else:
             self.area_id = None
-            self.l_cs_area_title.setText('')
+            self.l_cs_area_title.setText("")
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
-                '\n ---------------------- NO CAPTURE SOURCE AREA ---------'
-                '----------------- \n\nThere is no area id, please fix in database'
+                "\n ---------------------- NO CAPTURE SOURCE AREA ---------"
+                "----------------- \n\nThere is no area id, please fix in database"
             )
             self.error_dialog.show()
             self.display_dataset_error()
@@ -312,32 +314,34 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             Add bulk load outlines of current dataset to canvas.
         """
 
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'styles/')
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
         # add the bulk_load_outlines to the layer registry
         self.bulk_load_layer = self.layer_registry.add_postgres_layer(
-            'bulk_load_outlines', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '',
-            'supplied_dataset_id = {0}'.format(self.current_dataset))
-        self.bulk_load_layer.loadNamedStyle(path + 'building_editing.qml')
+            "bulk_load_outlines",
+            "bulk_load_outlines",
+            "shape",
+            "buildings_bulk_load",
+            "",
+            "supplied_dataset_id = {0}".format(self.current_dataset),
+        )
+        self.bulk_load_layer.loadNamedStyle(path + "building_editing.qml")
         iface.setActiveLayer(self.bulk_load_layer)
 
     def add_historic_outlines(self):
-        path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                            'styles/')
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
         self.historic_layer = self.layer_registry.add_postgres_layer(
-            'loaded_datasets', 'bulk_load_outlines',
-            'shape', 'buildings_bulk_load', '', '')
-        self.historic_layer.loadNamedStyle(path + 'building_historic.qml')
+            "loaded_datasets", "bulk_load_outlines", "shape", "buildings_bulk_load", "", ""
+        )
+        self.historic_layer.loadNamedStyle(path + "building_historic.qml")
 
     @pyqtSlot(int)
     def cmb_capture_src_grp_changed(self, index):
         self.cmb_cap_src_area.clear()
         id_capture_src_grp = self.ids_capture_src_grp[index]
-        result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp, ))
+        result = self.db._execute(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp,))
         ls = result.fetchall()
         for (external_id, area_title) in reversed(ls):
-            text = external_id + '- ' + area_title
+            text = external_id + "- " + area_title
             self.cmb_cap_src_area.addItem(text)
 
     @pyqtSlot(bool)
@@ -345,7 +349,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
         layer_tree_model = iface.layerTreeView().model()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
-        bulk_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Bulk Loaded']
+        bulk_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Bulk Loaded"]
         if checked:
             bulk_category[0].setData(Qt.Checked, Qt.CheckStateRole)
         else:
@@ -356,8 +360,8 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
         layer_tree_model = iface.layerTreeView().model()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
-        added_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Added During QA']
-        added_edit_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Added- to be saved']
+        added_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Added During QA"]
+        added_edit_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Added- to be saved"]
         if checked:
             added_category[0].setData(Qt.Checked, Qt.CheckStateRole)
             added_edit_category[0].setData(Qt.Checked, Qt.CheckStateRole)
@@ -370,7 +374,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
         layer_tree_model = iface.layerTreeView().model()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
-        removed_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == 'Removed During QA']
+        removed_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Removed During QA"]
         if checked:
             removed_category[0].setData(Qt.Checked, Qt.CheckStateRole)
         else:
@@ -384,14 +388,14 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.confirm(self.msgbox_bulk_load):
             QApplication.setOverrideCursor(Qt.WaitCursor)
             bulk_load.bulk_load(self, commit_status)
-            # find if adding was sucessful
+            # find if adding was successful
             result = self.db._execute(bulk_load_select.supplied_dataset_count_both_dates_are_null)
             result = result.fetchall()[0][0]
             # if bulk loading completed without errors
             if result == 1:
-                QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+                QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
                 self.layer_registry.remove_layer(self.historic_layer)
-                QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+                QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
                 self.cmb_capture_src_grp.currentIndexChanged.disconnect(self.cmb_capture_src_grp_changed)
                 self.add_outlines()
                 self.display_current_bl_not_compared()
@@ -434,7 +438,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.circle_tool = None
         self.polyline = None
         # setup circle button
-        image_dir = os.path.join(__location__, '..', 'icons')
+        image_dir = os.path.join(__location__, "..", "icons")
         icon_path = os.path.join(image_dir, "circle.png")
         icon = QIcon()
         icon.addFile(icon_path, QSize(8, 8))
@@ -457,6 +461,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.edit_dialog.show()
         self.edit_dialog.edit_attribute()
         self.change_instance = self.edit_dialog.get_change_instance()
+        self.change_instance.populate_edit_comboboxes()
 
     def canvas_edit_geometry(self):
         """
@@ -470,7 +475,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
             When cancel clicked
         """
-        if len(QgsMapLayerRegistry.instance().mapLayersByName('bulk_load_outlines')) > 0:
+        if len(QgsProject.instance().mapLayersByName("bulk_load_outlines")) > 0:
             if isinstance(self.change_instance, bulk_load_changes.EditAttribute):
                 try:
                     self.bulk_load_layer.selectionChanged.disconnect(self.change_instance.selection_changed)
@@ -508,10 +513,6 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
 
         iface.actionCancelEdits().trigger()
 
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
-        self.edit_dialog.remove_territorial_auth()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
-
         self.setup_toolbar()
 
         self.change_instance = None
@@ -526,16 +527,15 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         if self.change_instance is not None:
             self.edit_dialog.close()
         self.db.close_connection()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         self.layer_registry.remove_layer(self.bulk_load_layer)
         for action in iface.building_toolbar.actions():
-            if action.objectName() not in ['mActionPan']:
+            if action.objectName() not in ["mActionPan"]:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
-        dw.new_widget(AlterRelationships(
-            dw, self.current_dataset))
+        dw.new_widget(AlterRelationships(dw, self.current_dataset))
 
     @pyqtSlot(bool)
     def publish_clicked(self, commit_status):
@@ -549,20 +549,20 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             if self.change_instance is not None:
                 self.edit_dialog.close()
             self.db.open_cursor()
-            sql = 'SELECT buildings_bulk_load.load_building_outlines(%s);'
+            sql = "SELECT buildings_bulk_load.load_building_outlines(%s);"
             self.db.execute_no_commit(sql, (self.current_dataset,))
             if commit_status:
                 self.db.commit_open_cursor()
             self.display_no_bulk_load()
             self.cmb_capture_src_grp.currentIndexChanged.connect(self.cmb_capture_src_grp_changed)
             self.current_dataset = None
-            self.lb_dataset_id.setText('None')
-            QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+            self.lb_dataset_id.setText("None")
+            QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
             self.layer_registry.remove_layer(self.bulk_load_layer)
             self.add_historic_outlines()
             QApplication.restoreOverrideCursor()
             self.grpb_layers.hide()
-            QgsMapLayerRegistry.instance().layerWillBeRemoved.connect(self.layers_removed)
+            QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
     def check_duplicate_ids(self):
         """
@@ -573,7 +573,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             return True
         else:
             self.check_dialog.show()
-            self.check_dialog.set_message('FAILED: duplicate id(s) found.')
+            self.check_dialog.set_message("FAILED: duplicate id(s) found.")
             self.check_dialog.set_data(result)
             return False
 
@@ -602,11 +602,11 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         data = []
         for (feat_id,) in ids_added_matched:
-            data.append((feat_id, 'Added', 'Matched'))
+            data.append((feat_id, "Added", "Matched"))
         for (feat_id,) in ids_added_related:
-            data.append((feat_id, 'Added', 'Related'))
+            data.append((feat_id, "Added", "Related"))
         for (feat_id,) in ids_matched_related:
-            data.append((feat_id, 'Matched', 'Related'))
+            data.append((feat_id, "Matched", "Related"))
         return data
 
     @pyqtSlot()
@@ -623,25 +623,26 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """
         if self.change_instance is not None:
             self.edit_dialog.close()
-        QgsMapLayerRegistry.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
         iface.actionCancelEdits().trigger()
         if self.historic_layer is not None:
             self.layer_registry.remove_layer(self.historic_layer)
         if self.bulk_load_layer is not None:
             self.layer_registry.remove_layer(self.bulk_load_layer)
         from buildings.gui.menu_frame import MenuFrame
+
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
         for action in iface.building_toolbar.actions():
-            if action.text() not in ['Pan Map']:
+            if action.text() not in ["Pan Map"]:
                 iface.building_toolbar.removeAction(action)
         iface.building_toolbar.hide()
 
     @pyqtSlot(str)
     def layers_removed(self, layerids):
         self.layer_registry.update_layers()
-        if 'bulk_load_outlines' in layerids or 'territorial_authorities' in layerids:
+        if "bulk_load_outlines" in layerids:
             self.btn_compare_outlines.setDisabled(1)
             self.btn_alter_rel.setDisabled(1)
             self.btn_publish.setDisabled(1)
@@ -649,21 +650,27 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.cb_added.setDisabled(1)
             self.cb_removed.setDisabled(1)
             for action in iface.building_toolbar.actions():
-                if action.text() not in ['Pan Map', 'Add Outline', 'Edit Geometry', 'Edit Attributes']:
+                if action.text() not in ["Pan Map", "Add Outline", "Edit Geometry", "Edit Attributes"]:
                     iface.building_toolbar.removeAction(action)
-                if action.text() in ['Add Outline', 'Edit Geometry', 'Edit Attributes']:
+                if action.text() in ["Add Outline", "Edit Geometry", "Edit Attributes"]:
                     action.setDisabled(True)
                 else:
                     action.setEnabled(True)
-            iface.messageBar().pushMessage("ERROR",
-                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                           level=QgsMessageBar.CRITICAL, duration=5)
+            iface.messageBar().pushMessage(
+                "ERROR",
+                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                level=Qgis.Critical,
+                duration=5,
+            )
             return
 
-        if 'loaded_datasets' in layerids:
-            iface.messageBar().pushMessage("ERROR",
-                                           "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
-                                           level=QgsMessageBar.CRITICAL, duration=5)
+        if "loaded_datasets" in layerids:
+            iface.messageBar().pushMessage(
+                "ERROR",
+                "Required layer Removed! Please reload the buildings plugin or the current frame before continuing",
+                level=Qgis.Critical,
+                duration=5,
+            )
             # disable bulk loading buttons
             self.btn_bl_save.setDisabled(1)
             self.btn_bl_reset.setDisabled(1)

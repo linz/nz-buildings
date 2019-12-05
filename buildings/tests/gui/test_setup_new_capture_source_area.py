@@ -20,13 +20,14 @@ import unittest
 
 from qgis.utils import plugins
 from qgis.core import QgsProject
-from PyQt4.QtCore import Qt
+from qgis.PyQt.QtCore import Qt
 
 from buildings.utilities import database as db
 
 
 class SetUpCaptureSourceAreaTest(unittest.TestCase):
     """Test New Capture Source Area GUI initial setup confirm default settings"""
+
     @classmethod
     def setUpClass(cls):
         """Runs at TestCase init."""
@@ -39,12 +40,13 @@ class SetUpCaptureSourceAreaTest(unittest.TestCase):
 
     def setUp(self):
         """Runs before each test."""
-        self.building_plugin = plugins.get('buildings')
+        self.building_plugin = plugins.get("buildings")
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(sub_menu.findItems(
-            'Capture Sources', Qt.MatchExactly)[0])
+        sub_menu.setCurrentItem(
+            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
+        )
         self.capture_frame = self.dockwidget.current_frame
         self.capture_frame.btn_new_geometry.click()
         self.capture_area_frame = self.dockwidget.current_frame
@@ -65,9 +67,9 @@ class SetUpCaptureSourceAreaTest(unittest.TestCase):
         """Capture source area layer is added to layer registry"""
         layer_bool = True
         root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup('Building Tool Layers')
+        group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
-        layer_name = ['capture_source_area']
+        layer_name = ["capture_source_area"]
         for layer in layers:
             if layer.layer().name() not in layer_name:
                 layer_bool = False
