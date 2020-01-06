@@ -4,6 +4,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Changed
+-------
+
+* Updated NZ Imagery Surveys reference table to NZ Imagery Survey Index
+
 3.0.0
 ==========
 06-12-2019

@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_lds/functions/populate_buildings_lds to pg
+-- Revert nz-buildings:buildings_lds/functions/populate_buildings_lds to v1.4.0
 
 BEGIN;
 
@@ -40,7 +40,7 @@ $$
             , nz_imagery_surveys.name AS capture_source_name
             , nz_imagery_surveys.flown_from AS capture_source_from
             , nz_imagery_surveys.flown_to AS capture_source_to
-            , GREATEST(building_outlines.begin_lifespan, COALESCE(building_outlines.end_lifespan, '1900-01-01 00:00:00'), COALESCE(building_outlines.last_modified, '1900-01-01 00:00:00'))::date AS last_modified
+            , building_outlines.begin_lifespan::date AS last_modified
             , building_outlines.shape
         FROM buildings.building_outlines
         JOIN buildings.buildings USING (building_id)
@@ -159,7 +159,7 @@ $$
             , COALESCE(building_outline_lifecycle.status, 'Current') AS building_outline_lifecycle
             , building_outlines.begin_lifespan::date AS begin_lifespan
             , building_outlines.end_lifespan::date AS end_lifespan
-            , GREATEST(building_outlines.begin_lifespan, COALESCE(building_outlines.end_lifespan, '1900-01-01 00:00:00'), COALESCE(building_outlines.last_modified, '1900-01-01 00:00:00'))::date AS last_modified
+            , GREATEST(COALESCE(building_outlines.end_lifespan, '1900-01-01 00:00:00'), building_outlines.begin_lifespan)::date AS last_modified
             , building_outlines.shape
         FROM buildings.building_outlines
         JOIN buildings.buildings USING (building_id)
