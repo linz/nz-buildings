@@ -153,9 +153,9 @@ $$
             , capture_method.value AS capture_method
             , capture_source_group.value AS capture_source_group
             , LEFT(capture_source.external_source_id, 4)::integer AS capture_source_id
-            , nz_imagery_surveys.name AS capture_source_name
-            , nz_imagery_surveys.flown_from AS capture_source_from
-            , nz_imagery_surveys.flown_to AS capture_source_to
+            , nz_imagery_survey_index.name AS capture_source_name
+            , nz_imagery_survey_index.flown_from AS capture_source_from
+            , nz_imagery_survey_index.flown_to AS capture_source_to
             , COALESCE(building_outline_lifecycle.status, 'Current') AS building_outline_lifecycle
             , building_outlines.begin_lifespan::date AS begin_lifespan
             , building_outlines.end_lifespan::date AS end_lifespan
@@ -171,7 +171,7 @@ $$
         JOIN buildings.lifecycle_stage USING (lifecycle_stage_id)
         JOIN buildings_common.capture_method USING (capture_method_id)
         JOIN buildings_common.capture_source USING (capture_source_id)
-        JOIN aerial_lds.nz_imagery_surveys ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_surveys.imagery_survey_id
+        JOIN aerial_lds.nz_imagery_survey_index ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_survey_index.imagery_survey_id
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
         LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
