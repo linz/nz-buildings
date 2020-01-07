@@ -16,6 +16,7 @@ Changed
 -------
 
 * Updated NZ Imagery Surveys reference table to NZ Imagery Survey Index
+* metadata updated to reflect additional Bay of Plenty outlines.
 
 3.0.0
 ==========
