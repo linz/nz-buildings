@@ -1,10 +1,25 @@
 stages:
+  - linter
   - docs
   - database
   - plugin
 
 jobs:
   include:
+    - stage: linter
+      env: BUILD=linter
+      language: python
+      python: 3.6
+      dist: trusty
+      install:
+        - python -m pip install --upgrade pip
+        - pip install -r requirements-dev.txt
+      before_script:
+        # Travis-CI does not include master in the build by default
+        - git fetch origin refs/heads/master:refs/heads/master
+      script:
+        - gitlint --commits master..
+
     - stage: docs
       env: BUILD=docs
       language: python

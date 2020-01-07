@@ -145,11 +145,33 @@ The plugin can be installed in the local plugin folder from this repository.
 Development
 -----------
 
+Clone, then create and activate a virtual environment.
+
+.. code-block:: shell
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+
+``python3`` must be 3.6+.
+
+Upgrade ``pip`` and install the required dependencies.
+
+.. code-block:: shell
+
+    pip install --upgrade pip
+    pip install -r requirements-dev.txt
+I
+Install ``commit-msg`` git hook.
+
+.. code-block:: shell
+
+    pre-commit install --hook-type commit-msg
+
 Creating a symlink from the repo to the local QGIS plugin directory makes it easy to evaluate changes to QGIS plugin code.
 
-.. code-block:: 
+.. code-block:: shell
 
-    ln -s $DEV/nz-buildings/buildings $HOME/.qgis2/python/plugins/buildings
+    ln -s $DEV/nz-buildings/buildings $HOME/.local/share/QGIS/QGIS3/profiles/default/python/plugins
 
 Testing
 -------
