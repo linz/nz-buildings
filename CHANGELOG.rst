@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Added
+-----
+
+* Ensure git commit messages conform to the conventional commits spec
+
 Changed
 -------
 
