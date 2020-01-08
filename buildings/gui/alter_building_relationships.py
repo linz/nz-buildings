@@ -1822,7 +1822,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 except TypeError:
                     pass
                 try:
-                    self.lyr_bulk_load.geometryChanged.disconnect(creator_geometry_changed)
+                    self.lyr_bulk_load.geometryChanged.disconnect()
                 except TypeError:
                     pass
                 if self.polyline:

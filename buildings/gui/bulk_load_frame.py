@@ -500,7 +500,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                 except TypeError:
                     pass
                 try:
-                    self.bulk_load_layer.geometryChanged.disconnect(creator_geometry_changed)
+                    self.bulk_load_layer.geometryChanged.disconnect()
                 except TypeError:
                     pass
                 if self.polyline:
