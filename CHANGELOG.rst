@@ -18,6 +18,10 @@ Changed
 * Updated NZ Imagery Surveys reference table to NZ Imagery Survey Index
 * metadata updated to reflect additional Bay of Plenty outlines.
 
+Fixed
+-----
+* bulk load outlines and alter relationships edit vertices and split features bug
+
 3.0.0
 ==========
 06-12-2019
