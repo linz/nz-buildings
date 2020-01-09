@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 # from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton
+from qgis.PyQt.QtCore import Qt
 from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
 
@@ -893,17 +894,21 @@ class EditGeometry(BulkLoadChanges):
                 "SELECT buildings_bulk_load.bulk_load_outlines_update_capture_method(%s, %s)",
                 (key, capture_method_id),
             )
+
         if self.parent_frame.__class__.__name__ == "AlterRelationships":
             self.parent_frame.repaint_view()
-
         self.disable_UI_functions()
 
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
-            self.edit_dialog.split_geoms = {}
             self.new_attrs = {}
             self.edit_dialog.editing_layer.triggerRepaint()
+
+        if len(self.edit_dialog.split_geoms) > 0:
+            self.edit_reset_clicked()
+            self.parent_frame.reload_bulk_load_layer()
+            self.edit_dialog.split_geoms = {}
 
     # @pyqtSlot()
     def edit_reset_clicked(self):

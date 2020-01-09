@@ -1809,7 +1809,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     pass
             elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
                 try:
-                    self.lyr_bulk_load.geometryChanged.disconnect()
+                    self.lyr_bulk_load.geometryChanged.disconnect(self.change_instance.geometry_changed)
                 except TypeError:
                     pass
             elif isinstance(self.change_instance, bulk_load_changes.AddBulkLoad):
@@ -1854,3 +1854,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_maptool.click()
 
         self.change_instance = None
+
+    def reload_bulk_load_layer(self):
+        """To ensure QGIS has most up to date ID for the newly split feature see #349"""
+        ltl = QgsProject.instance().layerTreeRoot().findLayer(self.lyr_bulk_load.id())
+        ltm = iface.layerTreeView().model()
+        legendNodes = ltm.layerLegendNodes(ltl)
+        legendNode_null = [ln for ln in legendNodes if not ln.data(Qt.DisplayRole)]
+        legendNode_null[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+        legendNode_added = [ln for ln in legendNodes if ln.data(Qt.DisplayRole) == 'Added In Edit']
+        legendNode_added[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+        legendNode_null[0].setData(Qt.Checked, Qt.CheckStateRole)
+        legendNode_added[0].setData(Qt.Checked, Qt.CheckStateRole)

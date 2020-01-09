@@ -483,7 +483,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
                     pass
             elif isinstance(self.change_instance, bulk_load_changes.EditGeometry):
                 try:
-                    self.bulk_load_layer.geometryChanged.disconnect()
+                    self.bulk_load_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
                 except TypeError:
                     pass
                 try:
@@ -675,3 +675,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_bl_save.setDisabled(1)
             self.btn_bl_reset.setDisabled(1)
             return
+
+    def reload_bulk_load_layer(self):
+        """To ensure QGIS has most up to date ID for the newly split feature see #349"""
+        self.cb_added_clicked(False)
+        self.cb_added_clicked(True)
+ 
