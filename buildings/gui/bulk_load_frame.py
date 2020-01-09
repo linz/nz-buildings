@@ -675,3 +675,9 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
             self.btn_bl_save.setDisabled(1)
             self.btn_bl_reset.setDisabled(1)
             return
+
+    def reload_bulk_load_layer(self):
+        """To ensure QGIS has most up to date ID for the newly split feature see #349"""
+        self.cb_added_clicked(False)
+        self.cb_added_clicked(True)
+ 

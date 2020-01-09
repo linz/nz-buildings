@@ -4,7 +4,7 @@ from collections import OrderedDict
 # from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsFeatureRequest, QgsProject
+from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -906,25 +906,8 @@ class EditGeometry(BulkLoadChanges):
             self.edit_dialog.editing_layer.triggerRepaint()
 
         if len(self.edit_dialog.split_geoms) > 0:
-            self.edit_dialog.close_dialog()
-            if self.parent_frame.__class__.__name__ == "AlterRelationships":
-                ltl = QgsProject.instance().layerTreeRoot().findLayer(self.parent_frame.lyr_bulk_load.id())
-                ltl.setItemVisibilityChecked(False)
-                ltm = iface.layerTreeView().model()
-                legendNodes = ltm.layerLegendNodes(ltl)
-                legendNode_null = [ln for ln in legendNodes if not ln.data(Qt.DisplayRole)]
-                legendNode_null[0].setData(Qt.Unchecked, Qt.CheckStateRole)
-                legendNode_added = [ln for ln in legendNodes if ln.data(Qt.DisplayRole) == 'Added In Edit']
-                legendNode_added[0].setData(Qt.Unchecked, Qt.CheckStateRole)
-                ltl.setItemVisibilityChecked(True)
-                legendNode_null[0].setData(Qt.Checked, Qt.CheckStateRole)
-                legendNode_added[0].setData(Qt.Checked, Qt.CheckStateRole)
-            else:
-                self.parent_frame.cb_added_clicked(False)
-                self.parent_frame.cb_added_clicked(True)    
-            self.edit_dialog.edit_geometry()
-
-        if commit_status:
+            self.edit_reset_clicked()
+            self.parent_frame.reload_bulk_load_layer()
             self.edit_dialog.split_geoms = {}
 
     # @pyqtSlot()
