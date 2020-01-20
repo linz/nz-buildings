@@ -105,7 +105,8 @@ $$
             , suburb_1st
             , ST_SetSRID(ST_Transform(shape, 2193), 2193)
         FROM admin_bdys.nz_locality
-        WHERE id NOT IN (
+        WHERE type in ('SUBURB','LOCALITY')
+        AND id NOT IN (
             SELECT external_suburb_locality_id
             FROM buildings_reference.suburb_locality
         )
