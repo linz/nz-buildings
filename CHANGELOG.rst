@@ -4,6 +4,12 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+Fixed
+-----
+* New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB
+
 3.1.0
 ==========
 15-01-2020

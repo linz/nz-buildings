@@ -34,9 +34,7 @@ class SetUpReferenceData(unittest.TestCase):
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(
-            sub_menu.findItems("Reference Data", Qt.MatchExactly)[0]
-        )
+        sub_menu.setCurrentItem(sub_menu.findItems("Reference Data", Qt.MatchExactly)[0])
         self.reference_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -54,12 +52,16 @@ class SetUpReferenceData(unittest.TestCase):
         self.reference_frame.update_clicked(commit_status=False)
 
         # deleted suburb locality
-        sql_removed = "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 104;"
+        sql_removed = (
+            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 104;"
+        )
         result = db._execute(sql_removed)
         count_removed = result.fetchone()[0]
         self.assertEqual(count_removed, 0)
         # new suburb locality
-        sql_added = "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 105;"
+        sql_added = (
+            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 105;"
+        )
         result = db._execute(sql_added)
         count_added = result.fetchone()[0]
         self.assertEqual(count_added, 1)
@@ -78,6 +80,13 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_bo)
         bo_suburb_update = result.fetchone()[0]
         self.assertEqual(bo_suburb_update, 4)
+        # check suburb locality only adds type = locality and suburbs
+        sql_added = (
+            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 106;"
+        )
+        result = db._execute(sql_added)
+        count_added = result.fetchone()[0]
+        self.assertEqual(count_added, 0)
 
     def test_town_city_table_update(self):
         """Check buildings_reference.town_city table updates correctly."""
