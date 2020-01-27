@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 Unreleased
 ==========
+
+Changed
+-------
+
+* metadata updated to reflect additional Gisborne outlines.
+
 Fixed
 -----
 * New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB
