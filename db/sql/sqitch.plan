@@ -61,3 +61,4 @@ buildings_reference/functions/change_reference_name_col_insert 2019-08-30T01:40:
 buildings_bulk_load/functions/supplied_outlines_fix_shape_handling 2019-11-24T21:49:23Z Megan Davidson <mdavidson@linz.govt.nz> # update supplied_outlines_insert geometry handling for QGIS3
 @v3.0.0-dev1 2020-01-05T23:37:24Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.0.0-dev1
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.0.0-dev1] 2020-01-05T23:37:32Z Daniel Silk <dsilk@linz.govt.nz> # Update nz_imagery_surveys table name
+buildings_reference/functions/add_localities_by_type 2020-01-27T19:18:03Z Douglas Kwan <dkwan@linz.govt.nz> # Add localities by type.
