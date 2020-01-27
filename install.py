@@ -91,6 +91,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_reference", "functions", "shelter_points.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "change_reference_name_col_insert.sql"),
     os.path.join("sql", "deploy", "buildings_bulk_load", "functions", "supplied_outlines_fix_shape_handling.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "functions", "add_localities_by_type.sql"),
 ]
 
 
