@@ -10,12 +10,12 @@ services:
       - ./data:/var/lib/postgresql/data
     # Refer to https://hub.docker.com/_/postgres/ for other possibilities
     environment:
-      POSTGRES_DB: travis_ci_test
+      POSTGRES_DB: github_ci_test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
 
   qgis-testing-environment:
-    image: ${IMAGE}:${QGIS_VERSION_TAG}
+    image: qgis/qgis:release-3_4
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./:/tests_directory
