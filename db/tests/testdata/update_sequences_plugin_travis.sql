@@ -12,7 +12,7 @@ BEGIN
   FOR schema_name, table_name IN (
     SELECT tables.table_schema, tables.table_name
     FROM information_schema.tables
-    WHERE table_catalog='travis_ci_test'
+    WHERE table_catalog='github_ci_test'
   ) LOOP
 
     -- Get the primary key column for each table

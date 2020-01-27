@@ -10,6 +10,11 @@ Fixed
 -----
 * New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB
 
+Changed
+-------
+
+* Replace Travis CI with Github Actions
+
 3.1.0
 ==========
 15-01-2020

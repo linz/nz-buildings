@@ -20,8 +20,8 @@ if build == "db":
     _host = "localhost"
     _port = os.getenv("PGPORT")
     _dbname = "nz-buildings-pgtap-db"
-    _user = "travis"
-    _pw = "travis"
+    _user = "github"
+    _pw = "github"
 else:
     from qgis.core import QgsApplication
 

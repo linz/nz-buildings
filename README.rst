@@ -10,8 +10,8 @@
     :target: https://data.linz.govt.nz/layer/101290
     :alt: Current Building Outlines Feature Count
 
-.. image:: https://api.travis-ci.com/linz/nz-buildings.svg?branch=master
-    :target: https://travis-ci.com/linz/nz-buildings
+.. image:: https://github.com/linz/nz-buildings/workflows/Build/badge.svg
+    :target: https://github.com/linz/nz-buildings/actions
     :alt: CI Status
     
 .. image:: https://readthedocs.org/projects/nz-buildings/badge/?version=latest
@@ -70,10 +70,10 @@ The database for the *NZ Buildings* system is a PostgreSQL database with the Pos
 Dependencies
 ------------
 
-- PostgreSQL and PostGIS must be installed. Supported versions are tested on Travis-CI_ (note the environment variables that show version numbers for PostgreSQL and PostGIS).
+- PostgreSQL and PostGIS must be installed. Supported versions are tested on `GitHub Actions`_ (note the matrix variables in the ``pgtap`` job that show version numbers for PostgreSQL and PostGIS).
 - For development / testing, install pgTAP_.
 
-.. _Travis-CI: https://travis-ci.com/linz/nz-buildings
+.. _`GitHub Actions`: https://github.com/linz/nz-buildings/actions
 .. _pgTAP: https://pgtap.org/
 
 Installation
@@ -120,10 +120,10 @@ Testing uses pgTAP_ via ``pg_prove``.
 
 A database called ``nz-buildings-pgtap-db`` is created with some test data in order to run the tests.
 
-Travis-CI_ is used for continuous integration.
+`GitHub Actions`_ is used for continuous integration.
 
 .. _pgTAP: https://pgtap.org/
-.. _Travis-CI: https://travis-ci.com/linz/nz-buildings
+.. _`GitHub Actions`: https://github.com/linz/nz-buildings/actions
 
 QGIS Plugin
 ===========
@@ -180,10 +180,10 @@ Testing uses Python ``unittest`` inside a real QGIS instance.
 
 Individual test cases can be executed within QGIS by using the `Script Assistant`_ plugin, which will reload a test every time it is executed to allow ease of writing tests and checking their output.
 
-Travis-CI and the `QGIS Testing Environment`_ are used for continuous integration.
+GitHub Actions and the `QGIS Testing Environment`_ are used for continuous integration.
 
 .. _`Script Assistant`: https://plugins.qgis.org/plugins/scriptassistant/ 
-.. _`QGIS Testing Environment`: https://hub.docker.com/r/elpaso/qgis-testing-environment/
+.. _`QGIS Testing Environment`: https://hub.docker.com/r/qgis/qgis
 
 Data Dictionary
 ===============

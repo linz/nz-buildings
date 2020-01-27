@@ -28,7 +28,7 @@ from qgis.utils import plugins, iface
 from buildings.utilities import database as db
 
 
-is_travis = "QGIS_TEST_MODULE" in os.environ
+is_ci = "QGIS_TEST_MODULE" in os.environ
 
 
 class ProcessProductionAddOutlinesTest(unittest.TestCase):
@@ -274,7 +274,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
     def test_edit_existing_outline_fails(self):
         """Editing fails when the existing outlines geometry changed."""
         # add geom
-        if is_travis:
+        if is_ci:
             return
 
         widget = iface.mapCanvas().viewport()
