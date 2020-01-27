@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2020-01-08</gco:Date>
+    <gco:Date>2020-01-24</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-01-08</gco:Date>
+                <gco:Date>2020-01-24</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-01-08</gco:Date>
+                <gco:Date>2020-01-24</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -126,7 +126,7 @@ Building roof outlines observed in aerial imagery larger than or equal to 10 squ
 
 This dataset contains all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
 
-Coverage areas include Northland, Auckland, Waikato, Bay of Plenty, Hawke’s Bay, Manawatu-Whanganui, Wellington, Taranaki, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
+Coverage areas include Northland, Auckland, Waikato, Bay of Plenty, Gisborne, Hawke’s Bay, Manawatu-Whanganui, Wellington, Taranaki, Tasman, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
 
 Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
