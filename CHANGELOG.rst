@@ -10,11 +10,12 @@ Unreleased
 Changed
 -------
 
-* metadata updated to reflect additional Gisborne outlines.
+* Metadata updated to reflect additional Gisborne outlines.
 
 Fixed
 -----
-* New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB
+
+* New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
 
 Changed
 -------
