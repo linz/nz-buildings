@@ -10,18 +10,4 @@ SELECT has_function_privilege('buildings_reference.suburb_locality_insert_new_ar
 
 SELECT has_function_privilege('buildings_reference.suburb_locality_update_suburb_locality()', 'execute');
 
-DO $$
-BEGIN
-
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'suburb_locality_insert_new_areas'
-    AND prosrc LIKE '%PARK_RESERVE%';
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'PARK_RESERVE not found.';
-    END IF;
-
-END $$;
-
 ROLLBACK;
