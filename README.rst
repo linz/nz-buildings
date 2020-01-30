@@ -6,10 +6,6 @@
 
 ****
 
-.. image:: https://img.shields.io/badge/building%20outlines-2,709,928-green.svg
-    :target: https://data.linz.govt.nz/layer/101290
-    :alt: Current Building Outlines Feature Count
-
 .. image:: https://github.com/linz/nz-buildings/workflows/Build/badge.svg
     :target: https://github.com/linz/nz-buildings/actions
     :alt: CI Status
@@ -18,13 +14,29 @@
     :target: https://nz-buildings.readthedocs.io/en/latest/introduction.html
     :alt: Documentation Status
 
-.. image:: https://img.shields.io/github/release-date/linz/nz-buildings.svg
-    :target: https://github.com/linz/nz-buildings/blob/master/CHANGELOG.rst
-    :alt: Release Date
+.. image:: https://badgen.net/github/release/linz/nz-buildings?label=Release&labelColor=2e3a44&color=5cc3db
+    :target: https://github.com/linz/nz-buildings/releases
+    :alt: Latest Release
 
-.. image:: https://img.shields.io/badge/license-BSD%203--Clause-blue.svg 
+.. image:: https://badgen.net/badge/Building%20Outlines/3%2C115%2C271?labelColor=2e3a44&color=5cc3db
+    :target: https://data.linz.govt.nz/layer/101290
+    :alt: Current Building Outlines Feature Count
+
+.. image:: https://badgen.net/dependabot/linz/nz-buildings?icon=dependabot&labelColor=2e3a44&color=blue
+    :target: https://dependabot.com
+    :alt: Dependabot Status
+
+.. image:: https://badgen.net/badge/License/BSD%203-clause?labelColor=2e3a44&color=blue
     :target: https://github.com/linz/nz-buildings/blob/master/LICENSE
     :alt: License
+
+.. image:: https://badgen.net/badge/Commits/conventional?labelColor=2e3a44&color=EC5772
+    :target: https://conventionalcommits.org
+    :alt: Convetional Commits
+
+.. image:: https://badgen.net/badge/Code%20Style/black?labelColor=2e3a44&color=000000
+    :target: https://github.com/psf/black
+    :alt: Code Style
 
 ============
 NZ Buildings
@@ -131,7 +143,7 @@ QGIS Plugin
 Dependencies
 ------------
 
-- The QGIS plugin currently requires ``QGIS 2.18.x``.
+- The QGIS plugin currently requires ``QGIS 3.4.x``.
 
 Installation
 ------------
