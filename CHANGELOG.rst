@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Added
+-----
+
+* Dependabot enabled to manage Python dependencies.
+
 Changed
 -------
 
