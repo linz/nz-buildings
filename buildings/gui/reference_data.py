@@ -176,34 +176,11 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             self.db.open_cursor()
         # suburb localities
         if self.chbx_suburbs.isChecked():
-            suburb_list = []
-            # delete existing suburbs where the external id is no longer in the suburb_locality table
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.suburb_locality_delete_removed_areas();"
-            )
-            if result is not None:
-                suburb_list.extend(result.fetchone()[0])
-            # modify all existing areas to check they are up to date
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.suburb_locality_insert_new_areas();"
-            )
-            if result is not None:
-                suburb_list.extend(result.fetchone()[0])
-            # insert into table ids in nz_localities that are not in suburb_locality
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.suburb_locality_update_suburb_locality();"
-            )
-            if result is not None:
-                suburb_list.extend(result.fetchone()[0])
-            # update bulk_load_outlines suburb values
-            db.execute_no_commit(
-                "SELECT buildings_bulk_load.bulk_load_outlines_update_all_suburbs(%s);",
-                (suburb_list,),
-            )
-            # update building_outlines suburb values
-            db.execute_no_commit(
-                "SELECT buildings.building_outlines_update_suburb(%s);", (suburb_list,)
-            )
+            # update building_outlines suburb values (changed, deleted & added)
+            # delete remove suburbs and update modified suburbs
+            db.execute_no_commit("SELECT buildings_reference.building_outlines_update_changed_and_deleted_suburb();")
+            # add new suburbs and update building outlines
+            db.execute_no_commit("SELECT buildings_reference.building_outlines_update_added_suburb();")
             # update messages and log
             self.update_message("updated", "suburb_locality")
             self.updates.append("suburb_locality")
