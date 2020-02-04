@@ -16,6 +16,7 @@ Changed
 -------
 
 * Metadata updated to reflect additional Gisborne outlines.
+* Changed the process of updating localities
 
 Fixed
 -----

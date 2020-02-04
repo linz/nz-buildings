@@ -63,3 +63,4 @@ buildings_bulk_load/functions/supplied_outlines_fix_shape_handling 2019-11-24T21
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.0.0-dev1] 2020-01-05T23:37:32Z Daniel Silk <dsilk@linz.govt.nz> # Update nz_imagery_surveys table name
 @v3.1.0-dev1 2020-01-28T04:42:02Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.1.0-dev1
 buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v3.1.0-dev1] 2020-01-28T04:42:04Z Daniel Silk <dsilk@linz.govt.nz> # Specify types of suburb and locality to include in reference data.
+buildings_reference/functions/suburb_locality_optimised 2020-02-04T21:29:59Z Megan Davidson <mdavidson@linz.govt.nz> # updating suburb localities has been optimised
