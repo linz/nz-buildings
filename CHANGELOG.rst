@@ -16,17 +16,15 @@ Changed
 -------
 
 * Metadata updated to reflect additional Gisborne outlines.
-* Changed the process of updating localities
+* Changed the process of updating localities.
+* Islands that have an empty suburb_4th column can now be assigned to a building.
+* Replace Travis CI with Github Actions.
 
 Fixed
 -----
 
 * New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
-
-Changed
--------
-
-* Replace Travis CI with Github Actions
+* Corrected a join for territorial authority updates.
 
 3.1.0
 ==========

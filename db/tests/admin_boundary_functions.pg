@@ -19,7 +19,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 
-SELECT plan(12);
+SELECT plan(14);
 
 -- Tests
 
@@ -29,6 +29,18 @@ SELECT results_eq(
 	$$SELECT buildings_reference.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (102)$$,
     'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building intersects suburb polygon'
+);
+
+SELECT results_eq(
+	$$SELECT buildings_reference.suburb_locality_intersect_polygon('01030000209108000001000000050000008AA13A5BACA93C414227A7D5AF3155418AA13A5BACA93C416B9C8E5CAC315541CF072FE2C0A93C41E1C0D369AC315541F7751AADC0A93C412E7031F0AF3155418AA13A5BACA93C414227A7D5AF315541');$$,
+    $$VALUES (107)$$,
+    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building intersects suburb polygon - island'
+);
+
+SELECT results_eq(
+	$$SELECT buildings_reference.suburb_locality_intersect_polygon('01030000209108000001000000050000002F02D344AFA93C4180AEA44DA8315541C1D7B600B0A93C41736D2300A5315541055058C897A93C41B17159EDA4315541F871083297A93C41A0B03F44A83155412F02D344AFA93C4180AEA44DA8315541');$$,
+    $$VALUES (107)$$,
+    'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building intersects suburb polygon - island'
 );
 
 SELECT results_eq(

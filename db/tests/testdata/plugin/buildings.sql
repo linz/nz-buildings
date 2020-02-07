@@ -34,6 +34,7 @@ INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALU
 INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALUES (10031, '2017-01-01 09:00:00', NULL);
 INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALUES (10032, '2017-01-01 09:00:00', NULL);
 INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALUES (10033, '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALUES (10034, '2020-01-28 15:23:34.795317', NULL);
 
 -- buildings.building_name
 
