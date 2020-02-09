@@ -64,3 +64,5 @@ buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate
 @v3.1.0-dev1 2020-01-28T04:42:02Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.1.0-dev1
 buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v3.1.0-dev1] 2020-01-28T04:42:04Z Daniel Silk <dsilk@linz.govt.nz> # Specify types of suburb and locality to include in reference data.
 buildings_reference/functions/suburb_locality_optimised 2020-02-04T21:29:59Z Megan Davidson <mdavidson@linz.govt.nz> # updating suburb localities has been optimised
+buildings_reference/functions/territorial_authority [buildings_reference/functions/territorial_authority@v3.1.0-dev1] 2020-02-04T23:18:39Z Douglas Kwan <dkwan@linz.govt.nz> # Update territorial authority comparison
+buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.1.0-dev1] 2020-02-05T01:11:27Z Douglas Kwan <dkwan@linz.govt.nz> # Update suburb_locality to include suburb_3rd etc
