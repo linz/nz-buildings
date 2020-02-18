@@ -1,4 +1,4 @@
--- Revert nz-buildings:buildings_reference/functions/suburb_locality to pg
+-- Deploy nz-buildings:buildings_reference/functions/suburb_locality to pg
 
 BEGIN;
 
