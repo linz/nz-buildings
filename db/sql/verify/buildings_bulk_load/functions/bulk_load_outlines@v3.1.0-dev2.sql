@@ -2,16 +2,6 @@
 
 BEGIN;
 
-DO $$
-BEGIN
-    PERFORM *
-    FROM pg_proc
-    WHERE proname = 'bulk_load_outlines_update_all_suburbs';
-    IF FOUND THEN
-        RAISE EXCEPTION 'Dropped function found.';
-    END IF;
-END $$;
-
 SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_insert(integer, integer, integer, integer, integer, integer, integer, integer, geometry)', 'execute');
 
 SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_insert_supplied(integer, integer, integer, integer)', 'execute');
@@ -25,6 +15,8 @@ SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_update_cap
 SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_update_shape(geometry, integer)', 'execute');
 
 SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_update_suburb(integer)', 'execute');
+
+SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[])', 'execute');
 
 SELECT has_function_privilege('buildings_bulk_load.bulk_load_outlines_update_territorial_authority(integer)', 'execute');
 

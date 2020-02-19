@@ -25,6 +25,7 @@ Fixed
 
 * New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
 * Corrected a join for territorial authority updates.
+* Suburb Locality updating process has been fix/optimised
 
 3.1.0
 ==========

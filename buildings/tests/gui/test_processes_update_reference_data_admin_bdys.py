@@ -100,6 +100,15 @@ class SetUpReferenceData(unittest.TestCase):
         result = db._execute(sql_updated)
         name_updated = result.fetchone()[0]
         self.assertEqual(name_updated, "Kelburn North")
+        # check last modified date
+        sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1021;"
+        modified_date = db._execute(sql_date)
+        modified_date = result.fetchone()[0]
+        self.assertNotEqual(modified_date, "NULL")
+        sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1022;"
+        modified_date = db._execute(sql_date)
+        modified_date = result.fetchone()[0]
+        self.assertIsNone(modified_date)
         # check building_outlines
         sql_bo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings.building_outlines;"
         result = db._execute(sql_bo)

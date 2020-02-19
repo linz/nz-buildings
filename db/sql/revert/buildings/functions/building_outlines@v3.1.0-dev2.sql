@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings/functions/building_outlines to pg
+-- Revert nz-buildings:buildings/functions/building_outlines to v1.4.0
 
 BEGIN;
 
@@ -30,17 +30,13 @@ BEGIN;
     -- params: integer[]
     -- return: count of outlines updated
 
--- building_outlines_update_modified_date (update the modified date attr of building to now)
-    -- params: integer, building_outline_id
-    -- return: number of outlines updated
-
--- building_outlines_update_modified_date_by_building_id (update the modified date attr of building to now)
-    -- params: integer, building_id
-    -- return: number of outlines updated
-
 -- building outlines_update_shape (update the geometry of specified outline)
     -- params: shape to update to geometry, integer building_outline_id
     --return: number of outlines updated (should only be one)
+
+-- building_outlines_update_suburb (replace suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: integer count of number of building outlines updated
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer[] list of territorial_authorities buildings must be within
@@ -221,51 +217,6 @@ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings.building_outlines_update_end_lifespan(integer[]) IS
 'Update end_lifespan in building outlines table';
 
--- building_outlines_update_modified_date (update the modified date attr of building to now)
-    -- params: integer, building_outline_id
-    -- return: number of outlines updated
-
-CREATE OR REPLACE FUNCTION buildings.building_outlines_update_modified_date(integer)
-    RETURNS integer AS
-$$
-    WITH update_buildings AS (
-        UPDATE buildings.building_outlines
-        SET last_modified = now()
-        WHERE building_outline_id = $1
-        RETURNING *
-    )
-    SELECT count(*)::integer FROM update_buildings;
-
-$$ LANGUAGE sql;
-
-COMMENT ON FUNCTION buildings.building_outlines_update_modified_date(integer) IS
-'Update modified_date of outline in building_outlines table';
-
-
--- building_outlines_update_modified_date_by_building_id (update the modified date attr of building to now)
-    -- params: integer, building_id
-    -- return: number of outlines updated
-
-CREATE OR REPLACE FUNCTION buildings.building_outlines_update_modified_date_by_building_id(integer)
-    RETURNS integer AS
-$$
-    WITH update_buildings AS (
-        UPDATE buildings.building_outlines
-        SET last_modified = now()
-        WHERE building_outline_id in (
-            SELECT building_outline_id
-            FROM buildings.building_outlines
-            WHERE building_id = $1
-            AND end_lifespan is NULL
-        )
-        RETURNING *
-    )
-    SELECT count(*)::integer FROM update_buildings;
-
-$$ LANGUAGE sql;
-
-COMMENT ON FUNCTION buildings.building_outlines_update_modified_date_by_building_id(integer) IS
-'Update modified_date of outline in building_outlines table by building_id';
 
 -- building outlines_update_shape (update the geometry of specified outline)
     -- params: shape to update to geometry, integer building_outline_id
@@ -288,6 +239,35 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_shape(geometry, integer) IS
 'Update shape in building_outlines table';
+
+-- building_outlines_update_suburb (replace suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: integer count of number of building outlines updated
+
+CREATE OR REPLACE FUNCTION buildings.building_outlines_update_suburb(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_suburb AS (
+        UPDATE buildings.building_outlines outlines
+        SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.suburb_locality_intersect_polygon(outlines.shape)
+                , outlines.building_outline_id
+            FROM buildings.building_outlines outlines
+        ) suburb_locality_intersect
+        WHERE outlines.building_outline_id = suburb_locality_intersect.building_outline_id
+        AND suburb_locality_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings.building_outlines_update_suburb(integer[]) IS
+'Replace suburb values with the intersection result of buildings in the building_outlines table';
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer[] list of territorial_authorities buildings must be within
@@ -346,5 +326,9 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_town_city(integer[]) IS
 'Replace the town/city values with the intersection result for all buildings in buildings.building_outlines';
+
+DROP FUNCTION buildings.building_outlines_update_modified_date(integer);
+
+DROP FUNCTION buildings.building_outlines_update_modified_date_by_building_id(integer);
 
 COMMIT;

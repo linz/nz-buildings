@@ -46,10 +46,6 @@ BEGIN;
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of building outlines updated
 
--- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
-    -- params: integer[] list of suburb localities building must be within
-    -- return: count(integer) number of building outlines updated
-
 -- bulk_load_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
@@ -342,35 +338,6 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_suburb(integer) IS
 'Replace suburb values with the intersection result of buildings from a supplied dataset in the bulk_load_outlines table';
-
--- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
-    -- params: integer[] list of suburb localities building must be within
-    -- return: count(integer) number of building outlines updated
-
-CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[])
-RETURNS integer AS
-$$
-
-    WITH update_suburb AS (
-        UPDATE buildings_bulk_load.bulk_load_outlines outlines
-        SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
-        FROM (
-            SELECT
-                  buildings_reference.suburb_locality_intersect_polygon(outlines.shape)
-                , outlines.bulk_load_outline_id
-            FROM buildings_bulk_load.bulk_load_outlines outlines
-        ) suburb_locality_intersect
-        WHERE outlines.bulk_load_outline_id = suburb_locality_intersect.bulk_load_outline_id
-        AND suburb_locality_id = ANY($1)
-        RETURNING *
-    )
-    SELECT count(*)::integer FROM update_suburb;
-
-$$
-LANGUAGE sql VOLATILE;
-
-COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[]) IS
-'Replace suburb values with the intersection result of all buildings in the bulk_load_outlines table';
 
 -- bulk_load_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer supplied_dataset_id

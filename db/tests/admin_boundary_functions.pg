@@ -27,7 +27,7 @@ SELECT plan(14);
 SELECT has_function('buildings_reference', 'suburb_locality_intersect_polygon', 'Should have function suburb_locality_intersect_polygon in buildings schema.');
 SELECT results_eq(
 	$$SELECT buildings_reference.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
-    $$VALUES (102)$$,
+    $$VALUES (101)$$,
     'suburb_locality_intersect_polygon not returning correct suburb_locality_id value when building intersects suburb polygon'
 );
 
