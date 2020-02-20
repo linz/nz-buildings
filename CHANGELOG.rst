@@ -26,6 +26,7 @@ Fixed
 * New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
 * Corrected a join for territorial authority updates.
 * Suburb Locality updating process has been fix/optimised
+* Apply NZ Imagery Surveys reference table update to NZ Imagery Survey Index to the correct files.
 
 3.1.0
 ==========
