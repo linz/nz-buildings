@@ -65,12 +65,15 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.6
-      - name: Add PostgreSQL APT repository
+      - name: Add PostgreSQL apt repository
         run: |
           sudo apt-get install curl ca-certificates gnupg
           curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ \
             $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+      - name: Fix broken apt list
+        if: matrix == null || matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-18.04'
+        run: sudo perl -p -i -e 's#16\.04/prod xenial#18.04/prod bionic#' /etc/apt/sources.list.d/microsoft-prod.list{,.save}
       - name: Install dependencies
         run: |
           sudo apt-get update
