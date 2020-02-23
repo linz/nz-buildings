@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS aerial_lds.nz_imagery_survey_index (
     , CONSTRAINT valid_flight_dates CHECK (flown_from <= flown_to)
 );
 
--- Old Imagery Surveys (old but table still required for testing)
+-- Old Imagery Surveys (old but table still required to verify a full database migration)
 
 CREATE TABLE IF NOT EXISTS aerial_lds.nz_imagery_surveys (
       imagery_survey_id serial PRIMARY KEY
