@@ -62,6 +62,29 @@ The source imagery is linked via the ``capture_source_id`` attribute of building
 The NZ Aerial Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
 
+Suburbs & Localities
+--------------------
+
+Published building outlines include the attribute ``suburb_locality`` which provides the suburb or locality name as sourced from NZ Localities (an NZ Fire Service owned dataset). A derived suburb or locality name may not be the official geographic name for the geographic area that a building occupies.
+
+The attributed name may refer to suburbs, localities, islands and parks / reserves. Water features such as coastal bays, lakes and inland bays are not included.
+
+If a building outline intersects two localities, the locality with larger area of intersection is used for that feature.
+
+.. figure:: _static/locality_larger_area.png
+   :scale: 70%
+   :alt: Examples of locality
+
+   Image 3. Example of a building outline intersecting two localities.
+
+For building outlines on water and not within any locality, the nearest locality is used for that feature.
+
+.. figure:: _static/locality_nearest.png
+   :scale: 70%
+   :alt: Examples of locality
+
+   Image 4. Examples of building outlines not within any locality.
+
 Coverage Maps
 ---------------------------
 
@@ -72,7 +95,7 @@ The NZ Building Outlines dataset is being procured and released in stages. Image
 |    :scale: 40%                                              |    :scale: 40%                                              |
 |    :alt: current building outlines coverage                 |    :alt: upcoming building outlines coverage                |
 |                                                             |                                                             |
-|    Image 3: Map of current dataset coverage.                |    Image 4: Map of dataset coverage by the end of June 2020.|
+|    Image 5: Map of current dataset coverage.                |    Image 6: Map of dataset coverage by the end of June 2020.|
 |                                                             |                                                             |
 +-------------------------------------------------------------+-------------------------------------------------------------+
 
