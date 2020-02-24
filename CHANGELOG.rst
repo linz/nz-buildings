@@ -11,6 +11,7 @@ Added
 -----
 
 * Dependabot enabled to manage Python dependencies.
+* Data Dictionary for locality
 
 Changed
 -------

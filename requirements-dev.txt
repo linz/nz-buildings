@@ -3,3 +3,5 @@ gitlint==0.12.0
 isort==4.3.21
 pre-commit==2.1.0
 pylint==2.4.4
+sphinx==2.4.3
+sphinx_rtd_theme==0.4.3
