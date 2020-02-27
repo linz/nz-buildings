@@ -16,8 +16,8 @@ $$
         WHERE bulk_load_outline_id IN (
             SELECT b.bulk_load_outline_id
             FROM buildings_bulk_load.bulk_load_outlines b
-            WHERE (12.566370614*((ST_area(b.shape))/((ST_Perimeter(b.shape))*(ST_Perimeter(b.shape))))) >= 0.8
-            AND (12.566370614*((ST_area(b.shape))/((ST_Perimeter(b.shape))*(ST_Perimeter(b.shape))))) <= 1.3
+            WHERE 12.566370614*(ST_area(b.shape)/(ST_Perimeter(b.shape)*ST_Perimeter(b.shape))) >= 0.8
+            AND 12.566370614*(ST_area(b.shape)/(ST_Perimeter(b.shape)*ST_Perimeter(b.shape))) <= 1.3
             AND ST_Area(b.shape) <= 16
             AND b.bulk_load_outline_id NOT IN (
                 SELECT bulk_load_outline_id
