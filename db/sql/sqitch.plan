@@ -70,3 +70,4 @@ buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate
 buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v3.1.0-dev2] 2020-02-04T22:45:27Z Megan Davidson <mdavidson@linz.govt.nz> # Remove suburb area from suburb assignment
 buildings/functions/building_outlines [buildings/functions/building_outlines@v3.1.0-dev2] 2020-02-04T23:06:57Z Megan Davidson <mdavidson@linz.govt.nz> # Remove update suburb function
 buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/bulk_load_outlines@v3.1.0-dev2] 2020-02-05T01:06:50Z Megan Davidson <mdavidson@linz.govt.nz> # Remove update suburb function for bulk loaded buildings
+buildings_bulk_load/functions/remove_small_tanks 2019-12-03T23:56:18Z Megan Davidson <mdavidson@linz.govt.nz> # add a function to remove small tanks on bulk load

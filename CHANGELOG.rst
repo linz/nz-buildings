@@ -37,6 +37,7 @@ Added
 -----
 
 * Ensure git commit messages conform to the conventional commits spec
+* Circular buildings smaller than 16sqm are removed on bulk load
 
 Changed
 -------

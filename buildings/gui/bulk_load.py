@@ -286,7 +286,6 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method, capture_source):
     self.db.execute_no_commit(sql, (dataset_id, capture_method, capture_source))
 
     # Remove small buildings
-
     sql = "SELECT buildings_bulk_load.bulk_load_outlines_remove_small_buildings(%s);"
     self.db.execute_no_commit(sql, (dataset_id,))
     # insert into deletion_description
@@ -295,6 +294,10 @@ def insert_bulk_load_outlines(self, dataset_id, capture_method, capture_source):
     for bulk_loaded_id in bulk_loaded_ids:
         sql = "SELECT buildings_bulk_load.deletion_description_insert(%s, %s);"
         self.db.execute_no_commit(sql, (bulk_loaded_id, "Building outlines smaller than 10m2"))
+
+    # remove small tanks
+    sql = "SELECT buildings_bulk_load.bulk_load_outlines_remove_small_tanks(%s);"
+    self.db.execute_no_commit(sql, (dataset_id,))
 
     self.le_data_description.clear()
     # return 1 if function worked
