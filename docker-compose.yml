@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
   qgis-testing-environment:
-    image: qgis/qgis:release-3_4
+    image: qgis/qgis:release-3_10
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./:/tests_directory
