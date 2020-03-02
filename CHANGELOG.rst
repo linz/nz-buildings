@@ -4,30 +4,30 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
+3.2.0
 ==========
+02-03-2020
 
 Added
 -----
 
 * Dependabot enabled to manage Python dependencies.
-* Data Dictionary for locality
+* New data dictionary section defining how suburbs and localities are determined.
 
 Changed
 -------
 
 * Metadata updated to reflect additional Gisborne outlines.
-* Changed the process of updating localities.
-* Islands that have an empty suburb_4th column can now be assigned to a building.
-* Replace Travis CI with Github Actions.
+* Optimised the process of updating suburbs and localities.
+* Islands that have an empty suburb_4th column can now be assigned to a building using suburb_3rd.
+* Replaced Travis CI with Github Actions for continuous integration.
 
 Fixed
 -----
 
-* New suburb_locality features added only for types ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
+* Only reference suburbs and localities that are of types: ISLAND, LOCALITY, PARK_RESERVE, SUBURB.
 * Corrected a join for territorial authority updates.
-* Suburb Locality updating process has been fix/optimised
-* Apply NZ Imagery Surveys reference table update to NZ Imagery Survey Index to the correct files.
+* Apply the NZ Imagery Surveys reference table update to NZ Imagery Survey Index to the correct files.
 
 3.1.0
 ==========
