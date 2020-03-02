@@ -2,7 +2,7 @@
 
 # Installs the SQL creation scripts and load script.
 
-VERSION = dev
+VERSION = 3.2.0
 
 SED = sed
 
