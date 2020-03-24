@@ -50,9 +50,9 @@ uninstall:
 check test: $(SQLSCRIPTS)
 	# Build a test database and run unit tests
 	export PGDATABASE=nz-buildings-pgtap-db; \
-	dropdb --if-exists $$PGDATABASE; \
-	createdb $$PGDATABASE; \
-	nz-buildings-load nz-buildings-pgtap-db --with-test-data; \
+	dropdb --if-exists $$PGDATABASE && \
+	createdb $$PGDATABASE && \
+	nz-buildings-load $$PGDATABASE --with-test-data && \
 	pg_prove db/tests/
 
 clean:
