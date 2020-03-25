@@ -4,6 +4,14 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
+Unreleased
+==========
+
+Added
+-----
+
+* CI runs on push and pull request
+
 3.2.0
 ==========
 02-03-2020
