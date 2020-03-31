@@ -166,6 +166,6 @@ jobs:
           asset_path: ./buildings.zip
           asset_name: buildings.zip
           asset_content_type: application/zip
-      # - name: Upload To LINZ QGIS Plugin Repository in AWS
-      #   run: |
-      #     curl -X POST -H 'Content-Type: application/octet-stream' -H "authorization: bearer ${{ secrets.PLUGIN_REPO_AUTH }}" --data-binary @buildings.zip ${{ secrets.PLUGIN_REPO_URL }}
+      - name: Upload To LINZ QGIS Plugin Repository in AWS
+        run: |
+          curl -X POST -H 'Content-Type: application/octet-stream' -H "authorization: bearer ${{ secrets.PLUGIN_REPO_AUTH }}" --data-binary @buildings.zip https://plugins.qgis.linz.govt.nz/v1/plugin/buildings
