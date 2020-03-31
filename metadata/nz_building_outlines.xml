@@ -136,6 +136,13 @@ Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.
 [NZ Building Outlines (All Sources)](https://data.linz.govt.nz/layer/101292) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
 
 [NZ Building Outlines Lifecycle](https://data.linz.govt.nz/table/101291) - is related to the dataset above and stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline.
+
+---
+**APIs and web services**
+This dataset is available via ArcGIS Online and ArcGIS REST services, as well as our standard APIs.
+[LDS APIs and OGC web services](https://data.linz.govt.nz/layer/101290/webservices/)
+[ArcGIS Online map services](https://basedatanz.maps.arcgis.com/home/item.html?id=c2e9e61f55a245978c0bd64558553101)
+[ArcGIS REST API](https://services7.arcgis.com/jI87xPT7G1AGV8Uo/arcgis/rest/services/)
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
