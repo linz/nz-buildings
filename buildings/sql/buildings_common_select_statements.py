@@ -56,7 +56,7 @@ SELECT value
 FROM buildings_common.capture_method cm,
      buildings.building_outlines bo
 WHERE bo.capture_method_id = cm.capture_method_id
-AND bo.building_outline_id = %s;
+AND bo.building_outline_id = '%s';
 """
 
 capture_method_value_by_bulk_outline_id = """

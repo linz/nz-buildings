@@ -7,6 +7,7 @@ from collections import OrderedDict
 from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
 from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
+from qgis.PyQt.QtTest import QTest
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -109,8 +110,17 @@ class ProductionChanges(object):
         if self.edit_dialog.layout_capture_method.isVisible():
             # capture method id
             text = self.edit_dialog.cmb_capture_method.currentText()
+            if text is '':
+                text = "Trace Orthophotography"
+                iface.messageBar().pushMessage(
+                "INFO",
+                "No Capture Method Detected- Defaulting to 'Trace Orthophotography",
+                level=Qgis.Info,
+                duration=3,
+            )
             result = self.edit_dialog.db.execute_no_commit(common_select.capture_method_id_by_value, (text,))
-            capture_method_id = result.fetchall()[0][0]
+            result = result.fetchall()
+            capture_method_id = result[0][0]
         else:
             capture_method_id = None
 
@@ -761,6 +771,7 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.db.open_cursor()
 
         capture_method_id, _, _, _, _, _ = self.get_comboboxes_values()
+        # print(self.get_comboboxes_values())
 
         for key in self.edit_dialog.geoms:
             sql = "SELECT buildings.building_outlines_update_shape(%s, %s);"

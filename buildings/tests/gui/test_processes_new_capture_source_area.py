@@ -103,10 +103,12 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_polygon.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
+        layer2 = iface.addVectorLayer(path, "", "ogr")
+        iface.setActiveLayer(layer2)
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
         self.capture_area_frame.mcb_selection_layer.hidePopup()
-        self.capture_area_frame.mcb_selection_layer.setLayer(layer)
+        self.capture_area_frame.mcb_selection_layer.setLayer(layer2)
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -140,6 +142,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
         QgsProject.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer2.id())
 
     def test_select_multipolygon_from_layer(self):
         """Check new capture source area added by selecting multipolygon from other layer"""
@@ -149,10 +152,12 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_multipolygon.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
+        layer2 = iface.addVectorLayer(path, "", "ogr")
+        iface.setActiveLayer(layer2)
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
         self.capture_area_frame.mcb_selection_layer.hidePopup()
-        self.capture_area_frame.mcb_selection_layer.setLayer(layer)
+        self.capture_area_frame.mcb_selection_layer.setLayer(layer2)
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
@@ -186,15 +191,19 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
         QgsProject.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer2.id())
 
     def test_select_wrong_projection(self):
         """Check error messages by selecting from wrong projection"""
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "testdata/test_external_area_polygon_wrong_proj.shp")
         layer = iface.addVectorLayer(path, "", "ogr")
+        layer2 = iface.addVectorLayer(path, "", "ogr")
+        iface.setActiveLayer(layer2)
 
         self.capture_area_frame.rb_select_from_layer.setChecked(True)
         self.capture_area_frame.mcb_selection_layer.hidePopup()
-        self.capture_area_frame.mcb_selection_layer.setLayer(layer)
+        self.capture_area_frame.mcb_selection_layer.setLayer(layer2)
+        print(self.capture_area_frame.l_wrong_projection.text())
 
         self.assertNotEqual(self.capture_area_frame.l_wrong_projection.text(), "")
         self.assertIn("INCORRECT CRS", self.capture_area_frame.error_dialog.tb_error_report.toPlainText())
@@ -203,6 +212,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         self.capture_area_frame.rb_select_from_layer.setChecked(False)
         # remove temporary layers from canvas
         QgsProject.instance().removeMapLayer(layer.id())
+        QgsProject.instance().removeMapLayer(layer2.id())
 
     def test_reset_clicked(self):
         """Check if gui is reset when reset clicked."""
