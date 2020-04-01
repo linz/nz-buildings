@@ -772,7 +772,9 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.db.open_cursor()
 
         capture_method_id, _, _, _, _, _ = self.get_comboboxes_values()
+
         if len(self.edit_dialog.split_geoms) > 0:
+    
             for qgsfId, geom in list(self.edit_dialog.split_geoms.items()):
                 attributes = self.new_attrs[qgsfId]
                 if not attributes[7]:
@@ -804,7 +806,6 @@ class EditGeometry(ProductionChanges):
             )
             sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
             self.edit_dialog.db.execute_no_commit(sql, (key,))
-        self.disable_UI_functions()
 
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
@@ -813,8 +814,8 @@ class EditGeometry(ProductionChanges):
             self.edit_dialog.editing_layer.triggerRepaint()
 
         if len(self.edit_dialog.split_geoms) > 0:
-            self.edit_dialog.close_dialog()
-            # self.parent_frame.reload_bulk_load_layer()
+            self.edit_reset_clicked()
+            self.parent_frame.reload_production_layer()
             self.edit_dialog.split_geoms = {}
 
     def edit_reset_clicked(self):

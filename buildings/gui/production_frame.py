@@ -230,3 +230,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     duration=5,
                 )
                 return
+
+    def reload_production_layer(self):
+        """To ensure QGIS has most up to date ID for the newly split feature see #349"""
+        self.building_layer.dataProvider().forceReload()
