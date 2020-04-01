@@ -224,3 +224,36 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
 
         self.edit_dialog.geoms = {}
         self.edit_dialog.db.rollback_open_cursor()
+
+    def test_fail_on_split_geometry_twice(self):
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878225.60, 5555552.0, 1878535.30, 5555411.60)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        iface.actionSplitFeatures().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878348.8, 5555544.0)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878354.8, 5555452.3)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878354.8, 5555452.3)), delay=30)
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878255.8, 5555511.60)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878464.0, 5555508.2)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878464.0, 5555508.2)), delay=30)
+        # TODO: fix for 3.10
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(
+            iface.messageBar().currentItem().text(),
+            "You've tried to split/edit an outline that has just been created. You must first save this new outline to the db before splitting/editing it again.",
+        )
+        iface.messageBar().popWidget()
