@@ -807,15 +807,16 @@ class EditGeometry(ProductionChanges):
             sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
             self.edit_dialog.db.execute_no_commit(sql, (key,))
 
+        self.disable_UI_functions()
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
             self.new_attrs = {}
             self.edit_dialog.editing_layer.triggerRepaint()
+            self.parent_frame.reload_production_layer()
 
         if len(self.edit_dialog.split_geoms) > 0:
             self.edit_reset_clicked()
-            self.parent_frame.reload_production_layer()
             self.edit_dialog.split_geoms = {}
 
     def edit_reset_clicked(self):
