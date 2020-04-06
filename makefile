@@ -47,12 +47,13 @@ uninstall:
 	# Remove the SQL scripts installed locally
 	rm -rf ${datadir}
 
-check test: $(SQLSCRIPTS)
+check test: db/scripts/nz-buildings-load
 	# Build a test database and run unit tests
 	export PGDATABASE=nz-buildings-pgtap-db; \
-	dropdb --if-exists $$PGDATABASE; \
-	createdb $$PGDATABASE; \
-	nz-buildings-load nz-buildings-pgtap-db --with-test-data; \
+	export BUILDINGSCHEMA_SQLDIR=db; \
+	dropdb --if-exists $$PGDATABASE && \
+	createdb $$PGDATABASE && \
+	db/scripts/nz-buildings-load $$PGDATABASE --with-test-data && \
 	pg_prove db/tests/
 
 clean:
