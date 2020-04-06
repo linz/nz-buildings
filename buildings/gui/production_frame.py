@@ -31,11 +31,10 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.layer_registry = LayerRegistry()
         self.db = db
         self.db.connect()
-        self.building_layer = QgsVectorLayer()
         self.add_outlines()
+        self.change_instance = None
         # Set up edit dialog
         self.edit_dialog = EditDialog(self)
-        self.change_instance = None
 
         self.cb_production.setChecked(True)
 
@@ -85,7 +84,6 @@ class ProductionFrame(QFrame, FORM_CLASS):
             Add building outlines to canvas
         """
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
-        self.layer_registry.remove_layer(self.building_layer)
         self.building_historic = self.layer_registry.add_postgres_layer(
             "historic_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is not NULL"
         )
@@ -94,16 +92,19 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_layer = self.layer_registry.add_postgres_layer(
             "building_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is NULL"
         )
-        self.building_layer.loadNamedStyle(path + "building_blue.qml")
+        self.building_layer.loadNamedStyle(path + "production_outlines.qml")
         iface.setActiveLayer(self.building_layer)
 
     @pyqtSlot(bool)
     def cb_production_clicked(self, checked):
-        group = QgsProject.instance().layerTreeRoot().findGroup("Building Tool Layers")
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.building_layer.id())
+        layer_tree_model = iface.layerTreeView().model()
+        categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
+        current_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Building Outlines"]
         if checked:
-            group.setItemVisibilityCheckedRecursive(True)
+            current_category[0].setData(Qt.Checked, Qt.CheckStateRole)
         else:
-            group.setItemVisibilityCheckedRecursive(False)
+            current_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
 
     def canvas_add_outline(self):
         """
@@ -162,21 +163,21 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """
         if self.change_instance is not None:
             self.edit_dialog.close()
-        iface.actionCancelEdits().trigger()
         QgsProject.instance().layerWillBeRemoved.disconnect(self.layers_removed)
+        iface.actionCancelEdits().trigger()
         self.layer_registry.remove_layer(self.building_layer)
         self.layer_registry.remove_layer(self.building_historic)
-        # reset toolbar
-        for action in iface.building_toolbar.actions():
-            if action.objectName() not in ["mActionPan"]:
-                iface.building_toolbar.removeAction(action)
-        iface.building_toolbar.hide()
 
         from buildings.gui.menu_frame import MenuFrame
 
         dw = self.dockwidget
         dw.stk_options.removeWidget(dw.stk_options.currentWidget())
         dw.new_widget(MenuFrame(dw))
+        # reset toolbar
+        for action in iface.building_toolbar.actions():
+            if action.objectName() not in ["mActionPan"]:
+                iface.building_toolbar.removeAction(action)
+        iface.building_toolbar.hide()
 
     @pyqtSlot()
     def edit_cancel_clicked(self):
@@ -188,7 +189,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
                     pass
             elif isinstance(self.change_instance, production_changes.EditGeometry):
                 try:
-                    self.building_layer.geometryChanged.disconnect()
+                    self.building_layer.geometryChanged.disconnect(self.change_instance.geometry_changed)
                 except TypeError:
                     pass
             elif isinstance(self.change_instance, production_changes.AddProduction):
@@ -233,4 +234,5 @@ class ProductionFrame(QFrame, FORM_CLASS):
 
     def reload_production_layer(self):
         """To ensure QGIS has most up to date ID for the newly split feature see #349"""
-        self.building_layer.dataProvider().reloadData()
+        self.cb_production_clicked(False)
+        self.cb_production_clicked(True)

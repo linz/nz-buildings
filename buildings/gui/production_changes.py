@@ -808,16 +808,17 @@ class EditGeometry(ProductionChanges):
             self.edit_dialog.db.execute_no_commit(sql, (key,))
 
         self.disable_UI_functions()
+
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
             self.new_attrs = {}
             self.edit_dialog.editing_layer.triggerRepaint()
-            self.parent_frame.reload_production_layer()
 
         if len(self.edit_dialog.split_geoms) > 0:
             self.edit_reset_clicked()
             self.edit_dialog.split_geoms = {}
+            self.parent_frame.reload_production_layer()
 
     def edit_reset_clicked(self):
         """
@@ -835,6 +836,7 @@ class EditGeometry(ProductionChanges):
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
+        iface.mapCanvas().currentLayer().reload()
 
     def geometry_changed(self, qgsfId, geom):
         """
