@@ -7,6 +7,7 @@ from collections import OrderedDict
 from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
 from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
+from qgis.PyQt.QtTest import QTest
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -109,8 +110,17 @@ class ProductionChanges(object):
         if self.edit_dialog.layout_capture_method.isVisible():
             # capture method id
             text = self.edit_dialog.cmb_capture_method.currentText()
+            if text is '':
+                text = "Trace Orthophotography"
+                iface.messageBar().pushMessage(
+                "INFO",
+                "No Capture Method Detected- Defaulting to 'Trace Orthophotography",
+                level=Qgis.Info,
+                duration=3,
+            )
             result = self.edit_dialog.db.execute_no_commit(common_select.capture_method_id_by_value, (text,))
-            capture_method_id = result.fetchall()[0][0]
+            result = result.fetchall()
+            capture_method_id = result[0][0]
         else:
             capture_method_id = None
 
@@ -748,11 +758,12 @@ class EditGeometry(ProductionChanges):
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
-            if adv.objectName() in ["mActionUndo", "mActionRedo", "mActionReshapeFeatures", "mActionOffsetCurve"]:
+            if adv.objectName() in ["mActionUndo", "mActionRedo", "mActionReshapeFeatures", "mActionOffsetCurve", "mActionSplitFeatures"]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
 
         self.disable_UI_functions()
+        self.new_attrs = {}
 
     def edit_save_clicked(self, commit_status):
         """
@@ -761,6 +772,30 @@ class EditGeometry(ProductionChanges):
         self.edit_dialog.db.open_cursor()
 
         capture_method_id, _, _, _, _, _ = self.get_comboboxes_values()
+
+        if len(self.edit_dialog.split_geoms) > 0:
+    
+            for qgsfId, geom in list(self.edit_dialog.split_geoms.items()):
+                attributes = self.new_attrs[qgsfId]
+                if not attributes[7]:
+                    attributes[7] = None
+                sql = "SELECT buildings.buildings_insert();"
+                result = self.edit_dialog.db.execute_no_commit(sql)
+                building_id = result.fetchall()[0][0]
+                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s, %s);"
+                result = self.edit_dialog.db.execute_no_commit(
+                    sql,
+                    (
+                        building_id,
+                        attributes[2],
+                        attributes[3],
+                        attributes[5],
+                        attributes[6],
+                        attributes[7],
+                        geom
+                    ),
+                )
+                self.edit_dialog.outline_id = result.fetchall()[0][0]
 
         for key in self.edit_dialog.geoms:
             sql = "SELECT buildings.building_outlines_update_shape(%s, %s);"
@@ -771,10 +806,19 @@ class EditGeometry(ProductionChanges):
             )
             sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
             self.edit_dialog.db.execute_no_commit(sql, (key,))
+
         self.disable_UI_functions()
+
         if commit_status:
             self.edit_dialog.db.commit_open_cursor()
             self.edit_dialog.geoms = {}
+            self.new_attrs = {}
+            self.edit_dialog.editing_layer.triggerRepaint()
+
+        if len(self.edit_dialog.split_geoms) > 0:
+            self.edit_reset_clicked()
+            self.edit_dialog.split_geoms = {}
+            self.parent_frame.reload_production_layer()
 
     def edit_reset_clicked(self):
         """
@@ -784,12 +828,15 @@ class EditGeometry(ProductionChanges):
         iface.actionCancelEdits().trigger()
         self.editing_layer.geometryChanged.connect(self.geometry_changed)
         self.edit_dialog.geoms = {}
+        self.edit_dialog.split_geoms = {}
+        self.new_attrs = {}
         # restart editing
         iface.actionToggleEditing().trigger()
         iface.actionVertexTool().trigger()
         iface.activeLayer().removeSelection()
         # reset and disable comboboxes
         self.disable_UI_functions()
+        iface.mapCanvas().currentLayer().reload()
 
     def geometry_changed(self, qgsfId, geom):
         """
@@ -813,23 +860,67 @@ class EditGeometry(ProductionChanges):
                 level=Qgis.Info,
                 duration=3,
             )
-        result = result.fetchall()[0][0]
-        if self.edit_dialog.geom == result:
-            if qgsfId in list(self.edit_dialog.geoms.keys()):
-                del self.edit_dialog.geoms[qgsfId]
+        result = result.fetchall()
+        if len(result) == 0:
+            iface.messageBar().pushMessage(
+                "CANNOT SPLIT/EDIT A NEWLY ADDED FEATURE",
+                "You've tried to split/edit an outline that has just been created. You must first save this new outline to the db before splitting/editing it again.",
+                level=Qgis.Warning,
+                duration=5,
+            )
+            self.edit_dialog.btn_edit_save.setDisabled(1)
             self.disable_UI_functions()
+            self.edit_dialog.btn_edit_reset.setEnabled(1)
+            return
         else:
-            self.edit_dialog.geoms[qgsfId] = self.edit_dialog.geom
-            self.enable_UI_functions()
-            self.populate_edit_comboboxes()
-            self.select_comboboxes_value()
+            result = result[0][0]
+            if self.edit_dialog.geom == result:
+                if qgsfId in list(self.edit_dialog.geoms.keys()):
+                    del self.edit_dialog.geoms[qgsfId]
+                self.disable_UI_functions()
+            else:
+                self.edit_dialog.geoms[qgsfId] = self.edit_dialog.geom
+                self.enable_UI_functions()
+                self.populate_edit_comboboxes()
+                self.select_comboboxes_value()
 
         self.edit_dialog.activateWindow()
         self.edit_dialog.btn_edit_save.setDefault(True)
 
     def creator_feature_added(self, qgsfId):
-        """Future Enhancement"""
-        pass
+        """Enable user to split features"""
+        # get new feature geom
+        request = QgsFeatureRequest().setFilterFid(qgsfId)
+        new_feature = next(self.editing_layer.getFeatures(request))
+        self.new_attrs[qgsfId] = new_feature.attributes()
+        if not self.new_attrs[qgsfId][5]:
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report(
+                "\n -------------------- CANNOT ADD NEW FEATURE ------"
+                "-------------- \n\nYou've added a new feature, "
+                "this can't be done in edit geometry, "
+                "please switch to add outline."
+            )
+            self.error_dialog.show()
+            self.disable_UI_functions()
+            self.edit_dialog.btn_edit_reset.setEnabled(1)
+            return
+        new_geometry = new_feature.geometry()
+        # calculate area
+        area = new_geometry.area()
+        if area < 10:
+            iface.messageBar().pushMessage(
+                "INFO",
+                "You've created an outline that is less than 10sqm, are you sure this is correct?",
+                level=Qgis.Info,
+                duration=3,
+            )
+
+        # convert to correct format
+        wkt = new_geometry.asWkt()
+        sql = general_select.convert_geometry
+        result = self.edit_dialog.db.execute_return(sql, (wkt,))
+        self.edit_dialog.split_geoms[qgsfId] = result.fetchall()[0][0]
 
     def select_comboboxes_value(self):
         """

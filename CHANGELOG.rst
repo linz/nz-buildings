@@ -11,6 +11,7 @@ Added
 -----
 
 * CI runs on push and pull request
+* Users are now able to split features in Production
 
 3.2.0
 ==========
