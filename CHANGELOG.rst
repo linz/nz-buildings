@@ -4,7 +4,7 @@ Change Log
 
 All notable changes to this project will be documented in this file.
 
-Unreleased
+3.4.0
 ==========
 
 Added
