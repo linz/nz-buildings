@@ -2,6 +2,6 @@ black==19.10b0
 gitlint==0.13.1
 isort==4.3.21
 pre-commit==2.3.0
-pylint==2.4.4
+pylint==2.5.0
 sphinx==3.0.3
 sphinx_rtd_theme==0.4.3
