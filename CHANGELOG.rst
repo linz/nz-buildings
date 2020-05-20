@@ -8,28 +8,23 @@ Unreleased
 ==========
 
 Fixed
------
-* CI: fixed postgres installation
-
-Fixed
------
-
-* outlines deleted or split in production are now added to all_sources table
-* Completed Upgrade to QGIS 3.10
-
-Changed
 -------
-* Some symbology changed to enable the removal of QgsHighlight due to bugs
-* Data Dictionary and Metadata updated to reflect additional Tasman, Nelson , Otago and Dunedin building outlines updates.
 
-3.4.0
+* Production split features edits tables using correct processes
+
+Added
+-----
+
+* Users are now able to split features in Production
+
+3.3.0
 ==========
+01-04-2020
 
 Added
 -----
 
 * CI runs on push and pull request
-* Users are now able to split features in Production
 
 3.2.0
 ==========

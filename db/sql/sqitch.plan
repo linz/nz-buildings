@@ -73,3 +73,5 @@ buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/
 buildings_bulk_load/functions/remove_small_tanks 2019-12-03T23:56:18Z Megan Davidson <mdavidson@linz.govt.nz> # add a function to remove small tanks on bulk load
 @v3.2.0-dev1 2020-03-02T01:54:14Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.2.0-dev1
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.2.0-dev1] 2020-05-22T02:23:52Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Remove deleted_in_production where clause
+
+buildings/functions/insert_lifecycle_record 2020-04-29T04:03:16Z Megan Davidson <mdavidson@linz.govt.nz> # Allow the user to insert a record into the lifecycle table
