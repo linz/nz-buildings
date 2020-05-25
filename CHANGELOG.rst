@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
+Fixed
+-----
+* outlines deleted or split in production are now added to all_sources table
+
 Added
 -----
 

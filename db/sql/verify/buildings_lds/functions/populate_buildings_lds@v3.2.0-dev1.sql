@@ -25,6 +25,7 @@ END $$;
 
 DO $$
 BEGIN
+
     PERFORM proname, proargnames, prosrc 
     FROM pg_proc
     WHERE proname = 'nz_building_outlines_all_sources_insert'
@@ -32,17 +33,7 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'suburb_3rd not found.';
     END IF;
-END $$;
 
-DO $$
-BEGIN
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'nz_building_outlines_all_sources_insert'
-    AND prosrc LIKE '%deleted_in_production.building_outline_id IS NULL%';
-    IF FOUND THEN
-        RAISE EXCEPTION 'Building outlines that are deleted in production should not be excluded.';
-    END IF;
 END $$;
 
 ROLLBACK;
