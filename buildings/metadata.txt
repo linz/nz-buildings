@@ -4,7 +4,7 @@ description=This plugin is used to maintain New Zealand topographic buildings da
 about=This plugin is used to maintain New Zealand topographic buildings datasets
 version=dev
 
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.10
 
 author=Megan Davidson, Daniel Silk
 email=dsilk@linz.govt.nz

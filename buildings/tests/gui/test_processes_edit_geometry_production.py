@@ -74,10 +74,9 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878202.1, 5555298.1)), delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878211.4, 5555304.6)), delay=30)
         QTest.qWait(10)
-        # TODO: 3.10 fix this
-        # self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
-        # self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
-        # self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
 
     def test_reset_clicked(self):
         """Check Geometries reset correctly when 'reset' called"""
@@ -167,9 +166,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
             result = db._execute(sql, (key,))
             result = result.fetchall()[0][0]
             self.assertEqual(result, self.edit_dialog.geoms[key])
-        # TODO: Fix for QGIS 3.10
-        # self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
-        # self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
         self.edit_dialog.geoms = {}
         self.edit_dialog.db.rollback_open_cursor()
 
@@ -190,10 +188,8 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878202.1, 5555298.1)), delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878211.4, 5555304.6)), delay=30)
         QTest.qWait(10)
-
-        # TODO: fix for 3.10
-        # self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
-        # self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
     def test_modified_date_update_on_save(self):
         """Check modified_date is updated when save clicked"""
@@ -249,7 +245,6 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878255.8, 5555511.60)), delay=30)
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878464.0, 5555508.2)), delay=30)
         QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878464.0, 5555508.2)), delay=30)
-        # TODO: fix for 3.10
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())

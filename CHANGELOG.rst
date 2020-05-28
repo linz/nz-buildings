@@ -9,7 +9,16 @@ Unreleased
 
 Fixed
 -----
+
 * outlines deleted or split in production are now added to all_sources table
+* Completed Upgrade to QGIS 3.10
+
+Changed
+-------
+* Some symbology changed to enable the removal of QgsHighlight due to bugs
+
+3.4.0
+==========
 
 Added
 -----

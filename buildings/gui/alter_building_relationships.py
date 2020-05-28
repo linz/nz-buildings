@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import QAbstractItemView, QAction, QFrame, QHeaderView,
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import QSize, Qt
 from qgis.core import QgsProject
-from qgis.gui import QgsHighlight, QgsMessageBar
+from qgis.gui import QgsMessageBar
 from qgis.utils import Qgis, iface
 
 from buildings.gui import bulk_load_changes
@@ -43,7 +43,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry = LayerRegistry()
         self.current_dataset = current_dataset
         self.error_dialog = None
-        self.highlight_features = []
         self.autosave = False
         self.delete = False
         self.deletion_reason = None
@@ -86,8 +85,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.setup_message_box()
 
     def layers_setup(self):
-        # set selected item color as transparent
-        iface.mapCanvas().setSelectionColor(QColor("Transparent"))
         self.add_building_lyrs()
         self.repaint_view()
         self.clear_layer_filter()
@@ -174,8 +171,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
 
-        self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
-        self.lyr_bulk_load.selectionChanged.connect(self.highlight_selection_changed)
         self.cmb_relationship.currentIndexChanged.connect(
             self.cmb_relationship_current_index_changed
         )
@@ -194,26 +189,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """ Add building layers """
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
-
-        self.lyr_existing = self.layer_registry.add_postgres_layer(
-            "existing_subset_extracts",
-            "existing_subset_extracts",
-            "shape",
-            "buildings_bulk_load",
-            "building_outline_id",
-            "supplied_dataset_id = {0}".format(self.current_dataset),
-        )
-        self.lyr_existing.loadNamedStyle(path + "building_transparent.qml")
-
-        self.lyr_bulk_load = self.layer_registry.add_postgres_layer(
-            "bulk_load_outlines",
-            "bulk_load_outlines",
-            "shape",
-            "buildings_bulk_load",
-            "bulk_load_outline_id",
-            "supplied_dataset_id = {0}".format(self.current_dataset),
-        )
-        self.lyr_bulk_load.loadNamedStyle(path + "buildings_bulk_load_alter_rel.qml")
 
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
             "related_bulk_load_outlines",
@@ -335,6 +310,26 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
         self.lyr_added_bulk_load_in_edit.loadNamedStyle(path + "building_green.qml")
 
+        self.lyr_existing = self.layer_registry.add_postgres_layer(
+            "existing_subset_extracts",
+            "existing_subset_extracts",
+            "shape",
+            "buildings_bulk_load",
+            "building_outline_id",
+            "supplied_dataset_id = {0}".format(self.current_dataset),
+        )
+        self.lyr_existing.loadNamedStyle(path + "building_transparent.qml")
+
+        self.lyr_bulk_load = self.layer_registry.add_postgres_layer(
+            "bulk_load_outlines",
+            "bulk_load_outlines",
+            "shape",
+            "buildings_bulk_load",
+            "bulk_load_outline_id",
+            "supplied_dataset_id = {0}".format(self.current_dataset),
+        )
+        self.lyr_bulk_load.loadNamedStyle(path + "buildings_bulk_load_alter_rel.qml")
+
     def repaint_view(self):
         """Repaint views to update changes in result"""
         self.lyr_added_bulk_load.triggerRepaint()
@@ -370,23 +365,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def on_dockwidget_closed(self):
         """Remove highlight when the dockwideget closes"""
-        self.highlight_features = []
-
-    def highlight_selection_changed(self):
-        """Highlights selected features"""
-
-        # remove all highlight objects
-        self.highlight_features = []
-
-        for lyr in [self.lyr_existing, self.lyr_bulk_load]:
-            for feat in lyr.selectedFeatures():
-                h = QgsHighlight(iface.mapCanvas(), feat.geometry(), lyr)
-
-                # set highlight symbol properties
-                h.setColor(QColor(255, 255, 0, 255))
-                h.setWidth(4)
-                h.setFillColor(QColor(255, 255, 255, 0))
-                self.highlight_features.append(h)
+        pass
 
     def maptool_clicked(self):
         canvas = iface.mapCanvas()
@@ -846,15 +825,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_existing.removeSelection()
             self.lyr_bulk_load.removeSelection()
             return
-        try:
-            self.lyr_existing.selectionChanged.disconnect(
-                self.highlight_selection_changed
-            )
-            self.lyr_bulk_load.selectionChanged.disconnect(
-                self.highlight_selection_changed
-            )
-        except TypeError:
-            pass
 
         row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
         current_text = self.cmb_relationship.currentText()
@@ -893,15 +863,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         if self.zoom:
             self.zoom_to_feature()
-        self.highlight_selection_changed()
-
-        try:
-            self.lyr_existing.selectionChanged.connect(self.highlight_selection_changed)
-            self.lyr_bulk_load.selectionChanged.connect(
-                self.highlight_selection_changed
-            )
-        except TypeError:
-            pass
 
     def btn_qa_status_clicked(self, qa_status, commit_status=True):
 
@@ -1025,9 +986,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.findLayer(self.lyr_added_bulk_load.id()).setItemVisibilityChecked(True)
             legend.findLayer(self.lyr_matched_bulk_load.id()).setItemVisibilityChecked(True)
             legend.findLayer(self.lyr_related_bulk_load.id()).setItemVisibilityChecked(True)
-            for h in self.highlight_features:
-                if h.layer() == self.lyr_bulk_load:
-                    h.setVisible(True)
         else:
             legend.findLayer(self.lyr_added_bulk_load_in_edit.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_matched_bulk_load_in_edit.id()).setItemVisibilityChecked(False)
@@ -1035,9 +993,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.findLayer(self.lyr_added_bulk_load.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_matched_bulk_load.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_related_bulk_load.id()).setItemVisibilityChecked(False)
-            for h in self.highlight_features:
-                if h.layer() == self.lyr_bulk_load:
-                    h.setVisible(False)
 
     def cb_lyr_existing_state_changed(self):
         legend = QgsProject.instance().layerTreeRoot()
@@ -1048,9 +1003,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.findLayer(self.lyr_removed_existing.id()).setItemVisibilityChecked(True)
             legend.findLayer(self.lyr_matched_existing.id()).setItemVisibilityChecked(True)
             legend.findLayer(self.lyr_related_existing.id()).setItemVisibilityChecked(True)
-            for h in self.highlight_features:
-                if h.layer() == self.lyr_existing:
-                    h.setVisible(True)
         else:
             legend.findLayer(self.lyr_removed_existing_in_edit.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_matched_existing_in_edit.id()).setItemVisibilityChecked(False)
@@ -1058,9 +1010,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             legend.findLayer(self.lyr_removed_existing.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_matched_existing.id()).setItemVisibilityChecked(False)
             legend.findLayer(self.lyr_related_existing.id()).setItemVisibilityChecked(False)
-            for h in self.highlight_features:
-                if h.layer() == self.lyr_existing:
-                    h.setVisible(False)
 
     def cb_autosave_state_changed(self):
         if self.btn_save.isEnabled():
