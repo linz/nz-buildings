@@ -88,16 +88,16 @@ For building outlines on water and not within any locality, the nearest locality
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 3 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 4 shows the additional coverage of building outlines available by the end of June 2020 in blue.
+The NZ Building Outlines dataset is being procured and released in stages. Image 5 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_. Image 6 shows the additional coverage of building outlines available by the end of September 2020 in blue.
 
-+-------------------------------------------------------------+-------------------------------------------------------------+
-| .. figure:: _static/coverage_map_current.png                | .. figure:: _static/coverage_map_future.png                 |
-|    :scale: 40%                                              |    :scale: 40%                                              |
-|    :alt: current building outlines coverage                 |    :alt: upcoming building outlines coverage                |
-|                                                             |                                                             |
-|    Image 5: Map of current dataset coverage.                |    Image 6: Map of dataset coverage by the end of June 2020.|
-|                                                             |                                                             |
-+-------------------------------------------------------------+-------------------------------------------------------------+
++-------------------------------------------------------------+------------------------------------------------------------------+
+| .. figure:: _static/coverage_map_current.png                | .. figure:: _static/coverage_map_future.png                      |
+|    :scale: 40%                                              |    :scale: 40%                                                   |
+|    :alt: current building outlines coverage                 |    :alt: upcoming building outlines coverage                     |
+|                                                             |                                                                  |
+|    Image 5: Map of current dataset coverage.                |    Image 6: Map of dataset coverage by the end of September 2020.|
+|                                                             |                                                                  |
++-------------------------------------------------------------+------------------------------------------------------------------+
 
 
 
