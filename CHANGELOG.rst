@@ -9,6 +9,10 @@ Unreleased
 
 Fixed
 -----
+* CI: fixed postgres installation
+
+Fixed
+-----
 
 * outlines deleted or split in production are now added to all_sources table
 * Completed Upgrade to QGIS 3.10
