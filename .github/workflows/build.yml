@@ -53,6 +53,8 @@ jobs:
       PGPORT: 5432
       PGUSER: postgres
       PGPASSWORD: github
+      APT: "apt-get -o Dpkg::Progress=0 -o Dpkg::Use-Pty=0" # Make apt non-interactive by default, and not showing progress
+      APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: 1 # Avoid warnings on apt-key usage
     strategy:
       matrix:
         psql: [9.5, 9.6, 10, 11]
@@ -67,17 +69,26 @@ jobs:
           python-version: 3.6
       - name: Add PostgreSQL apt repository
         run: |
-          sudo apt-get install curl ca-certificates gnupg
-          curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ \
-            $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo ${APT} -qq purge \
+              libpq5 \
+              libpq-dev \
+              *php* \
+              postgresql \
+              postgresql-client-common \
+              postgresql-common
+          sudo rm -rf /var/lib/postgresql
+          sudo ${APT} install curl ca-certificates gnupg
+          distro=`lsb_release -cs`
+          # Enable fetching packages from apt.postgresql repository
+          curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ ${distro}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
       - name: Fix broken apt list
         if: matrix == null || matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-18.04'
         run: sudo perl -p -i -e 's#16\.04/prod xenial#18.04/prod bionic#' /etc/apt/sources.list.d/microsoft-prod.list{,.save}
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo ${APT} -qq update
+          sudo ${APT} -qq install \
             libtap-parser-sourcehandler-pgtap-perl \
             postgresql-${{ matrix.psql }} \
             postgresql-${{ matrix.psql }}-pgtap \
