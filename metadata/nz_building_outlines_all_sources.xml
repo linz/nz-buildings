@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2020-02-25</gco:Date>
+    <gco:Date>2020-07-15</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-02-25</gco:Date>
+                <gco:Date>2020-07-15</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-02-25</gco:Date>
+                <gco:Date>2020-07-15</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -307,7 +307,7 @@ For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributi
           <gmd:statement>
             <gco:CharacterString>
 **Source imagery**
-Resolution of the aerial imagery used for building outline capture ranges from 50cm pixel resolution (0.5m GSD) to 7.5cm pixel resolution (0.075m GSD).  The source imagery is linked via the capture_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+Resolution of the aerial imagery used for building outline capture ranges from 7.5cm pixel resolution (0.075m GSD) to 50cm pixel resolution (0.5m GSD).  The source imagery is linked via the capture_source_id attribute of building outlines to the imagery_survey_id of NZ Imagery Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
 The NZ Imagery Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
