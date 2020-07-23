@@ -20,6 +20,7 @@ Fixed
 Changed
 -------
 * Some symbology changed to enable the removal of QgsHighlight due to bugs
+* Data Dictionary and Metadata updated to reflect additional Tasman and Nelson building outlines updates.
 
 3.4.0
 ==========
