@@ -23,7 +23,7 @@ The NZ Building Outlines data described below represents the outlines of individ
 Description
 ---------------------------
 
-This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Bay of Plenty, Gisborne, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, West Coast, Taranaki, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
+This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Bay of Plenty, Gisborne, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, Nelson, West Coast, Taranaki, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
 
 This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from aerial imagery using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground.
 

@@ -1,5 +1,3 @@
-from builtins import str
-
 # -*- coding: utf-8 -*-
 #
 # Building Outlines Test documentation build configuration file, created by
