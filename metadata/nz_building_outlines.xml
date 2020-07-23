@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2020-07-15</gco:Date>
+    <gco:Date>2020-07-24</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-07-15</gco:Date>
+                <gco:Date>2020-07-24</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-07-15</gco:Date>
+                <gco:Date>2020-07-24</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -125,7 +125,7 @@ Building outlines observed in aerial imagery larger than or equal to 10 square m
 
 This dataset shows the most recent set of building outlines extracted from the LINZ aerial imagery available on the LINZ Data Service.
 
-Current coverage includes areas in Northland, Auckland, Waikato, Gisborne, Bay of Plenty, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, Taranaki, West Coast, Marlborough, Canterbury, Southland, and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
+Current coverage includes areas in Northland, Auckland, Waikato, Gisborne, Bay of Plenty, Hawke’s Bay, Taranaki, Manawatu-Whanganui, Wellington, Tasman, Nelson, West Coast, Marlborough, Canterbury, Southland, and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
 
 Since aerial imagery is flown only every few years in each region of the country, building outlines only reflect those buildings observed at the date of this aerial imagery capture, and may not reflect buildings constructed after this time period.
 
