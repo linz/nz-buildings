@@ -118,26 +118,26 @@ jobs:
       - uses: actions/checkout@v1
       - name: Run Docker Compose Up
         run: |
-          docker-compose up -d
+          sudo docker-compose up -d
       - name: Install Required Python Modules
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "pip3 install -r tests_directory/requirements-dev.txt"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "pip3 install -r tests_directory/requirements-dev.txt"
       - name: Move Config File
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "mkdir -p /root/.local/share/QGIS/QGIS3/profiles/default/buildings"
-          docker-compose exec -T qgis-testing-environment sh -c "cp tests_directory/buildings/tests/pg_config_test.ini /root/.local/share/QGIS/QGIS3/profiles/default/buildings/pg_config.ini"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "mkdir -p /root/.local/share/QGIS/QGIS3/profiles/default/buildings"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "cp tests_directory/buildings/tests/pg_config_test.ini /root/.local/share/QGIS/QGIS3/profiles/default/buildings/pg_config.ini"
       - name: Setup Plugin
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "qgis_setup.sh buildings"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "qgis_setup.sh buildings"
       - name: Create Symlink
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "ln -s /tests_directory/buildings /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/buildings"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "ln -s /tests_directory/buildings /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/buildings"
       - name: Setup DB
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && python3 install.py"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && python3 install.py"
       - name: Run QGIS Test Runner
         run: |
-          docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && sh testrunner.sh buildings.tests.test_runner.run_test_modules"
+          sudo docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && sh testrunner.sh buildings.tests.test_runner.run_test_modules"
 
   deploy:
     name: deploy
