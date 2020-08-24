@@ -20,7 +20,7 @@ Fixed
 Changed
 -------
 * Some symbology changed to enable the removal of QgsHighlight due to bugs
-* Data Dictionary and Metadata updated to reflect additional Tasman, Nelson and Otago building outlines updates.
+* Data Dictionary and Metadata updated to reflect additional Tasman, Nelson , Otago and Dunedin building outlines updates.
 
 3.4.0
 ==========
