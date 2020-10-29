@@ -7,15 +7,39 @@ All notable changes to this project will be documented in this file.
 Unreleased
 ==========
 
-Fixed
+Changed
 -------
 
-* Production split features edits tables using correct processes
+* Completed upgrade to QGIS 3.10
+* Some symbology changed to enable the removal of QgsHighlight due to bugs
+* Data dictionary and metadata updated to reflect additional Tasman, Nelson, Otago and Dunedin building outlines updates
+
+Fixed
+-----
+
+* Fixed PostgreSQL installation for continuous integration
+* Outlines deleted or split in production are now added to all_sources table
+* Outlines split in production now cause all split outputs to have new identifiers
+
+3.4.0
+==========
+08-04-2020
 
 Added
 -----
 
 * Users are now able to split features in Production
+
+Changed
+-------
+
+* `make check` uses built installer, not system installer
+
+Fixed
+-----
+
+* Errors that occur during `make check` are better exposed to the user
+* Exit build process immediately if `sqitch` not found
 
 3.3.0
 ==========
@@ -24,7 +48,14 @@ Added
 Added
 -----
 
-* CI runs on push and pull request
+* QGIS plugin now deploys to LINZ QGIS Plugin Repository automatically on version tag
+* Metadata links to ArcGIS Online dataset mirror / ArcGIS REST Services
+
+Changed
+-------
+
+* CI now runs on pull request (to help contribute from forks)
+
 
 3.2.0
 ==========
@@ -65,11 +96,12 @@ Changed
 -------
 
 * Updated NZ Imagery Surveys reference table to NZ Imagery Survey Index
-* metadata updated to reflect additional Bay of Plenty outlines.
+* Metadata updated to reflect additional Bay of Plenty outlines.
 
 Fixed
 -----
-* bulk load outlines and alter relationships edit vertices and split features bug
+
+* Bulk load outlines and alter relationships edit vertices and split features bug
 
 3.0.0
 ==========
@@ -85,7 +117,6 @@ Fixed
 
 * Include name in the update or insert functions for reference data (hut, shelter, bivouac and protected area).
 * Fix sqitch deployment to 'sqitch deploy --verify'
-
 
 2.0.0
 ==========
