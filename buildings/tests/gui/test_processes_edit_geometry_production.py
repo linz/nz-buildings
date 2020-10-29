@@ -253,3 +253,56 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
             "You've tried to split/edit an outline that has just been created. You must first save this new outline to the db before splitting/editing it again.",
         )
         iface.messageBar().popWidget()
+
+    def test_split_geometry(self):
+        widget = iface.mapCanvas().viewport()
+        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        canvas = iface.mapCanvas()
+        selectedcrs = "EPSG:2193"
+        target_crs = QgsCoordinateReferenceSystem()
+        target_crs.createFromUserInput(selectedcrs)
+        canvas.setDestinationCrs(target_crs)
+        zoom_rectangle = QgsRectangle(1878225.60, 5555552.0, 1878535.30, 5555411.60)
+        canvas.setExtent(zoom_rectangle)
+        canvas.refresh()
+        iface.actionSplitFeatures().trigger()
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878348.8, 5555544.0)), delay=30)
+        QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878354.8, 5555452.3)), delay=30)
+        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878354.8, 5555452.3)), delay=30)
+        self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
+        sql_building_outline = "SELECT Count(*)::integer FROM buildings.building_outlines;"
+        pre_save_building_outlines = db._execute(sql_building_outline)
+        pre_save_building_outlines = pre_save_building_outlines.fetchone()[0]
+        sql_buildings = "SELECT Count(*)::integer FROM buildings.buildings;"
+        pre_save_buildings = db._execute(sql_buildings)
+        pre_save_buildings = pre_save_buildings.fetchone()[0]
+        sql_historic = "SELECT Count(*)::integer FROM buildings.building_outlines WHERE end_lifespan IS NOT NULL;"
+        pre_save_historic = db._execute(sql_historic)
+        pre_save_historic = pre_save_historic.fetchone()[0]
+        sql_lifecycle = "SELECT Count(*)::integer FROM buildings.lifecycle;"
+        pre_save_lifecycle = db._execute(sql_lifecycle)
+        pre_save_lifecycle = pre_save_lifecycle.fetchone()[0]
+        self.production_frame.change_instance.edit_save_clicked(False)
+        post_save_building_outlines = db._execute(sql_building_outline)
+        post_save_building_outlines = post_save_building_outlines.fetchone()[0]
+        post_save_buildings = db._execute(sql_buildings)
+        post_save_buildings = post_save_buildings.fetchone()[0]
+        post_save_historic = db._execute(sql_historic)
+        post_save_historic = post_save_historic.fetchone()[0]
+        post_save_lifecycle = db._execute(sql_lifecycle)
+        post_save_lifecycle = post_save_lifecycle.fetchone()[0]
+        self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
+        self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
+        self.assertEqual(pre_save_building_outlines, post_save_building_outlines - 2)
+        self.assertEqual(pre_save_buildings, post_save_buildings - 2)
+        self.assertEqual(pre_save_historic, post_save_historic - 1)
+        self.assertEqual(pre_save_lifecycle, post_save_lifecycle - 2)
+        self.production_frame.edit_dialog.geoms = {}
+        self.production_frame.edit_dialog.split_geoms = []
+        self.production_frame.edit_dialog.added_building_ids = []
+        self.production_frame.db.rollback_open_cursor()

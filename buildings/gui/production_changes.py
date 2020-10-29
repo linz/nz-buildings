@@ -777,11 +777,13 @@ class EditGeometry(ProductionChanges):
     
             for qgsfId, geom in list(self.edit_dialog.split_geoms.items()):
                 attributes = self.new_attrs[qgsfId]
-                if not attributes[7]:
-                    attributes[7] = None
+                if not attributes[6]:
+                    attributes[6] = None
+                # New building
                 sql = "SELECT buildings.buildings_insert();"
                 result = self.edit_dialog.db.execute_no_commit(sql)
                 building_id = result.fetchall()[0][0]
+                # new building outline
                 sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s, %s);"
                 result = self.edit_dialog.db.execute_no_commit(
                     sql,
@@ -796,16 +798,53 @@ class EditGeometry(ProductionChanges):
                     ),
                 )
                 self.edit_dialog.outline_id = result.fetchall()[0][0]
+                # insert into lifecycle table
+                sql = "SELECT buildings.lifecycle_insert_record(%s, %s);"
+                self.edit_dialog.db.execute_no_commit(sql, (self.split_geom, building_id))
 
-        for key in self.edit_dialog.geoms:
-            sql = "SELECT buildings.building_outlines_update_shape(%s, %s);"
-            self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.geoms[key], key))
+            for key in self.edit_dialog.geoms:
+                #new building
+                sql = "SELECT buildings.buildings_insert();"
+                result = self.edit_dialog.db.execute_no_commit(sql)
+                building_id = result.fetchall()[0][0]
 
-            self.edit_dialog.db.execute_no_commit(
-                "SELECT buildings.building_outlines_update_capture_method(%s, %s)", (key, capture_method_id)
-            )
-            sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
-            self.edit_dialog.db.execute_no_commit(sql, (key,))
+                # new building outline
+                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s, %s);"
+                result = self.edit_dialog.db.execute_no_commit(
+                    sql,
+                    (
+                        building_id,
+                        attributes[2],
+                        attributes[3],
+                        attributes[5],
+                        attributes[6],
+                        attributes[7],
+                        self.edit_dialog.geoms[key]
+                    ),
+                )
+
+                # update lifecycle table
+                sql = "SELECT buildings.lifecycle_insert_record(%s, %s);"
+                self.edit_dialog.db.execute_no_commit(sql, (self.split_geom, building_id))
+
+                # end lifespan
+                sql = "SELECT buildings.building_outlines_update_end_lifespan(%s);"
+                self.edit_dialog.db.execute_no_commit(sql, ([key],))
+
+                sql = "SELECT buildings.buildings_update_end_lifespan(%s);"
+                self.edit_dialog.db.execute_no_commit(sql, ([self.split_geom],))
+
+        else:
+
+            for key in self.edit_dialog.geoms:
+                sql = "SELECT buildings.building_outlines_update_shape(%s, %s);"
+                self.edit_dialog.db.execute_no_commit(sql, (self.edit_dialog.geoms[key], key))
+
+                self.edit_dialog.db.execute_no_commit(
+                    "SELECT buildings.building_outlines_update_capture_method(%s, %s)", (key, capture_method_id)
+                )
+                sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
+                self.edit_dialog.db.execute_no_commit(sql, (key,))
 
         self.disable_UI_functions()
 
@@ -879,6 +918,9 @@ class EditGeometry(ProductionChanges):
                     del self.edit_dialog.geoms[qgsfId]
                 self.disable_UI_functions()
             else:
+                sql = buildings_select.building_id_by_building_outline_id
+                result = self.edit_dialog.db.execute_return(sql, (qgsfId,))
+                self.split_geom = result.fetchall()[0][0]
                 self.edit_dialog.geoms[qgsfId] = self.edit_dialog.geom
                 self.enable_UI_functions()
                 self.populate_edit_comboboxes()

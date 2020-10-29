@@ -37,10 +37,12 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.edit_dialog = EditDialog(self)
 
         self.cb_production.setChecked(True)
+        self.cb_historic.setChecked(True)
 
         # set up signals and slots
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.cb_production.clicked.connect(self.cb_production_clicked)
+        self.cb_historic.clicked.connect(self.cb_historic_clicked)
         QgsProject.instance().layerWillBeRemoved.connect(self.layers_removed)
 
         self.setup_toolbar()
@@ -87,7 +89,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
         self.building_historic = self.layer_registry.add_postgres_layer(
             "historic_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is not NULL"
         )
-        self.building_historic.loadNamedStyle(path + "building_historic.qml")
+        self.building_historic.loadNamedStyle(path + "historic_production_outlines.qml")
         self.building_layer = None
         self.building_layer = self.layer_registry.add_postgres_layer(
             "building_outlines", "building_outlines", "shape", "buildings", "", "end_lifespan is NULL"
@@ -101,6 +103,17 @@ class ProductionFrame(QFrame, FORM_CLASS):
         layer_tree_model = iface.layerTreeView().model()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         current_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Building Outlines"]
+        if checked:
+            current_category[0].setData(Qt.Checked, Qt.CheckStateRole)
+        else:
+            current_category[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+
+    @pyqtSlot(bool)
+    def cb_historic_clicked(self, checked):
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.building_historic.id())
+        layer_tree_model = iface.layerTreeView().model()
+        categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
+        current_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Historic Outlines"]
         if checked:
             current_category[0].setData(Qt.Checked, Qt.CheckStateRole)
         else:
@@ -236,3 +249,5 @@ class ProductionFrame(QFrame, FORM_CLASS):
         """To ensure QGIS has most up to date ID for the newly split feature see #349"""
         self.cb_production_clicked(False)
         self.cb_production_clicked(True)
+        self.cb_historic_clicked(False)
+        self.cb_historic_clicked(True)
