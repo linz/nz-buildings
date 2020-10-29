@@ -1,8 +1,10 @@
 # coding=utf-8
 
 from __future__ import print_function
-import sys
+
 import os
+import sys
+
 import psycopg2
 
 from buildings.utilities import config
@@ -44,6 +46,7 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_lds", "schema_and_tables.sql"),
     os.path.join("sql", "deploy", "buildings", "add_modified_date.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "huts_and_protected_areas.sql"),
+    os.path.join("sql", "deploy", "buildings_reference", "add_nz_imagery_survey_index.sql"),
     # Default Values
     os.path.join("sql", "deploy", "buildings_common", "default_values.sql"),
     os.path.join("sql", "deploy", "buildings", "default_values.sql"),

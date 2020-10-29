@@ -60,18 +60,25 @@ buildings_reference/functions/protected_area_polygons 2019-06-20T19:43:21Z Jan D
 buildings_reference/functions/change_reference_name_col_insert 2019-08-30T01:40:37Z Chen Yingting <ychen@linz.govt.nz> # Alter the functions to allow updates or inserts on reference name column
 buildings_bulk_load/functions/supplied_outlines_fix_shape_handling 2019-11-24T21:49:23Z Megan Davidson <mdavidson@linz.govt.nz> # update supplied_outlines_insert geometry handling for QGIS3
 @v3.0.0-dev1 2020-01-05T23:37:24Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.0.0-dev1
+
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.0.0-dev1] 2020-01-05T23:37:32Z Daniel Silk <dsilk@linz.govt.nz> # Update nz_imagery_surveys table name
 @v3.1.0-dev1 2020-01-28T04:42:02Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.1.0-dev1
+
 buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v3.1.0-dev1] 2020-01-28T04:42:04Z Daniel Silk <dsilk@linz.govt.nz> # Specify types of suburb and locality to include in reference data.
 buildings_reference/functions/suburb_locality_optimised 2020-02-04T21:29:59Z Megan Davidson <mdavidson@linz.govt.nz> # updating suburb localities has been optimised
 buildings_reference/functions/territorial_authority [buildings_reference/functions/territorial_authority@v3.1.0-dev1] 2020-02-04T23:18:39Z Douglas Kwan <dkwan@linz.govt.nz> # Update territorial authority comparison
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.1.0-dev1] 2020-02-05T01:11:27Z Douglas Kwan <dkwan@linz.govt.nz> # Update suburb_locality to include suburb_3rd etc
 @v3.1.0-dev2 2020-02-04T21:29:59Z Megan Davidson <mdavidson@linz.govt.nz> # Tag v3.1.0-dev2
+
 buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v3.1.0-dev2] 2020-02-04T22:45:27Z Megan Davidson <mdavidson@linz.govt.nz> # Remove suburb area from suburb assignment
 buildings/functions/building_outlines [buildings/functions/building_outlines@v3.1.0-dev2] 2020-02-04T23:06:57Z Megan Davidson <mdavidson@linz.govt.nz> # Remove update suburb function
 buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/bulk_load_outlines@v3.1.0-dev2] 2020-02-05T01:06:50Z Megan Davidson <mdavidson@linz.govt.nz> # Remove update suburb function for bulk loaded buildings
 buildings_bulk_load/functions/remove_small_tanks 2019-12-03T23:56:18Z Megan Davidson <mdavidson@linz.govt.nz> # add a function to remove small tanks on bulk load
 @v3.2.0-dev1 2020-03-02T01:54:14Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.2.0-dev1
+
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.2.0-dev1] 2020-05-22T02:23:52Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Remove deleted_in_production where clause
+@v3.2.0-dev2 2020-10-20T18:57:05Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.2.0-dev2
 
 buildings/functions/insert_lifecycle_record 2020-04-29T04:03:16Z Megan Davidson <mdavidson@linz.govt.nz> # Allow the user to insert a record into the lifecycle table
+buildings_reference/add_nz_imagery_survey_index 2020-10-20T18:57:10Z Daniel Silk <dsilk@linz.govt.nz> # Add a copy of the NZ Imagery Survey Index table
+buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.2.0-dev2] 2020-10-20T19:01:16Z Daniel Silk <dsilk@linz.govt.nz> # Update reference for NZ Imagery Survey Index table and account for building name and use updates in published last_modified date

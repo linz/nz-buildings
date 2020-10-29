@@ -10,16 +10,30 @@ Unreleased
 Changed
 -------
 
-* Completed upgrade to QGIS 3.10
-* Some symbology changed to enable the removal of QgsHighlight due to bugs
+* The building outlines database now holds its own imagery survey index
+* Modified date column in LDS dataset views takes into account name or use changes
 * Data dictionary and metadata updated to reflect additional Tasman, Nelson, Otago and Dunedin building outlines updates
 
 Fixed
 -----
 
 * Fixed PostgreSQL installation for continuous integration
-* Outlines deleted or split in production are now added to all_sources table
 * Outlines split in production now cause all split outputs to have new identifiers
+
+3.5.0
+==========
+29-05-2020
+
+Changed
+-------
+
+* Completed upgrade to QGIS 3.10
+* Some symbology changed to enable the removal of QgsHighlight due to bugs
+
+Fixed
+-----
+
+* Outlines deleted or split in production are now added to all_sources table
 
 3.4.0
 ==========

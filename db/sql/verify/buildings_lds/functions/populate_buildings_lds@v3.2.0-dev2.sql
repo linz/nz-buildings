@@ -45,48 +45,4 @@ BEGIN
     END IF;
 END $$;
 
-DO $$
-BEGIN
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'nz_building_outlines_insert'
-    AND prosrc LIKE '%aerial_lds.nz_imagery_survey_index%';
-    IF FOUND THEN
-        RAISE EXCEPTION 'aerial_lds found - should now refer to buildings_reference';
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'nz_building_outlines_all_sources_insert'
-    AND prosrc LIKE '%aerial_lds.nz_imagery_survey_index%';
-    IF FOUND THEN
-        RAISE EXCEPTION 'aerial_lds found - should now refer to buildings_reference';
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'nz_building_outlines_insert'
-    AND prosrc LIKE '%building_name.begin_lifespan%';
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'building_name date not taken into account for published last_modified date';
-    END IF;
-END $$;
-
-DO $$
-BEGIN
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'nz_building_outlines_all_sources_insert'
-    AND prosrc LIKE '%building_name.begin_lifespan%';
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'building_name date not taken into account for published last_modified date';
-    END IF;
-END $$;
-
 ROLLBACK;
