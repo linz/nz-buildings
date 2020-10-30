@@ -178,6 +178,7 @@ $$
         JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         LEFT JOIN deleted_in_production USING (building_outline_id)
         LEFT JOIN building_outline_lifecycle USING (building_outline_id)
+        WHERE deleted_in_production.building_outline_id IS NULL
         ORDER BY building_outlines.building_outline_id
         RETURNING *
         )
