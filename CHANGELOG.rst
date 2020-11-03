@@ -17,6 +17,7 @@ Changed
 Fixed
 -----
 
+* Added the supplied_dataset_id and a new primary key to the buildings_bulk_load.removed table to allow a building to be identified for removal more than once
 * Fixed PostgreSQL installation for continuous integration
 * Outlines split in production now cause all split outputs to have new identifiers
 
