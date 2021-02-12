@@ -183,7 +183,7 @@ class ProcessComparison(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(len(result), 17)
-        Matched
+        # matched
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
         result = result.fetchall()
