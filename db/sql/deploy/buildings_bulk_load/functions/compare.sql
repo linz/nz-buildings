@@ -335,7 +335,7 @@ IF ( SELECT processed_date
             , 1 AS qa_status_id
             , ese.supplied_dataset_id
         FROM buildings_bulk_load.find_removed(p_supplied_dataset_id) r
-        JOIN buildings_bulk_load.existing_subset_extracts ese USING (building_outline_id);
+        LEFT JOIN buildings_bulk_load.existing_subset_extracts ese USING (building_outline_id);
 
         -- MATCHED
 
