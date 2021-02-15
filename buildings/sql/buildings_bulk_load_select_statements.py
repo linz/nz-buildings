@@ -284,9 +284,8 @@ ORDER BY r.building_outline_id ASC;
 removed_by_existing_outline_id_dataset_id = """
 SELECT building_outline_id
 FROM buildings_bulk_load.removed
-JOIN buildings_bulk_load.existing_subset_extracts existing USING (building_outline_id)
-WHERE removed.building_outline_id = %s
-AND removed.supplied_dataset_id = %s;
+WHERE building_outline_id = %s
+AND supplied_dataset_id = %s;
 """
 
 removed_count_by_building_outline_id = """

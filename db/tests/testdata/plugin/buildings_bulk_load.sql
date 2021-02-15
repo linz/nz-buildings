@@ -187,8 +187,8 @@ INSERT INTO buildings_bulk_load.related (related_id, related_group_id, bulk_load
 
 -- buildings_bulk_load.removed
 
-INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1004, 1, 2);
-INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1006, 1, 2);
+INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1004, 1, 1);
+INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1006, 1, 1);
 
 -- buildings_bulk_load.supplied_outlines
 
