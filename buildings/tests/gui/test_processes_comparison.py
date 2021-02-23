@@ -95,18 +95,22 @@ class ProcessComparison(unittest.TestCase):
         sql = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;"
         resulta = db._execute(sql)
         resulta = resulta.fetchall()
+        print(resulta)
         # removed
         sql = "SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;"
         resultr = db._execute(sql)
         resultr = resultr.fetchall()
+        print(resultr)
         # matched
         sql = "SELECT bulk_load_outline_id, building_outline_id FROM buildings_bulk_load.matched ORDER BY bulk_load_outline_id, building_outline_id;"
         resultm = db._execute(sql)
         resultm = resultm.fetchall()
+        print(resultm)
         # related
         sql = "SELECT bulk_load_outline_id, building_outline_id FROM buildings_bulk_load.related ORDER BY bulk_load_outline_id, building_outline_id;"
         resultrl = db._execute(sql)
         resultrl = resultrl.fetchall()
+        print(resultrl)
         # FAILS HERE - RESULT = 2
         # self.assertEqual(len(resulta), 16)
         self.assertEqual(len(resultr), 33)
@@ -158,13 +162,13 @@ class ProcessComparison(unittest.TestCase):
         """Checks outlines that are added during qa before comparisons is not causing issues when carried through"""
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
         result = db._execute(sql)
-        result = result.fetchall()[0][0]
+        supplied_dataset_id = result.fetchall()[0][0]
         # Add one outline in both bulk_load_outlines and added table
         sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
         result = db._execute(
             sql,
             (
-                result,
+                supplied_dataset_id,
                 None,
                 2,
                 1,
@@ -176,6 +180,7 @@ class ProcessComparison(unittest.TestCase):
             ),
         )
         result = result.fetchall()[0][0]
+        print(result)
 
         btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
@@ -184,20 +189,22 @@ class ProcessComparison(unittest.TestCase):
         # FAILS HERE - RESULT = 2
         # sql = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;"
         # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 17)
+        # resulta = result.fetchall()
+        # self.assertEqual(len(resulta), 17)
         # matched
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
         result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 4)
+        resultm = result.fetchall()
+        self.assertEqual(len(resultm), 4)
         # related
+        # FAILS HERE - RESULT = 44
         sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
         result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 46)
+        resultr = result.fetchall()
+        print(resultr)
+        self.assertEqual(len(resultr), 46)
         # removed
         sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
         result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 33)
+        resultd = result.fetchall()
+        self.assertEqual(len(resultd), 33)
