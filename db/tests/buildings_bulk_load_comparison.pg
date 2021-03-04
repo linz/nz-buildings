@@ -120,9 +120,9 @@ SELECT set_has(
 -- removed
 
 SELECT set_has( 
-    'SELECT building_outline_id FROM buildings_bulk_load.removed', 
-    $$VALUES (1004), 
-             (1006)$$, 
+    'SELECT building_outline_id, qa_status_id, supplied_dataset_id, removed_id FROM buildings_bulk_load.removed', 
+    $$VALUES (1004, 1, 1, 1),
+             (1006, 1, 1, 2)$$,
     'Check contents of removed buildings table after building comparison function has run' 
 );
 

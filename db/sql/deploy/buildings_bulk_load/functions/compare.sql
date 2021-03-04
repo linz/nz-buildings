@@ -329,11 +329,12 @@ IF ( SELECT processed_date
 
         -- REMOVED
 
-        INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id)
+        INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id)
         SELECT
-              building_outline_id
+              r.building_outline_id
             , 1 AS qa_status_id
-        FROM buildings_bulk_load.find_removed(p_supplied_dataset_id);
+            , p_supplied_dataset_id
+        FROM buildings_bulk_load.find_removed(p_supplied_dataset_id) r;
 
         -- MATCHED
 
@@ -448,13 +449,13 @@ IF ( SELECT processed_date
 
         -- Insert Existing Subset Extracts Outlines that don't get sorted into REMOVED
 
-        INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id)
-        SELECT ex.building_outline_id, 1 AS qa_status_id
-        FROM buildings_bulk_load.existing_subset_extracts ex
-        LEFT JOIN buildings_bulk_load.removed removed ON removed.building_outline_id = ex.building_outline_id
-        LEFT JOIN buildings_bulk_load.matched matched ON matched.building_outline_id = ex.building_outline_id
-        LEFT JOIN buildings_bulk_load.related related ON related.building_outline_id = ex.building_outline_id
-        WHERE ex.supplied_dataset_id = p_supplied_dataset_id
+        INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id, supplied_dataset_id)
+        SELECT ese.building_outline_id, 1 AS qa_status_id, ese.supplied_dataset_id
+        FROM buildings_bulk_load.existing_subset_extracts ese
+        LEFT JOIN buildings_bulk_load.removed removed ON removed.building_outline_id = ese.building_outline_id
+        LEFT JOIN buildings_bulk_load.matched matched ON matched.building_outline_id = ese.building_outline_id
+        LEFT JOIN buildings_bulk_load.related related ON related.building_outline_id = ese.building_outline_id
+        WHERE ese.supplied_dataset_id = p_supplied_dataset_id
         AND removed.building_outline_id IS NULL
         AND matched.building_outline_id IS NULL
         AND related.building_outline_id IS NULL;
