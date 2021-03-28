@@ -40,3 +40,9 @@ def buildings_warning(warn_text, warn_message, warn_level_text):
         warn_duration = 0
 
     iface.messageBar().pushMessage(warn_text, warn_message, level=warn_level, duration=warn_duration)
+
+    error_txt_path = os.path.join(QgsApplication.qgisSettingsDirPath(), "buildings", "errors.txt")
+
+    file = open(error_txt_path,"a")
+    file.write(warn_message)
+    file.close()
