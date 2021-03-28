@@ -70,6 +70,13 @@ def connect():
         _conn = None
         buildings_warning("Database Error", str(error), "critical")
 
+def write_to_txt(text):
+    error_txt_path = os.path.join(QgsApplication.qgisSettingsDirPath(), "buildings", "errors.txt")
+
+    file = open(error_txt_path,"a")
+    file.write(text)
+    file.close()
+
 
 def _execute(sql, data=None):
     """
@@ -99,6 +106,8 @@ def _execute(sql, data=None):
             _conn.commit()
         else:
             _conn.rollback()
+        txt = "db error \nsql {} \ndata {}".format(sql, data)
+        write_to_txt(txt)
         buildings_warning("Database Error", str(error), "critical")
 
         return None
@@ -107,6 +116,9 @@ def _execute(sql, data=None):
         cursor.close()
         _conn.rollback()
         buildings_warning("Interface Error", str(error), "critical")
+
+        txt = "interface error \nsql {} \ndata {}".format(sql, data)
+        write_to_txt(txt)
 
         return None
 

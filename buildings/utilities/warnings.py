@@ -15,6 +15,8 @@
 # and catch raised errors
 """
 
+import os
+
 from qgis.core import QgsApplication
 from qgis.utils import Qgis, iface
 
