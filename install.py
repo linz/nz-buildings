@@ -6,7 +6,6 @@ import os
 import sys
 
 import psycopg2
-
 from buildings.utilities import config
 
 # Get the path for the parent directory of this file.
@@ -53,6 +52,8 @@ SQL_SCRIPTS = [
     os.path.join("sql", "deploy", "buildings_bulk_load", "default_values.sql"),
     # Views
     os.path.join("sql", "deploy", "buildings_bulk_load", "create_view_alter_relationships.sql"),
+    # Table Modifications
+    os.path.join("sql", "deploy", "buildings_bulk_load", "add_new_pk_column_to_removed.sql"),
     # Functions
     os.path.join("sql", "deploy", "buildings_reference", "functions", "canal_polygons.sql"),
     os.path.join("sql", "deploy", "buildings_reference", "functions", "capture_source_area.sql"),

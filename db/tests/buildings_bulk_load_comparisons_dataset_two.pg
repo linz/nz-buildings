@@ -46,7 +46,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT buildings_bulk_load.find_related(2)',
-    $$VALUES ((1036,2035)), ((1037,2035))$$,
+    $$VALUES ((1036, 2035)), ((1037, 2035))$$,
     'Check return of buildings bulk load finc_related function'
 );
 
@@ -55,7 +55,7 @@ SELECT results_eq(
 
 SELECT results_eq(
     'SELECT buildings_bulk_load.find_matched(2)',
-    $$VALUES ((1035,2036))$$,
+    $$VALUES ((1035, 2036))$$,
     'Check return of buildings bulk load find_matched function'
 );
 
@@ -72,8 +72,8 @@ SELECT set_has(
 -- removed buildings contents
 
 SELECT set_has(
-    'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id',
-    $$VALUES (1034)$$,
+    'SELECT building_outline_id, qa_status_id, supplied_dataset_id, removed_id FROM buildings_bulk_load.removed', 
+    $$VALUES (1034, 1, 2, 3)$$,
     'Check contents of removed table after building comparison function has run'
 );
 

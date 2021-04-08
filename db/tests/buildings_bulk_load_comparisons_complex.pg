@@ -99,8 +99,10 @@ SELECT set_has(
 -- Test comparisons function inputs complex removed outlines
 
 SELECT set_has(
-    'SELECT building_outline_id FROM buildings_bulk_load.removed',
-    $$VALUES (1042), (1058), (1081)$$,
+    'SELECT building_outline_id, qa_status_id, supplied_dataset_id, removed_id FROM buildings_bulk_load.removed',
+    $$VALUES (1042, 1, 4, 4),
+             (1058, 1, 4, 5),
+             (1081, 1, 4, 7)$$,
     'Check removed outlines after comparisons function has run'
 );
 

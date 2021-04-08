@@ -82,3 +82,6 @@ buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate
 buildings/functions/insert_lifecycle_record 2020-04-29T04:03:16Z Megan Davidson <mdavidson@linz.govt.nz> # Allow the user to insert a record into the lifecycle table
 buildings_reference/add_nz_imagery_survey_index 2020-10-20T18:57:10Z Daniel Silk <dsilk@linz.govt.nz> # Add a copy of the NZ Imagery Survey Index table
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v3.2.0-dev2] 2020-10-20T19:01:16Z Daniel Silk <dsilk@linz.govt.nz> # Update reference for NZ Imagery Survey Index table and account for building name and use updates in published last_modified date
+buildings_bulk_load/add_new_pk_column_to_removed 2020-11-02T19:15:15Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_dataset_id and a new primary key column to the removed table
+buildings_bulk_load/functions/removed [buildings_bulk_load/functions/removed@v3.2.0-dev2] 2020-11-03T01:53:25Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_dataset_id column to removed_insert_building_outlines function
+buildings_bulk_load/functions/compare [buildings_bulk_load/functions/compare@v3.2.0-dev2] 2020-11-03T02:21:26Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_dataset_id column to removed table inserts in comparison functions

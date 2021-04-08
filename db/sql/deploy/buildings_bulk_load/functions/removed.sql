@@ -127,8 +127,10 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.removed_insert_building_outlines(
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id)
-    VALUES ($1, 2)
+    INSERT INTO buildings_bulk_load.removed(building_outline_id, qa_status_id, supplied_dataset_id)
+    SELECT ese.building_outline_id, 2, ese.supplied_dataset_id
+    FROM buildings_bulk_load.existing_subset_extracts ese
+    WHERE building_outline_id = $1
     RETURNING removed.building_outline_id;
 
 $$

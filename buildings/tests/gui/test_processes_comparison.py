@@ -141,31 +141,28 @@ class ProcessComparison(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(len(result), 4)
-        # # related
-        # sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
-        # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 44)
-        # # removed
-        # # btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
-        # # QTimer.singleShot(500, btn_yes.click)
-        # # self.bulk_load_frame.compare_outlines_clicked(False)
-        # sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
-        # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 35)
+        # related
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 44)
+        # removed
+        sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        result = result.fetchall()
+        self.assertEqual(len(result), 35)
 
     def test_outline_add_during_qa(self):
         """Checks outlines that are added during qa before comparisons is not causing issues when carried through"""
         sql = "SELECT supplied_dataset_id FROM buildings_bulk_load.supplied_datasets WHERE description = 'Test bulk load outlines';"
         result = db._execute(sql)
-        result = result.fetchall()[0][0]
+        supplied_dataset_id = result.fetchall()[0][0]
         # Add one outline in both bulk_load_outlines and added table
         sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s);"
         result = db._execute(
             sql,
             (
-                result,
+                supplied_dataset_id,
                 None,
                 2,
                 1,
@@ -184,20 +181,20 @@ class ProcessComparison(unittest.TestCase):
         # added
         sql = "SELECT bulk_load_outline_id FROM buildings_bulk_load.added ORDER BY bulk_load_outline_id;"
         result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 17)
-        # Matched
-        # sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
-        # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 4)
-        # # related
-        # sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
-        # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 46)
-        # # removed
-        # sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
-        # result = db._execute(sql)
-        # result = result.fetchall()
-        # self.assertEqual(len(result), 33)
+        resulta = result.fetchall()
+        self.assertEqual(len(resulta), 17)
+        # matched
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.matched ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        resultm = result.fetchall()
+        self.assertEqual(len(resultm), 4)
+        # related
+        sql = 'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;'
+        result = db._execute(sql)
+        resultr = result.fetchall()
+        self.assertEqual(len(resultr), 46)
+        # removed
+        sql = 'SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;'
+        result = db._execute(sql)
+        resultd = result.fetchall()
+        self.assertEqual(len(resultd), 33)

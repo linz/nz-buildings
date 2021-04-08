@@ -187,8 +187,8 @@ INSERT INTO buildings_bulk_load.related (related_id, related_group_id, bulk_load
 
 -- buildings_bulk_load.removed
 
-INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id) VALUES (1004, 1);
-INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id) VALUES (1006, 1);
+INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1004, 1, 2);
+INSERT INTO buildings_bulk_load.removed (building_outline_id, qa_status_id, supplied_dataset_id) VALUES (1006, 1, 2);
 
 -- buildings_bulk_load.supplied_outlines
 
@@ -260,4 +260,3 @@ INSERT INTO buildings_bulk_load.supplied_outlines (supplied_outline_id, supplied
 INSERT INTO buildings_bulk_load.supplied_outlines (supplied_outline_id, supplied_dataset_id, external_outline_id, begin_lifespan, shape) VALUES (233, 2, NULL, '2019-06-18 08:20:36.244828', '01030000209108000001000000050000006CBF296F71A93C41DB6FCA85523155419D2603DC7AA93C411B2C2893343155410C3FF0E3B1A93C415FCEB27F3431554192106F27AFA93C411F125572523155416CBF296F71A93C41DB6FCA8552315541');
 
 -- buildings_bulk_load.transferred
-
