@@ -23,7 +23,8 @@ The NZ Building Outlines data described below represents the outlines of individ
 Description
 ---------------------------
 
-This dataset consists of building outlines within mainland New Zealand. This is not a complete set and will be added to as new imagery becomes available. Current coverage includes areas in Northland, Auckland, Waikato, Bay of Plenty, Gisborne, Hawke’s Bay, Manawatu-Whanganui, Wellington, Tasman, Nelson, West Coast, Taranaki, Marlborough, Canterbury, Southland and Otago (See coverage maps below for more detail).
+
+This dataset consists of the most recent set of building outlines extracted from the LINZ aerial imagery available on the LINZ Data Service. Current coverage includes nearly all regions of New Zealand, except parts of rural Auckland, remote parts of Bay of Plenty, Tasman and the Southern Alps, as well as Fiordland, Stewart Island and the Chatham Islands.  This dataset will be updated and expanded as new aerial imagery becomes available. (See coverage maps below for more detail).
 
 This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from aerial imagery using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground.
 
@@ -36,14 +37,23 @@ This dataset includes the spatial coverage of building outlines using remotely s
 
 Building outlines data are defined by the following criteria:
 
-* Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
-* Primary building structures are captured as separate building outline polygons from adjoining building structures, such as garages (see Image 2a)
-* Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
-* Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline.
-* Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
-* Adjoining commercial buildings are captured as separate building outlines when rooflines allow delineation (see Image 2c).
-* Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
-* Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
+
+   * Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
+
+   * Primary building structures are captured as separate building outline polygons from adjoining building structures, such as garages (see Image 2a)
+
+   * Building extensions, sunrooms, balconies, patios and annexes are captured as part of the primary building outline structure if they exist as part of multi-level buildings and if sufficient imagery resolution allows this determination.
+
+   * Permanent building structures such as sheds and greenhouses >10sq meters, not attached to a primary building structure, are captured as a separate building outline.
+
+   * Adjoining townhouses are not captured as separate structures, but rather as joined primary structures.
+
+   * Adjoining commercial buildings are captured as separate building outlines when rooflines allow delineation (see Image 2c).
+
+   * Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
+
+   * Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
+
 
 .. figure:: _static/examples.png
    :scale: 70%
@@ -54,19 +64,38 @@ Building outlines data are defined by the following criteria:
 The publicly available building outlines data consists of three tables. The `NZ Building Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ Building Outlines All Sources <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-all-sources>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ Building Outlines Lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building_id relationship information buildings that are split or merged.
 
 
-Source Imagery
+Attributes
 ---------------------------
+
+
+Source Imagery
+***************************
 
 The source imagery is linked via the ``capture_source_id`` attribute of building outlines to the ``imagery_survey_id`` of NZ Aerial Surveys. Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
 
 The NZ Aerial Surveys data dictionary is here: https://nz-imagery-surveys.readthedocs.io/en/latest/index.html
 
 
+Name & Use
+***************************
+
+The attributes ``name`` and ``use`` provide the building name and use for the following:
+
+* as sourced from NZ Facilities dataset <LINK>, currently containing hospitals and schools. The name and use of the facilities have been applied to all Building Outlines where the building centroid intersects the NZ Facilities polygon.
+* as sourced from supermarket company information in 2020 and applied manually to individual buildings.
+
+
+.. figure:: _static/name_use.png
+   :scale: 30%
+   :alt: Examples of NZ Facilities
+
+   Image 3. Example of building outlines centroid intersection of NZ Facilities polygons
+
+
 Suburbs & Localities
---------------------
+*****************************
 
-Published building outlines include the attribute ``suburb_locality`` which provides the suburb or locality name as sourced from NZ Localities (an NZ Fire Service owned dataset). A derived suburb or locality name may not be the official geographic name for the geographic area that a building occupies.
-
+The attribute ``suburb_locality`` provides the suburb or locality name and is sourced from NZ Localities (an NZ Fire Service owned dataset). A derived suburb or locality name may not be the official geographic name for the geographic area that a building occupies.
 The attributed name may refer to suburbs, localities, islands and parks / reserves. Water features such as coastal bays, lakes and inland bays are not included.
 
 If a building outline intersects two localities, the locality with larger area of intersection is used for that feature.
@@ -75,7 +104,7 @@ If a building outline intersects two localities, the locality with larger area o
    :scale: 70%
    :alt: Examples of locality
 
-   Image 3. Example of a building outline intersecting two localities.
+   Image 4. Example of a building outline intersecting two localities.
 
 For building outlines on water and not within any locality, the nearest locality is used for that feature.
 
@@ -83,19 +112,19 @@ For building outlines on water and not within any locality, the nearest locality
    :scale: 70%
    :alt: Examples of locality
 
-   Image 4. Examples of building outlines not within any locality.
+   Image 5. Examples of building outlines not within any locality.
 
 Coverage Maps
 ---------------------------
 
-The NZ Building Outlines dataset is being procured and released in stages. Image 5 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_.
+The NZ Building Outlines dataset is being procured and released in stages. Image 6 shows the current coverage of building outlines in green available on the `LINZ Data Service <https://data.linz.govt.nz/layer/101290>`_.
 
 +-------------------------------------------------------------+
 | .. figure:: _static/coverage_map_current.png                |
-|    :scale: 40%                                              |
+|    :scale: 50%                                              |
 |    :alt: current building outlines coverage                 |
 |                                                             |
-|    Image 5: Map of current dataset coverage.                |
+|    Image 6: Map of current dataset coverage.                |
 |                                                             |
 +-------------------------------------------------------------+
 
@@ -111,6 +140,7 @@ Valid Geometry
 ---------------------------
 
 A building outline polygon is considered to have valid geometry if:
+
 
 * It does not overlap with any other current building outline polygon
 * It does not contain any spikes (a series of vertices which create an extremely acute angle)

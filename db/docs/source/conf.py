@@ -36,7 +36,8 @@ sys.path.insert(0, os.path.abspath("../../sql/deploy"))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc"]
+# extensions = ["sphinx.ext.autodoc"]
+extensions = ["sphinx_rtd_theme"]
 
 # 'sphinx.ext.autosectionlabel'
 # Add any paths that contain templates here, relative to this directory.
@@ -121,7 +122,7 @@ html_theme = "sphinx_rtd_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {"sticky_navigation": True}
+html_theme_options = {"sticky_navigation": True, "display_version": False}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
@@ -135,7 +136,7 @@ html_short_title = "NZ Buildings Data Dictionary"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "logo.png"
+# html_logo = "logo.png"
 
 # The name of an image file (relative to this directory) to use as a favicon of
 # the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -256,7 +257,9 @@ latex_use_parts = True
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "buildings_data_dictionary", u"buildings_data_dictionary", [author], 1)]
+man_pages = [
+    (master_doc, "buildings_data_dictionary", u"buildings_data_dictionary", [author], 1)
+]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -311,19 +314,27 @@ def get_schema(sql_file_path):
     with open(sql_file_path) as f:
         for line in f:
             schema_search = re.search(r"CREATE SCHEMA IF NOT EXISTS\s(.*);", line)
-            schema_comment_search = re.search(r"COMMENT ON SCHEMA .*?\sIS\s(.+?)\;", file_content, re.DOTALL)
+            schema_comment_search = re.search(
+                r"COMMENT ON SCHEMA .*?\sIS\s(.+?)\;", file_content, re.DOTALL
+            )
 
             if schema_search is not None:
                 schema_count += 1
                 if schema_count > 1:
-                    raise ValueError("More than one schema is defined in this SQL file: {}".format(sql_file_path))
+                    raise ValueError(
+                        "More than one schema is defined in this SQL file: {}".format(
+                            sql_file_path
+                        )
+                    )
                 else:
                     schema_name = schema_search.group(1)
                     schema["name"] = schema_name
 
             if schema_comment_search is not None:
                 schema_comment = schema_comment_search.group(1)
-                schema_comment_clean = schema_comment.replace("\r\n", "").replace("'", "")
+                schema_comment_clean = schema_comment.replace("\r\n", "").replace(
+                    "'", ""
+                )
                 schema["comment"] = schema_comment_clean
 
     f.close()
@@ -350,39 +361,77 @@ def get_tables(schema_out, sql_file_path):
     with open(sql_file_path) as f:
         for line in f:
 
-            table_name_search = re.search(r"CREATE TABLE IF NOT EXISTS \w+\.([^\(\s]*)", line)
+            table_name_search = re.search(
+                r"CREATE TABLE IF NOT EXISTS \w+\.([^\(\s]*)", line
+            )
 
             if table_name_search is not None:
                 # Now perform all actions to find table name, table comment, table columns, and table comments
                 # and when done add all these content to table_dict, and then finally to schema_tabulate_list
 
-                table_dict_tabulate = {}  # This dict hold all the information for one table
+                table_dict_tabulate = (
+                    {}
+                )  # This dict hold all the information for one table
                 table_name = table_name_search.group(1)
                 table_dict_tabulate["table_nam"] = table_name
                 table_str = schema_out["name"] + "." + table_name
                 table_comment_str = "(?<=COMMENT ON TABLE " + table_str + " IS)([^\;]*)"
-                table_comment_search = re.search(table_comment_str, file_content, re.DOTALL)
-                this_table_columns = []  # this holds several lists, each list is is one column of info
+                table_comment_search = re.search(
+                    table_comment_str, file_content, re.DOTALL
+                )
+                this_table_columns = (
+                    []
+                )  # this holds several lists, each list is is one column of info
 
                 if table_comment_search is not None:
                     table_comment_result = table_comment_search.group(1)
                     # remove line terminators and quote marks from multiline comment
-                    table_comment_result_clean = table_comment_result.replace("\r\n", "").replace("'", "")
+                    table_comment_result_clean = table_comment_result.replace(
+                        "\r\n", ""
+                    ).replace("'", "")
                     table_dict_tabulate["table_comment"] = table_comment_result_clean
                     # get the columns for this table
-                    this_table_columns = get_columns(table_str, file_content, this_table_columns)
-                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Allows Nulls", "Description"]
-                    tabulate_columns = tabulate(this_table_columns, tablefmt="rst", headers=headers)
-                    tabulate_split = [x.split(",") for x in tabulate_columns.split("\n")]
+                    this_table_columns = get_columns(
+                        table_str, file_content, this_table_columns
+                    )
+                    headers = [
+                        "Column Name",
+                        "Data Type",
+                        "Length",
+                        "Precision",
+                        "Scale",
+                        "Allows Nulls",
+                        "Description",
+                    ]
+                    tabulate_columns = tabulate(
+                        this_table_columns, tablefmt="rst", headers=headers
+                    )
+                    tabulate_split = [
+                        x.split(",") for x in tabulate_columns.split("\n")
+                    ]
                     table_dict_tabulate["table_columns"] = tabulate_split
 
                 elif table_comment_search is None:
                     # get the columms for this table
-                    this_table_columns = get_columns(table_str, file_content, this_table_columns)
+                    this_table_columns = get_columns(
+                        table_str, file_content, this_table_columns
+                    )
                     table_dict_tabulate["table_comment"] = " "
-                    headers = ["Column Name", "Data Type", "Length", "Precision", "Scale", "Allows Nulls", "Description"]
-                    tabulate_columns = tabulate(this_table_columns, tablefmt="rst", headers=headers)
-                    tabulate_split = [x.split(",") for x in tabulate_columns.split("\n")]
+                    headers = [
+                        "Column Name",
+                        "Data Type",
+                        "Length",
+                        "Precision",
+                        "Scale",
+                        "Allows Nulls",
+                        "Description",
+                    ]
+                    tabulate_columns = tabulate(
+                        this_table_columns, tablefmt="rst", headers=headers
+                    )
+                    tabulate_split = [
+                        x.split(",") for x in tabulate_columns.split("\n")
+                    ]
                     table_dict_tabulate["table_columns"] = tabulate_split
 
                 schema_tabulate_list.append(table_dict_tabulate)
@@ -402,12 +451,16 @@ def get_column_comments(column_str, file_content):
 
     if column_comment_search is not None:
         column_comment = column_comment_search.group(1)
-        column_comment_result_clean = column_comment.replace("\r\n", "").replace("'", "").replace("\n", "")
+        column_comment_result_clean = (
+            column_comment.replace("\r\n", "").replace("'", "").replace("\n", "")
+        )
         column_comment_result_strip = column_comment_result_clean.strip()
         column_comment_result_clean_lower = column_comment_result_clean.lower().strip()
         if "foreign key to the" in column_comment_result_clean_lower:
             foreign_search = re.search(
-                r"(.*)(foreign key to the\s)(.*\..*)\stable(.*)", column_comment_result_strip, re.IGNORECASE
+                r"(.*)(foreign key to the\s)(.*\..*)\stable(.*)",
+                column_comment_result_strip,
+                re.IGNORECASE,
             )
             if foreign_search is not None:
                 schema_and_table = foreign_search.group(3)
@@ -417,18 +470,38 @@ def get_column_comments(column_str, file_content):
                 foreign_key_comment = foreign_search.group(2)
                 schema_named, table_named = schema_and_table.split(".")
                 hyphens = table_named.replace("_", "-")
-                if schema_check == "buildings" or schema_check == "buildings_common" or schema_check == "buildings_bulk_load":
+                if (
+                    schema_check == "buildings"
+                    or schema_check == "buildings_common"
+                    or schema_check == "buildings_bulk_load"
+                ):
                     template_url = "`{schema_table} <{site_url}internal_data.html#table-{table_name_hyphens}>`_"
                     foreign_link = template_url.format(
-                        schema_table=schema_and_table_strip, site_url=SITE_URL, table_name_hyphens=hyphens
+                        schema_table=schema_and_table_strip,
+                        site_url=SITE_URL,
+                        table_name_hyphens=hyphens,
                     )
-                    column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
+                    column_comment_result_strip = (
+                        front_comment
+                        + foreign_key_comment
+                        + foreign_link
+                        + " table"
+                        + end_comment
+                    )
                 if schema_check == "buildings_lds":
                     template_url = "`{schema_table} <{site_url}published_data.html#table-{table_name_hyphens}>`_"
                     foreign_link = template_url.format(
-                        schema_table=schema_and_table_strip, site_url=SITE_URL, table_name_hyphens=hyphens
+                        schema_table=schema_and_table_strip,
+                        site_url=SITE_URL,
+                        table_name_hyphens=hyphens,
                     )
-                    column_comment_result_strip = front_comment + foreign_key_comment + foreign_link + " table" + end_comment
+                    column_comment_result_strip = (
+                        front_comment
+                        + foreign_key_comment
+                        + foreign_link
+                        + " table"
+                        + end_comment
+                    )
 
     if column_comment_search is None:
         column_comment_result_strip = " "
@@ -437,7 +510,7 @@ def get_column_comments(column_str, file_content):
 
 def get_columns(table_str, file_content, this_table_columns):
     """
-    Get the columns for one table, which are listed across multiple lines 
+    Get the columns for one table, which are listed across multiple lines
     """
 
     search_str = r"CREATE TABLE IF NOT EXISTS " + table_str + r"\s\(([^\;]*)\)\;"
@@ -505,19 +578,37 @@ def get_columns(table_str, file_content, this_table_columns):
         "numeric": {
             "regex": r"(.*)\snumeric\((.*)\,(.*)\)(?! NOT NULL)",
             "extra": "precision_scale",
-            "columns": [column_name_str, "numeric", " ", str(numeric_precision), str(numeric_scale), "Yes"],
+            "columns": [
+                column_name_str,
+                "numeric",
+                " ",
+                str(numeric_precision),
+                str(numeric_scale),
+                "Yes",
+            ],
         },
         "numeric_not_null": {
             "regex": r"(.*)\snumeric\((.*)\,(.*)\).*NOT NULL",
             "extra": "precision_scale",
-            "columns": [column_name_str, "numeric", " ", str(numeric_precision), str(numeric_scale), "No"],
+            "columns": [
+                column_name_str,
+                "numeric",
+                " ",
+                str(numeric_precision),
+                str(numeric_scale),
+                "No",
+            ],
         },
         "shape": {
             "regex": r"(shape).*geometry",
             "extra": "notbold",
             "columns": [column_name_str, "geometry", " ", " ", " ", "Yes"],
         },
-        "text": {"regex": r"(.*)\stext", "extra": "notbold", "columns": [column_name_str, "text", " ", " ", " ", "Yes"]},
+        "text": {
+            "regex": r"(.*)\stext",
+            "extra": "notbold",
+            "columns": [column_name_str, "text", " ", " ", " ", "Yes"],
+        },
         "text_not_null": {
             "regex": r"(.*)\stext NOT NULL",
             "extra": "notbold",
@@ -536,12 +627,26 @@ def get_columns(table_str, file_content, this_table_columns):
         "decimal": {
             "regex": r"(.*)\sdecimal\((.*)\,(.*)\)(?! NOT NULL)",
             "extra": "precision_scale",
-            "columns": [column_name_str, "decimal", " ", str(numeric_precision), str(numeric_scale), "Yes"],
+            "columns": [
+                column_name_str,
+                "decimal",
+                " ",
+                str(numeric_precision),
+                str(numeric_scale),
+                "Yes",
+            ],
         },
         "decimal_not_null": {
             "regex": r"(.*)\sdecimal\((.*)\,(.*)\)(?! NOT NULL)",
             "extra": "precision_scale",
-            "columns": [column_name_str, "decimal", " ", str(numeric_precision), str(numeric_scale), "No"],
+            "columns": [
+                column_name_str,
+                "decimal",
+                " ",
+                str(numeric_precision),
+                str(numeric_scale),
+                "No",
+            ],
         },
     }
 
@@ -636,7 +741,7 @@ def rstjinja(app, docname, source):
 
 def setup(app):
     app.connect("source-read", rstjinja)
-    app.add_stylesheet("custom.css")
+    app.add_css_file("custom.css")
 
 
 html_context = context_out
