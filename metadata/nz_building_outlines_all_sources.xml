@@ -342,7 +342,7 @@ Name and Use attributes have been added for the following buildings:
 - Hospitals based on Ministry of Health and NationalMap data
 - Schools based on Ministry of Education and NationalMap data
 - Supermarkets based on supermarket company information as they existed in 2020
-An [NZ Facilities](https://data.linz.govt.nz/layer/105568) dataset was created to help attribute some of the building name and use attributes above, and to provide an indication of the extents of these facilities.
+An [NZ Facilities](https://data.linz.govt.nz/layer/105588) dataset was created to help attribute some of the building name and use attributes above, and to provide an indication of the extents of these facilities.
 **Suburbs and Localities**
 The suburb_locality attribute provides the suburb or locality name as sourced from [NZ Localities](https://data.linz.govt.nz/layer/104830) (an NZ Fire Service owned dataset). A derived suburb or locality name may not be the official geographic name for the geographic area that a building occupies.
 The attributed name may refer to suburbs, localities, islands and parks / reserves. Water features such as coastal bays, lakes and inland bays are not included.
