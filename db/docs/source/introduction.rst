@@ -81,7 +81,7 @@ Name & Use
 
 The attributes ``name`` and ``use`` provide the building name and use for the following:
 
-* as sourced from NZ Facilities dataset <LINK>, currently containing hospitals and schools. The name and use of the facilities have been applied to all Building Outlines where the building centroid intersects the NZ Facilities polygon.
+* as sourced from `NZ Facilities dataset <https://data.linz.govt.nz/layer/105588>`_, currently containing hospitals and schools. The name and use of the facilities have been applied to all Building Outlines where the building centroid intersects the NZ Facilities polygon.
 * as sourced from supermarket company information in 2020 and applied manually to individual buildings.
 
 
