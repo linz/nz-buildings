@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2020-08-21</gco:Date>
+    <gco:Date>2021-06-11</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-08-21</gco:Date>
+                <gco:Date>2021-06-11</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2020-08-21</gco:Date>
+                <gco:Date>2021-06-11</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -126,7 +126,7 @@ Building roof outlines observed in aerial imagery larger than or equal to 10 squ
 
 This dataset contains all building outlines which have been extracted from multiple years of aerial imagery available in each region of the country, including the most recent imagery. This dataset includes the dates for which each building existed in the aerial imagery.
 
-Coverage areas include Northland, Auckland, Waikato, Bay of Plenty, Gisborne, Hawke’s Bay, Taranaki, Manawatu-Whanganui, Wellington, Tasman, Nelson, West Coast, Marlborough, Canterbury, Southland and Otago. This dataset will be updated and expanded as new aerial imagery becomes available.
+Current coverage includes nearly all regions of New Zealand, except parts of rural Auckland, remote parts of Bay of Plenty, Tasman and the Southern Alps, as well as Fiordland, Stewart Island and the Chatham Islands. This dataset will be updated and expanded as new aerial imagery becomes available.
 
 Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.readthedocs.io/en/latest/introduction.html) for detailed metadata and information about this dataset.
 
@@ -329,10 +329,25 @@ The Building Outlines contain spatial detail reflective of the visible character
 A building outline polygon is considered to have valid geometry if;
 • It does not overlap with other building outline polygons;
 • It does not contain any spikes along edges;
-* It does not contain duplicate nodes;
+• It does not contain duplicate nodes;
 • It does not contain lines that are intersected with each other;
 • It can contain polygons with interior rings (holes);
 • It does not contain polygons with multiple exterior rings;
+
+**Attribution:**
+**Source Imagery**
+The source imagery is linked via the capture_source_id attribute of building outlines to the imagery_survey_id of [NZ Imagery Survey Index](https://data.linz.govt.nz/layer/95677). Using this link, additional attributes can be connected to building outlines - for example the dates that the imagery was captured and the accuracy / ground sample distance of the imagery used.
+**Name and Use**
+Name and Use attributes have been added for the following buildings:
+- Hospitals based on Ministry of Health and NationalMap data
+- Schools based on Ministry of Education and NationalMap data
+- Supermarkets based on supermarket company information as they existed in 2020
+An [NZ Facilities](https://data.linz.govt.nz/layer/105588) dataset was created to help attribute some of the building name and use attributes above, and to provide an indication of the extents of these facilities.
+**Suburbs and Localities**
+The suburb_locality attribute provides the suburb or locality name as sourced from [NZ Localities](https://data.linz.govt.nz/layer/104830) (an NZ Fire Service owned dataset). A derived suburb or locality name may not be the official geographic name for the geographic area that a building occupies.
+The attributed name may refer to suburbs, localities, islands and parks / reserves. Water features such as coastal bays, lakes and inland bays are not included.
+If a building outline intersects two localities, the locality with larger area of intersection is used for that feature.
+For building outlines on water and not within any locality, the nearest locality is used for that feature.
           </gco:CharacterString>
           </gmd:statement>
         </gmd:LI_Lineage>
