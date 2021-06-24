@@ -5,7 +5,6 @@ from collections import OrderedDict
 from qgis.PyQt.QtWidgets import QToolButton, QVBoxLayout
 from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis, QgsFeatureRequest
-from qgis.gui import QgsMessageBar
 from qgis.utils import Qgis, iface
 
 from buildings.sql import (
@@ -450,10 +449,6 @@ class EditAttribute(BulkLoadChanges):
         """Constructor"""
         BulkLoadChanges.__init__(self, edit_dialog)
 
-        # add message bar
-        self.message_bar = QgsMessageBar()
-        self.edit_dialog.message_bar_layout.addWidget(self.message_bar)
-
         # set editing to edit polygon
         iface.actionSelect().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
@@ -498,7 +493,9 @@ class EditAttribute(BulkLoadChanges):
                     "\n -------------------- EMPTY VALUE FIELD ------"
                     '-------------- \n\n There are no "reason for deletion" entries '
                 )
-                self.message_bar.pushMessage(msg, level=Qgis.Warning, duration=0)
+                self.edit_dialog.message_bar.pushMessage(
+                    msg, level=Qgis.Warning, duration=0
+                )
                 self.disable_UI_functions()
                 return
             ls_relationships = self.remove_compared_outlines()
@@ -625,7 +622,9 @@ class EditAttribute(BulkLoadChanges):
                 "features when all existing attributes a"
                 "re identical."
             )
-            self.message_bar.pushMessage(msg, level=Qgis.Warning, duration=0)
+            self.edit_dialog.message_bar.pushMessage(
+                msg, level=Qgis.Warning, duration=0
+            )
 
             return False
         # if all selected features have the same attributes (allowed)
@@ -658,7 +657,7 @@ class EditAttribute(BulkLoadChanges):
                                 "Cannot edit deleted features as have differing"
                                 " reasons for deletion. Please edit individually.\n"
                             )
-                            self.message_bar.pushMessage(
+                            self.edit_dialog.message_bar.pushMessage(
                                 msg, level=Qgis.Warning, duration=0
                             )
 
@@ -670,7 +669,7 @@ class EditAttribute(BulkLoadChanges):
                             " run, instead please add this feature manually.\n"
                             "Note: Don't forget to update the relationship too!"
                         )
-                        self.message_bar.pushMessage(
+                        self.edit_dialog.message_bar.pushMessage(
                             msg, level=Qgis.Warning, duration=0
                         )
                         return False
@@ -799,7 +798,9 @@ class EditAttribute(BulkLoadChanges):
                         "-------\n\nCan only mark for deletion outline if"
                         " no relationship exists"
                     )
-                    self.message_bar.pushMessage(msg, level=Qgis.Warning, duration=0)
+                    self.edit_dialog.message_bar.pushMessage(
+                        msg, level=Qgis.Warning, duration=0
+                    )
                     break
                 # related
                 if (item,) in related_outlines:
@@ -808,7 +809,9 @@ class EditAttribute(BulkLoadChanges):
                         "---------- \n\nCan only mark for deletion outline if"
                         " no relationship exists"
                     )
-                    self.message_bar.pushMessage(msg, level=Qgis.Warning, duration=0)
+                    self.edit_dialog.message_bar.pushMessage(
+                        msg, level=Qgis.Warning, duration=0
+                    )
                     ls_relationships["related"].append(item)
                     break
         return ls_relationships
@@ -1016,7 +1019,9 @@ class EditGeometry(BulkLoadChanges):
                 "this can't be done in edit geometry, "
                 "please switch to add outline."
             )
-            self.message_bar.pushMessage(msg, level=Qgis.Warning, duration=0)
+            self.edit_dialog.message_bar.pushMessage(
+                msg, level=Qgis.Warning, duration=0
+            )
             self.disable_UI_functions()
             self.edit_dialog.btn_edit_reset.setEnabled(1)
             return
