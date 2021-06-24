@@ -36,6 +36,9 @@
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
+     <layout class="QVBoxLayout" name="message_bar_layout"/>
+    </item>
+    <item>
      <widget class="QWidget" name="layout_status" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
