@@ -2,7 +2,7 @@
 from collections import OrderedDict
 
 # from qgis.PyQt.QtCore import pyqtSlot
-from qgis.PyQt.QtWidgets import QToolButton, QVBoxLayout
+from qgis.PyQt.QtWidgets import QToolButton
 from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis, QgsFeatureRequest
 from qgis.utils import Qgis, iface
