@@ -4,10 +4,9 @@ from collections import OrderedDict
 # from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton
 from qgis.PyQt.QtCore import Qt
-from qgis.core import QgsFeatureRequest
+from qgis.core import Qgis, QgsFeatureRequest
 from qgis.utils import Qgis, iface
 
-from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
     buildings_bulk_load_select_statements as bulk_load_select,
     buildings_common_select_statements as common_select,
@@ -23,7 +22,6 @@ class BulkLoadChanges(object):
         """Constructor."""
         # setup
         self.edit_dialog = edit_dialog
-        self.error_dialog = None
         self.parent_frame = self.edit_dialog.parent_frame
         self.editing_layer = self.edit_dialog.editing_layer
         iface.setActiveLayer(self.editing_layer)
@@ -41,7 +39,9 @@ class BulkLoadChanges(object):
 
         if self.edit_dialog.layout_capture_method.isVisible():
             # populate capture method combobox
-            result = self.edit_dialog.db.execute_return(common_select.capture_method_value)
+            result = self.edit_dialog.db.execute_return(
+                common_select.capture_method_value
+            )
             ls = result.fetchall()
             for item in ls:
                 self.edit_dialog.cmb_capture_method.addItem(item[0])
@@ -217,16 +217,20 @@ class AddBulkLoad(BulkLoadChanges):
         # editing actions
         iface.building_toolbar.addSeparator()
         for dig in iface.digitizeToolBar().actions():
-            if dig.objectName() in ["mActionAddFeature", "mActionVertexTool", "mActionMoveFeature"]:
+            if dig.objectName() in [
+                "mActionAddFeature",
+                "mActionVertexTool",
+                "mActionMoveFeature",
+            ]:
                 iface.building_toolbar.addAction(dig)
         # advanced Actions
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                    "mActionUndo",
-                    "mActionRedo",
-                    "mActionReshapeFeatures",
-                    "mActionOffsetCurve",
+                "mActionUndo",
+                "mActionRedo",
+                "mActionReshapeFeatures",
+                "mActionOffsetCurve",
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -444,6 +448,7 @@ class EditAttribute(BulkLoadChanges):
     def __init__(self, edit_dialog):
         """Constructor"""
         BulkLoadChanges.__init__(self, edit_dialog)
+
         # set editing to edit polygon
         iface.actionSelect().trigger()
         selecttools = iface.attributesToolBar().findChildren(QToolButton)
@@ -484,18 +489,19 @@ class EditAttribute(BulkLoadChanges):
                 self.edit_dialog.le_deletion_reason.text()
             )
             if len(self.edit_dialog.description_del) == 0:
-                self.error_dialog = ErrorDialog()
-                self.error_dialog.fill_report(
+                msg = (
                     "\n -------------------- EMPTY VALUE FIELD ------"
                     '-------------- \n\n There are no "reason for deletion" entries '
                 )
-                self.error_dialog.show()
+                self.edit_dialog.message_bar.pushMessage(
+                    msg, level=Qgis.Warning, duration=0
+                )
                 self.disable_UI_functions()
                 return
             ls_relationships = self.remove_compared_outlines()
             if (
-                    len(ls_relationships["matched"]) == 0
-                    and len(ls_relationships["related"]) == 0
+                len(ls_relationships["matched"]) == 0
+                and len(ls_relationships["related"]) == 0
             ):
                 if len(self.edit_dialog.ids) > 0:
                     # Send signal to LIQA through edit dialog
@@ -610,14 +616,16 @@ class EditAttribute(BulkLoadChanges):
                 feats.append(ls)
         # if selected features have different attributes (not allowed)
         if len(feats) > 1:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
+            msg = (
                 "\n ---- MULTIPLE NON IDENTICAL FEATURES SELECTED"
                 " ---- \n\n Can only edit attributes of multiple"
                 "features when all existing attributes a"
                 "re identical."
             )
-            self.error_dialog.show()
+            self.edit_dialog.message_bar.pushMessage(
+                msg, level=Qgis.Warning, duration=0
+            )
+
             return False
         # if all selected features have the same attributes (allowed)
         elif len(feats) == 1:
@@ -644,23 +652,26 @@ class EditAttribute(BulkLoadChanges):
                         if len(reasons) <= 1:
                             return True
                         else:
-                            self.error_dialog = ErrorDialog()
-                            self.error_dialog.fill_report(
+                            msg = (
                                 "\n ---- DIFFERING DELETION REASONS ---- \n\n"
                                 "Cannot edit deleted features as have differing"
                                 " reasons for deletion. Please edit individually.\n"
                             )
-                            self.error_dialog.show()
+                            self.edit_dialog.message_bar.pushMessage(
+                                msg, level=Qgis.Warning, duration=0
+                            )
+
                             return False
                     else:
-                        self.error_dialog = ErrorDialog()
-                        self.error_dialog.fill_report(
+                        msg = (
                             "\n ---- CANNOT EDIT DELETED FEATURE ---- \n\n"
                             "Cannot edit deleted feature after comparison has been"
                             " run, instead please add this feature manually.\n"
                             "Note: Don't forget to update the relationship too!"
                         )
-                        self.error_dialog.show()
+                        self.edit_dialog.message_bar.pushMessage(
+                            msg, level=Qgis.Warning, duration=0
+                        )
                         return False
             else:
                 return True
@@ -781,24 +792,26 @@ class EditAttribute(BulkLoadChanges):
                     ls_relationships["added"].append(item)
                 # matched
                 if (item,) in matched_outlines:
-                    self.error_dialog = ErrorDialog()
-                    self.error_dialog.fill_report(
+                    ls_relationships["matched"].append(item)
+                    msg = (
                         "\n --------------- RELATIONSHIP EXISTS ---------"
                         "-------\n\nCan only mark for deletion outline if"
                         " no relationship exists"
                     )
-                    self.error_dialog.show()
-                    ls_relationships["matched"].append(item)
+                    self.edit_dialog.message_bar.pushMessage(
+                        msg, level=Qgis.Warning, duration=0
+                    )
                     break
                 # related
                 if (item,) in related_outlines:
-                    self.error_dialog = ErrorDialog()
-                    self.error_dialog.fill_report(
+                    msg = (
                         "\n ------------------- RELATIONSHIP EXISTS ---------"
                         "---------- \n\nCan only mark for deletion outline if"
                         " no relationship exists"
                     )
-                    self.error_dialog.show()
+                    self.edit_dialog.message_bar.pushMessage(
+                        msg, level=Qgis.Warning, duration=0
+                    )
                     ls_relationships["related"].append(item)
                     break
         return ls_relationships
@@ -829,11 +842,11 @@ class EditGeometry(BulkLoadChanges):
         iface.building_toolbar.addSeparator()
         for adv in iface.advancedDigitizeToolBar().actions():
             if adv.objectName() in [
-                    "mActionUndo",
-                    "mActionRedo",
-                    "mActionReshapeFeatures",
-                    "mActionOffsetCurve",
-                    "mActionSplitFeatures",
+                "mActionUndo",
+                "mActionRedo",
+                "mActionReshapeFeatures",
+                "mActionOffsetCurve",
+                "mActionSplitFeatures",
             ]:
                 iface.building_toolbar.addAction(adv)
         iface.building_toolbar.show()
@@ -1000,14 +1013,15 @@ class EditGeometry(BulkLoadChanges):
         new_feature = next(self.editing_layer.getFeatures(request))
         self.new_attrs[qgsfId] = new_feature.attributes()
         if not self.new_attrs[qgsfId][5]:
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
+            msg = (
                 "\n -------------------- CANNOT ADD NEW FEATURE ------"
                 "-------------- \n\nYou've added a new feature, "
                 "this can't be done in edit geometry, "
                 "please switch to add outline."
             )
-            self.error_dialog.show()
+            self.edit_dialog.message_bar.pushMessage(
+                msg, level=Qgis.Warning, duration=0
+            )
             self.disable_UI_functions()
             self.edit_dialog.btn_edit_reset.setEnabled(1)
             return
