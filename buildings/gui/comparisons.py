@@ -66,7 +66,7 @@ def compare_outlines(self, commit_status):
         self.db.execute_no_commit(sql, (self.current_dataset,))
 
         # populate bulk_load_name table with existing names of matched existing buildings
-        sql = "SELECT building_id, building_outline_id, building_name FROM buildings.building_name JOIN (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN (SELECT building_outline_id FROM buildings_bulk_load.matched_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id);"
+        sql = "INSERT INTO buildings_bulk_load.bulk_load_name (building_id, building_outline_id, building_name) SELECT building_id, building_outline_id, building_name FROM buildings.building_name JOIN (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN (SELECT building_outline_id FROM buildings_bulk_load.matched_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id);"
         self.db.execute_no_commit(sql)
 
         # populate bulk_load_name table with existing names of related existing buildings
