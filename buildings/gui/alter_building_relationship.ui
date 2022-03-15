@@ -51,8 +51,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>383</width>
-        <height>850</height>
+        <width>378</width>
+        <height>910</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -94,64 +94,17 @@ QGroupBox::title {
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="7" column="0">
-           <widget class="QPushButton" name="btn_qa_not_checked">
-            <property name="text">
-             <string>Uncheck</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="2">
+          <property name="verticalSpacing">
+           <number>6</number>
+          </property>
+          <item row="6" column="2">
            <widget class="QPushButton" name="btn_qa_pending">
             <property name="text">
              <string>Pending</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="4">
-           <widget class="QTableWidget" name="tbl_relationship"/>
-          </item>
-          <item row="7" column="1">
-           <widget class="QPushButton" name="btn_qa_refer2supplier">
-            <property name="text">
-             <string>Refer</string>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="3">
-           <widget class="QPushButton" name="btn_qa_okay">
-            <property name="text">
-             <string>Okay</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="2">
-           <spacer name="verticalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="3" column="0" colspan="4">
-           <widget class="QComboBox" name="cmb_relationship">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change to see different building relationships&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="4">
-           <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
-          </item>
-          <item row="6" column="3">
+          <item row="5" column="3">
            <widget class="QPushButton" name="btn_qa_not_removed">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not Removed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -162,12 +115,65 @@ QGroupBox::title {
            </widget>
           </item>
           <item row="6" column="0">
+           <widget class="QPushButton" name="btn_qa_not_checked">
+            <property name="text">
+             <string>Uncheck</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="4">
+           <widget class="QComboBox" name="cmb_relationship">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change to see different building relationships&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
            <widget class="QPushButton" name="btn_next">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Skip to next 'Not Checked' building&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QPushButton" name="btn_qa_refer2supplier">
+            <property name="text">
+             <string>Refer</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="4">
+           <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
+          </item>
+          <item row="4" column="0" colspan="4">
+           <widget class="QTableWidget" name="tbl_relationship">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
+            <attribute name="horizontalHeaderMinimumSectionSize">
+             <number>80</number>
+            </attribute>
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>80</number>
+            </attribute>
+            <attribute name="verticalHeaderMinimumSectionSize">
+             <number>21</number>
+            </attribute>
+            <attribute name="verticalHeaderDefaultSectionSize">
+             <number>30</number>
+            </attribute>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QPushButton" name="btn_qa_okay">
+            <property name="text">
+             <string>Okay</string>
             </property>
            </widget>
           </item>
@@ -231,6 +237,9 @@ QGroupBox::title {
           </item>
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <property name="spacing">
+             <number>6</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="verticalLayout_3">
               <item>
@@ -386,22 +395,6 @@ QGroupBox::title {
                </widget>
               </item>
               <item>
-               <spacer name="verticalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>10</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
                <widget class="QPushButton" name="btn_matched">
                 <property name="text">
                  <string>Match</string>
@@ -421,22 +414,6 @@ QGroupBox::title {
                  <string>Delete</string>
                 </property>
                </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_6">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeType">
-                 <enum>QSizePolicy::Fixed</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>10</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
              </layout>
             </item>

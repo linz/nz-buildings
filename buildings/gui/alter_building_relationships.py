@@ -785,7 +785,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
-            self.init_tbl_relationship(["Group", "Existing", "Bulk Load", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"])
+            self.init_tbl_relationship(["Group", "Exist ID", "Bulk ID", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"])
             self.populate_tbl_related()
             self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
@@ -795,7 +795,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.qa_button_set_enable(True)
         elif current_text == "Matched Outlines":
             self.init_tbl_relationship(
-                ["Existing Outlines", "Bulk Load Outlines", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"]
+                ["Exist ID", "Bulk ID", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"]
             )
             self.populate_tbl_matched()
             self.btn_next.setEnabled(True)
@@ -805,7 +805,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             else:
                 self.qa_button_set_enable(True)
         elif current_text == "Removed Outlines":
-            self.init_tbl_relationship(["Existing Outlines", "QA Status", "Exist Use", "Exist Name"])
+            self.init_tbl_relationship(["Exist ID", "QA Status", "Exist Use", "Exist Name"])
             self.populate_tbl_removed()
             self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(True)
@@ -815,7 +815,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             else:
                 self.qa_button_set_enable(True)
         elif current_text == "Added Outlines":
-            self.init_tbl_relationship(["Added Outline Ids"])
+            self.init_tbl_relationship(["Bulk ID - added"])
             self.populate_tbl_added()
             self.btn_qa_not_removed.setEnabled(False)
             self.qa_button_set_enable(False)
