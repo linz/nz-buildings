@@ -65,20 +65,20 @@ def compare_outlines(self, commit_status):
         sql = "SELECT buildings_bulk_load.compare_building_outlines(%s);"
         self.db.execute_no_commit(sql, (self.current_dataset,))
 
-        # populate bulk_load_name table with existing names of matched existing buildings
-        sql = "INSERT INTO buildings_bulk_load.bulk_load_name (building_id, building_outline_id, building_name) SELECT building_id, building_outline_id, building_name FROM buildings.building_name JOIN (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN (SELECT building_outline_id FROM buildings_bulk_load.matched_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id);"
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name of existing names of matched existing buildings
+        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_name = building_name FROM (SELECT building_name, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_name bn JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.matched JOIN buildings_bulk_load.matched_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
         self.db.execute_no_commit(sql)
 
-        # populate bulk_load_name table with existing names of related existing buildings
-        sql = "INSERT INTO buildings_bulk_load.bulk_load_name (building_id, building_outline_id, building_name) SELECT building_id, building_outline_id, building_name FROM buildings.building_name JOIN (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN (SELECT building_outline_id FROM buildings_bulk_load.related_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id);"
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name with existing names of related existing buildings
+        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_name = building_name FROM (SELECT building_name, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_name bn JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.related JOIN buildings_bulk_load.related_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
         self.db.execute_no_commit(sql)
 
-        # populate bulk_load_use table with existing uses of related existing buildings
-        sql = "INSERT INTO buildings_bulk_load.bulk_load_use (building_id, building_outline_id, use_id, building_use) SELECT building_id, building_outline_id, use_id, value as building_use FROM buildings.use JOIN (SELECT building_id, building_outline_id, use_id FROM buildings.building_use JOIN  (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN  (SELECT building_outline_id  FROM buildings_bulk_load.related_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id)) s3 USING (use_id);"
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of matched existing buildings
+        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_use_id = use_id FROM (SELECT use_id, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_use bu JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.matched JOIN buildings_bulk_load.matched_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
         self.db.execute_no_commit(sql)
 
-        # populate bulk_load_use table with existing uses of matched existing buildings
-        sql = "INSERT INTO buildings_bulk_load.bulk_load_use (building_id, building_outline_id, use_id, building_use) SELECT building_id, building_outline_id, use_id, value as building_use FROM buildings.use JOIN (SELECT building_id, building_outline_id, use_id FROM buildings.building_use JOIN  (SELECT building_outline_id, building_id FROM buildings.building_outlines JOIN  (SELECT building_outline_id  FROM buildings_bulk_load.matched_existing_outlines) s1 USING (building_outline_id)) s2 USING (building_id)) s3 USING (use_id);"
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of related existing buildings
+        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_use_id = use_id FROM (SELECT use_id, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_use bu JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.related JOIN buildings_bulk_load.related_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
         self.db.execute_no_commit(sql)
 
     if commit_status:
