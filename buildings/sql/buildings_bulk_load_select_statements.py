@@ -179,7 +179,7 @@ WHERE building_outline_id = %s;
 # """
 
 matched_by_bulk_load_outline_id_dataset_id = """
-SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.building_use, bln.building_name
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.matched m
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
@@ -187,8 +187,7 @@ JOIN buildings.building_outlines bo USING (building_outline_id)
 JOIN buildings.building_use bu USING (building_id)
 JOIN buildings.use u USING (use_id)
 JOIN buildings.building_name bn USING (building_id)
-JOIN buildings_bulk_load.bulk_load_name bln USING (building_outline_id)
-JOIN buildings_bulk_load.bulk_load_use blu USING (building_outline_id)
+JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s
 ORDER BY m.building_outline_id ASC;
 """
@@ -203,7 +202,7 @@ ORDER BY m.building_outline_id ASC;
 # """
 
 matched_by_dataset_id = """
-SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.building_use, bln.building_name
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.matched m
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
@@ -211,8 +210,7 @@ JOIN buildings.building_outlines bo USING (building_outline_id)
 JOIN buildings.building_use bu USING (building_id)
 JOIN buildings.use u USING (use_id)
 JOIN buildings.building_name bn USING (building_id)
-JOIN buildings_bulk_load.bulk_load_name bln USING (building_outline_id)
-JOIN buildings_bulk_load.bulk_load_use blu USING (building_outline_id)
+JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE blo.supplied_dataset_id = %s
 ORDER BY m.building_outline_id ASC;
 """
@@ -225,7 +223,7 @@ ORDER BY m.building_outline_id ASC;
 # """
 
 matched_by_existing_outline_id_dataset_id = """
-SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.building_use, bln.building_name
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.matched m
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
@@ -233,8 +231,7 @@ JOIN buildings.building_outlines bo USING (building_outline_id)
 JOIN buildings.building_use bu USING (building_id)
 JOIN buildings.use u USING (use_id)
 JOIN buildings.building_name bn USING (building_id)
-JOIN buildings_bulk_load.bulk_load_name bln USING (building_outline_id)
-JOIN buildings_bulk_load.bulk_load_use blu USING (building_outline_id)
+JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE m.building_outline_id = %s AND blo.supplied_dataset_id = %s
 ORDER BY m.building_outline_id ASC;
 """
@@ -299,7 +296,7 @@ WHERE related_group_id in (
 """
 
 related_by_dataset_id = """
-SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.building_use, bln.building_name
+SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.related r
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
@@ -307,8 +304,7 @@ JOIN buildings.building_outlines bo USING (building_outline_id)
 JOIN buildings.building_use bu USING (building_id)
 JOIN buildings.use u USING (use_id)
 JOIN buildings.building_name bn USING (building_id)
-JOIN buildings_bulk_load.bulk_load_name bln USING (building_outline_id)
-JOIN buildings_bulk_load.bulk_load_use blu USING (building_outline_id)
+JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE blo.supplied_dataset_id = %s
 ORDER BY r.related_group_id ASC;
 """
