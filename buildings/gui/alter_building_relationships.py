@@ -395,6 +395,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         has_multi_set = False
         has_added, has_removed, has_matched, has_related = False, False, False, False
         existing_to_lst, bulk_to_list = [], []
+
         for feat_id in selected_bulk:
             if feat_id in bulk_to_list:
                 continue
@@ -508,6 +509,52 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 for id_bulk in bulk_to_list:
                     self.select_row_in_tbl_related(id_existing, id_bulk)
         self.tbl_relationship.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        # Add attributes to list for displaying
+        if has_removed:
+            for id in existing_to_lst:
+                for row in range(self.tbl_relationship.rowCount()):
+                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                        existing_use = self.tbl_relationship.item(row, 2).text()
+                        existing_name = self.tbl_relationship.item(row, 3).text()
+                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+            self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
+        elif has_added:
+            for id in bulk_to_list:
+                self.insert_into_list(self.lst_bulk_attrs, [id])
+            self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
+        elif has_matched:
+            for id in existing_to_lst:
+                for row in range(self.tbl_relationship.rowCount()):
+                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                        existing_use = self.tbl_relationship.item(row, 3).text()
+                        existing_name = self.tbl_relationship.item(row, 4).text()
+                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        break
+            for id in bulk_to_list:
+                for row in range(self.tbl_relationship.rowCount()):
+                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                        bulk_load_use = self.tbl_relationship.item(row, 5).text()
+                        bulk_load_name = self.tbl_relationship.item(row, 6).text()
+                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        break
+            self.update_attr_list_item_color(QColor("#00b4d4"), QColor("#00b4d4"))
+        elif has_related:
+            for id in existing_to_lst:
+                for row in range(self.tbl_relationship.rowCount()):
+                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                        existing_use = self.tbl_relationship.item(row, 4).text()
+                        existing_name = self.tbl_relationship.item(row, 5).text()
+                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        break
+            for id in bulk_to_list:
+                for row in range(self.tbl_relationship.rowCount()):
+                    if id == int(self.tbl_relationship.item(row, 2).text()):
+                        bulk_load_use = self.tbl_relationship.item(row, 6).text()
+                        bulk_load_name = self.tbl_relationship.item(row, 7).text()      
+                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        break
+            self.update_attr_list_item_color(QColor("#e601ff"), QColor("#e601ff"))
 
         # Change item color in the list
         if has_removed or has_added:
@@ -1277,12 +1324,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def find_related_existing_outlines(self, id_bulk):
         ids_existing, ids_bulk = [], []
         existing_use, existing_name = [], []
+        bulk_load_use, bulk_load_name = [], []
 
         result = self.db._execute(
             bulk_load_select.related_by_bulk_load_outline_id_dataset_id,
             (id_bulk, self.current_dataset),
         )
-        for (id_existing, id_bulk) in result.fetchall():
+        for (id_existing, id_bulk, existing_use, existing_name, bulk_load_use, bulk_load_name) in result.fetchall():
             ids_existing.append(id_existing)
             ids_bulk.append(id_bulk)
         return list(set(ids_existing)), list(set(ids_bulk))
