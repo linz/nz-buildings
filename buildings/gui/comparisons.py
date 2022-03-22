@@ -66,29 +66,29 @@ def compare_outlines(self, commit_status):
         self.db.execute_no_commit(sql, (self.current_dataset,))
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name of existing names of matched existing buildings
-        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_name = building_name FROM (SELECT building_name, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_name bn JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.matched JOIN buildings_bulk_load.matched_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
+        sql = "SELECT buildings_bulk_load.load_matched_names();"
         self.db.execute_no_commit(sql)
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name with existing names of related existing buildings
-        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_name = building_name FROM (SELECT building_name, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_name bn JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.related JOIN buildings_bulk_load.related_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
+        sql = "SELECT buildings_bulk_load.load_related_names();"
         self.db.execute_no_commit(sql)
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of matched existing buildings
-        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_use_id = use_id FROM (SELECT use_id, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_use bu JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.matched JOIN buildings_bulk_load.matched_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
+        sql = "SELECT buildings_bulk_load.load_matched_use_id();"
         self.db.execute_no_commit(sql)
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of related existing buildings
-        sql = "UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_use_id = use_id FROM (SELECT use_id, building_id, bulk_load_outline_id, building_outline_id FROM buildings.building_use bu JOIN (SELECT building_outline_id, building_id, bulk_load_outline_id FROM buildings.building_outlines JOIN (SELECT bulk_load_outline_id, building_outline_id, qa_status_id FROM buildings_bulk_load.related JOIN buildings_bulk_load.related_bulk_load_outlines USING (bulk_load_outline_id) WHERE qa_status_id = 1) s1 USING (building_outline_id)) s3 USING (building_id)) s4 WHERE blo.bulk_load_outline_id = s4.bulk_load_outline_id;"
+        sql = "SELECT buildings_bulk_load.load_related_use_id();"
         self.db.execute_no_commit(sql)
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name if an added building exists more than 50% inside a facility polygon.
         # This assumes you have a facilities_lds schema in your db.
-        sql = 'UPDATE buildings_bulk_load.bulk_load_outlines blo set bulk_load_name = name FROM (SELECT bulk_load_outline_id, name FROM buildings_bulk_load.bulk_load_outlines blo JOIN ((WITH added_facility_intersects AS ( SELECT bulk_load_outline_id, fac.name, ST_Area(ST_Intersection(supplied.shape, fac.shape)) / ST_Area(supplied.shape) * 100 AS "supplied_intersect" FROM facilities_lds.nz_facilities fac JOIN (SELECT bulk_load_outline_id, qa_status_id, shape FROM buildings_bulk_load.added supplied JOIN buildings_bulk_load.added_outlines addedshapes USING (bulk_load_outline_id) WHERE qa_status_id = 1) supplied ON ST_Intersects(supplied.shape, fac.shape)) SELECT * FROM added_facility_intersects WHERE "supplied_intersect" > 50)) s1 USING (bulk_load_outline_id)) added WHERE added.bulk_load_outline_id = blo.bulk_load_outline_id;'
+        sql = "SELECT buildings_bulk_load.load_facility_names();"
         self.db.execute_no_commit(sql)
 
         # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id if an added building exists more than 50% inside a facility polygon.
         # This assumes you have a facilities_lds schema in your db.
-        sql = "SELECT buildings_bulk_load.load_use_id()"
+        sql = "SELECT buildings_bulk_load.load_facility_use_id();"
         self.db.execute_no_commit(sql)
 
     if commit_status:
