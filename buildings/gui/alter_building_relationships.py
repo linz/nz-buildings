@@ -541,12 +541,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         # Add attributes to list for displaying
         if has_removed:
-            for id in existing_to_lst:
+            for id_ in existing_to_lst:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         existing_use = self.tbl_relationship.item(row, 2).text()
                         existing_name = self.tbl_relationship.item(row, 3).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
                         break
             # if removed and added selected, then alternative extraction of attributes required due to different tables
             if has_added:
@@ -556,50 +556,50 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     added_use = item[1]
                     added_name = item[2]
                     attr_dict[added_id] = [added_use, added_name]
-                for id in bulk_to_list:
-                    bulk_use = attr_dict[id][0]
-                    bulk_name = attr_dict[id][1]
-                    self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_use, bulk_name]])
+                for id_ in bulk_to_list:
+                    bulk_use = attr_dict[id_][0]
+                    bulk_name = attr_dict[id_][1]
+                    self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_use, bulk_name]])
             self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
         elif has_added:
-            for id in bulk_to_list:
+            for id_ in bulk_to_list:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         bulk_use = self.tbl_relationship.item(row, 1).text()
                         bulk_name = self.tbl_relationship.item(row, 2).text()
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_use, bulk_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_use, bulk_name]])
                         break
             self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
         elif has_matched:
-            for id in existing_to_lst:
+            for id_ in existing_to_lst:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         existing_use = self.tbl_relationship.item(row, 3).text()
                         existing_name = self.tbl_relationship.item(row, 4).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
                         break
-            for id in bulk_to_list:
+            for id_ in bulk_to_list:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 1).text()):
                         bulk_load_use = self.tbl_relationship.item(row, 5).text()
                         bulk_load_name = self.tbl_relationship.item(row, 6).text()
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_load_use, bulk_load_name]])
                         break
             self.update_attr_list_item_color(QColor("#00b4d4"), QColor("#00b4d4"))
         elif has_related:
-            for id in existing_to_lst:
+            for id_ in existing_to_lst:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 1).text()):
                         existing_use = self.tbl_relationship.item(row, 4).text()
                         existing_name = self.tbl_relationship.item(row, 5).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
                         break
-            for id in bulk_to_list:
+            for id_ in bulk_to_list:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 2).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 2).text()):
                         bulk_load_use = self.tbl_relationship.item(row, 6).text()
                         bulk_load_name = self.tbl_relationship.item(row, 7).text()      
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_load_use, bulk_load_name]])
                         break
             self.update_attr_list_item_color(QColor("#e601ff"), QColor("#e601ff"))
 
@@ -952,19 +952,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_unlink.setEnabled(True)
 
             # Add related attributes to list for displaying
-            for id in ids_existing:
+            for id_ in ids_existing:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 1).text()):
                         existing_use = self.tbl_relationship.item(row, 4).text()
                         existing_name = self.tbl_relationship.item(row, 5).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
                         break
-            for id in ids_bulk:
+            for id_ in ids_bulk:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 2).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 2).text()):
                         bulk_load_use = self.tbl_relationship.item(row, 6).text()
                         bulk_load_name = self.tbl_relationship.item(row, 7).text()      
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_load_use, bulk_load_name]])
                         break
             self.update_attr_list_item_color(QColor("#e601ff"), QColor("#e601ff"))
 
@@ -984,19 +984,19 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_unlink.setEnabled(True)
 
             # Add matched attributes to list for displaying
-            for id in ids_existing:
+            for id_ in ids_existing:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         existing_use = self.tbl_relationship.item(row, 3).text()
                         existing_name = self.tbl_relationship.item(row, 4).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
                         break
-            for id in ids_bulk:
+            for id_ in ids_bulk:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 1).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 1).text()):
                         bulk_load_use = self.tbl_relationship.item(row, 5).text()
                         bulk_load_name = self.tbl_relationship.item(row, 6).text()
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_load_use, bulk_load_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_load_use, bulk_load_name]])
                         break
             self.update_attr_list_item_color(QColor("#00b4d4"), QColor("#00b4d4"))
 
@@ -1008,12 +1008,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lyr_bulk_load.selectByIds([])
 
             # Add removed attributes to list for displaying
-            for id in [id_existing]:
+            for id_ in [id_existing]:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         existing_use = self.tbl_relationship.item(row, 2).text()
                         existing_name = self.tbl_relationship.item(row, 3).text()
-                        self.insert_into_list(self.lst_existing_attrs, [[id, existing_use, existing_name]])
+                        self.insert_into_list(self.lst_existing_attrs, [[id_, existing_use, existing_name]])
             self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
 
         elif current_text == "Added Outlines":
@@ -1024,12 +1024,12 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_delete.setEnabled(True)
 
             # Add added attributes to list for displaying
-            for id in [id_bulk]:
+            for id_ in [id_bulk]:
                 for row in range(self.tbl_relationship.rowCount()):
-                    if id == int(self.tbl_relationship.item(row, 0).text()):
+                    if id_ == int(self.tbl_relationship.item(row, 0).text()):
                         bulk_use = self.tbl_relationship.item(row, 1).text()
                         bulk_name = self.tbl_relationship.item(row, 2).text()
-                        self.insert_into_list(self.lst_bulk_attrs, [[id, bulk_use, bulk_name]])
+                        self.insert_into_list(self.lst_bulk_attrs, [[id_, bulk_use, bulk_name]])
             self.update_attr_list_item_color(QColor("#ff2b01"), QColor("#3f9800"))
 
         if self.zoom:
@@ -1435,16 +1435,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def insert_into_lyr_removed_in_edit(self, ids_existing):
         for id_existing in ids_existing:
-            filter = self.lyr_removed_existing_in_edit.subsetString()
+            filter_ = self.lyr_removed_existing_in_edit.subsetString()
             self.lyr_removed_existing_in_edit.setSubsetString(
-                filter + " or building_outline_id = %s" % id_existing
+                filter_ + " or building_outline_id = %s" % id_existing
             )
 
     def insert_into_lyr_added_in_edit(self, ids_bulk):
         for id_bulk in ids_bulk:
-            filter = self.lyr_added_bulk_load_in_edit.subsetString()
+            filter_ = self.lyr_added_bulk_load_in_edit.subsetString()
             self.lyr_added_bulk_load_in_edit.setSubsetString(
-                filter + " or bulk_load_outline_id = %s" % id_bulk
+                filter_ + " or bulk_load_outline_id = %s" % id_bulk
             )
 
     def delete_original_relationship_in_existing(self, id_existing):
@@ -1557,15 +1557,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.lst_bulk_attrs.item(i).setForeground(QColor(bulk_color))
 
     def delete_from_lyr_removed_in_edit(self, id_existing):
-        filter = self.lyr_removed_existing_in_edit.subsetString()
+        filter_ = self.lyr_removed_existing_in_edit.subsetString()
         self.lyr_removed_existing_in_edit.setSubsetString(
-            "(" + filter + ') and "building_outline_id" != %s' % id_existing
+            "(" + filter_ + ') and "building_outline_id" != %s' % id_existing
         )
 
     def delete_from_lyr_added_in_edit(self, id_bulk):
-        filter = self.lyr_added_bulk_load_in_edit.subsetString()
+        filter_ = self.lyr_added_bulk_load_in_edit.subsetString()
         self.lyr_added_bulk_load_in_edit.setSubsetString(
-            "(" + filter + ') and "bulk_load_outline_id" != %s' % id_bulk
+            "(" + filter_ + ') and "bulk_load_outline_id" != %s' % id_bulk
         )
 
     def insert_into_lyr_matched_existing_in_edit(self, id_existing):
@@ -1579,15 +1579,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
 
     def insert_into_lyr_related_existing_in_edit(self, id_existing):
-        filter = self.lyr_related_existing_in_edit.subsetString()
+        filter_ = self.lyr_related_existing_in_edit.subsetString()
         self.lyr_related_existing_in_edit.setSubsetString(
-            filter + ' or "building_outline_id" = %s' % id_existing
+            filter_ + ' or "building_outline_id" = %s' % id_existing
         )
 
     def insert_into_lyr_related_bulk_load_in_edit(self, id_bulk):
-        filter = self.lyr_related_bulk_load_in_edit.subsetString()
+        filter_ = self.lyr_related_bulk_load_in_edit.subsetString()
         self.lyr_related_bulk_load_in_edit.setSubsetString(
-            filter + ' or "bulk_load_outline_id" = %s' % id_bulk
+            filter_ + ' or "bulk_load_outline_id" = %s' % id_bulk
         )
 
     def delete_original_relationships(self):
