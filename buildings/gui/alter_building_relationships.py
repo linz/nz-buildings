@@ -1343,21 +1343,21 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.error_dialog.show()
 
     def find_added_outlines(self, id_bulk):
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.added_by_bulk_load_outline_id_dataset_id,
             (id_bulk, self.current_dataset),
         )
         return result.fetchone()
 
     def find_removed_outlines(self, id_existing):
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.removed_by_existing_outline_id_dataset_id,
             (id_existing, self.current_dataset),
         )
         return result.fetchone()
 
     def find_matched_existing_outlines(self, id_bulk):
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.matched_by_bulk_load_outline_id_dataset_id,
             (id_bulk, self.current_dataset),
         )
@@ -1367,7 +1367,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         ids_existing, ids_bulk = [], []
         existing_use, existing_name = [], []
 
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.matched_by_existing_outline_id_dataset_id,
             (id_existing, self.current_dataset),
         )
@@ -1378,7 +1378,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         existing_use, existing_name = [], []
         bulk_load_use, bulk_load_name = [], []
 
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.related_by_bulk_load_outline_id_dataset_id,
             (id_bulk, self.current_dataset),
         )
@@ -1391,7 +1391,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         ids_existing, ids_bulk = [], []
         existing_use, existing_name = [], []
 
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.related_by_existing_outline_id_dataset_id,
             (id_existing, self.current_dataset),
         )
@@ -1713,7 +1713,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_related(self):
         """Populates tbl_relationship when cmb_relationship switches to related"""
         tbl = self.tbl_relationship
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.related_by_dataset_id, (self.current_dataset,)
         )
         for (id_group, id_existing, id_bulk, qa_status, exist_use, exist_name, bulk_use, bulk_name) in result.fetchall():
@@ -1731,7 +1731,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_matched(self):
         """Populates tbl_relationship when cmb_relationship switches to matched"""
         tbl = self.tbl_relationship
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.matched_by_dataset_id, (self.current_dataset,)
         )
         for (id_existing, id_bulk, qa_status, exist_use, exist_name, bulk_use, bulk_name) in result.fetchall():
@@ -1748,7 +1748,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_removed(self):
         """Populates tbl_relationship when cmb_relationship switches to removed"""
         tbl = self.tbl_relationship
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.removed_by_dataset_id, (self.current_dataset,)
         )
         for (id_existing, qa_status, exist_use, exist_name) in result.fetchall():
@@ -1762,7 +1762,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def populate_tbl_added(self):
         """Populates tbl_relationship when cmb_relationship switches to added"""
         tbl = self.tbl_relationship
-        result = self.db._execute(
+        result = self.db.execute_return(
             bulk_load_select.added_by_dataset_id, (self.current_dataset,)
         )
         for (id_bulk_load, bulk_use, bulk_name) in result.fetchall():
