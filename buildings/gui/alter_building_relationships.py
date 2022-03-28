@@ -552,7 +552,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             if has_added:
                 attr_dict = {}
                 for item in bulk_attr_to_list:
-                    added_id = int(item[0].replace("(","").replace(")","").split(",")[0])
+                    added_id = int(item[0].replace("(", "").replace(")", "").split(",")[0])
                     added_use = item[1]
                     added_name = item[2]
                     attr_dict[added_id] = [added_use, added_name]
@@ -879,7 +879,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def cmb_relationship_current_index_changed(self):
         current_text = self.cmb_relationship.currentText()
         if current_text == "Related Outlines":
-            self.init_tbl_relationship(["Group", "Exist ID", "Bulk ID", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"])
+            self.init_tbl_relationship(
+                ["Group", "Exist ID", "Bulk ID", "QA Status", "Exist Use", "Exist Name", "Bulk Use", "Bulk Name"]
+            )
             self.populate_tbl_related()
             self.btn_next.setEnabled(True)
             self.btn_qa_not_removed.setEnabled(False)
@@ -1126,7 +1128,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     break
             if len(selected_ids) > 1:
                 self.message_bar_edit.pushMessage(
-                    "You cannot have multiple selected matched relationships. The first (ordered numerically) has been selected"
+                    "You cannot have multiple selected matched relationships. "
+                    "The first (ordered numerically) has been selected"
                 )
 
     def zoom_to_next(self):
@@ -2015,10 +2018,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
         """To ensure QGIS has most up to date ID for the newly split feature see #349"""
         ltl = QgsProject.instance().layerTreeRoot().findLayer(self.lyr_bulk_load.id())
         ltm = iface.layerTreeView().model()
-        legendNodes = ltm.layerLegendNodes(ltl)
-        legendNode_null = [ln for ln in legendNodes if not ln.data(Qt.DisplayRole)]
-        legendNode_null[0].setData(Qt.Unchecked, Qt.CheckStateRole)
-        legendNode_added = [ln for ln in legendNodes if ln.data(Qt.DisplayRole) == 'Added In Edit']
-        legendNode_added[0].setData(Qt.Unchecked, Qt.CheckStateRole)
-        legendNode_null[0].setData(Qt.Checked, Qt.CheckStateRole)
-        legendNode_added[0].setData(Qt.Checked, Qt.CheckStateRole)
+        legend_nodes = ltm.layerLegendNodes(ltl)
+        legend_node_null = [ln for ln in legend_nodes if not ln.data(Qt.DisplayRole)]
+        legend_node_null[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+        legend_node_null[0].setData(Qt.Checked, Qt.CheckStateRole)
+        legend_node_added = [ln for ln in legend_nodes if ln.data(Qt.DisplayRole) == 'Added In Edit']
+        legend_node_added[0].setData(Qt.Unchecked, Qt.CheckStateRole)
+        legend_node_added[0].setData(Qt.Checked, Qt.CheckStateRole)
