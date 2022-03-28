@@ -55,6 +55,33 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.toolbar_setup()
         self.connect_signals()
 
+        # Attributes set in subsequent methods
+        self.message_bar_edit = None
+        self.message_bar_qa = None
+        self.add_action = None
+        self.edit_geom_action = None
+        self.edit_attrs_action = None
+        self.lyr_related_existing = None
+        self.lyr_related_bulk_load = None
+        self.lyr_matched_existing = None
+        self.lyr_matched_bulk_load = None
+        self.lyr_removed_existing = None
+        self.lyr_added_bulk_load = None
+        self.lyr_related_bulk_load_in_edit = None
+        self.lyr_related_existing_in_edit = None
+        self.lyr_matched_bulk_load_in_edit = None
+        self.lyr_matched_existing_in_edit = None
+        self.lyr_removed_existing_in_edit = None
+        self.lyr_added_bulk_load_in_edit = None
+        self.lyr_existing = None
+        self.lyr_bulk_load = None
+        self.msgbox = None
+        self.tool = None
+        self.reason_text = None
+        self.circle_tool = None
+        self.polyline = None
+        self.circle_action = None
+
     def frame_setup(self):
 
         self.message_bar_edit = QgsMessageBar()
