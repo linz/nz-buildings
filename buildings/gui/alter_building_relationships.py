@@ -217,6 +217,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "styles/")
 
+        self.lyr_related_existing = self.layer_registry.add_postgres_layer(
+            "related_existing_outlines",
+            "related_existing_outlines",
+            "shape",
+            "buildings_bulk_load",
+            "building_outline_id",
+            "",
+        )
+        self.lyr_related_existing.loadNamedStyle(path + "building_purple_existing.qml")
+
         self.lyr_related_bulk_load = self.layer_registry.add_postgres_layer(
             "related_bulk_load_outlines",
             "related_bulk_load_outlines",
@@ -227,15 +237,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
         )
         self.lyr_related_bulk_load.loadNamedStyle(path + "building_purple.qml")
 
-        self.lyr_related_existing = self.layer_registry.add_postgres_layer(
-            "related_existing_outlines",
-            "related_existing_outlines",
+        self.lyr_matched_existing = self.layer_registry.add_postgres_layer(
+            "matched_existing_outlines",
+            "matched_existing_outlines",
             "shape",
             "buildings_bulk_load",
             "building_outline_id",
             "",
         )
-        self.lyr_related_existing.loadNamedStyle(path + "building_purple.qml")
+        self.lyr_matched_existing.loadNamedStyle(path + "building_blue_existing.qml")
 
         self.lyr_matched_bulk_load = self.layer_registry.add_postgres_layer(
             "matched_bulk_load_outlines",
@@ -246,16 +256,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "",
         )
         self.lyr_matched_bulk_load.loadNamedStyle(path + "building_blue.qml")
-
-        self.lyr_matched_existing = self.layer_registry.add_postgres_layer(
-            "matched_existing_outlines",
-            "matched_existing_outlines",
-            "shape",
-            "buildings_bulk_load",
-            "building_outline_id",
-            "",
-        )
-        self.lyr_matched_existing.loadNamedStyle(path + "building_blue.qml")
 
         self.lyr_removed_existing = self.layer_registry.add_postgres_layer(
             "removed_outlines",
