@@ -33,27 +33,6 @@ FORM_CLASS, _ = uic.loadUiType(
 class AlterRelationships(QFrame, FORM_CLASS):
     def __init__(self, dockwidget, current_dataset, parent=None):
         """Constructor."""
-        super(AlterRelationships, self).__init__(parent)
-        self.setupUi(self)
-
-        self.db = db
-        self.db.connect()
-
-        self.dockwidget = dockwidget
-        self.layer_registry = LayerRegistry()
-        self.current_dataset = current_dataset
-        self.error_dialog = None
-        self.autosave = False
-        self.delete = False
-        self.deletion_reason = None
-        self.zoom = True
-
-        self.frame_setup()
-        self.layers_setup()
-        self.edit_dialog = EditDialog(self)
-        self.change_instance = None
-        self.toolbar_setup()
-        self.connect_signals()
 
         # Attributes set in subsequent methods
         self.message_bar_edit = None
@@ -81,6 +60,28 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.circle_tool = None
         self.polyline = None
         self.circle_action = None
+
+        super(AlterRelationships, self).__init__(parent)
+        self.setupUi(self)
+
+        self.db = db
+        self.db.connect()
+
+        self.dockwidget = dockwidget
+        self.layer_registry = LayerRegistry()
+        self.current_dataset = current_dataset
+        self.error_dialog = None
+        self.autosave = False
+        self.delete = False
+        self.deletion_reason = None
+        self.zoom = True
+
+        self.frame_setup()
+        self.layers_setup()
+        self.edit_dialog = EditDialog(self)
+        self.change_instance = None
+        self.toolbar_setup()
+        self.connect_signals()
 
     def frame_setup(self):
 
