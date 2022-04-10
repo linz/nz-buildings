@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>frame_alter_building_relationship</class>
  <widget class="QFrame" name="frame_alter_building_relationship">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>401</width>
-    <height>868</height>
+    <width>404</width>
+    <height>950</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -51,8 +54,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>378</width>
-        <height>943</height>
+        <width>376</width>
+        <height>1058</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -97,6 +100,9 @@ QGroupBox::title {
           <property name="verticalSpacing">
            <number>6</number>
           </property>
+          <item row="0" column="0" colspan="4">
+           <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
+          </item>
           <item row="6" column="2">
            <widget class="QPushButton" name="btn_qa_pending">
             <property name="text">
@@ -104,37 +110,10 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="5" column="3">
-           <widget class="QPushButton" name="btn_qa_not_removed">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not Removed&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="6" column="0">
-           <widget class="QPushButton" name="btn_qa_not_checked">
-            <property name="text">
-             <string>Uncheck</string>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="0" colspan="4">
            <widget class="QComboBox" name="cmb_relationship">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Change to see different building relationships&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <widget class="QPushButton" name="btn_next">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Skip to next 'Not Checked' building&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string/>
+             <string>Change to see different building relationships</string>
             </property>
            </widget>
           </item>
@@ -145,8 +124,29 @@ QGroupBox::title {
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="4">
-           <layout class="QVBoxLayout" name="layout_msg_bar_qa"/>
+          <item row="6" column="0">
+           <widget class="QPushButton" name="btn_qa_not_checked">
+            <property name="text">
+             <string>Uncheck</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="3">
+           <widget class="QPushButton" name="btn_qa_okay">
+            <property name="text">
+             <string>Okay</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QPushButton" name="btn_qa_not_removed">
+            <property name="toolTip">
+             <string>Not Removed</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
           </item>
           <item row="4" column="0" colspan="4">
            <widget class="QTableWidget" name="tbl_relationship">
@@ -170,10 +170,13 @@ QGroupBox::title {
             </attribute>
            </widget>
           </item>
-          <item row="6" column="3">
-           <widget class="QPushButton" name="btn_qa_okay">
+          <item row="5" column="0">
+           <widget class="QPushButton" name="btn_next">
+            <property name="toolTip">
+             <string>Skip to next 'Not Checked' building</string>
+            </property>
             <property name="text">
-             <string>Okay</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -181,7 +184,7 @@ QGroupBox::title {
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_5">
+        <spacer name="vspacer_1">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -228,70 +231,15 @@ QGroupBox::title {
           <string>Edit Relationships</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="2" column="0">
-           <widget class="Line" name="line">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
-            <item>
-             <spacer name="horizontalSpacer_5">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="cb_autosave">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn on to auto-save changes&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Auto-save</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_save">
-              <property name="text">
-               <string>Save</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="btn_cancel">
-              <property name="text">
-               <string>Cancel</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item row="4" column="0">
-           <widget class="Line" name="line_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <layout class="QHBoxLayout" name="hlayout_outlines">
             <property name="spacing">
              <number>6</number>
             </property>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
+             <layout class="QVBoxLayout" name="vlayout_existing">
               <item>
-               <widget class="QLabel" name="label">
+               <widget class="QLabel" name="lbl_existing">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -337,9 +285,9 @@ QGroupBox::title {
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_8">
+             <layout class="QVBoxLayout" name="vlayout_bulk">
               <item>
-               <widget class="QLabel" name="label_2">
+               <widget class="QLabel" name="lbl_bulk">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -379,11 +327,11 @@ QGroupBox::title {
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_5">
+             <layout class="QVBoxLayout" name="vlayout_relationship_btns">
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout">
+               <layout class="QHBoxLayout" name="hlayout_maptool">
                 <item>
-                 <spacer name="horizontalSpacer">
+                 <spacer name="hspace_maptool">
                   <property name="orientation">
                    <enum>Qt::Horizontal</enum>
                   </property>
@@ -420,7 +368,7 @@ QGroupBox::title {
                </layout>
               </item>
               <item>
-               <spacer name="verticalSpacer">
+               <spacer name="vspace_relationship_btns">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>
                 </property>
@@ -435,7 +383,7 @@ QGroupBox::title {
               <item>
                <widget class="QPushButton" name="btn_unlink">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Remove relationship between outlines&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>Remove relationship between outlines</string>
                 </property>
                 <property name="text">
                  <string>Unlink</string>
@@ -467,20 +415,154 @@ QGroupBox::title {
             </item>
            </layout>
           </item>
-          <item row="3" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item row="4" column="0">
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="layout_msg_bar_edit"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <layout class="QHBoxLayout" name="hlayout_save">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_10">
+             <spacer name="hspace_save">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="cb_autosave">
+              <property name="toolTip">
+               <string>Turn on to auto-save changes</string>
+              </property>
+              <property name="text">
+               <string>Auto-save</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_save">
+              <property name="text">
+               <string>Save</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_cancel">
+              <property name="text">
+               <string>Cancel</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="3" column="0">
+           <layout class="QVBoxLayout" name="vlayout_attributes">
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="lbl_existing_attributes">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Existing Attributes</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="lst_existing_attrs">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="lbl_bulk_load_attributes">
+              <property name="font">
+               <font>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Bulk Load Attributes</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="lst_bulk_attrs">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayout_attributes">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
               <item>
-               <widget class="QLabel" name="label_6">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
+               <widget class="QLabel" name="lbl_attributes">
                 <property name="text">
-                 <string>Existing Attrs</string>
+                 <string>Attributes</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -488,16 +570,70 @@ QGroupBox::title {
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="lst_existing_attrs">
+               <spacer name="hspace_copy_from_existing">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_copy_from_existing">
+                <property name="text">
+                 <string>Copy from existing</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayout_use">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_use">
+                <property name="minimumSize">
+                 <size>
+                  <width>42</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Use</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cbox_use">
                 <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayout_name">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_name">
                 <property name="minimumSize">
                  <size>
-                  <width>0</width>
+                  <width>42</width>
                   <height>0</height>
                  </size>
                 </property>
@@ -507,77 +643,58 @@ QGroupBox::title {
                   <height>16777215</height>
                  </size>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_7">
-                <property name="font">
-                 <font>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
                 <property name="text">
-                 <string>Bulk Load Attrs</string>
+                 <string>Name</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QListWidget" name="lst_bulk_attrs">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QLineEdit" name="ledit_name">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
-                <property name="minimumSize">
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="hlayout_set_delete_atributes">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <spacer name="hspace_set_delete_attributes">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
                  <size>
-                  <width>0</width>
-                  <height>0</height>
+                  <width>40</width>
+                  <height>20</height>
                  </size>
                 </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>16777215</height>
-                 </size>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_set_attributes">
+                <property name="text">
+                 <string>Set Attributes</string>
                 </property>
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_8">
-                <item>
-                 <widget class="QPushButton" name="pushButton_10">
-                  <property name="text">
-                   <string>Copy Attrs</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_11">
-                  <property name="text">
-                   <string>Del Attrs</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_12">
-                  <property name="text">
-                   <string>TBA</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+               <widget class="QPushButton" name="btn_delete_attributes">
+                <property name="text">
+                 <string>Delete Attributes</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
            </layout>
-          </item>
-          <item row="0" column="0">
-           <layout class="QVBoxLayout" name="layout_msg_bar_edit"/>
           </item>
          </layout>
         </widget>
@@ -585,7 +702,7 @@ QGroupBox::title {
        <item>
         <widget class="QCheckBox" name="cb_lyr_bulk_load">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Turn on/off bulk load layers&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>Turn on/off bulk load layers</string>
          </property>
          <property name="layoutDirection">
           <enum>Qt::RightToLeft</enum>
@@ -601,7 +718,7 @@ QGroupBox::title {
        <item>
         <widget class="QCheckBox" name="cb_lyr_existing">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;turn on/off existing layers&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>Turn on/off existing layers</string>
          </property>
          <property name="layoutDirection">
           <enum>Qt::RightToLeft</enum>
@@ -627,6 +744,37 @@ QGroupBox::title {
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>cmb_relationship</tabstop>
+  <tabstop>tbl_relationship</tabstop>
+  <tabstop>btn_next</tabstop>
+  <tabstop>btn_qa_not_removed</tabstop>
+  <tabstop>btn_qa_not_checked</tabstop>
+  <tabstop>btn_qa_refer2supplier</tabstop>
+  <tabstop>btn_qa_pending</tabstop>
+  <tabstop>btn_qa_okay</tabstop>
+  <tabstop>lst_existing</tabstop>
+  <tabstop>lst_bulk</tabstop>
+  <tabstop>btn_maptool</tabstop>
+  <tabstop>btn_unlink</tabstop>
+  <tabstop>btn_matched</tabstop>
+  <tabstop>btn_related</tabstop>
+  <tabstop>btn_delete</tabstop>
+  <tabstop>lst_existing_attrs</tabstop>
+  <tabstop>lst_bulk_attrs</tabstop>
+  <tabstop>btn_copy_from_existing</tabstop>
+  <tabstop>cbox_use</tabstop>
+  <tabstop>ledit_name</tabstop>
+  <tabstop>btn_set_attributes</tabstop>
+  <tabstop>btn_delete_attributes</tabstop>
+  <tabstop>cb_autosave</tabstop>
+  <tabstop>btn_save</tabstop>
+  <tabstop>btn_cancel</tabstop>
+  <tabstop>cb_lyr_bulk_load</tabstop>
+  <tabstop>cb_lyr_existing</tabstop>
+  <tabstop>btn_exit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+from ast import literal_eval
 from functools import partial
 
 from qgis.PyQt import uic
@@ -65,6 +66,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.db = db
         self.db.connect()
 
+        self.valid_building_uses = {
+            None: "None",
+            **{use_id: use for use_id, use in self.db.execute_return("SELECT * FROM buildings.use;").fetchall()}
+        }
+
         self.dockwidget = dockwidget
         self.layer_registry = LayerRegistry()
         self.current_dataset = current_dataset
@@ -73,6 +79,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.delete = False
         self.deletion_reason = None
         self.zoom = True
+        self.attributes_changed = False
 
         self.frame_setup()
         self.layers_setup()
@@ -91,6 +98,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_qa_not_removed.setIcon(QIcon(os.path.join(__location__, "..", "icons", "match.png")))
         self.btn_next.setIcon(QIcon(os.path.join(__location__, "..", "icons", "next.png")))
         self.btn_maptool.setIcon(QIcon(os.path.join(__location__, "..", "icons", "multi_layer_selection_tool.png")))
+
+        self.cbox_use.insertItems(0, self.valid_building_uses.values())
 
         self.maptool_clicked()
         self.reset_buttons()
@@ -157,6 +166,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_matched.clicked.connect(partial(self.matched_clicked, commit_status=True))
         self.btn_related.clicked.connect(partial(self.related_clicked, commit_status=True))
         self.btn_delete.clicked.connect(partial(self.delete_clicked, commit_status=True))
+        self.btn_copy_from_existing.clicked.connect(self.on_click_btn_copy_from_existing)
+        self.btn_set_attributes.clicked.connect(self.on_click_btn_set_attributes)
+        self.btn_delete_attributes.clicked.connect(self.on_click_btn_delete_attributes)
         self.btn_save.clicked.connect(partial(self.save_clicked, commit_status=True))
         self.btn_cancel.clicked.connect(self.cancel_clicked)
         self.btn_exit.clicked.connect(self.exit_clicked)
@@ -462,10 +474,20 @@ class AlterRelationships(QFrame, FORM_CLASS):
         # switch button
         if has_matched or has_related:
             self.btn_unlink.setEnabled(True)
+            self.btn_copy_from_existing.setEnabled(True)
+            self.btn_set_attributes.setEnabled(True)
+            self.btn_delete_attributes.setEnabled(True)
+            self.ledit_name.setEnabled(True)
+            self.cbox_use.setEnabled(True)
+            self.switch_btn_match_and_related()
         elif has_added and has_removed:
             self.switch_btn_match_and_related()
         elif has_added and not has_removed:
             self.btn_delete.setEnabled(True)
+            self.btn_set_attributes.setEnabled(True)
+            self.btn_delete_attributes.setEnabled(True)
+            self.ledit_name.setEnabled(True)
+            self.cbox_use.setEnabled(True)
         # select rows in tbl_relationship
         self.tbl_relationship.setSelectionMode(QAbstractItemView.MultiSelection)
         if has_removed:
@@ -684,6 +706,51 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def reason_cancel(self):
         self.deletion_reason.close()
 
+    def on_click_btn_copy_from_existing(self):
+        selected_existing_outlines = self.get_lst_content(self.lst_existing_attrs)
+        existing_uses = [row[1][1] for row in selected_existing_outlines]
+        existing_names = [row[1][2] for row in selected_existing_outlines]
+        non_null_pairs = [pair for pair in zip(existing_uses, existing_names) if pair != ("None", "None")]
+        if non_null_pairs:
+            existing_use = non_null_pairs[0][0]
+            use_id = self.valid_building_use_ids[existing_use]
+            self.cbox_use.setCurrentIndex(use_id)
+            existing_name = non_null_pairs[0][1]
+            self.ledit_name.setText(existing_name)
+        else:
+            self.cbox_use.setCurrentIndex(0)
+            self.ledit_name.setText("")
+
+    def on_click_btn_set_attributes(self, commit_status=True):
+        use = self.cbox_use.currentText()
+        name = self.ledit_name.text()
+        name = "None" if name == "" else name
+        if use == "None" and name != "None":
+            self.error_dialog = ErrorDialog()
+            self.error_dialog.fill_report("An outline cannot have a name without a use. Please select a value for use.")
+            self.error_dialog.show()
+            return
+        for row_id, row_content in self.get_lst_content(self.lst_bulk_attrs):
+            updated_row_content = [row_content[0], use, name]
+            self.lst_bulk_attrs.item(row_id).setText(str(updated_row_content))
+        self.connect_to_error_msg()
+        self.attributes_changed = True
+        if self.autosave:
+            self.save_clicked(commit_status)
+        else:
+            self.btn_save.setEnabled(True)
+
+    def on_click_btn_delete_attributes(self, commit_status=True):
+        for row_id, row_content in self.get_lst_content(self.lst_bulk_attrs):
+            updated_row_content = [row_content[0], "None", "None"]
+            self.lst_bulk_attrs.item(row_id).setText(str(updated_row_content))
+        self.connect_to_error_msg()
+        self.attributes_changed = True
+        if self.autosave:
+            self.save_clicked(commit_status)
+        else:
+            self.btn_save.setEnabled(True)
+
     def save_clicked(self, commit_status=True):
         """
         Save result and change database
@@ -705,9 +772,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 self.db.execute_no_commit(sql, (feat_id, self.reason_text))
             self.reason_text = ""
             self.delete = False
+        elif self.attributes_changed:
+            self.update_bulkload_attributes()
         else:
             self.delete_original_relationships()
-
             self.insert_new_added_outlines()
             self.insert_new_removed_outlines()
             self.insert_new_matched_outlines()
@@ -1332,12 +1400,16 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.tool.multi_selection_changed.connect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.tbl_relationship_item_selection_changed)
         self.tbl_relationship.itemSelectionChanged.connect(self.unfinished_error_msg)
+        self.reset_buttons()
+        self.btn_maptool.setEnabled(False)
 
     def disconnect_to_error_msg(self):
         self.tool.multi_selection_changed.disconnect(self.unfinished_error_msg)
         self.tool.multi_selection_changed.connect(self.multi_selection_changed)
         self.tbl_relationship.itemSelectionChanged.disconnect(self.unfinished_error_msg)
         self.tbl_relationship.itemSelectionChanged.connect(self.tbl_relationship_item_selection_changed)
+        self.reset_buttons()
+        self.btn_maptool.setEnabled(True)
 
     def has_no_selection_in_table(self, tbl):
         if not tbl.selectionModel().selectedRows():
@@ -1411,6 +1483,11 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.btn_delete.setEnabled(False)
         self.btn_save.setEnabled(False)
         self.btn_maptool.setEnabled(True)
+        self.btn_copy_from_existing.setEnabled(False)
+        self.btn_set_attributes.setEnabled(False)
+        self.btn_delete_attributes.setEnabled(False)
+        self.cbox_use.setEnabled(False)
+        self.ledit_name.setEnabled(False)
 
     def qa_button_set_enable(self, boolean):
         self.btn_qa_okay.setEnabled(boolean)
@@ -1427,6 +1504,13 @@ class AlterRelationships(QFrame, FORM_CLASS):
         for row in range(lst.count()):
             feat_ids.append(int(lst.item(row).text()))
         return feat_ids
+
+    @staticmethod
+    def get_lst_content(lst):
+        """
+        Returns a list of tuples of the row_id and the row content evaluated using `literal_eval`.
+        """
+        return [(n, literal_eval(lst.item(n).text())) for n in range(lst.count())]
 
     def disable_listwidget(self, lst):
         for row in range(lst.count()):
@@ -1522,6 +1606,18 @@ class AlterRelationships(QFrame, FORM_CLASS):
             for feat2 in self.lyr_related_existing_in_edit.getFeatures():
                 id_existing = feat2["building_outline_id"]
                 self.db.execute_no_commit(sql_insert_related, (new_group_id, id_bulk, id_existing))
+
+    def update_bulkload_attributes(self):
+        sql_update_attrs = """
+            UPDATE buildings_bulk_load.bulk_load_outlines
+            SET bulk_load_use_id = %s, bulk_load_name = %s
+            WHERE bulk_load_outline_id = %s;
+            """
+        for row_id, (id_, use, name) in self.get_lst_content(self.lst_bulk_attrs):
+            use_id = self.valid_building_use_ids[use]
+            if name in {"", "None"}:
+                name = None
+            self.db.execute_no_commit(sql_update_attrs, (use_id, name, id_))
 
     def disable_tbl_editing(self, tbl):
         """Disable editing so item cannot be changed in the table"""
@@ -1844,3 +1940,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         legend_node_added = [ln for ln in legend_nodes if ln.data(Qt.DisplayRole) == "Added In Edit"]
         legend_node_added[0].setData(Qt.Unchecked, Qt.CheckStateRole)
         legend_node_added[0].setData(Qt.Checked, Qt.CheckStateRole)
+
+    @property
+    def valid_building_use_ids(self):
+        """self.valid_building_uses flipped to map use strings to use_id ints"""
+        return {use: use_id for use_id, use in self.valid_building_uses.items()}
