@@ -449,7 +449,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
                 if has_matched:
                     has_multi_set = True
                 existing_to_lst = [feat_id]
-                bulk_to_list = [id_matched[0]]
+                bulk_to_list = [id_matched[1]]
                 has_matched = True
             elif ids_existing and ids_bulk:
                 if has_added or has_removed or has_matched:
