@@ -236,7 +236,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "building_outline_id",
             "",
         )
-        self.lyr_removed_existing.loadNamedStyle(path + "building_red.qml")
+        self.lyr_removed_existing.loadNamedStyle(path + "building_red_existing.qml")
 
         self.lyr_added_bulk_load = self.layer_registry.add_postgres_layer(
             "added_outlines",
