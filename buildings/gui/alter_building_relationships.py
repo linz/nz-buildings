@@ -774,6 +774,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.delete = False
         elif self.attributes_changed:
             self.update_bulkload_attributes()
+            self.attributes_changed = False
         else:
             self.delete_original_relationships()
             self.insert_new_added_outlines()
