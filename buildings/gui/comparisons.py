@@ -25,6 +25,7 @@ def compare_outlines(self, commit_status):
 
     if len(results) == 0:
         # No intersecting outlines
+        print("no intersecting outlines...")
         # add all incoming outlines to added table
         sql = "SELECT buildings_bulk_load.added_insert_all_bulk_loaded_outlines(%s);"
         self.db.execute_no_commit(sql, (self.current_dataset,))
@@ -35,6 +36,7 @@ def compare_outlines(self, commit_status):
 
     else:
         # intersecting outlines exist
+        print("Intersecting outlines exist...")
         for ls in results:
             life_span_check = self.db.execute_no_commit(
                 buildings_select.building_outlines_end_lifespan_by_building_outline_id,
@@ -62,5 +64,32 @@ def compare_outlines(self, commit_status):
         # run comparisons function
         sql = "SELECT buildings_bulk_load.compare_building_outlines(%s);"
         self.db.execute_no_commit(sql, (self.current_dataset,))
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name of existing names of matched existing buildings
+        sql = "SELECT buildings_bulk_load.load_matched_names();"
+        self.db.execute_no_commit(sql)
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name with existing names of related existing buildings
+        sql = "SELECT buildings_bulk_load.load_related_names();"
+        self.db.execute_no_commit(sql)
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of matched existing buildings
+        sql = "SELECT buildings_bulk_load.load_matched_use_id();"
+        self.db.execute_no_commit(sql)
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id with existing use_id of related existing buildings
+        sql = "SELECT buildings_bulk_load.load_related_use_id();"
+        self.db.execute_no_commit(sql)
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_name if an added building exists more than 50% inside a facility polygon.
+        # This assumes you have a facilities_lds schema in your db.
+        sql = "SELECT buildings_bulk_load.load_facility_names();"
+        self.db.execute_no_commit(sql)
+
+        # populate buildings_bulk_load.bulk_load_outlines with bulk_load_use_id if an added building exists more than 50% inside a facility polygon.
+        # This assumes you have a facilities_lds schema in your db.
+        sql = "SELECT buildings_bulk_load.load_facility_use_id();"
+        self.db.execute_no_commit(sql)
+
     if commit_status:
         self.db.commit_open_cursor()
