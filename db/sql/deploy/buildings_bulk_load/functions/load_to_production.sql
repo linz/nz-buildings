@@ -1,5 +1,3 @@
--- Deploy nz-buildings:buildings_bulk_load/functions/load_to_production to pg
-
 BEGIN;
 
 --------------------------------------------------------------------
