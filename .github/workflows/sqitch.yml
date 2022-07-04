@@ -17,22 +17,8 @@ jobs:
           - {postgres: "10", postgis: "2.5"}
           - {postgres: "14", postgis: "3.2"}
 
-    services:
-      postgres:
-        image: postgis/postgis:${{ matrix.postgres }}-${{ matrix.postgis }}
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: user
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        # Checks to see if the PostgreSQL database is ready
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+    container: pgxn/pgxn-tools
+          
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -47,10 +33,20 @@ jobs:
 
       - name: Check Sqitch version
         run: sqitch --version
+        
+      - name: Install PostGIS 
+        run: |
+          sudo apt-get install \
+            postgresql-${{ matrix.pg }}-postgis-${{ matrix.pgis }} \
+            postgresql-${{ matrix.pg }}-postgis-${{ matrix.pgis }}-scripts
 
       - name: Database setup
         run: |
-          psql -d ${{ env.TEST_DB }} -c 'CREATE EXTENSION intarray;' 
+          pg-start ${{ matrix.postgres }}
+          sudo -u postgres createuser -s user
+          sudo -u postgres createdb --owner=user test_db
+          psql -d ${{ env.TEST_DB }} -c 'CREATE EXTENSION postgis;'
+          psql -d ${{ env.TEST_DB }} -c 'CREATE EXTENSION intarray;'
           psql -d ${{ env.TEST_DB }} -a -f create_test_admin_bdys_schema.sql
           psql -d ${{ env.TEST_DB }} -a -f db/admin_bdys.sql
           psql -d ${{ env.TEST_DB }} -a -f create_test_aerial_schema.sql
@@ -91,11 +87,6 @@ jobs:
         env:
           TEST_DB: postgresql://user@127.0.0.1/test_db
           PGPASSWORD: password
-
-      - name: Install pgTAP 
-        run: |
-          sudo apt-get install -y libtap-parser-sourcehandler-pgtap-perl
-          sudo apt-get install -y postgresql-pgtap
 
       - name: Run pgTAP tests
         run: pg_prove -d postgresql://user@127.0.0.1/test_db db/tests/
