@@ -37,8 +37,8 @@ jobs:
       - name: Install PostGIS 
         run: |
           sudo apt-get install \
-            postgresql-${{ matrix.pg }}-postgis-${{ matrix.pgis }} \
-            postgresql-${{ matrix.pg }}-postgis-${{ matrix.pgis }}-scripts
+            postgresql-${{ matrix.postgres }}-postgis-${{ matrix.pgis }} \
+            postgresql-${{ matrix.postgres }}-postgis-${{ matrix.pgis }}-scripts
 
       - name: Database setup
         run: |
