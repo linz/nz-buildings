@@ -15,8 +15,6 @@ COMMENT ON SCHEMA facilities_lds IS
 -- The nz_facilities table holds a copy of the facilities.facilities table
 -- minus the internal and internal_comments fields.
 
-DROP TABLE IF EXISTS facilities_lds.nz_facilities;
-
 CREATE TABLE IF NOT EXISTS facilities_lds.nz_facilities (
       facility_id integer PRIMARY KEY
     , source_facility_id character varying(80) DEFAULT ''

@@ -7,11 +7,11 @@ BEGIN
 
     PERFORM proname, proargnames, prosrc
     FROM pg_proc
-    WHERE proname = 'load_to_production'
-    AND prosrc LIKE '%building_name_removed_insert_bulk%';
+    WHERE proname = 'load_building_outlines'
+    AND prosrc LIKE '%buildings.building_name_added_insert_bulk%';
 
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'building_name_removed_insert_bulk not found.';
+        RAISE EXCEPTION 'The load_to_production function does not include modifications to handle names and uses.';
     END IF;
 
 END $$;
