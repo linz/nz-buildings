@@ -9,7 +9,6 @@ ENV LANG en_US.utf8
 
 ENV POSTGRESQL_VERSION 9.3
 ENV POSTGIS_VERSION 2.3
-ENV SQITCH_VERSION 1.2.1
 ENV GOSU_VERSION 1.14
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -64,19 +63,8 @@ RUN \
         "postgresql-$POSTGRESQL_VERSION" \
         "postgresql-$POSTGRESQL_VERSION-pgtap" \
         "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION" \
-        "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts" \
-        # libtap-parser-sourcehandler-pgtap-perl \
-        # libdbd-pg-perl \
-        perl \
-        # perl-doc \
-        build-essential \
-        cpanminus && \
+        "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts" && \
     rm -rf /var/lib/apt/lists/*
-
-# Install Sqitch
-RUN \
-    cpanm --notest --no-interactive --no-man-pages "DWHEELER/App-Sqitch-v$SQITCH_VERSION.tar.gz" && \
-    rm -r ~/.cpanm
 
 # make the sample config easier to munge (and "correct by default")
 RUN \
