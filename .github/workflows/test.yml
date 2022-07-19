@@ -7,23 +7,6 @@ jobs:
       fail-fast: false
       matrix:
         db_image: [ 'nz-buildings-db-legacy:2022-07-19_1fc2bb4', 'nz-buildings-db-modern:2022-07-19_1fc2bb4' ]
-    services:
-      postgres:
-        image: ghcr.io/linz/${{ matrix.db_image }}
-        env:
-          POSTGRES_USER: github
-          POSTGRES_PASSWORD: github
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-          --name db
-        volumes:
-          - ${{ env.GITHUB_WORKSPACE }}/db/tests:/db_tests
-
     env:
       PGHOST: localhost
       PGPORT: 5432
@@ -34,6 +17,18 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Spawn database container
+        run: |
+          docker run \
+          --name db \
+          -p 5432:5432 \
+          --volume ${{ env.GITHUB_WORKSPACE }}/db/tests:/db_tests \
+          --health-cmd pg_isready \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 5 \
+          -d \
+          ghcr.io/linz/${{ matrix.db_image }}
       - name: Install Sqitch 
         run: |
           sudo apt-get install -y libdbd-pg-perl build-essential perl perl-doc
