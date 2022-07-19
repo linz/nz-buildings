@@ -13,6 +13,7 @@ jobs:
       PGUSER: github
       PGPASSWORD: github
       PGDATABASE: github
+      PGCONN: postgresql://github:github@localhost:5432/github
       SQITCH_VERSION: 1.2.1
     steps:
       - name: Checkout Code
@@ -38,10 +39,10 @@ jobs:
         run: sqitch --version
       - name: Setup database
         run: |
-          psql -a -f create_test_admin_bdys_schema.sql
-          psql -a -f db/admin_bdys.sql
-          psql -a -f create_test_aerial_schema.sql
-          psql -a -f db/aerial_lds.sql
+          psql -d $PGCONN -a -f create_test_admin_bdys_schema.sql
+          psql -d $PGCONN -a -f db/admin_bdys.sql
+          psql -d $PGCONN -a -f create_test_aerial_schema.sql
+          psql -d $PGCONN -a -f db/aerial_lds.sql
         working-directory: ./db/tests/testdata
       - name: Sqitch deploy
         run: sqitch deploy --verify
@@ -54,12 +55,12 @@ jobs:
         working-directory: ./db/sql
       - name: Add test data
         run: |
-          psql -a -f buildings_reference.sql
-          psql -a -f buildings_common.sql
-          psql -a -f buildings.sql
-          psql -a -f buildings_bulk_load.sql
-          psql -a -f buildings_lds.sql
-          psql -a -f update_sequences.sql
+          psql -d $PGCONN -a -f buildings_reference.sql
+          psql -d $PGCONN -a -f buildings_common.sql
+          psql -d $PGCONN -a -f buildings.sql
+          psql -d $PGCONN -a -f buildings_bulk_load.sql
+          psql -d $PGCONN -a -f buildings_lds.sql
+          psql -d $PGCONN -a -f update_sequences.sql
           psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
         working-directory: ./db/tests/testdata/db
       - name: Run pgTAP tests
