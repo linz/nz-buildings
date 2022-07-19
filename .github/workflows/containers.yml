@@ -1,0 +1,33 @@
+name: Build and publish containers
+on:
+  push:
+    paths:
+      - docker/**
+jobs:
+  build-containers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Build containers
+        run: |
+          for file in *.Dockerfile
+          do
+            IMAGE=${file%.*}
+            docker build --file $file --tag $IMAGE --label "github_run_id=${GITHUB_RUN_ID}" .
+          done
+        working-directory: docker
+      - name: Publish containers
+        run: |
+          for file in *.Dockerfile
+          do
+            IMAGE=${file%.*}
+            VERSION="$IMAGE_$(date +'%Y-%m-%d')_$(git rev-parse --short "$GITHUB_SHA")"
+            docker tag $IMAGE ghcr.io/linz/$IMAGE:$VERSION
+            docker push ghcr.io/linz/$IMAGE:$VERSION
+          done
+        working-directory: docker
