@@ -23,11 +23,16 @@ jobs:
         working-directory: docker
       - name: Publish containers
         run: |
+          BRANCH=${GITHUB_REF##*/}
           for file in *.Dockerfile
           do
             IMAGE=${file%.*}
             VERSION="$IMAGE_$(date +'%Y-%m-%d')_$(git rev-parse --short "$GITHUB_SHA")"
             docker tag $IMAGE ghcr.io/linz/$IMAGE:$VERSION
             docker push ghcr.io/linz/$IMAGE:$VERSION
+            if [ $BRANCH = 'master' ]; then
+              docker tag $IMAGE ghcr.io/linz/$IMAGE:latest
+              docker push ghcr.io/linz/$IMAGE:latest
+            fi
           done
         working-directory: docker

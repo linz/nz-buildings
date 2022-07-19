@@ -1,0 +1,59 @@
+name: Run tests
+on: push
+jobs:
+  tests:
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        db_image: [ 'nz-buildings-db-legacy:2022-07-19_e9a4480', 'nz-buildings-db-modern:2022-07-19_e9a4480' ]
+    services:
+      postgres:
+        image: ghcr.io/linz/${{ matrix.db_image }}
+        env:
+          POSTGRES_USER: github
+          POSTGRES_PASSWORD: github
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: github
+      PGPASSWORD: github
+      PGDATABASE: github
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup database
+        run: |
+          psql -a -f create_test_admin_bdys_schema.sql
+          psql -a -f db/admin_bdys.sql
+          psql -a -f create_test_aerial_schema.sql
+          psql -a -f db/aerial_lds.sql
+        working-directory: ./db/tests/testdata
+      - name: Sqitch deploy
+        run: sqitch deploy --verify
+        working-directory: ./db/sql
+      - name: Sqitch revert
+        run: sqitch revert -y
+        working-directory: ./db/sql
+      - name: Sqitch deploy again
+        run: sqitch deploy
+        working-directory: ./db/sql
+      - name: Add test data
+        run: |
+          psql -a -f buildings_reference.sql
+          psql -a -f buildings_common.sql
+          psql -a -f buildings.sql
+          psql -a -f buildings_bulk_load.sql
+          psql -a -f buildings_lds.sql
+          psql -a -f update_sequences.sql
+          psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
+        working-directory: ./db/tests/testdata/db
+      - name: Run pgTAP tests
+        run: pg_prove db/tests/
