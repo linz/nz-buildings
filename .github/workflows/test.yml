@@ -6,7 +6,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        db_image: [ 'nz-buildings-db-legacy:2022-07-19_1fc2bb4', 'nz-buildings-db-modern:2022-07-19_1fc2bb4' ]
+        db_image: [ 'nz-buildings-db-legacy:v1', 'nz-buildings-db-modern:v1' ]
     env:
       PGHOST: localhost
       PGPORT: 5432
@@ -22,7 +22,7 @@ jobs:
           docker run \
           --name db \
           -p $PGPORT:5432 \
-          --volume ${{ github.workspace }}/db/tests:/db_tests \
+          --volume ${{ github.workspace }}:/nz-buildings \
           --health-cmd pg_isready \
           --health-interval 10s \
           --health-timeout 5s \
@@ -39,38 +39,28 @@ jobs:
           ghcr.io/linz/${{ matrix.db_image }}
       - name: Print docker logs
         uses: jwalton/gh-docker-logs@v1
-      - name: Install Sqitch 
-        run: |
-          sudo apt-get install -y libdbd-pg-perl build-essential perl perl-doc
-          sudo apt-get install -y cpanminus
-          sudo cpanm --notest DWHEELER/App-Sqitch-v$SQITCH_VERSION.tar.gz
-      - name: Check Sqitch version
-        run: sqitch --version
       - name: Setup database
         run: |
-          psql -a -f create_test_admin_bdys_schema.sql
-          psql -a -f db/admin_bdys.sql
-          psql -a -f create_test_aerial_schema.sql
-          psql -a -f db/aerial_lds.sql
-        working-directory: ./db/tests/testdata
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_admin_bdys_schema.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/admin_bdys.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_aerial_schema.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/aerial_lds.sql
       - name: Sqitch deploy
-        run: sqitch deploy --verify
-        working-directory: ./db/sql
+        run: docker exec --workdir /nz-buildings/db/sql sqitch deploy --verify
       - name: Sqitch revert
-        run: sqitch revert -y
+        run: docker exec --workdir /nz-buildings/db/sql sqitch revert -y
         working-directory: ./db/sql
       - name: Sqitch deploy again
-        run: sqitch deploy
+        run: docker exec --workdir /nz-buildings/db/sql sqitch deploy
         working-directory: ./db/sql
       - name: Add test data
         run: |
-          psql -a -f buildings_reference.sql
-          psql -a -f buildings_common.sql
-          psql -a -f buildings.sql
-          psql -a -f buildings_bulk_load.sql
-          psql -a -f buildings_lds.sql
-          psql -a -f update_sequences.sql
-          psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
-        working-directory: ./db/tests/testdata/db
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_reference.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_common.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_bulk_load.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_lds.sql
+          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/update_sequences.sql
+          docker exec -u postgres db psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
       - name: Run pgTAP tests
-        run: docker exec db pg_prove /db_tests
+        run: docker exec db pg_prove /nz-buildings/db/tests
