@@ -22,7 +22,7 @@ jobs:
           docker run \
           --name db \
           -p $PGPORT:5432 \
-          --volume ${{ env.GITHUB_WORKSPACE }}/db/tests:/db_tests \
+          --volume ${{ github.workspace }}/db/tests:/db_tests \
           --health-cmd pg_isready \
           --health-interval 10s \
           --health-timeout 5s \
@@ -38,7 +38,7 @@ jobs:
         run: |
           sudo apt-get install -y libdbd-pg-perl build-essential perl perl-doc
           sudo apt-get install -y cpanminus
-          sudo cpanm --notest DWHEELER/App-Sqitch-v${{ env.SQITCH_VERSION }}.tar.gz
+          sudo cpanm --notest DWHEELER/App-Sqitch-v$SQITCH_VERSION.tar.gz
       - name: Check Sqitch version
         run: sqitch --version
       - name: Setup database
