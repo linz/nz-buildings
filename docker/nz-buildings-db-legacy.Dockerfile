@@ -5,11 +5,14 @@
 
 FROM ubuntu:trusty
 
+LABEL version="v1"
+
 ENV LANG en_US.utf8
 
 ENV POSTGRESQL_VERSION 9.3
 ENV POSTGIS_VERSION 2.3
 ENV GOSU_VERSION 1.14
+ENV SQITCH_VERSION 1.2.1
 ENV DEBIAN_FRONTEND noninteractive
 
 # explicitly set user/group IDs
@@ -63,8 +66,17 @@ RUN \
         "postgresql-$POSTGRESQL_VERSION" \
         "postgresql-$POSTGRESQL_VERSION-pgtap" \
         "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION" \
-        "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts" && \
-    rm -rf /var/lib/apt/lists/*
+        "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts" \
+        perl \
+        build-essential \
+        cpanminus && \
+    rm -rf /var/lib/apt/lists/* && \
+    cpanm --notest --no-interactive --no-man-pages "DWHEELER/App-Sqitch-v$SQITCH_VERSION.tar.gz" && \
+    rm -r ~/.cpanm && \
+    apt-get purge -y \
+        build-essential \
+        cpanminus && \
+    apt-get autoremove -y
 
 # make the sample config easier to munge (and "correct by default")
 RUN \
