@@ -27,13 +27,13 @@ jobs:
           --health-interval 10s \
           --health-timeout 5s \
           --health-retries 5 \
-          -e "PGHOST=$PGHOST" \
-          -e "PGPORT=$PGPORT" \
-          -e "PGUSER=$PGUSER" \
-          -e "PGPASSWORD=$PGPASSWORD" \
-          -e "PGDATABASE=$PGDATABASE" \
+          -e "POSTGRES_USER=$PGUSER" \
+          -e "POSTGRES_PASSWORD=$PGPASSWORD" \
+          -e "POSTGRES_DB=$PGDATABASE" \
           -d \
           ghcr.io/linz/${{ matrix.db_image }}
+      - name: Print docker logs
+        uses: jwalton/gh-docker-logs@v1
       - name: Install Sqitch 
         run: |
           sudo apt-get install -y libdbd-pg-perl build-essential perl perl-doc
