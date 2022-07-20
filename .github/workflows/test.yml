@@ -21,7 +21,7 @@ jobs:
         run: |
           docker run \
           --name db \
-          -p 5432:5432 \
+          -p $PGPORT:5432 \
           --volume ${{ env.GITHUB_WORKSPACE }}/db/tests:/db_tests \
           --health-cmd pg_isready \
           --health-interval 10s \
@@ -68,4 +68,4 @@ jobs:
           psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
         working-directory: ./db/tests/testdata/db
       - name: Run pgTAP tests
-        run: docker exec -it db pg_prove /db_tests
+        run: docker exec db pg_prove /db_tests
