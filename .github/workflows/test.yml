@@ -41,10 +41,27 @@ jobs:
         uses: jwalton/gh-docker-logs@v1
       - name: Wait for DB to start
         run: |
-          until docker exec -u postgres db pg_isready
+          function check_db { docker exec -u postgres db pg_isready; }
+          check_db;
+          is_ready=$?;
+          until $is_ready
           do
-            echo "Waiting for postgres"
+            case $is_ready in
+              1)
+                echo "Postgres still starting" ;;
+              2)
+                echo "No response to the connection attempt" ;
+                exit 2 ;;
+              3)
+                echo "Invalid parameters" ;
+                exit 3 ;;
+              *)
+                echo "Error of exit code $is_ready" ;
+                exit $is_ready ;;
+            ecas
             sleep 2;
+            check_db;
+            is_ready=$?;
           done
       - name: Setup database
         run: |
