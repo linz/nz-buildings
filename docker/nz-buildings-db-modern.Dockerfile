@@ -15,9 +15,7 @@ RUN \
     rm -rf /var/lib/apt/lists/* && \
     cpanm --notest --no-interactive --no-man-pages "DWHEELER/App-Sqitch-v$SQITCH_VERSION.tar.gz" && \
     rm -r ~/.cpanm && \
-    apt-get purge -y \
-        build-essential \
-        cpanminus && \
+    apt-get purge -y build-essential && \
     apt-get autoremove -y
 
 COPY initialise-extensions.sql /docker-entrypoint-initdb.d/
