@@ -68,6 +68,7 @@ RUN \
         "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION" \
         "postgresql-$POSTGRESQL_VERSION-postgis-$POSTGIS_VERSION-scripts" \
         perl \
+        libdbd-pg-perl \
         build-essential \
         cpanminus && \
     rm -rf /var/lib/apt/lists/* && \

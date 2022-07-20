@@ -10,6 +10,7 @@ RUN \
     apt-get install -y \
         "postgresql-$PG_MAJOR-pgtap" \
         perl \
+        libdbd-pg-perl \
         build-essential \
         cpanminus && \
     rm -rf /var/lib/apt/lists/* && \
