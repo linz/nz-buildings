@@ -27,6 +27,11 @@ jobs:
           --health-interval 10s \
           --health-timeout 5s \
           --health-retries 5 \
+          -e "PGHOST=$PGHOST" \
+          -e "PGPORT=$PGPORT" \
+          -e "PGUSER=$PGUSER" \
+          -e "PGPASSWORD=$PGPASSWORD" \
+          -e "PGDATABASE=$PGDATABASE" \
           -e "POSTGRES_USER=$PGUSER" \
           -e "POSTGRES_PASSWORD=$PGPASSWORD" \
           -e "POSTGRES_DB=$PGDATABASE" \
