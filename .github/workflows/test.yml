@@ -39,6 +39,13 @@ jobs:
           ghcr.io/linz/${{ matrix.db_image }}
       - name: Print docker logs
         uses: jwalton/gh-docker-logs@v1
+      - name: Wait for DB to start
+        run: |
+          until docker exec -u postgres db pg_isready
+          do
+            echo "Waiting for postgres"
+            sleep 2;
+          done
       - name: Setup database
         run: |
           docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_admin_bdys_schema.sql
@@ -46,12 +53,12 @@ jobs:
           docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_aerial_schema.sql
           docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/aerial_lds.sql
       - name: Sqitch deploy
-        run: docker exec --workdir /nz-buildings/db/sql sqitch deploy --verify
+        run: docker exec --workdir /nz-buildings/db/sql db sqitch deploy --verify
       - name: Sqitch revert
-        run: docker exec --workdir /nz-buildings/db/sql sqitch revert -y
+        run: docker exec --workdir /nz-buildings/db/sql db sqitch revert -y
         working-directory: ./db/sql
       - name: Sqitch deploy again
-        run: docker exec --workdir /nz-buildings/db/sql sqitch deploy
+        run: docker exec --workdir /nz-buildings/db/sql db sqitch deploy
         working-directory: ./db/sql
       - name: Add test data
         run: |
