@@ -31,10 +31,8 @@ jobs:
           -e "PGPORT=$PGPORT" \
           -e "PGUSER=$PGUSER" \
           -e "PGPASSWORD=$PGPASSWORD" \
-          -e "PGDATABASE=$PGDATABASE" \
           -e "POSTGRES_USER=$PGUSER" \
           -e "POSTGRES_PASSWORD=$PGPASSWORD" \
-          -e "POSTGRES_DB=$PGDATABASE" \
           -d \
           ghcr.io/linz/${{ matrix.db_image }}
           sleep 30;
