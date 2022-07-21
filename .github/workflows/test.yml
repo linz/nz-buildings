@@ -12,8 +12,6 @@ jobs:
       PGPORT: 5432
       PGUSER: github
       PGPASSWORD: github
-      PGDATABASE: github
-      SQITCH_VERSION: 1.2.1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -23,10 +21,6 @@ jobs:
           --name db \
           -p $PGPORT:5432 \
           --volume ${{ github.workspace }}:/nz-buildings \
-          --health-cmd pg_isready \
-          --health-interval 10s \
-          --health-timeout 5s \
-          --health-retries 5 \
           -e "PGHOST=$PGHOST" \
           -e "PGPORT=$PGPORT" \
           -e "PGUSER=$PGUSER" \
@@ -35,9 +29,16 @@ jobs:
           -e "POSTGRES_PASSWORD=$PGPASSWORD" \
           -d \
           ghcr.io/linz/${{ matrix.db_image }}
-          sleep 30;
       - name: Print docker logs
         uses: jwalton/gh-docker-logs@v1
+      - name: Wait for database container to start
+        run: |
+          RETRIES=3
+          until docker exec -u postgres db pg_isready || [ $RETRIES -eq 0 ]; do
+            RETRIES=$((RETRIES-=1))
+            echo "Waiting for postgres, $RETRIES attempts remaining..."
+            sleep 10;
+          done
       - name: Setup database
         run: |
           docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_admin_bdys_schema.sql
