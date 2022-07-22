@@ -18,32 +18,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Launch database container
-        run: |
-          bash $BASE_DIR/scripts/steps/launch_database_container.sh
+        run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
       - name: Print docker logs
         uses: jwalton/gh-docker-logs@v1
-      - name: Setup database
-        run: |
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_admin_bdys_schema.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/admin_bdys.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/create_test_aerial_schema.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/aerial_lds.sql
-      - name: Sqitch deploy
-        run: docker exec --workdir /nz-buildings/db/sql db sqitch deploy --verify
+      - name: Load additional schemas
+        run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
+      - name: Sqitch deploy and verify
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy_verify.sh
       - name: Sqitch revert
-        run: docker exec --workdir /nz-buildings/db/sql db sqitch revert -y
-        working-directory: ./db/sql
-      - name: Sqitch deploy again
-        run: docker exec --workdir /nz-buildings/db/sql db sqitch deploy
-        working-directory: ./db/sql
-      - name: Add test data
-        run: |
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_reference.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_common.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_bulk_load.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/buildings_lds.sql
-          docker exec -u postgres db psql -a -f /nz-buildings/db/tests/testdata/db/update_sequences.sql
-          docker exec -u postgres db psql -c 'REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;' 
+        run: bash $BASE_DIR/scripts/steps/sqitch_revert.sh
+      - name: Sqitch deploy
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
+      - name: Load test data
+        run: bash $BASE_DIR/scripts/steps/load_test_data.sh
       - name: Run pgTAP tests
-        run: docker exec db pg_prove /nz-buildings/db/tests
+        run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
