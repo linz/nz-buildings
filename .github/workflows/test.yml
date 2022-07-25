@@ -1,22 +1,28 @@
 name: Run tests
 on: push
 jobs:
-  tests:
+  db-tests:
+    name: Database tests [${{ matrix.db_image.name }} DB]
     runs-on: ubuntu-18.04
     strategy:
       fail-fast: false
       matrix:
-        db_image: [ 'ghcr.io/linz/nz-buildings-db-legacy:v1', 'ghcr.io/linz/nz-buildings-db-modern:v1' ]
+        db_image:
+          - {name: 'Legacy', image: 'ghcr.io/linz/nz-buildings-db-legacy:v1'}
+          - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
     env:
       PGHOST: localhost
       PGPORT: 5432
       PGUSER: github
       PGPASSWORD: github
       BASE_DIR: ${{ github.workspace }}
-      DB_DOCKER_IMAGE: ${{ matrix.db_image }}
+      DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
+      DOCKER_NETWORK: github
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Create docker network
+        run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
       - name: Launch database container
         run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
       - name: Print docker logs
@@ -33,3 +39,47 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/load_test_data.sh
       - name: Run pgTAP tests
         run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
+  qgis-tests:
+    name: QGIS tests [QGIS ${{ matrix.qgis_image.name }}, ${{ matrix.db_image.name }} DB]
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+      matrix:
+        db_image:
+          - {name: 'Legacy', image: 'ghcr.io/linz/nz-buildings-db-legacy:v1'}
+          - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
+        qgis_image:
+          - {name: '3.10', image: 'qgis/qgis:release-3_10'}
+          - {name: '3.16', image: 'qgis/qgis:release-3_16'}
+          - {name: '3.24', image: 'qgis/qgis:release-3_24'}
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: github
+      PGPASSWORD: github
+      BASE_DIR: ${{ github.workspace }}
+      DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
+      QGIS_DOCKER_IMAGE: ${{ matrix.qgis_image.image }}
+      DOCKER_NETWORK: github
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Create docker network
+        run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
+      - name: Launch database container
+        run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
+      - name: Print docker logs
+        uses: jwalton/gh-docker-logs@v1
+      - name: Load additional schemas
+        run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
+      - name: Sqitch deploy
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
+      - name: Load test data
+        run: bash $BASE_DIR/scripts/steps/load_test_data.sh
+      - name: Launch QGIS container
+        run: bash $BASE_DIR/scripts/steps/launch_qgis_container.sh
+      - name: Setup QGIS plugin
+        run: bash $BASE_DIR/scripts/steps/setup_qgis_plugin.sh
+      - name: Run QGIS tests
+        run: bash $BASE_DIR/scripts/steps/run_qgis_tests.sh

@@ -4,6 +4,7 @@ docker run \
 --name db \
 -p $PGPORT:$PGPORT \
 --volume $BASE_DIR:/nz-buildings \
+--net $DOCKER_NETWORK \
 -e "PGHOST=$PGHOST" \
 -e "PGPORT=$PGPORT" \
 -e "PGUSER=$PGUSER" \
