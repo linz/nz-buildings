@@ -15,16 +15,11 @@
 \set ON_ERROR_STOP true
 
 BEGIN;
-
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
-
-SELECT plan(10);
+SELECT plan(5);
 
 -- Tests
 
 --Organisation--------------------------
-SELECT has_function('buildings_bulk_load', 'organisation_insert', 'Should have function organisation_insert in bulk_load schema.');
 SELECT buildings_bulk_load.organisation_insert('Test Organisation');
 SELECT set_has(
     'SELECT value FROM buildings_bulk_load.organisation',
@@ -33,7 +28,6 @@ SELECT set_has(
 );
 
 --Capture Source Group-------------------
-SELECT has_function('buildings_common', 'capture_source_group_insert', 'Should have function capture_source_group_insert in buildings_common schema.');
 SELECT buildings_common.capture_source_group_insert('Test CS Value', 'Test CS Description');
 SELECT set_has(
     'SELECT value FROM buildings_common.capture_source_group',
@@ -42,7 +36,6 @@ SELECT set_has(
 );
 
 --Capture Source-------------------------
-SELECT has_function('buildings_common', 'capture_source_insert', 'Should have function capture_source_insert in buildings_common schema.');
 SELECT buildings_common.capture_source_insert(1, 'Test External Source');
 SELECT set_has(
     'SELECT external_source_id FROM buildings_common.capture_source',
@@ -51,7 +44,6 @@ SELECT set_has(
 );
 
 --Lifecycle Stage-------------------------
-SELECT has_function('buildings', 'lifecycle_stage_insert', 'Should have function lifecycle_stage_insert in buildings schema.');
 SELECT buildings.lifecycle_stage_insert('Test Lifecycle Stage');
 SELECT set_has(
     'SELECT value FROM buildings.lifecycle_stage',
@@ -60,7 +52,6 @@ SELECT set_has(
 );
 
 --Capture Method-------------------------
-SELECT has_function('buildings_common', 'capture_method_insert', 'Should have function capture_method_insert in buildings_common schema.');
 SELECT buildings_common.capture_method_insert('Test Capture Method');
 SELECT set_has(
     'SELECT value FROM buildings_common.capture_method',

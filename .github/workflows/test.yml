@@ -36,7 +36,7 @@ jobs:
       - name: Sqitch deploy
         run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
       - name: Load test data
-        run: bash $BASE_DIR/scripts/steps/load_test_data.sh
+        run: bash $BASE_DIR/scripts/steps/load_db_test_data.sh
       - name: Run pgTAP tests
         run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
   qgis-tests:
@@ -76,7 +76,7 @@ jobs:
       - name: Sqitch deploy
         run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
       - name: Load test data
-        run: bash $BASE_DIR/scripts/steps/load_test_data.sh
+        run: bash $BASE_DIR/scripts/steps/load_qgis_test_data.sh
       - name: Launch QGIS container
         run: bash $BASE_DIR/scripts/steps/launch_qgis_container.sh
       - name: Setup QGIS plugin

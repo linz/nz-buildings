@@ -1,5 +1,11 @@
 #!/bin/sh
 
+echo >&2 ""
+echo >&2 "################################"
+echo >&2 "# Launching database container #"
+echo >&2 "################################"
+echo >&2 ""
+
 docker run \
 --name db \
 -p $PGPORT:$PGPORT \

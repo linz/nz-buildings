@@ -15,6 +15,6 @@ bash $SCRIPTS_DIR/steps/load_additional_schemas.sh &&
 bash $SCRIPTS_DIR/steps/sqitch_deploy_verify.sh &&
 bash $SCRIPTS_DIR/steps/sqitch_revert.sh &&
 bash $SCRIPTS_DIR/steps/sqitch_deploy.sh &&
-bash $SCRIPTS_DIR/steps/load_test_data.sh &&
-bash $SCRIPTS_DIR/steps/run_pgtap_tests.sh &&
+bash $SCRIPTS_DIR/steps/load_db_test_data.sh &&
+bash $SCRIPTS_DIR/steps/run_pgtap_tests.sh ;
 bash $SCRIPTS_DIR/steps/cleanup.sh
