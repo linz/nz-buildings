@@ -38,6 +38,7 @@ try:
     _conn = psycopg2.connect(host=_host, port=_port, database=_dbname, user=_user, password=_pw)
 except psycopg2.DatabaseError as error:
     _conn = None
+    print(str(error))
     buildings_warning("Database Error", str(error), "critical")
 
 
