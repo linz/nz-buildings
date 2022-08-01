@@ -17,5 +17,5 @@ bash $SCRIPTS_DIR/steps/sqitch_deploy.sh &&
 bash $SCRIPTS_DIR/steps/load_qgis_test_data.sh &&
 bash $SCRIPTS_DIR/steps/launch_qgis_container.sh &&
 bash $SCRIPTS_DIR/steps/setup_qgis_plugin.sh &&
-bash $SCRIPTS_DIR/steps/run_qgis_tests.sh &&
+bash $SCRIPTS_DIR/steps/run_qgis_tests.sh ;
 bash $SCRIPTS_DIR/steps/cleanup.sh
