@@ -13,11 +13,11 @@ jobs:
     env:
       PGHOST: localhost
       PGPORT: 5432
-      PGUSER: github
-      PGPASSWORD: github
+      PGUSER: buildings
+      PGPASSWORD: buildings
       BASE_DIR: ${{ github.workspace }}
       DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
-      DOCKER_NETWORK: github
+      DOCKER_NETWORK: buildings
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -52,16 +52,15 @@ jobs:
           - {name: '3.10', image: 'qgis/qgis:release-3_10'}
           - {name: '3.16', image: 'qgis/qgis:release-3_16'}
           - {name: '3.24', image: 'qgis/qgis:release-3_24'}
-
     env:
       PGHOST: localhost
       PGPORT: 5432
-      PGUSER: github
-      PGPASSWORD: github
+      PGUSER: buildings
+      PGPASSWORD: buildings
       BASE_DIR: ${{ github.workspace }}
       DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
       QGIS_DOCKER_IMAGE: ${{ matrix.qgis_image.image }}
-      DOCKER_NETWORK: github
+      DOCKER_NETWORK: buildings
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
