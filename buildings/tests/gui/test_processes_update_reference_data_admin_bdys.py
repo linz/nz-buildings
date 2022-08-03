@@ -42,98 +42,90 @@ class SetUpReferenceData(unittest.TestCase):
         self.reference_frame.db.rollback_open_cursor()
         self.reference_frame.btn_exit.click()
 
-    def test_suburb_locality_table_update(self):
-        """Check buildings_reference.suburb_locality table updates correctly."""
-        # insert building outline to check for deleted suburb id
-        if self.reference_frame.db._open_cursor is None:
-            self.reference_frame.db.open_cursor()
-        insert_building = "SELECT buildings.buildings_insert();"
-        insert_building_outline = "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);"
-        result = self.reference_frame.db.execute_no_commit(insert_building)
-        building_id = result.fetchone()[0]
-        result = self.reference_frame.db.execute_no_commit(
-            insert_building_outline,
-            (
-                building_id,
-                11,
-                1002,
-                1,
-                101,
-                1002,
-                10002,
-                "010300002091080000010000000500000054A0D29477AA3C4194E310ED71315541D10AA5B679AA3C415417E8DD643155410DA2D440E3AA3C4104CAAD99643155414BD7BD51E4AA3C4171B36E867331554154A0D29477AA3C4194E310ED71315541",
-            ),
-        )
-        building_outline_id = result.fetchone()[0]
+    # def test_suburb_locality_table_update(self):
+    #     """Check buildings_reference.suburb_locality table updates correctly."""
+    #     # insert building outline to check for deleted suburb id
+    #     if self.reference_frame.db._open_cursor is None:
+    #         self.reference_frame.db.open_cursor()
+    #     insert_building = "SELECT buildings.buildings_insert();"
+    #     insert_building_outline = "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);"
+    #     result = self.reference_frame.db.execute_no_commit(insert_building)
+    #     building_id = result.fetchone()[0]
+    #     result = self.reference_frame.db.execute_no_commit(
+    #         insert_building_outline,
+    #         (
+    #             building_id,
+    #             11,
+    #             1002,
+    #             1,
+    #             101,
+    #             1002,
+    #             10002,
+    #             "010300002091080000010000000500000054A0D29477AA3C4194E310ED71315541D10AA5B679AA3C415417E8DD643155410DA2D440E3AA3C4104CAAD99643155414BD7BD51E4AA3C4171B36E867331554154A0D29477AA3C4194E310ED71315541",
+    #         ),
+    #     )
+    #     building_outline_id = result.fetchone()[0]
 
-        # run reference update
-        self.reference_frame.chbx_suburbs.setChecked(True)
+    #     # run reference update
+    #     self.reference_frame.chbx_suburbs.setChecked(True)
 
-        btn_ok = self.reference_frame.msgbox.button(QMessageBox.Ok)
-        QTimer.singleShot(500, btn_ok.click)
+    #     btn_ok = self.reference_frame.msgbox.button(QMessageBox.Ok)
+    #     QTimer.singleShot(500, btn_ok.click)
 
-        self.reference_frame.update_clicked(commit_status=False)
+    #     self.reference_frame.update_clicked(commit_status=False)
 
-        # deleted suburb locality
-        sql_removed = (
-            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 104;"
-        )
-        result = db._execute(sql_removed)
-        count_removed = result.fetchone()[0]
-        self.assertEqual(count_removed, 0)
-        sql_building_in_removed_area = (
-            "SELECT suburb_locality_id from buildings.building_outlines WHERE building_outline_id = %s;"
-        )
-        result = db._execute(sql_building_in_removed_area, (building_outline_id,))
-        suburb_id_of_removed_building = result.fetchone()[0]
-        self.assertEqual(suburb_id_of_removed_building, 101)
+    #     # deleted suburb locality
+    #     sql_removed = "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 104;"
+    #     result = db._execute(sql_removed)
+    #     count_removed = result.fetchone()[0]
+    #     self.assertEqual(count_removed, 0)
+    #     sql_building_in_removed_area = "SELECT suburb_locality_id from buildings.building_outlines WHERE building_outline_id = %s;"
+    #     result = db._execute(sql_building_in_removed_area, (building_outline_id,))
+    #     suburb_id_of_removed_building = result.fetchone()[0]
+    #     self.assertEqual(suburb_id_of_removed_building, 101)
 
-        # new suburb locality
-        sql_added = (
-            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 105;"
-        )
-        result = db._execute(sql_added)
-        count_added = result.fetchone()[0]
-        self.assertEqual(count_added, 1)
-        # updated suburb locality
-        sql_updated = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 101;"
-        result = db._execute(sql_updated)
-        name_updated = result.fetchone()[0]
-        self.assertEqual(name_updated, "Kelburn North")
-        # check last modified date
-        sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1021;"
-        modified_date = db._execute(sql_date)
-        modified_date = result.fetchone()[0]
-        self.assertNotEqual(modified_date, "NULL")
-        sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1022;"
-        modified_date = db._execute(sql_date)
-        modified_date = result.fetchone()[0]
-        self.assertIsNone(modified_date)
-        # check building_outlines
-        sql_bo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings.building_outlines;"
-        result = db._execute(sql_bo)
-        bo_suburb_update = result.fetchone()[0]
-        self.assertEqual(bo_suburb_update, 4)
-        sql_select_building_in_changed_region = (
-            "SELECT suburb_locality_id FROM buildings.building_outlines WHERE building_outline_id = 1005;"
-        )
-        result = db._execute(sql_select_building_in_changed_region)
-        suburb_id_bo_in_changed_region = result.fetchone()[0]
-        self.assertEqual(suburb_id_bo_in_changed_region, 103)
-        # check suburb locality only adds types locality, suburb, island, park_reserve
-        sql_added = (
-            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 106;"
-        )
-        result = db._execute(sql_added)
-        count_added = result.fetchone()[0]
-        self.assertEqual(count_added, 0)
-        # check suburb locality island with null suburb_4th is added
-        sql_added = (
-            "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 108;"
-        )
-        result = db._execute(sql_added)
-        count_added = result.fetchone()[0]
-        self.assertEqual(count_added, 1)
+    #     # new suburb locality
+    #     sql_added = "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 105;"
+    #     result = db._execute(sql_added)
+    #     count_added = result.fetchone()[0]
+    #     self.assertEqual(count_added, 1)
+    #     # updated suburb locality
+    #     sql_updated = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 101;"
+    #     result = db._execute(sql_updated)
+    #     name_updated = result.fetchone()[0]
+    #     self.assertEqual(name_updated, "Kelburn North")
+    #     # check last modified date
+    #     sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1021;"
+    #     modified_date = db._execute(sql_date)
+    #     modified_date = result.fetchone()[0]
+    #     self.assertNotEqual(modified_date, "NULL")
+    #     sql_date = "SELECT last_modified FROM buildings.building_outlines WHERE building_outline_id = 1022;"
+    #     modified_date = db._execute(sql_date)
+    #     modified_date = result.fetchone()[0]
+    #     self.assertIsNone(modified_date)
+    #     # check building_outlines
+    #     sql_bo = "SELECT count(DISTINCT suburb_locality_id)::integer FROM buildings.building_outlines;"
+    #     result = db._execute(sql_bo)
+    #     bo_suburb_update = result.fetchone()[0]
+    #     self.assertEqual(bo_suburb_update, 4)
+    #     sql_select_building_in_changed_region = "SELECT suburb_locality_id FROM buildings.building_outlines WHERE building_outline_id = 1005;"
+    #     result = db._execute(sql_select_building_in_changed_region)
+    #     suburb_id_bo_in_changed_region = result.fetchone()[0]
+    #     self.assertEqual(suburb_id_bo_in_changed_region, 103)
+    #     # check suburb locality only adds types locality, suburb, island, park_reserve
+    #     sql_added = (
+    #         "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 106;"
+    #     )
+    #     result = db._execute(sql_added)
+    #     count_added = result.fetchone()[0]
+    #     self.assertEqual(count_added, 0)
+    #     # check suburb locality island with null suburb_4th is added
+    #     sql_added = (
+    #         "SELECT count(*)::integer FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 108;"
+    #     )
+    #     result = db._execute(sql_added)
+    #     count_added = result.fetchone()[0]
+    #     self.assertEqual(count_added, 1)
 
     def test_town_city_table_update(self):
         """Check buildings_reference.town_city table updates correctly."""
