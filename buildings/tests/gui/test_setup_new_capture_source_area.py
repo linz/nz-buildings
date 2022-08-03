@@ -44,9 +44,7 @@ class SetUpCaptureSourceAreaTest(unittest.TestCase):
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(
-            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
-        )
+        sub_menu.setCurrentItem(sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0])
         self.capture_frame = self.dockwidget.current_frame
         self.capture_frame.btn_new_geometry.click()
         self.capture_area_frame = self.dockwidget.current_frame
@@ -65,14 +63,9 @@ class SetUpCaptureSourceAreaTest(unittest.TestCase):
 
     def test_capture_source_area_layer_registry(self):
         """Capture source area layer is added to layer registry"""
-        layer_bool = True
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
-        layer_name = ["capture_source_area"]
-        for layer in layers:
-            if layer.layer().name() not in layer_name:
-                layer_bool = False
-
-        self.assertEqual(len([layer for layer in layers]), len(layer_name))
-        self.assertTrue(layer_bool)
+        intended_layer_names = ["capture_source_area"]
+        actual_layer_names = sorted(l.layer().name() for l in layers)
+        self.assertEqual(actual_layer_names, intended_layer_names)

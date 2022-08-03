@@ -985,6 +985,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
         self.layer_registry.remove_layer(self.lyr_matched_bulk_load_in_edit)
         self.layer_registry.remove_layer(self.lyr_related_existing_in_edit)
         self.layer_registry.remove_layer(self.lyr_related_bulk_load_in_edit)
+        self.layer_registry.remove_layer(self.lyr_facilities)
 
         for action in iface.building_toolbar.actions():
             if action.text() not in ["Pan Map"]:
