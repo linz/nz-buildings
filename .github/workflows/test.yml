@@ -60,6 +60,7 @@ jobs:
       BASE_DIR: ${{ github.workspace }}
       DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
       QGIS_DOCKER_IMAGE: ${{ matrix.qgis_image.image }}
+      QGIS_DISPLAY: ":99"
       DOCKER_NETWORK: buildings
     steps:
       - name: Checkout Code
