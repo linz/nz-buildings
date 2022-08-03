@@ -11,7 +11,8 @@ docker run \
 --volume $BASE_DIR:/tests_directory \
 --volume /tmp/.X11-unix:/tmp/.X11-unix \
 --net $DOCKER_NETWORK \
--e DISPLAY=":99" \
+-e DISPLAY=$QGIS_DISPLAY \
+-e QT_LOGGING_RULES='*.debug=false;qt.qpa.*=false' \
 -d \
 $QGIS_DOCKER_IMAGE
 
