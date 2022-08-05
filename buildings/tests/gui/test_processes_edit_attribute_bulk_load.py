@@ -68,7 +68,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """UI and Canvas behave correctly when geometry is selected"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
@@ -117,7 +117,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.bulk_load_frame.edit_dialog.close()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
@@ -168,7 +168,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -242,7 +242,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -304,7 +304,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check comboboxes reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -347,7 +347,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check attributes are updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -428,7 +428,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -535,7 +535,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         This test protects against a regression of #59"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -620,7 +620,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check 'deleting' geom fails when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -640,7 +640,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             pos=canvas_point(QgsPointXY(1878090.9, 5555322.0)),
             delay=30,
         )
-        QTest.qWait(10)
+        QTest.qWait(100)
         self.edit_dialog.cmb_status.setCurrentIndex(
             self.edit_dialog.cmb_status.findText("Deleted During QA")
         )
@@ -673,7 +673,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check 'delete' fail when enter none in 'reason for deletion' """
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -779,7 +779,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),

@@ -62,7 +62,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -96,7 +96,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         """Allows user to draw circle using circle button"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -128,7 +128,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # add geom to canvas
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -190,7 +190,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # add geom
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -241,7 +241,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         # add geom
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747520, 5428152)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()

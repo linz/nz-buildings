@@ -83,7 +83,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Check Geometries reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -127,7 +127,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.8, 5555290.8)), delay=30)
         QTest.mousePress(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878205.6, 5555283.2)), delay=30)
         QTest.mouseRelease(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878215.6, 5555283.2)), delay=30)
-        QTest.qWait(10)
+        QTest.qWait(100)
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for key in self.bulk_load_frame.edit_dialog.geoms:
             sql = "SELECT shape FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s"
@@ -143,7 +143,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         """Checks the geometries of multiple features can be edited at the same time"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -193,7 +193,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
     def test_split_geometry_once(self):
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -241,6 +241,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878162.88, 5555300.88)), delay=30)
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
         QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878204.72, 5555282.72)), delay=30)
+        QTest.qWait(100)
         self.assertTrue(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
@@ -248,6 +249,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878162.99, 5555282.70)), delay=30)
         QTest.mouseClick(widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878204.78, 5555301.03)), delay=30)
         QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878204.78, 5555301.03)), delay=30)
+        QTest.qWait(100)
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertTrue(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
