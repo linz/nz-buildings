@@ -2273,9 +2273,9 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
     def reload_bulk_load_layer(self):
         """To ensure QGIS has most up to date ID for the newly split feature see #349"""
-        ltl = QgsProject.instance().layerTreeRoot().findLayer(self.lyr_bulk_load.id())
-        ltm = iface.layerTreeView().model()
-        legend_nodes = ltm.layerLegendNodes(ltl)
+        layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.lyr_bulk_load.id())
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
+        legend_nodes = layer_tree_model.layerLegendNodes(layer_tree_layer)
         legend_node_null = [ln for ln in legend_nodes if not ln.data(Qt.DisplayRole)]
         legend_node_null[0].setData(Qt.Unchecked, Qt.CheckStateRole)
         legend_node_null[0].setData(Qt.Checked, Qt.CheckStateRole)
