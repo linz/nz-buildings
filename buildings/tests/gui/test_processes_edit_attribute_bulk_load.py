@@ -31,7 +31,6 @@ from qgis.gui import QgsMapTool
 from qgis.utils import plugins, iface
 
 from buildings.utilities import database as db
-from buildings.tests.test_utilities import clear_message_bar
 
 
 class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
@@ -63,6 +62,18 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
     def tearDown(self):
         """Runs after each test."""
         self.bulk_load_frame.btn_exit.click()
+
+    def _clear_message_bar(self):
+        """Deletes all messages in a message bar"""
+
+        layout = self.edit_dialog.message_bar.layout()
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget() is not None:
+                child.widget().deleteLater()
+            elif child.layout() is not None:
+                raise RuntimeError('Unclear what "self" was intended to refer to here - see source')
+                # self.clear_layout(child.layout())
 
     def test_ui_on_geom_selected(self):
         """UI and Canvas behave correctly when geometry is selected"""
@@ -290,7 +301,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         for action in iface.building_toolbar.actions():
             if action.text() == "Edit Attributes":
                 action.trigger()
-        clear_message_bar(self.edit_dialog.message_bar)
+        self._clear_message_bar()
         self.assertFalse(self.edit_dialog.btn_edit_save.isEnabled())
         self.assertFalse(self.edit_dialog.btn_edit_reset.isEnabled())
         self.assertFalse(self.edit_dialog.cmb_capture_method.isEnabled())
@@ -646,7 +657,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         )
         self.edit_dialog.le_deletion_reason.setText("Reason for deletion")
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        clear_message_bar(self.edit_dialog.message_bar)
+        self._clear_message_bar()
         sql = "SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;"
         result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
@@ -714,7 +725,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.le_deletion_reason.setText("")
 
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        clear_message_bar(self.edit_dialog.message_bar)
+        self._clear_message_bar()
 
         sql = "SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;"
         result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
@@ -750,7 +761,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         )
         self.edit_dialog.le_deletion_reason.setText("Reason for deletion")
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        clear_message_bar(self.edit_dialog.message_bar)
+        self._clear_message_bar()
         sql = "SELECT bulk_load_status_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = 2003 OR bulk_load_outline_id = 2004;"
         result = db._execute(sql)
         result = result.fetchall()
