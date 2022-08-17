@@ -1,7 +1,7 @@
 name: Run tests
-on: push
+on: [push, pull_request]
 jobs:
-  db-tests:
+  db:
     name: Database tests [${{ matrix.db_image.name }} DB]
     runs-on: ubuntu-18.04
     strategy:
@@ -39,7 +39,7 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/load_db_test_data.sh
       - name: Run pgTAP tests
         run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
-  qgis-tests:
+  qgis:
     name: QGIS tests [QGIS ${{ matrix.qgis_image.name }}, ${{ matrix.db_image.name }} DB]
     runs-on: ubuntu-18.04
     strategy:
@@ -83,3 +83,22 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/setup_qgis_plugin.sh
       - name: Run QGIS tests
         run: bash $BASE_DIR/scripts/steps/run_qgis_tests.sh
+  docs:
+    name: Documentation
+    runs-on: ubuntu-18.04
+    env:
+      BUILD: docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.10
+      - name: Install required Python modules
+        run: |
+          grep sphinx requirements-dev.txt | xargs pip3 install
+          pip3 install -r requirements-docs.txt
+      - name: Run Sphinx build
+        run: |
+          sphinx-build -b html db/docs/source db/docs
