@@ -44,6 +44,8 @@ NZ Buildings
 
 The *NZ Buildings* system is used to manage New Zealand's national building outlines dataset. This dataset is published under CC-BY-4.0 `on the LINZ Data Service`_.
 
+.. _`on the LINZ Data Service`: https://data.linz.govt.nz/layer/101290
+
 Features
 ========
 
@@ -56,7 +58,6 @@ The Topography team at `Land Information New Zealand`_ built this system and use
 - manage the lifecycle of building outlines across multiple data captures
 - prepare data to be published on the LINZ Data Service
 
-.. _`on the LINZ Data Service`: https://data.linz.govt.nz/layer/101290
 .. _`Land Information New Zealand`: https://www.linz.govt.nz/
 
 Components
@@ -66,13 +67,14 @@ Components
 - A QGIS_ plugin for data maintenance
 - A data dictionary hosted on readthedocs
 - ISO 19115 geospatial metadata to accompany the published datasets
+- Dockerfiles of specific PostgreSQL versions and dependencies used for testing.
 
-All of the components build upon other free and open source software. See ACKNOWLEDGEMENTS.rst_ for a summary.
+All of the components build upon other free and open source software. See `ACKNOWLEDGEMENTS.rst`_ for a summary.
 
 .. _PostgreSQL: https://www.postgresql.org/
 .. _PostGIS: https://postgis.net/
 .. _QGIS: https://qgis.org/
-.. _ACKNOWLEDGEMENTS.rst: ACKNOWLEDGEMENTS.rst
+.. _`ACKNOWLEDGEMENTS.rst`: ACKNOWLEDGEMENTS.rst
 
 Database
 ========
@@ -82,11 +84,16 @@ The database for the *NZ Buildings* system is a PostgreSQL database with the Pos
 Dependencies
 ------------
 
-- PostgreSQL and PostGIS must be installed. Supported versions are tested on `GitHub Actions`_ (note the matrix variables in the ``pgtap`` job that show version numbers for PostgreSQL and PostGIS).
-- For development / testing, install pgTAP_.
+- PostgreSQL_ database with PostGIS_ extension. Tested versions are PostgreSQL 9.3 with PostGIS 2.3, and PostgreSQL 14 with PostGIS 3.2.
+- Sqitch_ is used for database schema migrations.
+- pgTAP_ is used for database testing. This is included inside the Dockerfiles used for automated testing.
+- Docker_ is used for automated testing, of both QGIS plugin unit tests, and database tests using pgTAP.
 
-.. _`GitHub Actions`: https://github.com/linz/nz-buildings/actions
+.. _PostgreSQL: https://www.postgresql.org/
+.. _PostGIS: https://postgis.net/
+.. _Sqitch: https://sqitch.org/docs/
 .. _pgTAP: https://pgtap.org/
+.. _Docker: https://www.docker.com/
 
 Installation
 ------------
@@ -143,7 +150,7 @@ QGIS Plugin
 Dependencies
 ------------
 
-- The QGIS plugin currently requires ``QGIS 3.4.x``.
+The QGIS plugin is tested in QGIS versions 3.10, 3.16, and 3.24.
 
 Installation
 ------------
