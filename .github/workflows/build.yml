@@ -1,9 +1,9 @@
-name: Run tests
+name: Tests
 on: [push, pull_request]
 jobs:
   db:
     name: Database tests [${{ matrix.db_image.name }} DB]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -41,7 +41,7 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
   qgis:
     name: QGIS tests [QGIS ${{ matrix.qgis_image.name }}, ${{ matrix.db_image.name }} DB]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -85,7 +85,7 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/run_qgis_tests.sh
   docs:
     name: Documentation
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       BUILD: docs
     steps:
@@ -102,3 +102,43 @@ jobs:
       - name: Run Sphinx build
         run: |
           sphinx-build -b html db/docs/source db/docs
+  deploy:
+    name: Deploy
+    if: contains(github.ref, 'refs/tags/')
+    needs: [db, qgis, docs]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2-beta
+        with:
+          ref: ${{ github.ref }}
+      - name: Build project # This would actually build your project, using zip for an example artifact
+        run: |
+          echo ${{ github.ref }}
+          echo ${{ github.repository }}
+          zip -r buildings.zip buildings
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          body: |
+            See [${CHANGELOG} ${{ github.ref }}](https://github.com/linz/nz-buildings/blob/master/${CHANGELOG}#$(echo ${{ github.ref }} | sed -e 's/[a-zA-Z\.]//g')) for detailed release information.
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: ./buildings.zip
+          asset_name: buildings.zip
+          asset_content_type: application/zip
+      - name: Upload To LINZ QGIS Plugin Repository in AWS
+        run: |
+          curl -X POST -H 'Content-Type: application/octet-stream' -H "authorization: bearer ${{ secrets.PLUGIN_REPO_AUTH }}" --data-binary @buildings.zip https://plugins.qgis.linz.govt.nz/v1/plugin/buildings
