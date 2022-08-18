@@ -6,15 +6,25 @@ Each script is a bash shell script, tested on Ubuntu, but which should run on an
 
 Files in the [steps](./steps) subdirectory are called by the scripts in this directory (as well as the github actions configuration). They may access environment variables expected to be set by either the calling script or the github actions configuration, and so may not work when called directly unless those required environment variables are set manually.
 
-## Scripts
+## [bump_version.sh](./bump_version.sh)
 
-### [run_db_tests.sh](./run_db_tests.sh)
+Updates the version number in the QGIS plugin metadata and changelog for creating a release. Called with the desired version number as a single argument, e.g.:
+
+```bash
+./bump_version.sh 0.1
+```
+
+## [dump_schema.sh](./dump_schema.sh)
+
+Used for dumping the contents of a test database to files for use in test data. Has not been updated to account for changes to dockerise test running, and simply moved to this drectory verbatim. Will need some changes to run, but is included for reference and as a starting point if test data needs to be updated in the future.
+
+## [run_db_tests.sh](./run_db_tests.sh)
 
 Runs the pgTAP tests from [db/tests](../db/tests/) in a PostgreSQL database running in a docker container.
 
 By default the ["Legacy" PostgreSQL docker image](../docker/nz-buildings-db-legacy.Dockerfile) is used. To use the ["Modern" PostgreSQL docker image](../docker/nz-buildings-db-modern.Dockerfile), set the environment variable `DB_VERSION` to `modern`.
 
-### [run_qgis_tests.sh](./run_qgis_tests.sh)
+## [run_qgis_tests.sh](./run_qgis_tests.sh)
 
 Runs the QGIS unit tests, using a PostgreSQL database running in a docker container alongside an instance of QGIS running in a second docker container.
 
@@ -36,7 +46,7 @@ By default the ["Legacy" PostgreSQL docker image](../docker/nz-buildings-db-lega
 
 By default QGIS is run without the GUI being visible on screen. To see the GUI window and watch tests being run, set the environment variable `QGIS_DISPLAY` to the same value as the environment variable `DISPLAY`.
 
-### [run_qgis_interactively.sh](./run_qgis_tests.sh)
+## [run_qgis_interactively.sh](./run_qgis_tests.sh)
 
 Runs QGIS interactively inside a docker container.
 
