@@ -86,3 +86,10 @@ buildings_bulk_load/add_new_pk_column_to_removed 2020-11-02T19:15:15Z Daniel Sil
 buildings_bulk_load/functions/removed [buildings_bulk_load/functions/removed@v3.2.0-dev2] 2020-11-03T01:53:25Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_dataset_id column to removed_insert_building_outlines function
 buildings_bulk_load/functions/compare [buildings_bulk_load/functions/compare@v3.2.0-dev2] 2020-11-03T02:21:26Z Daniel Silk <dsilk@linz.govt.nz> # Add supplied_dataset_id column to removed table inserts in comparison functions
 @v3.6.0-dev1 2021-04-08T22:18:19Z Daniel Silk <dsilk@linz.govt.nz> # Tag v3.6.0-dev1
+
+facilities/schema_and_tables 2022-06-15T01:43:48Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add facilities schema and tables
+facilities_lds/schema_and_tables 2022-06-15T01:56:39Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add facilities_lds schema and tables
+buildings_bulk_load/add_name_and_use_columns 2022-06-15T02:03:39Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Add name and use columns to the buildings_bulk_load.bulk_load_outlines table
+buildings_bulk_load/functions/add_facilities_functions 2022-06-15T02:04:34Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Functions to bring in facilities during comparison
+buildings/functions/add_names_and_uses_functions 2022-06-15T02:54:14Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Functions to modify names and uses in the buildings tables
+buildings_bulk_load/functions/load_to_production [buildings_bulk_load/functions/load_to_production@v3.6.0-dev1] 2022-06-15T03:07:57Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Insert names and uses when loading bulk outlines into production

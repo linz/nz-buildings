@@ -1,5 +1,3 @@
--- Deploy nz-buildings:buildings_bulk_load/functions/load_to_production to pg
-
 BEGIN;
 
 --------------------------------------------------------------------
@@ -28,6 +26,9 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
         PERFORM buildings.building_outlines_update_end_lifespan(
             buildings_bulk_load.building_outlines_removed_select_by_dataset(p_supplied_dataset_id));
 
+        PERFORM buildings.building_name_removed_insert_bulk(p_supplied_dataset_id);
+        PERFORM buildings.building_use_removed_insert_bulk(p_supplied_dataset_id);
+
         PERFORM buildings.buildings_update_end_lifespan(
             buildings_bulk_load.buildings_removed_select_by_dataset(p_supplied_dataset_id));
 
@@ -46,6 +47,9 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
             SELECT buildings.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
 
+            PERFORM buildings.building_name_added_insert_bulk(v_bulk_load_outline_id, v_new_building_id);
+            PERFORM buildings.building_use_added_insert_bulk(v_bulk_load_outline_id, v_new_building_id);
+
             PERFORM buildings_bulk_load.transferred_insert(v_bulk_load_outline_id, v_new_building_outline_id);
 
         END LOOP;
@@ -63,6 +67,9 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
 
             SELECT buildings.building_outlines_insert_bulk(v_old_building_id ,v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
+
+            PERFORM buildings.building_name_matched_insert_bulk(v_bulk_load_outline_id);
+            PERFORM buildings.building_use_matched_insert_bulk(v_bulk_load_outline_id);
 
             PERFORM buildings_bulk_load.transferred_insert(v_bulk_load_outline_id, v_new_building_outline_id);
 
@@ -87,6 +94,9 @@ IF (SELECT buildings_bulk_load.supplied_datasets_select_transfer_date(p_supplied
 
             SELECT buildings.building_outlines_insert_bulk(v_new_building_id, v_bulk_load_outline_id)
             INTO v_new_building_outline_id;
+
+            PERFORM buildings.building_use_related_insert_bulk(v_bulk_load_outline_id, v_new_building_id);
+            PERFORM buildings.building_name_related_insert_bulk(v_bulk_load_outline_id, v_new_building_id);
 
             PERFORM buildings.lifecycle_add_record(v_new_building_id, v_bulk_load_outline_id);
 
