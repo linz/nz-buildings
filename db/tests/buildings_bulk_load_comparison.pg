@@ -14,39 +14,11 @@
 \set ON_ERROR_ROLLBACK 1
 \set ON_ERROR_STOP true
 
-
 BEGIN;
+SELECT plan(10);
 
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
-SELECT plan(15);
 
 --1----------------------------------------------------------
--- Check comparisons function exists
-
-SELECT has_function('buildings_bulk_load', 'compare_building_outlines', 'Should have function compare_building_outlines in buildings_bulk_load schema.');
-
---2----------------------------------------------------------
--- Check comparisons function exists
-
-SELECT has_function('buildings_bulk_load', 'find_added', 'Should have function find_added in buildings_bulk_load schema.');
-
---3----------------------------------------------------------
--- Check comparisons function exists
-
-SELECT has_function('buildings_bulk_load', 'find_removed', 'Should have function find_removed in buildings_bulk_load schema.');
-
---4----------------------------------------------------------
--- Check comparisons function exists
-
-SELECT has_function('buildings_bulk_load', 'find_related', 'Should have function find_related in buildings_bulk_load schema.');
-
---5----------------------------------------------------------
--- Check comparisons function exists
-
-SELECT has_function('buildings_bulk_load', 'find_matched', 'Should have function find_matched in buildings_bulk_load schema.');
-
---6----------------------------------------------------------
 -- New Buildings contents
 
 SELECT results_eq(
@@ -56,7 +28,7 @@ SELECT results_eq(
     'Check contents of new buildings table after building comparison function has run'
 );
 
---7----------------------------------------------------------
+--2----------------------------------------------------------
 -- Removed Buildings contents
 
 SELECT results_eq(
@@ -66,7 +38,7 @@ SELECT results_eq(
     'Check contents of removed buildings table after building comparison function has run'
 );
 
---8----------------------------------------------------------
+--3----------------------------------------------------------
 -- related
 
 SELECT results_eq(
@@ -96,7 +68,7 @@ SELECT results_eq(
     'Check bulk load outlines of related table after buildings comparison function has run'
 );
 
---9------------------------------------------------------
+--4------------------------------------------------------
 -- matched 
 
 SELECT results_eq(
@@ -106,7 +78,7 @@ SELECT results_eq(
     'Check outlines pairs of matched table after buildings comparison .find_matched function has run'
 );
 
---10------------------------------------------------------
+--5------------------------------------------------------
 -- added
 
 SELECT set_has( 
@@ -116,7 +88,7 @@ SELECT set_has(
     'Check contents of new buildings table after building comparison function has run' 
 );
 
---11------------------------------------------------------
+--6------------------------------------------------------
 -- removed
 
 SELECT set_has( 
@@ -126,7 +98,7 @@ SELECT set_has(
     'Check contents of removed buildings table after building comparison function has run' 
 );
 
---12------------------------------------------------------
+--7------------------------------------------------------
 -- related bulk_load_outline
 
 SELECT set_has( 
@@ -141,7 +113,7 @@ SELECT set_has(
   'Check bulk load outlines of related table after buildings comparison function has run' 
 ); 
 
---13----------------------------------------------------
+--8----------------------------------------------------
 -- related building_outline
 
 SELECT set_has( 
@@ -156,7 +128,7 @@ SELECT set_has(
   'Check current outlines of related table after buildings comparison function has run' 
 ); 
  
---14------------------------------------------------------ 
+--9------------------------------------------------------ 
 -- best_candidates bulk_load_outline_id 
  
 SELECT set_has( 
@@ -166,7 +138,7 @@ SELECT set_has(
   'Check supplied outlines of best candidates table after buildings comparison function has run' 
 ); 
 
---15------------------------------------------------------
+--10------------------------------------------------------
 -- best_candidates building_outline_id 
  
 SELECT set_has( 

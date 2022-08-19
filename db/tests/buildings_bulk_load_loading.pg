@@ -14,19 +14,10 @@
 \set ON_ERROR_ROLLBACK 1
 \set ON_ERROR_STOP true
 
-
 BEGIN;
-
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
-SELECT plan(13);
+SELECT plan(12);
 
 --1----------------------------------------------------------
--- Check function exists
-
-SELECT has_function('buildings_bulk_load', 'load_building_outlines', 'Should have function load_building_outlines in buildings_bulk_load stage schema.');
-
---2----------------------------------------------------------
 -- result of removed buildings in building_outlines table
 
 SELECT isnt_empty(
@@ -34,7 +25,7 @@ SELECT isnt_empty(
     'Check removed buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
---3----------------------------------------------------------
+--2----------------------------------------------------------
 -- result of removed buildings in buildings table
 
 SELECT isnt_empty(
@@ -42,7 +33,7 @@ SELECT isnt_empty(
     'Check removed buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
---4----------------------------------------------------------
+--3----------------------------------------------------------
 -- result of added buildings in buildings and building_outlines table
 
 SELECT results_eq(
@@ -52,7 +43,7 @@ SELECT results_eq(
     'Check added buildings in buildings and building_outlines table after load_buildings function has run'
 );
 
---5----------------------------------------------------------
+--4----------------------------------------------------------
 -- result of added buildings in transferred table
 
 SELECT results_eq(
@@ -62,7 +53,7 @@ SELECT results_eq(
     'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
 );
 
---6----------------------------------------------------------
+--5----------------------------------------------------------
 -- result of matched buildings in building_outlines table
 
 SELECT results_eq(
@@ -74,7 +65,7 @@ SELECT results_eq(
     'Check matched buildings in building_outlines table after load_buildings function has run'
 );
 
---7----------------------------------------------------------
+--6----------------------------------------------------------
 -- result of matched buildings in building_outlines table
 
 SELECT isnt_empty(
@@ -83,7 +74,7 @@ SELECT isnt_empty(
 );
 
 
---8----------------------------------------------------------
+--7----------------------------------------------------------
 -- result of matched buildings in transferred table
 
 SELECT results_eq(
@@ -96,7 +87,7 @@ SELECT results_eq(
 );
 
 
---9----------------------------------------------------------
+--8----------------------------------------------------------
 -- result of related buildings in buildings and building_outlines table
 
 SELECT results_eq(
@@ -110,7 +101,7 @@ SELECT results_eq(
     'Check related buildings in buildings and building_outlines table after load_buildings function has run'
 );
 
---10---------------------------------------------------------
+--9---------------------------------------------------------
 -- result of related buildings in lifecycle table
 
 SELECT results_eq(
@@ -130,7 +121,7 @@ SELECT results_eq(
     'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
 );
 
---11---------------------------------------------------------
+--10---------------------------------------------------------
 -- result of related buildings in building_outlines table
 
 SELECT isnt_empty(
@@ -138,7 +129,7 @@ SELECT isnt_empty(
     'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
 );
 
---12---------------------------------------------------------
+--11---------------------------------------------------------
 -- result of related buildings in buildings table
 
 SELECT isnt_empty(
@@ -146,7 +137,7 @@ SELECT isnt_empty(
     'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
 );
 
---13---------------------------------------------------------
+--12---------------------------------------------------------
 -- result of related buildings in transferred table
 
 SELECT results_eq(

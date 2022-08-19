@@ -1,28 +1,23 @@
-
 ------------------------------------------------------------------------------ 
 -- Provide testing for buildings_bulk_load comparisons functions 
 -- with complex real world and Hausdorff Distance examples using pgTAP 
 ------------------------------------------------------------------------------ 
- 
+
 -- Turn off echo. 
 \set QUIET 1 
- 
+
 -- Format the output nicely. 
 \pset format unaligned 
 \pset tuples_only true 
 \pset pager 
- 
+
 -- Revert all changes on failure. 
 \set ON_ERROR_ROLLBACK 1 
 \set ON_ERROR_STOP true 
- 
- 
-BEGIN; 
- 
-CREATE EXTENSION IF NOT EXISTS pgtap; 
- 
+
+BEGIN;
 SELECT plan(10); 
- 
+
 --1----------------------------------------------------------
 -- Test find_added function on complex data
 
