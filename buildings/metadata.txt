@@ -12,7 +12,7 @@ email=dsilk@linz.govt.nz
 homepage=https://github.com/linz/qgis-buildings-plugin
 repository=https://github.com/linz/qgis-buildings-plugin
 tracker=https://github.com/linz/qgis-buildings-plugin/issues
-changelog=https://github.com/linz/qgis-buildings-plugin/blob/master/CHANGELOG.rst
+changelog=https://github.com/linz/qgis-buildings-plugin/blob/master/CHANGELOG.md
 
 tags=data maintenance, topo, buildings
 
