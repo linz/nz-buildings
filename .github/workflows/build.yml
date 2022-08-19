@@ -1,155 +1,117 @@
-name: Build
+name: Tests
 on: [push, pull_request]
-
 jobs:
-  linter:
-    name: linter
-    runs-on: ubuntu-18.04
+  db:
+    name: Database tests [${{ matrix.db_image.name }} DB]
+    runs-on: ubuntu-latest
     strategy:
-      matrix:
-        python: ["3.6", "3.7"]
-    steps:
-      - uses: actions/checkout@v1
-      - name: Use Python ${{ matrix.python }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install Required Python Modules
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-      - name: Commit Lint
-        run: |
-          gitlint --commits origin/master..
-
-  docs:
-    name: docs
-    runs-on: ubuntu-18.04
-    env:
-      BUILD: docs
-    strategy:
-      matrix:
-        python: ["3.6", "3.7"]
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python }}
-      - name: Install Required Python Modules
-        run: |
-          pip3 install Sphinx sphinx_rtd_theme
-          pip3 install -r requirements-docs.txt
-      - name: Run Sphinx Build
-        run: |
-          sphinx-build -b html db/docs/source db/docs
-
-  pgtap:
-    name: pgtap
-    runs-on: ubuntu-18.04
-    env:
-      BUILD: db
-      PGHOST: localhost
-      PGPORT: 5432
-      PGUSER: postgres
-      PGPASSWORD: github
-      APT: "apt-get -o Dpkg::Progress=0 -o Dpkg::Use-Pty=0" # Make apt non-interactive by default, and not showing progress
-      APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE: 1 # Avoid warnings on apt-key usage
-    strategy:
-      matrix:
-        psql: [9.5, 9.6, 10, 11]
-        postgis: [2.5, 3]
       fail-fast: false
+      matrix:
+        db_image:
+          - {name: 'Legacy', image: 'ghcr.io/linz/nz-buildings-db-legacy:v1'}
+          - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
+    env:
+      PGHOST: localhost
+      PGPORT: 54320
+      PGUSER: buildings
+      PGPASSWORD: buildings
+      BASE_DIR: ${{ github.workspace }}
+      DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
+      DOCKER_NETWORK: buildings
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2-beta
+        uses: actions/checkout@v3
+      - name: Create docker network
+        run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
+      - name: Launch database container
+        run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
+      - name: Print docker logs
+        uses: jwalton/gh-docker-logs@v1
+      - name: Load additional schemas
+        run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
+      - name: Sqitch deploy and verify
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy_verify.sh
+      - name: Sqitch revert
+        run: bash $BASE_DIR/scripts/steps/sqitch_revert.sh
+      - name: Sqitch deploy
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
+      - name: Load test data
+        run: bash $BASE_DIR/scripts/steps/load_db_test_data.sh
+      - name: Run pgTAP tests
+        run: bash $BASE_DIR/scripts/steps/run_pgtap_tests.sh
+  qgis:
+    name: QGIS tests [QGIS ${{ matrix.qgis_image.name }}, ${{ matrix.db_image.name }} DB]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        db_image:
+          - {name: 'Legacy', image: 'ghcr.io/linz/nz-buildings-db-legacy:v1'}
+          - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
+        qgis_image:
+          - {name: '3.10', image: 'qgis/qgis:release-3_10'}
+          - {name: '3.16', image: 'qgis/qgis:release-3_16'}
+          - {name: '3.24', image: 'qgis/qgis:release-3_24'}
+    env:
+      PGHOST: localhost
+      PGPORT: 54320
+      PGUSER: buildings
+      PGPASSWORD: buildings
+      BASE_DIR: ${{ github.workspace }}
+      DB_DOCKER_IMAGE: ${{ matrix.db_image.image }}
+      QGIS_DOCKER_IMAGE: ${{ matrix.qgis_image.image }}
+      QGIS_DISPLAY: ":99"
+      DOCKER_NETWORK: buildings
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Create docker network
+        run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
+      - name: Launch database container
+        run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
+      - name: Print docker logs
+        uses: jwalton/gh-docker-logs@v1
+      - name: Load additional schemas
+        run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
+      - name: Sqitch deploy
+        run: bash $BASE_DIR/scripts/steps/sqitch_deploy.sh
+      - name: Load test data
+        run: bash $BASE_DIR/scripts/steps/load_qgis_test_data.sh
+      - name: Launch QGIS container
+        run: bash $BASE_DIR/scripts/steps/launch_qgis_container.sh
+      - name: Setup QGIS plugin
+        run: bash $BASE_DIR/scripts/steps/setup_qgis_plugin.sh
+      - name: Run QGIS tests
+        run: bash $BASE_DIR/scripts/steps/run_qgis_tests.sh
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    env:
+      BUILD: docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
-      - name: Add PostgreSQL apt repository
+          python-version: "3.10"
+      - name: Install required Python modules
         run: |
-          sudo ${APT} -qq purge \
-              libpq5 \
-              libpq-dev \
-              *php* \
-              postgresql \
-              postgresql-client-common \
-              postgresql-common
-          sudo rm -rf /var/lib/postgresql
-          sudo ${APT} install curl ca-certificates gnupg
-          distro=`lsb_release -cs`
-          # Enable fetching packages from apt.postgresql repository
-          curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          echo "deb http://apt.postgresql.org/pub/repos/apt/ ${distro}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
-      - name: Fix broken apt list
-        if: matrix == null || matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-18.04'
-        run: sudo perl -p -i -e 's#16\.04/prod xenial#18.04/prod bionic#' /etc/apt/sources.list.d/microsoft-prod.list{,.save}
-      - name: Install dependencies
+          grep sphinx requirements-dev.txt | xargs pip3 install
+          pip3 install -r requirements-docs.txt
+      - name: Run Sphinx build
         run: |
-          sudo ${APT} -qq update
-          sudo ${APT} -qq install \
-            libtap-parser-sourcehandler-pgtap-perl \
-            postgresql-${{ matrix.psql }} \
-            postgresql-${{ matrix.psql }}-pgtap \
-            postgresql-${{ matrix.psql }}-postgis-${{ matrix.postgis }} \
-            postgresql-${{ matrix.psql }}-postgis-${{ matrix.postgis }}-scripts \
-            python-dev \
-            libpq-dev
-          pip install psycopg2
-      - name: Configure postgres database
-        run: |
-          sudo -u postgres createuser -s github
-          sudo -u postgres psql -c "ALTER USER github WITH PASSWORD 'github';"
-          sudo -u postgres psql -c "CREATE EXTENSION postgis;"
-          sudo -u postgres createdb --owner=github nz-buildings-pgtap-db
-          python install.py
-      - name: Run Pg Prove
-        run: |
-          pg_prove -U github -d "nz-buildings-pgtap-db" db/tests/
-
-  unittest:
-    name: unittest
-    needs: [linter, docs, pgtap]
-    runs-on: ubuntu-18.04
-    env:
-      DOCKER_COMPOSE_VERSION: 1.7.1
-    steps:
-      - uses: actions/checkout@v1
-      - name: Run Docker Compose Up
-        run: |
-          docker-compose up -d
-      - name: Install Required Python Modules
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "pip3 install -r tests_directory/requirements-dev.txt"
-      - name: Move Config File
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "mkdir -p /root/.local/share/QGIS/QGIS3/profiles/default/buildings"
-          docker-compose exec -T qgis-testing-environment sh -c "cp tests_directory/buildings/tests/pg_config_test.ini /root/.local/share/QGIS/QGIS3/profiles/default/buildings/pg_config.ini"
-      - name: Setup Plugin
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "qgis_setup.sh buildings"
-      - name: Create Symlink
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "ln -s /tests_directory/buildings /root/.local/share/QGIS/QGIS3/profiles/default/python/plugins/buildings"
-      - name: Setup DB
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && python3 install.py"
-      - name: Run QGIS Test Runner
-        run: |
-          docker-compose exec -T qgis-testing-environment sh -c "cd tests_directory && sh testrunner.sh buildings.tests.test_runner.run_test_modules"
-
+          sphinx-build -b html db/docs/source db/docs
   deploy:
-    name: deploy
+    name: Deploy
     if: contains(github.ref, 'refs/tags/')
-    needs: [unittest]
-    runs-on: ubuntu-18.04
+    needs: [db, qgis, docs]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2-beta
         with:
           ref: ${{ github.ref }}
-
       - name: Build project # This would actually build your project, using zip for an example artifact
         run: |
           echo ${{ github.ref }}
