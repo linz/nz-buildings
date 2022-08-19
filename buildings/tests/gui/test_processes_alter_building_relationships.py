@@ -308,7 +308,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
 
     def test_cmb_relationship_current_index_changed(self):
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(1)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 2)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1004)
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
@@ -318,7 +318,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
 
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(2)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 3)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 7)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1001)
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())
@@ -328,7 +328,7 @@ class ProcessAlterRelationshipsTest(unittest.TestCase):
         self.assertFalse(self.alter_relationships_frame.btn_qa_not_removed.isEnabled())
 
         self.alter_relationships_frame.cmb_relationship.setCurrentIndex(3)
-        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 4)
+        self.assertEqual(self.alter_relationships_frame.tbl_relationship.columnCount(), 8)
         self.assertEqual(int(self.alter_relationships_frame.tbl_relationship.item(0, 0).text()), 1)
 
         self.assertTrue(self.alter_relationships_frame.btn_qa_not_checked.isEnabled())

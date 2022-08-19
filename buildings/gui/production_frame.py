@@ -100,7 +100,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot(bool)
     def cb_production_clicked(self, checked):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.building_layer.id())
-        layer_tree_model = iface.layerTreeView().model()
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         current_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Building Outlines"]
         if checked:
@@ -111,7 +111,7 @@ class ProductionFrame(QFrame, FORM_CLASS):
     @pyqtSlot(bool)
     def cb_historic_clicked(self, checked):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.building_historic.id())
-        layer_tree_model = iface.layerTreeView().model()
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         current_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Historic Outlines"]
         if checked:

@@ -44,9 +44,7 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         self.building_plugin.main_toolbar.actions()[0].trigger()
         self.dockwidget = self.building_plugin.dockwidget
         sub_menu = self.dockwidget.lst_sub_menu
-        sub_menu.setCurrentItem(
-            sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0]
-        )
+        sub_menu.setCurrentItem(sub_menu.findItems("Capture Sources", Qt.MatchExactly)[0])
         self.capture_frame = self.dockwidget.current_frame
 
     def tearDown(self):
@@ -59,17 +57,3 @@ class SetUpCaptureSourceTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()[0][0]
         self.assertEqual(self.capture_frame.cmb_capture_source_group.count(), result)
-
-    def test_capture_source_area_layer_registry(self):
-        """Capture source area layer is added to layer registry"""
-        layer_bool = True
-        root = QgsProject.instance().layerTreeRoot()
-        group = root.findGroup("Building Tool Layers")
-        layers = group.findLayers()
-        layer_name = ["capture_source_area"]
-        for layer in layers:
-            if layer.layer().name() not in layer_name:
-                layer_bool = False
-
-        self.assertEqual(len([layer for layer in layers]), len(layer_name))
-        self.assertTrue(layer_bool)

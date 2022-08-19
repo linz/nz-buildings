@@ -64,7 +64,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -112,7 +112,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -161,7 +161,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
 
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -218,7 +218,7 @@ class ProcessCaptureSourceTest(unittest.TestCase):
         """Check if gui is reset when reset clicked."""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1877795.6, 5555615.2)), delay=-1)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()

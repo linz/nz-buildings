@@ -12,7 +12,7 @@ BEGIN
   FOR schema_name, table_name IN (
     SELECT tables.table_schema, tables.table_name
     FROM information_schema.tables
-    WHERE table_catalog='nz-buildings-plugin-db'
+    WHERE table_catalog='buildings'
   ) LOOP
 
     -- Get the primary key column for each table

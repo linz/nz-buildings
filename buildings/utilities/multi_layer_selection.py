@@ -5,12 +5,24 @@ import os
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.PyQt.QtGui import QCursor, QPixmap
-from qgis.core import QgsRectangle, QgsProject, QgsPointXY, QgsWkbTypes
+from qgis.core import QgsRectangle, QgsProject, QgsPointXY, QgsWkbTypes, QgsVectorLayer
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.utils import Qgis
 
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+# The QgsVectorLayer.SelectBehavior enum was introduced in QGIS 3.22. Prior to
+# this the second arg to QgsVectorLayer.selectByRect() took an int, but this
+# now raises a type error. In earlier versions without the enum, trying to
+# access it will raise an AttributeError, which we can catch to set fallback
+# values for these older versions
+try:
+    ADD_TO_SELECTION = QgsVectorLayer.SelectBehavior.AddToSelection
+    SET_SELECTION = QgsVectorLayer.SelectBehavior.SetSelection
+except AttributeError:
+    ADD_TO_SELECTION = 1
+    SET_SELECTION = 0
 
 
 class MultiLayerSelection(QgsMapToolEmitPoint):
@@ -66,9 +78,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, self.rectangle())
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
-                    layer.selectByRect(layer_rect, True)
+                    layer.selectByRect(layer_rect, ADD_TO_SELECTION)
                 else:
-                    layer.selectByRect(layer_rect, False)
+                    layer.selectByRect(layer_rect, SET_SELECTION)
         else:
             w = self.canvas.mapUnitsPerPixel() * 3
             p = self.toMapCoordinates(event.pos())
@@ -76,9 +88,9 @@ class MultiLayerSelection(QgsMapToolEmitPoint):
             for layer in layers:
                 layer_rect = self.canvas.mapSettings().mapToLayerCoordinates(layer, rect)
                 if QApplication.keyboardModifiers() == Qt.ShiftModifier:
-                    layer.selectByRect(layer_rect, True)
+                    layer.selectByRect(layer_rect, ADD_TO_SELECTION)
                 else:
-                    layer.selectByRect(layer_rect, False)
+                    layer.selectByRect(layer_rect, SET_SELECTION)
         self.rubber_band.hide()
         # Signal emits every time canvas release event occurs and selection
         # could potentially have changed.

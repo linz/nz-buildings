@@ -82,7 +82,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check Geometries reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -114,7 +114,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check geometry is updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -143,7 +143,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Checks the geometries of multiple features can be edited at the same time"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -195,7 +195,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check modified_date is updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -225,7 +225,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
     def test_fail_on_split_geometry_twice(self):
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -257,7 +257,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
     def test_split_geometry(self):
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1747651, 5428152)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
