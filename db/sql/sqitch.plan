@@ -93,3 +93,4 @@ buildings_bulk_load/add_name_and_use_columns 2022-06-15T02:03:39Z Jan Ducnuigeen
 buildings_bulk_load/functions/add_facilities_functions 2022-06-15T02:04:34Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Functions to bring in facilities during comparison
 buildings/functions/add_names_and_uses_functions 2022-06-15T02:54:14Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Functions to modify names and uses in the buildings tables
 buildings_bulk_load/functions/load_to_production [buildings_bulk_load/functions/load_to_production@v3.6.0-dev1] 2022-06-15T03:07:57Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Insert names and uses when loading bulk outlines into production
+@v4.0.0-dev1 2022-09-14T22:18:19Z Daniel Silk <dsilk@linz.govt.nz> # Tag v4.0.0-dev1
