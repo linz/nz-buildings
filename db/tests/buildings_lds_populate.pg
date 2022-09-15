@@ -21,19 +21,10 @@ BEGIN;
 
 SELECT buildings_lds.populate_buildings_lds();
 
-CREATE EXTENSION IF NOT EXISTS pgtap;
+SELECT plan(3);
 
-SELECT plan(7);
 
 --1----------------------------------------------------------
--- Check functions exist
-
-SELECT has_function('buildings_lds', 'nz_building_outlines_insert', 'Should have function nz_building_outlines_insert in buildings_lds schema.');
-SELECT has_function('buildings_lds', 'nz_building_outlines_all_sources_insert', 'Should have function nz_building_outlines_all_sources_insert in buildings_lds schema.');
-SELECT has_function('buildings_lds', 'nz_building_outlines_lifecycle_insert', 'Should have function nz_building_outlines_lifecycle_insert in buildings_lds schema.');
-SELECT has_function('buildings_lds', 'populate_buildings_lds', 'Should have function populate_buildings_lds in buildings_lds schema.');
-
---2----------------------------------------------------------
 -- result of building outlines in the nz_building_outlines
 
 SELECT results_eq(
@@ -154,7 +145,7 @@ SELECT results_eq(
     'Check building outlines in buildings_lds.nz_building_outlines table after populate_buildings_lds function has run'
 );
 
---3------------------------------------------------------
+--2------------------------------------------------------
 
 -- modified date correctly handled
 

@@ -12,7 +12,7 @@
 # All configuration values  have a default; values that are commented out
 # serve to show the default.
 
-import glob2
+import glob
 import os
 import re
 import sys
@@ -693,7 +693,7 @@ def get_filenames():
     Read the path and file names of all of the SQL schema files in the /SQL folder
     including subfolders
     """
-    filenames = glob2.glob("../../sql/deploy/**/*")
+    filenames = glob.glob("../../sql/deploy/**/*", recursive=True)
     schema_filenames = list(filenames)
     for name in filenames:
         if "schema" not in name:

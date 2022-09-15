@@ -15,13 +15,8 @@
 \set ON_ERROR_ROLLBACK 1
 \set ON_ERROR_STOP true
 
-
 BEGIN;
-
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
 SELECT plan(10);
-
 
 --1----------------------------------------------------------
 -- New Buildings contents

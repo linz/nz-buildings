@@ -1,7 +1,8 @@
-black==20.8b1
-gitlint==0.15.0
-isort==5.8.0
-pre-commit==2.6.0
-pylint==2.6.0
-sphinx==3.5.3
-sphinx_rtd_theme==0.5.0
+-r requirements-docs.txt
+black==22.6.0
+gitlint==0.17.0
+isort==5.10.1
+pre-commit==2.20.0
+pylint==2.14.5
+sphinx==5.1.1
+sphinx_rtd_theme==1.0.0

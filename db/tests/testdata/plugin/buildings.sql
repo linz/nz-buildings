@@ -38,6 +38,13 @@ INSERT INTO buildings.buildings (building_id, begin_lifespan, end_lifespan) VALU
 
 -- buildings.building_name
 
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20003, 10003, 'Hospital Name 1', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20004, 10004, 'Hospital Name 2', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20007, 10007, 'Hospital Name 3', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20008, 10008, 'Hospital Name 3', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20027, 10027, 'Hospital Name 4', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20032, 10032, 'Hospital Name 5', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan, end_lifespan) VALUES (20033, 10033, 'Hospital Name 5', '2017-01-01 09:00:00', NULL);
 
 -- buildings.building_outlines
 
@@ -77,6 +84,22 @@ INSERT INTO buildings.building_outlines (building_outline_id, building_id, captu
 
 -- buildings.building_use
 
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30003, 10003, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30004, 10004, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30007, 10007, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30008, 10008, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30027, 10027, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30032, 10032, '16', '2017-01-01 09:00:00', NULL);
+INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan, end_lifespan) VALUES (30033, 10033, '16', '2017-01-01 09:00:00', NULL);
 
 -- buildings.lifecycle
 
+-- facilities.facilities
+
+INSERT INTO facilities.facilities (facility_id, source_facility_id, name, source_name, use, use_type, use_subtype, estimated_occupancy, last_modified, internal, internal_comments, shape) VALUES (1, '1-F00001-A', 'Hospital Name 10', 'Hospital Name 10', 'Hospital', 'Public Hospital', 'Surgical, Medical', 100, '2017-01-01 09:00:00', false, NULL, '01060000209108000001000000010300000001000000050000009E779831FAA73C41CE1C6B212B31554179F2BF6DFAA73C412E6E14C223315541AE2C08DB1AA83C41778F0AB323315541F736B9621AA83C413BDA7E3F2B3155419E779831FAA73C41CE1C6B212B315541');
+INSERT INTO facilities.facilities (facility_id, source_facility_id, name, source_name, use, use_type, use_subtype, estimated_occupancy, last_modified, internal, internal_comments, shape) VALUES (2, '1-F00002-A', 'Hospital Name 11', 'Hospital Name 11', 'Hospital', 'Private Hospital', 'Surgical, Mental', 101, '2017-01-01 09:00:00', false, NULL, '01060000209108000001000000010300000001000000050000008C3AEACDC3A83C412A54C7DE27315541D4A0AFFAC4A83C41449EC7711C315541DF2185DDEDA83C411F02AA441C3155410579D3CEECA83C41188638C8273155418C3AEACDC3A83C412A54C7DE27315541');
+
+-- facilities_lds.nz_facilities
+
+INSERT INTO facilities_lds.nz_facilities (facility_id, source_facility_id, name, source_name, use, use_type, use_subtype, estimated_occupancy, last_modified, shape) VALUES (1, '1-F00001-A', 'Hospital Name 10', 'Hospital Name 10', 'Hospital', 'Public Hospital', 'Surgical, Medical', 100, '2017-01-01 09:00:00', '01060000209108000001000000010300000001000000050000009E779831FAA73C41CE1C6B212B31554179F2BF6DFAA73C412E6E14C223315541AE2C08DB1AA83C41778F0AB323315541F736B9621AA83C413BDA7E3F2B3155419E779831FAA73C41CE1C6B212B315541');
+INSERT INTO facilities_lds.nz_facilities (facility_id, source_facility_id, name, source_name, use, use_type, use_subtype, estimated_occupancy, last_modified, shape) VALUES (2, '1-F00002-A', 'Hospital Name 11', 'Hospital Name 11', 'Hospital', 'Private Hospital', 'Surgical, Mental', 101, '2017-01-01 09:00:00', '01060000209108000001000000010300000001000000050000008C3AEACDC3A83C412A54C7DE27315541D4A0AFFAC4A83C41449EC7711C315541DF2185DDEDA83C411F02AA441C3155410579D3CEECA83C41188638C8273155418C3AEACDC3A83C412A54C7DE27315541');

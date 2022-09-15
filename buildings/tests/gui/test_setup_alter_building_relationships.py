@@ -67,32 +67,28 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
 
     def test_layer_registry(self):
         """ Layer registry has the correct components """
-        layer_bool = True
         root = QgsProject.instance().layerTreeRoot()
         group = root.findGroup("Building Tool Layers")
         layers = group.findLayers()
-        layer_name = [
+        intended_layer_names = [
             "added_bulk_load_in_edit",
-            "removed_existing_in_edit",
-            "matched_existing_in_edit",
-            "matched_bulk_load_in_edit",
-            "related_existing_in_edit",
-            "related_bulk_load_in_edit",
             "added_outlines",
-            "removed_outlines",
-            "matched_existing_outlines",
-            "matched_bulk_load_outlines",
-            "related_existing_outlines",
-            "related_bulk_load_outlines",
             "bulk_load_outlines",
             "existing_subset_extracts",
+            "facilities",
+            "matched_bulk_load_in_edit",
+            "matched_bulk_load_outlines",
+            "matched_existing_in_edit",
+            "matched_existing_outlines",
+            "related_bulk_load_in_edit",
+            "related_bulk_load_outlines",
+            "related_existing_in_edit",
+            "related_existing_outlines",
+            "removed_existing_in_edit",
+            "removed_outlines",
         ]
-        for layer in layers:
-            if layer.layer().name() not in layer_name:
-                layer_bool = False
-
-        self.assertEqual(len([layer for layer in layers]), len(layer_name))
-        self.assertTrue(layer_bool)
+        actual_layer_names = sorted(l.layer().name() for l in layers)
+        self.assertEqual(actual_layer_names, intended_layer_names)
 
     def test_has_toolbar(self):
         self.assertTrue(iface.building_toolbar.isVisible())

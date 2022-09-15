@@ -15,10 +15,6 @@
 \set ON_ERROR_STOP true
 
 BEGIN;
-
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
-
 SELECT plan(2);
 
 -- Tests

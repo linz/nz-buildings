@@ -347,7 +347,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot(bool)
     def cb_bulk_load_clicked(self, checked):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
-        layer_tree_model = iface.layerTreeView().model()
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         bulk_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Bulk Loaded"]
         if checked:
@@ -358,7 +358,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot(bool)
     def cb_added_clicked(self, checked):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
-        layer_tree_model = iface.layerTreeView().model()
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         added_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Added During QA"]
         added_edit_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Added- to be saved"]
@@ -372,7 +372,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
     @pyqtSlot(bool)
     def cb_removed_clicked(self, checked):
         layer_tree_layer = QgsProject.instance().layerTreeRoot().findLayer(self.bulk_load_layer.id())
-        layer_tree_model = iface.layerTreeView().model()
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
         categories = layer_tree_model.layerLegendNodes(layer_tree_layer)
         removed_category = [ln for ln in categories if ln.data(Qt.DisplayRole) == "Removed During QA"]
         if checked:

@@ -63,10 +63,12 @@ Bulk Load Outlines Select Statements:
 """
 
 # added
+
 added_by_bulk_load_outline_id_dataset_id = """
-SELECT bulk_load_outline_id
-FROM buildings_bulk_load.added
-JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+SELECT a bulk_load_outline_id, blu.value, blo.bulk_load_name
+FROM buildings_bulk_load.added a
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
 """
 
@@ -78,13 +80,16 @@ WHERE bulk_load_outline_id IN (
       FROM buildings_bulk_load.bulk_load_outlines
       WHERE supplied_dataset_id = %s);
 """
+
 added_by_dataset_id = """
-SELECT a.bulk_load_outline_id
+SELECT a.bulk_load_outline_id, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.added a
-JOIN buildings_bulk_load.bulk_load_outlines bulk_load USING (bulk_load_outline_id)
-WHERE bulk_load.supplied_dataset_id = %s AND bulk_load.bulk_load_status_id != 3
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
+WHERE blo.supplied_dataset_id = %s AND blo.bulk_load_status_id != 3
 ORDER BY a.bulk_load_outline_id ASC;
 """
+
 # bulk load outlines
 
 bulk_load_outlines_capture_source_by_supplied_dataset_id = """
@@ -169,28 +174,79 @@ WHERE building_outline_id = %s;
 
 # matched
 
-matched_by_bulk_load_outline_id_dataset_id = """
-SELECT building_outline_id
-FROM buildings_bulk_load.matched
-JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
-WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
-"""
+# matched_by_bulk_load_outline_id_dataset_id = """
+# SELECT building_outline_id
+# FROM buildings_bulk_load.matched
+# JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+# WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s;
+# """
 
-matched_by_dataset_id = """
-SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
+matched_by_bulk_load_outline_id_dataset_id = """
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.matched m
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+JOIN buildings.building_outlines bo USING (building_outline_id)
+LEFT JOIN buildings.building_use bu USING (building_id)
+LEFT JOIN buildings.use u USING (use_id)
+LEFT JOIN buildings.building_name bn USING (building_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
+WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s
+ORDER BY m.building_outline_id ASC;
+"""
+
+# matched_by_dataset_id = """
+# SELECT m.building_outline_id, m.bulk_load_outline_id, q.value
+# FROM buildings_bulk_load.matched m
+# JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+# JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+# WHERE blo.supplied_dataset_id = %s
+# ORDER BY m.building_outline_id ASC;
+# """
+
+matched_by_dataset_id = """
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
+FROM buildings_bulk_load.matched m
+JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+JOIN buildings.building_outlines bo USING (building_outline_id)
+LEFT JOIN buildings.building_use bu USING (building_id)
+LEFT JOIN buildings.use u USING (use_id)
+LEFT JOIN buildings.building_name bn USING (building_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE blo.supplied_dataset_id = %s
 ORDER BY m.building_outline_id ASC;
 """
 
+# matched_by_existing_outline_id_dataset_id = """
+# SELECT bulk_load_outline_id
+# FROM buildings_bulk_load.matched
+# JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
+# WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+# """
+
 matched_by_existing_outline_id_dataset_id = """
-SELECT bulk_load_outline_id
-FROM buildings_bulk_load.matched
-JOIN buildings_bulk_load.existing_subset_extracts USING (building_outline_id)
-WHERE building_outline_id = %s AND supplied_dataset_id = %s;
+SELECT m.building_outline_id, m.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
+FROM buildings_bulk_load.matched m
+JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
+JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+JOIN buildings.building_outlines bo USING (building_outline_id)
+LEFT JOIN buildings.building_use bu USING (building_id)
+LEFT JOIN buildings.use u USING (use_id)
+LEFT JOIN buildings.building_name bn USING (building_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
+WHERE m.building_outline_id = %s AND blo.supplied_dataset_id = %s
+ORDER BY m.building_outline_id ASC;
 """
+
+# matched_outlines_by_dataset_id = """
+# SELECT bulk_load_outline_id
+# FROM buildings_bulk_load.matched
+# WHERE bulk_load_outline_id IN(
+#       SELECT bulk_load_outline_id
+#       FROM buildings_bulk_load.bulk_load_outlines
+#       WHERE supplied_dataset_id = %s);
+# """
 
 matched_outlines_by_dataset_id = """
 SELECT bulk_load_outline_id
@@ -232,9 +288,25 @@ AND sd.supplier_id = o.organisation_id;
 
 # related
 
+# related_by_bulk_load_outline_id_dataset_id = """
+# SELECT building_outline_id, bulk_load_outline_id
+# FROM buildings_bulk_load.related
+# WHERE related_group_id in (
+#   SELECT DISTINCT related_group_id
+#   FROM buildings_bulk_load.related
+#   JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
+#   WHERE bulk_load_outline_id = %s AND supplied_dataset_id = %s);
+# """
+
 related_by_bulk_load_outline_id_dataset_id = """
-SELECT building_outline_id, bulk_load_outline_id
+SELECT building_outline_id, bulk_load_outline_id, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.related
+  JOIN buildings.building_outlines bo USING (building_outline_id)
+  LEFT JOIN buildings.building_use bu USING (building_id)
+  LEFT JOIN buildings.use u USING (use_id)
+  LEFT JOIN buildings.building_name bn USING (building_id)
+  LEFT JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+  LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE related_group_id in (
   SELECT DISTINCT related_group_id
   FROM buildings_bulk_load.related
@@ -243,10 +315,15 @@ WHERE related_group_id in (
 """
 
 related_by_dataset_id = """
-SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value
+SELECT r.related_group_id, r.building_outline_id, r.bulk_load_outline_id, q.value, u.value, bn.building_name, blu.value, blo.bulk_load_name
 FROM buildings_bulk_load.related r
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.bulk_load_outlines blo USING (bulk_load_outline_id)
+JOIN buildings.building_outlines bo USING (building_outline_id)
+LEFT JOIN buildings.building_use bu USING (building_id)
+LEFT JOIN buildings.use u USING (use_id)
+LEFT JOIN buildings.building_name bn USING (building_id)
+LEFT JOIN buildings.use blu ON blu.use_id = blo.bulk_load_use_id
 WHERE blo.supplied_dataset_id = %s
 ORDER BY r.related_group_id ASC;
 """
@@ -273,10 +350,14 @@ WHERE bulk_load_outline_id IN (
 # removed
 
 removed_by_dataset_id = """
-SELECT r.building_outline_id, q.value
+SELECT r.building_outline_id, q.value, u.value, bn.building_name
 FROM buildings_bulk_load.removed r
 JOIN buildings_bulk_load.qa_status q USING (qa_status_id)
 JOIN buildings_bulk_load.existing_subset_extracts existing USING (building_outline_id)
+JOIN buildings.building_outlines bo USING (building_outline_id)
+LEFT JOIN buildings.building_use bu USING (building_id)
+LEFT JOIN buildings.use u USING (use_id)
+LEFT JOIN buildings.building_name bn USING (building_id)
 WHERE existing.supplied_dataset_id = %s
 ORDER BY r.building_outline_id ASC;
 """

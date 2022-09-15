@@ -15,16 +15,11 @@
 \set ON_ERROR_STOP true
 
 BEGIN;
-
-CREATE EXTENSION IF NOT EXISTS pgtap;
-
-
-SELECT plan(14);
+SELECT plan(11);
 
 -- Tests
 
 --Suburb--------------------------
-SELECT has_function('buildings_reference', 'suburb_locality_intersect_polygon', 'Should have function suburb_locality_intersect_polygon in buildings schema.');
 SELECT results_eq(
 	$$SELECT buildings_reference.suburb_locality_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (101)$$,
@@ -56,7 +51,6 @@ SELECT results_eq(
 );
 
 --Town City-------------------
-SELECT has_function('buildings_reference', 'town_city_intersect_polygon', 'Should have function nz_locality_town_city_intersect_polygon in buildings schema.');
 SELECT results_eq(
 	$$SELECT buildings_reference.town_city_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (1001)$$,
@@ -76,7 +70,6 @@ SELECT results_eq(
 );
 
 --Territorial Authority-------------------------
-SELECT has_function('buildings_reference', 'territorial_authority_intersect_polygon', 'Should have function territorial_authority_intersect_polygon in buildings schema.');
 SELECT results_eq(
 	$$SELECT buildings_reference.territorial_authority_intersect_polygon('01060000209108000001000000010300000001000000050000000000000028A83C41000000C0263155410000000028A83C410000000019315541000000008CA83C410000000019315541000000008CA83C41000000C0263155410000000028A83C41000000C026315541');$$,
     $$VALUES (10001)$$,

@@ -61,7 +61,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """UI and Canvas behave correctly when geometry is selected"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
@@ -107,7 +107,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check comboboxes reset correctly when 'reset' called"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -148,7 +148,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check attributes are updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -233,7 +233,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -343,7 +343,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -416,7 +416,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.production_frame.edit_dialog.close()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
@@ -467,7 +467,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -542,7 +542,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         iface.actionSelectPolygon().trigger()
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
@@ -604,12 +604,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """test that ending lifespan of removed building works"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
-            delay=50,
-        )
+        QTest.mouseDClick(widget, Qt.RightButton, pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)), delay=50)
         canvas = iface.mapCanvas()
         selectedcrs = "EPSG:2193"
         target_crs = QgsCoordinateReferenceSystem()
@@ -618,12 +613,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
         canvas.setExtent(zoom_rectangle)
         canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPointXY(1878038.1, 5555312.6)),
-            delay=30,
-        )
+        QTest.mouseClick( widget, Qt.LeftButton, pos=canvas_point(QgsPointXY(1878046.0,5555323.3)), delay=30)
 
         btn_yes = self.edit_dialog.change_instance.msgbox_remove.button(QMessageBox.Yes)
         QTimer.singleShot(500, btn_yes.click)
@@ -650,7 +640,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """test that ending lifespan of related building fails"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
@@ -695,7 +685,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         """Check modified date is updated when save clicked"""
         widget = iface.mapCanvas().viewport()
         canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseClick(
+        QTest.mouseDClick(
             widget,
             Qt.RightButton,
             pos=canvas_point(QgsPointXY(1747651, 5428152)),
