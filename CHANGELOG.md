@@ -3,7 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 
-## Unreleased
+## 3.6.0
+2021-04-09
 
 ### Changed
 - The building outlines database now holds its own imagery survey index
