@@ -1,5 +1,5 @@
 -r requirements-docs.txt
-black==22.6.0
+black==22.8.0
 gitlint==0.17.0
 isort==5.10.1
 pre-commit==2.20.0
