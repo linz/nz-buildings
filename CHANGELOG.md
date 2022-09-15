@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 4.0.0
+2022-09-15
+
+### Added
+- Names and uses are now retained when bulk loading new datasets
+- Custom Dockerfiles added that include Sqitch / pgTAP
+
+### Changed
+- Tests that were duplicating `sqitch verify` checks removed from pgTAP test suite
+
+### Fixed
+- Updated CI to use the same method to run tests as what is used in the Docker containers
+
 
 ## 3.6.0
 2021-04-09
