@@ -183,7 +183,7 @@ Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.
       <gmd:resourceConstraints>
         <gmd:MD_LegalConstraints>
           <gmd:useLimitation>
-            <gco:CharacterString>Released by LINZ under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
+            <gco:CharacterString>Released by Toitū Te Whenua Land Information New Zealand under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
 Following Attribution:
 "Sourced from the LINZ Data Service and licensed for reuse under CC BY 4.0"
 For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributing-linz-data</gco:CharacterString>
@@ -373,7 +373,7 @@ For building outlines on water and not within any locality, the nearest locality
   <gmd:metadataConstraints>
     <gmd:MD_LegalConstraints>
       <gmd:useLimitation>
-        <gco:CharacterString>Released by LINZ under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
+        <gco:CharacterString>Released by Toitū Te Whenua Land Information New Zealand under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
 Following Attribution:
 "Sourced from the LINZ Data Service and licensed for reuse under CC BY 4.0"
 For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributing-linz-data</gco:CharacterString>
