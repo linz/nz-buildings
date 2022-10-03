@@ -52,7 +52,7 @@ Building outlines data are defined by the following criteria:
 
    * Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations (see Image 2d).
 
-   * Water tanks are captured as building outlines when their size is at least 16.5 square metres, or 4.5 meters in diameter (see Image 2b).
+   * Water tanks are captured as building outlines when their size is at least 20 square metres, or 5 meters in diameter (see Image 2b).
 
 
 .. figure:: _static/examples.png

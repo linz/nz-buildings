@@ -23,7 +23,7 @@
         <gco:CharacterString>Omit</gco:CharacterString>
       </gmd:individualName>
       <gmd:organisationName>
-        <gco:CharacterString>LINZ - Land Information New Zealand</gco:CharacterString>
+        <gco:CharacterString>Toitū Te Whenua Land Information New Zealand</gco:CharacterString>
       </gmd:organisationName>
       <gmd:positionName gco:nilReason="missing">
         <gco:CharacterString>
@@ -53,7 +53,7 @@
                 <gco:CharacterString>New Zealand</gco:CharacterString>
               </gmd:country>
               <gmd:electronicMailAddress>
-                <gco:CharacterString>info@linz.govt.nz</gco:CharacterString>
+                <gco:CharacterString>customersupport@linz.govt.nz</gco:CharacterString>
               </gmd:electronicMailAddress>
             </gmd:CI_Address>
           </gmd:address>
@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2021-06-11</gco:Date>
+    <gco:Date>2022-09-30</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2021-06-11</gco:Date>
+                <gco:Date>2022-09-30</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2021-06-11</gco:Date>
+                <gco:Date>2022-09-30</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -152,7 +152,7 @@ This dataset is available via ArcGIS Online and ArcGIS REST services, as well as
         <gmd:MD_ProgressCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_ProgressCode" codeListValue="onGoing">onGoing</gmd:MD_ProgressCode>
       </gmd:status>
       <gmd:pointOfContact>
-        <gmd:CI_ResponsibleParty>  <gmd:individualName>    <gco:CharacterString>Omit</gco:CharacterString>  </gmd:individualName>  <gmd:organisationName>    <gco:CharacterString>LINZ - Land Information New Zealand</gco:CharacterString>  </gmd:organisationName>  <gmd:positionName>    <gco:CharacterString>Data Manager - Topography</gco:CharacterString>  </gmd:positionName>  <gmd:contactInfo>    <gmd:CI_Contact>      <gmd:phone>        <gmd:CI_Telephone>          <gmd:voice>            <gco:CharacterString>0800 665 463 or +64 4 460 0110</gco:CharacterString>          </gmd:voice>          <gmd:facsimile>            <gco:CharacterString>+64 4 472 2244</gco:CharacterString>          </gmd:facsimile>        </gmd:CI_Telephone>      </gmd:phone>      <gmd:address>        <gmd:CI_Address>          <gmd:deliveryPoint>            <gco:CharacterString>155 The Terrace</gco:CharacterString>          </gmd:deliveryPoint>          <gmd:city>            <gco:CharacterString>Wellington</gco:CharacterString>          </gmd:city>          <gmd:administrativeArea gco:nilReason="missing">            <gco:CharacterString></gco:CharacterString>          </gmd:administrativeArea>          <gmd:postalCode>            <gco:CharacterString>6011</gco:CharacterString>          </gmd:postalCode>          <gmd:country>            <gco:CharacterString>New Zealand</gco:CharacterString>          </gmd:country>          <gmd:electronicMailAddress>            <gco:CharacterString>info@linz.govt.nz</gco:CharacterString>          </gmd:electronicMailAddress>        </gmd:CI_Address>      </gmd:address>    </gmd:CI_Contact>  </gmd:contactInfo>  <gmd:role>    <gmd:CI_RoleCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>  </gmd:role></gmd:CI_ResponsibleParty>
+        <gmd:CI_ResponsibleParty>  <gmd:individualName>    <gco:CharacterString>Omit</gco:CharacterString>  </gmd:individualName>  <gmd:organisationName>    <gco:CharacterString>Toitū Te Whenua Land Information New Zealand</gco:CharacterString>  </gmd:organisationName>  <gmd:positionName>    <gco:CharacterString>Data Manager - Topography</gco:CharacterString>  </gmd:positionName>  <gmd:contactInfo>    <gmd:CI_Contact>      <gmd:phone>        <gmd:CI_Telephone>          <gmd:voice>            <gco:CharacterString>0800 665 463 or +64 4 460 0110</gco:CharacterString>          </gmd:voice>          <gmd:facsimile>            <gco:CharacterString>+64 4 472 2244</gco:CharacterString>          </gmd:facsimile>        </gmd:CI_Telephone>      </gmd:phone>      <gmd:address>        <gmd:CI_Address>          <gmd:deliveryPoint>            <gco:CharacterString>155 The Terrace</gco:CharacterString>          </gmd:deliveryPoint>          <gmd:city>            <gco:CharacterString>Wellington</gco:CharacterString>          </gmd:city>          <gmd:administrativeArea gco:nilReason="missing">            <gco:CharacterString></gco:CharacterString>          </gmd:administrativeArea>          <gmd:postalCode>            <gco:CharacterString>6011</gco:CharacterString>          </gmd:postalCode>          <gmd:country>            <gco:CharacterString>New Zealand</gco:CharacterString>          </gmd:country>          <gmd:electronicMailAddress>            <gco:CharacterString>customersupport@linz.govt.nz</gco:CharacterString>          </gmd:electronicMailAddress>        </gmd:CI_Address>      </gmd:address>    </gmd:CI_Contact>  </gmd:contactInfo>  <gmd:role>    <gmd:CI_RoleCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>  </gmd:role></gmd:CI_ResponsibleParty>
       </gmd:pointOfContact>
       <gmd:resourceMaintenance>
         <gmd:MD_MaintenanceInformation>
@@ -181,7 +181,7 @@ This dataset is available via ArcGIS Online and ArcGIS REST services, as well as
       <gmd:resourceConstraints>
         <gmd:MD_LegalConstraints>
           <gmd:useLimitation>
-            <gco:CharacterString>Copyright of this work is owned by Land Information New Zealand© LINZ</gco:CharacterString>
+            <gco:CharacterString>Copyright of this work is owned by Toitū Te Whenua Land Information New Zealand</gco:CharacterString>
           </gmd:useLimitation>
           <gmd:useConstraints>
             <gmd:MD_RestrictionCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_RestrictionCode" codeListValue="copyright">copyright</gmd:MD_RestrictionCode>
@@ -191,7 +191,7 @@ This dataset is available via ArcGIS Online and ArcGIS REST services, as well as
       <gmd:resourceConstraints>
         <gmd:MD_LegalConstraints>
           <gmd:useLimitation>
-            <gco:CharacterString>Released by LINZ under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
+            <gco:CharacterString>Released by Toitū Te Whenua Land Information New Zealand under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
 Following Attribution:
 "Sourced from the LINZ Data Service and licensed for reuse under CC BY 4.0"
 For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributing-linz-data</gco:CharacterString>
@@ -331,7 +331,7 @@ The Building Outlines contain spatial detail reflective of the visible character
 • Adjoining commercial buildings are captured as separate building outlines when rooflines allow delineation.
 • Hay bales and silage are not captured as building outlines.
 • Building outline polygons captured will be greater than 10 square meters. An exception to this is in national parks, conservation areas, and wildlife areas where small structures such as huts, bivies and shelters are included as building outlines to address safety concerns in remote locations
-• Water tanks are captured as building outlines when their area is at least 16.5 square metres (or 4.5 meters in diameter).
+• Water tanks are captured as building outlines when their area is at least 20 square metres (or 5 meters in diameter).
 
 **Valid Geometry:**
 A building outline polygon is considered to have valid geometry if;
@@ -372,9 +372,7 @@ For building outlines on water and not within any locality, the nearest locality
   <gmd:metadataConstraints>
     <gmd:MD_LegalConstraints>
       <gmd:useLimitation>
-        <gco:CharacterString>Copyright of this work is owned by Land Information New Zealand
-
-© LINZ</gco:CharacterString>
+        <gco:CharacterString>Copyright of this work is owned by Toitū Te Whenua Land Information New Zealand</gco:CharacterString>
       </gmd:useLimitation>
       <gmd:useConstraints>
         <gmd:MD_RestrictionCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#MD_RestrictionCode" codeListValue="copyright">copyright</gmd:MD_RestrictionCode>
@@ -384,7 +382,7 @@ For building outlines on water and not within any locality, the nearest locality
   <gmd:metadataConstraints>
     <gmd:MD_LegalConstraints>
       <gmd:useLimitation>
-        <gco:CharacterString>Released by LINZ under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
+        <gco:CharacterString>Released by Toitū Te Whenua Land Information New Zealand under Creative Commons Attribution 4.0 International (CC BY 4.0) with:
 Following Attribution:
 "Sourced from the LINZ Data Service and licensed for reuse under CC BY 4.0"
 For details see https://www.linz.govt.nz/data/licensing-and-using-data/attributing-linz-data</gco:CharacterString>
