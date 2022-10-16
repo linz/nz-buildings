@@ -36,13 +36,34 @@ CREATE OR REPLACE FUNCTION buildings_reference.town_city_intersect_polygon(
 )
 RETURNS integer AS
 $$
+    -- Precaculate which (and how many) town_city geometries the input geometry
+    -- intersects with
+    WITH intersecting_town_citys AS (
+        SELECT town_city_id, shape
+        FROM buildings_reference.town_city
+        WHERE ST_Intersects(p_polygon_geometry, shape)
+    ), intersecting_town_citys_count AS (
+        SELECT COUNT(*) AS num_town_citys FROM intersecting_town_citys
+    )
 
-    SELECT town_city_id
-    FROM buildings_reference.town_city
-    WHERE ST_Intersects(shape, p_polygon_geometry)
-    ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) DESC
-    LIMIT 1;
-
+    SELECT
+    -- If the input geometry does not intersect with any town_city geometries,
+    -- return null
+    CASE WHEN intersecting_town_citys_count.num_town_citys = 0 THEN null
+    -- If the input geometry intersects with exactly one town_city geometry,
+    -- return that
+    WHEN intersecting_town_citys_count.num_town_citys = 1 THEN (
+        SELECT town_city_id FROM intersecting_town_citys LIMIT 1
+    )
+    -- If the input geometry intersects with more than one town_city geometry,
+    -- return the town_city with the largest overlap
+    ELSE (
+        SELECT town_city_id FROM intersecting_town_citys
+        ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) DESC
+        LIMIT 1
+    ) 
+    END AS town_city_id
+    FROM intersecting_town_citys_count;
 $$
 LANGUAGE sql VOLATILE;
 

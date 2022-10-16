@@ -3,19 +3,6 @@
 BEGIN;
 
 SELECT has_function_privilege('buildings_reference.territorial_authority_grid_intersect_polygon(geometry)', 'execute');
-DO $$
-BEGIN
-
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'territorial_authority_grid_intersect_polygon'
-    AND prosrc LIKE '%WITH intersecting_territorial_authority_grids AS%';
-
-    IF NOT FOUND THEN
-        RAISE EXCEPTION '"WITH intersecting_territorial_authority_grids AS" not found';
-    END IF;
-
-END $$;
 
 SELECT has_function_privilege('buildings_reference.territorial_authority_intersect_polygon(geometry)', 'execute');
 
