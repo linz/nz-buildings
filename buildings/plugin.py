@@ -14,6 +14,7 @@ from qgis.utils import iface, plugins
 from buildings.gui.dockwidget import BuildingsDockwidget
 from buildings.gui.menu_frame import MenuFrame
 from buildings.settings.project import get_attribute_dialog_setting, set_attribute_dialog_setting
+from buildings.utilities.log import configure_logger
 
 # Get the path for the parent directory of this file.
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -26,6 +27,8 @@ class Buildings(object):
 
     def __init__(self, iface):
         """Constructor."""
+
+        configure_logger()
 
         # Store original enter attribute values dialog setting
         self.attribute_dialog_setting = get_attribute_dialog_setting()

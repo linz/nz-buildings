@@ -14,23 +14,22 @@
 from __future__ import absolute_import
 from builtins import str
 
-import os
 import psycopg2
+from qgis.core import QgsDataSourceUri
 
 from buildings.utilities.warnings import buildings_warning
-from qgis.core import QgsDataSourceUri, QgsApplication
+from buildings.utilities.config import read_config_file
 
-from . import config
-
-
-config_path = os.path.join(QgsApplication.qgisSettingsDirPath(), "buildings", "pg_config.ini")
-
-pg_config = config.read_config_file(config_path)
-_host = pg_config["localhost"]["host"]
-_port = pg_config["localhost"]["port"]
-_dbname = pg_config["localhost"]["dbname"]
-_user = pg_config["localhost"]["user"]
-_pw = pg_config["localhost"]["password"]
+try:
+    DB_CONFIG = read_config_file()["database"]
+except RuntimeError as error:
+    buildings_warning("Config file error", str(error), "critical")
+    raise error
+_host = DB_CONFIG["host"]
+_port = DB_CONFIG["port"]
+_dbname = DB_CONFIG["dbname"]
+_user = DB_CONFIG["user"]
+_pw = DB_CONFIG["password"]
 
 _open_cursor = None
 
