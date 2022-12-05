@@ -19,7 +19,7 @@ class QgsHandler(logging.Handler):
             level = Qgis.Warning
         else:
             level = Qgis.Info
-        QgsApplication.messageLog().logMessage(message=self.format(record), level=level)
+        QgsApplication.messageLog().logMessage(message=self.format(record), tag="Buildings", level=level)
 
 
 def get_logfile_path() -> Path:
@@ -44,6 +44,6 @@ def configure_logger():
     logger.addHandler(qgis_handler)
     logfile = get_logfile_path()
     file_handler = logging.handlers.RotatingFileHandler(logfile, encoding="utf8", maxBytes=MAX_LOGFILE_SIZE)
-    file_formatter = logging.Formatter(fmt="{asctime}  {name}  {levelname}  {message}", datefmt="%Y-%m-%dT%H:%M:%S", style="{")
+    file_formatter = logging.Formatter(fmt="{asctime}  {levelname}  [{name}]  {message}", datefmt="%Y-%m-%dT%H:%M:%S", style="{")
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
