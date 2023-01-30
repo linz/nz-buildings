@@ -1,8 +1,7 @@
-from builtins import str
-
 # -*- coding: utf-8 -*-
-
+from builtins import str
 from qgis.PyQt.QtCore import pyqtSlot
+from qgis.PyQt.QtCore import Qt
 
 from buildings.gui.error_dialog import ErrorDialog
 from buildings.sql import (
@@ -14,12 +13,12 @@ from buildings.sql import (
 
 def populate_bulk_comboboxes(self):
     """
-        Populate bulk load comboboxes
+    Populate bulk load comboboxes
     """
 
     def fix_truncated_dropdown(cmb, text):
         """
-            Fix the truncated cmb dropdown in windows
+        Fix the truncated cmb dropdown in windows
         """
         w = cmb.fontMetrics().boundingRect(text).width()
         cmb.view().setFixedWidth(w + 30)
@@ -41,7 +40,9 @@ def populate_bulk_comboboxes(self):
     # capture source group
     self.cmb_capture_src_grp.clear()
     self.ids_capture_src_grp = []
-    result = self.db.execute_return(common_select.capture_source_group_id_value_description)
+    result = self.db.execute_return(
+        common_select.capture_source_group_id_value_description
+    )
     ls = result.fetchall()
     text_max = ""
     for (id_capture_src_grp, value, description) in ls:
@@ -56,7 +57,10 @@ def populate_bulk_comboboxes(self):
     self.cmb_cap_src_area.clear()
     index = self.cmb_capture_src_grp.currentIndex()
     id_capture_src_grp = self.ids_capture_src_grp[index]
-    result = self.db.execute_return(common_select.capture_source_external_id_and_area_title_by_group_id, (id_capture_src_grp,))
+    result = self.db.execute_return(
+        common_select.capture_source_external_id_and_area_title_by_group_id,
+        (id_capture_src_grp,),
+    )
     ls = result.fetchall()
     text_max = ""
     for (external_id, area_title) in reversed(ls):
@@ -69,43 +73,59 @@ def populate_bulk_comboboxes(self):
 
 def load_current_fields(self):
     """
-        Function to load fields related to the current supplied dataset
+    Function to load fields related to the current supplied dataset
     """
     # capture method
-    result = self.db.execute_return(common_select.capture_method_value_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(
+        common_select.capture_method_value_by_dataset_id, (self.current_dataset,)
+    )
     result = result.fetchall()[0][0]
     self.cmb_capture_method.setCurrentIndex(self.cmb_capture_method.findText(result))
 
     # organisation
-    result = self.db.execute_return(bulk_load_select.organisation_value_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(
+        bulk_load_select.organisation_value_by_dataset_id, (self.current_dataset,)
+    )
     result = result.fetchall()[0][0]
     self.cmb_organisation.setCurrentIndex(self.cmb_organisation.findText(result))
 
     # data description
-    result = self.db.execute_return(bulk_load_select.supplied_dataset_description_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(
+        bulk_load_select.supplied_dataset_description_by_dataset_id,
+        (self.current_dataset,),
+    )
     result = result.fetchall()[0][0]
     self.le_data_description.setText(result)
 
     # External Id/fields
-    ex_result = self.db.execute_return(common_select.capture_source_external_source_id_by_dataset_id, (self.current_dataset,))
+    ex_result = self.db.execute_return(
+        common_select.capture_source_external_source_id_by_dataset_id,
+        (self.current_dataset,),
+    )
     ex_result = ex_result.fetchall()[0][0]
     if ex_result is not None:
         self.rad_external_id.setChecked(True)
-        self.cmb_cap_src_area.setCurrentIndex(self.cmb_cap_src_area.findText(ex_result))
+        self.cmb_cap_src_area.setCurrentIndex(
+            self.cmb_cap_src_area.findText(ex_result, Qt.MatchStartsWith)
+        )
 
     # capture source group
-    result = self.db.execute_return(common_select.capture_source_group_id_by_dataset_id, (self.current_dataset,))
+    result = self.db.execute_return(
+        common_select.capture_source_group_id_by_dataset_id, (self.current_dataset,)
+    )
     result = result.fetchall()[0][0]
     self.cmb_capture_src_grp.setCurrentIndex(result - 1)
 
     # outlines layer
-    self.ml_outlines_layer.setCurrentIndex(self.ml_outlines_layer.findText("bulk_load_outlines"))
+    self.ml_outlines_layer.setCurrentIndex(
+        self.ml_outlines_layer.findText("bulk_load_outlines")
+    )
 
 
 @pyqtSlot()
 def enable_external_bulk(self):
     """
-        Called when external source radio button is toggled
+    Called when external source radio button is toggled
     """
     if self.rad_external_id.isChecked():
         self.fcb_external_id.setEnabled(1)
@@ -118,22 +138,23 @@ def enable_external_bulk(self):
 
 def populate_external_fcb(self):
     """
-        Populate external field combobox
+    Populate external field combobox
     """
     self.fcb_external_id.setLayer(self.ml_outlines_layer.currentLayer())
 
 
 def bulk_load(self, commit_status):
     """
-        Begins the process of bulk load data into buildings_bulk_load.
-        bulk_load_outlines Called when bulk load outlines ok button
-        is clicked
+    Begins the process of bulk load data into buildings_bulk_load.
+    bulk_load_outlines Called when bulk load outlines ok button
+    is clicked
     """
     if self.le_data_description.text() == "":
         # if no data description
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
-            "\n -------------------- EMPTY DESCRIPTION FIELD ---------" "----------- \n\n Null descriptions not allowed"
+            "\n -------------------- EMPTY DESCRIPTION FIELD ---------"
+            "----------- \n\n Null descriptions not allowed"
         )
         self.error_dialog.show()
         return
@@ -141,7 +162,8 @@ def bulk_load(self, commit_status):
         # if description is too long
         self.error_dialog = ErrorDialog()
         self.error_dialog.fill_report(
-            "\n -------------------- VALUE TOO LONG -------------------- " "\n\n Enter less than 250 characters"
+            "\n -------------------- VALUE TOO LONG -------------------- "
+            "\n\n Enter less than 250 characters"
         )
         self.error_dialog.show()
         return
@@ -162,7 +184,9 @@ def bulk_load(self, commit_status):
     # capture source group
     text = self.cmb_capture_src_grp.currentText()
     text_ls = text.split("-")
-    result = self.db.execute_return(common_select.capture_source_group_id_by_value, (text_ls[0],))
+    result = self.db.execute_return(
+        common_select.capture_source_group_id_by_value, (text_ls[0],)
+    )
     capture_source_group = result.fetchall()[0][0]
 
     # capture source area
@@ -228,7 +252,9 @@ def bulk_load(self, commit_status):
     if val is None:
         return
 
-    val = insert_bulk_load_outlines(self, self.current_dataset, capture_method, capture_source)
+    val = insert_bulk_load_outlines(
+        self, self.current_dataset, capture_method, capture_source
+    )
     # if insert_bulk_load_outlines function failed
     if val is None:
         return
@@ -239,7 +265,7 @@ def bulk_load(self, commit_status):
 
 def insert_supplied_dataset(self, organisation, description):
     """
-        Generates new supplied outline dataset for incoming data
+    Generates new supplied outline dataset for incoming data
     """
     if self.db._open_cursor is None:
         self.db.open_cursor()
@@ -250,7 +276,7 @@ def insert_supplied_dataset(self, organisation, description):
 
 def insert_supplied_outlines(self, dataset_id, layer):
     """
-        Inserts new outlines into buildings_bulk_load.supplied_outlines table
+    Inserts new outlines into buildings_bulk_load.supplied_outlines table
     """
     # external field
     external_field = str(self.fcb_external_id.currentField())
@@ -280,20 +306,26 @@ def insert_supplied_outlines(self, dataset_id, layer):
 
 def insert_bulk_load_outlines(self, dataset_id, capture_method, capture_source):
     """
-        Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
+    Inserts new outlines into buildings_bulk_load.bulk_load_outlines table
     """
-    sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert_supplied(%s, 1, %s, %s);"
+    sql = (
+        "SELECT buildings_bulk_load.bulk_load_outlines_insert_supplied(%s, 1, %s, %s);"
+    )
     self.db.execute_no_commit(sql, (dataset_id, capture_method, capture_source))
 
     # Remove small buildings
     sql = "SELECT buildings_bulk_load.bulk_load_outlines_remove_small_buildings(%s);"
     self.db.execute_no_commit(sql, (dataset_id,))
     # insert into deletion_description
-    results = self.db.execute_no_commit(bulk_load_select.bulk_load_removed_outline_ids_by_dataset_id, (dataset_id,))
+    results = self.db.execute_no_commit(
+        bulk_load_select.bulk_load_removed_outline_ids_by_dataset_id, (dataset_id,)
+    )
     bulk_loaded_ids = results.fetchall()
     for bulk_loaded_id in bulk_loaded_ids:
         sql = "SELECT buildings_bulk_load.deletion_description_insert(%s, %s);"
-        self.db.execute_no_commit(sql, (bulk_loaded_id, "Building outlines smaller than 10m2"))
+        self.db.execute_no_commit(
+            sql, (bulk_loaded_id, "Building outlines smaller than 10m2")
+        )
 
     # remove small tanks
     sql = "SELECT buildings_bulk_load.bulk_load_outlines_remove_small_tanks(%s);"
