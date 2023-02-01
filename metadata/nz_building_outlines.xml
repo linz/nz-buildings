@@ -141,8 +141,8 @@ Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.
 **APIs and web services**
 This dataset is available via ArcGIS Online and ArcGIS REST services, as well as our standard APIs.
 [LDS APIs and OGC web services](https://data.linz.govt.nz/layer/101290/webservices/)
-[ArcGIS Online map services](https://basedatanz.maps.arcgis.com/home/item.html?id=c2e9e61f55a245978c0bd64558553101)
-[ArcGIS REST API](https://services7.arcgis.com/jI87xPT7G1AGV8Uo/arcgis/rest/services/)
+[ArcGIS Online map services](https://linz.maps.arcgis.com/home/item.html?id=ef40ae8beaff4b6eb43f3c6971b34d1b)
+[ArcGIS REST API](https://services.arcgis.com/xdsHIIxuCWByZiCB/arcgis/rest/services/)
 </gco:CharacterString>
       </gmd:abstract>
       <gmd:purpose>
