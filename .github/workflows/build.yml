@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2-beta
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
       - name: Build project # This would actually build your project, using zip for an example artifact
