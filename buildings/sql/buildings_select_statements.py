@@ -31,7 +31,7 @@ WHERE building_outline_id = %s;
 building_outlines_intersect_geometry = """
 SELECT *
 FROM buildings.building_outlines bo
-WHERE ST_Intersects(bo.shape, %s)
+WHERE ST_Within(bo.shape, %s)
 AND bo.building_outline_id NOT IN (
     SELECT building_outline_id
     FROM buildings_bulk_load.removed
