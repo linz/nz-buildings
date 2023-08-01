@@ -37,7 +37,7 @@ sys.path.insert(0, os.path.abspath("../../sql/deploy"))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 # extensions = ["sphinx.ext.autodoc"]
-extensions = ["sphinx_rtd_theme"]
+# extensions = ["sphinx_rtd_theme"]
 
 # 'sphinx.ext.autosectionlabel'
 # Add any paths that contain templates here, relative to this directory.
@@ -72,7 +72,7 @@ release = "0.0.1"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
