@@ -37,6 +37,8 @@ This dataset includes the spatial coverage of building outlines using remotely s
 
 Building outlines data are defined by the following criteria:
 
+   The details and criteria used to capture building outlines is listed in the `Specification for Building Outlines version 2 <../_static/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`_. Some of the older areas of capture were based on earlier versions of this specification.
+
 
    * Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
 
@@ -63,7 +65,6 @@ Building outlines data are defined by the following criteria:
 
 The publicly available building outlines data consists of three tables. The `NZ Building Outlines <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines>`_ table contains all of the building outlines which match the most recent imagery available for each region of the country. The `NZ Building Outlines All Sources <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-all-sources>`_ table contains all building outlines that have been delineated from every imagery year/set that has been captured, whether this is historical imagery or the most recent imagery. The `NZ Building Outlines Lifecycle <https://nz-buildings.readthedocs.io/en/latest/published_data.html#table-nz-building-outlines-lifecycle>`_ table provides building_id relationship information buildings that are split or merged.
 
-The details and criteria used to capture building outlines is listed in the  :download:`Specification for Building Outlines version 2 <.._downloads/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`. Some of the current outlines in the data were captured according to an earlier Specification for Building Outlines version 1, however all new updates to the dataset follow the more current version 2 of this document.
 
 Attributes
 ---------------------------
@@ -134,7 +135,7 @@ The NZ Building Outlines dataset is being procured and released in stages. Image
 Accuracy Specification
 ---------------------------
 
-The Building Outlines contain spatial detail reflective of 90% to 110% of the visible characteristics of building roof outlines as shown in the source imagery . Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees. Effort has been made to adhere to the building outline criteria described above, and future updates may include adjustments of building outlines as imagery resolution allows.
+At least 95% of building outlines are correctly delineated within 1 metre of the roofline seen on imagery. Outlines are captured in full where they are partially occluded by vegetation or require additional viewer interpretation, and squared off at 90 degrees if the corner angles are between 80-100 degrees. Effort has been made to adhere to the building outline criteria described above, and future updates may include adjustments of building outlines as imagery resolution allows.
 
 
 Valid Geometry
