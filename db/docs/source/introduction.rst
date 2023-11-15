@@ -13,7 +13,6 @@ Background
 
 
 Building outlines have been identified as a dataset of national importance. They influence a multitude of decisions made across New Zealand at both the national and regional levels. It is therefore critical to have a consistent and dynamic dataset available. In 2016 LINZ conducted a pilot project to capture building outlines over three regions of New Zealand (Canterbury, Hawke’s Bay and Waikato). A survey was sent out to assess users’ opinion and determine the usefulness and suitability of the data for their purposes. The majority of the respondents (90%) to the survey agreed that the data is useful for their organisation. Many commented that the data is better than existing data, it is fit for purpose, and has become invaluable when enriched with other datasets. LINZ will continue to procure building outlines aligning with aerial imagery capture. This building outline dataset will provide a foundation for various stakeholders to map risk modelling, environmental assessment, urban development, resilience planning in addition to the visualization and physical location of buildings.
-Over the next decade, the LINZ Topography Team is working towards its vision of recognising the way location information can help unlock new patterns and knowledge, particularly when it is combined with other types of information. One of our `strategic goals <https://www.linz.govt.nz/about-linz/publications/strategy/topographic-strategy-2015>`_ is to improve national scale datasets and maximize their opportunities for reuse by a variety of national and regional stakeholders.
 
 The current Topo50 data for buildings is represented by either a `building polygon <https://data.linz.govt.nz/layer/50246-nz-building-polygons-topo-150k/>`_ or a `building point <https://data.linz.govt.nz/layer/50245-nz-building-points-topo-150k/>`_ . A building polygon is used to represent a structure that is large enough to be captured at 1:50,000 scale and has an area of 625m² or greater. The central business districts of large towns and cities is held in the LINZ building data as large building polygons. It is shown on the 1:50,000 scale printed maps as black fill, and is a generalized view, not showing individual buildings, or open spaces between buildings. A building point is used to represent a building with an area too small to be captured as a polygon feature at 1:50,000 scale.
 
@@ -37,7 +36,7 @@ This dataset includes the spatial coverage of building outlines using remotely s
 
 Building outlines data are defined by the following criteria:
 
-   The details and criteria used to capture building outlines is listed in the `Specification for Building Outlines version 2 <../_static/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`_. Some of the older areas of capture were based on earlier versions of this specification.
+   The details and criteria used to capture building outlines is listed in the `Specification for Building Outlines version 2 <.._static/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`_. Some of the older areas of capture were based on earlier versions of this specification.
 
 
    * Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
