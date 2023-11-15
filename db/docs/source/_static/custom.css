@@ -1,18 +1,18 @@
 tr {
-    background-color: hsla(205, 46%, 86%, 0.41);
+   background-color: hsla(205, 46%, 86%, 0.41);
 }
 
 th {
-    background-color: #bbbbbb;
-    color: #ffffff;
+   background-color: #bbbbbb;
+   color: #ffffff;
 }
 
 
 .wy-nav-content {
-	padding: 1.618em 3.236em;
-    height: 100%;
-    max-width: 100%;
-    margin: auto;
+   padding: 1.618em 3.236em;
+   height: 100%;
+   max-width: none;
+   margin: auto;
 
 }
 
@@ -31,5 +31,5 @@ th {
 }
 
 div.section p {
-	font-size: 100%;
+   font-size: 100%;
 }
