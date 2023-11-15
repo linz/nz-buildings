@@ -36,7 +36,7 @@ This dataset includes the spatial coverage of building outlines using remotely s
 
 Building outlines data are defined by the following criteria:
 
-   The details and criteria used to capture building outlines is listed in the `Specification for Building Outlines version 2 <.._static/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`_. Some of the older areas of capture were based on earlier versions of this specification.
+   The details and criteria used to capture building outlines is listed in the `Specification for Building Outlines version 2 <_static/Specification_for_Building_Outlines_V2.0_March_2023.pdf>`_. Some of the older areas of capture were based on earlier versions of this specification.
 
 
    * Buildings under construction, caravans, trailers, house boats, shipping containers and other mobile structures are not captured as building outlines.
