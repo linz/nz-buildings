@@ -11,7 +11,7 @@ th {
 .wy-nav-content {
    padding: 1.618em 3.236em;
    height: 100%;
-   max-width: none;
+   max-width: 2000px !important;
    margin: auto;
 
 }
