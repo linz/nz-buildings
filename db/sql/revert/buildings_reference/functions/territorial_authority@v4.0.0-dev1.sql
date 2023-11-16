@@ -150,9 +150,13 @@ $$
               name = ata.name
             , shape = ST_SetSRID(ST_Transform(ata.shape, 2193), 2193)
         FROM admin_bdys.territorial_authority ata
-        WHERE bta.external_territorial_authority_id = ata.ogc_fid
-        AND (NOT ST_Equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
-            OR bta.name != ata.name)
+        WHERE bta.external_territorial_authority_id IN (
+            SELECT ogc_fid
+            FROM admin_bdys.territorial_authority ata
+            JOIN buildings_reference.territorial_authority bta ON ogc_fid = external_territorial_authority_id
+            WHERE (   NOT ST_Equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
+                   OR bta.name != ata.name)
+        )
         RETURNING *
     )
     SELECT ARRAY (

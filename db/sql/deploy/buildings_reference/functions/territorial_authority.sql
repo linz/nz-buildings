@@ -40,14 +40,41 @@ CREATE OR REPLACE FUNCTION buildings_reference.territorial_authority_grid_inters
 )
 RETURNS integer AS
 $$
+    -- Precaculate which (and how many) terrtorial_authority_grid geometries
+    -- the input geometry intersects with
+    WITH intersecting_territorial_authority_grids AS (
+        SELECT territorial_authority_id, shape
+        FROM buildings_reference.territorial_authority_grid
+        WHERE ST_Intersects(p_polygon_geometry, shape)
+    ), intersecting_territorial_authority_grids_count AS (
+        SELECT COUNT(*) AS num_territorial_authority_grids FROM intersecting_territorial_authority_grids
+    )
 
-    SELECT territorial_authority_id
-    FROM buildings_reference.territorial_authority_grid
-    WHERE ST_DWithin(p_polygon_geometry, shape, 1000)
-    ORDER BY
-          ST_Area(ST_Intersection(p_polygon_geometry, shape)) / ST_Area(shape) DESC
-        , ST_Distance(p_polygon_geometry, shape) ASC
-    LIMIT 1;
+    SELECT
+    -- If the input geometry does not intersect directly with any
+    -- territorial_authority_grid geometries, return the closest
+    -- territorial_authority_grid
+    CASE WHEN intersecting_territorial_authority_grids_count.num_territorial_authority_grids = 0 THEN (
+        SELECT territorial_authority_id FROM buildings_reference.territorial_authority_grid
+        WHERE ST_DWithin(p_polygon_geometry, shape, 1000)
+        ORDER BY ST_Distance(p_polygon_geometry, shape) ASC
+        LIMIT 1
+    )
+    -- If the input geometry intersects with exactly one
+    -- territorial_authority_grid geometry, return that
+    WHEN intersecting_territorial_authority_grids_count.num_territorial_authority_grids = 1 THEN (
+        SELECT territorial_authority_id FROM intersecting_territorial_authority_grids LIMIT 1
+    )
+    -- If the input geometry intersects with more than one
+    -- territorial_authority_grid geometry, return the
+    -- territorial_authority_grid with the largest overlap
+    ELSE (
+        SELECT territorial_authority_id FROM intersecting_territorial_authority_grids
+        ORDER BY ST_Area(ST_Intersection(p_polygon_geometry, shape)) DESC
+        LIMIT 1
+    ) 
+    END AS territorial_authority_id
+    FROM intersecting_territorial_authority_grids_count;
 
 $$
 LANGUAGE sql VOLATILE;
