@@ -28,7 +28,6 @@ This dataset consists of the most recent set of building outlines extracted from
 This dataset includes the spatial coverage of building outlines using remotely sensed information. A building outline is a 2D representation of the roof outline of buildings which have been classified from aerial imagery using a combination of automated and manual processes to extract and orthogonalise building roof outlines. Structures greater than or equal to 10 square meters are captured in this dataset, with exception in National Parks, Conservation Areas, and Wildlife Areas. Each building polygon represents a building outline and this may include spaces such as garages and large sheds. The building outlines represented in this dataset should not be confused with *building footprints*, which are 2D representations of where a building touches the ground.
 
 .. figure:: _static/footprint.png
-   :scale: 100 %
    :alt: comparison of footprint with building outlines
 
    Image 1. Example of a building outline versus a building footprint.
@@ -58,7 +57,6 @@ The details and criteria used to capture building outlines is listed in the `Spe
 
 
 .. figure:: _static/examples.png
-   :scale: 70%
    :alt: Examples of building outlines
 
    Image 2. Examples of building outlines. (a) An example of a home and garage as separate outlines. (b) An example of a tank outline which is greater than the 5 meter diameter threshold. In this case the diameter shown in red is 7.2 meters. (c) An example of an adjoining commercial building outlines. (d) An example of a small remote hut located in a conservation area.
