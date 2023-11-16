@@ -86,7 +86,6 @@ The attributes ``name`` and ``use`` provide the building name and use for the fo
 
 
 .. figure:: _static/name_use.png
-   :scale: 30%
    :alt: Examples of NZ Facilities
 
    Image 3. Example of building outlines centroid intersection of NZ Facilities polygons
@@ -101,7 +100,6 @@ The attributed name may refer to suburbs, localities, islands and parks / reserv
 If a building outline intersects two localities, the locality with larger area of intersection is used for that feature.
 
 .. figure:: _static/locality_larger_area.png
-   :scale: 70%
    :alt: Examples of locality
 
    Image 4. Example of a building outline intersecting two localities.
@@ -109,7 +107,6 @@ If a building outline intersects two localities, the locality with larger area o
 For building outlines on water and not within any locality, the nearest locality is used for that feature.
 
 .. figure:: _static/locality_nearest.png
-   :scale: 70%
    :alt: Examples of locality
 
    Image 5. Examples of building outlines not within any locality.
