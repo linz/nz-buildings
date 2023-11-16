@@ -20,6 +20,10 @@ div.body {
    width: 100%;
 }
 
+body {
+   width: 100%;
+}
+
 div.section p {
    font-size: 100%;
 }
