@@ -215,6 +215,7 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         self.rad_external_id.setEnabled(1)
         self.rad_external_id.setChecked(False)
         self.fcb_external_id.setDisabled(1)
+        self.fcb_external_id.setLayer(None)
         self.cmb_capture_src_grp.setEnabled(1)
         self.cmb_capture_src_grp.setCurrentIndex(0)
         self.cmb_cap_src_area.setEnabled(1)
@@ -680,4 +681,3 @@ class BulkLoadFrame(QFrame, FORM_CLASS):
         """To ensure QGIS has most up to date ID for the newly split feature see #349"""
         self.cb_added_clicked(False)
         self.cb_added_clicked(True)
- 
