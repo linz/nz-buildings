@@ -2,12 +2,6 @@
 
 BEGIN;
 
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_insert_new_areas();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_suburb_locality();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_delete_removed_areas();
-DROP FUNCTION IF EXISTS buildings.building_outlines_update_suburb(integer[]);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[]);
-
 -- building_outlines_update_changed_and_deleted_suburb (replace suburb values with the intersection result)
     -- params: 
     -- return: integer count of number of building outlines updated
@@ -38,10 +32,7 @@ BEGIN
     -- Update the changed suburbs
     UPDATE buildings_reference.suburb_locality bsl
     SET
-      suburb_4th = nzl.suburb_4th,
-      suburb_3rd = nzl.suburb_3rd,
-      suburb_2nd = nzl.suburb_2nd,
-      suburb_1st = nzl.suburb_1st,
+      name = COALESCE(nzl.suburb_4th, nzl.suburb_3rd, nzl.suburb_2nd, nzl.suburb_1st),
       shape = ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193)
     FROM
       admin_bdys.nz_locality nzl
@@ -49,10 +40,7 @@ BEGIN
       bsl.external_suburb_locality_id = nzl.id
     AND (
       NOT ST_Equals(ST_SetSRID(ST_Transform(nzl.shape, 2193), 2193), bsl.shape)
-      OR nzl.suburb_4th != bsl.suburb_4th
-      OR nzl.suburb_3rd != bsl.suburb_3rd
-      OR nzl.suburb_2nd != bsl.suburb_2nd
-      OR nzl.suburb_1st != bsl.suburb_1st
+      OR bsl.name != COALESCE(nzl.suburb_4th, nzl.suburb_3rd, nzl.suburb_2nd, nzl.suburb_1st)
     );
 
     -- Remove deleted suburbs
@@ -104,25 +92,17 @@ BEGIN
     CREATE TEMP TABLE added_suburbs (
     suburb_locality_id integer
     , external_suburb_locality_id integer
-    , suburb_4th character varying(60)
-    , suburb_3rd character varying(60)
-    , suburb_2nd character varying(60)
-    , suburb_1st character varying(60)
+    , name character varying(60)
     , shape public.geometry(MultiPolygon, 2193)
   );
 
     WITH add_new_suburbs AS (
       INSERT INTO buildings_reference.suburb_locality (
-      external_suburb_locality_id, suburb_4th,
-      suburb_3rd, suburb_2nd, suburb_1st,
-      shape
+      external_suburb_locality_id, name, shape
       )
       SELECT
       id,
-      suburb_4th,
-      suburb_3rd,
-      suburb_2nd,
-      suburb_1st,
+      COALESCE(suburb_4th, suburb_3rd, suburb_2nd, suburb_1st),
       ST_Transform(shape, 2193)
       FROM 
       admin_bdys.nz_locality
