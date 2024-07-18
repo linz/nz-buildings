@@ -97,3 +97,5 @@ buildings_bulk_load/functions/load_to_production [buildings_bulk_load/functions/
 
 buildings_reference/update_suburb_locality_name_column 2024-07-18T03:44:07Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column to match NZ Suburbs and Localities
 buildings_reference/functions/suburb_locality_optimised [buildings_reference/functions/suburb_locality_optimised@v4.0.0-dev1] 2024-07-18T05:10:43Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name fields in functions
+buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v4.0.0-dev1] 2024-07-18T05:45:55Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column in populate_buildings_lds function
+buildings_reference/remove_suburb_locality_old_name_column 2024-07-18T06:26:12Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ

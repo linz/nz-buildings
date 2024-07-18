@@ -31,7 +31,7 @@ $$
               buildings.building_id
             , COALESCE(building_name.building_name, '') AS name
             , COALESCE(use.value, 'Unknown') AS use
-            , COALESCE(suburb_locality.suburb_4th, suburb_locality.suburb_3rd, suburb_locality.suburb_2nd, suburb_locality.suburb_1st) AS suburb_locality
+            , suburb_locality.name AS suburb_locality
             , COALESCE(town_city.name, '') AS town_city
             , territorial_authority.name AS territorial_authority
             , capture_method.value AS capture_method
@@ -147,7 +147,7 @@ $$
             , buildings.building_id
             , COALESCE(building_name.building_name, '') AS name
             , COALESCE(use.value, 'Unknown') AS use
-            , COALESCE(suburb_locality.suburb_4th, suburb_locality.suburb_3rd, suburb_locality.suburb_2nd, suburb_locality.suburb_1st) AS suburb_locality
+            , suburb_locality.name AS suburb_locality
             , COALESCE(town_city.name, '') AS town_city
             , territorial_authority.name AS territorial_authority
             , capture_method.value AS capture_method
