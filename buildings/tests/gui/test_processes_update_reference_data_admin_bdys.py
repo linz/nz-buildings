@@ -93,7 +93,7 @@ class SetUpReferenceData(unittest.TestCase):
     #     count_added = result.fetchone()[0]
     #     self.assertEqual(count_added, 1)
     #     # updated suburb locality
-    #     sql_updated = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 101;"
+    #     sql_updated = "SELECT name FROM buildings_reference.suburb_locality WHERE external_suburb_locality_id = 101;"
     #     result = db._execute(sql_updated)
     #     name_updated = result.fetchone()[0]
     #     self.assertEqual(name_updated, "Kelburn North")
