@@ -117,7 +117,7 @@ BEGIN
     )
 
     INSERT INTO added_suburbs
-    SELECT *
+    SELECT suburb_locality_id, external_suburb_locality_id, name, shape
     FROM add_new_suburbs;
 
     -- update building outline suburb locality Id and last modified date where:
