@@ -15,9 +15,9 @@ Buildings Reference Select Statements
 
 - suburb_locality
     - suburb_locality_intersect_geom (geometry)
-    - suburb_locality_suburb_4th
-    - suburb_locality_suburb_4th_by_building_outline_id (building_outline_id)
-    - suburb_locality_suburb_4th_by_bulk_outline_id (bulk_load_outline_id)
+    - suburb_locality_name
+    - suburb_locality_name_by_building_outline_id (building_outline_id)
+    - suburb_locality_name_by_bulk_outline_id (bulk_load_outline_id)
 
 - territorial_authority
     - territorial_authority_intersect_geom (geometry)
@@ -97,27 +97,27 @@ WHERE external_{0}_points_id = %s;
 # suburb locality
 
 suburb_locality_intersect_geom = """
-SELECT suburb_locality_id, suburb_4th
+SELECT suburb_locality_id, name
 FROM buildings_reference.suburb_locality
 WHERE shape && ST_Expand(%s::Geometry, 1000)
-ORDER BY suburb_4th;
+ORDER BY name;
 """
 
-suburb_locality_suburb_4th = """
-SELECT DISTINCT suburb_4th
+suburb_locality_name = """
+SELECT DISTINCT name
 FROM buildings_reference.suburb_locality;
 """
 
-suburb_locality_suburb_4th_by_building_outline_id = """
-SELECT suburb_4th
+suburb_locality_name_by_building_outline_id = """
+SELECT name
 FROM buildings_reference.suburb_locality sl,
      buildings.building_outlines bo
 WHERE sl.suburb_locality_id = bo.suburb_locality_id
 AND bo.building_outline_id = %s;
 """
 
-suburb_locality_suburb_4th_by_bulk_outline_id = """
-SELECT suburb_4th
+suburb_locality_name_by_bulk_outline_id = """
+SELECT name
 FROM buildings_reference.suburb_locality sl,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE sl.suburb_locality_id = blo.suburb_locality_id

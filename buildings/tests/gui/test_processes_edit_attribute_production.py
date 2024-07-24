@@ -203,7 +203,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         capture_method = capture_method.fetchall()[0][0]
         self.assertEqual("Unknown", capture_method)
         # suburb
-        sql = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+        sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
         suburb = db._execute(sql, (result[2],))
         suburb = suburb.fetchall()[0][0]
         self.assertEqual("Hokowhitu", suburb)
@@ -311,7 +311,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
             capture_method = capture_method.fetchall()[0][0]
             self.assertEqual("Unknown", capture_method)
             # suburb
-            sql = "SELECT suburb_4th FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+            sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
             suburb = db._execute(sql, (result[2],))
             suburb = suburb.fetchall()[0][0]
             self.assertEqual("Hokowhitu", suburb)
