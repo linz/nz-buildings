@@ -708,7 +708,7 @@ class EditAttribute(ProductionChanges):
 
         # suburb
         result = self.edit_dialog.db.execute_return(
-            reference_select.suburb_locality_suburb_4th_by_building_outline_id, (self.edit_dialog.building_outline_id,)
+            reference_select.suburb_locality_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
         result = result.fetchall()[0][0]
         self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText(result))

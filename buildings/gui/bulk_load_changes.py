@@ -735,7 +735,7 @@ class EditAttribute(BulkLoadChanges):
 
         # suburb
         result = self.edit_dialog.db.execute_return(
-            reference_select.suburb_locality_suburb_4th_by_bulk_outline_id,
+            reference_select.suburb_locality_name_by_bulk_outline_id,
             (self.edit_dialog.bulk_load_outline_id,),
         )
         result = result.fetchall()[0][0]
