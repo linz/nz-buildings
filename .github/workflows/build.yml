@@ -26,7 +26,7 @@ jobs:
       - name: Launch database container
         run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
       - name: Print docker logs
-        uses: jwalton/gh-docker-logs@v1
+        uses: jwalton/gh-docker-logs@v2
       - name: Load additional schemas
         run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
       - name: Sqitch deploy and verify
@@ -70,7 +70,7 @@ jobs:
       - name: Launch database container
         run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
       - name: Print docker logs
-        uses: jwalton/gh-docker-logs@v1
+        uses: jwalton/gh-docker-logs@v2
       - name: Load additional schemas
         run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
       - name: Sqitch deploy
