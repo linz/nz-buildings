@@ -31,9 +31,9 @@ $$
               buildings.building_id
             , COALESCE(building_name.building_name, '') AS name
             , COALESCE(use.value, 'Unknown') AS use
-            , suburb_locality.name AS suburb_locality
-            , COALESCE(town_city.name, '') AS town_city
-            , territorial_authority.name AS territorial_authority
+            , suburb_locality.suburb_locality AS suburb_locality
+            , COALESCE(suburb_locality.town_city, '') AS town_city
+            , COALESCE(territorial_authority.name, 'Area Outside Territorial Authority') AS territorial_authority
             , capture_method.value AS capture_method
             , capture_source_group.value AS capture_source_group
             , LEFT(capture_source.external_source_id, 4)::integer AS capture_source_id
@@ -55,8 +55,7 @@ $$
         JOIN buildings_reference.nz_imagery_survey_index ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_survey_index.imagery_survey_id
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
-        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
+        LEFT JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         WHERE building_outlines.end_lifespan IS NULL
         AND buildings.end_lifespan IS NULL
         ORDER BY buildings.building_id
@@ -147,9 +146,9 @@ $$
             , buildings.building_id
             , COALESCE(building_name.building_name, '') AS name
             , COALESCE(use.value, 'Unknown') AS use
-            , suburb_locality.name AS suburb_locality
-            , COALESCE(town_city.name, '') AS town_city
-            , territorial_authority.name AS territorial_authority
+            , suburb_locality.suburb_locality AS suburb_locality
+            , COALESCE(suburb_locality.town_city, '') AS town_city
+            , COALESCE(territorial_authority.name, 'Area Outside Territorial Authority') AS territorial_authority
             , capture_method.value AS capture_method
             , capture_source_group.value AS capture_source_group
             , LEFT(capture_source.external_source_id, 4)::integer AS capture_source_id
@@ -174,8 +173,7 @@ $$
         JOIN buildings_reference.nz_imagery_survey_index ON LEFT(capture_source.external_source_id, 4)::integer = nz_imagery_survey_index.imagery_survey_id
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
-        LEFT JOIN buildings_reference.town_city ON town_city.town_city_id = building_outlines.town_city_id
-        JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
+        LEFT JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
         LEFT JOIN deleted_in_production USING (building_outline_id)
         LEFT JOIN building_outline_lifecycle USING (building_outline_id)
         ORDER BY building_outlines.building_outline_id

@@ -16,9 +16,9 @@ BEGIN
     PERFORM proname, proargnames, prosrc 
     FROM pg_proc
     WHERE proname = 'nz_building_outlines_insert'
-    AND prosrc LIKE '%suburb_locality.name%';
+    AND prosrc LIKE '%suburb_locality.suburb_locality%';
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'suburb_locality name not found.';
+        RAISE EXCEPTION 'suburb_locality column not found.';
     END IF;
 
 END $$;
@@ -28,9 +28,9 @@ BEGIN
     PERFORM proname, proargnames, prosrc 
     FROM pg_proc
     WHERE proname = 'nz_building_outlines_all_sources_insert'
-    AND prosrc LIKE '%suburb_locality.name%';
+    AND prosrc LIKE '%suburb_locality.suburb_locality%';
     IF NOT FOUND THEN
-        RAISE EXCEPTION 'suburb_locality name not found.';
+        RAISE EXCEPTION 'suburb_locality column not found.';
     END IF;
 END $$;
 
