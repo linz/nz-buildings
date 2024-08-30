@@ -4,4 +4,17 @@ BEGIN;
 
 SELECT has_function_privilege('buildings_reference.reference_update_log_insert_log(varchar[])', 'execute');
 
+DO $$
+BEGIN
+
+    PERFORM proname, proargnames, prosrc 
+    FROM pg_proc
+    WHERE proname = 'reference_update_log_insert_log'
+    AND prosrc LIKE '%town_city%';
+    IF FOUND THEN
+        RAISE EXCEPTION 'town_city found, should have been removed.';
+    END IF;
+
+END $$;
+
 ROLLBACK;

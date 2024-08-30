@@ -105,5 +105,6 @@ buildings/remove_building_outlines_town_city_id_column 2024-08-14T03:50:02Z Ying
 buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/bulk_load_outlines@v4.0.0-dev1] 2024-08-14T04:27:25Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in funct\nions.
 buildings_bulk_load/remove_bulk_load_outlines_town_city_id_column 2024-08-14T04:32:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in bulk_load_outlines table
 buildings_reference/functions/town_city [buildings_reference/functions/town_city@v4.0.0-dev1] 2024-08-14T04:35:22Z Yingting Chen <ychen@linz.govt.nz> # Remove functions of town_city table.
+buildings_reference/functions/reference_update_log [buildings_reference/functions/reference_update_log@v4.0.0-dev1] 2024-08-14T04:38:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city in reference_update_log update function.
 buildings_reference/remove_suburb_locality_old_name_column 2024-08-14T04:40:22Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ
 buildings_reference/drop_town_city 2024-08-14T04:45:02Z Yingting Chen <ychen@linz.govt.nz> # Drop table town_city as it has been merged into suburb_locality.
