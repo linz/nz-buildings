@@ -2,12 +2,6 @@
 
 BEGIN;
 
-
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_insert(integer, integer, integer, integer, integer, integer, integer, integer, geometry);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_town_city(integer);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_town_cities(integer[]);
-
 --------------------------------------------
 -- buildings_bulk_load.bulk_load_outlines
 
@@ -17,7 +11,7 @@ DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_town_c
     -- params: integer supplied_dataset_id, integer external_outline_id
             -- integer external_outline_id, integer bulk_load_status_id
             -- integer capture_method_id, integer suburb_locality_id
-            -- integer territorial_authority_id,
+            -- integer town_city_id, integer territorial_authority_id,
             -- geometry shape
     -- return: integer new bulk_load_outline_id
 
@@ -33,7 +27,7 @@ DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_town_c
 -- bulk_load_outlines_update_attributes (update the attributes of an outlines)
     -- params: integer bulk_load_outline_id, integer bulk_load_status_id, integer
             -- capture_method_id, integer capture_source_id, integer suburb_locality_id
-            -- integer territorial_authority_id, geometry shape
+            -- integer town_city_id, integer territorial_authority_id, geometry shape
     -- return: count of number of outlines updated
 
 -- bulk_load_outlines_update_bulk_load_status (Update bulk load status in bulk_load_outlines table)
@@ -52,12 +46,24 @@ DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_town_c
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of building outlines updated
 
+-- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: count(integer) number of building outlines updated
+
 -- bulk_load_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
 
 -- bulk_load_outlines_update_all_territorial_authorities (Replace the TA values with the intersection result)
     -- params: integer[] list of territorial_authorities buildings must be within
+    -- return: count(integer) number of outlines updated
+
+-- bulk_load_outlines_update_town_city (Replace the town/city values with the intersection)
+    -- params: integer supplied_dataset_id
+    -- return: count(integer) number of outlines updated
+
+-- bulk_load_outlines_update_all_town_cities (Replace the town/city values with the intersection)
+    -- params: integer[] list of town_city_ids building must be within
     -- return: count(integer) number of outlines updated
 
 --------------------------------------------
@@ -68,7 +74,7 @@ DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_town_c
     -- params: integer supplied_dataset_id, integer external_outline_id
             -- integer external_outline_id, integer bulk_load_status_id
             -- integer capture_method_id, integer suburb_locality_id
-            -- integer territorial_authority_id
+            -- integer town_city_id, integer territorial_authority_id
             -- geometry shape
     -- return: integer new bulk_load_outline_id
 
@@ -79,6 +85,7 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_insert(
     , p_capture_method_id integer
     , p_capture_source_id integer
     , p_suburb_locality_id integer
+    , p_town_city_id integer
     , p_territorial_authority_id integer
     , p_shape geometry
 )
@@ -93,6 +100,7 @@ $$
         , capture_method_id
         , capture_source_id
         , suburb_locality_id
+        , town_city_id
         , territorial_authority_id
         , begin_lifespan
         , shape
@@ -105,6 +113,7 @@ $$
         , p_capture_method_id
         , p_capture_source_id
         , p_suburb_locality_id
+        , p_town_city_id
         , p_territorial_authority_id
         , now()
         , p_shape
@@ -114,7 +123,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_insert(integer, integer, integer, integer, integer, integer, integer, geometry) IS
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_insert(integer, integer, integer, integer, integer, integer, integer, integer, geometry) IS
 'Insert new bulk load outline';
 
 -- bulk_load_outlines_insert_supplied (insert supplied outlines into bulk_load_outlines)
@@ -139,6 +148,7 @@ $$
             , capture_method_id
             , capture_source_id
             , suburb_locality_id
+            , town_city_id
             , territorial_authority_id
             , begin_lifespan
             , shape
@@ -150,6 +160,7 @@ $$
             , p_capture_method_id
             , p_capture_source_id
             , buildings_reference.suburb_locality_intersect_polygon(shape)
+            , buildings_reference.town_city_intersect_polygon(shape)
             , buildings_reference.territorial_authority_grid_intersect_polygon(shape)
             , now()
             , shape
@@ -196,7 +207,7 @@ COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_remove_small_building
 -- bulk_load_outlines_update_attributes (update the attributes of an outlines)
     -- params: integer bulk_load_outline_id, integer bulk_load_status_id, integer
             -- capture_method_id, integer capture_source_id, integer suburb_locality_id
-            -- integer territorial_authority_id, geometry shape
+            -- integer town_city_id, integer territorial_authority_id, geometry shape
     -- return: count of number of outlines updated
 
 CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(
@@ -205,6 +216,7 @@ CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_attribu
     , p_capture_method_id integer
     , p_capture_source_id integer
     , p_suburb_locality_id integer
+    , p_town_city_id integer
     , p_territorial_authority_id integer
 )
 RETURNS integer AS
@@ -217,7 +229,8 @@ $$
             , capture_method_id = $3
             , capture_source_id = $4
             , suburb_locality_id = $5
-            , territorial_authority_id = $6
+            , town_city_id = $6
+            , territorial_authority_id = $7
         WHERE bulk_load_outline_id = $1
         RETURNING *
     )
@@ -226,7 +239,7 @@ $$
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer) IS
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_attributes(integer, integer, integer, integer, integer, integer, integer) IS
 'Update attributes in bulk_load_outlines table';
 
 -- bulk_load_outlines_update_bulk_load_status (Update bulk load status in bulk_load_outlines table)
@@ -330,6 +343,35 @@ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_suburb(integer) IS
 'Replace suburb values with the intersection result of buildings from a supplied dataset in the bulk_load_outlines table';
 
+-- bulk_load_outlines_update_all_suburbs (replace all suburb values with the intersection result)
+    -- params: integer[] list of suburb localities building must be within
+    -- return: count(integer) number of building outlines updated
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_suburb AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.suburb_locality_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) suburb_locality_intersect
+        WHERE outlines.bulk_load_outline_id = suburb_locality_intersect.bulk_load_outline_id
+        AND suburb_locality_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_suburb;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[]) IS
+'Replace suburb values with the intersection result of all buildings in the bulk_load_outlines table';
+
 -- bulk_load_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer supplied_dataset_id
     -- return: count(integer) number of outlines updated
@@ -387,5 +429,63 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_territorial_authorities(integer[]) IS
 'Replace the TA values with the intersection result for all buildings in bulk_load_outlines';
+
+-- bulk_load_outlines_update_town_city (Replace the town/city values with the intersection)
+    -- params: integer supplied_dataset_id
+    -- return: count(integer) number of outlines updated
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_town_city(integer)
+RETURNS integer AS
+$$
+
+    WITH update_town_city AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET town_city_id = town_city_intersect.town_city_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.town_city_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) town_city_intersect
+        WHERE outlines.bulk_load_outline_id = town_city_intersect.bulk_load_outline_id
+        AND outlines.supplied_dataset_id = $1
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_town_city;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_town_city(integer) IS
+'Replace the town/city values with the intersection results for a supplied bulk loaded dataset';
+
+-- bulk_load_outlines_update_all_town_cities (Replace the town/city values with the intersection)
+    -- params: integer[] list of town_city_ids building must be within
+    -- return: count(integer) number of outlines updated
+
+CREATE OR REPLACE FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_town_cities(integer[])
+RETURNS integer AS
+$$
+
+    WITH update_town_city AS (
+        UPDATE buildings_bulk_load.bulk_load_outlines outlines
+        SET town_city_id = town_city_intersect.town_city_intersect_polygon
+        FROM (
+            SELECT
+                  buildings_reference.town_city_intersect_polygon(outlines.shape)
+                , outlines.bulk_load_outline_id
+            FROM buildings_bulk_load.bulk_load_outlines outlines
+        ) town_city_intersect
+        WHERE outlines.bulk_load_outline_id = town_city_intersect.bulk_load_outline_id
+        AND town_city_id = ANY($1)
+        RETURNING *
+    )
+    SELECT count(*)::integer FROM update_town_city;
+
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_bulk_load.bulk_load_outlines_update_all_town_cities(integer[]) IS
+'Replace the town/city values with the intersection result for all buildings in buildings_bulk_load.bulk_load_outlines';
 
 COMMIT;

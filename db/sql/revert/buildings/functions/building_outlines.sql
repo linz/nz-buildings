@@ -1,6 +1,9 @@
--- Revert nz-buildings:buildings/functions/building_outlines to pg
+-- Deploy nz-buildings:buildings/functions/building_outlines to pg
 
 BEGIN;
+
+DROP FUNCTION IF EXISTS buildings.building_outlines_insert(integer, integer, integer, integer, integer, integer, geometry);
+DROP FUNCTION IF EXISTS buildings.building_outlines_update_attributes(integer, integer, integer, integer, integer, integer);
 
 --------------------------------------------
 -- buildings.building_outlines
@@ -41,10 +44,6 @@ BEGIN;
 -- building outlines_update_shape (update the geometry of specified outline)
     -- params: shape to update to geometry, integer building_outline_id
     --return: number of outlines updated (should only be one)
-
--- building_outlines_update_suburb (replace suburb values with the intersection result)
-    -- params: integer[] list of suburb localities building must be within
-    -- return: integer count of number of building outlines updated
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer[] list of territorial_authorities buildings must be within
@@ -292,35 +291,6 @@ LANGUAGE sql VOLATILE;
 
 COMMENT ON FUNCTION buildings.building_outlines_update_shape(geometry, integer) IS
 'Update shape in building_outlines table';
-
--- building_outlines_update_suburb (replace suburb values with the intersection result)
-    -- params: integer[] list of suburb localities building must be within
-    -- return: integer count of number of building outlines updated
-
-CREATE OR REPLACE FUNCTION buildings.building_outlines_update_suburb(integer[])
-RETURNS integer AS
-$$
-
-    WITH update_suburb AS (
-        UPDATE buildings.building_outlines outlines
-        SET suburb_locality_id = suburb_locality_intersect.suburb_locality_intersect_polygon
-        FROM (
-            SELECT
-                  buildings_reference.suburb_locality_intersect_polygon(outlines.shape)
-                , outlines.building_outline_id
-            FROM buildings.building_outlines outlines
-        ) suburb_locality_intersect
-        WHERE outlines.building_outline_id = suburb_locality_intersect.building_outline_id
-        AND suburb_locality_id = ANY($1)
-        RETURNING *
-    )
-    SELECT count(*)::integer FROM update_suburb;
-
-$$
-LANGUAGE sql VOLATILE;
-
-COMMENT ON FUNCTION buildings.building_outlines_update_suburb(integer[]) IS
-'Replace suburb values with the intersection result of buildings in the building_outlines table';
 
 -- building_outlines_update_territorial_authority (Replace the TA values with the intersection result)
     -- params: integer[] list of territorial_authorities buildings must be within

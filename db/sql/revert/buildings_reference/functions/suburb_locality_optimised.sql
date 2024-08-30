@@ -2,12 +2,6 @@
 
 BEGIN;
 
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_insert_new_areas();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_suburb_locality();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_delete_removed_areas();
-DROP FUNCTION IF EXISTS buildings.building_outlines_update_suburb(integer[]);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[]);
-
 -- building_outlines_update_changed_and_deleted_suburb (replace suburb values with the intersection result)
     -- params: 
     -- return: integer count of number of building outlines updated

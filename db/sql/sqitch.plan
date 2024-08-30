@@ -100,6 +100,10 @@ buildings_reference/functions/suburb_locality_optimised [buildings_reference/fun
 buildings/remove_building_outlines_ta_not_null_constraint 2024-08-07T02:50:08Z Yingting Chen <ychen@linz.govt.nz> # Remove NOT NULL constraint for territorial_authority_id column in building_outlines table.
 buildings_bulk_load/remove_bulk_load_outlines_ta_not_null_constraint 2024-08-07T02:51:28Z Yingting Chen <ychen@linz.govt.nz> # Remove NOT NULL constraint for territorial_authority_id column in bulk_load_outlines table.
 buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v4.0.0-dev1] 2024-08-14T03:45:12Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column in populate_buildings_lds function
+buildings/functions/building_outlines [buildings/functions/building_outlines@v4.0.0-dev1] 2024-08-14T03:47:12Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in functions.
+buildings/remove_building_outlines_town_city_id_column 2024-08-14T03:50:02Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in building_outlines table
+buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/bulk_load_outlines@v4.0.0-dev1] 2024-08-14T04:27:25Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in funct\nions.
+buildings_bulk_load/remove_bulk_load_outlines_town_city_id_column 2024-08-14T04:32:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in bulk_load_outlines table
 buildings_reference/functions/town_city [buildings_reference/functions/town_city@v4.0.0-dev1] 2024-08-14T04:35:22Z Yingting Chen <ychen@linz.govt.nz> # Remove functions of town_city table.
 buildings_reference/remove_suburb_locality_old_name_column 2024-08-14T04:40:22Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ
 buildings_reference/drop_town_city 2024-08-14T04:45:02Z Yingting Chen <ychen@linz.govt.nz> # Drop table town_city as it has been merged into suburb_locality.
