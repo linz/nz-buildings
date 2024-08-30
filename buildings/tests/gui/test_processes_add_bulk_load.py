@@ -83,7 +83,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
         self.assertEquals(self.edit_dialog.cmb_capture_source.currentText(), "1- Imagery One- NZ Aerial Imagery")
@@ -117,7 +117,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
@@ -149,7 +149,7 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
@@ -157,7 +157,6 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_capture_method.setCurrentIndex(1)
         self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
         self.edit_dialog.cmb_ta.setCurrentIndex(1)
-        self.edit_dialog.cmb_town.setCurrentIndex(0)
         self.edit_dialog.cmb_suburb.setCurrentIndex(1)
         # click reset button
         self.edit_dialog.btn_edit_reset.click()
@@ -211,13 +210,12 @@ class ProcessBulkAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEquals(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
         # change indexes of comboboxes
         self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
         self.edit_dialog.cmb_ta.setCurrentIndex(0)
-        self.edit_dialog.cmb_town.setCurrentIndex(0)
         self.edit_dialog.cmb_suburb.setCurrentIndex(0)
         self.edit_dialog.change_instance.edit_save_clicked(False)
         sql = "SELECT COUNT(bulk_load_outline_id) FROM buildings_bulk_load.bulk_load_outlines;"

@@ -4,6 +4,7 @@ from builtins import object
 # -*- coding: utf-8 -*-\
 from collections import OrderedDict
 
+from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt.QtWidgets import QToolButton, QMessageBox
 from qgis.core import QgsFeatureRequest
 from qgis.utils import Qgis, iface
@@ -84,26 +85,16 @@ class ProductionChanges(object):
                 self.edit_dialog.cmb_ta.addItem(name)
                 self.edit_dialog.ids_ta.append(id_ta)
 
-            # populate suburb combobox
+            # populate suburb/town combobox
             result = self.edit_dialog.db.execute_return(
                 reference_select.suburb_locality_intersect_geom, (self.edit_dialog.geom,)
             )
             self.edit_dialog.ids_suburb = []
-            for (id_suburb, name) in result.fetchall():
+            for (id_suburb, suburb_locality, town_city) in result.fetchall():
                 if name is not None:
-                    self.edit_dialog.cmb_suburb.addItem(name)
+                    self.edit_dialog.cmb_suburb.addItem(suburb_locality)
+                    self.edit_dialog.cmb_town.addItem(town_city)
                     self.edit_dialog.ids_suburb.append(id_suburb)
-
-            # populate town combobox
-            result = self.edit_dialog.db.execute_return(
-                reference_select.town_city_intersect_geometry, (self.edit_dialog.geom,)
-            )
-            self.edit_dialog.cmb_town.addItem("")
-            self.edit_dialog.ids_town = [None]
-            for (id_town, name) in result.fetchall():
-                if name is not None:
-                    self.edit_dialog.cmb_town.addItem(name)
-                    self.edit_dialog.ids_town.append(id_town)
 
     def get_comboboxes_values(self):
         """Returns values in comboboxes"""
@@ -149,16 +140,12 @@ class ProductionChanges(object):
             index = self.edit_dialog.cmb_suburb.currentIndex()
             suburb = self.edit_dialog.ids_suburb[index]
 
-            # town
-            index = self.edit_dialog.cmb_town.currentIndex()
-            town = self.edit_dialog.ids_town[index]
-
             # territorial Authority
             index = self.edit_dialog.cmb_ta.currentIndex()
             t_a = self.edit_dialog.ids_ta[index]
         else:
-            capture_source_id, lifecycle_stage_id, suburb, town, t_a = (None, None, None, None, None)
-        return (capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a)
+            capture_source_id, lifecycle_stage_id, suburb, t_a = (None, None, None, None)
+        return (capture_method_id, capture_source_id, lifecycle_stage_id, suburb, t_a)
 
     def enable_UI_functions(self):
         """
@@ -173,7 +160,7 @@ class ProductionChanges(object):
         self.edit_dialog.cmb_ta.clear()
         self.edit_dialog.cmb_ta.setEnabled(1)
         self.edit_dialog.cmb_town.clear()
-        self.edit_dialog.cmb_town.setEnabled(1)
+        self.edit_dialog.cmb_town.setEnabled(0)
         self.edit_dialog.cmb_suburb.clear()
         self.edit_dialog.cmb_suburb.setEnabled(1)
         self.edit_dialog.btn_edit_save.setEnabled(1)
@@ -247,17 +234,17 @@ class AddProduction(ProductionChanges):
         """
         self.edit_dialog.db.open_cursor()
 
-        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, t_a = self.get_comboboxes_values()
 
         # insert into buildings
         sql = "SELECT buildings.buildings_insert();"
         result = self.edit_dialog.db.execute_no_commit(sql)
         building_id = result.fetchall()[0][0]
         # insert into building_outlines table
-        sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s);"
+        sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, %s, %s, %s, %s);"
         result = self.edit_dialog.db.execute_no_commit(
             sql,
-            (building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a, self.edit_dialog.geom),
+            (building_id, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, t_a, self.edit_dialog.geom),
         )
         self.edit_dialog.outline_id = result.fetchall()[0][0]
 
@@ -434,17 +421,12 @@ class AddProduction(ProductionChanges):
         index = self.edit_dialog.ids_ta.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_ta.setCurrentIndex(index)
 
-        # town locality
-        sql = "SELECT buildings_reference.town_city_intersect_polygon(%s);"
-        result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
-        index = self.edit_dialog.ids_town.index(result.fetchall()[0][0])
-        self.edit_dialog.cmb_town.setCurrentIndex(index)
-
-        # suburb locality
+        # suburb locality / town city
         sql = "SELECT buildings_reference.suburb_locality_intersect_polygon(%s);"
         result = self.edit_dialog.db.execute_return(sql, (self.edit_dialog.geom,))
         index = self.edit_dialog.ids_suburb.index(result.fetchall()[0][0])
         self.edit_dialog.cmb_suburb.setCurrentIndex(index)
+        self.edit_dialog.cmb_town.setCurrentIndex(index)
 
 
 class EditAttribute(ProductionChanges):
@@ -487,13 +469,13 @@ class EditAttribute(ProductionChanges):
         """
         self.edit_dialog.db.open_cursor()
 
-        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a = self.get_comboboxes_values()
+        capture_method_id, capture_source_id, lifecycle_stage_id, suburb, t_a = self.get_comboboxes_values()
 
         if len(self.edit_dialog.ids) > 0:
             for i in self.edit_dialog.ids:
-                sql = "SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s, %s);"
+                sql = "SELECT buildings.building_outlines_update_attributes(%s, %s, %s, %s, %s, %s);"
                 self.edit_dialog.db.execute_no_commit(
-                    sql, (i, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, town, t_a)
+                    sql, (i, capture_method_id, capture_source_id, lifecycle_stage_id, suburb, t_a)
                 )
                 sql = "SELECT buildings.building_outlines_update_modified_date(%s);"
                 self.edit_dialog.db.execute_no_commit(sql, (i,))
@@ -647,7 +629,6 @@ class EditAttribute(ProductionChanges):
             ls.append(feature.attributes()[4])
             ls.append(feature.attributes()[5])
             ls.append(feature.attributes()[6])
-            ls.append(feature.attributes()[7])
             if ls not in feats:
                 feats.append(ls)
         # if selected features have different attributes (not allowed)
@@ -708,18 +689,12 @@ class EditAttribute(ProductionChanges):
 
         # suburb
         result = self.edit_dialog.db.execute_return(
-            reference_select.suburb_locality_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
+            reference_select.suburb_locality_town_city_by_building_outline_id, (self.edit_dialog.building_outline_id,)
         )
-        result = result.fetchall()[0][0]
-        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText(result))
-
-        # town city
-        result = self.edit_dialog.db.execute_return(
-            reference_select.town_city_name_by_building_outline_id, (self.edit_dialog.building_outline_id,)
-        )
-        result = result.fetchall()
-        if result:
-            self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText(result[0][0]))
+        result1, result2 = result.fetchall()[0]
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText(result1))
+        if result2:
+            self.edit_dialog.cmb_town.setCurrentIndex(self.edit_dialog.cmb_town.findText(result2))
         else:
             self.edit_dialog.cmb_town.setCurrentIndex(0)
 
@@ -771,20 +746,18 @@ class EditGeometry(ProductionChanges):
         """
         self.edit_dialog.db.open_cursor()
 
-        capture_method_id, _, _, _, _, _ = self.get_comboboxes_values()
+        capture_method_id, _, _, _, _= self.get_comboboxes_values()
 
         if len(self.edit_dialog.split_geoms) > 0:
     
             for qgsfId, geom in list(self.edit_dialog.split_geoms.items()):
                 attributes = self.new_attrs[qgsfId]
-                if not attributes[6]:
-                    attributes[6] = None
                 # New building
                 sql = "SELECT buildings.buildings_insert();"
                 result = self.edit_dialog.db.execute_no_commit(sql)
                 building_id = result.fetchall()[0][0]
                 # new building outline
-                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s, %s);"
+                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s);"
                 result = self.edit_dialog.db.execute_no_commit(
                     sql,
                     (
@@ -793,7 +766,6 @@ class EditGeometry(ProductionChanges):
                         attributes[3],
                         attributes[5],
                         attributes[6],
-                        attributes[7],
                         geom
                     ),
                 )
@@ -809,7 +781,7 @@ class EditGeometry(ProductionChanges):
                 building_id = result.fetchall()[0][0]
 
                 # new building outline
-                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s, %s);"
+                sql = "SELECT buildings.building_outlines_insert(%s, %s, %s, 1, %s, %s, %s);"
                 result = self.edit_dialog.db.execute_no_commit(
                     sql,
                     (
@@ -818,7 +790,6 @@ class EditGeometry(ProductionChanges):
                         attributes[3],
                         attributes[5],
                         attributes[6],
-                        attributes[7],
                         self.edit_dialog.geoms[key]
                     ),
                 )

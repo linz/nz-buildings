@@ -87,7 +87,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
@@ -123,7 +123,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
@@ -154,7 +154,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
 
@@ -162,7 +162,6 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_capture_method.setCurrentIndex(1)
         self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
         self.edit_dialog.cmb_ta.setCurrentIndex(1)
-        self.edit_dialog.cmb_town.setCurrentIndex(0)
         self.edit_dialog.cmb_suburb.setCurrentIndex(1)
         self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(2)
         # click reset button
@@ -216,7 +215,7 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_method.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_capture_method.currentText(), "Trace Orthophotography")
@@ -225,7 +224,6 @@ class ProcessProductionAddOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_capture_source.setCurrentIndex(0)
         self.edit_dialog.cmb_lifecycle_stage.setCurrentIndex(2)
         self.edit_dialog.cmb_ta.setCurrentIndex(0)
-        self.edit_dialog.cmb_town.setCurrentIndex(0)
         self.edit_dialog.cmb_suburb.setCurrentIndex(0)
         self.edit_dialog.change_instance.edit_save_clicked(False)
         sql = "SELECT COUNT(building_outline_id) FROM buildings.building_outlines;"

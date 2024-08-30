@@ -88,7 +88,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
         self.assertEqual(self.edit_dialog.cmb_lifecycle_stage.currentText(), "Current")
@@ -178,16 +178,13 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_ta.setCurrentIndex(
             self.edit_dialog.cmb_ta.findText("Manawatu-Whanganui")
         )
-        self.edit_dialog.cmb_town.setCurrentIndex(
-            self.edit_dialog.cmb_town.findText("Palmerston North")
-        )
         self.edit_dialog.cmb_suburb.setCurrentIndex(
             self.edit_dialog.cmb_suburb.findText("Hokowhitu")
         )
 
         self.edit_dialog.change_instance.edit_save_clicked(False)
 
-        sql = "SELECT lifecycle_stage_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s"
+        sql = "SELECT lifecycle_stage_id, capture_method_id, suburb_locality_id, territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s"
         result = db._execute(sql, (self.edit_dialog.building_outline_id,))
         result = result.fetchall()[0]
         # lifecycle_stage
@@ -202,19 +199,15 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         capture_method = db._execute(sql, (result[1],))
         capture_method = capture_method.fetchall()[0][0]
         self.assertEqual("Unknown", capture_method)
-        # suburb
-        sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+        # suburb/town
+        sql = "SELECT suburb_locality, town_city FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
         suburb = db._execute(sql, (result[2],))
-        suburb = suburb.fetchall()[0][0]
+        suburb, town = suburb.fetchall()[0]
         self.assertEqual("Hokowhitu", suburb)
-        # town
-        sql = "SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;"
-        town_city = db._execute(sql, (result[3],))
-        town_city = town_city.fetchall()[0][0]
-        self.assertEqual("Palmerston North", town_city)
+        self.assertEqual("Palmerston North", town)
         # territorial Authority
         sql = "SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;"
-        territorial_authority = db._execute(sql, (result[4],))
+        territorial_authority = db._execute(sql, (result[3],))
         territorial_authority = territorial_authority.fetchall()[0][0]
         self.assertEqual("Manawatu-Whanganui", territorial_authority)
 
@@ -287,9 +280,6 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_ta.setCurrentIndex(
             self.edit_dialog.cmb_ta.findText("Manawatu-Whanganui")
         )
-        self.edit_dialog.cmb_town.setCurrentIndex(
-            self.edit_dialog.cmb_town.findText("Palmerston North")
-        )
         self.edit_dialog.cmb_suburb.setCurrentIndex(
             self.edit_dialog.cmb_suburb.findText("Hokowhitu")
         )
@@ -297,7 +287,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.change_instance.edit_save_clicked(False)
 
         for i in self.edit_dialog.ids:
-            sql = "SELECT lifecycle_stage_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s;"
+            sql = "SELECT lifecycle_stage_id, capture_method_id, suburb_locality_id, territorial_authority_id FROM buildings.building_outlines WHERE building_outline_id = %s;"
             result = db._execute(sql, (i,))
             result = result.fetchall()[0]
             # lifecycle_stage
@@ -310,19 +300,15 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
             capture_method = db._execute(sql, (result[1],))
             capture_method = capture_method.fetchall()[0][0]
             self.assertEqual("Unknown", capture_method)
-            # suburb
-            sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+            # suburb/town
+            sql = "SELECT suburb_locality, town_city FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
             suburb = db._execute(sql, (result[2],))
-            suburb = suburb.fetchall()[0][0]
+            suburb, town = suburb.fetchall()[0]
             self.assertEqual("Hokowhitu", suburb)
-            # town
-            sql = "SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;"
-            town_city = db._execute(sql, (result[3],))
-            town_city = town_city.fetchall()[0][0]
-            self.assertEqual("Palmerston North", town_city)
+            self.assertEqual("Palmerston North", town)
             # territorial Authority
             sql = "SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;"
-            territorial_authority = db._execute(sql, (result[4],))
+            territorial_authority = db._execute(sql, (result[3],))
             territorial_authority = territorial_authority.fetchall()[0][0]
             self.assertEqual("Manawatu-Whanganui", territorial_authority)
             self.assertEqual(len(self.edit_dialog.ids), 4)
@@ -446,7 +432,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
         self.assertEqual(self.edit_dialog.cmb_lifecycle_stage.currentText(), "Current")
@@ -521,7 +507,7 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_lifecycle_stage.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
         self.assertEqual(self.edit_dialog.cmb_lifecycle_stage.currentText(), "Current")
@@ -714,9 +700,6 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         )
         self.edit_dialog.cmb_ta.setCurrentIndex(
             self.edit_dialog.cmb_ta.findText("Manawatu-Whanganui")
-        )
-        self.edit_dialog.cmb_town.setCurrentIndex(
-            self.edit_dialog.cmb_town.findText("Palmerston North")
         )
         self.edit_dialog.cmb_suburb.setCurrentIndex(
             self.edit_dialog.cmb_suburb.findText("Hokowhitu")

@@ -1487,15 +1487,15 @@ class AlterRelationships(QFrame, FORM_CLASS):
             suburb = self.db.execute_no_commit(sql, (building_outline_id,))
             suburb = suburb.fetchall()[0][0]
             sql = buildings_select.building_outlines_town_city_id_by_building_outline_id
-            town_city = self.db.execute_no_commit(sql, (building_outline_id,))
-            town_city = town_city.fetchall()[0][0]
+            # town_city = self.db.execute_no_commit(sql, (building_outline_id,))
+            # town_city = town_city.fetchall()[0][0]
             sql = (
                 buildings_select.building_outlines_territorial_authority_id_by_building_outline
             )
             territorial_auth = self.db.execute_no_commit(sql, (building_outline_id,))
             territorial_auth = territorial_auth.fetchall()[0][0]
             # insert outline into building_bulk_load.bulk_load_outlines
-            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            sql = "SELECT buildings_bulk_load.bulk_load_outlines_insert(%s, %s, %s, %s, %s, %s, %s, %s)"
             bulk_load_id = self.db.execute_no_commit(
                 sql,
                 (
@@ -1505,7 +1505,6 @@ class AlterRelationships(QFrame, FORM_CLASS):
                     capture_method,
                     capture_source,
                     suburb,
-                    town_city,
                     territorial_auth,
                     geometry,
                 ),
