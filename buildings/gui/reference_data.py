@@ -13,6 +13,16 @@ from buildings.reference_data import topo50
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
+from buildings.utilities.warnings import buildings_warning
+from buildings.utilities.config import read_config_file
+
+try:
+    DB_CONFIG = read_config_file()["api"]
+except RuntimeError as error:
+    buildings_warning("Config file error", str(error), "critical")
+    raise error
+API_KEY_LINZ = DB_CONFIG["linz"]
+API_KEY_STATSNZ = DB_CONFIG["statsnz"]
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 FORM_CLASS, _ = uic.loadUiType(
@@ -26,45 +36,34 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         super(UpdateReferenceData, self).__init__(parent)
         self.setupUi(self)
         self.dockwidget = dockwidget
+        self.api_key = ""
         self.db = db
         self.db.connect()
         self.error_dialog = None
         self.message = ""
         self.msgbox = self.message_box()
-        self.btn_view_key.setIcon(
-            QIcon(os.path.join(__location__, "..", "icons", "view_password.png"))
-        )
 
         # disable all check boxes if a curret dataset exists
         sql = bulk_load_select.supplied_dataset_latest_id_and_dates
         result = self.db.execute_return(sql)
         if result is None:
             self.enable_checkboxes()
-            self.le_key.setDisabled(1)
-            self.btn_view_key.setDisabled(1)
         else:
             result = result.fetchone()
             process = result[1]
             transfer = result[2]
             if process is not None and transfer is not None:
                 self.enable_checkboxes()
-                self.le_key.setDisabled(1)
-                self.btn_view_key.setDisabled(1)
             else:
                 self.disable_checkboxes()
 
         # set up signals and slots
-        self.btn_view_key.pressed.connect(self.view_key)
-        self.btn_view_key.released.connect(self.hide_key)
-        self.le_key.editingFinished.connect(self.hide_key)
         self.grbx_topo.toggled.connect(self.check_all_topo)
         self.grbx_admin.toggled.connect(self.check_all_admin)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_update.clicked.connect(
             partial(self.update_clicked, commit_status=True)
         )
-        for box in self.grbx_topo.findChildren(QCheckBox):
-            box.clicked.connect(self.chbx_clicked)
 
     def close_cursor(self):
         self.db.close_cursor()
@@ -96,7 +95,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def disable_checkboxes(self):
         """Disable frame (when outlines dataset in progress)"""
-        self.le_key.setDisabled(1)
         self.grbx_topo.setDisabled(1)
         self.grbx_admin.setDisabled(1)
         self.chbx_canals.setDisabled(1)
@@ -113,22 +111,11 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setDisabled(1)
         self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
-        self.btn_view_key.setDisabled(1)
         self.btn_update.setDisabled(1)
         # add message
         self.lb_message.setText(
             "\nNOTE: You can't update reference data with\n             a dataset in progress \n"
         )
-
-    @pyqtSlot()
-    def view_key(self):
-        """Called when view key button pressed"""
-        self.le_key.setEchoMode(QLineEdit.Normal)
-
-    @pyqtSlot()
-    def hide_key(self):
-        """Called when view key button released/editing of text finished"""
-        self.le_key.setEchoMode(QLineEdit.Password)
 
     @pyqtSlot()
     def update_clicked(self, commit_status=True):
@@ -137,7 +124,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         # setup
         self.message = ""
-        self.api_key = self.le_key.text()
         self.updates = []
         # canals
         if self.chbx_canals.isChecked():
@@ -301,7 +287,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(False)
                 box.setEnabled(1)
-                self.chbx_clicked()
 
     @pyqtSlot()
     def chbx_clicked(self):
@@ -343,7 +328,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             "\n ---------------------- REQUEST ERROR ---------"
             "----------------- \n\nSomething appears to have gone"
             " wrong with requesting the changeset, first please"
-            " check you entered the correct api key if this is correct"
+            " check you entered the correct api key in config file"
             " then please inform a developer."
         )
         self.error_dialog.show()
@@ -351,15 +336,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     def topo_layer_processing(self, layer):
         """Processes to run for all topo layers"""
-        if not self.check_api_key():
+        if not self.check_api_key(layer):
             return
         status = topo50.update_topo50(self.api_key, layer)
         self.update_message(status, "{}_polygons".format(layer))
         if status != "error":
             self.updates.append(layer)
 
-    def check_api_key(self):
+    def check_api_key(self, layer):
         # check for API key
+        if layer in DATASET_LINZ:
+            self.api_key = API_KEY_LINZ
+        elif layer in DATASET_STATSNZ:
+            self.api_key = API_KEY_STATSNZ
         if self.api_key == "":
             self.error_dialog = ErrorDialog()
             self.error_dialog.fill_report(
