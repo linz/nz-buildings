@@ -39,12 +39,4 @@ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_reference.suburb_locality_intersect_polygon(geometry) IS
 'Return id of suburb/locality with most overlap';
 
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_delete_by_external_id(integer);
-
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_insert(integer, varchar, varchar, varchar);
-
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_by_external_id(integer, varchar, varchar, varchar);
-
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_building_outlines(integer[], integer[]);
-
 COMMIT;

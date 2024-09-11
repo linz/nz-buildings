@@ -9,7 +9,7 @@ from qgis.PyQt.QtWidgets import QFrame, QLineEdit, QMessageBox, QApplication, QC
 from qgis.PyQt.QtGui import QIcon
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import topo50
+from buildings.reference_data import topo50, admin_bdys
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
@@ -28,6 +28,22 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "reference_data.ui")
 )
+
+DATASET_LINZ = [
+    "canal_polygons",
+    "lagoon_polygons",
+    "lake_polygons",
+    "pond_polygons",
+    "river_polygons",
+    "swamp_polygons",
+    "hut_points",
+    "shelter_points",
+    "bivouac_points",
+    "protected_areas_polygons",
+    "coastlines and islands",
+    "suburb_locality",
+]
+DATASET_STATSNZ = ["territorial_authority"]
 
 
 class UpdateReferenceData(QFrame, FORM_CLASS):
@@ -87,7 +103,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_bivouacs.setEnabled(1)
         self.chbx_protected_areas.setEnabled(1)
         self.chbx_suburbs.setEnabled(1)
-        self.chbx_town.setEnabled(1)
         self.chbx_ta.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
@@ -109,7 +124,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_bivouacs.setDisabled(1)
         self.chbx_protected_areas.setDisabled(1)
         self.chbx_suburbs.setDisabled(1)
-        self.chbx_town.setDisabled(1)
         self.chbx_ta.setDisabled(1)
         self.btn_update.setDisabled(1)
         # add message
@@ -125,6 +139,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # setup
         self.message = ""
         self.updates = []
+        if self.db._open_cursor is None:
+            self.db.open_cursor()
         # canals
         if self.chbx_canals.isChecked():
             self.topo_layer_processing("canal_polygons")
@@ -158,89 +174,12 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # coastlines and islands (placeholder)
         if self.chbx_coastline_and_islands.isChecked():
             self.message += "The coastlines and islands table must be updated manually"
-        if self.db._open_cursor is None:
-            self.db.open_cursor()
         # suburb localities
         if self.chbx_suburbs.isChecked():
-            # update building_outlines suburb values (changed, deleted & added)
-            # delete remove suburbs and update modified suburbs
-            db.execute_no_commit("SELECT buildings_reference.building_outlines_update_changed_and_deleted_suburb();")
-            # add new suburbs and update building outlines
-            db.execute_no_commit("SELECT buildings_reference.building_outlines_update_added_suburb();")
-            # update messages and log
-            self.update_message("updated", "suburb_locality")
-            self.updates.append("suburb_locality")
-        # town_city
-        if self.chbx_town.isChecked():
-            town_list = []
-            # delete existing areas where the external id is no longer in the town_city table
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.town_city_delete_removed_areas();"
-            )
-            if result is not None:
-                town_list.extend(result.fetchone()[0])
-            # modify all existing areas to check they are up to date
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.town_city_insert_new_areas();"
-            )
-            if result is not None:
-                town_list.extend(result.fetchone()[0])
-            # insert into table ids in nz_localities that are not in town_city
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.town_city_update_areas();"
-            )
-            if result is not None:
-                town_list.extend(result.fetchone()[0])
-            # update bulk_load_outlines town/city values
-            db.execute_no_commit(
-                "SELECT buildings_bulk_load.bulk_load_outlines_update_all_town_cities(%s);",
-                (town_list,),
-            )
-            # update building outlines town/city values
-            db.execute_no_commit(
-                "SELECT buildings.building_outlines_update_town_city(%s);", (town_list,)
-            )
-            # update messages and log
-            self.update_message("updated", "town_city")
-            self.updates.append("town_city")
+            self.admin_bdy_layer_processing("suburb_locality")
         # territorial authority and grid
         if self.chbx_ta.isChecked():
-            ta_list = []
-            # delete removed TA areas
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.territorial_auth_delete_areas();"
-            )
-            if result is not None:
-                ta_list.extend(result.fetchone()[0])
-            # Insert TA areas
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.territorial_auth_insert_areas();"
-            )
-            if result is not None:
-                ta_list.extend(result.fetchone()[0])
-            # Update new TA areas
-            result = db.execute_no_commit(
-                "SELECT buildings_reference.territorial_auth_update_areas();"
-            )
-            if result is not None:
-                ta_list.extend(result.fetchone()[0])
-            # update bulk_load_outlines territorial authority values
-            db.execute_no_commit(
-                "SELECT buildings_bulk_load.bulk_load_outlines_update_all_territorial_authorities(%s);",
-                (ta_list,),
-            )
-            # update building outlines territorial authority values
-            db.execute_no_commit(
-                "SELECT buildings.building_outlines_update_territorial_authority(%s);",
-                (ta_list,),
-            )
-            # update message and log
-            self.update_message("updated", "territorial_authority")
-            self.updates.append("territorial_authority")
-            # refresh grid
-            db.execute_no_commit(reference_select.refresh_ta_grid_view)
-            self.update_message("updated", "territorial_authority_grid")
-            self.updates.append("territorial_authority_grid")
+            self.admin_bdy_layer_processing("territorial_authority")
 
         # create log for this update
         if len(self.updates) > 0:
@@ -277,36 +216,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
 
     @pyqtSlot()
     def check_all_topo(self):
-        """ Called when combobox to check all topo layers is toggled"""
+        """Called when combobox to check all topo layers is toggled"""
         if self.grbx_topo.isChecked():
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(True)
                 box.setEnabled(1)
-                self.chbx_clicked()
         else:
             for box in self.grbx_topo.findChildren(QCheckBox):
                 box.setChecked(False)
                 box.setEnabled(1)
 
     @pyqtSlot()
-    def chbx_clicked(self):
-        """Called when topo checkboxes are checked"""
-        if not self.loop_topo_boxes():
-            self.le_key.setDisabled(1)
-            self.btn_view_key.setDisabled(1)
-
-    def loop_topo_boxes(self):
-        """loops through topo check boxes returns true if one is checked and enables api key features"""
-        for box in self.grbx_topo.findChildren(QCheckBox):
-            if box.isChecked():
-                self.le_key.setEnabled(1)
-                self.btn_view_key.setEnabled(1)
-                return True
-        return False
-
-    @pyqtSlot()
     def check_all_admin(self):
-        """ Called when combobox to check all admin layers is toggled"""
+        """Called when combobox to check all admin layers is toggled"""
         if self.grbx_admin.isChecked():
             for box in self.grbx_admin.findChildren(QCheckBox):
                 box.setChecked(True)
@@ -338,10 +260,23 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         """Processes to run for all topo layers"""
         if not self.check_api_key(layer):
             return
-        status = topo50.update_topo50(self.api_key, layer)
-        self.update_message(status, "{}_polygons".format(layer))
+        status = topo50.update_topo50(self.api_key, layer, self.db)
+        self.update_message(status, layer)
         if status != "error":
             self.updates.append(layer)
+
+    def admin_bdy_layer_processing(self, layer):
+        """Processes to run for all admin bdy layers"""
+        if not self.check_api_key(layer):
+            return
+        status = admin_bdys.update_admin_bdys(self.api_key, layer, self.db)
+        self.update_message(status, layer)
+        if status != "error":
+            self.updates.append(layer)
+            if layer == "territorial_authority":
+                self.db.execute_no_commit(reference_select.refresh_ta_grid_view)
+                self.update_message("updated", "territorial_authority_grid")
+                self.updates.append("territorial_authority_grid")
 
     def check_api_key(self, layer):
         # check for API key

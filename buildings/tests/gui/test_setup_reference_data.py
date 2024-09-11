@@ -43,7 +43,6 @@ class SetUpReferenceData(unittest.TestCase):
 
     def test_disabled_on_start(self):
         """Test ui options disabled on opening as there is a current dataset"""
-        self.assertFalse(self.reference_frame.le_key.isEnabled())
         self.assertFalse(self.reference_frame.grbx_topo.isEnabled())
         self.assertFalse(self.reference_frame.grbx_admin.isEnabled())
         self.assertFalse(self.reference_frame.chbx_canals.isEnabled())
@@ -53,15 +52,9 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_rivers.isEnabled())
         self.assertFalse(self.reference_frame.chbx_swamps.isEnabled())
         self.assertFalse(self.reference_frame.chbx_suburbs.isEnabled())
-        self.assertFalse(self.reference_frame.chbx_town.isEnabled())
         self.assertFalse(self.reference_frame.chbx_ta.isEnabled())
         self.assertFalse(self.reference_frame.btn_update.isEnabled())
         self.assertTrue(self.reference_frame.btn_exit.isEnabled())
-
-    def test_lineedit_key(self):
-        """Check line edit is in password mode to hide key"""
-        self.reference_frame.le_key.setText("testing")
-        self.assertEqual(self.reference_frame.le_key.echoMode(), QLineEdit.Password)
 
     def test_groupbx_check(self):
         """Check changing of group boxes changes the correct checkboxes"""
@@ -73,7 +66,6 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertTrue(self.reference_frame.chbx_rivers.isChecked())
         self.assertTrue(self.reference_frame.chbx_swamps.isChecked())
         self.assertFalse(self.reference_frame.chbx_suburbs.isChecked())
-        self.assertFalse(self.reference_frame.chbx_town.isChecked())
         self.assertFalse(self.reference_frame.chbx_ta.isChecked())
         self.reference_frame.grbx_topo.setChecked(False)
         self.assertFalse(self.reference_frame.chbx_canals.isChecked())
@@ -84,7 +76,6 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_swamps.isChecked())
         self.reference_frame.grbx_admin.setChecked(True)
         self.assertTrue(self.reference_frame.chbx_suburbs.isChecked())
-        self.assertTrue(self.reference_frame.chbx_town.isChecked())
         self.assertTrue(self.reference_frame.chbx_ta.isChecked())
         self.assertFalse(self.reference_frame.chbx_canals.isChecked())
         self.assertFalse(self.reference_frame.chbx_lagoons.isChecked())
@@ -94,5 +85,4 @@ class SetUpReferenceData(unittest.TestCase):
         self.assertFalse(self.reference_frame.chbx_swamps.isChecked())
         self.reference_frame.grbx_admin.setChecked(False)
         self.assertFalse(self.reference_frame.chbx_suburbs.isChecked())
-        self.assertFalse(self.reference_frame.chbx_town.isChecked())
         self.assertFalse(self.reference_frame.chbx_ta.isChecked())

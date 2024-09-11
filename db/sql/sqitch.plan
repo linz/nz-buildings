@@ -108,3 +108,5 @@ buildings_reference/functions/town_city [buildings_reference/functions/town_city
 buildings_reference/functions/reference_update_log [buildings_reference/functions/reference_update_log@v4.0.0-dev1] 2024-08-14T04:38:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city in reference_update_log update function.
 buildings_reference/remove_suburb_locality_old_name_column 2024-08-14T04:40:22Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ
 buildings_reference/drop_town_city 2024-08-14T04:45:02Z Yingting Chen <ychen@linz.govt.nz> # Drop table town_city as it has been merged into suburb_locality.
+buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v4.0.0-dev1] 2024-08-30T02:54:25Z Yingting Chen <ychen@linz.govt.nz> # Add new suburb_locality functions for the reference update process.
+buildings_reference/functions/territorial_authority [buildings_reference/functions/territorial_authority@v4.0.0-dev1] 2024-09-10T05:51:01Z Yingting Chen <ychen@linz.govt.nz> # Add new territorial_authority functions for the reference update process.

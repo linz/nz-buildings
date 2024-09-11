@@ -2,14 +2,6 @@
 
 BEGIN;
 
-DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_delete_by_external_id(integer);
-
-DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_insert(integer, varchar, varchar);
-
-DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_update_by_external_id(integer, varchar, varchar);
-
-DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_update_building_outlines(integer[], integer[]);
-
 ----------------------------------------------------------------------------------------------
 -- buildings_reference.territorial_authority && buildings_reference.territorial_authority_grid
 

@@ -126,6 +126,13 @@ WHERE sl.suburb_locality_id = blo.suburb_locality_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+suburb_locality_attribute_updates = """
+SELECT suburb_locality_id
+FROM buildings_reference.suburb_locality
+WHERE external_suburb_locality_id = %s
+AND NOT (suburb_locality = %s AND town_city = %s)
+"""
+
 # territorial Authority
 
 territorial_authority_intersect_geom = """
@@ -154,6 +161,13 @@ FROM buildings_reference.territorial_authority ta,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE ta.territorial_authority_id = blo.territorial_authority_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+territorial_authority_attribute_updates = """
+SELECT territorial_authority_id
+FROM buildings_reference.territorial_authority
+WHERE external_territorial_authority_id = %s
+AND NOT name = %s
 """
 
 # territorial authority grid

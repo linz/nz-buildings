@@ -77,7 +77,7 @@ class BulkLoadChanges(object):
             )
             self.edit_dialog.ids_suburb = []
             for (id_suburb, suburb_locality, town_city) in result.fetchall():
-                if name is not None:
+                if suburb_locality is not None:
                     self.edit_dialog.cmb_suburb.addItem(suburb_locality)
                     self.edit_dialog.cmb_town.addItem(town_city)
                     self.edit_dialog.ids_suburb.append(id_suburb)
