@@ -4,7 +4,7 @@ from builtins import str
 
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
-from qgis.core import QgsVectorLayer
+from qgis.core import QgsGeometry, QgsVectorLayer
 
 # TODO: review if the filter works
 LAYERS = {
@@ -55,7 +55,7 @@ def current_date():
 
 # todo: add kx_api_key in config
 # todo: combine suburb_locality- and town city
-def update_admin_bdys(kx_api_key, dataset, dbconn):
+def update_admin_bdys(kx_api_key, dataset, dbconn: db):
 
     # get last update of layer date from log
     from_var = last_update(dataset)
@@ -83,21 +83,19 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
 
     external_id = LAYERS[dataset]["primary_id"]
 
-    ids_updates = []
     ids_attr_updates = []
-
+    geoms_diff = []
     for feature in layer.getFeatures():
         if feature.attribute("__change__") == "DELETE":
+            geoms_diff.append(feature.geometry())
             sql = "SELECT buildings_reference.{}_delete_by_external_id(%s)".format(
                 dataset
             )
-            result = dbconn.execute_no_commit(sql, (feature[external_id],))
-            result = result.fetchone()
-            if result is not None:
-                ids_updates.append(result[0])
+            dbconn.execute_no_commit(sql, (feature[external_id],))
 
         elif feature.attribute("__change__") == "UPDATE":
             if dataset == "suburb_locality":
+                # get attribute differences
                 result = dbconn.execute_return(
                     reference_select.suburb_locality_attribute_updates,
                     (
@@ -109,8 +107,21 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
                 result = result.fetchone()
                 if result is not None:
                     ids_attr_updates.append(result[0])
+
+                # get geometry differences
+                result = dbconn.execute_return(
+                    reference_select.suburb_locality_shape_updates,
+                    (
+                        feature.geometry().asWkt(),
+                        feature[external_id],
+                    ),
+                )
+                result = result.fetchone()
+                if result is not None:
+                    geoms_diff.append(QgsGeometry.fromWkt(result[0]))
+
                 sql = "SELECT buildings_reference.suburb_locality_update_by_external_id(%s, %s, %s, %s)"
-                result = dbconn.execute_no_commit(
+                dbconn.execute_no_commit(
                     sql,
                     (
                         feature[external_id],
@@ -119,10 +130,8 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
                         feature.geometry().asWkt(),
                     ),
                 )
-                result = result.fetchone()
-                if result is not None:
-                    ids_updates.append(result[0])
             else:
+                # get attribute differences
                 result = dbconn.execute_return(
                     reference_select.territorial_authority_attribute_updates,
                     (
@@ -133,8 +142,21 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
                 result = result.fetchone()
                 if result is not None:
                     ids_attr_updates.append(result[0])
+
+                # get geometry differences
+                result = dbconn.execute_return(
+                    reference_select.territorial_authority_shape_updates,
+                    (
+                        feature.geometry().asWkt(),
+                        feature[external_id],
+                    ),
+                )
+                result = result.fetchone()
+                if result is not None:
+                    geoms_diff.append(QgsGeometry.fromWkt(result[0]))
+
                 sql = "SELECT buildings_reference.territorial_authority_update_by_external_id(%s, %s, %s)"
-                result = dbconn.execute_no_commit(
+                dbconn.execute_no_commit(
                     sql,
                     (
                         feature[external_id],
@@ -142,9 +164,6 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
                         feature.geometry().asWkt(),
                     ),
                 )
-                result = result.fetchone()
-                if result is not None:
-                    ids_updates.append(result[0])
 
         elif feature.attribute("__change__") == "INSERT":
             # Check if feature is already in reference table
@@ -153,42 +172,53 @@ def update_admin_bdys(kx_api_key, dataset, dbconn):
                 (feature[external_id],),
             )
             result = result.fetchone()
-            if result is None:
-                if dataset == "suburb_locality":
-                    sql = "SELECT buildings_reference.suburb_locality_insert(%s, %s, %s, %s)"
-                    dbconn.execute_no_commit(
-                        sql,
-                        (
-                            feature[external_id],
-                            correct_name_format(feature["name"]),
-                            correct_name_format(feature["major_name"]),
-                            feature.geometry().asWkt(),
-                        ),
-                    )
-                else:
-                    sql = "SELECT buildings_reference.territorial_authority_insert(%s, %s, %s)"
-                    dbconn.execute_no_commit(
-                        sql,
-                        (
-                            feature[external_id],
-                            correct_name_format(feature["name"]),
-                            feature.geometry().asWkt(),
-                        ),
-                    )
-    print("updated_id {}".format(ids_updates))
-    print("updated_attrs {}".format(ids_attr_updates))
-    sql = "SELECT buildings_reference.{}_update_building_outlines(%s, %s)".format(
+            if result is not None:
+                dbconn.rollback_open_cursor()
+                raise Exception(
+                    "INSERT type feature exists in buildings db. Please contact devs."
+                )
+            geoms_diff.append(feature.geometry())
+            if dataset == "suburb_locality":
+                sql = (
+                    "SELECT buildings_reference.suburb_locality_insert(%s, %s, %s, %s)"
+                )
+                dbconn.execute_no_commit(
+                    sql,
+                    (
+                        feature[external_id],
+                        correct_name_format(feature["name"]),
+                        correct_name_format(feature["major_name"]),
+                        feature.geometry().asWkt(),
+                    ),
+                )
+            else:
+                sql = "SELECT buildings_reference.territorial_authority_insert(%s, %s, %s)"
+                dbconn.execute_no_commit(
+                    sql,
+                    (
+                        feature[external_id],
+                        correct_name_format(feature["name"]),
+                        feature.geometry().asWkt(),
+                    ),
+                )
+    print("updated_attrs: {}".format(ids_attr_updates))
+    print("updated_geom: {}".format(len(geoms_diff)))
+    geom_union = QgsGeometry.unaryUnion(geoms_diff).asWkt()
+    print(geom_union)
+    sql = "SELECT buildings_reference.{}_attribute_update_building_outlines(%s)".format(
         dataset
     )
-    dbconn.execute_no_commit(sql, (ids_updates, ids_attr_updates))
+    dbconn.execute_no_commit(sql, (ids_attr_updates,))
+
+    sql = "SELECT buildings_reference.{}_geometry_update_building_outlines(%s)".format(
+        dataset
+    )
+    dbconn.execute_no_commit(sql, (geom_union,))
 
     return "updated"
 
 
 def correct_name_format(name):
-    if name:
-        if "'" in name:
-            name = "{}".format(name.replace("'", "''"))
-    else:
+    if not name:
         name = ""
     return str(name)

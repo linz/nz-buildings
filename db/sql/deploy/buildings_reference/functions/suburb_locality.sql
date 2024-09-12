@@ -23,8 +23,12 @@ BEGIN;
     -- params: integer external_suburb_locality_id, varchar suburb_locality, varchar town_city, varchar geometry
     -- return: integer suburb_locality_id
 
--- suburb_locality_update_building_outlines
-    -- params: integer[] suburb_locality_id, integer[] suburb_locality_id
+-- suburb_locality_attribute_update_building_outlines
+    -- params: integer[] suburb_locality_id
+    -- return: integer building_outline_id
+
+-- suburb_locality_geometry_update_building_outlines
+    -- params: varchar shape
     -- return: integer building_outline_id
     
 --------------------------------------------
@@ -113,26 +117,39 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_update_by_external_id(in
 'Update suburb_locality table by external id';
 
 
--- suburb_locality_update_building_outlines
-    -- params: integer[] suburb_locality_id, integer[] suburb_locality_id
+-- suburb_locality_attribute_update_building_outlines
+    -- params: integer[] suburb_locality_id
     -- return: integer building_outline_id
-CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_update_building_outlines(integer[], integer[])
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_attribute_update_building_outlines(integer[])
+RETURNS integer AS
+$$
+    UPDATE buildings.building_outlines
+    SET last_modified = NOW()
+    WHERE suburb_locality_id = ANY($1)
+    RETURNING building_outline_id;
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.suburb_locality_attribute_update_building_outlines(integer[]) IS
+'Update building_outlines last_modified value as suburb_locality/town_city attributes were updated';
+
+
+-- suburb_locality_geometry_update_building_outlines
+    -- params: varchar shape
+    -- return: integer building_outline_id
+CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_geometry_update_building_outlines(varchar)
 RETURNS integer AS
 $$
     UPDATE buildings.building_outlines
     SET suburb_locality_id = buildings_reference.suburb_locality_intersect_polygon(shape),
         last_modified = NOW()
-    WHERE (
-            suburb_locality_id = ANY($1)
-        AND suburb_locality_id != buildings_reference.suburb_locality_intersect_polygon(shape)
-    )
-    OR suburb_locality_id = ANY($2)
+    WHERE ST_Intersects(shape, ST_SetSRID(ST_GeometryFromText($1), 2193))
+    AND suburb_locality_id != buildings_reference.suburb_locality_intersect_polygon(shape)
     RETURNING building_outline_id;
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.suburb_locality_update_building_outlines(integer[], integer[]) IS
-'Update building_outlines suburb_locality_id value using suburb_locality table';
-
+COMMENT ON FUNCTION buildings_reference.suburb_locality_geometry_update_building_outlines(varchar) IS
+'Update building_outlines suburb_locality_id value where building_outlines intersects with updated suburb_locality';
 
 COMMIT;

@@ -45,6 +45,8 @@ DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_insert(integer, varc
 
 DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_by_external_id(integer, varchar, varchar, varchar);
 
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_building_outlines(integer[], integer[]);
+DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_attribute_update_building_outlines(integer[]);
+
+DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_geometry_update_building_outlines(varchar);
 
 COMMIT;

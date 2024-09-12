@@ -34,7 +34,9 @@ _pw = DB_CONFIG["password"]
 _open_cursor = None
 
 try:
-    _conn = psycopg2.connect(host=_host, port=_port, database=_dbname, user=_user, password=_pw)
+    _conn = psycopg2.connect(
+        host=_host, port=_port, database=_dbname, user=_user, password=_pw
+    )
 except psycopg2.DatabaseError as error:
     _conn = None
     buildings_warning("Database Error", str(error), "critical")
@@ -64,7 +66,9 @@ def connect():
     """Connect to DB"""
     global _conn
     try:
-        _conn = psycopg2.connect(host=_host, port=_port, database=_dbname, user=_user, password=_pw)
+        _conn = psycopg2.connect(
+            host=_host, port=_port, database=_dbname, user=_user, password=_pw
+        )
     except psycopg2.DatabaseError as error:
         _conn = None
         buildings_warning("Database Error", str(error), "critical")
@@ -118,7 +122,7 @@ def execute_return(sql, data=None):
 
 
 def execute(sql, data=None):
-    """ Execute an update or insert statement with no return
+    """Execute an update or insert statement with no return
 
     @param  sql:    sql statement
     @type   sql:    string
@@ -144,13 +148,13 @@ def execute_no_commit(sql, data=None):
     except psycopg2.DatabaseError as error:
         _conn.rollback()
         buildings_warning("Database Error", str(error), "critical")
-        return None
+        raise error
     except psycopg2.InterfaceError as error:
         # Raise the error
         cursor.close()
         _conn.rollback()
         buildings_warning("Interface Error", str(error), "critical")
-        return None
+        raise error
 
     return cursor
 
@@ -171,7 +175,7 @@ def close_cursor():
 
 
 def set_uri():
-    """ Creates a QgsDataSourceUri with connection
+    """Creates a QgsDataSourceUri with connection
 
     @return:    QGIS URI object
     @rtype:     qgis.core.QgsDataSourceUri

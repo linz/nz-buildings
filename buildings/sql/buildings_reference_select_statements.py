@@ -133,6 +133,14 @@ WHERE external_suburb_locality_id = %s
 AND NOT (suburb_locality = %s AND town_city = %s)
 """
 
+suburb_locality_shape_updates = """
+SELECT ST_AsText(
+    ST_SymDifference(shape, ST_SetSRID(ST_GeometryFromText(%s), 2193), 0.001)
+    ) AS diff
+FROM buildings_reference.suburb_locality
+WHERE external_suburb_locality_id = %s
+"""
+
 # territorial Authority
 
 territorial_authority_intersect_geom = """
@@ -168,6 +176,14 @@ SELECT territorial_authority_id
 FROM buildings_reference.territorial_authority
 WHERE external_territorial_authority_id = %s
 AND NOT name = %s
+"""
+
+territorial_authority_shape_updates = """
+SELECT ST_AsText(
+    ST_SymDifference(shape, ST_SetSRID(ST_GeometryFromText(%s), 2193), 0.001)
+    ) AS diff
+FROM buildings_reference.territorial_authority
+WHERE external_territorial_authority_id = %s
 """
 
 # territorial authority grid

@@ -8,7 +8,9 @@ DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_insert(integer
 
 DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_update_by_external_id(integer, varchar, varchar);
 
-DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_update_building_outlines(integer[], integer[]);
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_attribute_update_building_outlines(integer[]);
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_geometry_update_building_outlines(varchar);
 
 ----------------------------------------------------------------------------------------------
 -- buildings_reference.territorial_authority && buildings_reference.territorial_authority_grid

@@ -27,8 +27,12 @@ BEGIN;
     -- params: integer external_territorial_authority_id, varchar territorial_authority, varchar geometry
     -- return: integer territorial_authority_id
 
--- territorial_authority_update_building_outlines
-    -- params: integer[] territorial_authority_id, integer[] territorial_authority_id
+-- territorial_authority_attribute_update_building_outlines
+    -- params: integer[] territorial_authority_id
+    -- return: integer building_outline_id
+
+-- territorial_authority_geometry_update_building_outlines
+    -- params: varchar shape
     -- return: integer building_outline_id
 
 ----------------------------------------------------------------------------------------------
@@ -83,9 +87,9 @@ LANGUAGE sql VOLATILE;
 COMMENT ON FUNCTION buildings_reference.territorial_authority_intersect_polygon(geometry) IS
 'Return id of territorial authority with most overlap';
 
-DROP FUNCTION buildings_reference.territorial_auth_delete_areas();
-DROP FUNCTION buildings_reference.territorial_auth_insert_areas();
-DROP FUNCTION buildings_reference.territorial_auth_update_areas();
+DROP FUNCTION IF EXISTS buildings_reference.territorial_auth_delete_areas();
+DROP FUNCTION IF EXISTS buildings_reference.territorial_auth_insert_areas();
+DROP FUNCTION IF EXISTS buildings_reference.territorial_auth_update_areas();
 
 
 -- territorial_authority_delete_by_external_id
@@ -144,26 +148,39 @@ COMMENT ON FUNCTION buildings_reference.territorial_authority_update_by_external
 'Update territorial_authority table by external id';
 
 
--- territorial_authority_update_building_outlines
-    -- params: integer[] territorial_authority_id, integer[] territorial_authority_id
+-- territorial_authority_attribute_update_building_outlines
+    -- params: integer[] territorial_authority_id
     -- return: integer building_outline_id
-CREATE OR REPLACE FUNCTION buildings_reference.territorial_authority_update_building_outlines(integer[], integer[])
+CREATE OR REPLACE FUNCTION buildings_reference.territorial_authority_attribute_update_building_outlines(integer[])
 RETURNS integer AS
 $$
     UPDATE buildings.building_outlines
-    SET territorial_authority_id = buildings_reference.territorial_authority_intersect_polygon(shape),
-        last_modified = NOW()
-    WHERE (
-            territorial_authority_id = ANY($1)
-        AND territorial_authority_id != buildings_reference.territorial_authority_intersect_polygon(shape)
-    )
-    OR territorial_authority_id = ANY($2)
+    SET last_modified = NOW()
+    WHERE territorial_authority_id = ANY($1)
     RETURNING building_outline_id;
 $$
 LANGUAGE sql VOLATILE;
 
-COMMENT ON FUNCTION buildings_reference.territorial_authority_update_building_outlines(integer[], integer[]) IS
-'Update building_outlines territorial_authority_id value using territorial_authority table';
+COMMENT ON FUNCTION buildings_reference.territorial_authority_attribute_update_building_outlines(integer[]) IS
+'Update building_outlines last_modified value as territorial_authority attribute was updated';
 
+
+-- territorial_authority_geometry_update_building_outlines
+    -- params: varchar shape
+    -- return: integer building_outline_id
+CREATE OR REPLACE FUNCTION buildings_reference.territorial_authority_geometry_update_building_outlines(varchar)
+RETURNS integer AS
+$$
+    UPDATE buildings.building_outlines
+    SET territorial_authority_id = buildings_reference.territorial_authority_grid_intersect_polygon(shape),
+        last_modified = NOW()
+    WHERE ST_Intersects(shape, ST_SetSRID(ST_GeometryFromText($1), 2193))
+    AND territorial_authority_id != buildings_reference.territorial_authority_grid_intersect_polygon(shape)
+    RETURNING building_outline_id;
+$$
+LANGUAGE sql VOLATILE;
+
+COMMENT ON FUNCTION buildings_reference.territorial_authority_geometry_update_building_outlines(varchar) IS
+'Update building_outlines territorial_authority_id value where building_outlines intersects with updated territorial_authority';
 
 COMMIT;

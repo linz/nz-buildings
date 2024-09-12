@@ -166,9 +166,6 @@ def update_topo50(kx_api_key, dataset, dbconn):
 
 
 def correct_name_format(name):
-    if name:
-        if "'" in name:
-            name = "{}".format(name.replace("'", "''"))
-    else:
+    if not name:
         name = ""
     return str(name)
