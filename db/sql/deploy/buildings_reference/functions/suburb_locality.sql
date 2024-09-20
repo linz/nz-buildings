@@ -140,11 +140,15 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_attribute_update_buildin
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_geometry_update_building_outlines(varchar)
 RETURNS integer AS
 $$
-    UPDATE buildings.building_outlines
-    SET suburb_locality_id = buildings_reference.suburb_locality_intersect_polygon(shape),
+    WITH sub_tas AS (
+        SELECT ST_Subdivide(ST_SetSRID(ST_GeometryFromText($1), 2193)) AS shape
+    )
+    UPDATE buildings.building_outlines bo
+    SET suburb_locality_id = buildings_reference.suburb_locality_intersect_polygon(bo.shape),
         last_modified = NOW()
-    WHERE ST_Intersects(shape, ST_SetSRID(ST_GeometryFromText($1), 2193))
-    AND suburb_locality_id != buildings_reference.suburb_locality_intersect_polygon(shape)
+    FROM sub_tas ta
+    WHERE ST_Intersects(bo.shape, ta.shape)
+    AND suburb_locality_id != buildings_reference.suburb_locality_intersect_polygon(bo.shape)
     RETURNING building_outline_id;
 $$
 LANGUAGE sql VOLATILE;
