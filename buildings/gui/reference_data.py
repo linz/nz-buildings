@@ -40,7 +40,7 @@ DATASET_LINZ = [
     "shelter_points",
     "bivouac_points",
     "protected_areas_polygons",
-    "coastlines and islands",
+    "coastlines_and_islands",
     "suburb_locality",
 ]
 DATASET_STATSNZ = ["territorial_authority"]
@@ -52,7 +52,6 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         super(UpdateReferenceData, self).__init__(parent)
         self.setupUi(self)
         self.dockwidget = dockwidget
-        self.api_key = ""
         self.db = db
         self.db.connect()
         self.error_dialog = None
@@ -171,9 +170,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # protected areas
         if self.chbx_protected_areas.isChecked():
             self.topo_layer_processing("protected_areas_polygons")
-        # coastlines and islands (placeholder)
+        # coastlines and islands (overwrite the existing table)
         if self.chbx_coastline_and_islands.isChecked():
-            self.message += "The coastlines and islands table must be updated manually"
+            self.topo_layer_processing("coastlines_and_islands")
         # suburb localities
         if self.chbx_suburbs.isChecked():
             self.admin_bdy_layer_processing("suburb_locality")
@@ -256,24 +255,29 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.error_dialog.show()
         QApplication.restoreOverrideCursor()
 
-    def topo_layer_processing(self, layer):
-        """Processes to run for all topo layers"""
-        if not self.check_api_key(layer):
+    def topo_layer_processing(self, dataset):
+        """Processes to run for topo layers"""
+        api_key = self.check_api_key(dataset)
+        if api_key is None:
             return
-        status = topo50.update_topo50(self.api_key, layer, self.db)
-        self.update_message(status, layer)
+        if dataset == "coastlines_and_islands":
+            status = topo50.update_coastlines_and_islands(api_key, dataset, self.db)
+        else:
+            status = topo50.update_topo50(api_key, dataset, self.db)
+        self.update_message(status, dataset)
         if status != "error":
-            self.updates.append(layer)
+            self.updates.append(dataset)
 
-    def admin_bdy_layer_processing(self, layer):
-        """Processes to run for all admin bdy layers"""
-        if not self.check_api_key(layer):
+    def admin_bdy_layer_processing(self, dataset):
+        """Processes to run for admin bdy layers"""
+        api_key = self.check_api_key(dataset)
+        if api_key is None:
             return
-        status = admin_bdys.update_admin_bdys(self.api_key, layer, self.db)
-        self.update_message(status, layer)
+        status = admin_bdys.update_admin_bdys(api_key, dataset, self.db)
+        self.update_message(status, dataset)
         if status != "error":
-            self.updates.append(layer)
-            if layer == "territorial_authority":
+            self.updates.append(dataset)
+            if dataset == "territorial_authority":
                 self.db.execute_no_commit(reference_select.refresh_ta_grid_view)
                 self.update_message("updated", "territorial_authority_grid")
                 self.updates.append("territorial_authority_grid")
@@ -281,20 +285,18 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
     def check_api_key(self, layer):
         # check for API key
         if layer in DATASET_LINZ:
-            self.api_key = API_KEY_LINZ
+            return API_KEY_LINZ
         elif layer in DATASET_STATSNZ:
-            self.api_key = API_KEY_STATSNZ
-        if self.api_key == "":
-            self.error_dialog = ErrorDialog()
-            self.error_dialog.fill_report(
-                "\n------------- NO API KEY -------------"
-                "\n\nPlease enter a koordinates api key to"
-                " update the reference data."
-            )
-            self.error_dialog.show()
-            QApplication.restoreOverrideCursor()
-            return False
-        return True
+            return API_KEY_STATSNZ
+        self.error_dialog = ErrorDialog()
+        self.error_dialog.fill_report(
+            "\n------------- NO API KEY -------------"
+            "\n\nPlease enter a koordinates api key to"
+            " update the reference data."
+        )
+        self.error_dialog.show()
+        QApplication.restoreOverrideCursor()
+        return None
 
     def update_message(self, status, name):
         """add to message for display at end of processing"""

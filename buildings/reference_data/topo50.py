@@ -17,6 +17,7 @@ LDS_LAYER_IDS = {
     "shelter_points": 50245,
     "bivouac_points": 50239,
     "protected_areas_polygons": 53564,
+    "coastlines_and_islands": 51153,
 }
 
 LDS_LAYER_HAS_NAME = [
@@ -162,6 +163,26 @@ def update_topo50(kx_api_key, dataset, dbconn):
                         feature.geometry().asWkt(),
                     ),
                 )
+    return "updated"
+
+
+def update_coastlines_and_islands(kx_api_key, dataset, dbconn):
+    if dataset != "coastlines_and_islands":
+        return "error"
+    layer = QgsVectorLayer(
+        "https://data.linz.govt.nz/services;key={1}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=layer-{0}&outputFormat=json".format(
+            LDS_LAYER_IDS[dataset], kx_api_key
+        )
+    )
+    if not layer.isValid():
+        return "error"
+    # clear the table and insert all data via WFS
+    dbconn.execute_no_commit("DELETE FROM buildings_reference.coastlines_and_islands;")
+    for feature in layer.getFeatures():
+        sql = "INSERT INTO buildings_reference.coastlines_and_islands(external_coastline_and_island_id, shape) VALUES (%s, ST_SetSRID(ST_GeometryFromText(%s), 2193))"
+        dbconn.execute_no_commit(
+            sql, (feature["TARGET_FID"], feature.geometry().asWkt())
+        )
     return "updated"
 
 
