@@ -54,6 +54,32 @@
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_status">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Status</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -143,7 +169,7 @@
             <item row="12" column="0" colspan="2">
              <widget class="QCheckBox" name="chbx_coastline_and_islands">
               <property name="text">
-               <string>Coastlines and Islands</string>
+               <string>Coastlines and Islands (Overwrite existing)</string>
               </property>
              </widget>
             </item>

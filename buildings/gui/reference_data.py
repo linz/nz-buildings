@@ -3,9 +3,19 @@
 import os.path
 
 from functools import partial
+from qgis.core import QgsVectorLayer
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import pyqtSlot, Qt
-from qgis.PyQt.QtWidgets import QFrame, QLineEdit, QMessageBox, QApplication, QCheckBox
+from qgis.PyQt.QtWidgets import (
+    QDialog,
+    QFrame,
+    QMessageBox,
+    QApplication,
+    QCheckBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
+)
 from qgis.PyQt.QtGui import QIcon
 
 from buildings.gui.error_dialog import ErrorDialog
@@ -45,6 +55,21 @@ DATASET_LINZ = [
 ]
 DATASET_STATSNZ = ["territorial_authority"]
 
+DATASET_TOPO50 = [
+    "canal_polygons",
+    "lagoon_polygons",
+    "lake_polygons",
+    "pond_polygons",
+    "river_polygons",
+    "swamp_polygons",
+    "hut_points",
+    "shelter_points",
+    "bivouac_points",
+    "protected_areas_polygons",
+    "coastlines_and_islands",
+]
+DATASET_ADMIN_BDYS = ["suburb_locality", "territorial_authority"]
+
 
 class UpdateReferenceData(QFrame, FORM_CLASS):
     def __init__(self, dockwidget, parent=None):
@@ -79,6 +104,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.btn_update.clicked.connect(
             partial(self.update_clicked, commit_status=True)
         )
+        self.btn_status.clicked.connect(self.btn_status_clicked)
 
     def close_cursor(self):
         self.db.close_cursor()
@@ -129,6 +155,42 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.lb_message.setText(
             "\nNOTE: You can't update reference data with\n             a dataset in progress \n"
         )
+
+    @pyqtSlot()
+    def btn_status_clicked(self):
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        dialog = QDialog()
+        tbl = QTableWidget()
+        tbl.setColumnCount(6)
+        tbl.setHorizontalHeaderLabels(
+            ["Dataset", "Last Updated", "New Updates", "Insert", "Update", "Delete"]
+        )
+        for dataset in DATASET_LINZ + DATASET_STATSNZ:
+            api_key = self.check_api_key(dataset)
+            if api_key is None:
+                return
+            if dataset in DATASET_TOPO50:
+                status = topo50.check_status_topo50(api_key, dataset)
+            else:
+                status = admin_bdys.check_status_admin_bdys(api_key, dataset)
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem(status["dataset"]))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem(status["last_updated"]))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem(status["new_updates"]))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem(status["insert"]))
+            tbl.setItem(row_tbl, 4, QTableWidgetItem(status["update"]))
+            tbl.setItem(row_tbl, 5, QTableWidgetItem(status["delete"]))
+        tbl.resizeRowsToContents()
+        tbl.resizeColumnsToContents()
+        dialogWidth = tbl.horizontalHeader().length() + 100
+        dialogHeight = tbl.verticalHeader().length() + 100
+        dialog.setFixedSize(dialogWidth, dialogHeight)
+        layout = QVBoxLayout()
+        dialog.setLayout(layout)
+        layout.addWidget(tbl)
+        QApplication.restoreOverrideCursor()
+        dialog.exec()
 
     @pyqtSlot()
     def update_clicked(self, commit_status=True):

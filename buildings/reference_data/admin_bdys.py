@@ -1,4 +1,5 @@
 from builtins import str
+from collections import Counter
 
 # script to update canal data
 
@@ -53,8 +54,53 @@ def current_date():
     return to_var
 
 
-# todo: add kx_api_key in config
-# todo: combine suburb_locality- and town city
+def check_status_admin_bdys(kx_api_key, dataset):
+    # get last update of layer date from log
+    from_var = last_update(dataset)
+
+    # current date
+    to_var = current_date()
+
+    layer = QgsVectorLayer(
+        URI.format(
+            kx_api_key,
+            LAYERS[dataset]["url_base"],
+            LAYERS[dataset]["layer_id"],
+            from_var,
+            to_var,
+            LAYERS[dataset]["cql_filter"],
+        )
+    )
+    if not layer.isValid():
+        return {
+            "dataset": dataset,
+            "last_updated": from_var,
+            "new_updates": "error",
+            "insert": "error",
+            "update": "error",
+            "delete": "error",
+        }
+
+    if layer.featureCount() == 0:
+        return {
+            "dataset": dataset,
+            "last_updated": from_var,
+            "new_updates": "",
+            "insert": "0",
+            "update": "0",
+            "delete": "0",
+        }
+    counts = Counter([feat["__change__"] for feat in layer.getFeatures()])
+    return {
+        "dataset": dataset,
+        "last_updated": from_var,
+        "new_updates": "Available",
+        "insert": str(counts["INSERT"]),
+        "update": str(counts["UPDATE"]),
+        "delete": str(counts["DELETE"]),
+    }
+
+
 def update_admin_bdys(kx_api_key, dataset, dbconn: db):
     # get last update of layer date from log
     from_var = last_update(dataset)

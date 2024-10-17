@@ -1,4 +1,6 @@
 from builtins import str
+from collections import Counter
+
 
 # script to update canal data
 
@@ -55,6 +57,65 @@ def current_date():
     to_var = to_var.split(" ")
     to_var = to_var[0] + "T" + to_var[1]
     return to_var
+
+
+def check_status_topo50(kx_api_key, dataset):
+    if "polygon" in dataset:
+        column_name = dataset.replace("_polygons", "")
+    elif "point" in dataset:
+        column_name = dataset.replace("_points", "")
+    else:
+        column_name = dataset
+
+    # get last update of layer date from log
+    from_var = last_update(column_name)
+
+    # current date
+    to_var = current_date()
+
+    cql_filter = ""
+    if dataset == "hut_points":
+        cql_filter = "&cql_filter=bldg_use='hut'"
+    elif dataset == "shelter_points":
+        cql_filter = "&cql_filter=bldg_use='shelter'"
+    elif dataset == "protected_areas_polygons":
+        cql_filter = "&cql_filter=type = 'Conservation Area' OR type = 'National Park' OR type ='Wildlife Area'"
+
+    external_id = "t50_fid"
+    if dataset == "protected_areas_polygons":
+        external_id = "napalis_id"
+
+    layer = QgsVectorLayer(
+        URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var, cql_filter)
+    )
+    if not layer.isValid():
+        return {
+            "dataset": dataset,
+            "last_updated": from_var,
+            "new_updates": "error",
+            "insert": "error",
+            "update": "error",
+            "delete": "error",
+        }
+
+    if layer.featureCount() == 0:
+        return {
+            "dataset": dataset,
+            "last_updated": from_var,
+            "new_updates": "",
+            "insert": "0",
+            "update": "0",
+            "delete": "0",
+        }
+    counts = Counter([feat["__change__"] for feat in layer.getFeatures()])
+    return {
+        "dataset": dataset,
+        "last_updated": from_var,
+        "new_updates": "Available",
+        "insert": str(counts["INSERT"]),
+        "update": str(counts["UPDATE"]),
+        "delete": str(counts["DELETE"]),
+    }
 
 
 def update_topo50(kx_api_key, dataset, dbconn):
