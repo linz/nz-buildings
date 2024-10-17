@@ -265,7 +265,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         else:
             status = topo50.update_topo50(api_key, dataset, self.db)
         self.update_message(status, dataset)
-        if status != "error":
+        if status == "updated":
             self.updates.append(dataset)
 
     def admin_bdy_layer_processing(self, dataset):
@@ -273,14 +273,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         api_key = self.check_api_key(dataset)
         if api_key is None:
             return
-        status = admin_bdys.update_admin_bdys(api_key, dataset, self.db)
-        self.update_message(status, dataset)
-        if status != "error":
+        status, ids_bo = admin_bdys.update_admin_bdys(api_key, dataset, self.db)
+        if status == "updated":
+            self.update_message(
+                status,
+                f"{dataset} ({len(ids_bo)} building outlines modified)",
+            )
             self.updates.append(dataset)
             if dataset == "territorial_authority":
                 self.db.execute_no_commit(reference_select.refresh_ta_grid_view)
                 self.update_message("updated", "territorial_authority_grid")
                 self.updates.append("territorial_authority_grid")
+        else:
+            self.update_message(status, dataset)
 
     def check_api_key(self, layer):
         # check for API key
@@ -301,9 +306,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
     def update_message(self, status, name):
         """add to message for display at end of processing"""
         if status == "current":
-            self.message += "The {} table was up to date\n".format(name)
+            self.message += "The table {} was up to date\n".format(name)
         if status == "updated":
-            self.message += "The {} table has been updated\n".format(name)
+            self.message += "The table {} has been updated\n".format(name)
         if status == "error":
-            self.message += "The request errored on the {} table\n".format(name)
+            self.message += "The request errored on the table {}\n".format(name)
             self.request_error()

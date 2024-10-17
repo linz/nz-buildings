@@ -25,7 +25,7 @@ RETURNS integer AS
 $$
 
     INSERT INTO buildings_reference.reference_update_log (river, lake, pond, swamp, lagoon, canal, coastlines_and_islands, capture_source_area, territorial_authority, territorial_authority_grid, suburb_locality, hut, shelter, bivouac, protected_areas)
-    VALUES(CASE WHEN ('river_polygon' = ANY(p_list)) THEN True ELSE False END,
+    VALUES(CASE WHEN ('river_polygons' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('lake_polygons' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('pond_polygons' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('swamp_polygons' = ANY(p_list)) THEN True ELSE False END,

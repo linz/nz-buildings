@@ -121,7 +121,7 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_update_by_external_id(in
     -- params: integer[] suburb_locality_id
     -- return: integer building_outline_id
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_attribute_update_building_outlines(integer[])
-RETURNS integer AS
+RETURNS SETOF integer AS
 $$
     UPDATE buildings.building_outlines
     SET last_modified = NOW()
@@ -138,7 +138,7 @@ COMMENT ON FUNCTION buildings_reference.suburb_locality_attribute_update_buildin
     -- params: varchar shape
     -- return: integer building_outline_id
 CREATE OR REPLACE FUNCTION buildings_reference.suburb_locality_geometry_update_building_outlines(varchar)
-RETURNS integer AS
+RETURNS SETOF integer AS
 $$
     WITH sub_tas AS (
         SELECT ST_Subdivide(ST_SetSRID(ST_GeometryFromText($1), 2193)) AS shape

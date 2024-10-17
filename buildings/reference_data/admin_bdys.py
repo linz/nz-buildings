@@ -56,7 +56,6 @@ def current_date():
 # todo: add kx_api_key in config
 # todo: combine suburb_locality- and town city
 def update_admin_bdys(kx_api_key, dataset, dbconn: db):
-
     # get last update of layer date from log
     from_var = last_update(dataset)
 
@@ -76,10 +75,10 @@ def update_admin_bdys(kx_api_key, dataset, dbconn: db):
 
     if not layer.isValid():
         # something went wrong
-        return "error"
+        return "error", []
 
     if layer.featureCount() == 0:
-        return "current"
+        return "current", []
 
     external_id = LAYERS[dataset]["primary_id"]
 
@@ -201,21 +200,21 @@ def update_admin_bdys(kx_api_key, dataset, dbconn: db):
                         feature.geometry().asWkt(),
                     ),
                 )
-    print("updated_attrs: {}".format(ids_attr_updates))
-    print("updated_geom: {}".format(len(geoms_diff)))
     geom_union = QgsGeometry.unaryUnion(geoms_diff).asWkt()
-    print(geom_union)
     sql = "SELECT buildings_reference.{}_attribute_update_building_outlines(%s)".format(
         dataset
     )
-    dbconn.execute_no_commit(sql, (ids_attr_updates,))
+    result = dbconn.execute_no_commit(sql, (ids_attr_updates,))
+    ids_bo = [r[0] for r in result.fetchall() if r[0] is not None]
 
     sql = "SELECT buildings_reference.{}_geometry_update_building_outlines(%s)".format(
         dataset
     )
-    dbconn.execute_no_commit(sql, (geom_union,))
-
-    return "updated"
+    result = dbconn.execute_no_commit(sql, (geom_union,))
+    ids_bo.extend(
+        [r[0] for r in result.fetchall() if r[0] not in ids_bo and r[0] is not None]
+    )
+    return "updated", ids_bo
 
 
 def correct_name_format(name):
