@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_bulk_load/functions/bulk_load_outlines to pg
+-- Revert nz-buildings:buildings_bulk_load/functions/bulk_load_outlines to v3.1.0
 
 BEGIN;
 

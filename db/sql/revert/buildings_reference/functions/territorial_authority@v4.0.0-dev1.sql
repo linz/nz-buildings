@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/territorial_authority to pg
+-- Revert nz-buildings:buildings_reference/functions/territorial_authority to v3.1.0
 
 BEGIN;
 

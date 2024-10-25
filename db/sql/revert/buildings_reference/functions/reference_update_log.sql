@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/reference_update_log to pg
+-- Revert nz-buildings:buildings_reference/functions/reference_update_log to v4.0.0
 
 BEGIN;
 

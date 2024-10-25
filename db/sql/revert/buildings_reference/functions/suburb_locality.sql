@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/suburb_locality to pg
+-- Revert nz-buildings:buildings_reference/functions/suburb_locality to v4.0.0
 
 BEGIN;
 

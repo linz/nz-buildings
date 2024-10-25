@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/update_suburb_locality_changed_deleted_buildings to pg
+-- Revert nz-buildings:buildings_reference/functions/update_suburb_locality_changed_deleted_buildings to v4.0.0
 
 BEGIN;
 

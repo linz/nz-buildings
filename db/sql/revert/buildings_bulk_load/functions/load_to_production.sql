@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_bulk_load/functions/load_to_production to pg
+-- Revert nz-buildings:buildings_bulk_load/functions/load_to_production to v3.6.0
 
 BEGIN;
 

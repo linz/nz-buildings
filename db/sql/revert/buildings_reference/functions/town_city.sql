@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/town_city to pg
+-- Revert nz-buildings:buildings_reference/functions/town_city to v4.0.0
 
 BEGIN;
 

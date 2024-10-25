@@ -1,4 +1,4 @@
--- Revert nz-buildings:buildings_reference/functions/suburb_locality to pg
+-- Revert nz-buildings:buildings_reference/functions/suburb_locality to v3.1.0
 
 BEGIN;
 

@@ -1,4 +1,4 @@
--- Revert nz-buildings:buildings/functions/building_outlines to pg
+-- Revert nz-buildings:buildings/functions/building_outlines to v3.1.0
 
 BEGIN;
 
