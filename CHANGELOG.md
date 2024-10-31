@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+2024-10-31
+
+### Added
+- New update process for NZ Imagery Survey Index
+- A separate update process (overwrite) for nz coastlines and islands
+- New status button to see if ref data is available for update
+
+### Changed
+- Update process for Admin Bdys layers is now via WFS
+
+### Fixed
+- Fixed update process for topo50 layers
+
+
 ## 4.0.0
 2022-09-15
 
