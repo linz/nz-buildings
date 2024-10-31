@@ -225,6 +225,31 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="grbx_other">
+           <property name="title">
+            <string>Other reference</string>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QCheckBox" name="chbx_imagery">
+              <property name="text">
+               <string>NZ Imagery Survey Index</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer_3">
            <property name="orientation">
             <enum>Qt::Vertical</enum>

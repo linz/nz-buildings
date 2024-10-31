@@ -19,7 +19,7 @@ from qgis.PyQt.QtWidgets import (
 from qgis.PyQt.QtGui import QIcon
 
 from buildings.gui.error_dialog import ErrorDialog
-from buildings.reference_data import topo50, admin_bdys
+from buildings.reference_data import topo50, admin_bdys, other_reference
 from buildings.sql import buildings_bulk_load_select_statements as bulk_load_select
 from buildings.sql import buildings_reference_select_statements as reference_select
 from buildings.utilities import database as db
@@ -52,6 +52,7 @@ DATASET_LINZ = [
     "protected_areas_polygons",
     "coastlines_and_islands",
     "suburb_locality",
+    "nz_imagery_survey_index",
 ]
 DATASET_STATSNZ = ["territorial_authority"]
 
@@ -69,6 +70,8 @@ DATASET_TOPO50 = [
     "coastlines_and_islands",
 ]
 DATASET_ADMIN_BDYS = ["suburb_locality", "territorial_authority"]
+
+DATASET_OTHER = ["nz_imagery_survey_index"]
 
 
 class UpdateReferenceData(QFrame, FORM_CLASS):
@@ -100,6 +103,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # set up signals and slots
         self.grbx_topo.toggled.connect(self.check_all_topo)
         self.grbx_admin.toggled.connect(self.check_all_admin)
+        self.grbx_other.toggled.connect(self.check_all_other)
         self.btn_exit.clicked.connect(self.exit_clicked)
         self.btn_update.clicked.connect(
             partial(self.update_clicked, commit_status=True)
@@ -116,6 +120,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         """Enable frame"""
         self.grbx_topo.setEnabled(1)
         self.grbx_admin.setEnabled(1)
+        self.grbx_other.setEnabled(1)
         self.chbx_canals.setEnabled(1)
         self.chbx_coastline_and_islands.setEnabled(1)
         self.chbx_lagoons.setEnabled(1)
@@ -129,6 +134,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_protected_areas.setEnabled(1)
         self.chbx_suburbs.setEnabled(1)
         self.chbx_ta.setEnabled(1)
+        self.chbx_imagery.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText("")
@@ -137,6 +143,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         """Disable frame (when outlines dataset in progress)"""
         self.grbx_topo.setDisabled(1)
         self.grbx_admin.setDisabled(1)
+        self.grbx_other.setDisabled(1)
         self.chbx_canals.setDisabled(1)
         self.chbx_coastline_and_islands.setDisabled(1)
         self.chbx_lagoons.setDisabled(1)
@@ -150,6 +157,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_protected_areas.setDisabled(1)
         self.chbx_suburbs.setDisabled(1)
         self.chbx_ta.setDisabled(1)
+        self.chbx_imagery.setDisabled(1)
         self.btn_update.setDisabled(1)
         # add message
         self.lb_message.setText(
@@ -171,8 +179,13 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 return
             if dataset in DATASET_TOPO50:
                 status = topo50.check_status_topo50(api_key, dataset)
-            else:
+            elif dataset in DATASET_ADMIN_BDYS:
                 status = admin_bdys.check_status_admin_bdys(api_key, dataset)
+            else:
+                status = other_reference.check_status_imagery_survey_index(
+                    api_key, dataset
+                )
+
             row_tbl = tbl.rowCount()
             tbl.setRowCount(row_tbl + 1)
             tbl.setItem(row_tbl, 0, QTableWidgetItem(status["dataset"]))
@@ -241,6 +254,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # territorial authority and grid
         if self.chbx_ta.isChecked():
             self.admin_bdy_layer_processing("territorial_authority")
+        # nz imagery survey index
+        if self.chbx_imagery.isChecked():
+            self.other_layer_processing("nz_imagery_survey_index")
 
         # create log for this update
         if len(self.updates) > 0:
@@ -251,10 +267,10 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # final message box
         if self.message == "":
             self.message = "No layers were updated."
-        self.msgbox.setText(self.message)
-        self.msgbox.exec_()
         if commit_status:
             self.db.commit_open_cursor()
+        self.msgbox.setText(self.message)
+        self.msgbox.exec_()
 
     @pyqtSlot()
     def exit_clicked(self):
@@ -296,6 +312,18 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 box.setEnabled(1)
         else:
             for box in self.grbx_admin.findChildren(QCheckBox):
+                box.setChecked(False)
+                box.setEnabled(1)
+
+    @pyqtSlot()
+    def check_all_other(self):
+        """Called when combobox to check all admin layers is toggled"""
+        if self.grbx_other.isChecked():
+            for box in self.grbx_other.findChildren(QCheckBox):
+                box.setChecked(True)
+                box.setEnabled(1)
+        else:
+            for box in self.grbx_other.findChildren(QCheckBox):
                 box.setChecked(False)
                 box.setEnabled(1)
 
@@ -348,6 +376,19 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
                 self.updates.append("territorial_authority_grid")
         else:
             self.update_message(status, dataset)
+
+    def other_layer_processing(self, dataset):
+        """Processes to run for other layers"""
+        api_key = self.check_api_key(dataset)
+        if api_key is None:
+            return
+        if dataset == "nz_imagery_survey_index":
+            status = other_reference.update_imagery_survey_index(
+                api_key, dataset, self.db
+            )
+            self.update_message(status, dataset)
+            if status == "updated":
+                self.updates.append(dataset)
 
     def check_api_key(self, layer):
         # check for API key
