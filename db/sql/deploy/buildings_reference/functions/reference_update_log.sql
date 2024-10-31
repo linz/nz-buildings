@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION buildings_reference.reference_update_log_insert_log(p
 RETURNS integer AS
 $$
 
-    INSERT INTO buildings_reference.reference_update_log (river, lake, pond, swamp, lagoon, canal, coastlines_and_islands, capture_source_area, territorial_authority, territorial_authority_grid, suburb_locality, hut, shelter, bivouac, protected_areas)
+    INSERT INTO buildings_reference.reference_update_log (river, lake, pond, swamp, lagoon, canal, coastlines_and_islands, capture_source_area, territorial_authority, territorial_authority_grid, suburb_locality, hut, shelter, bivouac, protected_areas, imagery_survey_index)
     VALUES(CASE WHEN ('river_polygons' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('lake_polygons' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('pond_polygons' = ANY(p_list)) THEN True ELSE False END,
@@ -39,7 +39,8 @@ $$
            CASE WHEN ('hut_points' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('shelter_points' = ANY(p_list)) THEN True ELSE False END,
            CASE WHEN ('bivouac_points' = ANY(p_list)) THEN True ELSE False END,
-           CASE WHEN ('protected_areas_polygons' = ANY(p_list)) THEN True ELSE False END
+           CASE WHEN ('protected_areas_polygons' = ANY(p_list)) THEN True ELSE False END,
+           CASE WHEN ('nz_imagery_survey_index' = ANY(p_list)) THEN True ELSE False END
     )
     RETURNING update_id;
 

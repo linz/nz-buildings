@@ -21,7 +21,8 @@ BEGIN
     AND prosrc LIKE '%hut_points%'
     AND prosrc LIKE '%shelter_points%'
     AND prosrc LIKE '%bivouac_points%'
-    AND prosrc LIKE '%protected_areas_polygons%';
+    AND prosrc LIKE '%protected_areas_polygons%'
+    AND prosrc LIKE '%nz_imagery_survey_index%';
     IF NOT FOUND THEN
         RAISE EXCEPTION 'dataset keywords not found, should have been added.';
     END IF;
