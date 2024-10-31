@@ -29,7 +29,6 @@ LDS_LAYER_HAS_NAME = [
     "protected_areas_polygons",
 ]
 
-# URI = "srsname='EPSG:2193' typename='data.linz.govt.nz:layer-{0}-changeset' url=\"https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?viewparams=from:{2};to:{3}{4}\""
 URI = "https://data.linz.govt.nz/services;key={1}/wfs/layer-{0}-changeset?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&typeNames=layer-{0}-changeset&viewparams=from:{2};to:{3}{4}&SRSNAME=EPSG:2193&outputFormat=json"
 
 
