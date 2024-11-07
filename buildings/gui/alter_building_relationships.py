@@ -694,7 +694,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def unlink_clicked(self, commit_status=True):
         """
         Unlink the buildings in the table
-        Called when unlink_all botton is clicked
+        Called when unlink_all button is clicked
         """
         self.btn_unlink.setEnabled(False)
         self.btn_maptool.setEnabled(False)
@@ -718,7 +718,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def matched_clicked(self, commit_status=True):
         """
         Match the buildings in the list
-        Called when matched botton is clicked
+        Called when matched button is clicked
         """
         if self.lst_existing.count() == 1 and self.lst_bulk.count() == 1:
             self.btn_matched.setEnabled(False)
@@ -748,7 +748,7 @@ class AlterRelationships(QFrame, FORM_CLASS):
     def related_clicked(self, commit_status=True):
         """
         Relate the buildings in the list
-        Called when related botton is clicked
+        Called when related button is clicked
         """
         if self.lst_existing.count() == 0 or self.lst_bulk.count() == 0:
             pass
@@ -1058,6 +1058,63 @@ class AlterRelationships(QFrame, FORM_CLASS):
             self.btn_qa_not_removed.setEnabled(False)
             self.qa_button_set_enable(False)
             self.btn_next.setEnabled(False)
+        elif current_text == "Related Outlines - name sort":
+            self.init_tbl_relationship(
+                [
+                    "Group",
+                    "Exist ID",
+                    "Bulk ID",
+                    "QA Status",
+                    "Exist Use",
+                    "Exist Name",
+                    "Bulk Use",
+                    "Bulk Name",
+                ]
+            )
+            self.populate_tbl_related_name_sort()
+            self.btn_next.setEnabled(True)
+            self.btn_qa_not_removed.setEnabled(False)
+            if self.is_empty_tbl_relationship("Related Outlines"):
+                self.qa_button_set_enable(False)
+            else:
+                self.qa_button_set_enable(True)
+        elif current_text == "Matched Outlines - name sort":
+            self.init_tbl_relationship(
+                [
+                    "Exist ID",
+                    "Bulk ID",
+                    "QA Status",
+                    "Exist Use",
+                    "Exist Name",
+                    "Bulk Use",
+                    "Bulk Name",
+                ]
+            )
+            self.populate_tbl_matched_name_sort()
+            self.btn_next.setEnabled(True)
+            self.btn_qa_not_removed.setEnabled(False)
+            if self.is_empty_tbl_relationship("Matched Outlines"):
+                self.qa_button_set_enable(False)
+            else:
+                self.qa_button_set_enable(True)
+        elif current_text == "Removed Outlines - name sort":
+            self.init_tbl_relationship(
+                ["Exist ID", "QA Status", "Exist Use", "Exist Name"]
+            )
+            self.populate_tbl_removed_name_sort()
+            self.btn_next.setEnabled(True)
+            self.btn_qa_not_removed.setEnabled(True)
+            if self.is_empty_tbl_relationship("Removed Outlines"):
+                self.qa_button_set_enable(False)
+                self.btn_qa_not_removed.setEnabled(False)
+            else:
+                self.qa_button_set_enable(True)
+        elif current_text == "Added Outlines - name sort":
+            self.init_tbl_relationship(["Bulk ID", "Bulk Use", "Bulk Name"])
+            self.populate_tbl_added_name_sort()
+            self.btn_qa_not_removed.setEnabled(False)
+            self.qa_button_set_enable(False)
+            self.btn_next.setEnabled(False)
 
         elif current_text == "":
             self.tbl_relationship.setRowCount(0)
@@ -1083,6 +1140,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         row = self.tbl_relationship.selectionModel().selectedRows()[0].row()
         current_text = self.cmb_relationship.currentText()
+        # Treat " - name sort" text as Related/Matched/Removed/Added Outlines
+        current_text = current_text.split()[0] + " " + current_text.split()[1]
 
         if current_text == "Related Outlines":
             id_existing = int(self.tbl_relationship.item(row, 1).text())
@@ -1209,6 +1268,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
 
         qa_status_id = self.get_qa_status_id(qa_status)
         current_text = self.cmb_relationship.currentText()
+        # Treat " - name sort" text as Related/Matched/Removed/Added Outlines
+        current_text = current_text.split()[0] + " " + current_text.split()[1]
 
         ids_existing, ids_bulk = [], []
         existing_use, existing_name = [], []
@@ -1298,6 +1359,8 @@ class AlterRelationships(QFrame, FORM_CLASS):
         if not selected_rows:
             selected_rows = [-1]
         current_text = self.cmb_relationship.currentText()
+        # Treat " - name sort" text as Related/Matched/Removed/Added Outlines
+        current_text = current_text.split()[0] + " " + current_text.split()[1]
         if current_text == "Related Outlines":
             qa_column = 3
         elif current_text == "Matched Outlines":
@@ -1932,6 +1995,10 @@ class AlterRelationships(QFrame, FORM_CLASS):
             "Matched Outlines",
             "Related Outlines",
             "Added Outlines",
+            "Removed Outlines - name sort",
+            "Matched Outlines - name sort",
+            "Related Outlines - name sort",
+            "Added Outlines - name sort",
         ]
         self.cmb_relationship.addItems([""] + item_list)
 
@@ -2023,6 +2090,85 @@ class AlterRelationships(QFrame, FORM_CLASS):
         tbl = self.tbl_relationship
         result = self.db.execute_return(
             bulk_load_select.added_by_dataset_id, (self.current_dataset,)
+        )
+        for (id_bulk_load, bulk_use, bulk_name) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_bulk_load))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % bulk_use))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % bulk_name))
+
+    def populate_tbl_related_name_sort(self):
+        """Populates tbl_relationship when cmb_relationship switches to related - name sort"""
+        tbl = self.tbl_relationship
+        result = self.db.execute_return(
+            bulk_load_select.related_by_dataset_id_name_sort, (self.current_dataset,)
+        )
+        for (
+            id_group,
+            id_existing,
+            id_bulk,
+            qa_status,
+            exist_use,
+            exist_name,
+            bulk_use,
+            bulk_name,
+        ) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_group))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 4, QTableWidgetItem("%s" % exist_use))
+            tbl.setItem(row_tbl, 5, QTableWidgetItem("%s" % exist_name))
+            tbl.setItem(row_tbl, 6, QTableWidgetItem("%s" % bulk_use))
+            tbl.setItem(row_tbl, 7, QTableWidgetItem("%s" % bulk_name))
+
+    def populate_tbl_matched_name_sort(self):
+        """Populates tbl_relationship when cmb_relationship switches to matched - name sort"""
+        tbl = self.tbl_relationship
+        result = self.db.execute_return(
+            bulk_load_select.matched_by_dataset_id_name_sort, (self.current_dataset,)
+        )
+        for (
+            id_existing,
+            id_bulk,
+            qa_status,
+            exist_use,
+            exist_name,
+            bulk_use,
+            bulk_name,
+        ) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % id_bulk))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % exist_use))
+            tbl.setItem(row_tbl, 4, QTableWidgetItem("%s" % exist_name))
+            tbl.setItem(row_tbl, 5, QTableWidgetItem("%s" % bulk_use))
+            tbl.setItem(row_tbl, 6, QTableWidgetItem("%s" % bulk_name))
+
+    def populate_tbl_removed_name_sort(self):
+        """Populates tbl_relationship when cmb_relationship switches to removed - name sort"""
+        tbl = self.tbl_relationship
+        result = self.db.execute_return(
+            bulk_load_select.removed_by_dataset_id_name_sort, (self.current_dataset,)
+        )
+        for (id_existing, qa_status, exist_use, exist_name) in result.fetchall():
+            row_tbl = tbl.rowCount()
+            tbl.setRowCount(row_tbl + 1)
+            tbl.setItem(row_tbl, 0, QTableWidgetItem("%s" % id_existing))
+            tbl.setItem(row_tbl, 1, QTableWidgetItem("%s" % qa_status))
+            tbl.setItem(row_tbl, 2, QTableWidgetItem("%s" % exist_use))
+            tbl.setItem(row_tbl, 3, QTableWidgetItem("%s" % exist_name))
+
+    def populate_tbl_added_name_sort(self):
+        """Populates tbl_relationship when cmb_relationship switches to added - name sort"""
+        tbl = self.tbl_relationship
+        result = self.db.execute_return(
+            bulk_load_select.added_by_dataset_id_name_sort, (self.current_dataset,)
         )
         for (id_bulk_load, bulk_use, bulk_name) in result.fetchall():
             row_tbl = tbl.rowCount()
