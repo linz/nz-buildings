@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_lds/functions/populate_buildings_lds to pg
+-- Revert nz-buildings:buildings_lds/functions/populate_buildings_lds to v3.1.0
 
 BEGIN;
 

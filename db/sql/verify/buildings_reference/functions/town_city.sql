@@ -2,12 +2,48 @@
 
 BEGIN;
 
-SELECT has_function_privilege('buildings_reference.town_city_intersect_polygon(geometry)', 'execute');
+DO $$
+BEGIN
+    PERFORM *
+    FROM pg_proc
+    WHERE proname = 'town_city_intersect_polygon'
+    AND pronargs = 1;
+    IF FOUND THEN
+        RAISE EXCEPTION 'Dropped function found.';
+    END IF;
+END $$;
 
-SELECT has_function_privilege('buildings_reference.town_city_delete_removed_areas()', 'execute');
+DO $$
+BEGIN
+    PERFORM *
+    FROM pg_proc
+    WHERE proname = 'town_city_delete_removed_areas'
+    AND pronargs = 0;
+    IF FOUND THEN
+        RAISE EXCEPTION 'Dropped function found.';
+    END IF;
+END $$;
 
-SELECT has_function_privilege('buildings_reference.town_city_insert_new_areas()', 'execute');
+DO $$
+BEGIN
+    PERFORM *
+    FROM pg_proc
+    WHERE proname = 'town_city_insert_new_areas'
+    AND pronargs = 0;
+    IF FOUND THEN
+        RAISE EXCEPTION 'Dropped function found.';
+    END IF;
+END $$;
 
-SELECT has_function_privilege('buildings_reference.town_city_update_areas()', 'execute');
+DO $$
+BEGIN
+    PERFORM *
+    FROM pg_proc
+    WHERE proname = 'town_city_update_areas'
+    AND pronargs = 0;
+    IF FOUND THEN
+        RAISE EXCEPTION 'Dropped function found.';
+    END IF;
+END $$;
 
 ROLLBACK;

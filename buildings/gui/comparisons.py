@@ -54,7 +54,7 @@ def compare_outlines(self, commit_status):
                     # insert new outline into existing subset extracts
                     sql = "SELECT buildings_bulk_load.existing_subset_extracts_insert(%s, %s, %s);"
                     result = self.db.execute_no_commit(
-                        sql, (ls[0], self.current_dataset, ls[10])
+                        sql, (ls[0], self.current_dataset, ls[9])
                     )
                 else:
                     # update supplied dataset id of existing outline

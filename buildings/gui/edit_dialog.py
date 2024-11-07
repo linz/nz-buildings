@@ -73,6 +73,7 @@ class EditDialog(QDialog, FORM_CLASS):
         self.completer_box()
 
         self.cmb_status.currentIndexChanged.connect(self.enable_le_deletion_reason)
+        self.cmb_suburb.currentIndexChanged.connect(self.cmb_suburb_changed)
         self.rejected.connect(self.close_dialog)
 
     def init_dialog(self):
@@ -323,6 +324,11 @@ class EditDialog(QDialog, FORM_CLASS):
         else:
             self.le_deletion_reason.setDisabled(1)
             self.le_deletion_reason.clear()
+
+    @pyqtSlot(int)
+    def cmb_suburb_changed(self, index):
+        """Update cmb_town with the index from cmb_suburb"""
+        self.cmb_town.setCurrentIndex(index)
 
     @pyqtSlot(list)
     def liqa_on_edit_geometry_saved(self, ids):

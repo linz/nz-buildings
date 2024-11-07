@@ -15,9 +15,8 @@ Buildings Reference Select Statements
 
 - suburb_locality
     - suburb_locality_intersect_geom (geometry)
-    - suburb_locality_name
-    - suburb_locality_name_by_building_outline_id (building_outline_id)
-    - suburb_locality_name_by_bulk_outline_id (bulk_load_outline_id)
+    - suburb_locality_town_city_by_building_outline_id (building_outline_id)
+    - suburb_locality_town_city_by_bulk_outline_id (bulk_load_outline_id)
 
 - territorial_authority
     - territorial_authority_intersect_geom (geometry)
@@ -94,34 +93,52 @@ FROM buildings_reference.{0}_points
 WHERE external_{0}_points_id = %s;
 """
 
+# admin boundaries
+
+select_admin_bdy_id_by_external_id = """
+SELECT {0}_id
+FROM buildings_reference.{0}
+WHERE external_{0}_id = %s;
+"""
+
 # suburb locality
 
 suburb_locality_intersect_geom = """
-SELECT suburb_locality_id, name
+SELECT suburb_locality_id, suburb_locality, town_city
 FROM buildings_reference.suburb_locality
 WHERE shape && ST_Expand(%s::Geometry, 1000)
-ORDER BY name;
+ORDER BY suburb_locality;
 """
 
-suburb_locality_name = """
-SELECT DISTINCT name
-FROM buildings_reference.suburb_locality;
-"""
-
-suburb_locality_name_by_building_outline_id = """
-SELECT name
+suburb_locality_town_city_by_building_outline_id = """
+SELECT suburb_locality, town_city
 FROM buildings_reference.suburb_locality sl,
      buildings.building_outlines bo
 WHERE sl.suburb_locality_id = bo.suburb_locality_id
 AND bo.building_outline_id = %s;
 """
 
-suburb_locality_name_by_bulk_outline_id = """
-SELECT name
+suburb_locality_town_city_by_bulk_outline_id = """
+SELECT suburb_locality, town_city
 FROM buildings_reference.suburb_locality sl,
      buildings_bulk_load.bulk_load_outlines blo
 WHERE sl.suburb_locality_id = blo.suburb_locality_id
 AND blo.bulk_load_outline_id = %s;
+"""
+
+suburb_locality_attribute_updates = """
+SELECT suburb_locality_id
+FROM buildings_reference.suburb_locality
+WHERE external_suburb_locality_id = %s
+AND NOT (suburb_locality = %s AND town_city = %s)
+"""
+
+suburb_locality_shape_updates = """
+SELECT ST_AsText(
+    ST_SymDifference(shape, ST_SetSRID(ST_GeometryFromText(%s), 2193), 0.001)
+    ) AS diff
+FROM buildings_reference.suburb_locality
+WHERE external_suburb_locality_id = %s
 """
 
 # territorial Authority
@@ -154,38 +171,23 @@ WHERE ta.territorial_authority_id = blo.territorial_authority_id
 AND blo.bulk_load_outline_id = %s;
 """
 
+territorial_authority_attribute_updates = """
+SELECT territorial_authority_id
+FROM buildings_reference.territorial_authority
+WHERE external_territorial_authority_id = %s
+AND NOT name = %s
+"""
+
+territorial_authority_shape_updates = """
+SELECT ST_AsText(
+    ST_SymDifference(shape, ST_SetSRID(ST_GeometryFromText(%s), 2193), 0.001)
+    ) AS diff
+FROM buildings_reference.territorial_authority
+WHERE external_territorial_authority_id = %s
+"""
+
 # territorial authority grid
 
 refresh_ta_grid_view = """
 REFRESH MATERIALIZED VIEW buildings_reference.territorial_authority_grid;
-"""
-
-# town city
-
-town_city_intersect_geometry = """
-SELECT town_city_id, name
-FROM buildings_reference.town_city
-WHERE ST_Intersects(shape, ST_Buffer(%s::Geometry, 1000))
-ORDER BY name
-"""
-
-town_city_name = """
-SELECT DISTINCT name
-FROM buildings_reference.town_city;
-"""
-
-town_city_name_by_building_outline_id = """
-SELECT name
-FROM buildings_reference.town_city tc,
-     buildings.building_outlines bo
-WHERE tc.town_city_id = bo.town_city_id
-AND bo.building_outline_id = %s;
-"""
-
-town_city_name_by_bulk_outline_id = """
-SELECT name
-FROM buildings_reference.town_city tc,
-     buildings_bulk_load.bulk_load_outlines blo
-WHERE tc.town_city_id = blo.town_city_id
-AND blo.bulk_load_outline_id = %s;
 """

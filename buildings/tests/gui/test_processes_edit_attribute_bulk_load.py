@@ -108,7 +108,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertFalse(self.edit_dialog.le_deletion_reason.isEnabled())
         self.assertEqual(self.edit_dialog.le_deletion_reason.text(), "")
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
         self.assertEqual(self.edit_dialog.cmb_status.currentText(), "Supplied")
@@ -122,6 +122,10 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertEqual(self.edit_dialog.cmb_ta.currentText(), "Wellington")
         self.assertEqual(self.edit_dialog.cmb_town.currentText(), "Wellington")
         self.assertEqual(self.edit_dialog.cmb_suburb.currentText(), "Aro Valley")
+
+        # test cmb_suburb trigger function in edit_dialog.py
+        self.edit_dialog.cmb_suburb.setCurrentIndex(self.edit_dialog.cmb_suburb.findText("Hokowhitu"))
+        self.assertEqual(self.edit_dialog.cmb_town.currentText(), "Palmerston North")
 
     def test_select_geom_before_edit(self):
         """UI and Canvas behave correctly when geometry is selected before edits button clicked"""
@@ -158,7 +162,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_status.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
 
         self.assertEqual(self.edit_dialog.cmb_status.currentText(), "Supplied")
@@ -233,7 +237,7 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.assertTrue(self.edit_dialog.cmb_capture_source.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_status.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_ta.isEnabled())
-        self.assertTrue(self.edit_dialog.cmb_town.isEnabled())
+        self.assertFalse(self.edit_dialog.cmb_town.isEnabled())
         self.assertTrue(self.edit_dialog.cmb_suburb.isEnabled())
         self.assertEqual(self.edit_dialog.cmb_status.currentText(), "Supplied")
         self.assertEqual(
@@ -388,14 +392,11 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_ta.setCurrentIndex(
             self.edit_dialog.cmb_ta.findText("Manawatu-Whanganui")
         )
-        self.edit_dialog.cmb_town.setCurrentIndex(
-            self.edit_dialog.cmb_town.findText("Palmerston North")
-        )
         self.edit_dialog.cmb_suburb.setCurrentIndex(
             self.edit_dialog.cmb_suburb.findText("Hokowhitu")
         )
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
-        sql = "SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s"
+        sql = "SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s"
         result = db._execute(sql, (self.edit_dialog.bulk_load_outline_id,))
         result = result.fetchall()[0]
         # status
@@ -408,19 +409,15 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         capture_method = db._execute(sql, (result[1],))
         capture_method = capture_method.fetchall()[0][0]
         self.assertEqual("Unknown", capture_method)
-        # suburb
-        sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+        # suburb/town
+        sql = "SELECT suburb_locality, town_city FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
         suburb = db._execute(sql, (result[2],))
-        suburb = suburb.fetchall()[0][0]
+        suburb, town = suburb.fetchall()[0]
         self.assertEqual("Hokowhitu", suburb)
-        # town
-        sql = "SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;"
-        town_city = db._execute(sql, (result[3],))
-        town_city = town_city.fetchall()[0][0]
-        self.assertEqual("Palmerston North", town_city)
+        self.assertEqual("Palmerston North", town)
         # territorial Authority
         sql = "SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;"
-        territorial_authority = db._execute(sql, (result[4],))
+        territorial_authority = db._execute(sql, (result[3],))
         territorial_authority = territorial_authority.fetchall()[0][0]
         self.assertEqual("Manawatu-Whanganui", territorial_authority)
 
@@ -493,15 +490,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.cmb_ta.setCurrentIndex(
             self.edit_dialog.cmb_ta.findText("Manawatu-Whanganui")
         )
-        self.edit_dialog.cmb_town.setCurrentIndex(
-            self.edit_dialog.cmb_town.findText("Palmerston North")
-        )
         self.edit_dialog.cmb_suburb.setCurrentIndex(
             self.edit_dialog.cmb_suburb.findText("Hokowhitu")
         )
         self.bulk_load_frame.change_instance.edit_save_clicked(False)
         for i in self.edit_dialog.ids:
-            sql = "SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, town_city_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;"
+            sql = "SELECT bulk_load_status_id, capture_method_id, suburb_locality_id, territorial_authority_id FROM buildings_bulk_load.bulk_load_outlines WHERE bulk_load_outline_id = %s;"
             result = db._execute(sql, (i,))
             result = result.fetchall()[0]
             # status
@@ -514,16 +508,12 @@ class ProcessBulkLoadEditOutlinesTest(unittest.TestCase):
             capture_method = db._execute(sql, (result[1],))
             capture_method = capture_method.fetchall()[0][0]
             self.assertEqual("Unknown", capture_method)
-            # suburb
-            sql = "SELECT name FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
+            # suburb/town
+            sql = "SELECT suburb_locality, town_city FROM buildings_reference.suburb_locality WHERE suburb_locality_id = %s;"
             suburb = db._execute(sql, (result[2],))
-            suburb = suburb.fetchall()[0][0]
+            suburb, town = suburb.fetchall()[0]
             self.assertEqual("Hokowhitu", suburb)
-            # town
-            sql = "SELECT name FROM buildings_reference.town_city WHERE town_city_id = %s;"
-            town_city = db._execute(sql, (result[3],))
-            town_city = town_city.fetchall()[0][0]
-            self.assertEqual("Palmerston North", town_city)
+            self.assertEqual("Palmerston North", town)
             # territorial Authority
             sql = "SELECT name FROM buildings_reference.territorial_authority WHERE territorial_authority_id = %s;"
             territorial_authority = db._execute(sql, (result[4],))

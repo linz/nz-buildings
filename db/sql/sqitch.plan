@@ -95,7 +95,19 @@ buildings/functions/add_names_and_uses_functions 2022-06-15T02:54:14Z Jan Ducnui
 buildings_bulk_load/functions/load_to_production [buildings_bulk_load/functions/load_to_production@v3.6.0-dev1] 2022-06-15T03:07:57Z Jan Ducnuigeen <jducnuigeen@linz.govt.nz> # Insert names and uses when loading bulk outlines into production
 @v4.0.0-dev1 2022-09-14T22:18:19Z Daniel Silk <dsilk@linz.govt.nz> # Tag v4.0.0-dev1
 
-buildings_reference/update_suburb_locality_name_column 2024-07-18T03:44:07Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column to match NZ Suburbs and Localities
+buildings_reference/update_suburb_locality_table 2024-07-18T03:44:07Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column to match NZ Suburbs and Localities
 buildings_reference/functions/suburb_locality_optimised [buildings_reference/functions/suburb_locality_optimised@v4.0.0-dev1] 2024-07-18T05:10:43Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name fields in functions
-buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v4.0.0-dev1] 2024-07-18T05:45:55Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column in populate_buildings_lds function
-buildings_reference/remove_suburb_locality_old_name_column 2024-07-18T06:26:12Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ
+buildings/remove_building_outlines_ta_not_null_constraint 2024-08-07T02:50:08Z Yingting Chen <ychen@linz.govt.nz> # Remove NOT NULL constraint for territorial_authority_id column in building_outlines table.
+buildings_bulk_load/remove_bulk_load_outlines_ta_not_null_constraint 2024-08-07T02:51:28Z Yingting Chen <ychen@linz.govt.nz> # Remove NOT NULL constraint for territorial_authority_id column in bulk_load_outlines table.
+buildings_lds/functions/populate_buildings_lds [buildings_lds/functions/populate_buildings_lds@v4.0.0-dev1] 2024-08-14T03:45:12Z Yingting Chen <ychen@linz.govt.nz> # Update suburb_locality name column in populate_buildings_lds function
+buildings/functions/building_outlines [buildings/functions/building_outlines@v4.0.0-dev1] 2024-08-14T03:47:12Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in functions.
+buildings/remove_building_outlines_town_city_id_column 2024-08-14T03:50:02Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in building_outlines table
+buildings_bulk_load/functions/bulk_load_outlines [buildings_bulk_load/functions/bulk_load_outlines@v4.0.0-dev1] 2024-08-14T04:27:25Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in funct\nions.
+buildings_bulk_load/remove_bulk_load_outlines_town_city_id_column 2024-08-14T04:32:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city_id column in bulk_load_outlines table
+buildings_reference/functions/town_city [buildings_reference/functions/town_city@v4.0.0-dev1] 2024-08-14T04:35:22Z Yingting Chen <ychen@linz.govt.nz> # Remove functions of town_city table.
+buildings_reference/add_log_column_nz_imagery_survey_index 2024-08-14T04:37:22Z Yingting Chen <ychen@linz.govt.nz> # Add nz_imagery_survey_index column in reference_update_log.
+buildings_reference/functions/reference_update_log [buildings_reference/functions/reference_update_log@v4.0.0-dev1] 2024-08-14T04:38:22Z Yingting Chen <ychen@linz.govt.nz> # Remove town_city in reference_update_log update function.
+buildings_reference/remove_suburb_locality_old_name_column 2024-08-14T04:40:22Z Yingting Chen <ychen@linz.govt.nz> # Remove suburb_locality old name columns from FENZ
+buildings_reference/drop_town_city 2024-08-14T04:45:02Z Yingting Chen <ychen@linz.govt.nz> # Drop table town_city as it has been merged into suburb_locality.
+buildings_reference/functions/suburb_locality [buildings_reference/functions/suburb_locality@v4.0.0-dev1] 2024-08-30T02:54:25Z Yingting Chen <ychen@linz.govt.nz> # Add new suburb_locality functions for the reference update process.
+buildings_reference/functions/territorial_authority [buildings_reference/functions/territorial_authority@v4.0.0-dev1] 2024-09-10T05:51:01Z Yingting Chen <ychen@linz.govt.nz> # Add new territorial_authority functions for the reference update process.

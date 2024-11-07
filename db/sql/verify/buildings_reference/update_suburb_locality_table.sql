@@ -2,7 +2,7 @@
 
 BEGIN;
 
-SELECT name
+SELECT suburb_locality, town_city
 FROM buildings_reference.suburb_locality
 WHERE FALSE;
 

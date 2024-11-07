@@ -11,6 +11,7 @@ from qgis.core import QgsApplication
 CONFIG_FILE_PATH = os.path.join(QgsApplication.qgisSettingsDirPath(), "buildings", "config.ini")
 CONFIG_SCHEMA = {
     "database": ["host", "port", "dbname", "user", "password"],
+    "api": ["linz", "statsnz"],
     "logging": ["logfile"]
 }
 

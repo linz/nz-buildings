@@ -4,18 +4,14 @@ BEGIN;
 
 SELECT has_function_privilege('buildings_reference.suburb_locality_intersect_polygon(geometry)', 'execute');
 
-DO $$
-BEGIN
+SELECT has_function_privilege('buildings_reference.suburb_locality_delete_by_external_id(integer)', 'execute');
 
-    PERFORM proname, proargnames, prosrc 
-    FROM pg_proc
-    WHERE proname = 'suburb_locality_intersect_polygon'
-    AND prosrc LIKE '%ST_Area(shape)%';
+SELECT has_function_privilege('buildings_reference.suburb_locality_insert(integer, varchar, varchar, varchar)', 'execute');
 
-    IF FOUND THEN
-        RAISE EXCEPTION 'ST_Area(shape) Found.';
-    END IF;
+SELECT has_function_privilege('buildings_reference.suburb_locality_update_by_external_id(integer, varchar, varchar, varchar)', 'execute');
 
-END $$;
+SELECT has_function_privilege('buildings_reference.suburb_locality_attribute_update_building_outlines(integer[])', 'execute');
+
+SELECT has_function_privilege('buildings_reference.suburb_locality_geometry_update_building_outlines(varchar)', 'execute');
 
 ROLLBACK;

@@ -1,6 +1,16 @@
--- Deploy nz-buildings:buildings_reference/functions/territorial_authority to pg
+-- Revert nz-buildings:buildings_reference/functions/territorial_authority to v4.0.0
 
 BEGIN;
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_delete_by_external_id(integer);
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_insert(integer, varchar, varchar);
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_update_by_external_id(integer, varchar, varchar);
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_attribute_update_building_outlines(integer[]);
+
+DROP FUNCTION IF EXISTS buildings_reference.territorial_authority_geometry_update_building_outlines(varchar);
 
 ----------------------------------------------------------------------------------------------
 -- buildings_reference.territorial_authority && buildings_reference.territorial_authority_grid
@@ -150,13 +160,9 @@ $$
               name = ata.name
             , shape = ST_SetSRID(ST_Transform(ata.shape, 2193), 2193)
         FROM admin_bdys.territorial_authority ata
-        WHERE bta.external_territorial_authority_id IN (
-            SELECT ogc_fid
-            FROM admin_bdys.territorial_authority ata
-            JOIN buildings_reference.territorial_authority bta ON ogc_fid = external_territorial_authority_id
-            WHERE (   NOT ST_Equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
-                   OR bta.name != ata.name)
-        )
+        WHERE bta.external_territorial_authority_id = ata.ogc_fid
+        AND (NOT ST_Equals(bta.shape, ST_SetSRID(ST_Transform(ata.shape, 2193), 2193))
+            OR bta.name != ata.name)
         RETURNING *
     )
     SELECT ARRAY (

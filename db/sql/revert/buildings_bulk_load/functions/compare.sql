@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_bulk_load/functions/compare to pg
+-- Revert nz-buildings:buildings_bulk_load/functions/compare to v3.2.0
 
 BEGIN;
 

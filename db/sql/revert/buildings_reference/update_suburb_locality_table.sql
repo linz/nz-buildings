@@ -3,6 +3,7 @@
 BEGIN;
 
 ALTER TABLE buildings_reference.suburb_locality
-DROP COLUMN name;
+DROP COLUMN suburb_locality,
+DROP COLUMN town_city;
 
 COMMIT;

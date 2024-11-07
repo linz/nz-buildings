@@ -1,12 +1,6 @@
--- Deploy nz-buildings:buildings_reference/functions/update_suburb_locality_changed_deleted_buildings to pg
+-- Revert nz-buildings:buildings_reference/functions/update_suburb_locality_changed_deleted_buildings to v4.0.0
 
 BEGIN;
-
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_insert_new_areas();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_update_suburb_locality();
-DROP FUNCTION IF EXISTS buildings_reference.suburb_locality_delete_removed_areas();
-DROP FUNCTION IF EXISTS buildings.building_outlines_update_suburb(integer[]);
-DROP FUNCTION IF EXISTS buildings_bulk_load.bulk_load_outlines_update_all_suburbs(integer[]);
 
 -- building_outlines_update_changed_and_deleted_suburb (replace suburb values with the intersection result)
     -- params: 
