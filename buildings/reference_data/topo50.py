@@ -230,7 +230,7 @@ def update_coastlines_and_islands(kx_api_key, dataset, dbconn):
     if dataset != "coastlines_and_islands":
         return "error"
     layer = QgsVectorLayer(
-        "https://data.linz.govt.nz/services;key={1}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=layer-{0}&outputFormat=json".format(
+        "https://data.linz.govt.nz/services;key={1}/wfs?service=WFS&version=2.0.0&request=GetFeature&typeNames=layer-{0}&SRSName=EPSG:2193&outputFormat=json".format(
             LDS_LAYER_IDS[dataset], kx_api_key
         )
     )
