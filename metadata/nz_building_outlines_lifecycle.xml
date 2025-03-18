@@ -58,7 +58,7 @@
 <gmd:role><gmd:CI_RoleCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode></gmd:role></gmd:CI_ResponsibleParty>
 </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2024-12-09</gco:Date>
+    <gco:Date>2025-02-17</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -71,12 +71,12 @@
       <gmd:citation>
         <gmd:CI_Citation>
           <gmd:title>
-            <gco:CharacterString>NZ Building Outlines Lifecycle</gco:CharacterString>
+            <gco:CharacterString>NZ Building Outlines Lifecycle (Deprecated)</gco:CharacterString>
           </gmd:title>
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2024-12-09</gco:Date>
+                <gco:Date>2025-02-17</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -86,7 +86,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2024-12-09</gco:Date>
+                <gco:Date>2025-02-17</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -97,6 +97,8 @@
       </gmd:citation>
       <gmd:abstract>
         <gco:CharacterString>
+*Note: This table is no longer being updated as of January 2025*
+
 This table provides the relationships between building outlines within mainland New Zealand when buildings are split or merged.
 
 A building outline is a 2D representation of the roof outline of a building which has been classified from LINZ aerial imagery using a combination of automated and manual processes to extract and refine a building roof outline.

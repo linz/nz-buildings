@@ -65,7 +65,7 @@
     </gmd:CI_ResponsibleParty>
   </gmd:contact>
   <gmd:dateStamp>
-    <gco:Date>2024-12-09</gco:Date>
+    <gco:Date>2025-02-20</gco:Date>
   </gmd:dateStamp>
   <gmd:metadataStandardName>
     <gco:CharacterString>ANZLIC Metadata Profile: An Australian/New Zealand Profile of AS/NZS ISO 19115:2005, Geographic information - Metadata</gco:CharacterString>
@@ -94,7 +94,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2024-12-09</gco:Date>
+                <gco:Date>2025-02-20</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
@@ -104,7 +104,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:Date>2024-12-09</gco:Date>
+                <gco:Date>2025-02-20</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="http://asdd.ga.gov.au/asdd/profileinfo/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
@@ -135,6 +135,7 @@ Please refer to the [NZ Building Outlines Data Dictionary](https://nz-buildings.
 
 [NZ Building Outlines (All Sources)](https://data.linz.govt.nz/layer/101292) - contains all combinations of building outlines from multiple years of imagery that have existed since the beginning of this dataset, and the dates when each building outline existed in the associated aerial imagery.
 
+Note: The NZ Building Outlines Lifecycle table is no longer being updated past January 2025.
 [NZ Building Outlines Lifecycle](https://data.linz.govt.nz/table/101291) - is related to the dataset above and stores the relationship between building outlines when one building is split into two or more building outlines, or when multiple building outlines are merged into a single outline.
 
 ---
