@@ -25,8 +25,6 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
       - name: Launch database container
         run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
-      - name: Print docker logs
-        uses: jwalton/gh-docker-logs@v1
       - name: Load additional schemas
         run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
       - name: Sqitch deploy and verify
@@ -49,8 +47,6 @@ jobs:
           - {name: 'Legacy', image: 'ghcr.io/linz/nz-buildings-db-legacy:v1'}
           - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
         qgis_image:
-          - {name: '3.10', image: 'qgis/qgis:release-3_10'}
-          - {name: '3.16', image: 'qgis/qgis:release-3_16'}
           - {name: '3.24', image: 'qgis/qgis:release-3_24'}
     env:
       PGHOST: localhost
@@ -69,8 +65,6 @@ jobs:
         run: bash $BASE_DIR/scripts/steps/create_docker_network.sh
       - name: Launch database container
         run: bash $BASE_DIR/scripts/steps/launch_database_container.sh
-      - name: Print docker logs
-        uses: jwalton/gh-docker-logs@v1
       - name: Load additional schemas
         run: bash $BASE_DIR/scripts/steps/load_additional_schemas.sh
       - name: Sqitch deploy
