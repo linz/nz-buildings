@@ -48,7 +48,6 @@ jobs:
           - {name: 'Modern', image: 'ghcr.io/linz/nz-buildings-db-modern:v1'}
         qgis_image:
           - {name: '3.24', image: 'qgis/qgis:release-3_24'}
-          - {name: '3.34', image: 'qgis/qgis:release-3_34'}
     env:
       PGHOST: localhost
       PGPORT: 54320
