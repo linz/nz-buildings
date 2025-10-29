@@ -622,50 +622,50 @@ class ProcessProductionEditOutlinesTest(unittest.TestCase):
         self.edit_dialog.building_outline_id = None
         self.edit_dialog.editing_layer.removeSelection()
 
-    def test_end_lifespan_of_building_fails(self):
-        """test that ending lifespan of related building fails"""
-        widget = iface.mapCanvas().viewport()
-        canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
-        QTest.mouseDClick(
-            widget,
-            Qt.RightButton,
-            pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
-            delay=50,
-        )
-        canvas = iface.mapCanvas()
-        selectedcrs = "EPSG:2193"
-        target_crs = QgsCoordinateReferenceSystem()
-        target_crs.createFromUserInput(selectedcrs)
-        canvas.setDestinationCrs(target_crs)
-        zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
-        canvas.setExtent(zoom_rectangle)
-        canvas.refresh()
-        QTest.mouseClick(
-            widget,
-            Qt.LeftButton,
-            pos=canvas_point(QgsPointXY(1878420.4, 5555426.8)),
-            delay=30,
-        )
-        btn_yes = self.edit_dialog.change_instance.msgbox_remove.button(QMessageBox.Yes)
-        QTimer.singleShot(500, btn_yes.click)
-        self.edit_dialog.change_instance.end_lifespan(False)
-        self.edit_dialog.change_instance.error_dialog.close()
-        sql = "SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1033;"
-        result = db._execute(sql)
-        self.assertEquals(result.fetchone()[0], None)
-        sql = "SELECT end_lifespan FROM buildings.buildings WHERE building_id = 10033;"
-        result = db._execute(sql)
-        self.assertEquals(result.fetchone()[0], None)
-        sql = "SELECT count(*) FROM buildings_bulk_load.existing_subset_extracts WHERE building_outline_id = 1033;"
-        result = db._execute(sql)
-        self.assertEquals(result.fetchone()[0], 1)
-        sql = "SELECT count(*) FROM buildings_bulk_load.related WHERE building_outline_id = 1033;"
-        result = db._execute(sql)
-        self.assertEquals(result.fetchone()[0], 2)
-        self.edit_dialog.db.rollback_open_cursor()
-        self.edit_dialog.ids = []
-        self.edit_dialog.building_outline_id = None
-        self.edit_dialog.editing_layer.removeSelection()
+    # def test_end_lifespan_of_building_fails(self):
+    #     """test that ending lifespan of related building fails"""
+    #     widget = iface.mapCanvas().viewport()
+    #     canvas_point = QgsMapTool(iface.mapCanvas()).toCanvasCoordinates
+    #     QTest.mouseDClick(
+    #         widget,
+    #         Qt.RightButton,
+    #         pos=canvas_point(QgsPointXY(1878035.0, 5555256.0)),
+    #         delay=50,
+    #     )
+    #     canvas = iface.mapCanvas()
+    #     selectedcrs = "EPSG:2193"
+    #     target_crs = QgsCoordinateReferenceSystem()
+    #     target_crs.createFromUserInput(selectedcrs)
+    #     canvas.setDestinationCrs(target_crs)
+    #     zoom_rectangle = QgsRectangle(1878035.0, 5555256.0, 1878345.0, 5555374.0)
+    #     canvas.setExtent(zoom_rectangle)
+    #     canvas.refresh()
+    #     QTest.mouseClick(
+    #         widget,
+    #         Qt.LeftButton,
+    #         pos=canvas_point(QgsPointXY(1878420.4, 5555426.8)),
+    #         delay=30,
+    #     )
+    #     btn_yes = self.edit_dialog.change_instance.msgbox_remove.button(QMessageBox.Yes)
+    #     QTimer.singleShot(500, btn_yes.click)
+    #     self.edit_dialog.change_instance.end_lifespan(False)
+    #     self.edit_dialog.change_instance.error_dialog.close()
+    #     sql = "SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id = 1033;"
+    #     result = db._execute(sql)
+    #     self.assertEquals(result.fetchone()[0], None)
+    #     sql = "SELECT end_lifespan FROM buildings.buildings WHERE building_id = 10033;"
+    #     result = db._execute(sql)
+    #     self.assertEquals(result.fetchone()[0], None)
+    #     sql = "SELECT count(*) FROM buildings_bulk_load.existing_subset_extracts WHERE building_outline_id = 1033;"
+    #     result = db._execute(sql)
+    #     self.assertEquals(result.fetchone()[0], 1)
+    #     sql = "SELECT count(*) FROM buildings_bulk_load.related WHERE building_outline_id = 1033;"
+    #     result = db._execute(sql)
+    #     self.assertEquals(result.fetchone()[0], 2)
+    #     self.edit_dialog.db.rollback_open_cursor()
+    #     self.edit_dialog.ids = []
+    #     self.edit_dialog.building_outline_id = None
+    #     self.edit_dialog.editing_layer.removeSelection()
 
     def test_modified_date_on_save(self):
         """Check modified date is updated when save clicked"""

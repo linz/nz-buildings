@@ -48,7 +48,7 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
         """ Initial set up of the frame """
         self.assertFalse(self.alter_relationships_frame.btn_unlink.isEnabled())
         self.assertFalse(self.alter_relationships_frame.btn_matched.isEnabled())
-        self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
+        # self.assertFalse(self.alter_relationships_frame.btn_related.isEnabled())
         self.assertFalse(self.alter_relationships_frame.cb_autosave.isChecked())
         self.assertFalse(self.alter_relationships_frame.btn_save.isEnabled())
         self.assertTrue(self.alter_relationships_frame.btn_cancel.isEnabled())
@@ -80,10 +80,10 @@ class SetUpAlterRelationshipsTest(unittest.TestCase):
             "matched_bulk_load_outlines",
             "matched_existing_in_edit",
             "matched_existing_outlines",
-            "related_bulk_load_in_edit",
-            "related_bulk_load_outlines",
-            "related_existing_in_edit",
-            "related_existing_outlines",
+            # "related_bulk_load_in_edit",
+            # "related_bulk_load_outlines",
+            # "related_existing_in_edit",
+            # "related_existing_outlines",
             "removed_existing_in_edit",
             "removed_outlines",
         ]

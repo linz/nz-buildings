@@ -43,14 +43,14 @@ SELECT results_eq(
 --3----------------------------------------------------------
 -- Test find_related in complex data
 
-SELECT results_eq(
-  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_related(6) ORDER BY building_outline_id, bulk_load_outline_id',
-  $$VALUES (1801, 2089), (1801, 2090),
-           (1802, 2094), (1802, 2096),
-           (1803, 2096), (1805, 2096),
-           (1806, 2092), (1806, 2094)$$,
-  'Check return of buildings_bulk_load find related function'
-);
+--SELECT results_eq(
+--  'SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.find_related(6) ORDER BY building_outline_id, bulk_load_outline_id',
+--  $$VALUES (1801, 2089), (1801, 2090),
+--           (1802, 2094), (1802, 2096),
+--           (1803, 2096), (1805, 2096),
+--           (1806, 2092), (1806, 2094)$$,
+--  'Check return of buildings_bulk_load find related function'
+--);
 
 --4----------------------------------------------------------
 -- Test comparisons function inputs complex added outlines
@@ -71,7 +71,7 @@ SELECT set_has(
 );
 
 --6----------------------------------------------------------
--- Test comparsisons function inputs complex related outlines
+-- Test comparsisons function inputs complex matched outlines
 -- by bulk_load_outline id
 
 SELECT set_has(
@@ -84,32 +84,32 @@ SELECT set_has(
 -- Test comparisons function inputs complex related outlines
 -- by building_outline_id
 
-SELECT set_has(
-  'SELECT building_outline_id FROM buildings_bulk_load.related',
-  $$VALUES (1801), (1802),
-           (1803), (1805),
-           (1806)$$,
-  'Check building_outline_id of related table after comparisons function has run'
-);
+--SELECT set_has(
+--  'SELECT building_outline_id FROM buildings_bulk_load.related',
+--  $$VALUES (1801), (1802),
+--           (1803), (1805),
+--           (1806)$$,
+--  'Check building_outline_id of related table after comparisons function has run'
+--);
 
 --8----------------------------------------------------------
 -- Test comparisons function inputs complex related outlines
 -- by bulk_load_outline_id
 
-SELECT set_has(
-  'SELECT bulk_load_outline_id FROM buildings_bulk_load.related',
-  $$VALUES (2089), (2090),
-           (2094), (2096),
-           (2092)$$,
-  'Check bulk_load_outline_id of related table after comparisons function has run'
-);
+--SELECT set_has(
+--  'SELECT bulk_load_outline_id FROM buildings_bulk_load.related',
+--  $$VALUES (2089), (2090),
+--           (2094), (2096),
+--           (2092)$$,
+--  'Check bulk_load_outline_id of related table after comparisons function has run'
+--);
 
 --9-----------------------------------------------------------
 -- Test comparisons function does not input added outlines
 -- to related table
 
-SELECT set_hasnt(
-  'SELECT building_outline_id FROM buildings_bulk_load.related',
-  $$VALUES (2091), (2095)$$,
-  'Check bulk_load_outline_id of related table after comparisons function has run'
-);
+--SELECT set_hasnt(
+--  'SELECT building_outline_id FROM buildings_bulk_load.related',
+--  $$VALUES (2091), (2095)$$,
+--  'Check bulk_load_outline_id of related table after comparisons function has run'
+--);

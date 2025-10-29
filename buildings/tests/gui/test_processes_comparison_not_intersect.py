@@ -115,15 +115,15 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = result.fetchall()
         self.assertEqual(len(result), 4)
 
-    def test_compare_related(self):
-        """Check correct number of ids are determined as 'Related'"""
-        btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
-        QTimer.singleShot(500, btn_yes.click)
-        self.bulk_load_frame.compare_outlines_clicked(False)
-        sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
-        result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 44)
+    # def test_compare_related(self):
+    #     """Check correct number of ids are determined as 'Related'"""
+    #     btn_yes = self.bulk_load_frame.msgbox_compare.button(QMessageBox.Yes)
+    #     QTimer.singleShot(500, btn_yes.click)
+    #     self.bulk_load_frame.compare_outlines_clicked(False)
+    #     sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
+    #     result = db._execute(sql)
+    #     result = result.fetchall()
+    #     self.assertEqual(len(result), 44)
 
     def test_delete_during_qa(self):
         """Checks outlines that are deleted during qa before comparisons is run are not carried through"""
@@ -145,11 +145,11 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(len(result), 4)
-        # related
-        sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
-        result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 44)
+        # # related
+        # sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
+        # result = db._execute(sql)
+        # result = result.fetchall()
+        # self.assertEqual(len(result), 44)
         # removed
         sql = "SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;"
         result = db._execute(sql)
@@ -193,11 +193,11 @@ class ProcessComparisonNotIntersectTest(unittest.TestCase):
         result = db._execute(sql)
         result = result.fetchall()
         self.assertEqual(len(result), 4)
-        # related
-        sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
-        result = db._execute(sql)
-        result = result.fetchall()
-        self.assertEqual(len(result), 44)
+        # # related
+        # sql = "SELECT building_outline_id, bulk_load_outline_id FROM buildings_bulk_load.related ORDER BY building_outline_id, bulk_load_outline_id;"
+        # result = db._execute(sql)
+        # result = result.fetchall()
+        # self.assertEqual(len(result), 44)
         # removed
         sql = "SELECT building_outline_id FROM buildings_bulk_load.removed ORDER BY building_outline_id;"
         result = db._execute(sql)

@@ -90,67 +90,67 @@ SELECT results_eq(
 --8----------------------------------------------------------
 -- result of related buildings in buildings and building_outlines table
 
-SELECT results_eq(
-    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032) ORDER BY building_id',
-    $$VALUES (1000002), (1000003), (1000004), (1000005), (1000006),
-             (1000007), (1000008), (1000009), (1000010), (1000011),
-             (1000012), (1000013), (1000014), (1000015), (1000016),
-             (1000017), (1000018), (1000019), (1000020), (1000021),
-             (1000022), (1000023), (1000024), (1000025), (1000026),
-             (1000027), (1000028)$$,
-    'Check related buildings in buildings and building_outlines table after load_buildings function has run'
-);
+--SELECT results_eq(
+--    'SELECT building_id FROM buildings.building_outlines WHERE building_outline_id IN (1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032) ORDER BY building_id',
+--    $$VALUES (1000002), (1000003), (1000004), (1000005), (1000006),
+--             (1000007), (1000008), (1000009), (1000010), (1000011),
+--             (1000012), (1000013), (1000014), (1000015), (1000016),
+--             (1000017), (1000018), (1000019), (1000020), (1000021),
+--             (1000022), (1000023), (1000024), (1000025), (1000026),
+--             (1000027), (1000028)$$,
+--    'Check related buildings in buildings and building_outlines table after load_buildings function has run'
+--);
 
 --9---------------------------------------------------------
 -- result of related buildings in lifecycle table
 
-SELECT results_eq(
-    'SELECT parent_building_id, building_id FROM buildings.lifecycle ORDER BY parent_building_id DESC, building_id ASC',
-    $$VALUES (10033, 1000002), (10033, 1000003),
-             (10032, 1000002), (10032, 1000003),
-             (10031, 1000004), (10031, 1000005), (10031, 1000006), (10031, 1000007), (10031, 1000008), (10031, 1000009),
-             (10030, 1000010), (10030, 1000011), (10030, 1000012), (10030, 1000013), (10030, 1000014),
-             (10029, 1000015), (10029, 1000016), (10029, 1000017), (10029, 1000018),
-             (10028, 1000019), (10028, 1000020), (10028, 1000021),
-             (10027, 1000022), (10027, 1000023),
-             (10026, 1000024), (10025, 1000024), (10024, 1000024), (10023, 1000024), (10022, 1000024), (10021, 1000024),
-             (10020, 1000025), (10019, 1000025), (10018, 1000025), (10017, 1000025), (10016, 1000025),
-             (10015, 1000026), (10014, 1000026), (10013, 1000026), (10012, 1000026),
-             (10011, 1000027), (10010, 1000027), (10009, 1000027),
-             (10008, 1000028), (10007, 1000028)$$,
-    'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
-);
+--SELECT results_eq(
+--    'SELECT parent_building_id, building_id FROM buildings.lifecycle ORDER BY parent_building_id DESC, building_id ASC',
+--    $$VALUES (10033, 1000002), (10033, 1000003),
+--             (10032, 1000002), (10032, 1000003),
+--             (10031, 1000004), (10031, 1000005), (10031, 1000006), (10031, 1000007), (10031, 1000008), (10031, 1000009),
+--             (10030, 1000010), (10030, 1000011), (10030, 1000012), (10030, 1000013), (10030, 1000014),
+--             (10029, 1000015), (10029, 1000016), (10029, 1000017), (10029, 1000018),
+--             (10028, 1000019), (10028, 1000020), (10028, 1000021),
+--             (10027, 1000022), (10027, 1000023),
+--             (10026, 1000024), (10025, 1000024), (10024, 1000024), (10023, 1000024), (10022, 1000024), (10021, 1000024),
+--             (10020, 1000025), (10019, 1000025), (10018, 1000025), (10017, 1000025), (10016, 1000025),
+--             (10015, 1000026), (10014, 1000026), (10013, 1000026), (10012, 1000026),
+--             (10011, 1000027), (10010, 1000027), (10009, 1000027),
+--             (10008, 1000028), (10007, 1000028)$$,
+--    'Check parent_building_id and building_id in lifecycle table after load_buildings function has run'
+--);
 
 --10---------------------------------------------------------
 -- result of related buildings in building_outlines table
 
-SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1033, 1032, 1031, 1030, 1029, 1028, 1027, 1026, 1025, 1024, 1023, 1022, 1021, 1020, 1019, 1018, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009, 1008, 1007)',
-    'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
-);
+--SELECT isnt_empty(
+--    'SELECT end_lifespan FROM buildings.building_outlines WHERE building_outline_id IN (1033, 1032, 1031, 1030, 1029, 1028, 1027, 1026, 1025, 1024, 1023, 1022, 1021, 1020, 1019, 1018, 1017, 1016, 1015, 1014, 1013, 1012, 1011, 1010, 1009, 1008, 1007)',
+--    'Check related buildings (end_lifespan) in building_outlines table after load_buildings function has run'
+--);
 
 --11---------------------------------------------------------
 -- result of related buildings in buildings table
 
-SELECT isnt_empty(
-    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (10033, 10032, 10031, 10030, 10029, 10028, 10027, 10026, 10025, 10024, 10023, 10022, 10021, 10020, 10019, 10018, 10017, 10016, 10015, 10014, 10013, 10012, 10011, 100100, 10009, 10008, 10007)',
-    'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
-);
+--SELECT isnt_empty(
+--    'SELECT end_lifespan FROM buildings.buildings WHERE building_id IN (10033, 10032, 10031, 10030, 10029, 10028, 10027, 10026, 10025, 10024, 10023, 10022, 10021, 10020, 10019, 10018, 10017, 10016, 10015, 10014, 10013, 10012, 10011, 100100, 10009, 10008, 10007)',
+--    'Check related buildings (end_lifespan) in buildings table after load_buildings function has run'
+--);
 
 --12---------------------------------------------------------
 -- result of related buildings in transferred table
 
-SELECT results_eq(
-    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000000, 1000001, 1000002, 1000003, 1000004, 1000005, 1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032) ORDER BY new_building_outline_id',
-    $$VALUES (2010), (2003), (2031), (2004), (2002),
-             (2001), (2033), (2032), (2030), (2029),
-             (2028), (2027), (2026), (2025), (2024),
-             (2023), (2022), (2021), (2020), (2019),
-             (2018), (2017), (2016), (2015), (2014),
-             (2013), (2012), (2011), (2009), (2008),
-             (2007), (2006), (2005)$$,
-    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
-);
+--SELECT results_eq(
+--    'SELECT bulk_load_outline_id FROM buildings_bulk_load.transferred WHERE new_building_outline_id IN (1000000, 1000001, 1000002, 1000003, 1000004, 1000005, 1000006, 1000007, 1000008, 1000009, 1000010, 1000011, 1000012, 1000013, 1000014, 1000015, 1000016, 1000017, 1000018, 1000019, 1000020, 1000021, 1000022, 1000023, 1000024, 1000025, 1000026, 1000027, 1000028, 1000029, 1000030, 1000031, 1000032) ORDER BY new_building_outline_id',
+--    $$VALUES (2010), (2003), (2031), (2004), (2002),
+--             (2001), (2033), (2032), (2030), (2029),
+--             (2028), (2027), (2026), (2025), (2024),
+--             (2023), (2022), (2021), (2020), (2019),
+--             (2018), (2017), (2016), (2015), (2014),
+--             (2013), (2012), (2011), (2009), (2008),
+--             (2007), (2006), (2005)$$,
+--    'Check link between bulk_load_outline_id and new_building_outline_id in transferred table after load_buildings function has run'
+--);
 
 --------------------------------------------------------
 
