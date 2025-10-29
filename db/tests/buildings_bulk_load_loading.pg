@@ -15,7 +15,7 @@
 \set ON_ERROR_STOP true
 
 BEGIN;
-SELECT plan(12);
+SELECT plan(7);
 
 --1----------------------------------------------------------
 -- result of removed buildings in building_outlines table

@@ -16,7 +16,7 @@
 \set ON_ERROR_STOP true
 
 BEGIN;
-SELECT plan(10);
+SELECT plan(7);
 
 --1----------------------------------------------------------
 -- New Buildings contents
