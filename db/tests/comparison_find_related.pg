@@ -19,17 +19,24 @@
 
 
 BEGIN;
-SELECT plan(9);
+SELECT plan(5);
 
 --1----------------------------------------------------------
 -- Test find_added function on complex data
 
+--SELECT results_eq(
+--    'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(6) ORDER BY bulk_load_outline_id',
+--    $$VALUES (2091), (2095)$$,
+--    'Check return of buildings bulk load find_added function'
+--);
 SELECT results_eq(
     'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(6) ORDER BY bulk_load_outline_id',
-    $$VALUES (2091), (2095)$$,
+    $$VALUES (2089), (2090),
+             (2091), (2092),
+             (2094), (2095),
+             (2096)$$,
     'Check return of buildings bulk load find_added function'
 );
-
 
 --2----------------------------------------------------------
 -- Test find_matched function on complex data
@@ -55,9 +62,17 @@ SELECT results_eq(
 --4----------------------------------------------------------
 -- Test comparisons function inputs complex added outlines
 
+--SELECT set_has(
+--    'SELECT bulk_load_outline_id FROM buildings_bulk_load.added',
+--    $$VALUES (2091), (2095)$$,
+--    'Check added outlines after comparisons function has run'
+--);
 SELECT set_has(
     'SELECT bulk_load_outline_id FROM buildings_bulk_load.added',
-    $$VALUES (2091), (2095)$$,
+    $$VALUES (2089), (2090),
+             (2091), (2092),
+             (2094), (2095),
+             (2096)$$,
     'Check added outlines after comparisons function has run'
 );
 

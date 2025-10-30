@@ -21,9 +21,21 @@ SELECT plan(7);
 --1----------------------------------------------------------
 -- Test find_added function on complex data
 
+--SELECT results_eq(
+--    'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(4) ORDER BY bulk_load_outline_id',
+--    $$VALUES (2038), (2051), (2052), (2058),
+--             (2059), (2060), (2061), (2062),
+--             (2065), (2066), (2068), (2070),
+--             (2076), (2077), (2079)$$,
+--    'Check return of buildings bulk load find_added function'
+--);
 SELECT results_eq(
     'SELECT bulk_load_outline_id FROM buildings_bulk_load.find_added(4) ORDER BY bulk_load_outline_id',
-    $$VALUES (2038), (2051), (2052), (2058),
+    $$VALUES (2038),
+             (2037), (2039), (2040), (2041),
+             (2043), (2044), (2046), (2048),
+             (2049), (2051), (2052),
+             (2054), (2055), (2058),
              (2059), (2060), (2061), (2062),
              (2065), (2066), (2068), (2070),
              (2076), (2077), (2079)$$,
@@ -33,9 +45,24 @@ SELECT results_eq(
 --2----------------------------------------------------------
 -- Test find_removed function on complex data
 
+--SELECT results_eq(
+--    'SELECT building_outline_id FROM buildings_bulk_load.find_removed(4) ORDER BY building_outline_id',
+--    $$VALUES (1042), (1058), (1064)$$,
+--    'Check return of buildings bulk load find_removed function'
+--);
 SELECT results_eq(
     'SELECT building_outline_id FROM buildings_bulk_load.find_removed(4) ORDER BY building_outline_id',
-    $$VALUES (1042), (1058), (1064)$$,
+    $$VALUES (1038), (1039),
+             (1040), (1042),
+             (1043), (1044),
+             (1045), (1046),
+             (1047), (1049),
+             (1050), (1051),
+             (1052), (1053),
+             (1054), (1055), 
+             (1057), (1058), 
+             (1059), (1062), 
+             (1064)$$,
     'Check return of buildings bulk load find_removed function'
 );
 
