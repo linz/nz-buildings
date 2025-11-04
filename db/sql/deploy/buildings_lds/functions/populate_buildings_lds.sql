@@ -92,44 +92,34 @@ $$
             , last_modified
             , shape
         )
-        WITH transfer_dates AS (
-            SELECT DISTINCT transfer_date
-            FROM buildings_bulk_load.supplied_datasets
-        )
-        , deleted_in_production AS (
-            SELECT building_outlines.building_outline_id, supplied_datasets.processed_date, supplied_datasets.transfer_date, building_outlines.begin_lifespan, building_outlines.end_lifespan
-            FROM buildings.building_outlines
-            JOIN buildings_bulk_load.transferred ON building_outlines.building_outline_id = transferred.new_building_outline_id
-            JOIN buildings_bulk_load.bulk_load_outlines USING (bulk_load_outline_id)
-            JOIN buildings_bulk_load.supplied_datasets USING (supplied_dataset_id)
-            WHERE building_outlines.end_lifespan IS NOT NULL
-            AND building_outlines.end_lifespan NOT IN (
-                SELECT transfer_date
-                FROM transfer_dates
-            )
-        )
-        , removed AS (
+        WITH replaced AS (
             SELECT b1.building_outline_id
             FROM buildings.building_outlines b1
-            LEFT JOIN buildings.building_outlines b2 ON b1.building_id = b2.building_id AND b1.building_outline_id != b2.building_outline_id AND b2.end_lifespan IS NULL
-            LEFT JOIN buildings.lifecycle l ON b1.building_id = l.parent_building_id
-            LEFT JOIN deleted_in_production d ON b1.building_outline_id = d.building_outline_id
+            JOIN buildings.building_outlines b2 ON b1.building_id = b2.building_id AND b1.building_outline_id != b2.building_outline_id AND b1.end_lifespan = b2.begin_lifespan
             WHERE b1.end_lifespan IS NOT NULL
-            AND b2.building_outline_id IS NULL
-            AND l.parent_building_id IS NULL
-            AND d.building_outline_id IS NULL
+			AND b1.building_id NOT IN (
+				SELECT parent_building_id
+				FROM buildings.lifecycle
+			)
         )
-        , replaced AS (
-            SELECT b1.building_outline_id
-            FROM buildings.building_outlines b1
-            JOIN buildings.building_outlines b2 ON b1.building_id = b2.building_id AND b1.building_outline_id != b2.building_outline_id AND b1.end_lifespan = b2.begin_lifespan AND b2.end_lifespan IS NULL
-            WHERE b1.end_lifespan IS NOT NULL
-        )
-        , recombined AS (
+		, recombined AS (
             SELECT b.building_outline_id
             FROM buildings.building_outlines b
             JOIN buildings.lifecycle l ON b.building_id = l.parent_building_id
             WHERE b.end_lifespan IS NOT NULL
+        )
+        , removed AS (
+            SELECT b.building_outline_id
+            FROM buildings.building_outlines b
+            WHERE b.end_lifespan IS NOT NULL
+            AND b.building_outline_id NOT IN (
+                SELECT building_outline_id
+                FROM replaced
+            )
+            AND b.building_outline_id NOT IN (
+                SELECT building_outline_id
+             FROM recombined
+            )
         )
         , building_outline_lifecycle AS (
             SELECT building_outline_id, 'Removed' AS status
@@ -174,7 +164,6 @@ $$
         JOIN buildings_common.capture_source_group USING (capture_source_group_id)
         JOIN buildings_reference.suburb_locality ON suburb_locality.suburb_locality_id = building_outlines.suburb_locality_id
         LEFT JOIN buildings_reference.territorial_authority ON territorial_authority.territorial_authority_id = building_outlines.territorial_authority_id
-        LEFT JOIN deleted_in_production USING (building_outline_id)
         LEFT JOIN building_outline_lifecycle USING (building_outline_id)
         ORDER BY building_outlines.building_outline_id
         RETURNING *
