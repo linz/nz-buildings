@@ -53,6 +53,7 @@ DATASET_LINZ = [
     "coastlines_and_islands",
     "suburb_locality",
     "nz_imagery_survey_index",
+    "nz_facilities"
 ]
 DATASET_STATSNZ = ["territorial_authority"]
 
@@ -71,7 +72,7 @@ DATASET_TOPO50 = [
 ]
 DATASET_ADMIN_BDYS = ["suburb_locality", "territorial_authority"]
 
-DATASET_OTHER = ["nz_imagery_survey_index"]
+DATASET_OTHER = ["nz_imagery_survey_index", "nz_facilities"]
 
 
 class UpdateReferenceData(QFrame, FORM_CLASS):
@@ -135,6 +136,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setEnabled(1)
         self.chbx_ta.setEnabled(1)
         self.chbx_imagery.setEnabled(1)
+        self.chbx_facilities.setEnabled(1)
         self.btn_update.setEnabled(1)
         # clear message
         self.lb_message.setText("")
@@ -158,6 +160,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         self.chbx_suburbs.setDisabled(1)
         self.chbx_ta.setDisabled(1)
         self.chbx_imagery.setDisabled(1)
+        self.chbx_facilities.setDisabled(1)
         self.btn_update.setDisabled(1)
         # add message
         self.lb_message.setText(
@@ -182,7 +185,7 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             elif dataset in DATASET_ADMIN_BDYS:
                 status = admin_bdys.check_status_admin_bdys(api_key, dataset)
             else:
-                status = other_reference.check_status_imagery_survey_index(
+                status = other_reference.check_status_other_reference(
                     api_key, dataset
                 )
 
@@ -257,6 +260,9 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
         # nz imagery survey index
         if self.chbx_imagery.isChecked():
             self.other_layer_processing("nz_imagery_survey_index")
+        # nz facilities
+        if self.chbx_facilities.isChecked():
+            self.other_layer_processing("nz_facilities")
 
         # create log for this update
         if len(self.updates) > 0:
@@ -384,6 +390,13 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             return
         if dataset == "nz_imagery_survey_index":
             status = other_reference.update_imagery_survey_index(
+                api_key, dataset, self.db
+            )
+            self.update_message(status, dataset)
+            if status == "updated":
+                self.updates.append(dataset)
+        if dataset == "nz_facilities":
+            status = other_reference.update_facilities(
                 api_key, dataset, self.db
             )
             self.update_message(status, dataset)
