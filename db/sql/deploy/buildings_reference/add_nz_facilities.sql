@@ -3,7 +3,7 @@
 BEGIN;
 
 CREATE TABLE buildings_reference.nz_facilities (
-      facility_id integer NOT NULL
+      facility_id integer PRIMARY KEY
     , source_facility_id character varying(80)
     , name character varying(250)
     , source_name character varying(250)
