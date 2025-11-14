@@ -17,7 +17,6 @@ BEGIN;
 
 -- TODO - Add separate check before this step to check all facility USEs are
 --        matching buildings.use values corresponding to USE_IDs.
---      - Add missing building names and uses.
 --      - Retire building names and uses outside of facility polygons. Beware of Supermarkets.
 --      - Add comments
 
@@ -125,6 +124,99 @@ $$
 LANGUAGE sql VOLATILE;
 
 
+-- BUILDING NAME ADD
+CREATE OR REPLACE FUNCTION buildings.update_facilities_name_add()
+RETURNS integer AS
+$$
+    WITH bo_in_fac AS (
+        WITH bo_intersects_fac AS (
+            SELECT 
+                building_id,
+                fac.name AS fac_name,
+                ST_Area(ST_Intersection(bo.shape, fac.shape)) / NULLIF(ST_Area(bo.shape), 0) AS bo_intersect_ratio
+            FROM buildings_reference.nz_facilities fac
+            JOIN (
+                SELECT
+                    bo.building_id,
+                    bo.shape
+                FROM buildings.building_outlines bo
+                WHERE bo.end_lifespan is NULL
+            ) bo ON ST_Intersects(bo.shape, fac.shape)
+        )
+        SELECT *
+        FROM bo_intersects_fac
+        WHERE bo_intersect_ratio > 0.5
+    ),
+    building_name_joined AS (
+    SELECT
+        bo_in_fac.fac_name,
+        bo_in_fac.building_id,
+        bn.building_name_id,
+        bn.building_name
+    FROM bo_in_fac
+    LEFT JOIN buildings.building_name bn USING (building_id)
+    WHERE bn.building_name is NULL
+    ),
+    inserted AS (
+        INSERT INTO buildings.building_name (building_name_id, building_id, building_name, begin_lifespan)
+        SELECT nextval('buildings.building_name_building_name_id_seq'),
+            building_name_joined.building_id,
+            building_name_joined.fac_name,
+            NOW()
+        FROM building_name_joined
+    )
+    SELECT count(*)::integer FROM building_name_joined;
+$$
+LANGUAGE sql VOLATILE;
+
+
+-- BUILDING USE ADD
+CREATE OR REPLACE FUNCTION buildings.update_facilities_use_add()
+RETURNS integer AS
+$$
+    WITH bo_in_fac AS (
+        WITH bo_intersects_fac AS (
+            SELECT 
+                building_id,
+                fac.use AS fac_use,
+                ST_Area(ST_Intersection(bo.shape, fac.shape)) / NULLIF(ST_Area(bo.shape), 0) AS bo_intersect_ratio
+            FROM buildings_reference.nz_facilities fac
+            JOIN (
+                SELECT
+                    bo.building_id,
+                    bo.shape
+                FROM buildings.building_outlines bo
+                WHERE bo.end_lifespan is NULL
+            ) bo ON ST_Intersects(bo.shape, fac.shape)
+        )
+        SELECT *
+        FROM bo_intersects_fac
+        WHERE bo_intersect_ratio > 0.5
+    ),
+    building_use_joined AS (
+    SELECT
+        bo_in_fac.fac_use,
+        bo_in_fac.building_id,
+        bu.building_use_id,
+        u.value
+    FROM bo_in_fac
+    LEFT JOIN buildings.building_use bu USING (building_id)
+    LEFT JOIN buildings.use u USING (use_id)
+    WHERE bu.building_use_id is NULL
+    ),
+    inserted AS (
+        INSERT INTO buildings.building_use (building_use_id, building_id, use_id, begin_lifespan)
+        SELECT nextval('buildings.building_use_building_use_id_seq'),
+            building_use_joined.building_id,
+            (SELECT use_id FROM buildings.use WHERE use.value = building_use_joined.fac_use),
+            NOW()
+        FROM building_use_joined
+    )
+    SELECT count(*)::integer FROM building_use_joined;
+$$
+LANGUAGE sql VOLATILE;
+
+
 -- UPDATE FACILITIES ATTRIBUTES
 CREATE OR REPLACE FUNCTION buildings.update_facilities_attributes()
 RETURNS TABLE(update_type text, count integer) AS
@@ -138,6 +230,14 @@ BEGIN
 	RETURN QUERY
     SELECT 'Building USE modified'::text AS update_type,
 	buildings.update_facilities_use_modify()::integer AS count;
+
+    RETURN QUERY
+    SELECT 'Building NAME added'::text AS update_type,
+	buildings.update_facilities_name_add()::integer AS count;
+
+    RETURN QUERY
+    SELECT 'Building USE added'::text AS update_type,
+	buildings.update_facilities_use_add()::integer AS count;
 	
 END;
 $$
