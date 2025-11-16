@@ -17,7 +17,6 @@ BEGIN;
 
 -- TODO - Add separate check before this step to check all facility USEs are
 --        matching buildings.use values corresponding to USE_IDs.
---      - Retire building names and uses outside of facility polygons. Beware of Supermarkets.
 --      - Add comments
 
 
@@ -217,6 +216,65 @@ $$
 LANGUAGE sql VOLATILE;
 
 
+-- BUILDING NAME/USE REMOVE
+CREATE OR REPLACE FUNCTION buildings.update_facilities_name_use_remove()
+RETURNS integer AS
+$$
+    WITH bo_has_use AS (
+        SELECT
+            building_id,
+            bn.building_name_id AS bn_building_name_id,
+            bn.building_name AS bn_building_name,
+            bu.building_use_id AS bu_building_use_id,
+            u.value AS u_value,
+            bo.shape
+        FROM buildings.building_outlines bo
+        JOIN buildings.building_name bn USING (building_id)
+        JOIN buildings.building_use bu USING (building_id)
+        JOIN buildings.use u USING (use_id)
+        WHERE u.use_id IN (16,27) -- Hospital = 16, School = 27
+            AND bu.end_lifespan IS NULL
+            AND bo.end_lifespan IS NULL
+    ),
+    bo_outside_fac AS (
+    SELECT 
+        building_id,
+        bn_building_name_id,
+        bn_building_name,
+        bu_building_use_id,
+        u_value,
+        bo.shape
+    FROM bo_has_use bo
+    LEFT JOIN buildings_reference.nz_facilities f
+    ON ST_Intersects(bo.shape, f.shape)
+    GROUP BY building_id,
+            bn_building_name_id,
+            bn_building_name,
+            bu_building_use_id,
+            u_value,
+            bo.shape
+    HAVING 
+        COALESCE(SUM(ST_Area(ST_Intersection(bo.shape, f.shape))) / NULLIF(ST_Area(bo.shape), 0), 0) < 0.5
+    ),
+    remove_name AS (
+        UPDATE buildings.building_name b_name
+        SET end_lifespan = NOW()
+        FROM bo_outside_fac
+        WHERE b_name.building_id = bo_outside_fac.building_id
+            AND b_name.end_lifespan is NULL
+    ),
+    remove_use AS (
+        UPDATE buildings.building_use b_use
+        SET end_lifespan = NOW()
+        FROM bo_outside_fac
+        WHERE b_use.building_id = bo_outside_fac.building_id
+            AND b_use.end_lifespan is NULL
+    )
+    SELECT count(*)::integer FROM bo_outside_fac;
+$$
+LANGUAGE sql VOLATILE;
+
+
 -- UPDATE FACILITIES ATTRIBUTES
 CREATE OR REPLACE FUNCTION buildings.update_facilities_attributes()
 RETURNS TABLE(update_type text, count integer) AS
@@ -238,6 +296,11 @@ BEGIN
     RETURN QUERY
     SELECT 'Building USE added'::text AS update_type,
 	buildings.update_facilities_use_add()::integer AS count;
+
+    RETURN QUERY
+    SELECT 'Building NAME/USE removed'::text AS update_type,
+	buildings.update_facilities_name_use_remove()::integer AS count;
+    
 	
 END;
 $$
