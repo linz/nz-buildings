@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/functions/add_facilities_attribute_check to pg
+-- Deploy nz-buildings:buildings_reference/functions/add_check_facilities_attributes_function to pg
 
 ------------------------------------------------------------------------------
 -- Checks NZ Facilities (hospitals and schools) attributes are valid in buildings_reference.
