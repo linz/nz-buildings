@@ -5,19 +5,19 @@ BEGIN;
 ------------------------------------------------------------------------------
 -- Update Facilities (hospitals and schools) attributes on Building Outlines
 --
--- Assumes:       - NZ Facilities is current on the LINZ Data Service (LDS).
 -- Prerequisites: - NZ Facilities buildings reference data has been updated
 --                  to match the LDS layer, using the Buildings QGIS Plugin.
---                - Check NZ Facilities USE values match those in the buildings.use 
---                  table, using <process>. This is required because NZ Buildings
---                  have coded values for USE. If there are errors, then NZ Facilities
---                  might need to be corrected first.
+--                - Check NZ Facilities attribute errors, using:
+--                      SELECT * FROM buildings_reference.facility_attribute_errors()
+--                  This will find features with USE values that do not match those
+--                  in buildings.use, and also features with null USE or NAME.
+--                  Any errors detected will need to be manually corrected in
+--                  NZ Facilities, prior to updating NZ Buildings attributes
+--                  using this function.
 --
+-- This function can be run by using:
+--     SELECT * FROM buildings.update_facilities_attributes()
 ------------------------------------------------------------------------------
-
--- TODO - Add separate check before this step to check all facility USEs are
---        matching buildings.use values corresponding to USE_IDs.
-
 
 ------------------------------------------------------------------------------
 -- BUILDING NAME MODIFY
