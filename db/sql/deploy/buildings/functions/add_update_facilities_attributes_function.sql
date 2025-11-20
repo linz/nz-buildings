@@ -300,6 +300,10 @@ $$
             u_value,
             bo.shape
     -- Filter buildings to those that don't intersect, or are less than half within, facility polygons
+    -- Uses:
+    --   - SUM of area of intersection: to exclude buildings that are mostly within multiple facility polygons
+    --       (eg. exclude where combined ratio > 0.5, even if it has a ratio < 0.5 to one of the facility polygons)
+    --   - COALESCE 0: to include buildings that don't intersect facilities, by assigning a ratio of 0.
     HAVING 
         COALESCE(SUM(ST_Area(ST_Intersection(bo.shape, f.shape))) / NULLIF(ST_Area(bo.shape), 0), 0) < 0.5
     ),
