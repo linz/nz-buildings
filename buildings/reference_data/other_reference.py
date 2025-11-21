@@ -11,6 +11,7 @@ from qgis.PyQt.QtCore import Qt, QVariant
 
 LDS_LAYER_IDS = {
     "nz_imagery_survey_index": 95677,
+    "nz_facilities": 105588,
 }
 
 
@@ -43,9 +44,12 @@ def current_date():
     return to_var
 
 
-def check_status_imagery_survey_index(kx_api_key, dataset):
+def check_status_other_reference(kx_api_key, dataset):
     # get last update of layer date from log
-    from_var = last_update("imagery_survey_index")
+    if dataset == "nz_imagery_survey_index":
+        from_var = last_update("imagery_survey_index")
+    elif dataset == "nz_facilities":
+        from_var = last_update("facilities")
 
     # current date
     to_var = current_date()
@@ -184,6 +188,105 @@ def update_imagery_survey_index(kx_api_key, dataset, dbconn):
                     correct_attribute_format(feature["licensor"]),
                     feature["flown_from"].toString(Qt.ISODate),
                     feature["flown_to"].toString(Qt.ISODate),
+                    feature.geometry().asWkt(),
+                    feature[external_id],
+                ),
+            )
+    return "updated"
+
+
+def update_facilities(kx_api_key, dataset, dbconn):
+    if dataset != "nz_facilities":
+        return "error"
+
+    # get last update of layer date from log
+    from_var = last_update("facilities")
+
+    # current date
+    to_var = current_date()
+
+    cql_filter = ""
+    external_id = "facility_id"
+
+    layer = QgsVectorLayer(
+        URI.format(LDS_LAYER_IDS[dataset], kx_api_key, from_var, to_var, cql_filter)
+    )
+    if not layer.isValid():
+        # something went wrong
+        return "error"
+
+    if layer.featureCount() == 0:
+        return "current"
+
+    for feature in layer.getFeatures():
+        if feature.attribute("__change__") == "DELETE":
+            sql = "DELETE FROM buildings_reference.nz_facilities WHERE facility_id = %s;"
+            dbconn.execute_no_commit(sql, (feature[external_id],))
+
+        elif feature.attribute("__change__") == "INSERT":
+            sql = "SELECT True FROM buildings_reference.nz_facilities WHERE facility_id = %s;"
+            result = dbconn.execute_return(
+                sql,
+                (feature[external_id],),
+            )
+            result = result.fetchone()
+            if result is None:
+                sql = """  
+                    INSERT INTO buildings_reference.nz_facilities (
+                        facility_id,
+                        source_facility_id,
+                        name,
+                        source_name,
+                        use,
+                        use_type,
+                        use_subtype,
+                        estimated_occupancy,
+                        last_modified,
+                        shape)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, ST_SetSRID(ST_GeometryFromText(%s), 2193))
+                    """
+                dbconn.execute_no_commit(
+                    sql,
+                    (
+                        feature[external_id],
+                        correct_attribute_format(feature["source_facility_id"]),
+                        correct_attribute_format(feature["name"]),
+                        correct_attribute_format(feature["source_name"]),
+                        correct_attribute_format(feature["use"]),
+                        correct_attribute_format(feature["use_type"]),
+                        correct_attribute_format(feature["use_subtype"]),
+                        correct_attribute_format(feature["estimated_occupancy"]),
+                        feature["last_modified"].toString(Qt.ISODate),
+                        feature.geometry().asWkt(),
+                    ),
+                )
+
+        elif feature.attribute("__change__") == "UPDATE":
+            sql = """  
+                UPDATE buildings_reference.nz_facilities
+                SET
+                    source_facility_id = %s,
+                    name = %s,
+                    source_name = %s,
+                    use = %s,
+                    use_type = %s,
+                    use_subtype = %s,
+                    estimated_occupancy = %s,
+                    last_modified = %s,
+                    shape = ST_SetSRID(ST_GeometryFromText(%s), 2193)
+                WHERE facility_id = %s;
+                """
+            dbconn.execute_no_commit(
+                sql,
+                (
+                    correct_attribute_format(feature["source_facility_id"]),
+                    correct_attribute_format(feature["name"]),
+                    correct_attribute_format(feature["source_name"]),
+                    correct_attribute_format(feature["use"]),
+                    correct_attribute_format(feature["use_type"]),
+                    correct_attribute_format(feature["use_subtype"]),
+                    correct_attribute_format(feature["estimated_occupancy"]),
+                    feature["last_modified"].toString(Qt.ISODate),
                     feature.geometry().asWkt(),
                     feature[external_id],
                 ),
