@@ -21,4 +21,8 @@ CREATE INDEX sidx_nz_facilities_shape
 COMMENT ON TABLE buildings_reference.nz_facilities IS
 'A copy of the NZ Facilities table that contains hospitals and schools attributes';
 
+-- Add columns to Update Reference Log table
+
+ALTER TABLE buildings_reference.reference_update_log ADD facilities boolean DEFAULT False;
+
 COMMIT;
