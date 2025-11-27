@@ -26,13 +26,12 @@ BEGIN;
 CREATE OR REPLACE FUNCTION buildings.update_facilities_name_modify()
 RETURNS integer AS
 $$
-    -- Select buildings and names intersecting facility polygons, excluding retired buildings
+    -- Select buildings and names intersecting facility polygons, excluding retired buildings and names
     WITH bo_intersects_fac AS (
         SELECT 
             building_id AS bo_building_id,
             building_name_id,
             building_name,
-            bn_end_lifespan,
             fac.name AS fac_name,
             ST_Area(ST_Intersection(bo.shape, fac.shape)) / NULLIF(ST_Area(bo.shape), 0) AS bo_intersect_ratio
         FROM buildings_reference.nz_facilities fac
@@ -41,23 +40,21 @@ $$
                 bo.building_id,
                 bn.building_name_id,
                 bn.building_name,
-                bn.end_lifespan AS bn_end_lifespan,
                 bo.shape
             FROM buildings.building_outlines bo
             JOIN buildings.building_name bn USING (building_id)
 			WHERE bo.end_lifespan is NULL
+                AND bn.end_lifespan IS NULL
         ) bo ON ST_Intersects(bo.shape, fac.shape)
     ),
     -- Filter buildings:
     --   - More than half the geometry within facility polygon
     --   - Has a different name to facility name
-    --   - Has a current name
     bo_in_fac AS (
         SELECT *
         FROM bo_intersects_fac
         WHERE bo_intersect_ratio > 0.5
             AND building_name != fac_name
-            AND bn_end_lifespan IS NULL
     ),
     -- Retire old building name
     updated AS (
@@ -88,13 +85,12 @@ LANGUAGE sql VOLATILE;
 CREATE OR REPLACE FUNCTION buildings.update_facilities_use_modify()
 RETURNS integer AS
 $$
-    -- Select buildings and uses intersecting facility polygons, excluding retired buildings
+    -- Select buildings and uses intersecting facility polygons, excluding retired buildings and uses
     WITH bo_intersects_fac AS (
         SELECT 
             building_id AS bo_building_id,
             building_use_id,
             use_value,
-            bu_end_lifespan,
             fac.use AS fac_use,
             ST_Area(ST_Intersection(bo.shape, fac.shape)) / NULLIF(ST_Area(bo.shape), 0) AS bo_intersect_ratio
         FROM buildings_reference.nz_facilities fac
@@ -103,24 +99,22 @@ $$
                 bo.building_id,
                 bu.building_use_id,
                 u.value AS use_value,
-                bu.end_lifespan AS bu_end_lifespan,
                 bo.shape
             FROM buildings.building_outlines bo
             JOIN buildings.building_use bu USING (building_id)
 			JOIN buildings.use u USING (use_id)
 			WHERE bo.end_lifespan is NULL
+                AND bu.end_lifespan IS NULL
         ) bo ON ST_Intersects(bo.shape, fac.shape)
     ),
     -- Filter buildings:
     --   - More than half the geometry within facility polygon
     --   - Has a different use to facility use
-    --   - Has a current use
     bo_in_fac AS (
         SELECT *
         FROM bo_intersects_fac
         WHERE bo_intersect_ratio > 0.5
             AND use_value != fac_use
-            AND bu_end_lifespan IS NULL
     ),
     -- Retire old building use
     updated AS (

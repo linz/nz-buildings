@@ -217,11 +217,16 @@ def update_facilities(kx_api_key, dataset, dbconn):
 
     if layer.featureCount() == 0:
         return "current"
+    
+    deletes = 0
+    inserts = 0
+    updates = 0
 
     for feature in layer.getFeatures():
         if feature.attribute("__change__") == "DELETE":
             sql = "DELETE FROM buildings_reference.nz_facilities WHERE facility_id = %s;"
             dbconn.execute_no_commit(sql, (feature[external_id],))
+            deletes += 1
 
         elif feature.attribute("__change__") == "INSERT":
             sql = "SELECT True FROM buildings_reference.nz_facilities WHERE facility_id = %s;"
@@ -260,6 +265,7 @@ def update_facilities(kx_api_key, dataset, dbconn):
                         feature.geometry().asWkt(),
                     ),
                 )
+            inserts += 1
 
         elif feature.attribute("__change__") == "UPDATE":
             sql = """  
@@ -291,7 +297,8 @@ def update_facilities(kx_api_key, dataset, dbconn):
                     feature[external_id],
                 ),
             )
-    return "updated"
+            updates += 1
+    return ["updated", deletes, inserts, updates]
 
 
 def correct_attribute_format(value):

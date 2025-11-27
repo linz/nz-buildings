@@ -1,4 +1,4 @@
--- Deploy nz-buildings:buildings_reference/add_nz_imagery_survey_index to pg
+-- Deploy nz-buildings:buildings_reference/add_nz_facilities to pg
 
 BEGIN;
 

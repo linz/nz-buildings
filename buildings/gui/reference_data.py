@@ -399,8 +399,8 @@ class UpdateReferenceData(QFrame, FORM_CLASS):
             status = other_reference.update_facilities(
                 api_key, dataset, self.db
             )
-            self.update_message(status, dataset)
-            if status == "updated":
+            self.update_message(status[0], f"{dataset} (Deleted:{status[1]} , Added:{status[2]} , Updated:{status[3]})")
+            if status[0] == "updated":
                 self.updates.append(dataset)
 
     def check_api_key(self, layer):
