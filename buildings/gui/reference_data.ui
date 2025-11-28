@@ -246,6 +246,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="chbx_facilities">
+              <property name="text">
+               <string>NZ Facilities</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
